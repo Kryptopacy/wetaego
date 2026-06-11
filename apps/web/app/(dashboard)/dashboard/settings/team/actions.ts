@@ -1,0 +1,132 @@
+'use server'
+
+import { revalidatePath } from 'next/cache'
+import { createClient } from '@/lib/supabase/server'
+
+async function verifyOwner(orgId: string) {
+  const supabase = await createClient()
+  const { data: userData } = await supabase.auth.getUser()
+  if (!userData?.user) {
+    if (orgId === 'demo-org') return 'demo-user-id'
+    throw new Error('Not authenticated')
+  }
+
+  // Check if owner
+  const { data: member } = await supabase
+    .from('organization_members')
+    .select('role')
+    .eq('organization_id', orgId)
+    .eq('user_id', userData.user.id)
+    .single()
+
+  const isOwner = member?.role === 'owner' || (!member && await checkIsCreator(orgId, userData.user.id))
+  if (!isOwner) throw new Error('Only the business Owner can perform team management actions.')
+
+  return userData.user.id
+}
+
+async function checkIsCreator(orgId: string, userId: string): Promise<boolean> {
+  const supabase = await createClient()
+  const { data } = await supabase
+    .from('organizations')
+    .select('id')
+    .eq('id', orgId)
+    .eq('created_by', userId)
+    .single()
+  return !!data
+}
+
+export async function createInviteAction(
+  orgId: string,
+  email: string,
+  role: 'owner' | 'manager' | 'editor' | 'viewer'
+) {
+  try {
+    const userId = await verifyOwner(orgId)
+    const supabase = await createClient()
+
+    // Create the invite
+    const { data, error } = await supabase
+      .from('organization_invites')
+      .insert({
+        organization_id: orgId,
+        email: email.trim().toLowerCase(),
+        role,
+        invited_by: userId,
+      })
+      .select('token')
+      .single()
+
+    if (orgId === 'demo-org') {
+      revalidatePath('/dashboard/settings/team')
+      return { success: true, token: 'demo-invite-token-xyz' }
+    }
+
+    if (error) {
+      return { error: error.message }
+    }
+
+    revalidatePath('/dashboard/settings/team')
+    return { success: true, token: data.token }
+  } catch (err: any) {
+    return { error: err.message || 'An error occurred' }
+  }
+}
+
+export async function revokeInviteAction(orgId: string, inviteId: string) {
+  try {
+    await verifyOwner(orgId)
+    const supabase = await createClient()
+
+    const { error } = await supabase
+      .from('organization_invites')
+      .delete()
+      .eq('id', inviteId)
+      .eq('organization_id', orgId)
+
+    if (orgId === 'demo-org') {
+      revalidatePath('/dashboard/settings/team')
+      return { success: true }
+    }
+
+    if (error) {
+      return { error: error.message }
+    }
+
+    revalidatePath('/dashboard/settings/team')
+    return { success: true }
+  } catch (err: any) {
+    return { error: err.message || 'An error occurred' }
+  }
+}
+
+export async function removeMemberAction(orgId: string, userIdToDelete: string) {
+  try {
+    const currentUserId = await verifyOwner(orgId)
+    if (currentUserId === userIdToDelete) {
+      return { error: 'You cannot remove yourself from your own organization.' }
+    }
+
+    const supabase = await createClient()
+
+    const { error } = await supabase
+      .from('organization_members')
+      .delete()
+      .eq('organization_id', orgId)
+      .eq('user_id', userIdToDelete)
+
+    if (orgId === 'demo-org') {
+      revalidatePath('/dashboard/settings/team')
+      return { success: true }
+    }
+
+    if (error) {
+      return { error: error.message }
+    }
+
+    revalidatePath('/dashboard/settings/team')
+    return { success: true }
+  } catch (err: any) {
+    return { error: err.message || 'An error occurred' }
+  }
+}

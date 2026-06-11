@@ -1,0 +1,10 @@
+﻿{
+  "name": "ourmenu-os",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Our menu and availability SaaS for hospitality businesses.",
+  "scripts": {
+    "dev": "node scripts/serve.mjs",
+    "plan": "echo \"See docs/PRODUCT_PLAN.md\""
+  }
+}

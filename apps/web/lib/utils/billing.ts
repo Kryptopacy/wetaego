@@ -1,0 +1,12 @@
+import { getPlanLimits } from '@/lib/utils/settings'
+
+export type Tier = 'starter' | 'pro' | 'enterprise' | string;
+
+export async function getFreePagesLimit(tier: Tier): Promise<number> {
+  const dynamicPlanLimits = await getPlanLimits() as Record<string, { credits: number, pages: number }>
+  return dynamicPlanLimits[tier]?.pages || 0;
+}
+
+export function hasAdvancedAiFeatures(tier: Tier): boolean {
+  return tier !== 'starter';
+}

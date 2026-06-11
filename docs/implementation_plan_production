@@ -1,0 +1,75 @@
+# OurMenu OS: The 100% Production Readiness Roadmap
+
+This document serves as the master blueprint for taking OurMenu OS from a functional MVP to a world-class, globally scalable product. It is structured sequentially so that any agent can pick up execution seamlessly.
+
+## Competitive Analysis & Strategic Learnings
+
+To beat industry leaders like **Sunday**, **Mr Yum (me&u)**, and **Toast**, OurMenu OS must excel in three areas:
+
+1. **Frictionless Checkout (The "Sunday" advantage):** 
+   - *Learning:* Guests drop off if checkout takes more than 10 seconds. 
+   - *Optimization:* We must prioritize Apple Pay / Google Pay (via Paystack) and one-click checkouts.
+2. **Visual Upselling (The "Mr Yum" advantage):** 
+   - *Learning:* High-quality images and "Would you like fries with that?" prompts increase average order value by 20-30%.
+   - *Optimization:* Supabase Storage for fast, edge-cached image delivery and a sleek `framer-motion` powered "Upsell Modal" before checkout.
+3. **Resilience & Feedback (The "Toast" advantage):**
+   - *Learning:* Restaurant environments are chaotic. Staff ignore screens if they don't beep or flash.
+   - *Optimization:* Global Toast notifications (`sonner`), persistent client state (so refreshing doesn't clear a cart), and robust error boundaries (`Sentry`).
+
+---
+
+## Execution Order
+
+The execution is strictly ordered to build foundational resilience first, followed by UI polish, and finally scale.
+
+### Phase 1: Robust State & Feedback (The Foundation)
+*Goal: Prevent data loss, handle errors gracefully, and provide instant user feedback.*
+
+- [ ] **Global Toasts (`sonner`)**: Install and integrate `sonner` across the Dashboard and Public Menu to replace all `alert()` and `console.log()` calls.
+- [ ] **Persistent Cart State**: Update the `zustand` cart store to use the `persist` middleware (`localStorage`). If a guest accidentally refreshes the page, their cart survives.
+- [ ] **Error Boundaries & Logging (`Sentry`)**: Install `@sentry/nextjs`. Wrap the application so any unhandled exceptions instantly alert the developer.
+- [ ] **Form Validation (`zod`)**: Refactor all Server Actions to use `zod` schema validation to ensure no malformed data (like negative prices) reaches Supabase.
+
+### Phase 2: Impeccable UI & Upselling (The Polish)
+*Goal: Make the application feel alive, premium, and capable of driving higher sales.*
+
+- [ ] **Animations (`framer-motion`)**: 
+  - Animate the Cart FAB popping in when items are added.
+  - Add smooth layout transitions for category switching.
+- [ ] **Loading Skeletons**: Implement React Suspense boundaries and skeleton loaders for the Public Menu and Dashboard views to eliminate "frozen" screens during data fetches.
+- [ ] **Image Infrastructure**: 
+  - Create a `menu-images` bucket in Supabase Storage.
+  - Update the dashboard `Menu Manager` to allow image uploads.
+  - Use Next.js `<Image>` for WebP conversion and caching on the public menu.
+- [ ] **Tipping & Upsell Flow**: Add a sleek modal during checkout asking for a Tip (10%, 15%, 20%) and suggesting one featured item before generating the Paystack link.
+
+### Phase 3: Webhooks & Async Reliability (The Backbone)
+*Goal: Ensure payments never drop, even under heavy load.*
+
+- [ ] **Paystack Webhook Endpoint**: 
+  - Create `app/api/webhooks/paystack/route.ts`.
+  - Implement signature verification to ensure requests actually come from Paystack.
+  - Implement idempotency (ignore duplicate webhooks for the same transaction).
+- [ ] **Premium Tier WhatsApp Notifications**: Keep Termii as a fire-and-forget for now. In the future, this will be moved to an async worker queue explicitly as an upsell for higher subscription tiers, ensuring it never blocks the main checkout flow.
+
+### Phase 4: Performance & Scaling (The Edge)
+*Goal: Handle 1,000+ simultaneous guests seamlessly across digital menus, payments, and service requests.*
+
+- [ ] **Database Indexing**: Write a SQL migration to add indexes to `organization_id` and `location_id` on the `orders`, `order_items`, and `menu_items` tables.
+- [ ] **Edge Caching**: Configure Next.js caching (`revalidate: 60`) for the public portal (`/m/[slug]`). The menu rarely changes minute-by-minute, so it should be served from the Vercel CDN, not by querying Supabase every time.
+- [ ] **Analytics (`PostHog`)**: Integrate PostHog to track full customer funnels (Views -> Add to Order -> Call Staff -> Checkout).
+
+### Phase 5: CI/CD & Deployment
+*Goal: Zero-downtime deployments and safe testing environments.*
+
+- [ ] **Vercel Pipeline**: Connect GitHub to Vercel. Ensure build checks (TypeScript, ESLint) pass before deploying.
+- [ ] **Environment Parity**: Establish a standard for `.env.preview` and `.env.production` using distinct Supabase projects.
+
+---
+
+## User Review Required
+
+> [!IMPORTANT]
+> The roadmap is fully sequenced. An agent can read this document, start at Phase 1, and work down the checklist.
+> 
+> **Decision Required:** Are we aligned on this execution order? If so, I will immediately begin executing **Phase 1: Robust State & Feedback**.
