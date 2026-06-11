@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 
 export async function login(formData: FormData) {
   const supabase = await createClient()
@@ -66,15 +66,28 @@ export async function startInteractiveDemo() {
   const email = `demo-${uid}@pacygrills.com`
   const password = 'demo-password-123'
 
-  // 1. Create a real ephemeral user
-  const { data: authData, error: signUpError } = await supabase.auth.signUp({
+  // 1. Create a real ephemeral user (bypassing email confirmation using admin client)
+  const adminClient = await createAdminClient()
+  const { data: authData, error: signUpError } = await adminClient.auth.admin.createUser({
     email,
-    password
+    password,
+    email_confirm: true // Force confirmation so they can log in immediately
   })
 
   if (signUpError || !authData.user) {
     console.error(signUpError)
     redirect(`/login?message=Could not initialize demo workspace`)
+  }
+
+  // 1.5 Log them in (creates the session cookie)
+  const { error: signInError } = await supabase.auth.signInWithPassword({
+    email,
+    password
+  })
+
+  if (signInError) {
+    console.error(signInError)
+    redirect(`/login?message=Could not sign into demo workspace`)
   }
 
   const userId = authData.user.id
