@@ -10,6 +10,14 @@
 -- exposes the user's own email via a stable helper function.
 -- ============================================================
 
+-- Drop all policies that depend on the view FIRST (must happen before DROP VIEW)
+drop policy if exists "Organization members can view all pages" on public.location_pages;
+drop policy if exists "Managers and Owners can insert pages" on public.location_pages;
+drop policy if exists "Managers and Owners can update pages" on public.location_pages;
+drop policy if exists "Managers and Owners can delete pages" on public.location_pages;
+drop policy if exists "Org members can view credit transactions" on public.credit_transactions;
+
+-- Now we can safely drop the view
 drop view if exists public.organization_member_details;
 
 -- Re-create as SECURITY INVOKER (uses the querying user's permissions,
