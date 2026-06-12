@@ -44,10 +44,10 @@ export function GlobalRealtime() {
   const [orgId, setOrgId] = useState<string | null>(null)
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
+    supabase.auth.getUser().then(({ data }: any) => {
       if (data?.user?.id) {
         supabase.from('organizations').select('id').eq('created_by', data.user.id).single()
-          .then(({ data: orgData }) => {
+          .then(({ data: orgData }: any) => {
             if (orgData?.id) setOrgId(orgData.id)
           })
       }
@@ -76,7 +76,7 @@ export function GlobalRealtime() {
     })
 
     const channel = supabase.channel('global-realtime')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders', filter: `organization_id=eq.${orgId}` }, (payload) => {
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders', filter: `organization_id=eq.${orgId}` }, (payload: any) => {
         playChime('order')
         toast.success(`New Order Received!`, {
           description: `Table: ${payload.new.table_identifier || 'Takeaway'}`,
@@ -84,7 +84,7 @@ export function GlobalRealtime() {
         })
         router.refresh()
       })
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'service_requests', filter: `organization_id=eq.${orgId}` }, (payload) => {
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'service_requests', filter: `organization_id=eq.${orgId}` }, (payload: any) => {
         playChime('service')
         toast.error(`Service Request!`, {
           description: `Table ${payload.new.table_identifier} needs ${payload.new.request_type}`,

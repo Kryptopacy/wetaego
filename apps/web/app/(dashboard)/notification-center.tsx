@@ -14,19 +14,19 @@ export function NotificationCenter() {
 
   // Initial fetch and Realtime sync
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
+    supabase.auth.getUser().then(({ data }: any) => {
       if (data?.user?.id) {
         supabase.from('organizations').select('id').eq('created_by', data.user.id).single()
-          .then(({ data: orgData }) => {
+          .then(({ data: orgData }: any) => {
             if (orgData?.id) {
               setOrgId(orgData.id)
               
               // Initial Data Fetch
               supabase.from('orders').select('*').eq('organization_id', orgData.id).eq('status', 'pending')
-                .then(({ data }) => setPendingOrders(data || []))
+                .then(({ data }: any) => setPendingOrders(data || []))
               
               supabase.from('service_requests').select('*').eq('organization_id', orgData.id).eq('status', 'pending')
-                .then(({ data }) => setPendingRequests(data || []))
+                .then(({ data }: any) => setPendingRequests(data || []))
             }
           })
       }
