@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 import { getPricingSettings, getPlanLimits } from '@/lib/utils/settings'
 import { FadeIn, StaggerContainer, StaggerItem } from './components/animations'
+import { TrustedBy } from './components/trusted-by'
 
 async function Pricing() {
   const pricing = await getPricingSettings()
@@ -217,13 +218,6 @@ const sizeClass = {
   half: 'md:col-span-1',
 }
 
-const testimonials = [
-  { quote: 'Our tourist orders tripled the week we turned on the translator. It just works.', name: 'Aisha K.', role: 'GM, Nkoyo Lagos' },
-  { quote: 'The AI Copywriter made our menu look like it was written by a Michelin-starred consultant.', name: 'Emeka O.', role: 'Owner, The Grillhouse' },
-  { quote: 'When a guest typed "spill", staff were already moving before they hit send. Insane.', name: 'Fatima B.', role: 'Operations, Skyview Lounge' },
-  { quote: 'The demand forecast told us Suya was trending up two days before we actually sold out.', name: 'David T.', role: 'F&B Director, Heritage Hotels' },
-]
-
 export default async function HomePage() {
   return (
     <div className="bg-[#050505] min-h-screen selection:bg-violet-500/30 selection:text-white">
@@ -233,15 +227,20 @@ export default async function HomePage() {
           <div className="w-6 h-6 rounded-md bg-gradient-to-br from-white to-zinc-300 flex items-center justify-center shadow-[0_0_15px_rgba(255,255,255,0.3)]">
             <Zap className="w-3.5 h-3.5 text-black" aria-hidden="true" />
           </div>
-          <span className="font-semibold text-white tracking-tight">OurMenu OS</span>
+          <span className="font-semibold text-white tracking-tight">OurMenu</span>
         </div>
         <div className="hidden md:flex items-center gap-8 text-sm font-medium text-zinc-400">
           <a href="#features" className="hover:text-white transition-colors">Platform</a>
           <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
           <a href="#testimonials" className="hover:text-white transition-colors">Customers</a>
         </div>
-        <div className="flex items-center gap-4">
-          <a className="text-sm font-medium text-zinc-400 hover:text-white transition-colors hidden md:block" href="/dashboard">Log in</a>
+        <div className="flex items-center gap-2 md:gap-4">
+          <a className="text-sm font-medium text-zinc-400 hover:text-white transition-colors hidden lg:block" href="/dashboard">Log in</a>
+          <form action={startInteractiveDemo} className="hidden sm:block">
+            <button type="submit" className="text-sm font-medium text-zinc-300 hover:text-white transition-colors px-4 py-1.5 rounded-full border border-white/10 bg-white/5 hover:bg-white/10">
+              Try Demo
+            </button>
+          </form>
           <a className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-white text-black text-sm font-semibold hover:bg-zinc-200 hover:scale-105 transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.2)]" href="/dashboard">Get Started</a>
         </div>
       </nav>
@@ -271,17 +270,17 @@ export default async function HomePage() {
             <div className="mb-8">
               <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-zinc-300 text-xs font-medium backdrop-blur-sm">
                 <Zap className="w-3 h-3 text-violet-400" />
-                Enterprise Hospitality OS · Built for Africa
+                Smart Menu + Live KDS + Automated Payments
               </span>
             </div>
             <h1 className="text-5xl md:text-7xl font-black text-white tracking-[-0.04em] leading-[1.02] mb-6">
-              The OS your guests never see.{' '}
+              The ultimate digital menu.<br />
               <span className="text-transparent bg-clip-text bg-gradient-to-br from-violet-300 via-white to-zinc-400">
-                The one they'll never forget.
+                A complete management suite.
               </span>
             </h1>
             <p className="text-lg md:text-xl text-zinc-300 max-w-xl font-light leading-relaxed mb-10">
-              Run your entire hospitality operation from a single, intelligent platform. Live orders, AI menus, WhatsApp alerts, demand forecasting — unified in one command center.
+              Ditch the expensive custom websites, torn hardcopies, and terrible PDF links. Give your guests a stunning e-menu featuring a personalized AI Waiter that talks like your brand, streamlines ordering, and processes payments—freeing your staff to focus on hospitality. Behind the scenes? Your team gets a live KDS, WhatsApp staff alerts, AI tools to optimise flow, and demand forecasting.
             </p>
             <div className="flex flex-col sm:flex-row items-start gap-4">
               <a href="/dashboard" className="flex items-center gap-2 px-8 py-3.5 rounded-full bg-white text-black text-sm font-bold hover:scale-105 transition-all duration-300 shadow-[0_0_30px_rgba(255,255,255,0.15)]">
@@ -292,28 +291,6 @@ export default async function HomePage() {
                   Experience Demo Mode
                 </button>
               </form>
-            </div>
-            {/* Trust signals */}
-            <div className="mt-12 flex items-center gap-6 flex-wrap">
-              <div className="text-center">
-                <p className="text-2xl font-black text-white">500+</p>
-                <p className="text-zinc-500 text-xs">Active Venues</p>
-              </div>
-              <div className="w-px h-8 bg-white/10" />
-              <div className="text-center">
-                <p className="text-2xl font-black text-white">40+</p>
-                <p className="text-zinc-500 text-xs">Languages</p>
-              </div>
-              <div className="w-px h-8 bg-white/10" />
-              <div className="text-center">
-                <p className="text-2xl font-black text-white">2M+</p>
-                <p className="text-zinc-500 text-xs">Orders Processed</p>
-              </div>
-              <div className="w-px h-8 bg-white/10" />
-              <div className="text-center">
-                <p className="text-2xl font-black text-white">&lt; 1s</p>
-                <p className="text-zinc-500 text-xs">KDS Response</p>
-              </div>
             </div>
           </FadeIn>
 
@@ -333,7 +310,7 @@ export default async function HomePage() {
                   <div className="rounded-[38px] overflow-hidden bg-[#f5f7f5] aspect-[9/19.5] relative">
                     <Image
                       src="/guest_menu_screen.png"
-                      alt="OurMenu OS guest menu interface"
+                      alt="OurMenu guest menu interface"
                       fill
                       className="object-cover object-top"
                       quality={95}
@@ -358,6 +335,12 @@ export default async function HomePage() {
           </FadeIn>
         </div>
 
+        {/* Scroll Nudge */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2 animate-bounce opacity-70 hover:opacity-100 transition-opacity">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Explore Platform</span>
+          <ArrowRight className="w-4 h-4 text-zinc-500 rotate-90" />
+        </div>
+
         {/* Bottom fade into next section */}
         <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#050505] to-transparent pointer-events-none z-10" />
       </section>
@@ -367,7 +350,7 @@ export default async function HomePage() {
         <FadeIn className="text-center mb-20">
           <span className="inline-block px-4 py-1.5 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-300 text-xs font-bold uppercase tracking-widest mb-6">10 Integrated Modules</span>
           <h2 className="text-4xl md:text-6xl font-black text-white mb-6 tracking-tight">
-            Not features.<br /><span className="text-zinc-400">A complete hospitality OS.</span>
+            Not features.<br /><span className="text-zinc-400">A complete hospitality suite.</span>
           </h2>
           <p className="text-zinc-400 text-lg md:text-xl max-w-2xl mx-auto font-light">Everything your operation needs — from the guest's first QR scan to the last Paystack payout.</p>
         </FadeIn>
@@ -475,30 +458,8 @@ export default async function HomePage() {
         </StaggerContainer>
       </section>
 
-      {/* ── TESTIMONIALS ── */}
-      <section id="testimonials" className="py-32 px-6 bg-[#030303] border-y border-white/[0.03] relative overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-3xl h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-        <div className="max-w-7xl mx-auto relative z-10">
-          <FadeIn className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-black text-white tracking-tight mb-4">Operators love it. Guests notice it.</h2>
-            <p className="text-zinc-500 text-lg">Real results from real venues across Africa.</p>
-          </FadeIn>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {testimonials.map((t, i) => (
-              <FadeIn key={t.name} delay={i * 0.1} className="relative rounded-3xl p-8 bg-white/[0.02] border border-white/[0.04] hover:bg-white/[0.04] hover:border-white/10 transition-all duration-300 flex flex-col">
-                <div className="flex gap-1 mb-6">
-                  {[...Array(5)].map((_, j) => <Star key={j} className="w-4 h-4 fill-amber-400 text-amber-400" aria-hidden="true" />)}
-                </div>
-                <p className="text-zinc-300 text-base leading-relaxed mb-8 font-light flex-1">"{t.quote}"</p>
-                <div className="mt-auto">
-                  <p className="text-white font-bold text-sm">{t.name}</p>
-                  <p className="text-zinc-500 text-sm">{t.role}</p>
-                </div>
-              </FadeIn>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* ── DYNAMIC TRUSTED BY ── */}
+      <TrustedBy />
 
       {/* ── PRICING ── */}
       <Pricing />
@@ -515,7 +476,7 @@ export default async function HomePage() {
             <span className="text-transparent bg-clip-text bg-gradient-to-br from-violet-300 via-white to-zinc-400">better infrastructure.</span>
           </h2>
           <p className="text-zinc-400 text-xl font-light mb-12 max-w-2xl mx-auto">
-            Join 500+ venues already running on OurMenu OS. Setup takes under 10 minutes.
+            Join 500+ venues already running on OurMenu. Setup takes under 10 minutes.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <a href="/dashboard" className="flex items-center gap-2 px-10 py-4 rounded-full bg-white text-black text-base font-bold hover:scale-105 transition-all duration-300 shadow-[0_0_40px_rgba(255,255,255,0.15)]">
@@ -537,9 +498,9 @@ export default async function HomePage() {
             <div className="w-5 h-5 rounded-md bg-white flex items-center justify-center">
               <Zap className="w-3 h-3 text-black" aria-hidden="true" />
             </div>
-            <span className="font-semibold text-white text-sm">OurMenu OS</span>
+            <span className="font-semibold text-white text-sm">OurMenu</span>
           </div>
-          <p className="text-zinc-600 text-sm">© {new Date().getFullYear()} OurMenu OS. Built for African hospitality.</p>
+          <p className="text-zinc-600 text-sm">© {new Date().getFullYear()} OurMenu. Built for African hospitality.</p>
           <div className="flex items-center gap-6 text-zinc-500 text-sm">
             <a href="#" className="hover:text-white transition-colors">Privacy</a>
             <a href="#" className="hover:text-white transition-colors">Terms</a>
