@@ -23,7 +23,11 @@ export async function getSystemSetting<T>(key: string, fallback: T): Promise<T> 
     
     // Merge with fallback to ensure no missing keys
     return { ...fallback, ...data.value }
-  } catch (err) {
+  } catch (err: any) {
+    // Rethrow Next.js internal errors so it can opt out of static rendering
+    if (err?.digest === 'DYNAMIC_SERVER_USAGE') {
+      throw err
+    }
     console.error(`Failed to fetch setting ${key}`, err)
     return fallback
   }
