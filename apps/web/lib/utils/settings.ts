@@ -33,23 +33,23 @@ async function fetchSystemSettingFromDB<T>(key: string, fallback: T): Promise<T>
 export const getPricingSettings = unstable_cache(
   async () => fetchSystemSettingFromDB('pricing', DEFAULT_PRICING),
   ['system_setting_pricing'],
-  { revalidate: 3600, tags: ['pricing'] }
+  { revalidate: 86400, tags: ['pricing'] }
 )
 
 export const getCreditCosts = unstable_cache(
   async () => fetchSystemSettingFromDB('credit_costs', DEFAULT_CREDIT_COSTS),
   ['system_setting_credit_costs'],
-  { revalidate: 3600, tags: ['credit_costs'] }
+  { revalidate: 86400, tags: ['credit_costs'] }
 )
 
 export const getPlanLimits = unstable_cache(
   async () => fetchSystemSettingFromDB('plan_limits', DEFAULT_PLAN_LIMITS),
   ['system_setting_plan_limits'],
-  { revalidate: 3600, tags: ['plan_limits'] }
+  { revalidate: 86400, tags: ['plan_limits'] }
 )
 
 export const getAiModels = unstable_cache(
   async () => fetchSystemSettingFromDB('ai_models', DEFAULT_AI_MODELS),
   ['system_setting_ai_models'],
-  { revalidate: 3600, tags: ['ai_models'] }
+  { revalidate: 86400, tags: ['ai_models'] }
 )
