@@ -19,7 +19,7 @@ create table if not exists public.organization_invites (
   email text not null,
   role public.member_role not null default 'viewer',
   invited_by uuid not null references auth.users(id) on delete cascade,
-  token text not null unique default encode(gen_random_bytes(16), 'hex'),
+  token text not null unique default replace(gen_random_uuid()::text, '-', ''),
   created_at timestamptz not null default now(),
   expires_at timestamptz not null default (now() + interval '7 days')
 );

@@ -74,6 +74,15 @@ create policy "Managers and Owners can delete pages"
     )
   );
 
+-- Function for updated_at
+create or replace function public.handle_updated_at()
+returns trigger as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$ language plpgsql;
+
 -- Trigger for updated_at
 create trigger set_location_pages_updated_at
   before update on public.location_pages
