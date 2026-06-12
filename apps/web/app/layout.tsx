@@ -16,6 +16,16 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "OurMenu OS",
   description: "Digital Menus & Operations for Hospitality",
+  manifest: "/manifest.json",
+  themeColor: "#0a0a0f",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "OurMenu OS",
+  },
+  icons: {
+    apple: "/icon-192x192.png",
+  },
 };
 
 import { PostHogProvider } from './providers'

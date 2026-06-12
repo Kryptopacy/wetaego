@@ -8,6 +8,8 @@ import {
   LayoutDashboard, ClipboardList, BarChart3, BookOpen,
   FileText, Settings, CreditCard, LogOut, Sparkles, Zap
 } from 'lucide-react'
+import { GlobalRealtime } from './global-realtime'
+import { NotificationCenter } from './notification-center'
 
 const navItems = [
   { href: '/dashboard', label: 'Overview', icon: LayoutDashboard, exact: true },
@@ -177,8 +179,16 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             </div>
             <span className="font-bold text-sm text-white">OurMenu OS</span>
           </div>
-
+          
+          <div className="flex-1"></div>
+          
+          <div className="flex items-center gap-4">
+            <NotificationCenter />
+          </div>
         </header>
+
+        {/* Global Realtime Provider for Chimes and Toasts */}
+        <GlobalRealtime />
 
         {/* Expired Banner */}
         {isExpired && (
