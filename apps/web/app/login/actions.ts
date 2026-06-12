@@ -93,7 +93,7 @@ export async function startInteractiveDemo() {
   const userId = authData.user.id
 
   // 2. Provision the 'Pacy Grills' Org
-  const { data: org, error: orgError } = await supabase.from('organizations').insert({
+  const { data: org, error: orgError } = await adminClient.from('organizations').insert({
     name: 'Pacy Grills',
     slug: `pacy-grills-${uid}`,
     created_by: userId,
@@ -105,14 +105,14 @@ export async function startInteractiveDemo() {
   }
 
   // 3. Make them Owner
-  await supabase.from('organization_members').insert({
+  await adminClient.from('organization_members').insert({
     organization_id: org.id,
     user_id: userId,
     role: 'owner'
   })
 
   // 4. Create Location
-  const { data: loc } = await supabase.from('locations').insert({
+  const { data: loc } = await adminClient.from('locations').insert({
     organization_id: org.id,
     name: 'Main Branch',
     slug: `pacy-grills-${uid}`,
@@ -124,7 +124,7 @@ export async function startInteractiveDemo() {
   }).select('id').single()
 
   // 5. Create Menu
-  const { data: menu } = await supabase.from('menus').insert({
+  const { data: menu } = await adminClient.from('menus').insert({
     organization_id: org.id,
     location_id: loc.id,
     name: 'Main Menu',
@@ -132,14 +132,14 @@ export async function startInteractiveDemo() {
   }).select('id').single()
 
   // 6. Create Categories
-  const { data: cat1 } = await supabase.from('menu_categories').insert({
+  const { data: cat1 } = await adminClient.from('menu_categories').insert({
     organization_id: org.id,
     menu_id: menu.id,
     name: 'Signature Cocktails',
     sort_order: 0
   }).select('id').single()
 
-  const { data: cat2 } = await supabase.from('menu_categories').insert({
+  const { data: cat2 } = await adminClient.from('menu_categories').insert({
     organization_id: org.id,
     menu_id: menu.id,
     name: 'Main Courses',
@@ -147,7 +147,7 @@ export async function startInteractiveDemo() {
   }).select('id').single()
 
   // 7. Add Menu Items
-  await supabase.from('menu_items').insert([
+  await adminClient.from('menu_items').insert([
     {
       organization_id: org.id,
       category_id: cat1.id,
@@ -175,7 +175,7 @@ export async function startInteractiveDemo() {
   ])
 
   // 8. Add strict demo credits (financial defense)
-  await supabase.from('credit_transactions').insert({
+  await adminClient.from('credit_transactions').insert({
     organization_id: org.id,
     amount: 5,
     reason: 'Demo Signup Bonus',
