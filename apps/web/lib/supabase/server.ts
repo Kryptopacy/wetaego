@@ -45,3 +45,20 @@ export async function createAdminClient() {
     }
   ) as any
 }
+
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
+
+export function createAnonClient() {
+  // A standard Supabase client that ignores cookies and sessions entirely.
+  // Perfect for fetching public data in static layouts (like pricing).
+  return createSupabaseClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+      }
+    }
+  ) as any
+}
