@@ -28,8 +28,17 @@ export async function submitServiceRequest(formData: FormData) {
     urgency_tier: urgencyTier as any,
   })
 
+  // Fetch the location's configured WhatsApp number
+  const { data: location } = await supabase
+    .from('locations')
+    .select('whatsapp_number')
+    .eq('id', locId)
+    .single()
+
+  const whatsappNumber = location?.whatsapp_number || '08000000000'
+
   // Fire WhatsApp Notification in the background without blocking the UI
-  waitUntil(sendWhatsAppMessage('08000000000', `[${urgencyTier.toUpperCase()}] Table ${tableId} needs a ${requestType}! ${customRequestText || ''}`))
+  waitUntil(sendWhatsAppMessage(whatsappNumber, `[${urgencyTier.toUpperCase()}] Table ${tableId} needs a ${requestType}! ${customRequestText || ''}`))
 }
 
 export async function processCheckout(
@@ -113,8 +122,17 @@ export async function callStaffFromAi(
 
   if (error) return { error: error.message }
 
+  // Fetch the location's configured WhatsApp number
+  const { data: location } = await supabase
+    .from('locations')
+    .select('whatsapp_number')
+    .eq('id', locationId)
+    .single()
+
+  const whatsappNumber = location?.whatsapp_number || '08000000000'
+
   // Fire WhatsApp Notification in the background without blocking the UI
-  waitUntil(sendWhatsAppMessage('08000000000', `Table ${tableIdentifier} needs a ${requestType}!`))
+  waitUntil(sendWhatsAppMessage(whatsappNumber, `Table ${tableIdentifier} needs a ${requestType}!`))
 
   return { success: true }
 }

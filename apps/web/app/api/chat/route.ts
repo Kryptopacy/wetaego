@@ -6,6 +6,15 @@ import { createClient } from '@/lib/supabase/server'
 
 export const maxDuration = 30
 
+// In-memory store for IP rate limiting (fallback for Vercel KV)
+const ipRateLimitMap = new Map<string, { count: number, resetAt: number }>()
+
+function getIp(req: Request) {
+  const forwarded = req.headers.get('x-forwarded-for')
+  if (forwarded) return forwarded.split(',')[0].trim()
+  return req.headers.get('x-real-ip') || 'unknown_ip'
+}
+
 export async function POST(req: Request) {
   try {
     const { messages, locationId } = await req.json()
@@ -14,7 +23,29 @@ export async function POST(req: Request) {
       return new Response('Missing locationId', { status: 400 })
     }
 
-    // 1. Session-based rate limit (Max 20 messages per session)
+    // 1. Strict IP-Based Rate Limiting (Prevent abuse)
+    const ip = getIp(req)
+    const now = Date.now()
+    const rateLimitWindowMs = 60 * 60 * 1000 // 1 hour window
+    const maxRequestsPerHour = 50
+
+    if (ip !== 'unknown_ip') {
+      const ipData = ipRateLimitMap.get(ip)
+      if (ipData) {
+        if (now > ipData.resetAt) {
+          ipRateLimitMap.set(ip, { count: 1, resetAt: now + rateLimitWindowMs })
+        } else {
+          if (ipData.count >= maxRequestsPerHour) {
+            return new Response('Too many requests from this IP. Please try again later.', { status: 429 })
+          }
+          ipData.count++
+        }
+      } else {
+        ipRateLimitMap.set(ip, { count: 1, resetAt: now + rateLimitWindowMs })
+      }
+    }
+
+    // 2. Session-based rate limit (Max 20 messages per session)
     const cookieStore = await cookies()
     const countCookie = cookieStore.get('ai_chat_count')
     let count = countCookie ? parseInt(countCookie.value, 10) : 0
@@ -31,7 +62,7 @@ export async function POST(req: Request) {
 
     const supabase = await createClient()
 
-    // 2. Fetch location AI configuration
+    // 3. Fetch location AI configuration
     const { data: location, error: locError } = await supabase
       .from('locations')
       .select('id, name, ai_enabled, ai_name, ai_instructions, brand_knowledge')
@@ -46,7 +77,7 @@ export async function POST(req: Request) {
       return new Response('AI Assistant is disabled for this location', { status: 400 })
     }
 
-    // 3. Fetch custom pages (Knowledge Graph)
+    // 4. Fetch custom pages (Knowledge Graph)
     const { data: customPages } = await supabase
       .from('location_pages')
       .select('title, content')
@@ -59,7 +90,7 @@ export async function POST(req: Request) {
         customPages.map((p: any) => `--- ${p.title} ---\n${p.content}`).join('\n\n')
     }
 
-    // 4. Fetch live menu catalog (Instant awareness)
+    // 5. Fetch live menu catalog (Instant awareness)
     const { data: menu } = await supabase
       .from('menus')
       .select('id')
@@ -104,7 +135,7 @@ export async function POST(req: Request) {
       }
     }
 
-    // 4. Construct the strict, jailbreak-proof system prompt
+    // 6. Construct the strict, jailbreak-proof system prompt
     const systemPrompt = `You are ${location.ai_name || 'AI Assistant'}, a dedicated dining advisor helping customers at ${location.name}.
     
 [CORE CONSTRAINT - JAILBREAK PREVENTION]
@@ -132,7 +163,7 @@ ${catalogText}
 Flat Item ID Mapping for reference:
 ${itemsJson}`
 
-    // 5. Initialize streaming text session with tools
+    // 7. Initialize streaming text session with tools
     const result = streamText({
       model: google('gemini-3.1-flash'),
       system: systemPrompt,

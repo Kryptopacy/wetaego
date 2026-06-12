@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { createSubaccount } from '@/lib/payments/paystack'
 
 export async function savePaymentSettings(formData: FormData) {
   const supabase = await createClient()
@@ -20,14 +21,14 @@ export async function savePaymentSettings(formData: FormData) {
 
   const bankName = formData.get('bankName') as string
   const accountNumber = formData.get('accountNumber') as string
+  const businessName = formData.get('businessName') as string
 
-  // In a real implementation, we would call Paystack API here:
-  // 1. Resolve Account Number to verify name
-  // 2. Create Subaccount with Paystack
-  // 3. Receive `subaccount_code` (e.g., 'ACCT_123456789')
-  
-  // For MVP Scaffolding, we will mock the subaccount code:
-  const mockSubaccountCode = `ACCT_MOCK_${accountNumber}`
+  let subaccountCode = ''
+  try {
+    subaccountCode = await createSubaccount(bankName, accountNumber, businessName)
+  } catch (err: any) {
+    throw new Error(err.message || 'Failed to connect bank account via Paystack')
+  }
 
   // Check if settings exist
   const { data: existingSettings } = await supabase
@@ -41,7 +42,7 @@ export async function savePaymentSettings(formData: FormData) {
       .from('organization_payment_settings')
       .update({
         provider: 'paystack',
-        provider_account_id: mockSubaccountCode,
+        provider_account_id: subaccountCode,
         is_active: true
       })
       .eq('organization_id', org.id)
@@ -51,7 +52,7 @@ export async function savePaymentSettings(formData: FormData) {
       .insert({
         organization_id: org.id,
         provider: 'paystack',
-        provider_account_id: mockSubaccountCode,
+        provider_account_id: subaccountCode,
         is_active: true
       })
   }

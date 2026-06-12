@@ -11,6 +11,7 @@ export default async function OrdersPage() {
   let org = null
   let orders: any[] = []
   let serviceRequests: any[] = []
+  let menuItems: any[] = []
 
   if (userId) {
     const { data: orgData } = await supabase.from('organizations').select('id').eq('created_by', userId).single()
@@ -34,6 +35,15 @@ export default async function OrdersPage() {
         .order('created_at', { ascending: true })
       
       serviceRequests = requestsData || []
+
+      // Fetch Menu Items
+      const { data: itemsData } = await supabase
+        .from('menu_items')
+        .select('id, name, availability_status, price_minor')
+        .eq('organization_id', org.id)
+        .order('name')
+      
+      menuItems = itemsData || []
     }
   }
 
@@ -54,6 +64,7 @@ export default async function OrdersPage() {
           organizationId={org.id} 
           initialOrders={orders} 
           initialServiceRequests={serviceRequests} 
+          initialMenuItems={menuItems}
         />
       ) : (
         <p className="text-zinc-500">Please create an organization first.</p>

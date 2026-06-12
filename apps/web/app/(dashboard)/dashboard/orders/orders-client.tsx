@@ -7,12 +7,15 @@ interface OrdersClientProps {
   organizationId: string
   initialOrders: any[]
   initialServiceRequests: any[]
+  initialMenuItems?: any[]
 }
 
-export function OrdersClient({ organizationId, initialOrders, initialServiceRequests }: OrdersClientProps) {
+export function OrdersClient({ organizationId, initialOrders, initialServiceRequests, initialMenuItems = [] }: OrdersClientProps) {
   const supabase = createClient()
   const [orders, setOrders] = useState(initialOrders)
   const [serviceRequests, setServiceRequests] = useState(initialServiceRequests)
+  const [menuItems, setMenuItems] = useState(initialMenuItems)
+  const [activeTab, setActiveTab] = useState<'orders' | 'stock'>('orders')
 
   useEffect(() => {
     // Subscribe to Orders
@@ -57,9 +60,25 @@ export function OrdersClient({ organizationId, initialOrders, initialServiceRequ
       })
       .subscribe()
 
+      .subscribe()
+
+    // Subscribe to Menu Items
+    const menuSubscription = supabase
+      .channel('menu-channel')
+      .on('postgres_changes', { 
+        event: 'UPDATE', 
+        schema: 'public', 
+        table: 'menu_items',
+        filter: `organization_id=eq.${organizationId}`
+      }, (payload: any) => {
+        setMenuItems((prev) => prev.map(item => item.id === payload.new.id ? { ...item, ...payload.new } : item))
+      })
+      .subscribe()
+
     return () => {
       supabase.removeChannel(ordersSubscription)
       supabase.removeChannel(serviceRequestsSubscription)
+      supabase.removeChannel(menuSubscription)
     }
   }, [organizationId, supabase])
 
@@ -73,10 +92,35 @@ export function OrdersClient({ organizationId, initialOrders, initialServiceRequ
     })
   const activeOrders = orders.filter(o => o.status !== 'completed')
 
+  const toggleStock = async (itemId: string, currentStatus: string) => {
+    const newStatus = currentStatus === 'available' ? 'sold_out' : 'available'
+    // Optimistic update
+    setMenuItems(prev => prev.map(i => i.id === itemId ? { ...i, availability_status: newStatus } : i))
+    await supabase.from('menu_items').update({ availability_status: newStatus }).eq('id', itemId)
+  }
+
   return (
-    <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6 overflow-hidden mt-8">
-      
-      {/* Service Requests Column */}
+    <div className="flex-1 flex flex-col mt-8">
+      <div className="flex space-x-2 mb-6">
+        <button 
+          onClick={() => setActiveTab('orders')}
+          className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${activeTab === 'orders' ? 'bg-blue-600 text-white shadow-md' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white border border-zinc-700/50'}`}
+        >
+          Orders & Requests
+        </button>
+        <button 
+          onClick={() => setActiveTab('stock')}
+          className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors flex items-center gap-2 ${activeTab === 'stock' ? 'bg-blue-600 text-white shadow-md' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white border border-zinc-700/50'}`}
+        >
+          <span className={`w-2 h-2 rounded-full ${menuItems.some(i => i.availability_status === 'sold_out') ? 'bg-red-500' : 'bg-green-500'}`}></span>
+          Live Stock
+        </button>
+      </div>
+
+      {activeTab === 'orders' ? (
+        <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6 overflow-hidden">
+          
+          {/* Service Requests Column */}
       <div className="col-span-1 border border-zinc-800 rounded-xl bg-zinc-900/30 flex flex-col overflow-hidden max-h-[400px] lg:max-h-full">
         <div className="p-4 border-b border-zinc-800 bg-zinc-900">
           <h2 className="font-bold text-white flex justify-between items-center">
@@ -186,6 +230,35 @@ export function OrdersClient({ organizationId, initialOrders, initialServiceRequ
         </div>
       </div>
 
+    </div>
+    ) : (
+      <div className="flex-1 border border-zinc-800 rounded-xl bg-zinc-900/30 overflow-hidden min-h-[500px] flex flex-col">
+        <div className="p-4 border-b border-zinc-800 bg-zinc-900 flex justify-between items-center">
+          <h2 className="font-bold text-white">Stock Management</h2>
+          <span className="text-sm text-zinc-400">Updates sync instantly to guest menus</span>
+        </div>
+        <div className="flex-1 overflow-y-auto p-4 space-y-3">
+          {menuItems.length === 0 ? (
+            <p className="text-center text-zinc-500 py-10">No items on your menu yet.</p>
+          ) : (
+            menuItems.map(item => (
+              <div key={item.id} className="flex justify-between items-center p-4 bg-zinc-900/50 border border-zinc-800 rounded-lg">
+                <div>
+                  <div className="font-medium text-white">{item.name}</div>
+                  <div className="text-sm text-zinc-400">₦{(item.price_minor / 100).toLocaleString()}</div>
+                </div>
+                <button
+                  onClick={() => toggleStock(item.id, item.availability_status)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${item.availability_status === 'available' ? 'bg-green-500/10 border-green-500/20 text-green-400 hover:bg-green-500/20' : 'bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20'}`}
+                >
+                  {item.availability_status === 'available' ? 'Available' : 'Sold Out'}
+                </button>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    )}
     </div>
   )
 }

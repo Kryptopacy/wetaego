@@ -192,11 +192,16 @@ export default async function SettingsPage({
                 <label className="mb-2 block text-sm font-medium text-zinc-300">Bank Name</label>
                 <select name="bankName" required className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
                   <option value="">Select a bank...</option>
-                  <option value="GTB">Guaranty Trust Bank</option>
-                  <option value="ZENITH">Zenith Bank</option>
-                  <option value="FBN">First Bank of Nigeria</option>
-                  <option value="UBA">United Bank for Africa</option>
-                  <option value="ACCESS">Access Bank</option>
+                  <option value="058">Guaranty Trust Bank</option>
+                  <option value="057">Zenith Bank</option>
+                  <option value="011">First Bank of Nigeria</option>
+                  <option value="033">United Bank for Africa</option>
+                  <option value="044">Access Bank</option>
+                  <option value="050">Ecobank Nigeria</option>
+                  <option value="232">Sterling Bank</option>
+                  <option value="032">Union Bank of Nigeria</option>
+                  <option value="215">Unity Bank</option>
+                  <option value="035">Wema Bank</option>
                 </select>
               </div>
               <div>
@@ -210,6 +215,18 @@ export default async function SettingsPage({
                   className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                   placeholder="0123456789"
                 />
+                <p className="mt-1 text-xs text-zinc-500">Must be a valid 10-digit NUBAN account number.</p>
+              </div>
+              <div>
+                <label className="mb-2 block text-sm font-medium text-zinc-300">Registered Business Name</label>
+                <input
+                  type="text"
+                  name="businessName"
+                  required
+                  defaultValue={organization?.name || ''}
+                  className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                />
+                <p className="mt-1 text-xs text-zinc-500">The legal name associated with this bank account.</p>
               </div>
               <div className="mt-2 flex items-center justify-between">
                 <button type="submit" className="px-4 py-2 rounded-lg bg-green-600 hover:bg-green-500 text-white font-medium transition-colors">

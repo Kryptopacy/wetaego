@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { generateQrBatch, deleteQrCode } from './actions'
+import { generateQrBatch, deleteQrCode, assignQrTable } from './actions'
 import { toast } from 'sonner'
 
 export function QrClient({ organizationId, locations, qrCodes, baseUrl }: any) {
@@ -102,6 +102,17 @@ export function QrClient({ organizationId, locations, qrCodes, baseUrl }: any) {
                 <p className="text-zinc-500 print:text-zinc-600 text-xs truncate mt-1">
                   {qr.table_identifier ? `Table: ${qr.table_identifier}` : 'Unassigned'}
                 </p>
+                <button
+                  onClick={async () => {
+                    const tableId = window.prompt("Enter Table Name or Number (e.g. 'Table 14' or 'VIP 2')\nLeave blank to unassign.", qr.table_identifier || "");
+                    if (tableId !== null) {
+                      await assignQrTable(qr.id, tableId);
+                    }
+                  }}
+                  className="mt-2 text-[10px] bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-3 py-1 rounded-full print:hidden transition-colors"
+                >
+                  {qr.table_identifier ? 'Change Table' : 'Assign Table'}
+                </button>
                 <p className="text-zinc-700 print:text-zinc-400 text-[10px] font-mono mt-2 truncate">{qr.id.split('-')[0]}</p>
               </div>
             </div>

@@ -58,3 +58,17 @@ export async function deleteQrCode(qrId: string) {
   revalidatePath('/dashboard/qr')
   return { success: true }
 }
+
+export async function assignQrTable(qrId: string, tableIdentifier: string | null) {
+  const supabase = await createClient()
+  
+  const { error } = await supabase
+    .from('qr_codes')
+    .update({ table_identifier: tableIdentifier || null })
+    .eq('id', qrId)
+  
+  if (error) return { error: error.message }
+  
+  revalidatePath('/dashboard/qr')
+  return { success: true }
+}
