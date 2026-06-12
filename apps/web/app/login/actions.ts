@@ -120,7 +120,8 @@ export async function startInteractiveDemo() {
     currency_code: 'NGN',
     theme_color: '#0f7b55',
     ai_enabled: true,
-    ai_name: 'Pacy Assistant'
+    ai_name: 'Pacy Assistant',
+    publication_status: 'published'
   }).select('id').single()
 
   // 5. Create Menu

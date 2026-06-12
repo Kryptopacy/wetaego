@@ -64,7 +64,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       if (userData?.user) {
         const { data: member } = await supabase
           .from('organization_members')
-          .select('organizations(name)')
+          .select('organizations(id, name)')
           .eq('user_id', userData.user.id)
           .single()
         if (member && (member.organizations as any)?.name) {

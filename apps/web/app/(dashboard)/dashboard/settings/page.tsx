@@ -12,7 +12,12 @@ import { getPlanLimits } from '@/lib/utils/settings'
 import { savePaymentSettings } from './payment-actions'
 import { cookies } from 'next/headers'
 
-export default async function SettingsPage() {
+export default async function SettingsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string }>
+}) {
+  const { tab = 'general' } = await searchParams;
   const supabase = await createClient()
 
   // Fetch current user
@@ -104,8 +109,37 @@ export default async function SettingsPage() {
         </Link>
       </div>
 
+      <div className="flex space-x-1 border-b border-zinc-800 mb-6 overflow-x-auto no-scrollbar">
+        <Link 
+          href="?tab=general"
+          className={`px-4 py-2.5 text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${
+            tab === 'general' ? 'border-blue-500 text-white' : 'border-transparent text-zinc-400 hover:text-zinc-200 hover:border-zinc-700'
+          }`}
+        >
+          General & Payments
+        </Link>
+        <Link 
+          href="?tab=venue"
+          className={`px-4 py-2.5 text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${
+            tab === 'venue' ? 'border-blue-500 text-white' : 'border-transparent text-zinc-400 hover:text-zinc-200 hover:border-zinc-700'
+          }`}
+        >
+          Venue Information
+        </Link>
+        <Link 
+          href="?tab=ai"
+          className={`px-4 py-2.5 text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${
+            tab === 'ai' ? 'border-blue-500 text-white' : 'border-transparent text-zinc-400 hover:text-zinc-200 hover:border-zinc-700'
+          }`}
+        >
+          AI Assistant
+        </Link>
+      </div>
+
       <div className="space-y-6">
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
+        {tab === 'general' && (
+          <>
+            <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
           <h2 className="text-lg font-semibold text-white mb-4">General Info</h2>
           <form action={updateOrganization} className="flex flex-col gap-4">
             <div>
@@ -185,8 +219,10 @@ export default async function SettingsPage() {
             </form>
           </div>
         )}
+          </>
+        )}
 
-        {location && (
+        {tab === 'venue' && location && (
           <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
             <h2 className="text-lg font-semibold text-white mb-2 flex items-center gap-2">
               Venue Information
@@ -335,7 +371,7 @@ export default async function SettingsPage() {
           </div>
         )}
 
-        {location && (
+        {tab === 'ai' && location && (
           <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
             <h2 className="text-lg font-semibold text-white mb-2 flex items-center gap-2">
               AI Chat Assistant Configuration
