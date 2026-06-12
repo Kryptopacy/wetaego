@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
@@ -17,7 +17,6 @@ export const metadata: Metadata = {
   title: "OurMenu OS",
   description: "Digital Menus & Operations for Hospitality",
   manifest: "/manifest.json",
-  themeColor: "#0a0a0f",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
@@ -26,6 +25,10 @@ export const metadata: Metadata = {
   icons: {
     apple: "/icon-192x192.png",
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0a0a0f",
 };
 
 import { PostHogProvider } from './providers'

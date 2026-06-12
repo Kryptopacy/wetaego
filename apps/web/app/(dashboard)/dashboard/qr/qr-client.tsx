@@ -6,6 +6,11 @@ import { toast } from 'sonner'
 
 export function QrClient({ organizationId, locations, qrCodes, baseUrl }: any) {
   const [isGenerating, setIsGenerating] = useState(false)
+  
+  // Modal state for assigning tables
+  const [assignModalOpen, setAssignModalOpen] = useState(false)
+  const [assigningQr, setAssigningQr] = useState<any>(null)
+  const [tableInput, setTableInput] = useState('')
 
   async function handleGenerate(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -103,11 +108,10 @@ export function QrClient({ organizationId, locations, qrCodes, baseUrl }: any) {
                   {qr.table_identifier ? `Table: ${qr.table_identifier}` : 'Unassigned'}
                 </p>
                 <button
-                  onClick={async () => {
-                    const tableId = window.prompt("Enter Table Name or Number (e.g. 'Table 14' or 'VIP 2')\nLeave blank to unassign.", qr.table_identifier || "");
-                    if (tableId !== null) {
-                      await assignQrTable(qr.id, tableId);
-                    }
+                  onClick={() => {
+                    setAssigningQr(qr)
+                    setTableInput(qr.table_identifier || '')
+                    setAssignModalOpen(true)
                   }}
                   className="mt-2 text-[10px] bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-3 py-1 rounded-full print:hidden transition-colors"
                 >
@@ -125,6 +129,54 @@ export function QrClient({ organizationId, locations, qrCodes, baseUrl }: any) {
           </div>
         )}
       </div>
+
+      {/* Assign Table Modal */}
+      {assignModalOpen && assigningQr && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 print:hidden">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 max-w-sm w-full shadow-2xl animate-in fade-in zoom-in duration-200">
+            <h3 className="text-xl font-bold text-white mb-2">Assign Table</h3>
+            <p className="text-zinc-400 text-sm mb-4">
+              Enter the table name or number (e.g., "Table 14" or "VIP 2"). Leave blank to unassign.
+            </p>
+            <form onSubmit={async (e) => {
+              e.preventDefault()
+              const qrId = assigningQr.id
+              setAssignModalOpen(false)
+              
+              const res = await assignQrTable(qrId, tableInput.trim() || null)
+              if (res?.error) {
+                toast.error(res.error)
+              } else {
+                toast.success('Table assigned successfully!')
+              }
+            }}>
+              <input 
+                type="text" 
+                value={tableInput}
+                onChange={(e) => setTableInput(e.target.value)}
+                className="w-full bg-zinc-950 border border-zinc-800 text-white rounded-lg px-4 py-3 mb-6 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                placeholder="e.g. Table 14"
+                autoFocus
+              />
+              <div className="flex gap-3 justify-end">
+                <button 
+                  type="button"
+                  onClick={() => setAssignModalOpen(false)}
+                  className="px-4 py-2 text-zinc-400 hover:text-white font-medium transition-colors"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit"
+                  className="bg-blue-600 hover:bg-blue-500 text-white font-medium px-6 py-2 rounded-lg transition-colors"
+                >
+                  Save
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
     </div>
   )

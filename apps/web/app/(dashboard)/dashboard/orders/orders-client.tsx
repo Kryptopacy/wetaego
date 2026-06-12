@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { toast } from 'sonner'
 
 interface OrdersClientProps {
   organizationId: string
@@ -94,9 +95,22 @@ export function OrdersClient({ organizationId, initialOrders, initialServiceRequ
 
   const toggleStock = async (itemId: string, currentStatus: string) => {
     const newStatus = currentStatus === 'available' ? 'sold_out' : 'available'
+    
+    // Store previous state for rollback
+    const previousItems = [...menuItems]
+    
     // Optimistic update
     setMenuItems(prev => prev.map(i => i.id === itemId ? { ...i, availability_status: newStatus } : i))
-    await supabase.from('menu_items').update({ availability_status: newStatus }).eq('id', itemId)
+    
+    const { error } = await supabase.from('menu_items').update({ availability_status: newStatus }).eq('id', itemId)
+    
+    if (error) {
+      // Rollback on failure
+      setMenuItems(previousItems)
+      toast.error('Failed to update stock status: ' + error.message)
+    } else {
+      toast.success(`Item marked as ${newStatus === 'available' ? 'Available' : 'Sold Out'}`)
+    }
   }
 
   return (
