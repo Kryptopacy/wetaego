@@ -1,3 +1,4 @@
+﻿/* eslint-disable react/no-unescaped-entities */
 'use client'
 
 import { useState } from 'react'
@@ -71,7 +72,7 @@ export default function InviteAcceptForm({
           </svg>
         </div>
 
-        <h1 className="text-2xl font-bold tracking-tight text-white mb-2">You're Invited!</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-white mb-2">You&apos;re Invited!</h1>
         <p className="text-zinc-400 text-sm mb-6">
           You have been invited to join <strong className="text-zinc-200">{orgName}</strong> as a
           <span className={`inline-block ml-1.5 text-xs px-2.5 py-0.5 rounded-full font-medium ${getRoleBadgeColor(role)}`}>

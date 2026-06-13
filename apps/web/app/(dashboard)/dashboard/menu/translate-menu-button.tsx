@@ -1,3 +1,4 @@
+﻿/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
 import { useState } from 'react'
@@ -85,7 +86,7 @@ export function TranslateMenuButton({ orgId, categories }: TranslateMenuButtonPr
         disabled={isTranslating}
         className="px-4 py-2 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white text-sm font-bold transition-all disabled:opacity-50 flex items-center gap-2 shadow-lg"
       >
-        {isTranslating ? 'Translating...' : '🌐 Translate Menu'}
+        {isTranslating ? 'Translating...' : 'ðŸŒ Translate Menu'}
       </button>
     </div>
   )

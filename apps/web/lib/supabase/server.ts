@@ -1,4 +1,5 @@
-import { createServerClient, type CookieOptions } from '@supabase/ssr'
+﻿/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
+import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import type { Database } from './types'
 

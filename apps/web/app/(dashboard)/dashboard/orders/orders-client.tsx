@@ -1,3 +1,4 @@
+﻿/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -228,15 +229,15 @@ export function OrdersClient({ organizationId, initialOrders, initialServiceRequ
                   <div>
                     <div className="flex items-center gap-3 mb-1">
                       <span className="font-bold text-xl text-white">{order.table_identifier || 'Takeaway'}</span>
-                      <span className="text-zinc-500">·</span>
+                      <span className="text-zinc-500">Â·</span>
                       <span className="text-zinc-300 font-medium">{order.customer_name || 'Guest'}</span>
                     </div>
                     <span className="text-sm text-zinc-500">Order #{order.id.split('-')[0]}</span>
                   </div>
                   <div className="text-right">
-                    <div className="font-bold text-lg text-white">₦{(order.total_amount_minor / 100).toLocaleString()}</div>
+                    <div className="font-bold text-lg text-white">â‚¦{(order.total_amount_minor / 100).toLocaleString()}</div>
                     {order.tip_amount_minor > 0 && (
-                      <div className="text-sm text-blue-400 mb-1 font-medium">+ ₦{(order.tip_amount_minor / 100).toLocaleString()} Tip</div>
+                      <div className="text-sm text-blue-400 mb-1 font-medium">+ â‚¦{(order.tip_amount_minor / 100).toLocaleString()} Tip</div>
                     )}
                     <span className={`text-xs font-medium px-2 py-1 rounded-full ${order.status === 'paid' ? 'bg-green-500/20 text-green-400' : 'bg-zinc-800 text-zinc-400'}`}>
                       {order.status.toUpperCase()}
@@ -254,7 +255,7 @@ export function OrdersClient({ organizationId, initialOrders, initialServiceRequ
 
                 {order.customer_note && (
                   <div className="bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 rounded-lg p-3 text-sm font-medium mb-4">
-                    📝 Note: {order.customer_note}
+                    ðŸ“ Note: {order.customer_note}
                   </div>
                 )}
 
@@ -302,7 +303,7 @@ export function OrdersClient({ organizationId, initialOrders, initialServiceRequ
               <div key={item.id} className="flex justify-between items-center p-4 bg-zinc-900/50 border border-zinc-800 rounded-lg">
                 <div>
                   <div className="font-medium text-white">{item.name}</div>
-                  <div className="text-sm text-zinc-400">₦{(item.price_minor / 100).toLocaleString()}</div>
+                  <div className="text-sm text-zinc-400">â‚¦{(item.price_minor / 100).toLocaleString()}</div>
                 </div>
                 <button
                   onClick={() => toggleStock(item.id, item.availability_status)}

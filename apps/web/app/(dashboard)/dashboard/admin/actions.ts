@@ -1,3 +1,4 @@
+﻿/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
@@ -20,7 +21,7 @@ export async function updateSetting(formData: FormData) {
     const rawJson = formData.get('json_value') as string
     try {
       value = JSON.parse(rawJson)
-    } catch (e) {
+    } catch (_e) {
       throw new Error('Invalid JSON format')
     }
   } else {

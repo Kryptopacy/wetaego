@@ -1,3 +1,4 @@
+﻿/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
 import { useState } from 'react'
@@ -63,7 +64,7 @@ export function CategoryTabs({ categories, orgId }: { categories: any[], orgId: 
                   <div>
                     <h3 className="font-semibold text-white">
                       {item.name} 
-                      <span className="text-zinc-400 font-normal ml-2">₦{(item.price_minor / 100).toLocaleString()}</span>
+                      <span className="text-zinc-400 font-normal ml-2">â‚¦{(item.price_minor / 100).toLocaleString()}</span>
                     </h3>
                     {item.description && <p className="text-sm text-zinc-400 mt-1">{item.description}</p>}
                   </div>

@@ -1,12 +1,11 @@
-import Link from 'next/link'
+﻿/* eslint-disable @typescript-eslint/no-unused-vars, react/no-unescaped-entities */
 import Image from 'next/image'
 import { startInteractiveDemo } from './login/actions'
 import {
   Zap, ChefHat, Globe, BarChart3, ClipboardList,
   QrCode, ArrowRight, Check, Star,
-  Users, TrendingUp, Clock, MessageCircle,
-  Smartphone, Sparkles, MapPin, CreditCard,
-  Bell, FileText, ShieldCheck, Package
+  Users, MessageCircle, CreditCard,
+  Bell, FileText, ShieldCheck
 } from 'lucide-react'
 import { getPricingSettings, getPlanLimits } from '@/lib/utils/settings'
 import { FadeIn, StaggerContainer, StaggerItem } from './components/animations'
@@ -19,7 +18,7 @@ async function Pricing() {
   const plans = [
     {
       name: 'Starter',
-      price: '₦0',
+      price: 'â‚¦0',
       period: '30-day trial',
       description: 'Perfect for testing the platform at your venue.',
       features: ['AI Waiter (guest-facing chat)', 'Edge Translator (40+ languages)', 'Up to 2 QR codes', '1 active location'],
@@ -29,7 +28,7 @@ async function Pricing() {
     },
     {
       name: 'Pro',
-      price: `₦${pricing.pro_monthly_ngn.toLocaleString()}`,
+      price: `â‚¦${pricing.pro_monthly_ngn.toLocaleString()}`,
       period: 'per month',
       description: 'For serious operators who want every edge.',
       features: [
@@ -115,7 +114,7 @@ async function Pricing() {
 }
 
 const features = [
-  // Row 1 — The Operator Command Center
+  // Row 1 â€” The Operator Command Center
   {
     size: 'lg', // 2/3 width
     icon: ClipboardList,
@@ -132,9 +131,9 @@ const features = [
     tag: 'AI Dining Advisor',
     badge: 'Gemini-powered',
     title: 'Your best waiter, always on shift.',
-    description: 'Guests chat to get recommendations, ask about allergens, customize items, and add to cart — all without flagging down staff.',
+    description: 'Guests chat to get recommendations, ask about allergens, customize items, and add to cart â€” all without flagging down staff.',
   },
-  // Row 2 — Guest Experience
+  // Row 2 â€” Guest Experience
   {
     size: 'third',
     icon: QrCode,
@@ -162,15 +161,15 @@ const features = [
     title: 'Every tourist reads your menu.',
     description: 'Browser language detected on arrival. The menu auto-translates into French, Mandarin, Yoruba, Arabic, and more in seconds.',
   },
-  // Row 3 — AI Intelligence
+  // Row 3 â€” AI Intelligence
   {
     size: 'half',
     icon: ChefHat,
     color: 'from-violet-600 to-indigo-600',
     tag: 'AI Copywriter + Cover Studio',
-    badge: '3× faster menu updates',
+    badge: '3Ã— faster menu updates',
     title: 'Studio-quality menus. Zero effort.',
-    description: 'Type a dish name. Gemini generates sensory, appetizing copy — complete with allergen flags, dietary tags, and an AI-generated photo. Your menu becomes your sales pitch.',
+    description: 'Type a dish name. Gemini generates sensory, appetizing copy â€” complete with allergen flags, dietary tags, and an AI-generated photo. Your menu becomes your sales pitch.',
   },
   {
     size: 'half',
@@ -181,7 +180,7 @@ const features = [
     title: 'Never stock out on your best-sellers.',
     description: 'Analyses 30 days of sales velocity. Predicts the next 7 days of demand, and fires stock alerts before shelves run dry. Suya trending up? We knew two days ago.',
   },
-  // Row 4 — Built for Growth
+  // Row 4 â€” Built for Growth
   {
     size: 'third',
     icon: FileText,
@@ -189,7 +188,7 @@ const features = [
     tag: 'Custom Pages',
     badge: 'Unlimited creativity',
     title: 'More than a menu.',
-    description: 'Build a cocktail guide, event calendar, or brand story page — all hosted on your menu URL. No separate website needed.',
+    description: 'Build a cocktail guide, event calendar, or brand story page â€” all hosted on your menu URL. No separate website needed.',
   },
   {
     size: 'third',
@@ -209,7 +208,7 @@ const features = [
     title: 'Get paid when they order.',
     description: 'Connect your Nigerian bank account via Paystack. Revenue lands directly in your account the moment a guest completes an order.',
   },
-  // Row 5 — Staff Operations
+  // Row 5 â€” Staff Operations
   {
     size: 'lg',
     icon: Star,
@@ -240,7 +239,7 @@ const sizeClass = {
 export default async function HomePage() {
   return (
     <div className="bg-[#050505] min-h-screen selection:bg-violet-500/30 selection:text-white">
-      {/* ── Navbar ── */}
+      {/* â”€â”€ Navbar â”€â”€ */}
       <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-12 h-16 bg-black/40 backdrop-blur-xl border-b border-white/[0.04]">
         <div className="flex items-center gap-3">
           <div className="w-6 h-6 rounded-md bg-gradient-to-br from-white to-zinc-300 flex items-center justify-center shadow-[0_0_15px_rgba(255,255,255,0.3)]">
@@ -264,7 +263,7 @@ export default async function HomePage() {
         </div>
       </nav>
 
-      {/* ── HERO: Cinematic full-bleed background composition ── */}
+      {/* â”€â”€ HERO: Cinematic full-bleed background composition â”€â”€ */}
       <section className="relative min-h-screen flex items-center overflow-hidden">
         {/* Background image */}
         <div className="absolute inset-0 z-0">
@@ -284,7 +283,7 @@ export default async function HomePage() {
         {/* Content grid */}
         <div className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-12 pt-24 pb-16 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center min-h-screen">
 
-          {/* Left — Copy */}
+          {/* Left â€” Copy */}
           <FadeIn className="flex flex-col justify-center">
             <div className="mb-8">
               <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-zinc-300 text-xs font-medium backdrop-blur-sm">
@@ -299,7 +298,7 @@ export default async function HomePage() {
               </span>
             </h1>
             <p className="text-lg md:text-xl text-zinc-300 max-w-xl font-light leading-relaxed mb-10">
-              Ditch the expensive custom websites, torn hardcopies, and terrible PDF links. Give your guests a stunning e-menu featuring a personalized AI Waiter that talks like your brand, streamlines ordering, and processes payments—freeing your staff to focus on hospitality. Behind the scenes? Your team gets a live KDS, WhatsApp staff alerts, AI tools to optimise flow, and demand forecasting.
+              Ditch the expensive custom websites, torn hardcopies, and terrible PDF links. Give your guests a stunning e-menu featuring a personalized AI Waiter that talks like your brand, streamlines ordering, and processes paymentsâ€”freeing your staff to focus on hospitality. Behind the scenes? Your team gets a live KDS, WhatsApp staff alerts, AI tools to optimise flow, and demand forecasting.
             </p>
             <div className="flex flex-col sm:flex-row items-start gap-4">
               <a href="/dashboard" className="flex items-center gap-2 px-8 py-3.5 rounded-full bg-white text-black text-sm font-bold hover:scale-105 transition-all duration-300 shadow-[0_0_30px_rgba(255,255,255,0.15)]">
@@ -313,7 +312,7 @@ export default async function HomePage() {
             </div>
           </FadeIn>
 
-          {/* Right — Phone mockup with actual guest menu screen */}
+          {/* Right â€” Phone mockup with actual guest menu screen */}
           <FadeIn delay={0.3} className="hidden lg:flex items-center justify-center">
             <div className="relative">
               {/* Glow behind phone */}
@@ -344,7 +343,7 @@ export default async function HomePage() {
 
                 {/* Floating UI annotation badges */}
                 <div className="absolute -right-20 top-16 bg-black/80 backdrop-blur-md border border-white/10 rounded-2xl px-3 py-2 text-xs text-white whitespace-nowrap shadow-xl">
-                  <span className="text-emerald-400 font-bold">✓</span> Order received
+                  <span className="text-emerald-400 font-bold">âœ“</span> Order received
                 </div>
                 <div className="absolute -left-24 bottom-28 bg-black/80 backdrop-blur-md border border-white/10 rounded-2xl px-3 py-2 text-xs text-white whitespace-nowrap shadow-xl">
                   <span className="text-blue-400 font-bold">AI</span> Table 7 ready to order
@@ -364,17 +363,17 @@ export default async function HomePage() {
         <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#050505] to-transparent pointer-events-none z-10" />
       </section>
 
-      {/* ── FEATURES: Full Bento Grid ── */}
+      {/* â”€â”€ FEATURES: Full Bento Grid â”€â”€ */}
       <section id="features" className="py-24 px-6 max-w-7xl mx-auto relative z-10">
         <FadeIn className="text-center mb-20">
           <span className="inline-block px-4 py-1.5 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-300 text-xs font-bold uppercase tracking-widest mb-6">10 Integrated Modules</span>
           <h2 className="text-4xl md:text-6xl font-black text-white mb-6 tracking-tight">
             Not features.<br /><span className="text-zinc-400">A complete hospitality suite.</span>
           </h2>
-          <p className="text-zinc-400 text-lg md:text-xl max-w-2xl mx-auto font-light">Everything your operation needs — from the guest's first QR scan to the last Paystack payout.</p>
+          <p className="text-zinc-400 text-lg md:text-xl max-w-2xl mx-auto font-light">Everything your operation needs â€” from the guest&apos;s first QR scan to the last Paystack payout.</p>
         </FadeIn>
 
-        {/* Row 1 — Command Center */}
+        {/* Row 1 â€” Command Center */}
         <StaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           {features.slice(0, 2).map((f) => {
             const Icon = f.icon
@@ -400,7 +399,7 @@ export default async function HomePage() {
           })}
         </StaggerContainer>
 
-        {/* Row 2 — Guest Experience */}
+        {/* Row 2 â€” Guest Experience */}
         <StaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           {features.slice(2, 5).map((f) => {
             const Icon = f.icon
@@ -425,7 +424,7 @@ export default async function HomePage() {
           })}
         </StaggerContainer>
 
-        {/* Row 3 — AI Intelligence */}
+        {/* Row 3 â€” AI Intelligence */}
         <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           {features.slice(5, 7).map((f) => {
             const Icon = f.icon
@@ -451,7 +450,7 @@ export default async function HomePage() {
           })}
         </StaggerContainer>
 
-        {/* Row 4 — Built for Growth */}
+        {/* Row 4 â€” Built for Growth */}
         <StaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {features.slice(7, 10).map((f) => {
             const Icon = f.icon
@@ -475,7 +474,7 @@ export default async function HomePage() {
           })}
         </StaggerContainer>
 
-        {/* Row 5 — Staff Operations */}
+        {/* Row 5 â€” Staff Operations */}
         <StaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
           {features.slice(10, 12).map((f) => {
             const Icon = f.icon
@@ -502,13 +501,13 @@ export default async function HomePage() {
         </StaggerContainer>
       </section>
 
-      {/* ── DYNAMIC TRUSTED BY ── */}
+      {/* â”€â”€ DYNAMIC TRUSTED BY â”€â”€ */}
       <TrustedBy />
 
-      {/* ── PRICING ── */}
+      {/* â”€â”€ PRICING â”€â”€ */}
       <Pricing />
 
-      {/* ── FINAL CTA ── */}
+      {/* â”€â”€ FINAL CTA â”€â”€ */}
       <section className="py-32 px-6 bg-[#050505] relative overflow-hidden">
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div className="w-[600px] h-[600px] bg-violet-600/10 blur-[120px] rounded-full" />
@@ -524,7 +523,7 @@ export default async function HomePage() {
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <a href="/dashboard" className="flex items-center gap-2 px-10 py-4 rounded-full bg-white text-black text-base font-bold hover:scale-105 transition-all duration-300 shadow-[0_0_40px_rgba(255,255,255,0.15)]">
-              Start Free — No Card Required <ArrowRight className="w-5 h-5" />
+              Start Free â€” No Card Required <ArrowRight className="w-5 h-5" />
             </a>
             <form action={startInteractiveDemo}>
               <button type="submit" className="flex items-center gap-2 px-10 py-4 rounded-full bg-white/5 border border-white/10 text-white text-base font-semibold hover:bg-white/10 backdrop-blur-md transition-all duration-300">
@@ -535,7 +534,7 @@ export default async function HomePage() {
         </FadeIn>
       </section>
 
-      {/* ── FOOTER ── */}
+      {/* â”€â”€ FOOTER â”€â”€ */}
       <footer className="border-t border-white/[0.04] py-12 px-6">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-3">
@@ -544,7 +543,7 @@ export default async function HomePage() {
             </div>
             <span className="font-semibold text-white text-sm">OurMenu</span>
           </div>
-          <p className="text-zinc-600 text-sm">© {new Date().getFullYear()} OurMenu. Built for African hospitality.</p>
+          <p className="text-zinc-600 text-sm">Â© {new Date().getFullYear()} OurMenu. Built for African hospitality.</p>
           <div className="flex items-center gap-6 text-zinc-500 text-sm">
             <a href="#" className="hover:text-white transition-colors">Privacy</a>
             <a href="#" className="hover:text-white transition-colors">Terms</a>

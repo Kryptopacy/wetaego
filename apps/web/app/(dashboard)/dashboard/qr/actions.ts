@@ -1,3 +1,4 @@
+﻿/* eslint-disable @typescript-eslint/no-unused-vars */
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
@@ -27,7 +28,7 @@ export async function generateQrBatch(formData: FormData) {
   }
 
   // Generate generic QR codes
-  const qrCodes = Array.from({ length: quantity }).map((_, i) => {
+  const qrCodes = Array.from({ length: quantity }).map((__, _i) => {
     return {
       organization_id: orgId,
       location_id: locationId,

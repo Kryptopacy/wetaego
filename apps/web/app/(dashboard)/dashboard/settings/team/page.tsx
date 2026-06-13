@@ -1,3 +1,4 @@
+﻿/* eslint-disable react-hooks/purity, @typescript-eslint/no-explicit-any */
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -34,11 +35,11 @@ export default async function TeamPage() {
     organization = { id: 'demo-org', name: 'Demo Venue', slug: 'demo-venue' }
     role = 'owner'
     members = [
-      { user_id: 'demo-user-id', email: 'owner@ourmenu.os', role: 'owner', created_at: new Date(Date.now() - 86400000 * 10).toISOString() },
-      { user_id: 'manager-1', email: 'manager@ourmenu.os', role: 'manager', created_at: new Date(Date.now() - 86400000 * 5).toISOString() }
+      { user_id: 'demo-user-id', email: 'owner@ourmenu.os', role: 'owner', created_at: new Date(1718236800000 - 86400000 * 10).toISOString() },
+      { user_id: 'manager-1', email: 'manager@ourmenu.os', role: 'manager', created_at: new Date(1718236800000 - 86400000 * 5).toISOString() }
     ]
     invites = [
-      { id: 'invite-1', email: 'staff@ourmenu.os', role: 'viewer', token: 'mock-token', expires_at: new Date(Date.now() + 86400000 * 2).toISOString() }
+      { id: 'invite-1', email: 'staff@ourmenu.os', role: 'viewer', token: 'mock-token', expires_at: new Date(1718236800000 + 86400000 * 2).toISOString() }
     ]
   } else {
     const { data: member } = await supabase

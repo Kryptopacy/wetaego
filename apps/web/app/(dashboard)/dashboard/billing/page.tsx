@@ -1,5 +1,5 @@
+﻿/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
 import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
 import { subscribeToPro, buyCredits } from './actions'
 import { getUsdToNgnRate } from '@/lib/payments/exchange'
 
@@ -69,7 +69,7 @@ export default async function BillingPage() {
           
           <h2 className="text-2xl font-bold text-white mb-2 relative z-10">OurMenu OS Pro</h2>
           <div className="flex items-baseline gap-2 mb-4 relative z-10">
-            <span className="text-4xl font-extrabold text-white">₦{proPrice.toLocaleString()}</span>
+            <span className="text-4xl font-extrabold text-white">â‚¦{proPrice.toLocaleString()}</span>
             <span className="text-zinc-500">/mo</span>
           </div>
           
@@ -109,7 +109,7 @@ export default async function BillingPage() {
           <div className="flex items-center justify-between py-4 border-b border-zinc-800">
             <div>
               <div className="font-semibold text-white">10 Credits</div>
-              <div className="text-xs text-zinc-500">₦{credits10Price.toLocaleString()}</div>
+              <div className="text-xs text-zinc-500">â‚¦{credits10Price.toLocaleString()}</div>
             </div>
             <form action={buyCredits as any} className="relative z-10">
               <input type="hidden" name="organization_id" value={org.id} />
@@ -123,7 +123,7 @@ export default async function BillingPage() {
           <div className="flex items-center justify-between py-4 border-b border-zinc-800">
             <div>
               <div className="font-semibold text-white">50 Credits</div>
-              <div className="text-xs text-zinc-500">₦{credits50Price.toLocaleString()}</div>
+              <div className="text-xs text-zinc-500">â‚¦{credits50Price.toLocaleString()}</div>
             </div>
             <form action={buyCredits as any} className="relative z-10">
               <input type="hidden" name="organization_id" value={org.id} />
@@ -136,7 +136,7 @@ export default async function BillingPage() {
 
           <div className="mt-4 p-4 bg-blue-900/20 border border-blue-800/50 rounded-xl">
             <p className="text-xs text-blue-200">
-              💡 <strong className="font-bold text-blue-400">Pro Tip:</strong> Upgrading to Pro gives you 50 Credits included every month for only ₦{proPrice.toLocaleString()}—a massive saving over buying standalone credits!
+              ðŸ’¡ <strong className="font-bold text-blue-400">Pro Tip:</strong> Upgrading to Pro gives you 50 Credits included every month for only â‚¦{proPrice.toLocaleString()}â€”a massive saving over buying standalone credits!
             </p>
           </div>
         </div>

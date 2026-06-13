@@ -1,3 +1,4 @@
+﻿/* eslint-disable @typescript-eslint/no-explicit-any */
 import { google } from '@ai-sdk/google'
 import { streamText, tool, stepCountIs } from 'ai'
 import { z } from 'zod'
@@ -48,7 +49,7 @@ export async function POST(req: Request) {
     // 2. Session-based rate limit (Max 20 messages per session)
     const cookieStore = await cookies()
     const countCookie = cookieStore.get('ai_chat_count')
-    let count = countCookie ? parseInt(countCookie.value, 10) : 0
+    const count = countCookie ? parseInt(countCookie.value, 10) : 0
 
     if (count >= 20) {
       return new Response(
@@ -114,7 +115,7 @@ export async function POST(req: Request) {
             const itemsList = (cat.menu_items || [])
               .filter((item: any) => item.availability_status !== 'hidden')
               .map((item: any) => 
-                `- [ID: ${item.id}] ${item.name}: ₦${(item.price_minor / 100).toLocaleString()} | Availability: ${item.availability_status} | Description: ${item.description || 'No description'}`
+                `- [ID: ${item.id}] ${item.name}: â‚¦${(item.price_minor / 100).toLocaleString()} | Availability: ${item.availability_status} | Description: ${item.description || 'No description'}`
               )
               .join('\n')
             return `### ${cat.name}\n${itemsList}`

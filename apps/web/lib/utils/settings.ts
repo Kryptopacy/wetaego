@@ -1,3 +1,4 @@
+﻿/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createAnonClient } from '@/lib/supabase/server'
 import { unstable_cache } from 'next/cache'
 

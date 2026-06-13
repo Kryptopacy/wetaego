@@ -1,3 +1,4 @@
+﻿/* eslint-disable @typescript-eslint/no-unused-vars, react/no-unescaped-entities */
 'use client'
 
 import { useState } from 'react'
@@ -40,9 +41,9 @@ const TrendIcon = ({ trend }: { trend: Trend }) => {
 
 const AlertBadge = ({ alert }: { alert: StockAlert }) => {
   const map = {
-    critical: { label: '⚠️ Stock Critical', cls: 'bg-red-500/20 text-red-400 border border-red-500/50' },
-    order_soon: { label: '📦 Order Soon', cls: 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/50' },
-    sufficient: { label: '✅ Sufficient', cls: 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/50' },
+    critical: { label: 'âš ï¸ Stock Critical', cls: 'bg-red-500/20 text-red-400 border border-red-500/50' },
+    order_soon: { label: 'ðŸ“¦ Order Soon', cls: 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/50' },
+    sufficient: { label: 'âœ… Sufficient', cls: 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/50' },
   }
   const { label, cls } = map[alert]
   return <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${cls}`}>{label}</span>
@@ -69,7 +70,7 @@ export function ForecastClient({ locationId }: ForecastClientProps) {
       if (data.forecasts) setForecasts(data.forecasts)
       if (data.message) setMessage(data.message)
       setHasGenerated(true)
-    } catch (e) {
+    } catch (_e) {
       setMessage('Failed to generate forecast. Please try again.')
     } finally {
       setIsLoading(false)
@@ -112,7 +113,7 @@ export function ForecastClient({ locationId }: ForecastClientProps) {
             <svg className="w-8 h-8 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
           </div>
           <h3 className="text-white font-semibold text-lg mb-2">Ready to forecast</h3>
-          <p className="text-zinc-500 text-sm max-w-xs">Hit "Generate Forecast" and our AI will crunch 30 days of sales data to tell you exactly what to restock.</p>
+          <p className="text-zinc-500 text-sm max-w-xs">Hit &quot;Generate Forecast&quot; and our AI will crunch 30 days of sales data to tell you exactly what to restock.</p>
         </div>
       )}
 

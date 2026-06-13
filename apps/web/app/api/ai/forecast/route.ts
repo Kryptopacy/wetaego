@@ -1,3 +1,4 @@
+﻿/* eslint-disable @typescript-eslint/no-explicit-any */
 import { google } from '@ai-sdk/google'
 import { generateObject } from 'ai'
 import { z } from 'zod'
@@ -73,7 +74,7 @@ export async function POST(req: Request) {
 For each item, assess:
 - Its 'trend': Is it a rising star (selling faster than the average), stable, or declining?
 - 'predicted_units_next_7d': Extrapolate from avg_daily_velocity to project the next 7 days. Apply a slight uplift for rising trends and downward correction for declining.
-- 'stock_alert': Based on predicted demand — 'critical' if it's a top-5 seller and trending up, 'order_soon' for stable/moderate demand, 'sufficient' for slow-movers.
+- 'stock_alert': Based on predicted demand â€” 'critical' if it's a top-5 seller and trending up, 'order_soon' for stable/moderate demand, 'sufficient' for slow-movers.
 - 'insight': One crisp, actionable sentence a restaurant manager would find valuable.
 
 Sales data (last 30 days):

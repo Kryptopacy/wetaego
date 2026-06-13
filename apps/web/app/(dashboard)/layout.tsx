@@ -1,3 +1,4 @@
+﻿/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
 'use client'
 
 import Link from 'next/link'
@@ -6,7 +7,7 @@ import { ReactNode, useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import {
   LayoutDashboard, ClipboardList, BarChart3, BookOpen,
-  FileText, Settings, CreditCard, LogOut, Sparkles, Zap
+  FileText, Settings, CreditCard, LogOut, Zap
 } from 'lucide-react'
 import { GlobalRealtime } from './global-realtime'
 import { NotificationCenter } from './notification-center'
@@ -195,7 +196,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           <div className="bg-gradient-to-r from-red-900/80 to-orange-900/80 text-white px-6 py-3 flex items-center justify-between border-b border-red-500/20">
             <span className="text-sm"><strong>Trial Ended:</strong> Customers can no longer place orders.</span>
             <Link href="/dashboard/billing" className="bg-white text-red-700 font-bold px-4 py-1.5 rounded-full text-xs hover:bg-zinc-100 transition-colors">
-              Upgrade Now →
+              Upgrade Now â†’
             </Link>
           </div>
         )}

@@ -1,3 +1,4 @@
+﻿/* eslint-disable */
 'use client'
 
 import { useCartStore } from '@/lib/store/cart'

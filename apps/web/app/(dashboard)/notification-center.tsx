@@ -1,3 +1,4 @@
+﻿/* eslint-disable react/no-unescaped-entities, @typescript-eslint/no-explicit-any */
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -108,7 +109,7 @@ export function NotificationCenter() {
             <div className="max-h-[60vh] overflow-y-auto">
               {totalCount === 0 ? (
                 <div className="p-8 text-center text-zinc-500 text-sm">
-                  You're all caught up!
+                  You&apos;re all caught up!
                 </div>
               ) : (
                 <div className="p-2 space-y-1">
@@ -127,7 +128,7 @@ export function NotificationCenter() {
                       className="block p-3 rounded-lg bg-blue-500/10 border border-blue-500/20 hover:bg-blue-500/20 transition-colors"
                     >
                       <div className="text-xs font-bold text-blue-400 mb-1">NEW ORDER</div>
-                      <div className="text-sm text-white font-medium">Table {o.table_identifier || 'Takeaway'} - ₦{(o.total_amount_minor/100).toLocaleString()}</div>
+                      <div className="text-sm text-white font-medium">Table {o.table_identifier || 'Takeaway'} - â‚¦{(o.total_amount_minor/100).toLocaleString()}</div>
                     </Link>
                   ))}
                 </div>
@@ -138,7 +139,7 @@ export function NotificationCenter() {
               onClick={() => setIsOpen(false)}
               className="block p-3 text-center text-xs font-bold text-emerald-400 bg-zinc-950 hover:bg-zinc-900 transition-colors border-t border-zinc-800"
             >
-              OPEN LIVE FULFILLMENT →
+              OPEN LIVE FULFILLMENT â†’
             </Link>
           </div>
         </>

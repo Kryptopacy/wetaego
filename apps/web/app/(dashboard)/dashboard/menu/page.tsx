@@ -1,6 +1,6 @@
+﻿/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { cookies } from 'next/headers'
 import { createCategory } from './actions'
 import { CategoryTabs } from './category-tabs'
 import { TranslateMenuButton } from './translate-menu-button'

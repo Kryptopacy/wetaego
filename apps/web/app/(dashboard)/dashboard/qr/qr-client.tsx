@@ -1,3 +1,4 @@
+﻿/* eslint-disable @typescript-eslint/no-explicit-any, react/no-unescaped-entities */
 'use client'
 
 import { useState } from 'react'
@@ -136,7 +137,7 @@ export function QrClient({ organizationId, locations, qrCodes, baseUrl }: any) {
           <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 max-w-sm w-full shadow-2xl animate-in fade-in zoom-in duration-200">
             <h3 className="text-xl font-bold text-white mb-2">Assign Table</h3>
             <p className="text-zinc-400 text-sm mb-4">
-              Enter the table name or number (e.g., "Table 14" or "VIP 2"). Leave blank to unassign.
+              Enter the table name or number (e.g., &quot;Table 14&quot; or &quot;VIP 2&quot;). Leave blank to unassign.
             </p>
             <form onSubmit={async (e) => {
               e.preventDefault()

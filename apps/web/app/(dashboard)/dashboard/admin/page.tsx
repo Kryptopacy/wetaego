@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+﻿/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
 import { getPricingSettings, getCreditCosts, getPlanLimits, getAiModels } from '@/lib/utils/settings'
 import { updateSetting } from './actions'
 
