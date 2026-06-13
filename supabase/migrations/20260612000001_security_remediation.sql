@@ -84,6 +84,7 @@ $$;
 -- 3. FIX: rls_enabled_no_policy on webhook_events
 -- Add a safe default: only service role can read/write.
 -- ============================================================
+drop policy if exists "Only service role can access webhook events" on public.webhook_events;
 create policy "Only service role can access webhook events"
   on public.webhook_events for all
   to authenticated
@@ -175,6 +176,7 @@ create policy "Org members can view credit transactions"
 -- locations: merge "public can read published" + "members can read"
 drop policy if exists "public can read published locations" on public.locations;
 drop policy if exists "members can read locations" on public.locations;
+drop policy if exists "can read locations" on public.locations;
 create policy "can read locations"
   on public.locations for select
   using (
@@ -185,6 +187,7 @@ create policy "can read locations"
 -- menus: merge "public can read published" + "members can read"
 drop policy if exists "public can read published menus" on public.menus;
 drop policy if exists "members can read menus" on public.menus;
+drop policy if exists "can read menus" on public.menus;
 create policy "can read menus"
   on public.menus for select
   using (
@@ -201,6 +204,7 @@ create policy "can read menus"
 -- menu_categories: merge "public can read categories" + "members can read"
 drop policy if exists "public can read categories for published menus" on public.menu_categories;
 drop policy if exists "members can read categories" on public.menu_categories;
+drop policy if exists "can read menu categories" on public.menu_categories;
 create policy "can read menu categories"
   on public.menu_categories for select
   using (
@@ -218,6 +222,7 @@ create policy "can read menu categories"
 -- menu_items: merge "public can read visible" + "members can read"
 drop policy if exists "public can read visible items for published menus" on public.menu_items;
 drop policy if exists "members can read items" on public.menu_items;
+drop policy if exists "can read menu items" on public.menu_items;
 create policy "can read menu items"
   on public.menu_items for select
   using (
@@ -244,6 +249,7 @@ drop policy if exists "members can read qr codes" on public.qr_codes;
 drop policy if exists "Anyone can view published pages" on public.location_pages;
 -- The new "Organization members can view all pages" covers authenticated access.
 -- Add a separate anon-only policy for public pages:
+drop policy if exists "Public can view published pages" on public.location_pages;
 create policy "Public can view published pages"
   on public.location_pages for select
   to anon

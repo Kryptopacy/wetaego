@@ -98,7 +98,7 @@ export async function processCheckout(
     order.id // Use order ID as reference
   )
 
-  return { checkoutUrl }
+  return { checkoutUrl, orderId: order.id }
 }
 
 export async function callStaffFromAi(

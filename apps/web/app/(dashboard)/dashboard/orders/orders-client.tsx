@@ -9,9 +9,10 @@ interface OrdersClientProps {
   initialOrders: any[]
   initialServiceRequests: any[]
   initialMenuItems?: any[]
+  currentUserId: string
 }
 
-export function OrdersClient({ organizationId, initialOrders, initialServiceRequests, initialMenuItems = [] }: OrdersClientProps) {
+export function OrdersClient({ organizationId, initialOrders, initialServiceRequests, initialMenuItems = [], currentUserId }: OrdersClientProps) {
   const supabase = createClient()
   const [orders, setOrders] = useState(initialOrders)
   const [serviceRequests, setServiceRequests] = useState(initialServiceRequests)
@@ -110,6 +111,33 @@ export function OrdersClient({ organizationId, initialOrders, initialServiceRequ
       toast.error('Failed to update stock status: ' + error.message)
     } else {
       toast.success(`Item marked as ${newStatus === 'available' ? 'Available' : 'Sold Out'}`)
+    }
+  }
+
+  const handleClaimOrder = async (orderId: string) => {
+    const timeInput = window.prompt('Estimated time to prepare (in minutes)?', '15')
+    if (!timeInput) return
+
+    const minutes = parseInt(timeInput, 10)
+    if (isNaN(minutes)) {
+      toast.error('Please enter a valid number of minutes.')
+      return
+    }
+
+    const { data, error } = await supabase.rpc('claim_order', {
+      p_order_id: orderId,
+      p_prep_time_minutes: minutes
+    })
+
+    if (error) {
+      toast.error('Failed to claim order: ' + error.message)
+      return
+    }
+
+    if (data === false) {
+      toast.error('Order was already claimed by another staff member, or limit reached.')
+    } else {
+      toast.success('Order claimed successfully!')
     }
   }
 
@@ -231,12 +259,27 @@ export function OrdersClient({ organizationId, initialOrders, initialServiceRequ
                 )}
 
                 <div className="flex justify-end mt-4 pt-4 border-t border-zinc-800/50">
-                  <button 
-                    onClick={() => supabase.from('orders').update({ status: 'completed' }).eq('id', order.id)}
-                    className="px-6 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium transition-colors"
-                  >
-                    Mark as Completed
-                  </button>
+                  {order.status === 'paid' && !order.assigned_staff_id && (
+                    <button 
+                      onClick={() => handleClaimOrder(order.id)}
+                      className="px-6 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-medium transition-colors animate-pulse"
+                    >
+                      Claim Order
+                    </button>
+                  )}
+                  {order.status === 'preparing' && order.assigned_staff_id === currentUserId && (
+                    <button 
+                      onClick={() => supabase.from('orders').update({ status: 'completed' }).eq('id', order.id)}
+                      className="px-6 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium transition-colors"
+                    >
+                      Mark as Completed
+                    </button>
+                  )}
+                  {order.status === 'preparing' && order.assigned_staff_id !== currentUserId && (
+                    <div className="px-6 py-2 rounded-lg bg-zinc-800 text-zinc-400 font-medium">
+                      Claimed (Preparing)
+                    </div>
+                  )}
                 </div>
               </div>
             ))

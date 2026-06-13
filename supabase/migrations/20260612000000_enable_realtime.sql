@@ -10,6 +10,13 @@ begin
   end if; 
 end $$;
 
--- Add tables to the realtime publication
-alter publication supabase_realtime add table public.orders;
-alter publication supabase_realtime add table public.service_requests;
+-- Add tables to the realtime publication if not already present
+do $$
+begin
+  if not exists (select 1 from pg_publication_tables where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'orders') then
+    execute 'alter publication supabase_realtime add table public.orders';
+  end if;
+  if not exists (select 1 from pg_publication_tables where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'service_requests') then
+    execute 'alter publication supabase_realtime add table public.service_requests';
+  end if;
+end $$;

@@ -21,8 +21,6 @@ export function CartFAB({ organizationId, locationId, tableIdentifier }: CartFAB
   // Checkout Modal State
   const [showCheckoutModal, setShowCheckoutModal] = useState(false)
   const [tableNumber, setTableNumber] = useState(tableIdentifier || '')
-  const [tipSelection, setTipSelection] = useState<'0' | '10' | '15' | '20' | 'custom'>('0')
-  const [customTip, setCustomTip] = useState('')
   const [customerNote, setCustomerNote] = useState('')
 
   // Ensure zustand persist hydrate matches server render
@@ -36,11 +34,7 @@ export function CartFAB({ organizationId, locationId, tableIdentifier }: CartFAB
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)
   const subtotalMinor = totalAmountMinor()
   
-  const tipAmountMinor = tipSelection === 'custom'
-    ? Math.round(parseFloat(customTip || '0') * 100)
-    : Math.round(subtotalMinor * (parseInt(tipSelection) / 100))
-    
-  const finalTotalMinor = subtotalMinor + tipAmountMinor
+  const finalTotalMinor = subtotalMinor
 
   const handleCheckout = async () => {
     if (!tableNumber) {
@@ -51,9 +45,10 @@ export function CartFAB({ organizationId, locationId, tableIdentifier }: CartFAB
     setIsCheckingOut(true)
     try {
       posthog.capture('checkout_completed', { organizationId, locationId, totalAmountMinor: finalTotalMinor })
-      const { checkoutUrl } = await processCheckout(organizationId, locationId, items, finalTotalMinor, tipAmountMinor, tableNumber, customerNote)
+      const { checkoutUrl, orderId } = await processCheckout(organizationId, locationId, items, finalTotalMinor, 0, tableNumber, customerNote)
       
-      if (checkoutUrl) {
+      if (checkoutUrl && orderId) {
+        localStorage.setItem('activeOrderId', orderId)
         clearCart()
         window.location.href = checkoutUrl
       }
@@ -134,37 +129,7 @@ export function CartFAB({ organizationId, locationId, tableIdentifier }: CartFAB
                   )}
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-zinc-400 mb-2">Add a Tip (Optional)</label>
-                  <div className="grid grid-cols-5 gap-2 mb-2">
-                    {[
-                      { val: '0', label: 'None' },
-                      { val: '10', label: '10%' },
-                      { val: '15', label: '15%' },
-                      { val: '20', label: '20%' },
-                      { val: 'custom', label: 'Custom' }
-                    ].map(btn => (
-                      <button
-                        key={btn.val}
-                        onClick={() => setTipSelection(btn.val as any)}
-                        className={`py-2 text-sm rounded-lg font-medium transition-colors ${tipSelection === btn.val ? 'bg-blue-600 text-white' : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'}`}
-                      >
-                        {btn.label}
-                      </button>
-                    ))}
-                  </div>
-                  {tipSelection === 'custom' && (
-                    <input 
-                      type="number" 
-                      min="0"
-                      step="100"
-                      value={customTip}
-                      onChange={(e) => setCustomTip(e.target.value)}
-                      placeholder="Enter custom amount (₦)"
-                      className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white outline-none focus:border-blue-500 mt-2"
-                    />
-                  )}
-                </div>
+
 
                 <div>
                   <label className="block text-sm font-medium text-zinc-400 mb-2">Order Note (Optional)</label>
@@ -177,16 +142,6 @@ export function CartFAB({ organizationId, locationId, tableIdentifier }: CartFAB
                 </div>
 
                 <div className="bg-zinc-800/50 rounded-xl p-4 space-y-2">
-                  <div className="flex justify-between text-zinc-400">
-                    <span>Subtotal</span>
-                    <span>₦{(subtotalMinor / 100).toLocaleString()}</span>
-                  </div>
-                  {tipAmountMinor > 0 && (
-                    <div className="flex justify-between text-blue-400">
-                      <span>Tip {tipSelection !== 'custom' ? `(${tipSelection}%)` : ''}</span>
-                      <span>₦{(tipAmountMinor / 100).toLocaleString()}</span>
-                    </div>
-                  )}
                   <div className="flex justify-between text-white font-bold text-lg pt-2 border-t border-zinc-700/50 mt-2">
                     <span>Total</span>
                     <span>₦{(finalTotalMinor / 100).toLocaleString()}</span>

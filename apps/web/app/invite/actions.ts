@@ -14,54 +14,17 @@ export async function acceptInviteAction(token: string) {
     }
     const user = userData.user
 
-    // 2. Query the invite details
-    const { data: invite, error: inviteError } = await supabase
-      .from('organization_invites')
-      .select('*')
-      .eq('token', token)
-      .single()
+    // 2. Call the secure RPC to accept the invite
+    const { data: success, error: rpcError } = await supabase
+      .rpc('accept_invite_by_token', { lookup_token: token })
 
-    if (inviteError || !invite) {
+    if (rpcError) {
+      return { error: rpcError.message || 'Failed to accept invitation.' }
+    }
+
+    if (!success) {
       return { error: 'Invitation not found or has already been used.' }
     }
-
-    // 3. Verify expiration
-    if (new Date(invite.expires_at) < new Date()) {
-      return { error: 'This invitation has expired. Please request a new one.' }
-    }
-
-    // 4. Verify email match
-    if (user.email?.toLowerCase() !== invite.email.toLowerCase()) {
-      return {
-        error: `This invitation was sent to ${invite.email}, but you are logged in as ${user.email}. Please sign out and sign in with the correct account.`
-      }
-    }
-
-    // 5. Insert member
-    const { error: insertError } = await supabase
-      .from('organization_members')
-      .insert({
-        organization_id: invite.organization_id,
-        user_id: user.id,
-        role: invite.role,
-        invited_by: invite.invited_by
-      })
-
-    if (insertError) {
-      // If they are already a member, we can just delete the invite and proceed
-      if (insertError.code === '23505') { // unique key violation
-        // delete invite
-        await supabase.from('organization_invites').delete().eq('id', invite.id)
-        return { success: true }
-      }
-      return { error: insertError.message }
-    }
-
-    // 6. Delete invite token
-    await supabase
-      .from('organization_invites')
-      .delete()
-      .eq('id', invite.id)
 
     revalidatePath('/dashboard', 'layout')
     return { success: true }

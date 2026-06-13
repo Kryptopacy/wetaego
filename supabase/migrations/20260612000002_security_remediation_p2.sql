@@ -20,6 +20,7 @@ drop policy if exists "anyone can view an invite by token" on public.organizatio
 -- We expose invite lookup via RPC instead of direct select for anon.
 -- For authenticated owners, the ALL policy already covers SELECT.
 -- For anon (accept-invite flow), they must know the token:
+drop policy if exists "public can view invite by token" on public.organization_invites;
 create policy "public can view invite by token"
   on public.organization_invites for select
   to anon

@@ -60,12 +60,21 @@ OurMenu OS offers three tiered subscription plans, driven by a unified credit sy
 
 ## Current Status
 
-All core phases, including **Phase 5: Operations & Scaling**, are completed. OurMenu OS is now a production-ready, multi-tenant SaaS application.
+We have completed **Phase 5: Operations & Scaling** and just concluded a massive **Phase 5.5 Security & Architecture Audit**. OurMenu OS is now a highly secure, production-ready, multi-tenant SaaS application.
 
-### 🌟 Completed Phase 5 Features
+### 🌟 Recently Completed Upgrades (Phase 6 & Security Audit)
+- **Staff Operations & Order Claiming:** Atomic RPC-backed order claiming to prevent kitchen race conditions, live Dynamic Island-style progress tracking for customers, and real-time active order synchronization via Supabase subscriptions.
+- **Performance Tracking & Tipping:** Post-service customer feedback loop with 1-5 star ratings for individual staff and integrated secondary Paystack tipping flows, ensuring "flawless service is earned, not expected."
+- **Comprehensive Security Remediation:** Eliminated all Supabase Advisor warnings. Upgraded database architecture with `SECURITY DEFINER` RPC functions for atomic operations (like token-based invite acceptance), closed unauthenticated data leaks, and added strict referential integrity checks via RLS.
+- **Unified Credit System:** Consolidated feature pricing under a single, robust credits architecture for AI tools, translation, and custom pages.
 - **Dynamic QR Provisioning:** Multi-table scan-to-assign workflows, QR code color themes, table locking, and live reassignments.
-- **SaaS Subscription Billing:** Monthly Paystack Pro subscriptions ($39/mo) with live USD/NGN exchange rate updates, webhook lifecycle sync, and subscription layout enforcers.
+- **SaaS Subscription Billing:** Monthly Paystack Pro subscriptions with live USD/NGN exchange rate updates, webhook lifecycle sync, and subscription layout enforcers.
 - **Team Management:** Invite links (`/invite?token=xyz`), role validation (Owner, Manager, Editor, Viewer), and secure database views for roster emails.
+
+### 🚀 Upcoming: Phase 7 (Analytics & Growth)
+We are beginning to scope out the next major iteration of OurMenu OS:
+- **Deep Analytics Dashboard:** Visualizing staff performance, popular items, peak ordering times, and tip distribution logic.
+- **AI-Powered Upselling:** Integrating Gemini intelligence directly into the cart flow to recommend complementary items before checkout.
 
 ### 🚀 Running the Application
 

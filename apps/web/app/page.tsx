@@ -209,6 +209,25 @@ const features = [
     title: 'Get paid when they order.',
     description: 'Connect your Nigerian bank account via Paystack. Revenue lands directly in your account the moment a guest completes an order.',
   },
+  // Row 5 — Staff Operations
+  {
+    size: 'lg',
+    icon: Star,
+    color: 'from-amber-400 to-orange-500',
+    tag: 'Staff Performance & Tipping',
+    badge: 'Post-meal feedback',
+    title: 'Reward flawless service.',
+    description: 'Tipping shouldn\'t be demanded upfront. Customers leave a 1-5 star rating and an optional tip after their meal, giving you powerful HR insights into your top-performing staff.',
+  },
+  {
+    size: 'sm',
+    icon: Users,
+    color: 'from-emerald-500 to-teal-500',
+    tag: 'Atomic Order Claiming',
+    badge: 'Zero race conditions',
+    title: 'No double-prep. No hoarding.',
+    description: 'Staff claim orders securely. The system actively limits how many orders a single waiter can hoard, keeping your kitchen flowing smoothly.',
+  },
 ]
 
 const sizeClass = {
@@ -450,6 +469,31 @@ export default async function HomePage() {
                   </div>
                   <span className="text-[11px] font-bold uppercase tracking-widest text-zinc-500 mb-2 block">{f.tag}</span>
                   <h3 className="text-lg font-bold text-white mb-3 leading-tight">{f.title}</h3>
+                </div>
+              </StaggerItem>
+            )
+          })}
+        </StaggerContainer>
+
+        {/* Row 5 — Staff Operations */}
+        <StaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+          {features.slice(10, 12).map((f) => {
+            const Icon = f.icon
+            return (
+              <StaggerItem key={f.tag} className={`group relative rounded-3xl border border-white/[0.06] bg-zinc-900/40 backdrop-blur-xl overflow-hidden hover:border-white/15 transition-all duration-500 hover:shadow-2xl hover:shadow-black/50 ${sizeClass[f.size as keyof typeof sizeClass] || 'md:col-span-1'}`}>
+                <div className={`absolute inset-0 bg-gradient-to-br ${f.color} opacity-0 group-hover:opacity-[0.04] transition-opacity duration-500`} />
+                <div className="p-8 h-full flex flex-col z-10 relative">
+                  <div className="flex items-center justify-between mb-6">
+                    <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${f.color} flex items-center justify-center shadow-lg`}>
+                      <Icon className="w-6 h-6 text-white" aria-hidden="true" />
+                    </div>
+                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/5 backdrop-blur-md">
+                      <Zap className="w-3 h-3 text-white" aria-hidden="true" />
+                      <span className="text-xs font-bold text-white">{f.badge}</span>
+                    </div>
+                  </div>
+                  <span className="text-[11px] font-bold uppercase tracking-widest text-zinc-500 mb-3 block">{f.tag}</span>
+                  <h3 className="text-xl font-bold text-white mb-3 leading-snug">{f.title}</h3>
                   <p className="text-zinc-400 text-sm leading-relaxed">{f.description}</p>
                 </div>
               </StaggerItem>

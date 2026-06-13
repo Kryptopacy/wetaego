@@ -14,8 +14,16 @@ export default async function OrdersPage() {
   let menuItems: any[] = []
 
   if (userId) {
-    const { data: orgData } = await supabase.from('organizations').select('id').eq('created_by', userId).single()
-    org = orgData
+    // Check if user is a member of an organization
+    const { data: memberData } = await supabase.from('organization_members').select('organization_id').eq('user_id', userId).limit(1).single()
+    
+    if (memberData) {
+      org = { id: memberData.organization_id }
+    } else {
+      // Fallback: check if they created one (though they should be a member)
+      const { data: orgData } = await supabase.from('organizations').select('id').eq('created_by', userId).single()
+      org = orgData
+    }
 
     if (org) {
       // Fetch Orders
@@ -65,6 +73,7 @@ export default async function OrdersPage() {
           initialOrders={orders} 
           initialServiceRequests={serviceRequests} 
           initialMenuItems={menuItems}
+          currentUserId={userId!}
         />
       ) : (
         <p className="text-zinc-500">Please create an organization first.</p>

@@ -6,6 +6,7 @@ import { CartFAB } from './cart-fab'
 import { CallStaffFAB } from './call-staff-fab'
 import { AIChat } from './ai-chat'
 import { MenuRenderer } from './menu-renderer'
+import { LiveOrderTracker } from './live-order-tracker'
 
 // Revalidate this page every 60 seconds (Incremental Static Regeneration)
 // This ensures edge caching handles high traffic seamlessly
@@ -314,7 +315,8 @@ export default async function PublicMenuPage({
           </div>
         </header>
 
-        <article className="px-6 max-w-2xl mx-auto pt-6">
+        <article className="px-6 max-w-2xl mx-auto pt-6 relative">
+          <LiveOrderTracker organizationId={location.organization_id} locationId={location.id} />
           {/* Categories */}
           <MenuRenderer initialCategories={categories} />
         </article>

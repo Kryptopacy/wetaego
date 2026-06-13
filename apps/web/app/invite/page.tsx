@@ -36,12 +36,11 @@ export default async function InvitePage({
 
   const supabase = await createClient()
 
-  // Fetch the invite and join with organizations
-  const { data: invite, error } = await supabase
-    .from('organization_invites')
-    .select('*, organizations(name)')
-    .eq('token', token)
-    .single()
+  // Fetch the invite securely via RPC
+  const { data: invites, error } = await supabase
+    .rpc('get_invite_by_token', { lookup_token: token })
+
+  const invite = invites?.[0]
 
   if (error || !invite) {
     return (
@@ -75,7 +74,7 @@ export default async function InvitePage({
       <InviteAcceptForm
         token={token}
         inviteEmail={invite.email}
-        orgName={(invite as any).organizations?.name || 'OurMenu Partner'}
+        orgName={invite.organization_name || 'OurMenu Partner'}
         role={invite.role}
         currentUserEmail={userData?.user?.email || null}
       />

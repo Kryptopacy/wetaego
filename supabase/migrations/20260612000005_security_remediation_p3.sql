@@ -70,6 +70,7 @@ create policy "public can insert scan events"
 drop policy if exists "Public Access" on storage.objects;
 
 -- Allow public to fetch individual objects by URL (no listing)
+drop policy if exists "Public can read menu images by path" on storage.objects;
 create policy "Public can read menu images by path"
   on storage.objects for select
   to anon, authenticated
