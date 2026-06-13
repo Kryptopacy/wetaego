@@ -1,4 +1,4 @@
-﻿/* eslint-disable @typescript-eslint/no-unused-vars, react/no-unescaped-entities */
+/* eslint-disable @typescript-eslint/no-unused-vars, react/no-unescaped-entities */
 import Image from 'next/image'
 import { startInteractiveDemo } from './login/actions'
 import {
@@ -8,7 +8,8 @@ import {
   Bell, FileText, ShieldCheck
 } from 'lucide-react'
 import { getPricingSettings, getPlanLimits } from '@/lib/utils/settings'
-import { FadeIn, StaggerContainer, StaggerItem } from './components/animations'
+import { FadeIn } from './components/animations'
+import { FeatureTabs } from './components/feature-tabs'
 import { TrustedBy } from './components/trusted-by'
 
 async function Pricing() {
@@ -18,7 +19,7 @@ async function Pricing() {
   const plans = [
     {
       name: 'Starter',
-      price: 'â‚¦0',
+      price: '₦0',
       period: '30-day trial',
       description: 'Perfect for testing the platform at your venue.',
       features: ['AI Waiter (guest-facing chat)', 'Edge Translator (40+ languages)', 'Up to 2 QR codes', '1 active location'],
@@ -28,7 +29,7 @@ async function Pricing() {
     },
     {
       name: 'Pro',
-      price: `â‚¦${pricing.pro_monthly_ngn.toLocaleString()}`,
+      price: `₦${pricing.pro_monthly_ngn.toLocaleString()}`,
       period: 'per month',
       description: 'For serious operators who want every edge.',
       features: [
@@ -113,129 +114,6 @@ async function Pricing() {
   )
 }
 
-const features = [
-  // Row 1 â€” The Operator Command Center
-  {
-    size: 'lg', // 2/3 width
-    icon: ClipboardList,
-    color: 'from-red-600 to-orange-600',
-    tag: 'Live KDS',
-    badge: '< 1s delivery',
-    title: '"Table 7 ordered. Kitchen notified."',
-    description: 'Realtime order stream powered by Supabase subscriptions. New orders flash onto your Kitchen Display before the guest puts their phone down. No refresh. No delay. Ever.',
-  },
-  {
-    size: 'sm', // 1/3 width
-    icon: MessageCircle,
-    color: 'from-blue-600 to-cyan-600',
-    tag: 'AI Dining Advisor',
-    badge: 'Gemini-powered',
-    title: 'Your best waiter, always on shift.',
-    description: 'Guests chat to get recommendations, ask about allergens, customize items, and add to cart â€” all without flagging down staff.',
-  },
-  // Row 2 â€” Guest Experience
-  {
-    size: 'third',
-    icon: QrCode,
-    color: 'from-violet-600 to-indigo-600',
-    tag: 'QR Table Mapping',
-    badge: 'Per-table precision',
-    title: 'Every table has a unique identity.',
-    description: 'Generate individual QR codes per table. Orders arrive pre-tagged with the exact table number. Zero confusion at the pass.',
-  },
-  {
-    size: 'third',
-    icon: Bell,
-    color: 'from-emerald-600 to-teal-600',
-    tag: 'WhatsApp Notifications',
-    badge: 'via Termii',
-    title: 'No shouting. Just a ping.',
-    description: 'Guests receive a WhatsApp message the moment their order is ready. Staff spend less time yelling across the floor.',
-  },
-  {
-    size: 'third',
-    icon: Globe,
-    color: 'from-amber-500 to-orange-600',
-    tag: 'Edge Translator',
-    badge: '40+ languages',
-    title: 'Every tourist reads your menu.',
-    description: 'Browser language detected on arrival. The menu auto-translates into French, Mandarin, Yoruba, Arabic, and more in seconds.',
-  },
-  // Row 3 â€” AI Intelligence
-  {
-    size: 'half',
-    icon: ChefHat,
-    color: 'from-violet-600 to-indigo-600',
-    tag: 'AI Copywriter + Cover Studio',
-    badge: '3Ã— faster menu updates',
-    title: 'Studio-quality menus. Zero effort.',
-    description: 'Type a dish name. Gemini generates sensory, appetizing copy â€” complete with allergen flags, dietary tags, and an AI-generated photo. Your menu becomes your sales pitch.',
-  },
-  {
-    size: 'half',
-    icon: BarChart3,
-    color: 'from-emerald-600 to-teal-600',
-    tag: 'Demand Forecaster',
-    badge: '30-day data window',
-    title: 'Never stock out on your best-sellers.',
-    description: 'Analyses 30 days of sales velocity. Predicts the next 7 days of demand, and fires stock alerts before shelves run dry. Suya trending up? We knew two days ago.',
-  },
-  // Row 4 â€” Built for Growth
-  {
-    size: 'third',
-    icon: FileText,
-    color: 'from-blue-600 to-indigo-600',
-    tag: 'Custom Pages',
-    badge: 'Unlimited creativity',
-    title: 'More than a menu.',
-    description: 'Build a cocktail guide, event calendar, or brand story page â€” all hosted on your menu URL. No separate website needed.',
-  },
-  {
-    size: 'third',
-    icon: ShieldCheck,
-    color: 'from-zinc-600 to-zinc-700',
-    tag: 'Team Roles',
-    badge: 'Granular permissions',
-    title: 'Owner. Manager. Viewer.',
-    description: 'Every staff member sees exactly what they need and nothing more. Invite your whole team without losing control.',
-  },
-  {
-    size: 'third',
-    icon: CreditCard,
-    color: 'from-green-600 to-emerald-600',
-    tag: 'Paystack Payouts',
-    badge: 'Direct to your bank',
-    title: 'Get paid when they order.',
-    description: 'Connect your Nigerian bank account via Paystack. Revenue lands directly in your account the moment a guest completes an order.',
-  },
-  // Row 5 â€” Staff Operations
-  {
-    size: 'lg',
-    icon: Star,
-    color: 'from-amber-400 to-orange-500',
-    tag: 'Staff Performance & Tipping',
-    badge: 'Post-meal feedback',
-    title: 'Reward flawless service.',
-    description: 'Tipping shouldn\'t be demanded upfront. Customers leave a 1-5 star rating and an optional tip after their meal, giving you powerful HR insights into your top-performing staff.',
-  },
-  {
-    size: 'sm',
-    icon: Users,
-    color: 'from-emerald-500 to-teal-500',
-    tag: 'Atomic Order Claiming',
-    badge: 'Zero race conditions',
-    title: 'No double-prep. No hoarding.',
-    description: 'Staff claim orders securely. The system actively limits how many orders a single waiter can hoard, keeping your kitchen flowing smoothly.',
-  },
-]
-
-const sizeClass = {
-  lg: 'md:col-span-2',
-  sm: 'md:col-span-1',
-  third: 'md:col-span-1',
-  half: 'md:col-span-1',
-}
-
 export default async function HomePage() {
   return (
     <div className="bg-[#050505] min-h-screen selection:bg-violet-500/30 selection:text-white">
@@ -283,7 +161,7 @@ export default async function HomePage() {
         {/* Content grid */}
         <div className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-12 pt-24 pb-16 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center min-h-screen">
 
-          {/* Left â€” Copy */}
+          {/* Left — Copy */}
           <FadeIn className="flex flex-col justify-center">
             <div className="mb-8">
               <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-zinc-300 text-xs font-medium backdrop-blur-sm">
@@ -298,7 +176,7 @@ export default async function HomePage() {
               </span>
             </h1>
             <p className="text-lg md:text-xl text-zinc-300 max-w-xl font-light leading-relaxed mb-10">
-              Ditch the expensive custom websites, torn hardcopies, and terrible PDF links. Give your guests a stunning e-menu featuring a personalized AI Waiter that talks like your brand, streamlines ordering, and processes paymentsâ€”freeing your staff to focus on hospitality. Behind the scenes? Your team gets a live KDS, WhatsApp staff alerts, AI tools to optimise flow, and demand forecasting.
+              Ditch the expensive custom websites, torn hardcopies, and terrible PDF links. Give your guests a stunning e-menu featuring a personalized AI Waiter that talks like your brand, streamlines ordering, and processes payments—freeing your staff to focus on hospitality. Behind the scenes? Your team gets a live KDS, WhatsApp staff alerts, AI tools to optimise flow, and demand forecasting.
             </p>
             <div className="flex flex-col sm:flex-row items-start gap-4">
               <a href="/dashboard" className="flex items-center gap-2 px-8 py-3.5 rounded-full bg-white text-black text-sm font-bold hover:scale-105 transition-all duration-300 shadow-[0_0_30px_rgba(255,255,255,0.15)]">
@@ -312,7 +190,7 @@ export default async function HomePage() {
             </div>
           </FadeIn>
 
-          {/* Right â€” Phone mockup with actual guest menu screen */}
+          {/* Right — Phone mockup with actual guest menu screen */}
           <FadeIn delay={0.3} className="hidden lg:flex items-center justify-center">
             <div className="relative">
               {/* Glow behind phone */}
@@ -343,7 +221,7 @@ export default async function HomePage() {
 
                 {/* Floating UI annotation badges */}
                 <div className="absolute -right-20 top-16 bg-black/80 backdrop-blur-md border border-white/10 rounded-2xl px-3 py-2 text-xs text-white whitespace-nowrap shadow-xl">
-                  <span className="text-emerald-400 font-bold">âœ“</span> Order received
+                  <span className="text-emerald-400 font-bold">✓</span> Order received
                 </div>
                 <div className="absolute -left-24 bottom-28 bg-black/80 backdrop-blur-md border border-white/10 rounded-2xl px-3 py-2 text-xs text-white whitespace-nowrap shadow-xl">
                   <span className="text-blue-400 font-bold">AI</span> Table 7 ready to order
@@ -370,135 +248,10 @@ export default async function HomePage() {
           <h2 className="text-4xl md:text-6xl font-black text-white mb-6 tracking-tight">
             Not features.<br /><span className="text-zinc-400">A complete hospitality suite.</span>
           </h2>
-          <p className="text-zinc-400 text-lg md:text-xl max-w-2xl mx-auto font-light">Everything your operation needs â€” from the guest&apos;s first QR scan to the last Paystack payout.</p>
+          <p className="text-zinc-400 text-lg md:text-xl max-w-2xl mx-auto font-light">Everything your operation needs — from the guest&apos;s first QR scan to the last Paystack payout.</p>
         </FadeIn>
 
-        {/* Row 1 â€” Command Center */}
-        <StaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-          {features.slice(0, 2).map((f) => {
-            const Icon = f.icon
-            return (
-              <StaggerItem key={f.tag} className={`group relative rounded-3xl border border-white/[0.06] bg-zinc-900/40 backdrop-blur-xl overflow-hidden hover:border-white/15 transition-all duration-500 hover:shadow-2xl hover:shadow-black/50 ${sizeClass[f.size as keyof typeof sizeClass]}`}>
-                <div className={`absolute inset-0 bg-gradient-to-br ${f.color} opacity-0 group-hover:opacity-[0.04] transition-opacity duration-500`} />
-                <div className="p-8 h-full flex flex-col z-10 relative">
-                  <div className="flex items-center justify-between mb-6">
-                    <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${f.color} flex items-center justify-center shadow-lg`}>
-                      <Icon className="w-6 h-6 text-white" aria-hidden="true" />
-                    </div>
-                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/5 backdrop-blur-md">
-                      <Zap className="w-3 h-3 text-white" aria-hidden="true" />
-                      <span className="text-xs font-bold text-white">{f.badge}</span>
-                    </div>
-                  </div>
-                  <span className="text-[11px] font-bold uppercase tracking-widest text-zinc-500 mb-3 block">{f.tag}</span>
-                  <h3 className="text-xl font-bold text-white mb-3 leading-tight">{f.title}</h3>
-                  <p className="text-zinc-400 text-sm leading-relaxed">{f.description}</p>
-                </div>
-              </StaggerItem>
-            )
-          })}
-        </StaggerContainer>
-
-        {/* Row 2 â€” Guest Experience */}
-        <StaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-          {features.slice(2, 5).map((f) => {
-            const Icon = f.icon
-            return (
-              <StaggerItem key={f.tag} className="group relative rounded-3xl border border-white/[0.06] bg-zinc-900/40 backdrop-blur-xl overflow-hidden hover:border-white/15 transition-all duration-500 hover:shadow-2xl hover:shadow-black/50">
-                <div className={`absolute inset-0 bg-gradient-to-br ${f.color} opacity-0 group-hover:opacity-[0.04] transition-opacity duration-500`} />
-                <div className="p-8 h-full flex flex-col z-10 relative">
-                  <div className="flex items-center justify-between mb-6">
-                    <div className={`w-10 h-10 rounded-2xl bg-gradient-to-br ${f.color} flex items-center justify-center shadow-lg`}>
-                      <Icon className="w-5 h-5 text-white" aria-hidden="true" />
-                    </div>
-                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/5 border border-white/5">
-                      <span className="text-[11px] font-bold text-white">{f.badge}</span>
-                    </div>
-                  </div>
-                  <span className="text-[11px] font-bold uppercase tracking-widest text-zinc-500 mb-2 block">{f.tag}</span>
-                  <h3 className="text-lg font-bold text-white mb-3 leading-tight">{f.title}</h3>
-                  <p className="text-zinc-400 text-sm leading-relaxed">{f.description}</p>
-                </div>
-              </StaggerItem>
-            )
-          })}
-        </StaggerContainer>
-
-        {/* Row 3 â€” AI Intelligence */}
-        <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          {features.slice(5, 7).map((f) => {
-            const Icon = f.icon
-            return (
-              <StaggerItem key={f.tag} className="group relative rounded-3xl border border-white/[0.06] bg-zinc-900/40 backdrop-blur-xl overflow-hidden hover:border-white/15 transition-all duration-500 hover:shadow-2xl hover:shadow-black/50">
-                <div className={`absolute inset-0 bg-gradient-to-br ${f.color} opacity-0 group-hover:opacity-[0.04] transition-opacity duration-500`} />
-                <div className="p-8 h-full flex flex-col z-10 relative">
-                  <div className="flex items-center justify-between mb-6">
-                    <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${f.color} flex items-center justify-center shadow-lg`}>
-                      <Icon className="w-6 h-6 text-white" aria-hidden="true" />
-                    </div>
-                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/5 backdrop-blur-md">
-                      <Zap className="w-3 h-3 text-white" aria-hidden="true" />
-                      <span className="text-xs font-bold text-white">{f.badge}</span>
-                    </div>
-                  </div>
-                  <span className="text-[11px] font-bold uppercase tracking-widest text-zinc-500 mb-3 block">{f.tag}</span>
-                  <h3 className="text-xl font-bold text-white mb-3 leading-snug">{f.title}</h3>
-                  <p className="text-zinc-400 text-sm leading-relaxed">{f.description}</p>
-                </div>
-              </StaggerItem>
-            )
-          })}
-        </StaggerContainer>
-
-        {/* Row 4 â€” Built for Growth */}
-        <StaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {features.slice(7, 10).map((f) => {
-            const Icon = f.icon
-            return (
-              <StaggerItem key={f.tag} className="group relative rounded-3xl border border-white/[0.06] bg-zinc-900/40 backdrop-blur-xl overflow-hidden hover:border-white/15 transition-all duration-500 hover:shadow-2xl hover:shadow-black/50">
-                <div className={`absolute inset-0 bg-gradient-to-br ${f.color} opacity-0 group-hover:opacity-[0.04] transition-opacity duration-500`} />
-                <div className="p-8 h-full flex flex-col z-10 relative">
-                  <div className="flex items-center justify-between mb-6">
-                    <div className={`w-10 h-10 rounded-2xl bg-gradient-to-br ${f.color} flex items-center justify-center shadow-lg`}>
-                      <Icon className="w-5 h-5 text-white" aria-hidden="true" />
-                    </div>
-                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/5 border border-white/5">
-                      <span className="text-[11px] font-bold text-white">{f.badge}</span>
-                    </div>
-                  </div>
-                  <span className="text-[11px] font-bold uppercase tracking-widest text-zinc-500 mb-2 block">{f.tag}</span>
-                  <h3 className="text-lg font-bold text-white mb-3 leading-tight">{f.title}</h3>
-                </div>
-              </StaggerItem>
-            )
-          })}
-        </StaggerContainer>
-
-        {/* Row 5 â€” Staff Operations */}
-        <StaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-          {features.slice(10, 12).map((f) => {
-            const Icon = f.icon
-            return (
-              <StaggerItem key={f.tag} className={`group relative rounded-3xl border border-white/[0.06] bg-zinc-900/40 backdrop-blur-xl overflow-hidden hover:border-white/15 transition-all duration-500 hover:shadow-2xl hover:shadow-black/50 ${sizeClass[f.size as keyof typeof sizeClass] || 'md:col-span-1'}`}>
-                <div className={`absolute inset-0 bg-gradient-to-br ${f.color} opacity-0 group-hover:opacity-[0.04] transition-opacity duration-500`} />
-                <div className="p-8 h-full flex flex-col z-10 relative">
-                  <div className="flex items-center justify-between mb-6">
-                    <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${f.color} flex items-center justify-center shadow-lg`}>
-                      <Icon className="w-6 h-6 text-white" aria-hidden="true" />
-                    </div>
-                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/5 backdrop-blur-md">
-                      <Zap className="w-3 h-3 text-white" aria-hidden="true" />
-                      <span className="text-xs font-bold text-white">{f.badge}</span>
-                    </div>
-                  </div>
-                  <span className="text-[11px] font-bold uppercase tracking-widest text-zinc-500 mb-3 block">{f.tag}</span>
-                  <h3 className="text-xl font-bold text-white mb-3 leading-snug">{f.title}</h3>
-                  <p className="text-zinc-400 text-sm leading-relaxed">{f.description}</p>
-                </div>
-              </StaggerItem>
-            )
-          })}
-        </StaggerContainer>
+        <FeatureTabs />
       </section>
 
       {/* â”€â”€ DYNAMIC TRUSTED BY â”€â”€ */}
@@ -523,7 +276,7 @@ export default async function HomePage() {
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <a href="/dashboard" className="flex items-center gap-2 px-10 py-4 rounded-full bg-white text-black text-base font-bold hover:scale-105 transition-all duration-300 shadow-[0_0_40px_rgba(255,255,255,0.15)]">
-              Start Free â€” No Card Required <ArrowRight className="w-5 h-5" />
+              Start Free — No Card Required <ArrowRight className="w-5 h-5" />
             </a>
             <form action={startInteractiveDemo}>
               <button type="submit" className="flex items-center gap-2 px-10 py-4 rounded-full bg-white/5 border border-white/10 text-white text-base font-semibold hover:bg-white/10 backdrop-blur-md transition-all duration-300">
@@ -543,7 +296,7 @@ export default async function HomePage() {
             </div>
             <span className="font-semibold text-white text-sm">OurMenu</span>
           </div>
-          <p className="text-zinc-600 text-sm">Â© {new Date().getFullYear()} OurMenu. Built for African hospitality.</p>
+          <p className="text-zinc-600 text-sm">© {new Date().getFullYear()} OurMenu. Built for African hospitality.</p>
           <div className="flex items-center gap-6 text-zinc-500 text-sm">
             <a href="#" className="hover:text-white transition-colors">Privacy</a>
             <a href="#" className="hover:text-white transition-colors">Terms</a>

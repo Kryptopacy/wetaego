@@ -75,7 +75,7 @@ export function AddItemForm({ orgId, categoryId, categoryName }: { orgId: string
             disabled={isGenerating || !name}
             className="absolute right-1 top-1 bottom-1 px-3 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white rounded-md text-xs font-bold transition-all disabled:opacity-50 disabled:grayscale flex items-center gap-1 shadow-lg"
           >
-            {isGenerating ? 'Wait...' : 'âœ¨ Magic Fill'}
+            {isGenerating ? 'Wait...' : '✨ Magic Fill'}
           </button>
         </div>
         <div className="w-24">

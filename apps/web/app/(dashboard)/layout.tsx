@@ -196,7 +196,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           <div className="bg-gradient-to-r from-red-900/80 to-orange-900/80 text-white px-6 py-3 flex items-center justify-between border-b border-red-500/20">
             <span className="text-sm"><strong>Trial Ended:</strong> Customers can no longer place orders.</span>
             <Link href="/dashboard/billing" className="bg-white text-red-700 font-bold px-4 py-1.5 rounded-full text-xs hover:bg-zinc-100 transition-colors">
-              Upgrade Now â†’
+              Upgrade Now →
             </Link>
           </div>
         )}

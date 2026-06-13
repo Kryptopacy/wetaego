@@ -115,7 +115,7 @@ export async function POST(req: Request) {
             const itemsList = (cat.menu_items || [])
               .filter((item: any) => item.availability_status !== 'hidden')
               .map((item: any) => 
-                `- [ID: ${item.id}] ${item.name}: â‚¦${(item.price_minor / 100).toLocaleString()} | Availability: ${item.availability_status} | Description: ${item.description || 'No description'}`
+                `- [ID: ${item.id}] ${item.name}: ₦${(item.price_minor / 100).toLocaleString()} | Availability: ${item.availability_status} | Description: ${item.description || 'No description'}`
               )
               .join('\n')
             return `### ${cat.name}\n${itemsList}`

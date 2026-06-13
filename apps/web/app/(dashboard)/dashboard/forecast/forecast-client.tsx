@@ -43,7 +43,7 @@ const AlertBadge = ({ alert }: { alert: StockAlert }) => {
   const map = {
     critical: { label: 'âš ï¸ Stock Critical', cls: 'bg-red-500/20 text-red-400 border border-red-500/50' },
     order_soon: { label: 'ðŸ“¦ Order Soon', cls: 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/50' },
-    sufficient: { label: 'âœ… Sufficient', cls: 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/50' },
+    sufficient: { label: '✅ Sufficient', cls: 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/50' },
   }
   const { label, cls } = map[alert]
   return <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${cls}`}>{label}</span>
