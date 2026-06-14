@@ -96,7 +96,7 @@ create policy "Users can read staff tips"
 on public.staff_tips for select
 to authenticated
 using (
-  staff_id = (select auth.uid())
+  user_id = (select auth.uid())
   or private.has_org_role(organization_id, array['owner','manager']::public.member_role[])
 );
 
