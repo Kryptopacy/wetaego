@@ -1,4 +1,4 @@
-﻿/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
 'use client'
 
 import Link from 'next/link'
@@ -7,7 +7,7 @@ import { ReactNode, useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import {
   LayoutDashboard, ClipboardList, BarChart3, BookOpen,
-  FileText, Settings, CreditCard, LogOut, Zap
+  FileText, Settings, CreditCard, LogOut, Zap, Menu, X
 } from 'lucide-react'
 import { GlobalRealtime } from './global-realtime'
 import { NotificationCenter } from './notification-center'
@@ -24,8 +24,8 @@ const managerItems = [
   { href: '/dashboard/settings', label: 'Settings & Team', icon: Settings },
 ]
 
-function NavLink({ href, label, icon: Icon, badge, exact }: {
-  href: string; label: string; icon: any; badge?: string; exact?: boolean
+function NavLink({ href, label, icon: Icon, badge, exact, onClick }: {
+  href: string; label: string; icon: any; badge?: string; exact?: boolean; onClick?: () => void
 }) {
   const pathname = usePathname()
   const isActive = exact ? pathname === href : pathname.startsWith(href)
@@ -33,6 +33,7 @@ function NavLink({ href, label, icon: Icon, badge, exact }: {
   return (
     <Link
       href={href}
+      onClick={onClick}
       className={`group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 relative ${
         isActive
           ? 'bg-gradient-to-r from-violet-600/20 to-indigo-600/10 text-white border border-violet-500/30 shadow-lg shadow-violet-900/20'
@@ -59,6 +60,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const [isExpired, setIsExpired] = useState(false)
   const [isOwnerOrManager, setIsOwnerOrManager] = useState(true)
   const [time, setTime] = useState('')
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   useEffect(() => {
     const fetchOrg = async () => {
@@ -93,14 +95,10 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     return () => clearInterval(i)
   }, [])
 
-  return (
-    <div className="flex min-h-screen bg-[#0a0a0f] text-zinc-100 font-sans">
-
-      {/* === SIDEBAR === */}
-      <aside className="w-64 shrink-0 hidden md:flex flex-col border-r border-white/5 bg-zinc-950/80 backdrop-blur-xl">
-
+  const renderNavContent = (onClose?: () => void) => (
+    <>
         {/* Logo */}
-        <div className="p-6 pb-4">
+        <div className="p-6 pb-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-900/50">
               <Zap className="w-5 h-5 text-white" />
@@ -110,6 +108,11 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
               <div className="text-[10px] text-zinc-500 font-medium">{orgName}</div>
             </div>
           </div>
+          {onClose && (
+            <button onClick={onClose} className="p-2 -mr-2 text-zinc-400 hover:text-white md:hidden">
+              <X className="w-5 h-5" />
+            </button>
+          )}
         </div>
 
         {/* Live clock */}
@@ -121,7 +124,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         <div className="px-3 flex-1 flex flex-col gap-1 overflow-y-auto">
           {/* Main Nav */}
           <p className="px-3 pt-2 pb-1.5 text-[10px] font-semibold text-zinc-600 uppercase tracking-widest">Operations</p>
-          {navItems.map(item => <NavLink key={item.href} {...item} />)}
+          {navItems.map(item => <NavLink key={item.href} {...item} onClick={onClose} />)}
 
           {/* Manager Nav */}
           {isOwnerOrManager && (
@@ -147,17 +150,15 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
               <div className="mb-4 px-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">
                 System
               </div>
-              {managerItems.map(item => <NavLink key={item.href} {...item} />)}
+              {managerItems.map(item => <NavLink key={item.href} {...item} onClick={onClose} />)}
             </>
           )}
         </div>
 
-
-
         {/* Bottom Nav */}
         <div className="px-3 pb-4 space-y-1 border-t border-white/5 pt-4">
           {isOwnerOrManager && (
-            <NavLink href="/dashboard/billing" label="Billing & Plans" icon={CreditCard} />
+            <NavLink href="/dashboard/billing" label="Billing & Plans" icon={CreditCard} onClick={onClose} />
           )}
           <Link
             href="/login"
@@ -167,18 +168,43 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             Sign Out
           </Link>
         </div>
+    </>
+  )
+
+  return (
+    <div className="flex min-h-screen bg-[#0a0a0f] text-zinc-100 font-sans">
+
+      {/* === DESKTOP SIDEBAR === */}
+      <aside className="w-64 shrink-0 hidden md:flex flex-col border-r border-white/5 bg-zinc-950/80 backdrop-blur-xl">
+        {renderNavContent()}
       </aside>
+
+      {/* === MOBILE MENU OVERLAY === */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-50 flex md:hidden">
+          <div 
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity" 
+            onClick={() => setMobileMenuOpen(false)}
+          />
+          <aside className="relative w-[280px] max-w-[calc(100vw-3rem)] flex-col border-r border-white/5 bg-zinc-950/95 backdrop-blur-xl h-full flex animate-in slide-in-from-left duration-300">
+             {renderNavContent(() => setMobileMenuOpen(false))}
+          </aside>
+        </div>
+      )}
 
       {/* === MAIN AREA === */}
       <div className="flex-1 flex flex-col min-w-0">
 
         {/* Top Header */}
         <header className="h-14 border-b border-white/5 flex items-center justify-between px-6 bg-zinc-950/60 backdrop-blur-xl sticky top-0 z-10">
-          <div className="flex items-center gap-2 md:hidden">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center">
+          <div className="flex items-center gap-3 md:hidden">
+            <button onClick={() => setMobileMenuOpen(true)} className="p-1 -ml-2 text-zinc-400 hover:text-white transition-colors">
+              <Menu className="w-5 h-5" />
+            </button>
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-900/50">
               <Zap className="w-4 h-4 text-white" />
             </div>
-            <span className="font-bold text-sm text-white">OurMenu OS</span>
+            <span className="font-bold text-sm text-white tracking-tight">OurMenu OS</span>
           </div>
           
           <div className="flex-1"></div>

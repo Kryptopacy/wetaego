@@ -1,4 +1,3 @@
-﻿/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createClient } from '@/lib/supabase/server'
 import { getPlanLimits } from '@/lib/utils/settings'
 import * as Sentry from '@sentry/nextjs'
@@ -76,7 +75,7 @@ export async function chargeCredits(organizationId: string, cost: number, reason
 
     return { success: true, remaining: (newPurchased + Math.max(0, monthlyLimit - newFreeUsed)) }
 
-  } catch (error: any) {
+  } catch (error) {
     Sentry.captureException(error)
     return { success: false, error: error.message || 'An unexpected error occurred while processing credits.' }
   }

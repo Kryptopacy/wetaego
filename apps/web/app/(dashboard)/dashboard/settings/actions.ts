@@ -32,7 +32,7 @@ export async function updateOrganization(formData: FormData) {
       .eq('created_by', userData.user.id)
       .single()
 
-    let currentOrgId = org?.id
+    let currentOrgId = org?.id || ''
 
     if (org) {
       // Update existing org

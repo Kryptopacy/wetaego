@@ -1,4 +1,3 @@
-﻿/* eslint-disable @typescript-eslint/no-explicit-any */
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
@@ -27,7 +26,7 @@ export async function savePaymentSettings(formData: FormData) {
   let subaccountCode = ''
   try {
     subaccountCode = await createSubaccount(bankName, accountNumber, businessName)
-  } catch (err: any) {
+  } catch (err) {
     throw new Error(err.message || 'Failed to connect bank account via Paystack')
   }
 

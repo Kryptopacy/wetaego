@@ -1,4 +1,4 @@
-﻿/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use server'
 
 import { revalidatePath } from 'next/cache'
@@ -137,6 +137,8 @@ export async function startInteractiveDemo() {
     publication_status: 'published'
   }).select('id').single()
 
+  if (!loc) throw new Error('Failed to create location')
+
   // 5. Create Menu
   const { data: menu } = await adminClient.from('menus').insert({
     organization_id: org.id,
@@ -145,28 +147,36 @@ export async function startInteractiveDemo() {
     publication_status: 'published'
   }).select('id').single()
 
+  if (!menu) throw new Error('Failed to create menu')
+
   // 6. Create Categories
   const { data: cat1 } = await adminClient.from('menu_categories').insert({ organization_id: org.id, menu_id: menu.id, name: 'Starters & Bites', sort_order: 0 }).select('id').single()
   const { data: cat2 } = await adminClient.from('menu_categories').insert({ organization_id: org.id, menu_id: menu.id, name: 'Premium Mains', sort_order: 1 }).select('id').single()
   const { data: cat3 } = await adminClient.from('menu_categories').insert({ organization_id: org.id, menu_id: menu.id, name: 'Signature Cocktails', sort_order: 2 }).select('id').single()
   const { data: cat4 } = await adminClient.from('menu_categories').insert({ organization_id: org.id, menu_id: menu.id, name: 'Desserts', sort_order: 3 }).select('id').single()
 
+  if (!cat1 || !cat2 || !cat3 || !cat4) throw new Error('Failed to create categories')
+
   // 7. Add Menu Items
-  await adminClient.from('menu_items').insert([
+  const { error: itemsError } = await adminClient.from('menu_items').insert([
     // Starters
     { organization_id: org.id, category_id: cat1.id, name: 'Spicy Asun Rolls', description: 'Smoked goat meat wrapped in crispy pastry, served with pepper sauce.', price_minor: 650000, is_featured: true },
-    { organization_id: org.id, category_id: cat1.id, name: 'Truffle Plantain Fries', description: 'Crispy plantain tossed in truffle oil and parmesan.', price_minor: 450000 },
+    { organization_id: org.id, category_id: cat1.id, name: 'Truffle Plantain Fries', description: 'Crispy plantain tossed in truffle oil and parmesan.', price_minor: 450000, is_featured: false },
     // Mains
     { organization_id: org.id, category_id: cat2.id, name: '24-Hour Suya Steak', description: 'Prime ribeye marinated in our signature suya spice blend, grilled to perfection.', price_minor: 2800000, is_featured: true },
-    { organization_id: org.id, category_id: cat2.id, name: 'Jollof Paella', description: 'Rich, smoky jollof rice mixed with grilled prawns, calamari, and spicy chorizo.', price_minor: 1850000 },
-    { organization_id: org.id, category_id: cat2.id, name: 'Charcoal Grilled Croaker', description: 'Whole croaker fish stuffed with herbs, served with roasted yam.', price_minor: 1500000 },
+    { organization_id: org.id, category_id: cat2.id, name: 'Jollof Paella', description: 'Rich, smoky jollof rice mixed with grilled prawns, calamari, and spicy chorizo.', price_minor: 1850000, is_featured: false },
+    { organization_id: org.id, category_id: cat2.id, name: 'Charcoal Grilled Croaker', description: 'Whole croaker fish stuffed with herbs, served with roasted yam.', price_minor: 1500000, is_featured: false, availability_status: 'sold_out' },
     // Cocktails
     { organization_id: org.id, category_id: cat3.id, name: 'Lagos Sunset', description: 'Vodka, passion fruit puree, fresh lime, and a splash of cranberry.', price_minor: 700000, is_featured: true },
-    { organization_id: org.id, category_id: cat3.id, name: 'Smoked Hibiscus Margarita', description: 'Tequila, zobo extract, triple sec, smoked sea salt rim.', price_minor: 850000 },
+    { organization_id: org.id, category_id: cat3.id, name: 'Smoked Hibiscus Margarita', description: 'Tequila, zobo extract, triple sec, smoked sea salt rim.', price_minor: 850000, is_featured: false },
     // Desserts
-    { organization_id: org.id, category_id: cat4.id, name: 'Puff-Puff Beignets', description: 'Warm, fluffy dough dusted with cinnamon sugar, served with chocolate dip.', price_minor: 400000 },
-    { organization_id: org.id, category_id: cat4.id, name: 'Mango Sorbet', description: 'Fresh, icy mango sorbet made in-house.', price_minor: 350000 }
+    { organization_id: org.id, category_id: cat4.id, name: 'Puff-Puff Beignets', description: 'Warm, fluffy dough dusted with cinnamon sugar, served with chocolate dip.', price_minor: 400000, is_featured: false },
+    { organization_id: org.id, category_id: cat4.id, name: 'Mango Sorbet', description: 'Fresh, icy mango sorbet made in-house.', price_minor: 350000, is_featured: false }
   ])
+
+  if (itemsError) {
+    console.error('Failed to insert demo menu items', itemsError)
+  }
 
   // 8. Add strict demo credits (financial defense)
   await adminClient.from('credit_transactions').insert({

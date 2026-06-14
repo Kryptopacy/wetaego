@@ -1,4 +1,3 @@
-﻿/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createAnonClient } from '@/lib/supabase/server'
 import { unstable_cache } from 'next/cache'
 
@@ -24,8 +23,8 @@ async function fetchSystemSettingFromDB<T>(key: string, fallback: T): Promise<T>
     if (error || !data) return fallback
     
     // Merge with fallback to ensure no missing keys
-    return { ...fallback, ...data.value }
-  } catch (err: any) {
+    return { ...fallback, ...((data.value as object) || {}) }
+  } catch (err) {
     console.error(`Failed to fetch setting ${key}`, err)
     return fallback
   }

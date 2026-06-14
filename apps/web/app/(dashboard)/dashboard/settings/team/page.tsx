@@ -1,4 +1,3 @@
-﻿/* eslint-disable react-hooks/purity, @typescript-eslint/no-explicit-any */
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -22,7 +21,7 @@ export default async function TeamPage() {
     redirect('/login')
   }
 
-  const userId = user?.id
+  const userId = user?.id || 'demo-user-id'
 
   // Fetch organization and role
   let organization = null
@@ -62,11 +61,11 @@ export default async function TeamPage() {
     }
 
     const { data: membersRaw } = await supabase
-      .from('organization_member_details' as any)
+      .from('organization_member_details')
       .select('*')
       .eq('organization_id', organization?.id || '')
 
-    members = (membersRaw || []).map((m: any) => ({
+    members = (membersRaw || []).map((m) => ({
       user_id: m.user_id,
       email: m.email,
       role: m.role,
@@ -79,7 +78,7 @@ export default async function TeamPage() {
       .eq('organization_id', organization?.id || '')
       .order('created_at', { ascending: false })
 
-    invites = (invitesRaw || []).map((i: any) => ({
+    invites = (invitesRaw || []).map((i) => ({
       id: i.id,
       email: i.email,
       role: i.role,

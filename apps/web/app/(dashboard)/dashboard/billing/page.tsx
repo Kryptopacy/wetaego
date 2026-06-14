@@ -1,4 +1,3 @@
-﻿/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
 import { createClient } from '@/lib/supabase/server'
 import { subscribeToPro, buyCredits } from './actions'
 import { getUsdToNgnRate } from '@/lib/payments/exchange'
@@ -8,6 +7,10 @@ export default async function BillingPage() {
 
   const { data: userData } = await supabase.auth.getUser()
   const userId = userData?.user?.id
+
+  if (!userId) {
+    return <div className="p-8 text-zinc-500">Please log in to manage billing.</div>
+  }
 
   // Fetch the user's organization
   const { data: org } = await supabase
@@ -29,7 +32,7 @@ export default async function BillingPage() {
   const trialDaysLeft = Math.ceil((trialEnds.getTime() - new Date().getTime()) / (1000 * 3600 * 24))
 
   const { getPricingSettings } = await import('@/lib/utils/settings')
-  const pricing = await getPricingSettings() as any
+  const pricing = await getPricingSettings()
   const proPrice = pricing.pro_monthly_ngn || 49000
   const credits10Price = pricing.credits_10_ngn || 15000
   const credits50Price = pricing.credits_50_ngn || 60000
@@ -111,7 +114,7 @@ export default async function BillingPage() {
               <div className="font-semibold text-white">10 Credits</div>
               <div className="text-xs text-zinc-500">₦{credits10Price.toLocaleString()}</div>
             </div>
-            <form action={buyCredits as any} className="relative z-10">
+            <form action={buyCredits} className="relative z-10">
               <input type="hidden" name="organization_id" value={org.id} />
               <input type="hidden" name="credits" value="10" />
               <button type="submit" className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg text-sm font-medium transition-colors">
@@ -125,7 +128,7 @@ export default async function BillingPage() {
               <div className="font-semibold text-white">50 Credits</div>
               <div className="text-xs text-zinc-500">₦{credits50Price.toLocaleString()}</div>
             </div>
-            <form action={buyCredits as any} className="relative z-10">
+            <form action={buyCredits} className="relative z-10">
               <input type="hidden" name="organization_id" value={org.id} />
               <input type="hidden" name="credits" value="50" />
               <button type="submit" className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-lg text-sm font-bold transition-colors shadow-lg">

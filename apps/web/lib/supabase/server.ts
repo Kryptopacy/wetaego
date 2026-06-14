@@ -1,4 +1,4 @@
-﻿/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import type { Database } from './types'
@@ -27,7 +27,7 @@ export async function createClient() {
         },
       },
     }
-  ) as any
+  )
 }
 
 export async function createAdminClient() {
@@ -44,7 +44,7 @@ export async function createAdminClient() {
         },
       },
     }
-  ) as any
+  )
 }
 
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
@@ -61,5 +61,5 @@ export function createAnonClient() {
         autoRefreshToken: false,
       }
     }
-  ) as any
+  )
 }

@@ -1,4 +1,4 @@
-﻿/* eslint-disable */
+/* eslint-disable */
 'use client'
 
 import { useCartStore } from '@/lib/store/cart'
@@ -46,7 +46,14 @@ export function CartFAB({ organizationId, locationId, tableIdentifier }: CartFAB
     setIsCheckingOut(true)
     try {
       posthog.capture('checkout_completed', { organizationId, locationId, totalAmountMinor: finalTotalMinor })
-      const { checkoutUrl, orderId } = await processCheckout(organizationId, locationId, items, finalTotalMinor, 0, tableNumber, customerNote)
+      const response = await processCheckout(organizationId, locationId, items, finalTotalMinor, 0, tableNumber, customerNote)
+      
+      if (response && response.error === 'DEMO_BUSINESS') {
+        toast.error('This is a demo business. You cannot actually pay for items.', { duration: 5000 })
+        return
+      }
+
+      const { checkoutUrl, orderId } = response || {}
       
       if (checkoutUrl && orderId) {
         localStorage.setItem('activeOrderId', orderId)

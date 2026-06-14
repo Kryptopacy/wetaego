@@ -1,4 +1,3 @@
-﻿/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { Tier } from '@/lib/utils/billing'
@@ -28,7 +27,7 @@ export default async function PagesManager() {
   let pages: any[] = []
 
   if (isDemo) {
-    org = { id: 'demo-org', subscription_tier: 'pro', extra_pages_purchased: 0 }
+    org = { id: 'demo-org', subscription_tier: 'pro' }
     role = 'owner'
     locData = { id: 'demo-loc', slug: 'demo-venue' }
     pages = [
@@ -38,7 +37,7 @@ export default async function PagesManager() {
   } else {
     const { data: member } = await supabase
       .from('organization_members')
-      .select('role, organizations(id, subscription_tier, extra_pages_purchased)')
+      .select('role, organizations(id, subscription_tier, purchased_credits, monthly_free_credits_used)')
       .eq('user_id', userId)
       .single()
 
@@ -48,7 +47,7 @@ export default async function PagesManager() {
     } else {
       const { data } = await supabase
         .from('organizations')
-        .select('id, subscription_tier, extra_pages_purchased')
+        .select('id, subscription_tier, purchased_credits, monthly_free_credits_used')
         .eq('created_by', userId)
         .single()
       org = data
@@ -71,6 +70,10 @@ export default async function PagesManager() {
       
       pages = pagesData || []
     }
+  }
+
+  if (!org || !locData) {
+    return <div className="p-8 text-zinc-500">Please create an organization and a location first.</div>
   }
   
   const { getFreePagesLimit } = await import('@/lib/utils/billing')
@@ -113,7 +116,7 @@ export default async function PagesManager() {
             </div>
           </div>
         ) : (
-          <form action={createCustomPage as any} className="space-y-4">
+          <form action={createCustomPage} className="space-y-4">
             <input type="hidden" name="location_id" value={locData.id} />
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -141,7 +144,7 @@ export default async function PagesManager() {
         {pages.length === 0 ? (
           <div className="text-zinc-500 italic">No custom pages created yet.</div>
         ) : (
-          pages.map((page: any) => {
+          pages.map((page) => {
             const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://ourmenu.os'
             const fullUrl = `${baseUrl}/m/${locData.slug}/p/${page.slug}`
             const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(fullUrl)}&color=ffffff&bgcolor=09090b`
@@ -162,14 +165,14 @@ export default async function PagesManager() {
                 </div>
               </div>
               <div className="flex items-center gap-4">
-                <form action={togglePageStatus as any}>
+                <form action={togglePageStatus}>
                   <input type="hidden" name="pageId" value={page.id} />
                   <input type="hidden" name="currentStatus" value={page.is_published.toString()} />
                   <button type={`submit`} className={`px-4 py-2 rounded-lg text-sm font-medium border ${page.is_published ? 'border-green-500/50 bg-green-500/10 text-green-400' : 'border-zinc-700 bg-zinc-800 text-zinc-400'}`}>
                     {page.is_published ? 'Published' : 'Hidden'}
                   </button>
                 </form>
-                <form action={deletePage as any}>
+                <form action={deletePage}>
                   <input type="hidden" name="pageId" value={page.id} />
                   <button type="submit" className="text-zinc-500 hover:text-red-400 transition-colors">
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>

@@ -1,21 +1,19 @@
-﻿/* eslint-disable @typescript-eslint/no-explicit-any */
 import { MetadataRoute } from 'next'
 import { createClient } from '../lib/supabase/server'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const supabase = await createClient()
 
-  // Fetch all published menus
-  const { data: menus } = await supabase
-    .from('menus')
+  // Fetch all locations
+  const { data: locations } = await supabase
+    .from('locations')
     .select('slug, updated_at')
-    .eq('is_published', true)
 
   const baseUrl = 'https://ourmenu.os'
 
-  const menuUrls = (menus || []).map((menu: any) => ({
-    url: `${baseUrl}/m/${menu.slug}`,
-    lastModified: new Date(menu.updated_at),
+  const menuUrls = (locations || []).map((loc) => ({
+    url: `${baseUrl}/m/${loc.slug}`,
+    lastModified: new Date(loc.updated_at),
     changeFrequency: 'daily' as const,
     priority: 0.8,
   }))

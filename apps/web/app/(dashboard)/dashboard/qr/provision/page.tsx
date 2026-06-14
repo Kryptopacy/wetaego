@@ -44,7 +44,7 @@ export default async function QRProvisionPage({
     .from('organization_members')
     .select('role')
     .eq('organization_id', qrCode.organization_id)
-    .eq('user_id', userData.user.id)
+    .eq('user_id', user?.id || 'demo-id')
     .single()
 
   let isAuthorized = !!member
@@ -53,7 +53,7 @@ export default async function QRProvisionPage({
       .from('organizations')
       .select('id')
       .eq('id', qrCode.organization_id)
-      .eq('created_by', userData.user.id)
+      .eq('created_by', user?.id || 'demo-id')
       .single()
     isAuthorized = !!org
   }

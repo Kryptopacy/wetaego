@@ -1,4 +1,3 @@
-﻿/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -48,7 +47,7 @@ export default async function SettingsPage({
   if (member && member.organizations) {
     organization = member.organizations
     role = member.role
-    const orgData = organization as any
+    const orgData = organization
     const tier = orgData.subscription_tier as PlanType
     const dynamicPlanLimits = await getPlanLimits() as Record<string, { credits: number, pages: number }>
     const monthlyLimit = dynamicPlanLimits[tier]?.credits || 0
@@ -257,7 +256,7 @@ export default async function SettingsPage({
               />
             </div>
 
-            <form action={saveLocationInfoSettings as any} className="flex flex-col gap-4">
+            <form action={saveLocationInfoSettings} className="flex flex-col gap-4">
               <input type="hidden" name="locationId" value={location.id} />
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -401,7 +400,7 @@ export default async function SettingsPage({
               Enable an interactive AI dining advisor on your public menu. Guests can chat with it to get recommendations, ask questions, customize items, and manage their cart.
             </p>
 
-            <form action={saveLocationAiSettings as any} className="flex flex-col gap-4">
+            <form action={saveLocationAiSettings} className="flex flex-col gap-4">
               <input type="hidden" name="locationId" value={location.id} />
               
               <div>
