@@ -1,4 +1,4 @@
-﻿/* eslint-disable @typescript-eslint/no-explicit-any, react/no-unescaped-entities */
+/* eslint-disable @typescript-eslint/no-explicit-any, react/no-unescaped-entities */
 'use client'
 
 import { useState } from 'react'
@@ -98,16 +98,37 @@ export function QrClient({ organizationId, locations, qrCodes, baseUrl }: any) {
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
               </button>
 
-              <div className="bg-white p-2 rounded-lg mb-3 print:p-0">
+              <div className="bg-white p-2 rounded-lg mb-2 print:p-0">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={qrImageUrl} alt="QR Code" className="w-full aspect-square" crossOrigin="anonymous" />
               </div>
               
-              <div className="text-center w-full">
+              <div className="text-center w-full mb-3 print:mb-4">
+                <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-500 print:text-zinc-600 mb-1 leading-tight print:block hidden">Scan to view menu & order</p>
                 <p className="font-bold text-white print:text-black text-sm truncate">{loc?.name || 'Unknown'}</p>
                 <p className="text-zinc-500 print:text-zinc-600 text-xs truncate mt-1">
                   {qr.table_identifier ? `Table: ${qr.table_identifier}` : 'Unassigned'}
                 </p>
+              </div>
+
+              {/* Secondary Feedback QR */}
+              <div className="w-full border-t border-zinc-800 print:border-zinc-300 pt-3 flex flex-col items-center">
+                <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-500 print:text-zinc-600 mb-2 text-center leading-tight">
+                  Scan to Rate & Tip<br/>
+                  <span className="text-[7px] lowercase normal-case">(Requires 4-digit PIN from receipt)</span>
+                </p>
+                <div className="bg-white p-1 rounded-md print:p-0 w-16 h-16">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img 
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`${baseUrl}/api/feedback-entry?qr_id=${qr.id}`)}&color=000000`}
+                    alt="Feedback QR" 
+                    className="w-full h-full" 
+                    crossOrigin="anonymous" 
+                  />
+                </div>
+              </div>
+
+              <div className="text-center w-full mt-3">
                 <button
                   onClick={() => {
                     setAssigningQr(qr)

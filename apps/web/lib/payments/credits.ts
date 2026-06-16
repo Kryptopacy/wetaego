@@ -77,6 +77,6 @@ export async function chargeCredits(organizationId: string, cost: number, reason
 
   } catch (error) {
     Sentry.captureException(error)
-    return { success: false, error: error.message || 'An unexpected error occurred while processing credits.' }
+    return { success: false, error: (error as any).message || 'An unexpected error occurred while processing credits.' }
   }
 }

@@ -298,9 +298,9 @@ export default async function HomePage() {
           </div>
           <p className="text-zinc-600 text-sm">© {new Date().getFullYear()} OurMenu. Built for African hospitality.</p>
           <div className="flex items-center gap-6 text-zinc-500 text-sm">
-            <a href="#" className="hover:text-white transition-colors">Privacy</a>
-            <a href="#" className="hover:text-white transition-colors">Terms</a>
-            <a href="#" className="hover:text-white transition-colors">Contact</a>
+            <a href="/privacy" className="hover:text-white transition-colors">Privacy</a>
+            <a href="/terms" className="hover:text-white transition-colors">Terms</a>
+            <a href="mailto:support@ourmenu.os" className="hover:text-white transition-colors">Contact</a>
           </div>
         </div>
       </footer>

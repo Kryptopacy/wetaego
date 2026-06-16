@@ -26,7 +26,13 @@ export async function subscribeToPro(formData: FormData) {
   redirect(authUrl)
 }
 
-export async function buyCredits(formData: FormData) {
+import { Resend } from 'resend'
+import InvoiceEmail from '../../../../emails/invoice-email'
+import { waitUntil } from '@vercel/functions'
+
+const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy')
+
+export async function buyCredits(formData: FormData): Promise<void> {
   const supabase = await createClient()
   const { data: userData } = await supabase.auth.getUser()
   if (!userData?.user) throw new Error('Not authenticated')
@@ -34,15 +40,15 @@ export async function buyCredits(formData: FormData) {
   const orgId = formData.get('organization_id') as string
   const credits = parseInt(formData.get('credits') as string || '0', 10)
 
-  if (!orgId || credits <= 0) return { error: 'Invalid data' }
+  if (!orgId || credits <= 0) throw new Error('Invalid data')
 
   const { data: org } = await supabase
     .from('organizations')
-    .select('purchased_credits')
+    .select('name, purchased_credits')
     .eq('id', orgId)
     .single()
 
-  if (!org) return { error: 'Org not found' }
+  if (!org) throw new Error('Org not found')
 
   await supabase
     .from('organizations')
@@ -50,5 +56,26 @@ export async function buyCredits(formData: FormData) {
     .eq('id', orgId)
 
   // Normally we would redirect to a checkout page, but we'll fulfill directly for the demo
-  return { success: true }
+  // 3. Send the Invoice Email
+  const transactionId = crypto.randomUUID() // Mock transaction ID
+  const orgName = org.name || 'OurMenu Partner'
+  
+  waitUntil((async () => {
+    const { error: resendError } = await resend.emails.send({
+      from: 'OurMenu <onboarding@resend.dev>',
+      to: userData.user.email!,
+      subject: `Invoice for ${credits} Credits`,
+      react: InvoiceEmail({
+        organizationName: orgName,
+        amountCredits: credits,
+        userName: userData.user.email! // Or use full name if available
+      }) as React.ReactElement
+    }, {
+      idempotencyKey: `invoice-${transactionId}`
+    });
+
+    if (resendError) {
+      console.error('Failed to send invoice email:', resendError.message);
+    }
+  })())
 }

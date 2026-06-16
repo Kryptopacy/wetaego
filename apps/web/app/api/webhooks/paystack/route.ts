@@ -1,4 +1,4 @@
-﻿/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
 import { NextResponse } from 'next/server'
 import crypto from 'crypto'
 import { createClient } from '@/lib/supabase/server'
@@ -20,7 +20,9 @@ export async function POST(req: Request) {
 
     // 2. Process Charge Success
     if (event.event === 'charge.success') {
-      const reference = event.data.reference // this is our order.id
+      // The reference comes back as orderId_split_randomHash. We strip it back to orderId.
+      const rawReference = event.data.reference
+      const reference = rawReference.split('_split_')[0] 
       const amountPaidMinor = event.data.amount
 
       const supabase: any = await createClient()
@@ -52,33 +54,21 @@ export async function POST(req: Request) {
         return NextResponse.json({ status: 'already_processed' }, { status: 200 })
       }
 
-      // 1. Verify Amount
-      // Paystack amount is in kobo/minor units. Compare exactly.
-      if (event.data.amount < order.total_amount_minor) {
-        // Underpayment fraud detected!
-        await supabase
-          .from('orders')
-          .update({ status: 'failed' })
-          .eq('id', reference)
-          
-        return NextResponse.json({ error: 'Amount mismatch' }, { status: 400 })
+      // Insert payment into order_payments ledger. The DB trigger handles updating the order status.
+      const { error: paymentError } = await supabase
+        .from('order_payments')
+        .insert({
+          order_id: reference,
+          amount_minor: event.data.amount,
+          provider_reference: event.data.reference
+        })
+
+      if (paymentError) {
+        console.error('Failed to insert payment:', paymentError)
+        return NextResponse.json({ error: 'Failed to record payment' }, { status: 500 })
       }
 
-      // 2. Fetch Organization Settings to get phone number (for WhatsApp)
-      // Note: We bypass strict RLS here since it's a server action, or use service_role if needed.
-      const { data: org } = await supabase
-        .from('organizations')
-        .select('phone, name')
-        .eq('id', order.organization_id)
-        .single()
-
-      // 3. Mark as Paid (This triggers the Supabase Realtime channel on the Dashboard)
-      await supabase
-        .from('orders')
-        .update({ status: 'paid' })
-        .eq('id', reference)
-
-      // 4. Record the webhook as processed to prevent duplicates
+      // Record the webhook as processed to prevent duplicates
       await supabase
         .from('webhook_events')
         .insert({

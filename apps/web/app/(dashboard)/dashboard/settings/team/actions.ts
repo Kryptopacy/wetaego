@@ -1,4 +1,4 @@
-﻿/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use server'
 
 import { revalidatePath } from 'next/cache'
@@ -37,6 +37,12 @@ async function checkIsCreator(orgId: string, userId: string): Promise<boolean> {
   return !!data
 }
 
+import { Resend } from 'resend'
+import InviteEmail from '../../../../../emails/invite-email'
+import { waitUntil } from '@vercel/functions'
+
+const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy')
+
 export async function createInviteAction(
   orgId: string,
   email: string,
@@ -66,6 +72,36 @@ export async function createInviteAction(
     if (error) {
       return { error: error.message }
     }
+
+    // Fetch org name
+    const { data: org } = await supabase
+      .from('organizations')
+      .select('name')
+      .eq('id', orgId)
+      .single()
+
+    const orgName = org?.name || 'OurMenu Partner'
+    const origin = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+    const inviteLink = `${origin}/invite?token=${data.token}`
+
+    waitUntil((async () => {
+      const { error: resendError } = await resend.emails.send({
+        from: 'OurMenu <onboarding@resend.dev>',
+        to: email.trim().toLowerCase(),
+        subject: `You've been invited to ${orgName}`,
+        react: InviteEmail({
+          organizationName: orgName,
+          role,
+          inviteLink
+        }) as React.ReactElement
+      }, {
+        idempotencyKey: `invite-email/${data.token}`
+      });
+
+      if (resendError) {
+        console.error('Failed to send invite email:', resendError.message);
+      }
+    })())
 
     revalidatePath('/dashboard/settings/team')
     return { success: true, token: data.token }
@@ -131,3 +167,5 @@ export async function removeMemberAction(orgId: string, userIdToDelete: string) 
     return { error: err.message || 'An error occurred' }
   }
 }
+
+

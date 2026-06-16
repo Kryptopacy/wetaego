@@ -1,4 +1,4 @@
-﻿/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -38,10 +38,21 @@ export function OrdersClient({ organizationId, initialOrders, initialServiceRequ
             .eq('id', payload.new.id)
             .single()
             .then(({ data }: { data: any }) => {
-              if (data) setOrders((prev) => [data, ...prev])
+              if (data) {
+                setOrders((prev) => [data, ...prev])
+                if (data.status === 'paid' || data.status === 'pending') {
+                  toast.success(`New Order Received! Table: ${data.table_identifier}`)
+                }
+              }
             })
         } else if (payload.eventType === 'UPDATE') {
-          setOrders((prev) => prev.map(o => o.id === payload.new.id ? { ...o, ...payload.new } : o))
+          setOrders((prev) => {
+            const oldOrder = prev.find(o => o.id === payload.new.id)
+            if (oldOrder && oldOrder.status !== 'paid' && payload.new.status === 'paid') {
+              toast.success(`Payment Confirmed! Table: ${payload.new.table_identifier}`)
+            }
+            return prev.map(o => o.id === payload.new.id ? { ...o, ...payload.new } : o)
+          })
         }
       })
       .subscribe()
@@ -270,7 +281,14 @@ export function OrdersClient({ organizationId, initialOrders, initialServiceRequ
                   )}
                   {order.status === 'preparing' && order.assigned_staff_id === currentUserId && (
                     <button 
-                      onClick={() => supabase.from('orders').update({ status: 'completed' }).eq('id', order.id)}
+                      onClick={async () => {
+                        const { completeOrderAction } = await import('./actions')
+                        toast.promise(completeOrderAction(order.id), {
+                          loading: 'Completing order...',
+                          success: 'Order completed! Feedback email sent.',
+                          error: 'Failed to complete order'
+                        })
+                      }}
                       className="px-6 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium transition-colors"
                     >
                       Mark as Completed

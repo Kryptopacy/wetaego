@@ -1,0 +1,106 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { motion } from 'framer-motion'
+import { toast } from 'sonner'
+
+export default function SharingHubPage({
+  params
+}: {
+  params: { order_id: string }
+}) {
+  const [split, setSplit] = useState(1)
+  const [qrUrl, setQrUrl] = useState('')
+  const [shareLink, setShareLink] = useState('')
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    const splitCount = parseInt(urlParams.get('split') || '1')
+    setSplit(splitCount)
+
+    const link = `${window.location.origin}/pay/${params.order_id}?split=${splitCount}`
+    setShareLink(link)
+    setQrUrl(`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(link)}&color=000000`)
+  }, [params.order_id])
+
+  const copyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(shareLink)
+      toast.success('Link copied to clipboard!')
+    } catch (e) {
+      toast.error('Failed to copy link')
+    }
+  }
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Split the Bill',
+          text: `Pay your share of the bill (${split} ways)`,
+          url: shareLink
+        })
+      } catch (e) {
+        copyLink()
+      }
+    } else {
+      copyLink()
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-black flex flex-col items-center justify-center p-6 font-sans">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        className="max-w-sm w-full bg-zinc-900 border border-zinc-800 rounded-3xl p-8 shadow-2xl relative overflow-hidden"
+      >
+        {/* Glow effect */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-32 bg-blue-500/20 blur-3xl rounded-full" />
+
+        <div className="relative z-10 text-center space-y-6">
+          <div>
+            <h1 className="text-2xl font-black text-white">Share the Bill</h1>
+            <p className="text-zinc-400 text-sm mt-1">Let your friends scan this code to pay their share.</p>
+          </div>
+
+          <div className="bg-white p-3 rounded-2xl mx-auto w-fit shadow-xl">
+            {qrUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={qrUrl} alt="Payment QR Code" className="w-48 h-48" crossOrigin="anonymous" />
+            ) : (
+              <div className="w-48 h-48 bg-zinc-100 animate-pulse rounded-xl" />
+            )}
+          </div>
+
+          <div className="bg-zinc-800/50 rounded-xl p-4">
+            <p className="text-zinc-400 text-xs uppercase tracking-widest font-bold mb-1">Split Type</p>
+            <p className="text-white font-medium text-lg">{split} Ways</p>
+          </div>
+
+          <div className="space-y-3 pt-2">
+            <button 
+              onClick={handleShare}
+              className="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-[0_0_20px_rgba(37,99,235,0.3)] hover:bg-blue-500 transition-colors flex items-center justify-center gap-2"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
+              Share Link via App
+            </button>
+            <button 
+              onClick={copyLink}
+              className="w-full bg-zinc-800 text-white font-bold py-4 rounded-xl hover:bg-zinc-700 transition-colors"
+            >
+              Copy Link
+            </button>
+            <button 
+              onClick={() => window.location.href = `/pay/${params.order_id}?split=${split}`}
+              className="w-full py-3 text-zinc-500 text-sm font-medium hover:text-white transition-colors"
+            >
+              Proceed to my payment
+            </button>
+          </div>
+        </div>
+      </motion.div>
+    </div>
+  )
+}

@@ -1,0 +1,2 @@
+-- Add customer_email to orders for e-receipts
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS customer_email text;

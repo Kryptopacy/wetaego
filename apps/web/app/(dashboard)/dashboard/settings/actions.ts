@@ -102,7 +102,7 @@ const aiSettingsSchema = z.object({
   brandKnowledge: z.string().max(4000).optional().nullable(),
 })
 
-export async function saveLocationAiSettings(formData: FormData) {
+export async function saveLocationAiSettings(formData: FormData): Promise<void> {
   try {
     const supabase = await createClient()
 
@@ -168,7 +168,6 @@ export async function saveLocationAiSettings(formData: FormData) {
     if (updateError) throw new Error(updateError.message)
 
     revalidatePath('/dashboard/settings')
-    return { success: true }
   } catch (error) {
     Sentry.captureException(error)
     throw error
@@ -188,7 +187,7 @@ const locationInfoSchema = z.object({
   operatingHours: z.string().max(200).optional().nullable(),
 })
 
-export async function saveLocationInfoSettings(formData: FormData) {
+export async function saveLocationInfoSettings(formData: FormData): Promise<void> {
   try {
     const supabase = await createClient()
 
@@ -259,7 +258,6 @@ export async function saveLocationInfoSettings(formData: FormData) {
     if (updateError) throw new Error(updateError.message)
 
     revalidatePath('/dashboard/settings')
-    return { success: true }
   } catch (error) {
     Sentry.captureException(error)
     throw error

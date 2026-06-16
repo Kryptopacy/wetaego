@@ -22,7 +22,9 @@ export function CartFAB({ organizationId, locationId, tableIdentifier }: CartFAB
   // Checkout Modal State
   const [showCheckoutModal, setShowCheckoutModal] = useState(false)
   const [tableNumber, setTableNumber] = useState(tableIdentifier || '')
+  const [customerEmail, setCustomerEmail] = useState('')
   const [customerNote, setCustomerNote] = useState('')
+  const [splitCount, setSplitCount] = useState(1)
 
   // Ensure zustand persist hydrate matches server render
   useEffect(() => {
@@ -46,23 +48,42 @@ export function CartFAB({ organizationId, locationId, tableIdentifier }: CartFAB
     setIsCheckingOut(true)
     try {
       posthog.capture('checkout_completed', { organizationId, locationId, totalAmountMinor: finalTotalMinor })
-      const response = await processCheckout(organizationId, locationId, items, finalTotalMinor, 0, tableNumber, customerNote)
       
-      if (response && response.error === 'DEMO_BUSINESS') {
-        toast.error('This is a demo business. You cannot actually pay for items.', { duration: 5000 })
+      let paymentFractionMinor: number | undefined = undefined
+      if (splitCount > 1) {
+        paymentFractionMinor = Math.ceil(finalTotalMinor / splitCount)
+      }
+
+      const { checkoutUrl, orderId, error } = (await processCheckout(
+        organizationId,
+        locationId,
+        items,
+        finalTotalMinor,
+        0, 
+        tableNumber,
+        customerNote,
+        customerEmail,
+        paymentFractionMinor
+      )) as any
+
+      if (error) {
+        toast.error(error)
         return
       }
 
-      const { checkoutUrl, orderId } = response || {}
+      clearCart()
+      localStorage.setItem('activeOrderId', orderId)
       
-      if (checkoutUrl && orderId) {
-        localStorage.setItem('activeOrderId', orderId)
-        clearCart()
+      if (splitCount > 1) {
+        window.location.href = `/pay/${orderId}/share?split=${splitCount}`
+      } else if (checkoutUrl) {
         window.location.href = checkoutUrl
+      } else {
+        toast.success('Order placed successfully!')
+        setShowCheckoutModal(false)
       }
-    } catch (e) {
+    } catch (e: any) {
       toast.error('Could not initialize checkout. Please try again.')
-    } finally {
       setIsCheckingOut(false)
     }
   }
@@ -137,9 +158,16 @@ export function CartFAB({ organizationId, locationId, tableIdentifier }: CartFAB
                   )}
                 </div>
 
-
-
                 <div>
+                  <label className="block text-sm font-medium text-zinc-400 mb-2">Email (Optional for E-Receipt)</label>
+                  <input 
+                    type="email" 
+                    value={customerEmail}
+                    onChange={(e) => setCustomerEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white outline-none focus:border-blue-500"
+                  />
+                </div>                <div>
                   <label className="block text-sm font-medium text-zinc-400 mb-2">Order Note (Optional)</label>
                   <textarea 
                     value={customerNote}
@@ -149,10 +177,35 @@ export function CartFAB({ organizationId, locationId, tableIdentifier }: CartFAB
                   />
                 </div>
 
-                <div className="bg-zinc-800/50 rounded-xl p-4 space-y-2">
-                  <div className="flex justify-between text-white font-bold text-lg pt-2 border-t border-zinc-700/50 mt-2">
+                <div className="bg-zinc-800/50 rounded-xl p-4 space-y-4">
+                  <div className="flex justify-between items-center text-white font-bold text-lg pt-2 border-t border-zinc-700/50 mt-2">
                     <span>Total</span>
                     <span>₦{(finalTotalMinor / 100).toLocaleString()}</span>
+                  </div>
+
+                  <div className="border-t border-zinc-700/50 pt-3">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-sm font-medium text-zinc-400">Split Bill?</span>
+                      <div className="flex items-center gap-3 bg-zinc-900 rounded-lg p-1">
+                        <button 
+                          onClick={() => setSplitCount(Math.max(1, splitCount - 1))}
+                          className="w-8 h-8 flex items-center justify-center bg-zinc-800 rounded-md text-white hover:bg-zinc-700 disabled:opacity-50"
+                          disabled={splitCount <= 1}
+                        >-</button>
+                        <span className="text-white font-bold w-4 text-center">{splitCount}</span>
+                        <button 
+                          onClick={() => setSplitCount(Math.min(10, splitCount + 1))}
+                          className="w-8 h-8 flex items-center justify-center bg-zinc-800 rounded-md text-white hover:bg-zinc-700 disabled:opacity-50"
+                          disabled={splitCount >= 10}
+                        >+</button>
+                      </div>
+                    </div>
+                    {splitCount > 1 && (
+                      <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3 text-center">
+                        <span className="block text-xs text-blue-400 uppercase tracking-widest mb-1 font-bold">Your Share (1 of {splitCount})</span>
+                        <span className="text-xl font-black text-white">₦{(Math.ceil(finalTotalMinor / splitCount) / 100).toLocaleString()}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -161,7 +214,7 @@ export function CartFAB({ organizationId, locationId, tableIdentifier }: CartFAB
                   disabled={isCheckingOut || !tableNumber}
                   className="w-full bg-white text-black font-bold py-4 rounded-xl shadow-lg flex items-center justify-center disabled:opacity-50 hover:bg-zinc-200 transition-colors"
                 >
-                  {isCheckingOut ? 'Processing...' : `Pay ₦${(finalTotalMinor / 100).toLocaleString()}`}
+                  {isCheckingOut ? 'Processing...' : (splitCount > 1 ? `Pay My Share (₦${(Math.ceil(finalTotalMinor / splitCount) / 100).toLocaleString()})` : `Pay ₦${(finalTotalMinor / 100).toLocaleString()}`)}
                 </button>
               </div>
             </motion.div>

@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
-export async function createCustomPage(formData: FormData) {
+export async function createCustomPage(formData: FormData): Promise<void> {
   const supabase = await createClient()
   const title = formData.get('title') as string
   const slug = formData.get('slug') as string
@@ -12,15 +12,15 @@ export async function createCustomPage(formData: FormData) {
 
   if (location_id === 'demo-loc') {
     revalidatePath('/dashboard/pages')
-    return { success: true }
+    return
   }
 
   const { data: userData } = await supabase.auth.getUser()
-  if (!userData?.user) return { error: 'Not authenticated' }
+  if (!userData?.user) throw new Error('Not authenticated')
 
   // 1. Get organization ID for this location
   const { data: loc } = await supabase.from('locations').select('organization_id').eq('id', location_id).single()
-  if (!loc) return { error: 'Location not found' }
+  if (!loc) throw new Error('Location not found')
   const orgId = loc.organization_id
 
   // 2. Get org tier and current page count
@@ -39,7 +39,7 @@ export async function createCustomPage(formData: FormData) {
     const { chargeCredits } = await import('@/lib/payments/credits')
     const charge = await chargeCredits(orgId, pageCost, `Created Custom Page: ${slug}`, userData.user.id)
     if (!charge.success) {
-      return { error: `Insufficient credits to create an extra custom page. Please buy more credits. (Cost: ${pageCost})` }
+      throw new Error(`Insufficient credits to create an extra custom page. Please buy more credits. (Cost: ${pageCost})`)
     }
   }
 
@@ -51,10 +51,9 @@ export async function createCustomPage(formData: FormData) {
     is_published: true
   })
 
-  if (error) return { error: error.message }
+  if (error) throw new Error(error.message)
 
   revalidatePath('/dashboard/pages')
-  return { success: true }
 }
 
 export async function togglePageStatus(formData: FormData) {

@@ -27,7 +27,7 @@ export async function savePaymentSettings(formData: FormData) {
   try {
     subaccountCode = await createSubaccount(bankName, accountNumber, businessName)
   } catch (err) {
-    throw new Error(err.message || 'Failed to connect bank account via Paystack')
+    throw new Error((err as Error).message || 'Failed to connect bank account via Paystack')
   }
 
   // Check if settings exist
@@ -59,3 +59,5 @@ export async function savePaymentSettings(formData: FormData) {
 
   revalidatePath('/dashboard/settings')
 }
+
+

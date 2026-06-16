@@ -1,4 +1,4 @@
-﻿/* eslint-disable react/no-unescaped-entities, @typescript-eslint/no-explicit-any */
+/* eslint-disable react/no-unescaped-entities, @typescript-eslint/no-explicit-any */
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -23,7 +23,7 @@ export function NotificationCenter() {
               setOrgId(orgData.id)
               
               // Initial Data Fetch
-              supabase.from('orders').select('*').eq('organization_id', orgData.id).eq('status', 'pending')
+              supabase.from('orders').select('*').eq('organization_id', orgData.id).in('status', ['pending', 'paid'])
                 .then(({ data }: any) => setPendingOrders(data || []))
               
               supabase.from('service_requests').select('*').eq('organization_id', orgData.id).eq('status', 'pending')
@@ -40,16 +40,18 @@ export function NotificationCenter() {
     const channel = supabase.channel('notification-center')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: `organization_id=eq.${orgId}` }, (payload: any) => {
         if (payload.eventType === 'INSERT') {
-          if (payload.new.status === 'pending') setPendingOrders(prev => [payload.new, ...prev])
+          if (payload.new.status === 'pending' || payload.new.status === 'paid') {
+            setPendingOrders(prev => [payload.new, ...prev])
+          }
         } else if (payload.eventType === 'UPDATE') {
-          if (payload.new.status === 'pending') {
-             // Handle if it transitioned to pending (rare) or updated while pending
+          if (payload.new.status === 'pending' || payload.new.status === 'paid') {
+             // Handle if it transitioned to pending/paid or updated while pending/paid
              setPendingOrders(prev => {
                 const exists = prev.find(o => o.id === payload.new.id)
                 return exists ? prev.map(o => o.id === payload.new.id ? payload.new : o) : [payload.new, ...prev]
              })
           } else {
-             // Removed from pending
+             // Removed from pending/paid (e.g. completed, cancelled)
              setPendingOrders(prev => prev.filter(o => o.id !== payload.new.id))
           }
         }

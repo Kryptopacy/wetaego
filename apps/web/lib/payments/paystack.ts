@@ -32,11 +32,29 @@ export async function initializeTransaction(
   amountMinor: number,
   email: string,
   subaccountCode: string,
-  reference: string
+  reference: string,
+  callbackUrl?: string
 ) {
   if (!PAYSTACK_SECRET_KEY) {
     console.warn('PAYSTACK_SECRET_KEY is missing. Mocking transaction initialization.')
-    return `https://checkout.paystack.com/mock_${reference}`
+    return callbackUrl 
+      ? `https://checkout.paystack.com/mock_${reference}?redirect=${encodeURIComponent(callbackUrl)}`
+      : `https://checkout.paystack.com/mock_${reference}`
+  }
+
+  const payload: any = {
+    amount: amountMinor,
+    email,
+    reference,
+    bearer: 'subaccount', // The business pays the Paystack processing fees
+  }
+
+  if (subaccountCode) {
+    payload.subaccount = subaccountCode
+  }
+
+  if (callbackUrl) {
+    payload.callback_url = callbackUrl
   }
 
   const response = await fetch('https://api.paystack.co/transaction/initialize', {
@@ -45,13 +63,7 @@ export async function initializeTransaction(
       Authorization: `Bearer ${PAYSTACK_SECRET_KEY}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      amount: amountMinor,
-      email,
-      reference,
-      subaccount: subaccountCode,
-      bearer: 'subaccount', // The business pays the Paystack processing fees
-    }),
+    body: JSON.stringify(payload),
   })
 
   const data = await response.json()

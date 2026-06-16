@@ -56,11 +56,7 @@ export default async function DashboardOverviewPage() {
 
   if (orgId) {
     const [menuItemsRes, qrScansRes, ordersRes, requestsRes] = await Promise.all([
-      supabase.from('menu_items').select('id', { count: 'exact', head: true }).eq('menu_id',
-        (await supabase.from('menus').select('id').eq('location_id',
-          (await supabase.from('locations').select('id').eq('organization_id', orgId).single()).data?.id || ''
-        ).single()).data?.id || ''
-      ),
+      supabase.from('menu_items').select('id', { count: 'exact', head: true }).eq('organization_id', orgId),
       supabase.from('qr_codes').select('id', { count: 'exact', head: true }).eq('organization_id', orgId),
       supabase.from('orders').select('id', { count: 'exact', head: true }).eq('organization_id', orgId)
         .gte('created_at', new Date(1718236800000 - 86400000).toISOString()),
@@ -158,7 +154,7 @@ export default async function DashboardOverviewPage() {
       {/* === WELCOME HEADER === */}
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-zinc-500 text-sm mb-1">Good morning, {orgName} ðŸ‘‹</p>
+          <p className="text-zinc-500 text-sm mb-1">Good morning, {orgName} 👋</p>
           <h1 className="text-3xl font-bold text-white tracking-tight">Overview</h1>
           <p className="text-zinc-400 text-sm mt-1">Here&apos;s what&apos;s happening across your venue today.</p>
         </div>
@@ -260,3 +256,5 @@ export default async function DashboardOverviewPage() {
     </div>
   )
 }
+
+

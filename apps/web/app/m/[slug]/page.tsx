@@ -1,4 +1,4 @@
-﻿/* eslint-disable */
+/* eslint-disable */
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
@@ -8,6 +8,7 @@ import { CallStaffFAB } from './call-staff-fab'
 import { AIChat } from './ai-chat'
 import { MenuRenderer } from './menu-renderer'
 import { LiveOrderTracker } from './live-order-tracker'
+import { RouletteFAB } from './roulette-fab'
 
 // Revalidate this page every 60 seconds (Incremental Static Regeneration)
 // This ensures edge caching handles high traffic seamlessly
@@ -324,6 +325,7 @@ export default async function PublicMenuPage({
 
         {/* Floating Actions */}
         <CallStaffFAB organizationId={location.organization_id} locationId={location.id} tableIdentifier={tableIdentifier} />
+        <RouletteFAB />
         <CartFAB organizationId={location.organization_id} locationId={location.id} tableIdentifier={tableIdentifier} />
         {location.ai_enabled && (
           <AIChat 

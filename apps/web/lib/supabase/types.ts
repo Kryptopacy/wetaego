@@ -1,4 +1,4 @@
-﻿export type Json =
+export type Json =
   | string
   | number
   | boolean
@@ -11,31 +11,6 @@ export type Database = {
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "14.5"
-  }
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
   }
   public: {
     Tables: {
@@ -508,36 +483,74 @@ export type Database = {
           },
         ]
       }
+      order_payments: {
+        Row: {
+          amount_minor: number
+          created_at: string
+          id: string
+          order_id: string | null
+          provider_reference: string
+        }
+        Insert: {
+          amount_minor: number
+          created_at?: string
+          id?: string
+          order_id?: string | null
+          provider_reference: string
+        }
+        Update: {
+          amount_minor?: number
+          created_at?: string
+          id?: string
+          order_id?: string | null
+          provider_reference?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_payments_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_reviews: {
         Row: {
+          business_feedback: string | null
+          business_rating: number | null
           created_at: string
-          feedback: string | null
           id: string
           location_id: string
           order_id: string
           organization_id: string
-          rating: number
+          staff_feedback: string | null
           staff_id: string | null
+          staff_rating: number
         }
         Insert: {
+          business_feedback?: string | null
+          business_rating?: number | null
           created_at?: string
-          feedback?: string | null
           id?: string
           location_id: string
           order_id: string
           organization_id: string
-          rating: number
+          staff_feedback?: string | null
           staff_id?: string | null
+          staff_rating: number
         }
         Update: {
+          business_feedback?: string | null
+          business_rating?: number | null
           created_at?: string
-          feedback?: string | null
           id?: string
           location_id?: string
           order_id?: string
           organization_id?: string
-          rating?: number
+          staff_feedback?: string | null
           staff_id?: string | null
+          staff_rating?: number
         }
         Relationships: [
           {
@@ -565,12 +578,15 @@ export type Database = {
       }
       orders: {
         Row: {
+          amount_paid_minor: number | null
           assigned_staff_id: string | null
           created_at: string
+          customer_email: string | null
           customer_name: string | null
           customer_note: string | null
           estimated_prep_time_minutes: number | null
           estimated_ready_at: string | null
+          feedback_pin: string
           id: string
           location_id: string
           organization_id: string
@@ -582,12 +598,15 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          amount_paid_minor?: number | null
           assigned_staff_id?: string | null
           created_at?: string
+          customer_email?: string | null
           customer_name?: string | null
           customer_note?: string | null
           estimated_prep_time_minutes?: number | null
           estimated_ready_at?: string | null
+          feedback_pin?: string
           id?: string
           location_id: string
           organization_id: string
@@ -599,12 +618,15 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          amount_paid_minor?: number | null
           assigned_staff_id?: string | null
           created_at?: string
+          customer_email?: string | null
           customer_name?: string | null
           customer_note?: string | null
           estimated_prep_time_minutes?: number | null
           estimated_ready_at?: string | null
+          feedback_pin?: string
           id?: string
           location_id?: string
           organization_id?: string
@@ -1154,7 +1176,6 @@ export type Database = {
           token: string
         }[]
       }
-      get_invite_details: { Args: { lookup_token: string }; Returns: Json }
     }
     Enums: {
       availability_status: "available" | "low" | "sold_out" | "hidden"
@@ -1289,9 +1310,6 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {
       availability_status: ["available", "low", "sold_out", "hidden"],

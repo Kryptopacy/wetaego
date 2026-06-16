@@ -1,4 +1,4 @@
-﻿/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
@@ -49,7 +49,9 @@ export async function processCheckout(
   totalAmountMinor: number, 
   tipAmountMinor: number,
   tableIdentifier: string,
-  customerNote?: string
+  customerNote?: string,
+  customerEmail?: string,
+  paymentFractionMinor?: number
 ) {
   const supabase = await createClient()
 
@@ -74,9 +76,8 @@ export async function processCheckout(
       total_amount_minor: totalAmountMinor,
       tip_amount_minor: tipAmountMinor || 0,
       customer_note: customerNote || null,
-    })
-    .select('id')
-    .single()
+      customer_email: customerEmail || null,
+    } as any).select('id').single()
 
   if (orderError || !order) throw new Error('Failed to create order')
 
@@ -92,9 +93,11 @@ export async function processCheckout(
   await supabase.from('order_items').insert(orderItemsData)
 
   // 4. Initialize Paystack Transaction
+  const chargeAmountMinor = paymentFractionMinor ?? totalAmountMinor
+  const email = customerEmail || `order_${order.id}@ourmenu.os`
   const checkoutUrl = await initializeTransaction(
-    totalAmountMinor,
-    `order_${order.id}@ourmenu.os`, // Dummy email if none provided
+    chargeAmountMinor,
+    email,
     subaccountCode || '',
     order.id // Use order ID as reference
   )
@@ -136,4 +139,46 @@ export async function callStaffFromAi(
   waitUntil(sendWhatsAppMessage(whatsappNumber, `Table ${tableIdentifier} needs a ${requestType}!`))
 
   return { success: true }
+}
+
+export async function processExistingOrderPayment(
+  orderId: string,
+  amountMinor: number
+): Promise<{ checkoutUrl?: string; error?: string }> {
+  try {
+    const supabase = await createClient()
+
+    // Fetch the order to get org info
+    const { data: order, error: orderError } = await supabase
+      .from('orders')
+      .select('id, organization_id, total_amount_minor, customer_email')
+      .eq('id', orderId)
+      .single()
+
+    if (orderError || !order) return { error: 'Order not found' }
+
+    // Fetch payment settings for split
+    const { data: paySettings } = await supabase
+      .from('organization_payment_settings')
+      .select('provider_account_id, is_active')
+      .eq('organization_id', order.organization_id)
+      .single()
+
+    const subaccountCode = paySettings?.is_active ? paySettings.provider_account_id : null
+
+    // Initialize Paystack transaction for partial/split payment
+    const email = order.customer_email || `order_${orderId}@ourmenu.os`
+    const reference = `${orderId}_split_${crypto.randomUUID().slice(0, 8)}`
+
+    const checkoutUrl = await initializeTransaction(
+      amountMinor,
+      email,
+      subaccountCode || '',
+      reference
+    )
+
+    return { checkoutUrl }
+  } catch (err: any) {
+    return { error: err.message || 'Failed to initialize payment' }
+  }
 }

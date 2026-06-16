@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
 'use client'
 
 import Link from 'next/link'
@@ -7,7 +6,7 @@ import { ReactNode, useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import {
   LayoutDashboard, ClipboardList, BarChart3, BookOpen,
-  FileText, Settings, CreditCard, LogOut, Zap, Menu, X
+  FileText, Settings, CreditCard, LogOut, Zap, Menu, X, Users, QrCode
 } from 'lucide-react'
 import { GlobalRealtime } from './global-realtime'
 import { NotificationCenter } from './notification-center'
@@ -19,6 +18,8 @@ const navItems = [
 ]
 
 const managerItems = [
+  { href: '/dashboard/team-performance', label: 'Team Performance', icon: Users },
+  { href: '/dashboard/qr', label: 'QR Generator', icon: QrCode },
   { href: '/dashboard/menu', label: 'Catalog Manager', icon: BookOpen },
   { href: '/dashboard/pages', label: 'Custom Pages', icon: FileText },
   { href: '/dashboard/settings', label: 'Settings & Team', icon: Settings },
@@ -57,7 +58,6 @@ function NavLink({ href, label, icon: Icon, badge, exact, onClick }: {
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const [orgName, setOrgName] = useState('Pacy Grills')
   const [locationSlug, setLocationSlug] = useState('')
-  const [isExpired, setIsExpired] = useState(false)
   const [isOwnerOrManager, setIsOwnerOrManager] = useState(true)
   const [time, setTime] = useState('')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -69,13 +69,14 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       if (userData?.user) {
         const { data: member } = await supabase
           .from('organization_members')
-          .select('organizations(id, name)')
+          .select('role, organizations(id, name)')
           .eq('user_id', userData.user.id)
           .single()
         if (member && (member.organizations as any)?.name) {
           setOrgName((member.organizations as any).name)
+          setIsOwnerOrManager(['owner', 'manager'].includes(member.role))
         }
-        // Fetch location slug for Live Preview link
+        
         const orgId = (member?.organizations as any)?.id
         if (orgId) {
           const { data: loc } = await supabase
@@ -97,141 +98,114 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
   const renderNavContent = (onClose?: () => void) => (
     <>
-        {/* Logo */}
-        <div className="p-6 pb-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-900/50">
-              <Zap className="w-5 h-5 text-white" />
+        <div className="p-6 pb-2">
+          <Link href="/dashboard" className="flex items-center gap-3 group" onClick={onClose}>
+            <div className="w-10 h-10 bg-gradient-to-br from-violet-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-violet-900/20 group-hover:scale-105 transition-transform duration-300">
+              <span className="text-white font-black text-xl tracking-tighter">OM</span>
             </div>
-            <div>
-              <div className="font-bold text-white text-sm tracking-tight">OurMenu OS</div>
-              <div className="text-[10px] text-zinc-500 font-medium">{orgName}</div>
+            <div className="flex flex-col">
+              <span className="text-white font-bold tracking-tight leading-tight">{orgName}</span>
+              <span className="text-zinc-500 text-[10px] uppercase tracking-widest font-bold">OS Version 1.0</span>
             </div>
-          </div>
-          {onClose && (
-            <button onClick={onClose} className="p-2 -mr-2 text-zinc-400 hover:text-white md:hidden">
-              <X className="w-5 h-5" />
-            </button>
-          )}
-        </div>
-
-        {/* Live clock */}
-        <div className="mx-4 mb-4 px-3 py-2 rounded-xl bg-white/[0.03] border border-white/5 flex items-center justify-between">
-          <span className="text-[11px] text-zinc-500">Local Time</span>
-          <span className="text-[11px] font-mono text-zinc-300">{time}</span>
-        </div>
-
-        <div className="px-3 flex-1 flex flex-col gap-1 overflow-y-auto">
-          {/* Main Nav */}
-          <p className="px-3 pt-2 pb-1.5 text-[10px] font-semibold text-zinc-600 uppercase tracking-widest">Operations</p>
-          {navItems.map(item => <NavLink key={item.href} {...item} onClick={onClose} />)}
-
-          {/* Manager Nav */}
-          {isOwnerOrManager && (
-            <>
-              <div className="mt-8 mb-4 px-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">
-                Guest Experience
-              </div>
-              <Link 
-                href={locationSlug ? `/m/${locationSlug}` : '/dashboard/settings'} 
-                target={locationSlug ? '_blank' : undefined}
-                className="flex items-center gap-3 px-4 py-2 text-sm font-medium text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 rounded-lg transition-colors group mb-4"
-              >
-                <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                </svg>
-                Live Preview
-                <svg className="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                </svg>
-              </Link>
-
-              <div className="mb-4 px-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">
-                System
-              </div>
-              {managerItems.map(item => <NavLink key={item.href} {...item} onClick={onClose} />)}
-            </>
-          )}
-        </div>
-
-        {/* Bottom Nav */}
-        <div className="px-3 pb-4 space-y-1 border-t border-white/5 pt-4">
-          {isOwnerOrManager && (
-            <NavLink href="/dashboard/billing" label="Billing & Plans" icon={CreditCard} onClick={onClose} />
-          )}
-          <Link
-            href="/login"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-all duration-200"
-          >
-            <LogOut className="w-4 h-4" />
-            Sign Out
           </Link>
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-4 py-6 space-y-8 scrollbar-hide">
+          <div className="space-y-1">
+            <h3 className="px-3 text-xs font-bold text-zinc-500 uppercase tracking-wider mb-3">Daily Operations</h3>
+            {navItems.map((item) => (
+              <NavLink key={item.href} {...item} onClick={onClose} />
+            ))}
+          </div>
+
+          {isOwnerOrManager && (
+            <div className="space-y-1">
+              <div className="px-3 flex items-center gap-2 mb-3">
+                <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Management</h3>
+                <div className="h-px flex-1 bg-zinc-800/50"></div>
+              </div>
+              {managerItems.map((item) => (
+                <NavLink key={item.href} {...item} onClick={onClose} />
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="p-4 mt-auto">
+          {locationSlug && (
+            <a 
+              href={`/m/${locationSlug}`} 
+              target="_blank" 
+              rel="noreferrer"
+              className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 text-white text-sm font-medium rounded-xl transition-all mb-4 group"
+            >
+              Live Preview
+              <svg className="w-4 h-4 text-zinc-500 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+            </a>
+          )}
+          
+          <div className="flex items-center justify-between px-3 py-2 bg-black/40 rounded-xl border border-white/5">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+              <span className="text-xs font-medium text-zinc-400">System Active</span>
+            </div>
+            <span className="text-xs font-mono text-zinc-500">{time}</span>
+          </div>
         </div>
     </>
   )
 
   return (
-    <div className="flex min-h-screen bg-[#0a0a0f] text-zinc-100 font-sans">
-
-      {/* === DESKTOP SIDEBAR === */}
-      <aside className="w-64 shrink-0 hidden md:flex flex-col border-r border-white/5 bg-zinc-950/80 backdrop-blur-xl">
+    <div className="min-h-screen bg-black flex selection:bg-violet-500/30 print:bg-white">
+      <GlobalRealtime />
+      
+      {/* Desktop Sidebar */}
+      <aside className="hidden md:flex w-72 flex-col bg-[#0a0a0a] border-r border-white/5 relative z-20 print:hidden">
         {renderNavContent()}
       </aside>
 
-      {/* === MOBILE MENU OVERLAY === */}
+      {/* Mobile Header & Menu */}
+      <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-[#0a0a0a]/90 backdrop-blur-md border-b border-white/5 z-50 flex items-center justify-between px-4 print:hidden">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-gradient-to-br from-violet-600 to-indigo-600 rounded-lg flex items-center justify-center shadow-lg">
+            <span className="text-white font-black text-sm">OM</span>
+          </div>
+          <span className="text-white font-bold tracking-tight">{orgName}</span>
+        </div>
+        <div className="flex items-center gap-4">
+          <NotificationCenter />
+          <button onClick={() => setMobileMenuOpen(true)} className="text-zinc-400 hover:text-white">
+            <Menu className="w-6 h-6" />
+          </button>
+        </div>
+      </div>
+
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-50 flex md:hidden">
-          <div 
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity" 
-            onClick={() => setMobileMenuOpen(false)}
-          />
-          <aside className="relative w-[280px] max-w-[calc(100vw-3rem)] flex-col border-r border-white/5 bg-zinc-950/95 backdrop-blur-xl h-full flex animate-in slide-in-from-left duration-300">
-             {renderNavContent(() => setMobileMenuOpen(false))}
-          </aside>
+        <div className="md:hidden fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm print:hidden">
+          <div className="absolute right-0 top-0 bottom-0 w-80 bg-[#0a0a0a] border-l border-white/5 shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
+            <div className="flex justify-end p-4">
+              <button onClick={() => setMobileMenuOpen(false)} className="text-zinc-400 hover:text-white bg-zinc-900 p-2 rounded-full">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            {renderNavContent(() => setMobileMenuOpen(false))}
+          </div>
         </div>
       )}
 
-      {/* === MAIN AREA === */}
-      <div className="flex-1 flex flex-col min-w-0">
-
-        {/* Top Header */}
-        <header className="h-14 border-b border-white/5 flex items-center justify-between px-6 bg-zinc-950/60 backdrop-blur-xl sticky top-0 z-10">
-          <div className="flex items-center gap-3 md:hidden">
-            <button onClick={() => setMobileMenuOpen(true)} className="p-1 -ml-2 text-zinc-400 hover:text-white transition-colors">
-              <Menu className="w-5 h-5" />
-            </button>
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-900/50">
-              <Zap className="w-4 h-4 text-white" />
-            </div>
-            <span className="font-bold text-sm text-white tracking-tight">OurMenu OS</span>
-          </div>
-          
-          <div className="flex-1"></div>
-          
-          <div className="flex items-center gap-4">
+      {/* Main Content */}
+      <main className="flex-1 flex flex-col min-h-screen relative pt-16 md:pt-0 print:pt-0">
+        <div className="absolute top-0 right-0 p-6 z-10 hidden md:block print:hidden">
+          <div className="flex items-center gap-4 bg-zinc-900/50 backdrop-blur-md border border-zinc-800/50 px-4 py-2 rounded-full shadow-xl">
             <NotificationCenter />
+            <div className="w-px h-4 bg-zinc-800"></div>
+            <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest">{orgName}</span>
           </div>
-        </header>
-
-        {/* Global Realtime Provider for Chimes and Toasts */}
-        <GlobalRealtime />
-
-        {/* Expired Banner */}
-        {isExpired && (
-          <div className="bg-gradient-to-r from-red-900/80 to-orange-900/80 text-white px-6 py-3 flex items-center justify-between border-b border-red-500/20">
-            <span className="text-sm"><strong>Trial Ended:</strong> Customers can no longer place orders.</span>
-            <Link href="/dashboard/billing" className="bg-white text-red-700 font-bold px-4 py-1.5 rounded-full text-xs hover:bg-zinc-100 transition-colors">
-              Upgrade Now →
-            </Link>
-          </div>
-        )}
-
-        {/* Page Content */}
-        <main className="flex-1 overflow-y-auto p-6 md:p-8">
+        </div>
+        <div className="flex-1 p-4 md:p-10 max-w-[1600px] mx-auto w-full print:p-0">
           {children}
-        </main>
-      </div>
+        </div>
+      </main>
     </div>
   )
 }
