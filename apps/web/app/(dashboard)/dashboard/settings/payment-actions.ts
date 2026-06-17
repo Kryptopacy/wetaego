@@ -60,4 +60,63 @@ export async function savePaymentSettings(formData: FormData) {
   revalidatePath('/dashboard/settings')
 }
 
+export async function saveManualPaymentSettings(formData: FormData) {
+  const supabase = await createClient()
+
+  const { data: userData, error: authError } = await supabase.auth.getUser()
+  if (authError || !userData?.user) throw new Error('Not authenticated')
+
+  const locationId = formData.get('locationId') as string
+  if (!locationId) throw new Error('Location ID required')
+
+  const { data: loc } = await supabase
+    .from('locations')
+    .select('organization_id')
+    .eq('id', locationId)
+    .single()
+
+  if (!loc) throw new Error('Location not found')
+
+  const { data: member } = await supabase
+    .from('organization_members')
+    .select('role')
+    .eq('organization_id', loc.organization_id)
+    .eq('user_id', userData.user.id)
+    .single()
+
+  let isAuthorized = member?.role === 'owner' || member?.role === 'manager'
+  if (!member) {
+    const { data: org } = await supabase
+      .from('organizations')
+      .select('id')
+      .eq('id', loc.organization_id)
+      .eq('created_by', userData.user.id)
+      .single()
+    isAuthorized = !!org
+  }
+
+  if (!isAuthorized) throw new Error('Unauthorized')
+
+  const manualPaymentEnabled = formData.get('manualPaymentEnabled') === 'true'
+  const manualBankName = formData.get('manualBankName') as string || null
+  const manualAccountNumber = formData.get('manualAccountNumber') as string || null
+  const manualAccountName = formData.get('manualAccountName') as string || null
+  const manualInstructions = formData.get('manualInstructions') as string || null
+
+  const { error } = await supabase
+    .from('locations')
+    .update({
+      manual_payment_enabled: manualPaymentEnabled,
+      manual_payment_bank_name: manualBankName,
+      manual_payment_account_number: manualAccountNumber,
+      manual_payment_account_name: manualAccountName,
+      manual_payment_instructions: manualInstructions
+    })
+    .eq('id', locationId)
+
+  if (error) throw new Error(error.message)
+
+  revalidatePath('/dashboard/settings')
+}
+
 

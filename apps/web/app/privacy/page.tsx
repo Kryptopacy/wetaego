@@ -67,7 +67,7 @@ export default function PrivacyPage() {
               <li>Withdraw consent for data processing at any time.</li>
             </ul>
             <p className="mt-4">
-              To exercise these rights, please contact our Data Protection Officer at <a href="mailto:privacy@ourmenu.os" className="text-violet-400 hover:text-violet-300">privacy@ourmenu.os</a>. We will respond to all requests within 30 days.
+              To exercise these rights, please contact our Data Protection Officer at <a href="mailto:privacy@ourmenuos.online" className="text-violet-400 hover:text-violet-300">privacy@ourmenuos.online</a>. We will respond to all requests within 30 days.
             </p>
           </section>
         </div>

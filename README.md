@@ -1,19 +1,57 @@
 # OurMenu OS
 
-OurMenu OS is a SaaS product for hospitality businesses that need live, customer-facing menus and availability pages reachable from a custom QR code.
+OurMenu OS is a comprehensive SaaS platform designed to power the customer-facing digital presence of dynamic businesses. Originally built for hospitality, it has now expanded into a robust operating layer for retail, service professionals, boutiques, and consultants. 
 
-The wedge is simple: restaurants, lounges, cafes, bars, food trucks, and similar businesses should be able to update prices, specials, and stock status in seconds without reprinting menus or forcing customers to ask staff what is available.
+By leveraging dynamic, template-driven pages reachable via custom QR codes or direct links, businesses can bypass app downloads to offer real-time catalogs, interactive bookings, digital rate cards, and seamless checkout experiences.
 
 ## Product Thesis
 
-Do not build another QR menu generator. Build the live operating layer for what customers can see, buy, ask about, and trust right now.
+Do not build another static site generator or PDF QR menu. Build the live operating layer for what customers can see, buy, ask about, book, and trust right now.
 
-## Initial Focus
+## Expanded Scope & Business Types
 
-- Lounges and bars with changing drinks, bottle service, happy hour, and event menus.
-- Cafes, bakeries, and food trucks with frequent sell-outs.
-- Restaurants with specials, seasonal items, or price changes.
-- Hospitality venues that need branded pages without app downloads.
+OurMenu OS now supports a broad spectrum of industries beyond traditional hospitality through its flexible **Template Builders**:
+
+- **Hospitality (The Core):** Live restaurant menus, bar bottle service, cafe sell-out tracking, food trucks.
+- **Retail & Boutiques (Catalog Template):** Tech gadget shops, fashion boutiques, pharmacies, and local stores that need a quick, visual storefront with inventory and checkout.
+- **Services (Booking Template):** Salons, spas, therapists, and tutors who need to showcase services, handle appointment slots, and collect deposits.
+- **Consultants & Agencies (Rate Card Template):** Freelancers, marketing agencies, and consultants who need a polished digital rate card to share with clients for standardized pricing.
+- **Real Estate & Automotive (Listings Template):** Property rentals, car dealerships, and equipment rentals requiring image-heavy, location-based galleries.
+
+## Core Features & Elements
+
+### 1. Template Builders & Dynamic Pages
+Businesses are no longer limited to a single menu. The system supports multiple secondary pages (e.g., a restaurant can have a main menu, a catering rate card, and a VIP booking page) managed from a central dashboard.
+- **Catalog Builder:** Title, categories, rich descriptions, and prices.
+- **Booking Builder:** Service details, durations, maximum guests.
+- **Rate Card Builder:** Tiered services and fixed pricing.
+
+### 2. Omnichannel Payments & Manual Fallbacks
+A resilient checkout engine powers the entire ecosystem:
+- **Paystack Integration:** Seamlessly handles split payments, service charges, and automated reconciliation via Webhooks.
+- **Global Manual Fallback:** If API keys are pending or the payment provider experiences downtime, the system automatically degrades to a "Manual Bank Transfer" workflow. Customers see localized bank details and instructions without blocking conversions.
+- **Edge Functions:** Serverless edge functions reliably manage the payment webhook reconciliation, ensuring idempotency and instant order syncing.
+
+### 3. Progressive Web App (PWA) & Native Notifications
+OurMenu OS feels like a native app.
+- **Service Workers:** Caching assets for offline resilience and near-instant load times.
+- **Push Notifications:** Deeply integrated Web Push API ensures businesses receive instant, native push alerts (with sounds) on their devices the second a new order, booking, or quote inquiry is placed.
+
+### 4. Branch Switcher & Multi-Location Management
+Seamlessly scale operations across multiple venues from a single organization:
+- **Dynamic Branch Switcher:** A unified dashboard layout allowing owners to instantly switch active branch contexts.
+- **Scoped Data Views:** Live Operations (Orders), Menu Manager, QR Generator, and Team Performance dashboards automatically filter down to the active location securely via cookies.
+
+### 5. Post-Service Feedback & Team Performance
+Close the loop on customer satisfaction natively:
+- **Table Tent Integration:** Printable QR codes automatically include a secondary code for guests to rate their meal directly from the table.
+- **PIN-Protected Reviews:** Automated email receipts include a 4-digit PIN ensuring only verified customers can rate staff and business performance.
+- **Team Performance Dashboard:** Gamified staff leaderboard tracking average service ratings, recent feedback, and total tips collected.
+
+### 6. AI-Powered Operations
+- **AI Waiter/Assistant:** A customizable, conversational agent that guides customers through the catalog or menu.
+- **AI Generation:** Assisting businesses in writing high-converting item descriptions and generating professional cover images.
+- **Edge Translator:** Real-time localization for international customers.
 
 ## Pricing & Feature Tiers
 
@@ -35,62 +73,46 @@ OurMenu OS offers three tiered subscription plans, driven by a unified credit sy
 - **Features included from Starter:** AI Waiter, Edge Translator
 - **Premium AI Tools:** AI Copywriter (Menu Descriptions) & AI Image Studio (Venue Covers)
 - **KDS & Operations:** Smart Request Triaging (Instant urgency classification)
-- **Analytics:** Demand Forecasting Engine (Predicting stock & sales)
 - **Custom Pages:** 1 Page included (Additional pages cost 10 Credits each)
 - **Team:** Role-based team management (Owners, Managers, Viewers)
-- **Support:** Priority WhatsApp support
 
 ### 🟣 Enterprise Plan (Custom Pricing)
-*For hotel chains and multi-location brands.*
+*For massive chains and multi-location brands.*
 - **Credits:** 200 Monthly Credits
 - **Locations:** Multi-location dashboard (Manage multiple venues under one org)
-- **Features included from Pro:** All premium AI tools, unlimited QR codes, KDS, forecasting, custom pages, team management
-- **AI Customization:** Dedicated AI model fine-tuning (Tailored specifically to the brand's exact tone)
+- **Features included from Pro:** All premium AI tools, unlimited QR codes, custom pages
 - **Integrations:** Direct API access for PMS (Property Management System) integration
-- **Support:** Dedicated account manager & custom onboarding SLA
 
 ## Repo Layout
 
 - `docs/PRODUCT_PLAN.md`: working product plan, viability audit, roadmap, and assumptions.
-- `docs/PRODUCTION_READINESS.md`: production architecture, env contract, and launch checklist.
-- `docs/DECISIONS.md`: decision log for product and technical calls.
-- `apps/web/`: future customer-facing SaaS dashboard and public menu app.
+- `apps/web/`: customer-facing SaaS dashboard and public progressive web app (PWA).
 - `packages/core/`: shared domain models and business logic.
 - `supabase/migrations/`: production database schema migrations.
+- `supabase/functions/`: edge functions (webhooks, push notifications, reconciliations).
 
-## Current Status
+## Running the Application
 
-We have completed **Phase 5: Operations & Scaling** and just concluded a massive **Phase 5.5 Security & Architecture Audit**. OurMenu OS is now a highly secure, production-ready, multi-tenant SaaS application.
+### 1. Web Application (Next.js)
 
-### 🌟 Recently Completed Upgrades (Phase 6 & Security Audit)
-- **Staff Operations & Order Claiming:** Atomic RPC-backed order claiming to prevent kitchen race conditions, live Dynamic Island-style progress tracking for customers, and real-time active order synchronization via Supabase subscriptions.
-- **Performance Tracking & Tipping:** Post-service customer feedback loop with 1-5 star ratings for individual staff and integrated secondary Paystack tipping flows, ensuring "flawless service is earned, not expected."
-- **Comprehensive Security Remediation:** Eliminated all Supabase Advisor warnings. Upgraded database architecture with `SECURITY DEFINER` RPC functions for atomic operations (like token-based invite acceptance), closed unauthenticated data leaks, and added strict referential integrity checks via RLS.
-- **Unified Credit System:** Consolidated feature pricing under a single, robust credits architecture for AI tools, translation, and custom pages.
-- **Dynamic QR Provisioning:** Multi-table scan-to-assign workflows, QR code color themes, table locking, and live reassignments.
-- **SaaS Subscription Billing:** Monthly Paystack Pro subscriptions with live USD/NGN exchange rate updates, webhook lifecycle sync, and subscription layout enforcers.
-- **Team Management:** Invite links (`/invite?token=xyz`), role validation (Owner, Manager, Editor, Viewer), and secure database views for roster emails.
-
-### 🚀 Upcoming: Phase 7 (Analytics & Growth)
-We are beginning to scope out the next major iteration of OurMenu OS:
-- **Deep Analytics Dashboard:** Visualizing staff performance, popular items, peak ordering times, and tip distribution logic.
-- **AI-Powered Upselling:** Integrating Gemini intelligence directly into the cart flow to recommend complementary items before checkout.
-
-### 🚀 Running the Application
-
-To run the Next.js web application locally in development mode:
+To run the web app locally in development mode:
 
 ```bash
 cd apps/web
-npm run dev
+pnpm install
+pnpm dev
 ```
+Open [http://localhost:3000](http://localhost:3000) (or https://ourmenuos.online in production) to access the dashboard.
 
-Open [http://localhost:3000](http://localhost:3000) to access the dashboard.
-To run the static production preview server:
+### 2. Supabase Edge Functions
 
-```powershell
-node scripts/serve.mjs
+To test Webhooks or Push Notifications locally, you need the Supabase CLI installed.
+
+```bash
+# Start the local supabase instance (if not already running)
+supabase start
+
+# Serve the edge functions locally
+supabase functions serve
 ```
-
-Then open [http://localhost:4173](http://localhost:4173).
-
+Make sure you have your `.env.local` populated with the appropriate Supabase anon keys, service roles, and VAPID keys for the web push system.

@@ -1,4 +1,4 @@
-﻿/* eslint-disable */
+/* eslint-disable */
 'use client'
 
 import { useCartStore } from '@/lib/store/cart'
@@ -20,13 +20,19 @@ export function ItemCard({ item }: ItemCardProps) {
     <div className={`group flex gap-4 py-4 border-b border-zinc-200 dark:border-zinc-800 transition-colors ${!isAvailable ? 'opacity-60' : ''}`}>
       {/* Product Image on the Left */}
       {item.image_url ? (
-        <div className="w-[72px] h-[72px] shrink-0 relative rounded-xl overflow-hidden bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+        <div className="w-[72px] h-[72px] shrink-0 relative rounded-xl overflow-hidden bg-zinc-200 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 animate-pulse">
           <Image 
             src={item.image_url} 
             alt={item.name}
             fill
-            className="object-cover"
+            className="object-cover transition-opacity duration-500"
             sizes="72px"
+            placeholder="blur"
+            blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mN88B8AAsUB4ZtvxwAAAABJRU5ErkJggg=="
+            onLoad={(e) => {
+              const target = e.target as HTMLElement;
+              target.parentElement?.classList.remove('animate-pulse');
+            }}
           />
         </div>
       ) : (

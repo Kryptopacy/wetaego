@@ -1,4 +1,4 @@
-﻿/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createClient } from '@/lib/supabase/server'
 import { QrClient } from './qr-client'
 import { redirect } from 'next/navigation'
@@ -65,16 +65,28 @@ export default async function QRCodeBatchPage() {
     
     locations = locs || []
 
-    const { data: qrs } = await supabase
+    const savedLocId = cookieStore.get('ourmenu_active_location_id')?.value
+    let locationId = savedLocId
+    if (!locationId && locations.length > 0) {
+      locationId = locations[0].id
+    }
+    const activeLocationId = locationId || ''
+
+    let query = supabase
       .from('qr_codes')
       .select('*')
       .eq('organization_id', org.id)
-      .order('created_at', { ascending: false })
+      
+    if (activeLocationId) {
+      query = query.eq('location_id', activeLocationId)
+    }
+
+    const { data: qrs } = await query.order('created_at', { ascending: false })
     
     qrCodes = qrs || []
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://ourmenuos.online'
 
   return (
     <div className="max-w-6xl mx-auto">

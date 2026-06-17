@@ -46,7 +46,7 @@ Instead of printing hardcoded table numbers, venues print batches of **Generic Q
 
 OurMenu OS supports full multi-tenancy:
 - **Organizations:** The top-level billing/business entity (e.g., "The Hospitality Group").
-- **Locations:** Distinct physical venues (e.g., "Downtown Lounge"). Each gets a unique slug (`ourmenu.os/m/downtown`) and its own currency/theme.
+- **Locations:** Distinct physical venues (e.g., "Downtown Lounge"). Each gets a unique slug (`ourmenuos.online/m/downtown`) and its own currency/theme.
 - **Roles & Permissions:** Strict Row Level Security (RLS) combined with layout-level checks protects business data:
   - **Owner**: Full control. Can manage business settings, bank/payout configurations, subscriptions, and team invites/members.
   - **Manager**: Full administrative control over menus, catalog, orders, and QR generation. Can view the team roster but cannot invite or remove members.
@@ -55,7 +55,7 @@ OurMenu OS supports full multi-tenancy:
 
 ### ✉️ Team Invite & Verification System
 To add members, the Owner generates a single-use secure invite link from the **Team Management** dashboard:
-1. An invite is generated with a secure token: `ourmenu.os/invite?token=xyz`.
+1. An invite is generated with a secure token: `ourmenuos.online/invite?token=xyz`.
 2. When the invitee visits the page, they are prompted to sign in or register under the invited email address.
 3. Once authenticated, the system matches the emails and allows them to accept, automatically adding them to `organization_members` with their assigned role and deleting the token.
 4. Emails are fetched securely via the `organization_member_details` security-definer PostgreSQL view, allowing owners to view rosters without breaking standard Supabase schema boundaries.
@@ -82,7 +82,7 @@ cp .env.example .env.local
 npm run dev
 ```
 
-Visit `http://localhost:3000` to access the application.
+Visit `http://localhost:3000` (or `https://ourmenuos.online` in production) to access the application.
 
 ## 🔒 Security Highlights
 - **Underpayment Fraud Prevention:** Webhooks strictly compare the amount paid against the database `total_amount_minor` before marking an order as paid.

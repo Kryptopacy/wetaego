@@ -12,10 +12,36 @@ interface CartFABProps {
   organizationId: string
   locationId: string
   tableIdentifier?: string
+  paymentIsLive?: boolean
+  manualPaymentEnabled?: boolean
+  manualPaymentBankName?: string
+  manualPaymentAccountName?: string
+  manualPaymentAccountNumber?: string
+  manualPaymentInstructions?: string
+  globalDiscountEnabled?: boolean | null
+  globalDiscountPercentage?: number | null
+  menuItems?: any[]
+  templateType?: string
 }
 
-export function CartFAB({ organizationId, locationId, tableIdentifier }: CartFABProps) {
-  const { items, totalAmountMinor, clearCart } = useCartStore()
+export function CartFAB({ 
+  organizationId, 
+  locationId, 
+  tableIdentifier,
+  paymentIsLive,
+  manualPaymentEnabled,
+  manualPaymentBankName,
+  manualPaymentAccountName,
+  manualPaymentAccountNumber,
+  manualPaymentInstructions,
+  globalDiscountEnabled,
+  globalDiscountPercentage,
+  menuItems = [],
+  templateType = 'catalog'
+}: CartFABProps) {
+  const { items, totalAmountMinor } = useCartStore()
+  const clearCart = useCartStore((state) => state.clearCart)
+  const spinnerDiscount = useCartStore((state: any) => state.spinnerDiscount)
   const [isCheckingOut, setIsCheckingOut] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
   
@@ -25,6 +51,7 @@ export function CartFAB({ organizationId, locationId, tableIdentifier }: CartFAB
   const [customerEmail, setCustomerEmail] = useState('')
   const [customerNote, setCustomerNote] = useState('')
   const [splitCount, setSplitCount] = useState(1)
+  const [paymentMethod, setPaymentMethod] = useState<'card' | 'transfer'>(paymentIsLive ? 'card' : 'transfer')
 
   // Ensure zustand persist hydrate matches server render
   useEffect(() => {
@@ -34,13 +61,70 @@ export function CartFAB({ organizationId, locationId, tableIdentifier }: CartFAB
     return () => window.removeEventListener('open-checkout-modal', handleOpenModal)
   }, [])
 
+  // AI Upselling State
+  const [upsellData, setUpsellData] = useState<{ suggestedItemId: string, pitch: string } | null>(null)
+  const [isFetchingUpsell, setIsFetchingUpsell] = useState(false)
+
+  useEffect(() => {
+    if (showCheckoutModal && items.length > 0 && menuItems.length > 0 && !upsellData && !isFetchingUpsell) {
+      setIsFetchingUpsell(true)
+      const fetchUpsell = async () => {
+        try {
+          const res = await fetch('/api/upsell', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              cartItems: items,
+              availableItems: menuItems,
+              templateType
+            })
+          })
+          if (res.ok) {
+            const data = await res.json()
+            setUpsellData(data)
+          }
+        } catch (e) {
+          console.error('Upsell fetch failed', e)
+        } finally {
+          setIsFetchingUpsell(false)
+        }
+      }
+      fetchUpsell()
+    }
+  }, [showCheckoutModal, items, menuItems, templateType, upsellData, isFetchingUpsell])
+
+  const upsellItemDetails = upsellData ? menuItems.find(i => i.id === upsellData.suggestedItemId) : null
+  const { addItem } = useCartStore()
+
+  const handleAddUpsell = () => {
+    if (upsellItemDetails) {
+      addItem({
+        id: upsellItemDetails.id,
+        name: upsellItemDetails.name,
+        priceMinor: upsellItemDetails.price_minor,
+        quantity: 1
+      })
+      toast.success(`Added ${upsellItemDetails.name}`)
+      setUpsellData(null) // Remove upsell after adding
+    }
+  }
+
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)
   const subtotalMinor = totalAmountMinor()
   
-  const finalTotalMinor = subtotalMinor
+  // Calculate discount (Highest of Global vs Spinner wins)
+  const effectiveGlobalPercent = (globalDiscountEnabled && globalDiscountPercentage) ? globalDiscountPercentage : 0
+  const effectivePercent = Math.max(effectiveGlobalPercent, spinnerDiscount || 0)
+  
+  const discountMultiplier = effectivePercent / 100
+  const discountAmountMinor = Math.floor(subtotalMinor * discountMultiplier)
+  const discountedSubtotalMinor = subtotalMinor - discountAmountMinor
+  
+  // Final total
+  const finalTotalMinor = discountedSubtotalMinor + (tipAmount || 0)
 
   const handleCheckout = async () => {
-    if (!tableNumber) {
+    if (isCheckingOut || !tableNumber) {
       toast.error('Please enter your table number')
       return
     }
@@ -63,7 +147,9 @@ export function CartFAB({ organizationId, locationId, tableIdentifier }: CartFAB
         tableNumber,
         customerNote,
         customerEmail,
-        paymentFractionMinor
+        paymentFractionMinor,
+        paymentMethod,
+        discountAmountMinor
       )) as any
 
       if (error) {
@@ -74,17 +160,32 @@ export function CartFAB({ organizationId, locationId, tableIdentifier }: CartFAB
       clearCart()
       localStorage.setItem('activeOrderId', orderId)
       
-      if (splitCount > 1) {
+      if (paymentMethod === 'transfer' && manualPaymentEnabled) {
+        const currentSlug = window.location.pathname.split('/')[2]
+        window.location.href = `/m/${currentSlug}/order/${orderId}`
+      } else if (splitCount > 1) {
         window.location.href = `/pay/${orderId}/share?split=${splitCount}`
       } else if (checkoutUrl) {
         window.location.href = checkoutUrl
       } else {
-        toast.success('Order placed successfully!')
+        toast.success(
+          <div className="flex flex-col gap-1">
+            <span className="font-bold">Order Sent to Kitchen!</span>
+            {paymentMethod === 'transfer' && manualPaymentEnabled ? (
+              <span className="text-sm opacity-90">Please transfer to {manualPaymentBankName}: {manualPaymentAccountNumber}</span>
+            ) : null}
+          </div>,
+          { duration: 10000 }
+        )
         setShowCheckoutModal(false)
       }
     } catch (e: any) {
-      toast.error('Could not initialize checkout. Please try again.')
       setIsCheckingOut(false)
+      if (typeof window !== 'undefined' && (!window.navigator.onLine || e.message?.includes('fetch') || e.message?.includes('Network'))) {
+        toast.error("You're offline. Your cart is saved! Please connect to a stronger network to send your order to the kitchen.", { duration: 6000 })
+      } else {
+        toast.error(e.message || 'Could not initialize checkout. Please try again.')
+      }
     }
   }
 
@@ -112,7 +213,12 @@ export function CartFAB({ organizationId, locationId, tableIdentifier }: CartFAB
               </svg>
               <span>View Order</span>
             </div>
-            <span className="text-base">₦{(subtotalMinor / 100).toLocaleString()}</span>
+            <span className="text-base flex items-center gap-2">
+              {discountAmountMinor > 0 && (
+                <span className="line-through text-white/50 text-xs">₦{(subtotalMinor / 100).toLocaleString()}</span>
+              )}
+              ₦{(discountedSubtotalMinor / 100).toLocaleString()}
+            </span>
           </motion.button>
         )}
       </AnimatePresence>
@@ -177,7 +283,48 @@ export function CartFAB({ organizationId, locationId, tableIdentifier }: CartFAB
                   />
                 </div>
 
+                <AnimatePresence>
+                  {upsellItemDetails && upsellData && (
+                    <motion.div 
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="bg-gradient-to-r from-violet-500/10 to-blue-500/10 border border-violet-500/20 rounded-xl p-4 flex items-center justify-between gap-4">
+                        <div>
+                          <div className="flex items-center gap-1.5 mb-1">
+                            <span className="text-xs font-bold text-violet-400 uppercase tracking-wider">✨ Suggested</span>
+                          </div>
+                          <p className="text-sm text-white font-medium">{upsellData.pitch}</p>
+                          <p className="text-xs text-zinc-400 mt-0.5">{upsellItemDetails.name} • ₦{(upsellItemDetails.price_minor / 100).toLocaleString()}</p>
+                        </div>
+                        <button 
+                          onClick={handleAddUpsell}
+                          className="shrink-0 w-10 h-10 rounded-full bg-violet-500 hover:bg-violet-600 text-white flex items-center justify-center transition-colors shadow-lg shadow-violet-500/20"
+                        >
+                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
+                          </svg>
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
                 <div className="bg-zinc-800/50 rounded-xl p-4 space-y-4">
+                  {discountAmountMinor > 0 && (
+                    <div className="flex justify-between items-center text-zinc-400 text-sm mt-2">
+                      <span>Subtotal</span>
+                      <span className="line-through">₦{(subtotalMinor / 100).toLocaleString()}</span>
+                    </div>
+                  )}
+                  {discountAmountMinor > 0 && (
+                    <div className="flex justify-between items-center text-green-400 font-bold text-sm">
+                      <span>Discount ({effectivePercent}%) {spinnerDiscount && spinnerDiscount === effectivePercent ? '🎉 Spinner Win!' : ''}</span>
+                      <span>-₦{(discountAmountMinor / 100).toLocaleString()}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between items-center text-white font-bold text-lg pt-2 border-t border-zinc-700/50 mt-2">
                     <span>Total</span>
                     <span>₦{(finalTotalMinor / 100).toLocaleString()}</span>
@@ -190,13 +337,13 @@ export function CartFAB({ organizationId, locationId, tableIdentifier }: CartFAB
                         <button 
                           onClick={() => setSplitCount(Math.max(1, splitCount - 1))}
                           className="w-8 h-8 flex items-center justify-center bg-zinc-800 rounded-md text-white hover:bg-zinc-700 disabled:opacity-50"
-                          disabled={splitCount <= 1}
+                          disabled={splitCount <= 1 || paymentMethod === 'transfer'}
                         >-</button>
                         <span className="text-white font-bold w-4 text-center">{splitCount}</span>
                         <button 
                           onClick={() => setSplitCount(Math.min(10, splitCount + 1))}
                           className="w-8 h-8 flex items-center justify-center bg-zinc-800 rounded-md text-white hover:bg-zinc-700 disabled:opacity-50"
-                          disabled={splitCount >= 10}
+                          disabled={splitCount >= 10 || paymentMethod === 'transfer'}
                         >+</button>
                       </div>
                     </div>
@@ -207,14 +354,44 @@ export function CartFAB({ organizationId, locationId, tableIdentifier }: CartFAB
                       </div>
                     )}
                   </div>
+                  {paymentIsLive && manualPaymentEnabled && (
+                    <div className="border-t border-zinc-700/50 pt-4 flex flex-col gap-2">
+                      <span className="text-sm font-medium text-zinc-400">Payment Method</span>
+                      <div className="flex gap-2">
+                        <button 
+                          onClick={() => { setPaymentMethod('card') }}
+                          className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all border ${paymentMethod === 'card' ? 'bg-[#0f7b55] text-white border-[#0f7b55]' : 'bg-zinc-800 text-zinc-400 border-zinc-700 hover:border-zinc-500'}`}
+                        >
+                          Pay Online
+                        </button>
+                        <button 
+                          onClick={() => { setPaymentMethod('transfer'); setSplitCount(1); }}
+                          className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all border ${paymentMethod === 'transfer' ? 'bg-[#0f7b55] text-white border-[#0f7b55]' : 'bg-zinc-800 text-zinc-400 border-zinc-700 hover:border-zinc-500'}`}
+                        >
+                          Manual Transfer
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  {manualPaymentEnabled && paymentMethod === 'transfer' && (
+                    <div className="rounded-xl border p-4 text-xs space-y-1 mt-4 border-amber-500/30 bg-amber-500/10 text-amber-100/70">
+                      <p className="font-bold text-sm mb-2 text-amber-400">
+                        💳 Manual Bank Transfer Required
+                      </p>
+                      {manualPaymentBankName && <p>Bank: <span className="text-white">{manualPaymentBankName}</span></p>}
+                      {manualPaymentAccountName && <p>Account Name: <span className="text-white">{manualPaymentAccountName}</span></p>}
+                      {manualPaymentAccountNumber && <p>Account Number: <span className="text-white font-mono">{manualPaymentAccountNumber}</span></p>}
+                      {manualPaymentInstructions && <p className="mt-2 text-zinc-500 opacity-80">{manualPaymentInstructions}</p>}
+                    </div>
+                  )}
                 </div>
 
                 <button 
                   onClick={handleCheckout}
                   disabled={isCheckingOut || !tableNumber}
-                  className="w-full bg-white text-black font-bold py-4 rounded-xl shadow-lg flex items-center justify-center disabled:opacity-50 hover:bg-zinc-200 transition-colors"
+                  className="w-full bg-white text-black font-bold py-4 rounded-xl shadow-lg flex items-center justify-center disabled:opacity-50 hover:bg-zinc-200 transition-colors mt-4"
                 >
-                  {isCheckingOut ? 'Processing...' : (splitCount > 1 ? `Pay My Share (₦${(Math.ceil(finalTotalMinor / splitCount) / 100).toLocaleString()})` : `Pay ₦${(finalTotalMinor / 100).toLocaleString()}`)}
+                  {isCheckingOut ? 'Processing...' : paymentMethod === 'transfer' ? 'Place Order & Get Receipt' : (splitCount > 1 ? `Pay My Share (₦${(Math.ceil(finalTotalMinor / splitCount) / 100).toLocaleString()})` : `Pay ₦${(finalTotalMinor / 100).toLocaleString()}`)}
                 </button>
               </div>
             </motion.div>

@@ -4,24 +4,32 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { ReactNode, useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { setActiveLocationCookie } from './layout-actions'
 import {
   LayoutDashboard, ClipboardList, BarChart3, BookOpen,
   FileText, Settings, CreditCard, LogOut, Zap, Menu, X, Users, QrCode
 } from 'lucide-react'
 import { GlobalRealtime } from './global-realtime'
 import { NotificationCenter } from './notification-center'
+import { ServiceWorkerRegistration } from '@/app/components/service-worker-registration'
 
-const navItems = [
+interface NavItem {
+  href: string
+  label: string
+  icon: any
+  badge?: string
+  exact?: boolean
+}
+
+const baseNavItems: NavItem[] = [
   { href: '/dashboard', label: 'Overview', icon: LayoutDashboard, exact: true },
-  { href: '/dashboard/orders', label: 'Live Fulfillment', icon: ClipboardList, badge: 'LIVE' },
-  { href: '/dashboard/forecast', label: 'Demand Forecast', icon: BarChart3 },
 ]
 
-const managerItems = [
+const managerItems: NavItem[] = [
   { href: '/dashboard/team-performance', label: 'Team Performance', icon: Users },
   { href: '/dashboard/qr', label: 'QR Generator', icon: QrCode },
   { href: '/dashboard/menu', label: 'Catalog Manager', icon: BookOpen },
-  { href: '/dashboard/pages', label: 'Custom Pages', icon: FileText },
+  { href: '/dashboard/pages', label: 'Your Pages', icon: FileText },
   { href: '/dashboard/settings', label: 'Settings & Team', icon: Settings },
 ]
 
@@ -57,10 +65,13 @@ function NavLink({ href, label, icon: Icon, badge, exact, onClick }: {
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const [orgName, setOrgName] = useState('Pacy Grills')
+  const [locations, setLocations] = useState<any[]>([])
+  const [activeLocationId, setActiveLocationId] = useState('')
   const [locationSlug, setLocationSlug] = useState('')
   const [isOwnerOrManager, setIsOwnerOrManager] = useState(true)
   const [time, setTime] = useState('')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [dynamicNavItems, setDynamicNavItems] = useState<NavItem[]>(baseNavItems)
 
   useEffect(() => {
     const fetchOrg = async () => {
@@ -79,12 +90,57 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         
         const orgId = (member?.organizations as any)?.id
         if (orgId) {
-          const { data: loc } = await supabase
+          const { data: locs } = await supabase
             .from('locations')
-            .select('slug')
+            .select('*')
             .eq('organization_id', orgId)
-            .single()
-          if (loc?.slug) setLocationSlug(loc.slug)
+
+          if (locs && locs.length > 0) {
+            setLocations(locs)
+            
+            // Extract cookie safely on client side
+            const match = document.cookie.match(new RegExp('(^| )ourmenu_active_location_id=([^;]+)'))
+            const savedId = match ? match[2] : null
+            const activeLoc = locs.find((l: any) => l.id === savedId) || locs[0]
+            
+            setActiveLocationId(activeLoc.id)
+            setLocationSlug(activeLoc.slug)
+
+            // If cookie wasn't set or was invalid, set it now
+            if (activeLoc.id !== savedId) {
+              await setActiveLocationCookie(activeLoc.id)
+            }
+
+            // Fetch active templates to build dynamic nav
+            const { data: pages } = await supabase
+              .from('location_pages')
+              .select('template_type')
+              .eq('location_id', activeLoc.id)
+              .eq('is_published', true)
+          
+          let templates = new Set<string>()
+          if (pages) {
+            pages.forEach(p => templates.add(p.template_type))
+          }
+
+          const newNav = [...baseNavItems]
+          
+          if (templates.has('catalog')) {
+            newNav.push({ href: '/dashboard/orders', label: 'Order Inbox', icon: ClipboardList, badge: 'LIVE' })
+          }
+          if (templates.has('booking')) {
+            newNav.push({ href: '/dashboard/bookings', label: 'Bookings (BMS)', icon: BookOpen })
+          }
+          if (templates.has('listing')) {
+            newNav.push({ href: '/dashboard/properties', label: 'Properties (PMS)', icon: FileText })
+          }
+          if (templates.has('rate_card') || templates.has('info') || templates.has('custom')) {
+            newNav.push({ href: '/dashboard/quotes', label: 'Quotes & Inquiries', icon: FileText })
+          }
+          
+          newNav.push({ href: '/dashboard/analytics', label: 'Deep Analytics', icon: TrendingUp })
+          newNav.push({ href: '/dashboard/forecast', label: 'Demand Forecast', icon: BarChart3 })
+          setDynamicNavItems(newNav)
         }
       }
     }
@@ -99,7 +155,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const renderNavContent = (onClose?: () => void) => (
     <>
         <div className="p-6 pb-2">
-          <Link href="/dashboard" className="flex items-center gap-3 group" onClick={onClose}>
+          <Link href="/dashboard" className="flex items-center gap-3 group mb-4" onClick={onClose}>
             <div className="w-10 h-10 bg-gradient-to-br from-violet-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-violet-900/20 group-hover:scale-105 transition-transform duration-300">
               <span className="text-white font-black text-xl tracking-tighter">OM</span>
             </div>
@@ -108,12 +164,33 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
               <span className="text-zinc-500 text-[10px] uppercase tracking-widest font-bold">OS Version 1.0</span>
             </div>
           </Link>
+          {locations.length > 0 && (
+            <div className="relative">
+              <select
+                className="w-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-sm rounded-lg px-3 py-2 appearance-none focus:outline-none focus:border-violet-500 transition-colors"
+                value={activeLocationId}
+                onChange={async (e) => {
+                  const newId = e.target.value
+                  setActiveLocationId(newId)
+                  await setActiveLocationCookie(newId)
+                  window.location.reload()
+                }}
+              >
+                {locations.map((loc) => (
+                  <option key={loc.id} value={loc.id}>{loc.name}</option>
+                ))}
+              </select>
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-500">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="flex-1 overflow-y-auto px-4 py-6 space-y-8 scrollbar-hide">
           <div className="space-y-1">
             <h3 className="px-3 text-xs font-bold text-zinc-500 uppercase tracking-wider mb-3">Daily Operations</h3>
-            {navItems.map((item) => (
+            {dynamicNavItems.map((item) => (
               <NavLink key={item.href} {...item} onClick={onClose} />
             ))}
           </div>
@@ -158,6 +235,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-black flex selection:bg-violet-500/30 print:bg-white">
       <GlobalRealtime />
+      <ServiceWorkerRegistration />
       
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex w-72 flex-col bg-[#0a0a0a] border-r border-white/5 relative z-20 print:hidden">

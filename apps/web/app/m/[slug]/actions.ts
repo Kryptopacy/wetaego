@@ -4,7 +4,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
-import { initializeTransaction } from '@/lib/payments/paystack'
+import { paymentProvider } from '@/lib/payments/paystack'
 import { sendWhatsAppMessage } from '@/lib/notifications/termii'
 import { waitUntil } from '@vercel/functions'
 
@@ -51,7 +51,9 @@ export async function processCheckout(
   tableIdentifier: string,
   customerNote?: string,
   customerEmail?: string,
-  paymentFractionMinor?: number
+  paymentFractionMinor?: number,
+  paymentMethod?: 'card' | 'transfer',
+  discountAmountMinor?: number
 ) {
   const supabase = await createClient()
 
@@ -75,6 +77,7 @@ export async function processCheckout(
       status: 'pending',
       total_amount_minor: totalAmountMinor,
       tip_amount_minor: tipAmountMinor || 0,
+      discount_amount_minor: discountAmountMinor || 0,
       customer_note: customerNote || null,
       customer_email: customerEmail || null,
     } as any).select('id').single()
@@ -92,17 +95,28 @@ export async function processCheckout(
 
   await supabase.from('order_items').insert(orderItemsData)
 
-  // 4. Initialize Paystack Transaction
-  const chargeAmountMinor = paymentFractionMinor ?? totalAmountMinor
-  const email = customerEmail || `order_${order.id}@ourmenu.os`
-  const checkoutUrl = await initializeTransaction(
-    chargeAmountMinor,
-    email,
-    subaccountCode || '',
-    order.id // Use order ID as reference
-  )
+  // 4. Initialize Paystack Transaction if Active and method is card
+  const isPaystackLive = paySettings?.is_active && paySettings?.provider_account_id
+  
+  if (isPaystackLive && paymentMethod !== 'transfer') {
+    const chargeAmountMinor = paymentFractionMinor ?? totalAmountMinor
+    const email = customerEmail || `order_${order.id}@ourmenuos.online`
+    const { authorizationUrl: checkoutUrl } = await paymentProvider.initiatePayment({
+      amountMinor: chargeAmountMinor,
+      customerEmail: email,
+      reference: order.id,
+      currency: 'NGN',
+      callbackUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/api/bookings/callback`,
+    })
 
-  return { checkoutUrl, orderId: order.id }
+    return { checkoutUrl, orderId: order.id }
+  }
+
+  // Fallback to manual payment: trigger push notification immediately
+  const { sendPushToOrg, newOrderNotification } = await import('@/lib/notifications/push')
+  waitUntil(sendPushToOrg(orgId, newOrderNotification(tableIdentifier || 'Takeaway', totalAmountMinor)))
+
+  return { orderId: order.id }
 }
 
 export async function callStaffFromAi(
@@ -167,15 +181,16 @@ export async function processExistingOrderPayment(
     const subaccountCode = paySettings?.is_active ? paySettings.provider_account_id : null
 
     // Initialize Paystack transaction for partial/split payment
-    const email = order.customer_email || `order_${orderId}@ourmenu.os`
+    const email = order.customer_email || `order_${orderId}@ourmenuos.online`
     const reference = `${orderId}_split_${crypto.randomUUID().slice(0, 8)}`
 
-    const checkoutUrl = await initializeTransaction(
-      amountMinor,
-      email,
-      subaccountCode || '',
-      reference
-    )
+    const { authorizationUrl: checkoutUrl } = await paymentProvider.initiatePayment({
+      amountMinor: amountMinor,
+      customerEmail: email,
+      reference: reference,
+      currency: 'NGN',
+      callbackUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/api/bookings/callback`
+    })
 
     return { checkoutUrl }
   } catch (err: any) {

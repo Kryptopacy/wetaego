@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { cookies } from 'next/headers'
 
 export default async function TeamPerformancePage() {
   const supabase = await createClient()
@@ -17,6 +18,25 @@ export default async function TeamPerformancePage() {
   const orgId = (member?.organizations as any)?.id
   if (!orgId) redirect('/dashboard')
 
+  // Get active location
+  const cookieStore = await cookies()
+  const savedLocId = cookieStore.get('ourmenu_active_location_id')?.value
+
+  let locationId = savedLocId
+  if (!locationId) {
+    const { data: loc } = await supabase.from('locations').select('id').eq('organization_id', orgId).limit(1).single()
+    locationId = loc?.id
+  }
+  const activeLocationId = locationId || ''
+
+  if (!activeLocationId) {
+    return (
+      <div className="max-w-6xl mx-auto space-y-8">
+        <p className="text-zinc-500">Please create a location first.</p>
+      </div>
+    )
+  }
+
   // 1. Fetch staff members
   const { data: staffMembers } = await supabase
     .from('organization_members')
@@ -28,6 +48,7 @@ export default async function TeamPerformancePage() {
     .from('order_reviews')
     .select('*')
     .eq('organization_id', orgId)
+    .eq('location_id', activeLocationId)
     .order('created_at', { ascending: false })
   const reviews: any[] = reviewsRaw || []
 
@@ -36,6 +57,7 @@ export default async function TeamPerformancePage() {
     .from('orders')
     .select('id, assigned_staff_id, tip_amount_minor, created_at')
     .eq('organization_id', orgId)
+    .eq('location_id', activeLocationId)
     .gt('tip_amount_minor', 0)
   const ordersWithTips: any[] = ordersWithTipsRaw || []
 

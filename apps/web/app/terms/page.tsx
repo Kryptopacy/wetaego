@@ -55,7 +55,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-2xl font-bold text-white mb-4">5. Contact Information</h2>
             <p>
-              For questions regarding these Terms of Service, please contact us at <a href="mailto:legal@ourmenu.os" className="text-violet-400 hover:text-violet-300">legal@ourmenu.os</a>.
+              For questions regarding these Terms of Service, please contact us at <a href="mailto:legal@ourmenuos.online" className="text-violet-400 hover:text-violet-300">legal@ourmenuos.online</a>.
             </p>
           </section>
         </div>

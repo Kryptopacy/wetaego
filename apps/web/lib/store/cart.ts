@@ -12,8 +12,9 @@ interface CartState {
   items: CartItem[]
   addItem: (item: Omit<CartItem, 'quantity'>) => void
   removeItem: (id: string) => void
-  clearCart: () => void
   totalAmountMinor: () => number
+  spinnerDiscount: number | null
+  setSpinnerDiscount: (discount: number | null) => void
 }
 
 export const useCartStore = create<CartState>()(
@@ -34,11 +35,13 @@ export const useCartStore = create<CartState>()(
       removeItem: (id) => set((state) => ({
         items: state.items.filter(i => i.id !== id)
       })),
-      clearCart: () => set({ items: [] }),
+      clearCart: () => set({ items: [], spinnerDiscount: null }),
       totalAmountMinor: () => {
         const { items } = get()
         return items.reduce((total, item) => total + (item.price_minor * item.quantity), 0)
-      }
+      },
+      spinnerDiscount: null,
+      setSpinnerDiscount: (discount) => set({ spinnerDiscount: discount })
     }),
     {
       name: 'ourmenu-cart-storage', // name of the item in the storage (must be unique)

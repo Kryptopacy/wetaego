@@ -9,7 +9,7 @@ import {
 import { AICoverStudio } from './ai-cover-studio'
 import { PlanType } from '@/lib/payments/credits'
 import { getPlanLimits } from '@/lib/utils/settings'
-import { savePaymentSettings } from './payment-actions'
+import { savePaymentSettings, saveManualPaymentSettings } from './payment-actions'
 import { cookies } from 'next/headers'
 
 export default async function SettingsPage({
@@ -134,6 +134,14 @@ export default async function SettingsPage({
         >
           AI Assistant
         </Link>
+        <Link 
+          href="?tab=promotions"
+          className={`px-4 py-2.5 text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${
+            tab === 'promotions' ? 'border-blue-500 text-white' : 'border-transparent text-zinc-400 hover:text-zinc-200 hover:border-zinc-700'
+          }`}
+        >
+          Promotions
+        </Link>
       </div>
 
       <div className="space-y-6">
@@ -156,7 +164,7 @@ export default async function SettingsPage({
             <div>
               <label className="mb-2 block text-sm font-medium text-zinc-300">Public Slug (URL)</label>
               <div className="flex items-center rounded-lg border border-zinc-700 bg-zinc-800/50 overflow-hidden focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500">
-                <span className="px-4 text-zinc-500">ourmenu.os/m/</span>
+                <span className="px-4 text-zinc-500">ourmenuos.online/m/</span>
                 <input
                   type="text"
                   name="slug"
@@ -178,62 +186,143 @@ export default async function SettingsPage({
         </div>
 
         {organization && (
-          <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
-            <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-              Payment Settings
-              {paymentSettings?.is_active && (
-                <span className="text-xs px-2 py-0.5 rounded-full bg-green-500/20 text-green-400">Active</span>
-              )}
-            </h2>
-            <p className="text-sm text-zinc-400 mb-6">Connect your bank account via Paystack to receive payouts instantly when customers order from your digital menu.</p>
-            
-            <form action={savePaymentSettings} className="flex flex-col gap-4">
-              <div>
-                <label className="mb-2 block text-sm font-medium text-zinc-300">Bank Name</label>
-                <select name="bankName" required className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
-                  <option value="">Select a bank...</option>
-                  <option value="058">Guaranty Trust Bank</option>
-                  <option value="057">Zenith Bank</option>
-                  <option value="011">First Bank of Nigeria</option>
-                  <option value="033">United Bank for Africa</option>
-                  <option value="044">Access Bank</option>
-                  <option value="050">Ecobank Nigeria</option>
-                  <option value="232">Sterling Bank</option>
-                  <option value="032">Union Bank of Nigeria</option>
-                  <option value="215">Unity Bank</option>
-                  <option value="035">Wema Bank</option>
-                </select>
-              </div>
-              <div>
-                <label className="mb-2 block text-sm font-medium text-zinc-300">Account Number</label>
-                <input
-                  type="text"
-                  name="accountNumber"
-                  required
-                  pattern="[0-9]{10}"
-                  maxLength={10}
-                  className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                  placeholder="0123456789"
-                />
-                <p className="mt-1 text-xs text-zinc-500">Must be a valid 10-digit NUBAN account number.</p>
-              </div>
-              <div>
-                <label className="mb-2 block text-sm font-medium text-zinc-300">Registered Business Name</label>
-                <input
-                  type="text"
-                  name="businessName"
-                  required
-                  defaultValue={organization?.name || ''}
-                  className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                />
-                <p className="mt-1 text-xs text-zinc-500">The legal name associated with this bank account.</p>
-              </div>
-              <div className="mt-2 flex items-center justify-between">
-                <button type="submit" className="px-4 py-2 rounded-lg bg-green-600 hover:bg-green-500 text-white font-medium transition-colors">
-                  {paymentSettings?.is_active ? 'Update Bank Account' : 'Connect Bank Account'}
-                </button>
-              </div>
-            </form>
+          <div className="space-y-6">
+            <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
+              <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                Paystack Integration
+                {paymentSettings?.is_active && (
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-green-500/20 text-green-400">Active</span>
+                )}
+              </h2>
+              <p className="text-sm text-zinc-400 mb-6">Connect your bank account via Paystack to receive payouts instantly when customers order from your digital menu.</p>
+              
+              <form action={savePaymentSettings} className="flex flex-col gap-4">
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-zinc-300">Bank Name</label>
+                  <select name="bankName" required className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                    <option value="">Select a bank...</option>
+                    <option value="058">Guaranty Trust Bank</option>
+                    <option value="057">Zenith Bank</option>
+                    <option value="011">First Bank of Nigeria</option>
+                    <option value="033">United Bank for Africa</option>
+                    <option value="044">Access Bank</option>
+                    <option value="050">Ecobank Nigeria</option>
+                    <option value="232">Sterling Bank</option>
+                    <option value="032">Union Bank of Nigeria</option>
+                    <option value="215">Unity Bank</option>
+                    <option value="035">Wema Bank</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-zinc-300">Account Number</label>
+                  <input
+                    type="text"
+                    name="accountNumber"
+                    required
+                    pattern="[0-9]{10}"
+                    maxLength={10}
+                    className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    placeholder="0123456789"
+                  />
+                  <p className="mt-1 text-xs text-zinc-500">Must be a valid 10-digit NUBAN account number.</p>
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-zinc-300">Registered Business Name</label>
+                  <input
+                    type="text"
+                    name="businessName"
+                    required
+                    defaultValue={organization?.name || ''}
+                    className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  />
+                  <p className="mt-1 text-xs text-zinc-500">The legal name associated with this bank account.</p>
+                </div>
+                <div className="mt-2 flex items-center justify-between">
+                  <button type="submit" className="px-4 py-2 rounded-lg bg-green-600 hover:bg-green-500 text-white font-medium transition-colors">
+                    {paymentSettings?.is_active ? 'Update Bank Account' : 'Connect Bank Account'}
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
+              <h2 className="text-lg font-semibold text-white mb-2 flex items-center gap-2">
+                Manual Transfer Fallback
+                {location.manual_payment_enabled && (
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400">Enabled</span>
+                )}
+              </h2>
+              <p className="text-sm text-zinc-400 mb-6">
+                If your Paystack account isn't live yet or the provider experiences downtime, the system will automatically fall back to showing these manual bank transfer details so you never lose a booking.
+              </p>
+              
+              <form action={saveManualPaymentSettings} className="flex flex-col gap-4">
+                <input type="hidden" name="locationId" value={location.id} />
+                
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-zinc-300">Status</label>
+                  <select name="manualPaymentEnabled" defaultValue={location.manual_payment_enabled ? 'true' : 'false'} className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                    <option value="false">Disabled</option>
+                    <option value="true">Enabled (Use as Fallback)</option>
+                  </select>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-zinc-300">Bank Name</label>
+                    <input
+                      type="text"
+                      name="manualBankName"
+                      defaultValue={location.manual_payment_bank_name || ''}
+                      className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                      placeholder="e.g. Zenith Bank"
+                      maxLength={100}
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-zinc-300">Account Number</label>
+                    <input
+                      type="text"
+                      name="manualAccountNumber"
+                      defaultValue={location.manual_payment_account_number || ''}
+                      className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                      placeholder="0123456789"
+                      maxLength={50}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-zinc-300">Account Name</label>
+                  <input
+                    type="text"
+                    name="manualAccountName"
+                    defaultValue={location.manual_payment_account_name || ''}
+                    className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    placeholder="e.g. My Lounge Limited"
+                    maxLength={100}
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-zinc-300">Transfer Instructions</label>
+                  <textarea
+                    name="manualInstructions"
+                    rows={2}
+                    defaultValue={location.manual_payment_instructions || ''}
+                    className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm"
+                    placeholder="e.g. Please use your Order Number as the transfer remark and send a receipt on WhatsApp."
+                    maxLength={500}
+                  />
+                </div>
+
+                <div className="mt-2 flex items-center justify-between">
+                  <button type="submit" className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium transition-colors">
+                    Save Fallback Details
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         )}
           </>
@@ -379,9 +468,116 @@ export default async function SettingsPage({
                 />
               </div>
 
-              <div className="mt-2 flex items-center justify-between">
-                <button type="submit" className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium transition-colors">
+              <div className="flex items-center justify-between p-4 bg-zinc-800/30 border border-zinc-700 rounded-xl mt-4">
+                <div>
+                  <p className="text-sm font-bold text-white">Payment Roulette Add-on</p>
+                  <p className="text-xs text-zinc-400 mt-0.5">Enable the "Surprise Me" spinning wheel on your main menu for customers who can't decide.</p>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" name="randomizerEnabled" value="true" defaultChecked={location.randomizer_enabled} className="sr-only peer" />
+                  <div className="w-11 h-6 bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
+                </label>
+              </div>
+
+              <div className="mt-6">
+                <button type="submit" className="px-6 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium transition-colors">
                   Save Venue Info
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {tab === 'promotions' && location && (
+          <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
+            <h2 className="text-lg font-semibold text-white mb-4">Promotions & Discounts</h2>
+            <form action={async (formData) => {
+              'use server'
+              const { saveLocationPromotions } = await import('./promotions-actions')
+              await saveLocationPromotions(formData)
+            }} className="flex flex-col gap-5">
+              <input type="hidden" name="locationId" value={location.id} />
+              
+              <div className="flex items-center gap-3 bg-zinc-800/50 p-4 rounded-xl border border-zinc-700/50">
+                <input 
+                  type="checkbox" 
+                  id="global_discount_enabled"
+                  name="global_discount_enabled" 
+                  defaultChecked={location.global_discount_enabled}
+                  className="w-5 h-5 rounded border-zinc-600 text-blue-500 bg-zinc-800"
+                />
+                <label htmlFor="global_discount_enabled" className="text-sm font-medium text-white flex-1 cursor-pointer">
+                  Enable Global Discount
+                  <span className="block text-xs text-zinc-400 font-normal mt-0.5">Apply an automatic discount to all items on your menu.</span>
+                </label>
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-medium text-zinc-300">Discount Percentage (%)</label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    name="global_discount_percentage"
+                    defaultValue={location.global_discount_percentage || ''}
+                    placeholder="e.g. 10"
+                    min="0"
+                    max="100"
+                    className="w-full rounded-xl bg-zinc-800 border-zinc-700 px-4 py-3 text-white outline-none focus:border-blue-500 pl-10"
+                  />
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <span className="text-zinc-400">%</span>
+                  </div>
+                </div>
+                <p className="text-xs text-zinc-500 mt-2">Example: 10 means 10% off the cart subtotal.</p>
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-medium text-zinc-300">Promotional Banner Text</label>
+                <input
+                  type="text"
+                  name="global_discount_banner_text"
+                  defaultValue={location.global_discount_banner_text || ''}
+                  placeholder="e.g. Weekend Special! 10% Off Everything!"
+                  className="w-full rounded-xl bg-zinc-800 border-zinc-700 px-4 py-3 text-white outline-none focus:border-blue-500"
+                />
+                <p className="text-xs text-zinc-500 mt-2">This text will be displayed prominently at the top of your public menu.</p>
+              </div>
+
+              <div className="mt-8 pt-8 border-t border-zinc-800 space-y-5">
+                <h3 className="text-md font-bold text-white mb-2">Gamified Discount Spinner</h3>
+                
+                <div className="flex items-center gap-3 bg-zinc-800/50 p-4 rounded-xl border border-zinc-700/50">
+                  <input 
+                    type="checkbox" 
+                    id="spinner_enabled"
+                    name="spinner_enabled" 
+                    defaultChecked={location.spinner_enabled}
+                    className="w-5 h-5 rounded border-zinc-600 text-purple-500 bg-zinc-800"
+                  />
+                  <label htmlFor="spinner_enabled" className="text-sm font-medium text-white flex-1 cursor-pointer">
+                    Enable "Spin the Wheel"
+                    <span className="block text-xs text-zinc-400 font-normal mt-0.5">Let guests spin a wheel to win discounts before checkout.</span>
+                  </label>
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-zinc-300">Wheel Segments (JSON)</label>
+                  <textarea
+                    name="spinner_config"
+                    defaultValue={location.spinner_config ? JSON.stringify(location.spinner_config, null, 2) : '[\n  { "label": "10% Off", "value": 10, "type": "win" },\n  { "label": "Try Again", "value": 0, "type": "loss" },\n  { "label": "5% Off", "value": 5, "type": "win" },\n  { "label": "No Luck", "value": 0, "type": "loss" }\n]'}
+                    rows={6}
+                    className="w-full rounded-xl bg-zinc-800 border-zinc-700 px-4 py-3 text-white outline-none focus:border-purple-500 font-mono text-sm"
+                  />
+                  <p className="text-xs text-zinc-500 mt-2">Customize the wheel segments. "value" is the discount percentage won.</p>
+                </div>
+              </div>
+
+              <div className="mt-4 pt-4 border-t border-zinc-800">
+                <button
+                  type="submit"
+                  className="w-full sm:w-auto px-6 py-3 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium transition-colors"
+                >
+                  Save Promotions
                 </button>
               </div>
             </form>

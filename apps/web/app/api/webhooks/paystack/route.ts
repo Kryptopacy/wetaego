@@ -2,6 +2,12 @@
 import { NextResponse } from 'next/server'
 import crypto from 'crypto'
 import { createClient } from '@/lib/supabase/server'
+import {
+  sendPushToOrg,
+  newOrderNotification,
+  newBookingNotification,
+  paymentConfirmedNotification,
+} from '@/lib/notifications/push'
 
 export async function POST(req: Request) {
   try {
@@ -18,31 +24,81 @@ export async function POST(req: Request) {
 
     const event = JSON.parse(rawBody)
 
-    // 2. Process Charge Success
     if (event.event === 'charge.success') {
-      // The reference comes back as orderId_split_randomHash. We strip it back to orderId.
-      const rawReference = event.data.reference
-      const reference = rawReference.split('_split_')[0] 
-      const amountPaidMinor = event.data.amount
-
+      const rawReference = event.data.reference as string
+      const amountPaidMinor = event.data.amount as number
       const supabase: any = await createClient()
 
-      // Idempotency Check: Don't process if already in webhook_events
+      // Idempotency check
       const { data: existingEvent } = await supabase
         .from('webhook_events')
         .select('id')
         .eq('provider_reference', event.data.reference)
         .single()
-        
+
       if (existingEvent) {
         return NextResponse.json({ status: 'already_processed' }, { status: 200 })
       }
 
-      // Fetch the order
+      // Record webhook first (prevents duplicate processing even if later steps fail)
+      await supabase.from('webhook_events').insert({
+        provider_reference: event.data.reference,
+        event_type: 'charge.success',
+      })
+
+      // ── Determine what was paid: order or booking ────────────────────────────
+
+      // Booking references are prefixed: "book_<bookingId>_<hash>"
+      if (rawReference.startsWith('book_')) {
+        const bookingId = rawReference.replace('book_', '').split('_')[0]
+
+        const { data: booking } = await supabase
+          .from('page_bookings')
+          .select('id, page_id, total_amount_minor, customer_name, location_pages(location_id, title, locations(organization_id))')
+          .eq('id', bookingId)
+          .single()
+
+        if (!booking) {
+          return NextResponse.json({ error: 'Booking not found' }, { status: 404 })
+        }
+
+        const paidStatus =
+          booking.total_amount_minor && amountPaidMinor >= booking.total_amount_minor
+            ? 'fully_paid'
+            : 'deposit_paid'
+
+        await supabase
+          .from('page_bookings')
+          .update({
+            payment_status: paidStatus,
+            status: 'confirmed',
+            amount_paid_minor: amountPaidMinor,
+            payment_reference: rawReference,
+          })
+          .eq('id', bookingId)
+
+        // Push notification to business
+        const orgId = booking.location_pages?.locations?.organization_id
+        if (orgId) {
+          await sendPushToOrg(
+            orgId,
+            newBookingNotification(
+              booking.location_pages?.title || 'Service',
+              booking.customer_name
+            )
+          ).catch(console.error) // non-blocking
+        }
+
+        return NextResponse.json({ status: 'booking_confirmed' }, { status: 200 })
+      }
+
+      // ── Standard order payment ───────────────────────────────────────────────
+      const orderId = rawReference.split('_split_')[0]
+
       const { data: order } = await supabase
         .from('orders')
-        .select('id, status, total_amount_minor, organization_id')
-        .eq('id', reference)
+        .select('id, status, total_amount_minor, organization_id, table_identifier')
+        .eq('id', orderId)
         .single()
 
       if (!order) {
@@ -50,31 +106,28 @@ export async function POST(req: Request) {
       }
 
       if (order.status === 'paid' || order.status === 'completed') {
-        // Fallback catch if it was paid but somehow not in webhook_events
         return NextResponse.json({ status: 'already_processed' }, { status: 200 })
       }
 
-      // Insert payment into order_payments ledger. The DB trigger handles updating the order status.
-      const { error: paymentError } = await supabase
-        .from('order_payments')
-        .insert({
-          order_id: reference,
-          amount_minor: event.data.amount,
-          provider_reference: event.data.reference
-        })
+      // Insert into payment ledger — DB trigger handles updating order status
+      const { error: paymentError } = await supabase.from('order_payments').insert({
+        order_id: orderId,
+        amount_minor: amountPaidMinor,
+        provider_reference: event.data.reference,
+      })
 
       if (paymentError) {
         console.error('Failed to insert payment:', paymentError)
         return NextResponse.json({ error: 'Failed to record payment' }, { status: 500 })
       }
 
-      // Record the webhook as processed to prevent duplicates
-      await supabase
-        .from('webhook_events')
-        .insert({
-          provider_reference: event.data.reference,
-          event_type: 'charge.success'
-        })
+      // Push notification to business
+      if (order.organization_id) {
+        await sendPushToOrg(
+          order.organization_id,
+          newOrderNotification(order.table_identifier || 'Takeaway', amountPaidMinor)
+        ).catch(console.error) // non-blocking
+      }
 
       return NextResponse.json({ status: 'success' }, { status: 200 })
     }

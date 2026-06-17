@@ -9,7 +9,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .from('locations')
     .select('slug, updated_at')
 
-  const baseUrl = 'https://ourmenu.os'
+  const baseUrl = 'https://ourmenuos.online'
 
   const menuUrls = (locations || []).map((loc) => ({
     url: `${baseUrl}/m/${loc.slug}`,

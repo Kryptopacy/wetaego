@@ -32,6 +32,7 @@ export const viewport: Viewport = {
 };
 
 import { PostHogProvider } from './providers'
+import { PwaInstallPrompt } from './components/pwa-install-prompt'
 
 export default function RootLayout({
   children,
@@ -46,6 +47,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-zinc-950 text-zinc-50">
         <PostHogProvider>
           {children}
+          <PwaInstallPrompt />
           <Toaster theme="dark" position="bottom-center" richColors />
         </PostHogProvider>
       </body>

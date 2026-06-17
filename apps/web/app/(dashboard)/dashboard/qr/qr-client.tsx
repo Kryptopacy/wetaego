@@ -85,6 +85,7 @@ export function QrClient({ organizationId, locations, qrCodes, baseUrl }: any) {
           
           // Using qrserver API with color. (color format must be hex without hash)
           const fullUrl = `${baseUrl}${qr.destination_path}?qr_id=${qr.id}`
+          const displayUrl = `${baseUrl}${qr.destination_path}`.replace(/^https?:\/\//, '')
           const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(fullUrl)}&color=${hexColor}`
 
           return (
@@ -103,12 +104,21 @@ export function QrClient({ organizationId, locations, qrCodes, baseUrl }: any) {
                 <img src={qrImageUrl} alt="QR Code" className="w-full aspect-square" crossOrigin="anonymous" />
               </div>
               
-              <div className="text-center w-full mb-3 print:mb-4">
-                <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-500 print:text-zinc-600 mb-1 leading-tight print:block hidden">Scan to view menu & order</p>
+              <div className="text-center w-full mb-3 print:mb-4 flex flex-col items-center">
+                <div className="print:flex hidden items-center gap-1.5 mb-1.5 text-zinc-800 bg-zinc-100 border border-zinc-300 rounded-full px-2.5 py-0.5">
+                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                  <span className="text-[9px] font-black uppercase tracking-widest leading-tight">Scan with Camera</span>
+                </div>
                 <p className="font-bold text-white print:text-black text-sm truncate">{loc?.name || 'Unknown'}</p>
                 <p className="text-zinc-500 print:text-zinc-600 text-xs truncate mt-1">
                   {qr.table_identifier ? `Table: ${qr.table_identifier}` : 'Unassigned'}
                 </p>
+                
+                {/* Fallback URL */}
+                <div className="mt-2 text-center w-full print:block hidden">
+                  <p className="text-[8px] uppercase tracking-wider text-zinc-500 mb-0.5">Or visit link:</p>
+                  <p className="text-[10px] font-mono font-bold text-black border border-zinc-300 bg-zinc-50 rounded px-1.5 py-0.5 inline-block mx-auto truncate max-w-full">{displayUrl}</p>
+                </div>
               </div>
 
               {/* Secondary Feedback QR */}

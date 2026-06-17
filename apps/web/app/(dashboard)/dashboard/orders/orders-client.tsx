@@ -7,13 +7,14 @@ import { toast } from 'sonner'
 
 interface OrdersClientProps {
   organizationId: string
+  locationId: string
   initialOrders: any[]
   initialServiceRequests: any[]
   initialMenuItems?: any[]
   currentUserId: string
 }
 
-export function OrdersClient({ organizationId, initialOrders, initialServiceRequests, initialMenuItems = [], currentUserId }: OrdersClientProps) {
+export function OrdersClient({ organizationId, locationId, initialOrders, initialServiceRequests, initialMenuItems = [], currentUserId }: OrdersClientProps) {
   const supabase = createClient()
   const [orders, setOrders] = useState(initialOrders)
   const [serviceRequests, setServiceRequests] = useState(initialServiceRequests)
@@ -28,7 +29,7 @@ export function OrdersClient({ organizationId, initialOrders, initialServiceRequ
         event: '*', 
         schema: 'public', 
         table: 'orders',
-        filter: `organization_id=eq.${organizationId}`
+        filter: `location_id=eq.${locationId}`
       }, (payload: any) => {
         // Fetch full order with items if INSERT
         if (payload.eventType === 'INSERT') {
@@ -64,7 +65,7 @@ export function OrdersClient({ organizationId, initialOrders, initialServiceRequ
         event: '*', 
         schema: 'public', 
         table: 'service_requests',
-        filter: `organization_id=eq.${organizationId}`
+        filter: `location_id=eq.${locationId}`
       }, (payload: any) => {
         if (payload.eventType === 'INSERT') {
           setServiceRequests((prev) => [...prev, payload.new])
@@ -277,6 +278,21 @@ export function OrdersClient({ organizationId, initialOrders, initialServiceRequ
                       className="px-6 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-medium transition-colors animate-pulse"
                     >
                       Claim Order
+                    </button>
+                  )}
+                  {order.status === 'pending' && (
+                    <button 
+                      onClick={async () => {
+                        const { markOrderPaidOffline } = await import('./actions')
+                        toast.promise(markOrderPaidOffline(order.id), {
+                          loading: 'Confirming payment...',
+                          success: 'Payment confirmed!',
+                          error: 'Failed to confirm payment'
+                        })
+                      }}
+                      className="px-6 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-medium transition-colors"
+                    >
+                      Mark Paid Offline
                     </button>
                   )}
                   {order.status === 'preparing' && order.assigned_staff_id === currentUserId && (

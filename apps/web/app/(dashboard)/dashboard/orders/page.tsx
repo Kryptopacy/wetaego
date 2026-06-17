@@ -1,6 +1,7 @@
-﻿/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createClient } from '@/lib/supabase/server'
 import { OrdersClient } from './orders-client'
+import { cookies } from 'next/headers'
 
 export default async function OrdersPage() {
   const supabase = await createClient()
@@ -13,6 +14,7 @@ export default async function OrdersPage() {
   let orders: any[] = []
   let serviceRequests: any[] = []
   let menuItems: any[] = []
+  let activeLocationId = ''
 
   if (userId) {
     // Check if user is a member of an organization
@@ -27,25 +29,40 @@ export default async function OrdersPage() {
     }
 
     if (org) {
-      // Fetch Orders
-      const { data: ordersData } = await supabase
-        .from('orders')
-        .select('*, order_items(*)')
-        .eq('organization_id', org.id)
-        .order('created_at', { ascending: false })
-      
-      orders = ordersData || []
+      // Get active location
+      const cookieStore = await cookies()
+      const savedLocId = cookieStore.get('ourmenu_active_location_id')?.value
 
-      // Fetch Service Requests
-      const { data: requestsData } = await supabase
-        .from('service_requests')
-        .select('*')
-        .eq('organization_id', org.id)
-        .order('created_at', { ascending: true })
-      
-      serviceRequests = requestsData || []
+      let locationId = savedLocId
+      if (!locationId) {
+        const { data: loc } = await supabase.from('locations').select('id').eq('organization_id', org.id).limit(1).single()
+        locationId = loc?.id
+      }
+      activeLocationId = locationId || ''
 
-      // Fetch Menu Items
+      if (activeLocationId) {
+        // Fetch Orders
+        const { data: ordersData } = await supabase
+          .from('orders')
+          .select('*, order_items(*)')
+          .eq('organization_id', org.id)
+          .eq('location_id', activeLocationId)
+          .order('created_at', { ascending: false })
+        
+        orders = ordersData || []
+
+        // Fetch Service Requests
+        const { data: requestsData } = await supabase
+          .from('service_requests')
+          .select('*')
+          .eq('organization_id', org.id)
+          .eq('location_id', activeLocationId)
+          .order('created_at', { ascending: true })
+        
+        serviceRequests = requestsData || []
+      }
+
+      // Fetch Menu Items (usually org-wide)
       const { data: itemsData } = await supabase
         .from('menu_items')
         .select('id, name, availability_status, price_minor')
@@ -68,16 +85,17 @@ export default async function OrdersPage() {
         </div>
       </div>
 
-      {org ? (
+      {org && activeLocationId ? (
         <OrdersClient 
-          organizationId={org.id} 
+          organizationId={org.id}
+          locationId={activeLocationId}
           initialOrders={orders} 
           initialServiceRequests={serviceRequests} 
           initialMenuItems={menuItems}
           currentUserId={userId!}
         />
       ) : (
-        <p className="text-zinc-500">Please create an organization first.</p>
+        <p className="text-zinc-500">Please create an organization and location first.</p>
       )}
     </div>
   )

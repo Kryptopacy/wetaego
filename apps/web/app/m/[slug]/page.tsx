@@ -9,6 +9,8 @@ import { AIChat } from './ai-chat'
 import { MenuRenderer } from './menu-renderer'
 import { LiveOrderTracker } from './live-order-tracker'
 import { RouletteFAB } from './roulette-fab'
+import { ShareButton } from '@/app/components/share-button'
+import { SpinnerModal } from '../components/spinner-modal'
 
 // Revalidate this page every 60 seconds (Incremental Static Regeneration)
 // This ensures edge caching handles high traffic seamlessly
@@ -51,7 +53,7 @@ export default async function PublicMenuPage({
 
   const { data } = await supabase
     .from('locations')
-    .select('id, name, organization_id, ai_enabled, ai_name, theme_color, cover_image_url, operating_hours, wifi_network, wifi_password, instagram_handle, twitter_handle, facebook_handle, whatsapp_number, phone_number, google_maps_url, organizations(logo_url)')
+    .select('id, name, organization_id, ai_enabled, ai_name, theme_color, cover_image_url, operating_hours, wifi_network, wifi_password, instagram_handle, twitter_handle, facebook_handle, whatsapp_number, phone_number, google_maps_url, randomizer_enabled, organizations(logo_url)')
     .eq('slug', slug)
     .single()
   location = data
@@ -59,6 +61,15 @@ export default async function PublicMenuPage({
   if (!location) {
     notFound()
   }
+
+  // 1.2 Fetch Payment Settings
+  const { data: paymentSettings } = await supabase
+    .from('organization_payment_settings')
+    .select('is_active, provider_account_id')
+    .eq('organization_id', location.organization_id)
+    .single()
+    
+  const isPaystackLive = paymentSettings?.is_active && paymentSettings?.provider_account_id
 
   // 1.5 Handle Dynamic QR Routing
   let tableIdentifier = undefined
@@ -185,6 +196,12 @@ export default async function PublicMenuPage({
                 <img src={location.organizations.logo_url} alt="Logo" className="h-16 w-auto object-contain rounded-lg drop-shadow-md" />
               </div>
             )}
+            
+            {/* Share Button top right */}
+            <div className="absolute top-6 right-6 z-10">
+              <ShareButton title={`${location.name} Menu`} className="w-10 h-10 flex items-center justify-center rounded-full bg-black/40 backdrop-blur-md border border-white/20 text-white hover:bg-black/60 transition-colors shadow-lg" />
+            </div>
+
             <div className="flex items-center flex-wrap gap-3 mb-2">
               <h1 className="text-4xl font-black text-white tracking-tight leading-none drop-shadow-lg">
                 {location.name}
@@ -318,15 +335,53 @@ export default async function PublicMenuPage({
         </header>
 
         <article className="px-6 max-w-2xl mx-auto pt-6 relative">
+          {location.global_discount_enabled && location.global_discount_banner_text && (
+            <div className="mb-6 w-full rounded-2xl bg-gradient-to-r from-blue-600 to-violet-600 p-4 shadow-lg flex items-center gap-4 text-white animate-fade-in">
+              <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+                <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="font-bold text-lg leading-tight">{location.global_discount_banner_text}</h3>
+                {location.global_discount_percentage > 0 && (
+                  <p className="text-white/80 text-sm">{location.global_discount_percentage}% off applied automatically at checkout.</p>
+                )}
+              </div>
+            </div>
+          )}
           <LiveOrderTracker organizationId={location.organization_id} locationId={location.id} />
           {/* Categories */}
           <MenuRenderer initialCategories={categories} />
+          
+          <div className="mt-12 text-center pb-8">
+            <a href="https://ourmenuos.online" className="text-xs text-zinc-400 dark:text-zinc-600 hover:text-zinc-600 dark:hover:text-zinc-400 transition-colors font-medium">
+              Powered by OurMenu OS
+            </a>
+          </div>
         </article>
 
         {/* Floating Actions */}
         <CallStaffFAB organizationId={location.organization_id} locationId={location.id} tableIdentifier={tableIdentifier} />
-        <RouletteFAB />
-        <CartFAB organizationId={location.organization_id} locationId={location.id} tableIdentifier={tableIdentifier} />
+        {location.randomizer_enabled && <RouletteFAB />}
+        {location.spinner_enabled && location.spinner_config && (
+          <SpinnerModal locationId={location.id} config={location.spinner_config as any} />
+        )}
+        <CartFAB 
+          organizationId={location.organization_id} 
+          locationId={location.id} 
+          tableIdentifier={tableIdentifier}
+          paymentIsLive={!!isPaystackLive}
+          manualPaymentEnabled={location.manual_payment_enabled}
+          manualPaymentBankName={location.manual_payment_bank_name}
+          manualPaymentAccountName={location.manual_payment_account_name}
+          manualPaymentAccountNumber={location.manual_payment_account_number}
+          manualPaymentInstructions={location.manual_payment_instructions}
+          globalDiscountEnabled={location.global_discount_enabled}
+          globalDiscountPercentage={location.global_discount_percentage}
+          menuItems={allMenuItems}
+          templateType="catalog"
+        />
         {location.ai_enabled && (
           <AIChat 
             locationId={location.id}

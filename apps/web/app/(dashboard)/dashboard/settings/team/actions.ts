@@ -81,7 +81,7 @@ export async function createInviteAction(
       .single()
 
     const orgName = org?.name || 'OurMenu Partner'
-    const origin = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+    const origin = process.env.NEXT_PUBLIC_SITE_URL || 'https://ourmenuos.online'
     const inviteLink = `${origin}/invite?token=${data.token}`
 
     waitUntil((async () => {

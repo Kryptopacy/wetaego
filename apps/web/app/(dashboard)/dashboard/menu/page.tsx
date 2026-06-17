@@ -1,9 +1,10 @@
-﻿/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { createCategory } from './actions'
 import { CategoryTabs } from './category-tabs'
 import { TranslateMenuButton } from './translate-menu-button'
+import { cookies } from 'next/headers'
 
 export default async function MenuManagerPage() {
   const supabase = await createClient()
@@ -42,11 +43,26 @@ export default async function MenuManagerPage() {
     role = 'owner'
   }
 
-  const { data: menuData } = await supabase
+  const cookieStore = await cookies()
+  const savedLocId = cookieStore.get('ourmenu_active_location_id')?.value
+
+  let locationId = savedLocId
+  if (!locationId) {
+    const { data: loc } = await supabase.from('locations').select('id').eq('organization_id', org?.id).limit(1).single()
+    locationId = loc?.id
+  }
+  const activeLocationId = locationId || ''
+
+  let menuQuery = supabase
     .from('menus')
     .select('id')
     .eq('organization_id', org?.id || '')
-    .single()
+    
+  if (activeLocationId) {
+    menuQuery = menuQuery.eq('location_id', activeLocationId)
+  }
+
+  const { data: menuData } = await menuQuery.single()
   
   menu = menuData
 

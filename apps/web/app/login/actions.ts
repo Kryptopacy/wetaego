@@ -134,7 +134,12 @@ export async function startInteractiveDemo() {
     ai_name: 'Pacy Assistant',
     ai_instructions: 'You are the elegant AI assistant for Pacy Grills. Suggest wine pairings for steaks, and signature cocktails for starters. Be very polite.',
     brand_knowledge: 'Pacy Grills is known for its legendary 24-hour marinated Suya steak and craft cocktails.',
-    publication_status: 'published'
+    publication_status: 'published',
+    manual_payment_enabled: true,
+    manual_payment_bank_name: 'OurMenu Demo Bank',
+    manual_payment_account_name: 'Pacy Grills Demo',
+    manual_payment_account_number: '0000000000',
+    manual_payment_instructions: 'This is a demo. No real payment is required. Just click "I Have Transferred" to test the ordering flow!'
   }).select('id').single()
 
   if (!loc) throw new Error('Failed to create location')
@@ -185,6 +190,42 @@ export async function startInteractiveDemo() {
     reason: 'Demo Signup Bonus',
     created_by: userId
   })
+
+  // 9. Add Demo Custom Pages for them to preview
+  const { error: pagesError } = await adminClient.from('location_pages').insert([
+    {
+      location_id: loc.id,
+      slug: 'vip-tables',
+      title: 'VIP Table Reservations',
+      template_type: 'rate-card',
+      content: {
+        items: [
+          { name: 'Standard VIP Table', price: '₦250,000', description: 'Includes 1 premium spirit, 1 champagne, seating for 4.' },
+          { name: 'VVIP Cabana', price: '₦750,000', description: 'Includes 3 premium spirits, 2 champagnes, dedicated hostess, seating for 8.' }
+        ]
+      },
+      is_published: true,
+      randomizer_enabled: false
+    },
+    {
+      location_id: loc.id,
+      slug: 'links',
+      title: 'Our Links',
+      template_type: 'link-in-bio',
+      content: {
+        links: [
+          { label: 'Follow our Instagram', url: 'https://instagram.com/pacygrills' },
+          { label: 'Leave a Review', url: 'https://google.com' }
+        ]
+      },
+      is_published: true,
+      randomizer_enabled: false
+    }
+  ])
+
+  if (pagesError) {
+    console.error('Failed to insert demo pages', pagesError)
+  }
 
   // We are fully logged in and provisioned!
   revalidatePath('/', 'layout')

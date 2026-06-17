@@ -1,4 +1,4 @@
-﻿/* eslint-disable */
+/* eslint-disable */
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
@@ -22,6 +22,9 @@ interface AIChatProps {
   themeColor: string
   tableIdentifier: string
   menuItems: MenuItem[]
+  templateType?: string
+  billingMode?: string | null
+  businessTypePreset?: string | null
 }
 
 export function AIChat({
@@ -31,10 +34,18 @@ export function AIChat({
   themeColor,
   tableIdentifier,
   menuItems,
+  templateType = 'catalog',
+  billingMode = 'table_service',
+  businessTypePreset,
 }: AIChatProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [limitReached, setLimitReached] = useState(false)
   const chatEndRef = useRef<HTMLDivElement>(null)
+
+  const { getBusinessMode, resolvePersona } = require('@/lib/templates/ai-personas')
+  const mode = getBusinessMode(templateType, billingMode, businessTypePreset)
+  const persona = resolvePersona(mode, aiName)
+
 
   const addItem = useCartStore((state) => state.addItem)
   const removeItem = useCartStore((state) => state.removeItem)
@@ -44,7 +55,15 @@ export function AIChat({
   const handleInputChange = (e: any) => setInput(e.target.value)
 
   const { messages, sendMessage, status, error, addToolResult } = useChat({
-    transport: new DefaultChatTransport({ api: '/api/chat', body: { locationId } }),
+    transport: new DefaultChatTransport({
+      api: '/api/chat',
+      body: {
+        locationId,
+        templateType,
+        billingMode,
+        businessTypePreset
+      }
+    }),
     async onToolCall({ toolCall }: { toolCall: any }) {
       try {
         if (toolCall.toolName === 'addToCart') {
@@ -183,8 +202,8 @@ export function AIChat({
                     style={{ backgroundColor: themeColor || '#0066cc' }}
                   />
                   <div>
-                    <h3 className="font-bold text-white leading-none">{aiName || 'AI Waiter'}</h3>
-                    <span className="text-[10px] text-zinc-500 mt-1 block">Live Dining Assistant</span>
+                    <h3 className="font-bold text-white leading-none">{persona.defaultName}</h3>
+                    <span className="text-[10px] text-zinc-500 mt-1 block">{persona.subtitle}</span>
                   </div>
                 </div>
                 <button
@@ -205,9 +224,9 @@ export function AIChat({
                     >
                       💡
                     </div>
-                    <p className="text-sm font-semibold text-zinc-300">Welcome to {aiName || 'AI Assistant'}!</p>
-                    <p className="text-xs text-zinc-500 mt-1 max-w-[250px] mx-auto">
-                      Ask me to recommend dishes, pairings, Wi-Fi info, or ask me to add items to your cart!
+                    <p className="text-sm font-semibold text-zinc-300">Welcome to {locationId ? 'our page' : 'our menu'}!</p>
+                    <p className="text-xs text-zinc-500 mt-2 max-w-[250px] mx-auto leading-relaxed">
+                      {persona.greeting}
                     </p>
                   </div>
                 )}
@@ -260,7 +279,7 @@ export function AIChat({
                       type="text"
                       value={input}
                       onChange={handleInputChange}
-                      placeholder={isLoading ? 'Thinking...' : 'e.g. Recommend a sweet cocktail'}
+                      placeholder={isLoading ? 'Thinking...' : persona.inputPlaceholder}
                       disabled={isLoading || limitReached}
                       className="flex-1 bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2.5 text-sm text-white placeholder-zinc-600 outline-none focus:border-zinc-700 disabled:opacity-50 transition-colors"
                     />

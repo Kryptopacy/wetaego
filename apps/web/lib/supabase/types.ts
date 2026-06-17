@@ -92,30 +92,33 @@ export type Database = {
       }
       location_pages: {
         Row: {
-          content: string | null
+          content: Json | null
           created_at: string
           id: string
           is_published: boolean
+          randomizer_enabled: boolean
           location_id: string
           slug: string
           title: string
           updated_at: string
         }
         Insert: {
-          content?: string | null
+          content?: Json | null
           created_at?: string
           id?: string
           is_published?: boolean
+          randomizer_enabled?: boolean
           location_id: string
           slug: string
           title: string
           updated_at?: string
         }
         Update: {
-          content?: string | null
+          content?: Json | null
           created_at?: string
           id?: string
           is_published?: boolean
+          randomizer_enabled?: boolean
           location_id?: string
           slug?: string
           title?: string
@@ -142,7 +145,6 @@ export type Database = {
           created_at: string
           currency_code: string
           facebook_handle: string | null
-          google_maps_url: string | null
           id: string
           instagram_handle: string | null
           name: string
@@ -159,6 +161,16 @@ export type Database = {
           whatsapp_number: string | null
           wifi_network: string | null
           wifi_password: string | null
+          manual_payment_enabled: boolean
+          manual_payment_bank_name: string | null
+          manual_payment_account_name: string | null
+          manual_payment_account_number: string | null
+          manual_payment_instructions: string | null
+          global_discount_enabled: boolean | null
+          global_discount_percentage: number | null
+          global_discount_banner_text: string | null
+          spinner_enabled: boolean | null
+          spinner_config: Json | null
         }
         Insert: {
           address?: string | null
@@ -187,6 +199,16 @@ export type Database = {
           whatsapp_number?: string | null
           wifi_network?: string | null
           wifi_password?: string | null
+          manual_payment_enabled?: boolean
+          manual_payment_bank_name?: string | null
+          manual_payment_account_name?: string | null
+          manual_payment_account_number?: string | null
+          manual_payment_instructions?: string | null
+          global_discount_enabled?: boolean | null
+          global_discount_percentage?: number | null
+          global_discount_banner_text?: string | null
+          spinner_enabled?: boolean | null
+          spinner_config?: Json | null
         }
         Update: {
           address?: string | null
@@ -215,6 +237,16 @@ export type Database = {
           whatsapp_number?: string | null
           wifi_network?: string | null
           wifi_password?: string | null
+          manual_payment_enabled?: boolean
+          manual_payment_bank_name?: string | null
+          manual_payment_account_name?: string | null
+          manual_payment_account_number?: string | null
+          manual_payment_instructions?: string | null
+          global_discount_enabled?: boolean | null
+          global_discount_percentage?: number | null
+          global_discount_banner_text?: string | null
+          spinner_enabled?: boolean | null
+          spinner_config?: Json | null
         }
         Relationships: [
           {
@@ -584,6 +616,7 @@ export type Database = {
           customer_email: string | null
           customer_name: string | null
           customer_note: string | null
+          discount_amount_minor: number | null
           estimated_prep_time_minutes: number | null
           estimated_ready_at: string | null
           feedback_pin: string
@@ -604,6 +637,7 @@ export type Database = {
           customer_email?: string | null
           customer_name?: string | null
           customer_note?: string | null
+          discount_amount_minor?: number | null
           estimated_prep_time_minutes?: number | null
           estimated_ready_at?: string | null
           feedback_pin?: string
@@ -624,6 +658,7 @@ export type Database = {
           customer_email?: string | null
           customer_name?: string | null
           customer_note?: string | null
+          discount_amount_minor?: number | null
           estimated_prep_time_minutes?: number | null
           estimated_ready_at?: string | null
           feedback_pin?: string

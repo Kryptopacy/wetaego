@@ -185,6 +185,7 @@ const locationInfoSchema = z.object({
   phoneNumber: z.string().max(30).optional().nullable(),
   googleMapsUrl: z.string().max(300).url().optional().nullable().or(z.literal('')),
   operatingHours: z.string().max(200).optional().nullable(),
+  randomizerEnabled: z.boolean().optional(),
 })
 
 export async function saveLocationInfoSettings(formData: FormData): Promise<void> {
@@ -208,6 +209,7 @@ export async function saveLocationInfoSettings(formData: FormData): Promise<void
       phoneNumber: formData.get('phoneNumber') || null,
       googleMapsUrl: formData.get('googleMapsUrl') || null,
       operatingHours: formData.get('operatingHours') || null,
+      randomizerEnabled: formData.get('randomizerEnabled') === 'true',
     })
 
     // Fetch the location to verify auth
@@ -252,6 +254,7 @@ export async function saveLocationInfoSettings(formData: FormData): Promise<void
         phone_number: validatedData.phoneNumber,
         google_maps_url: validatedData.googleMapsUrl === '' ? null : validatedData.googleMapsUrl,
         operating_hours: validatedData.operatingHours,
+        randomizer_enabled: validatedData.randomizerEnabled,
       })
       .eq('id', validatedData.locationId)
 

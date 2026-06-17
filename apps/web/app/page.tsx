@@ -11,6 +11,7 @@ import { getPricingSettings, getPlanLimits } from '@/lib/utils/settings'
 import { FadeIn } from './components/animations'
 import { FeatureTabs } from './components/feature-tabs'
 import { TrustedBy } from './components/trusted-by'
+import { DirectorySearch } from './components/directory-search'
 
 async function Pricing() {
   const pricing = await getPricingSettings()
@@ -188,6 +189,11 @@ export default async function HomePage() {
                 </button>
               </form>
             </div>
+
+            <div className="mt-8 pt-8 border-t border-white/10 w-full max-w-md">
+              <p className="text-zinc-400 text-sm font-medium mb-3">Are you a guest looking for a venue's menu?</p>
+              <DirectorySearch />
+            </div>
           </FadeIn>
 
           {/* Right — Phone mockup with actual guest menu screen */}
@@ -300,7 +306,7 @@ export default async function HomePage() {
           <div className="flex items-center gap-6 text-zinc-500 text-sm">
             <a href="/privacy" className="hover:text-white transition-colors">Privacy</a>
             <a href="/terms" className="hover:text-white transition-colors">Terms</a>
-            <a href="mailto:support@ourmenu.os" className="hover:text-white transition-colors">Contact</a>
+            <a href="mailto:support@ourmenuos.online" className="hover:text-white transition-colors">Contact</a>
           </div>
         </div>
       </footer>
