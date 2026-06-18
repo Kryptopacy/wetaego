@@ -15,6 +15,7 @@ export default async function OrdersPage() {
   let serviceRequests: any[] = []
   let menuItems: any[] = []
   let activeLocationId = ''
+  let billingMode = 'standard_checkout'
 
   if (userId) {
     // Check if user is a member of an organization
@@ -48,6 +49,7 @@ export default async function OrdersPage() {
           .eq('organization_id', org.id)
           .eq('location_id', activeLocationId)
           .order('created_at', { ascending: false })
+          .limit(50)
         
         orders = ordersData || []
 
@@ -60,6 +62,16 @@ export default async function OrdersPage() {
           .order('created_at', { ascending: true })
         
         serviceRequests = requestsData || []
+
+        // Fetch billing mode
+        const { data: pageData } = await supabase
+          .from('location_pages')
+          .select('billing_mode')
+          .eq('location_id', activeLocationId)
+          .limit(1)
+          .single()
+        
+        billingMode = pageData?.billing_mode || 'standard_checkout'
       }
 
       // Fetch Menu Items (usually org-wide)
@@ -93,6 +105,7 @@ export default async function OrdersPage() {
           initialServiceRequests={serviceRequests} 
           initialMenuItems={menuItems}
           currentUserId={userId!}
+          billingMode={billingMode}
         />
       ) : (
         <p className="text-zinc-500">Please create an organization and location first.</p>

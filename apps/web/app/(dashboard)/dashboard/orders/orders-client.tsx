@@ -12,9 +12,10 @@ interface OrdersClientProps {
   initialServiceRequests: any[]
   initialMenuItems?: any[]
   currentUserId: string
+  billingMode?: string
 }
 
-export function OrdersClient({ organizationId, locationId, initialOrders, initialServiceRequests, initialMenuItems = [], currentUserId }: OrdersClientProps) {
+export function OrdersClient({ organizationId, locationId, initialOrders, initialServiceRequests, initialMenuItems = [], currentUserId, billingMode = 'standard_checkout' }: OrdersClientProps) {
   const supabase = createClient()
   const [orders, setOrders] = useState(initialOrders)
   const [serviceRequests, setServiceRequests] = useState(initialServiceRequests)
@@ -272,15 +273,36 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
                 )}
 
                 <div className="flex justify-end mt-4 pt-4 border-t border-zinc-800/50">
-                  {order.status === 'paid' && !order.assigned_staff_id && (
+                  {(!order.assigned_staff_id && (order.status === 'paid' || (order.status === 'pending' && billingMode === 'table_service'))) && (
                     <button 
                       onClick={() => handleClaimOrder(order.id)}
                       className="px-6 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-medium transition-colors animate-pulse"
                     >
-                      Claim Order
+                      {order.status === 'pending' ? 'Accept (Pay After)' : 'Claim Order'}
                     </button>
                   )}
-                  {order.status === 'pending' && (
+                  {order.status === 'pending' && billingMode === 'standard_checkout' && (
+                    <div className="flex items-center gap-4">
+                      <span className="text-amber-500 text-sm font-medium flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                        Waiting for payment
+                      </span>
+                      <button 
+                        onClick={async () => {
+                          const { markOrderPaidOffline } = await import('./actions')
+                          toast.promise(markOrderPaidOffline(order.id), {
+                            loading: 'Confirming payment...',
+                            success: 'Payment confirmed!',
+                            error: 'Failed to confirm payment'
+                          })
+                        }}
+                        className="px-4 py-2 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 font-medium transition-colors text-sm"
+                      >
+                        Force Paid Offline
+                      </button>
+                    </div>
+                  )}
+                  {order.status === 'pending' && billingMode === 'table_service' && (
                     <button 
                       onClick={async () => {
                         const { markOrderPaidOffline } = await import('./actions')

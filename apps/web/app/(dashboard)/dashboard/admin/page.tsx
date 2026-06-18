@@ -1,12 +1,21 @@
-﻿/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
 import { getPricingSettings, getCreditCosts, getPlanLimits, getAiModels } from '@/lib/utils/settings'
 import { updateSetting } from './actions'
+
+import { createClient } from '@/lib/supabase/server'
+import { TenantDirectory } from './tenant-directory'
 
 export default async function AdminPage() {
   const pricing = await getPricingSettings()
   const creditCosts = await getCreditCosts()
   const planLimits = await getPlanLimits()
   const aiModels = await getAiModels()
+
+  const supabase = await createClient()
+  const { data: orgs } = await supabase
+    .from('organizations')
+    .select('id, name, subscription_plan, subscription_status, purchased_credits, created_at')
+    .order('created_at', { ascending: false })
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 pb-20">
@@ -23,20 +32,37 @@ export default async function AdminPage() {
             <input type="hidden" name="key" value="pricing" />
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
+                <label className="block text-sm font-medium text-zinc-400 mb-1">Lite Monthly (NGN)</label>
+                <input type="number" name="lite_monthly_ngn" defaultValue={(pricing as any).lite_monthly_ngn || 15000} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white" />
+              </div>
+              <div>
                 <label className="block text-sm font-medium text-zinc-400 mb-1">Pro Monthly (NGN)</label>
-                <input type="number" name="pro_monthly_ngn" defaultValue={(pricing as any).pro_monthly_ngn} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white" />
+                <input type="number" name="pro_monthly_ngn" defaultValue={(pricing as any).pro_monthly_ngn || 49000} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-zinc-400 mb-1">Enterprise Monthly (NGN)</label>
+                <input type="number" name="enterprise_monthly_ngn" defaultValue={(pricing as any).enterprise_monthly_ngn || 150000} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-zinc-400 mb-1">10 Credits Pack (NGN)</label>
-                <input type="number" name="credits_10_ngn" defaultValue={(pricing as any).credits_10_ngn} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white" />
+                <input type="number" name="credits_10_ngn" defaultValue={(pricing as any).credits_10_ngn || 15000} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-zinc-400 mb-1">50 Credits Pack (NGN)</label>
-                <input type="number" name="credits_50_ngn" defaultValue={(pricing as any).credits_50_ngn} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white" />
+                <input type="number" name="credits_50_ngn" defaultValue={(pricing as any).credits_50_ngn || 60000} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white" />
               </div>
             </div>
             <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-500 transition">Save Pricing</button>
           </form>
+        </section>
+
+        {/* Tenant Directory */}
+        <section className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-white">Tenant Directory</h2>
+            <span className="px-3 py-1 bg-white/10 rounded-full text-xs text-white">{orgs?.length || 0} Businesses</span>
+          </div>
+          <TenantDirectory organizations={orgs || []} />
         </section>
 
         {/* AI Models */}

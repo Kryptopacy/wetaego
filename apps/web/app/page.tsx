@@ -124,7 +124,7 @@ export default async function HomePage() {
           <div className="w-6 h-6 rounded-md bg-gradient-to-br from-white to-zinc-300 flex items-center justify-center shadow-[0_0_15px_rgba(255,255,255,0.3)]">
             <Zap className="w-3.5 h-3.5 text-black" aria-hidden="true" />
           </div>
-          <span className="font-semibold text-white tracking-tight">OurMenu</span>
+          <span className="font-semibold text-white tracking-tight">OurMenu OS</span>
         </div>
         <div className="hidden md:flex items-center gap-8 text-sm font-medium text-zinc-400">
           <a href="#features" className="hover:text-white transition-colors">Platform</a>
@@ -177,7 +177,8 @@ export default async function HomePage() {
               </span>
             </h1>
             <p className="text-lg md:text-xl text-zinc-300 max-w-xl font-light leading-relaxed mb-10">
-              Ditch the expensive custom websites, torn hardcopies, and terrible PDF links. Give your guests a stunning e-menu featuring a personalized AI Waiter that talks like your brand, streamlines ordering, and processes payments—freeing your staff to focus on hospitality. Behind the scenes? Your team gets a live KDS, WhatsApp staff alerts, AI tools to optimise flow, and demand forecasting.
+              <strong>OurMenu OS is the complete platform to build your online presence, manage operations, and engage customers.</strong><br /><br />
+              Ditch the expensive custom websites and terrible PDF links. A 'menu' isn't just for food—it's any assortment of offerings your business provides. Whether you're processing restaurant orders, booking salon appointments, or listing consulting services, our flexible templates instantly give you a stunning digital storefront without the hassle of building from scratch. Delight your clients with a personalized AI Assistant that handles inquiries and processes payments, while your team stays seamlessly synced with live management dashboards and staff alerts.
             </p>
             <div className="flex flex-col sm:flex-row items-start gap-4">
               <a href="/dashboard" className="flex items-center gap-2 px-8 py-3.5 rounded-full bg-white text-black text-sm font-bold hover:scale-105 transition-all duration-300 shadow-[0_0_30px_rgba(255,255,255,0.15)]">

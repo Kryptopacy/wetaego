@@ -26,8 +26,5 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withSentryConfig(withPWA(nextConfig), {
-  silent: true,
-  org: process.env.SENTRY_ORG,
-  project: process.env.SENTRY_PROJECT,
-});
+// Temporarily bypassing Sentry until they release a patch for Next 16
+export default withPWA(nextConfig);

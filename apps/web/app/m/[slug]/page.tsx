@@ -10,7 +10,7 @@ import { MenuRenderer } from './menu-renderer'
 import { LiveOrderTracker } from './live-order-tracker'
 import { RouletteFAB } from './roulette-fab'
 import { ShareButton } from '@/app/components/share-button'
-import { SpinnerModal } from '../components/spinner-modal'
+import { SpinnerModal } from '../../components/spinner-modal'
 
 // Revalidate this page every 60 seconds (Incremental Static Regeneration)
 // This ensures edge caching handles high traffic seamlessly

@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test": "vitest run",
     "paystack:listen": "paystack webhook listen localhost:3000/api/webhooks/paystack"
   },
   "dependencies": {
@@ -21,6 +22,7 @@
     "@vercel/functions": "^3.6.2",
     "ai": "^6.0.197",
     "canvas-confetti": "^1.9.4",
+    "date-fns": "^4.4.0",
     "framer-motion": "^12.40.0",
     "lucide-react": "^1.17.0",
     "next": "16.2.7",
@@ -30,13 +32,15 @@
     "resend": "^6.12.4",
     "sonner": "^2.0.7",
     "zod": "^4.4.3",
-    "zustand": "^5.0.14"
+    "zustand": "^5.0.14",
+    "web-push": "^3.6.7"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/web-push": "^3.6.4",
     "eslint": "^9",
     "eslint-config-next": "16.2.7",
     "tailwindcss": "^4",

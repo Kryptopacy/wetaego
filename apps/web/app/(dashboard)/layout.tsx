@@ -7,11 +7,12 @@ import { createClient } from '@/lib/supabase/client'
 import { setActiveLocationCookie } from './layout-actions'
 import {
   LayoutDashboard, ClipboardList, BarChart3, BookOpen,
-  FileText, Settings, CreditCard, LogOut, Zap, Menu, X, Users, QrCode
+  FileText, Settings, CreditCard, LogOut, Zap, Menu, X, Users, QrCode, TrendingUp
 } from 'lucide-react'
 import { GlobalRealtime } from './global-realtime'
 import { NotificationCenter } from './notification-center'
 import { ServiceWorkerRegistration } from '@/app/components/service-worker-registration'
+import { TimeclockWidget } from './timeclock-widget'
 
 interface NavItem {
   href: string
@@ -275,6 +276,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       <main className="flex-1 flex flex-col min-h-screen relative pt-16 md:pt-0 print:pt-0">
         <div className="absolute top-0 right-0 p-6 z-10 hidden md:block print:hidden">
           <div className="flex items-center gap-4 bg-zinc-900/50 backdrop-blur-md border border-zinc-800/50 px-4 py-2 rounded-full shadow-xl">
+            {locationSlug && <TimeclockWidget locationId={locationSlug} />}
+            <div className="w-px h-4 bg-zinc-800"></div>
             <NotificationCenter />
             <div className="w-px h-4 bg-zinc-800"></div>
             <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest">{orgName}</span>

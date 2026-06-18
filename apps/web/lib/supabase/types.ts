@@ -14,6 +14,41 @@ export type Database = {
   }
   public: {
     Tables: {
+      staff_shifts: {
+        Row: {
+          id: string
+          location_id: string
+          profile_id: string
+          clock_in_time: string
+          clock_out_time: string | null
+          status: 'active' | 'completed' | 'auto_completed'
+          total_hours: number | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          location_id: string
+          profile_id: string
+          clock_in_time?: string
+          clock_out_time?: string | null
+          status?: 'active' | 'completed' | 'auto_completed'
+          total_hours?: number | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          location_id?: string
+          profile_id?: string
+          clock_in_time?: string
+          clock_out_time?: string | null
+          status?: 'active' | 'completed' | 'auto_completed'
+          total_hours?: number | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
       audit_logs: {
         Row: {
           action: string
@@ -847,7 +882,7 @@ export type Database = {
           purchased_credits?: number
           slug?: string
           subscription_plan?: string
-          subscription_status?: string
+          subscription_status?: Database["public"]["Enums"]["subscription_status"]
           subscription_tier?: string
           trial_ends_at?: string
           updated_at?: string

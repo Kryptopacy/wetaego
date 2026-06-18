@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { PageBuilderForm } from '@/app/components/page-builder-form'
-import { updatePage } from '../actions'
+import { updatePage } from '../../actions'
 
 export default async function PageEditDashboard({
   params

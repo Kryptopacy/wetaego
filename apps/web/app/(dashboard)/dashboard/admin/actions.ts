@@ -1,4 +1,4 @@
-﻿/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
@@ -52,4 +52,35 @@ export async function updateSetting(formData: FormData) {
   }
 
   revalidatePath('/', 'layout')
+}
+
+export async function overrideTenantPlan(formData: FormData) {
+  const supabase = await createClient()
+  const { data } = await supabase.auth.getUser()
+
+  if (data?.user?.email !== 'kryptopacy@gmail.com') {
+    throw new Error('Unauthorized')
+  }
+
+  const orgId = formData.get('org_id') as string
+  const plan = formData.get('subscription_plan') as string
+  const status = formData.get('subscription_status') as string
+  const credits = Number(formData.get('purchased_credits')) || 0
+
+  const { error } = await supabase
+    .from('organizations')
+    .update({
+      subscription_plan: plan,
+      subscription_status: status,
+      purchased_credits: credits,
+      updated_at: new Date().toISOString()
+    })
+    .eq('id', orgId)
+
+  if (error) {
+    console.error('Override error:', error)
+    throw new Error('Failed to override tenant plan')
+  }
+
+  revalidatePath('/dashboard/admin')
 }
