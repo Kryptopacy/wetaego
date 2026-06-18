@@ -145,12 +145,14 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         }
       }
     }
+    }
     fetchOrg()
 
     const update = () => setTime(new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }))
     update()
     const i = setInterval(update, 60000)
     return () => clearInterval(i)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const renderNavContent = (onClose?: () => void) => (
