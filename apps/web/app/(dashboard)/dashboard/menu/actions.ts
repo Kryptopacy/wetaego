@@ -1,4 +1,4 @@
-﻿/* eslint-disable @typescript-eslint/no-explicit-any */
+
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
@@ -96,13 +96,13 @@ export async function toggleItemStatus(itemId: string, currentStatus: string) {
 
   await supabase
     .from('menu_items')
-    .update({ availability_status: nextStatus as any })
+    .update({ availability_status: nextStatus })
     .eq('id', itemId)
 
   revalidatePath('/dashboard/menu')
 }
 
-export async function applyTranslations(orgId: string, translatedCategories: any[]) {
+export async function applyTranslations(orgId: string, translatedCategories: { id: string, name: string, items: { id: string, name: string, description: string }[] }[]) {
   const supabase = await createClient()
 
   if (orgId === 'demo-org') {

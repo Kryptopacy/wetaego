@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
+
 import { getPricingSettings, getCreditCosts, getPlanLimits, getAiModels } from '@/lib/utils/settings'
 import { updateSetting } from './actions'
 
@@ -33,23 +33,23 @@ export default async function AdminPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-zinc-400 mb-1">Lite Monthly (NGN)</label>
-                <input type="number" name="lite_monthly_ngn" defaultValue={(pricing as any).lite_monthly_ngn || 15000} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white" />
+                <input type="number" name="lite_monthly_ngn" defaultValue={(pricing as Record<string, number>).lite_monthly_ngn || 15000} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-zinc-400 mb-1">Pro Monthly (NGN)</label>
-                <input type="number" name="pro_monthly_ngn" defaultValue={(pricing as any).pro_monthly_ngn || 49000} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white" />
+                <input type="number" name="pro_monthly_ngn" defaultValue={(pricing as Record<string, number>).pro_monthly_ngn || 49000} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-zinc-400 mb-1">Enterprise Monthly (NGN)</label>
-                <input type="number" name="enterprise_monthly_ngn" defaultValue={(pricing as any).enterprise_monthly_ngn || 150000} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white" />
+                <input type="number" name="enterprise_monthly_ngn" defaultValue={(pricing as Record<string, number>).enterprise_monthly_ngn || 150000} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-zinc-400 mb-1">10 Credits Pack (NGN)</label>
-                <input type="number" name="credits_10_ngn" defaultValue={(pricing as any).credits_10_ngn || 15000} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white" />
+                <input type="number" name="credits_10_ngn" defaultValue={(pricing as Record<string, number>).credits_10_ngn || 15000} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-zinc-400 mb-1">50 Credits Pack (NGN)</label>
-                <input type="number" name="credits_50_ngn" defaultValue={(pricing as any).credits_50_ngn || 60000} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white" />
+                <input type="number" name="credits_50_ngn" defaultValue={(pricing as Record<string, number>).credits_50_ngn || 60000} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white" />
               </div>
             </div>
             <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-500 transition">Save Pricing</button>
@@ -73,11 +73,11 @@ export default async function AdminPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-zinc-400 mb-1">Text Generation Model</label>
-                <input type="text" name="text_generation" defaultValue={(aiModels as any).text_generation} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white" />
+                <input type="text" name="text_generation" defaultValue={(aiModels as Record<string, string>).text_generation} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-zinc-400 mb-1">Image Generation Model</label>
-                <input type="text" name="image_generation" defaultValue={(aiModels as any).image_generation} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white" />
+                <input type="text" name="image_generation" defaultValue={(aiModels as Record<string, string>).image_generation} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white" />
               </div>
             </div>
             <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-500 transition">Save Models</button>

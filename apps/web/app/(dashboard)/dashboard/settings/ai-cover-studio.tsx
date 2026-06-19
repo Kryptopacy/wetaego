@@ -1,4 +1,4 @@
-﻿/* eslint-disable @typescript-eslint/no-explicit-any */
+
 'use client'
 
 import { useState } from 'react'
@@ -38,8 +38,8 @@ export function AICoverStudio({
       setCoverUrl(data.url)
       toast.success('Cover image generated successfully!')
       
-    } catch (err: any) {
-      toast.error(err.message || 'An unexpected error occurred.')
+    } catch (err: unknown) {
+      toast.error((err as Error).message || 'An unexpected error occurred.')
     } finally {
       setIsGenerating(false)
     }

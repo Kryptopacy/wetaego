@@ -1,14 +1,24 @@
 import { NextResponse } from 'next/server'
 import { generateText } from 'ai'
 import { google } from '@ai-sdk/google'
+import { z } from 'zod'
+
+const generateContentSchema = z.object({
+  title: z.string().min(1, 'Title is required'),
+  businessTypePreset: z.string().optional().nullable(),
+  templateType: z.string().optional().nullable()
+})
 
 export async function POST(req: Request) {
   try {
-    const { title, businessTypePreset, templateType } = await req.json()
-
-    if (!title) {
-      return NextResponse.json({ error: 'Title is required' }, { status: 400 })
+    const body = await req.json()
+    const parsed = generateContentSchema.safeParse(body)
+    
+    if (!parsed.success) {
+      return NextResponse.json({ error: 'Invalid payload', details: parsed.error.format() }, { status: 400 })
     }
+
+    const { title, businessTypePreset, templateType } = parsed.data
 
     let systemPrompt = `You are an expert copywriter for a high-end business.`
     

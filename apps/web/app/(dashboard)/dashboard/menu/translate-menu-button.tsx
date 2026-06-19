@@ -1,4 +1,4 @@
-﻿/* eslint-disable @typescript-eslint/no-explicit-any */
+
 'use client'
 
 import { useState } from 'react'
@@ -7,7 +7,7 @@ import { applyTranslations } from './actions'
 
 interface TranslateMenuButtonProps {
   orgId: string
-  categories: any[]
+  categories: { id: string, name: string, menu_items?: { id: string, name: string, description: string | null }[] }[]
 }
 
 const LANGUAGES = [
@@ -35,7 +35,7 @@ export function TranslateMenuButton({ orgId, categories }: TranslateMenuButtonPr
       const menuData = categories.map(cat => ({
         id: cat.id,
         name: cat.name,
-        items: cat.menu_items?.map((item: any) => ({
+        items: cat.menu_items?.map((item) => ({
           id: item.id,
           name: item.name,
           description: item.description || undefined
@@ -62,8 +62,8 @@ export function TranslateMenuButton({ orgId, categories }: TranslateMenuButtonPr
       }
 
       toast.success(`Menu successfully translated to ${selectedLang}!`)
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to translate.')
+    } catch (err: unknown) {
+      toast.error((err as Error).message || 'Failed to translate.')
     } finally {
       setIsTranslating(false)
     }

@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getPlanLimits } from '@/lib/utils/settings'
 import * as Sentry from '@sentry/nextjs'
 
-export type PlanType = 'starter' | 'pro' | 'enterprise' | string
+export type PlanType = 'lite' | 'pro' | 'enterprise' | string
 
 /**
  * Attempts to charge credits for an organization.
@@ -23,7 +23,7 @@ export async function chargeCredits(organizationId: string, cost: number, reason
       throw new Error('Organization not found')
     }
 
-    const tier = (org.subscription_tier || 'starter') as string
+    const tier = (org.subscription_tier || 'lite') as string
     const dynamicPlanLimits = await getPlanLimits() as Record<string, { credits: number, pages: number }>
     const monthlyLimit = dynamicPlanLimits[tier]?.credits || 0
     const availableFree = Math.max(0, monthlyLimit - org.monthly_free_credits_used)

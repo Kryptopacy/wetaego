@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
+import { Database } from '@/lib/supabase/types'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { createCategory } from './actions'
@@ -19,10 +19,10 @@ export default async function MenuManagerPage() {
   }
   const userId = user.id
 
-  let org: any = null
+  let org: { id: string } | null = null
   let role = 'viewer'
-  let menu: any = null
-  let categories: any[] = []
+  let menu: { id: string } | null = null
+  let categories: (Database['public']['Tables']['menu_categories']['Row'] & { menu_items?: Database['public']['Tables']['menu_items']['Row'][] })[] = []
 
   const { data: member } = await supabase
     .from('organization_members')
@@ -96,7 +96,7 @@ export default async function MenuManagerPage() {
 
       <div className="mb-8 rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
         <h2 className="text-lg font-semibold text-white mb-4">Add Category</h2>
-        <form action={createCategory as any} className="flex gap-4 items-end">
+        <form action={createCategory as unknown as (payload: FormData) => void} className="flex gap-4 items-end">
           <input type="hidden" name="organization_id" value={org.id} />
           <input type="hidden" name="menu_id" value={menu.id} />
           <div className="flex-1">

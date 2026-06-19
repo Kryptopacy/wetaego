@@ -28,12 +28,18 @@ export default async function BillingVerifyPage({
     // Transaction successful. Update the organization status immediately.
     // The webhook will also catch this, but this makes the UI instantly responsive.
     const orgId = data.data.metadata?.organization_id
+    const planType = data.data.metadata?.plan_type
     
     if (orgId) {
       const supabase = await createClient()
+      const updateData: any = { subscription_status: 'active' }
+      if (planType) {
+        updateData.subscription_plan = planType
+      }
+
       await supabase
         .from('organizations')
-        .update({ subscription_status: 'active' })
+        .update(updateData)
         .eq('id', orgId)
     }
     

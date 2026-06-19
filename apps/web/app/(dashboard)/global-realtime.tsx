@@ -1,4 +1,4 @@
-﻿/* eslint-disable @typescript-eslint/no-explicit-any */
+
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -8,8 +8,8 @@ import { useRouter } from 'next/navigation'
 
 function playChime(type: 'order' | 'service') {
   try {
-    const AudioContext = window.AudioContext || (window as any).webkitAudioContext
-    const ctx = new AudioContext()
+    const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
+    const ctx = new AudioContextClass()
     const osc = ctx.createOscillator()
     const gain = ctx.createGain()
 
@@ -45,10 +45,10 @@ export function GlobalRealtime() {
   const [orgId, setOrgId] = useState<string | null>(null)
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }: any) => {
+    supabase.auth.getUser().then(({ data }) => {
       if (data?.user?.id) {
         supabase.from('organizations').select('id').eq('created_by', data.user.id).single()
-          .then(({ data: orgData }: any) => {
+          .then(({ data: orgData }) => {
             if (orgData?.id) setOrgId(orgData.id)
           })
       }
@@ -59,14 +59,14 @@ export function GlobalRealtime() {
     if (!orgId) return
 
     // Wake Lock Request
-    let wakeLock: any = null
+    let wakeLock: WakeLockSentinel | null = null
     const requestWakeLock = async () => {
       try {
         if ('wakeLock' in navigator) {
-          wakeLock = await (navigator as any).wakeLock.request('screen')
+          wakeLock = await navigator.wakeLock.request('screen')
         }
-      } catch (err: any) {
-        console.warn(`Wake Lock error: ${err.name}, ${err.message}`)
+      } catch (err: unknown) {
+        console.warn(`Wake Lock error: ${(err as Error).name}, ${(err as Error).message}`)
       }
     }
     requestWakeLock()
@@ -77,7 +77,7 @@ export function GlobalRealtime() {
     })
 
     const channel = supabase.channel('global-realtime')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders', filter: `organization_id=eq.${orgId}` }, (payload: any) => {
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders', filter: `organization_id=eq.${orgId}` }, (payload: { new: Record<string, unknown> }) => {
         playChime('order')
         toast.success(`New Order Received!`, {
           description: `Table: ${payload.new.table_identifier || 'Takeaway'}`,
@@ -85,7 +85,7 @@ export function GlobalRealtime() {
         })
         router.refresh()
       })
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'service_requests', filter: `organization_id=eq.${orgId}` }, (payload: any) => {
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'service_requests', filter: `organization_id=eq.${orgId}` }, (payload: { new: Record<string, unknown> }) => {
         playChime('service')
         toast.error(`Service Request!`, {
           description: `Table ${payload.new.table_identifier} needs ${payload.new.request_type}`,

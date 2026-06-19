@@ -1,16 +1,24 @@
-﻿/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { google } from '@ai-sdk/google'
 import { generateObject } from 'ai'
 import { z } from 'zod'
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
+const forecastSchema = z.object({
+  locationId: z.string().uuid('Invalid location ID')
+})
+
 export async function POST(req: Request) {
   try {
-    const { locationId } = await req.json()
-    if (!locationId) {
-      return NextResponse.json({ error: 'Missing locationId' }, { status: 400 })
+    const body = await req.json()
+    const parsed = forecastSchema.safeParse(body)
+    
+    if (!parsed.success) {
+      return NextResponse.json({ error: 'Invalid payload', details: parsed.error.format() }, { status: 400 })
     }
+
+    const { locationId } = parsed.data
 
     const supabase = await createClient()
 

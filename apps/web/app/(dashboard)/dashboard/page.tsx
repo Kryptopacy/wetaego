@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars, react-hooks/purity, @typescript-eslint/no-explicit-any, react/no-unescaped-entities */
+
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -27,8 +27,8 @@ export default async function DashboardOverviewPage() {
     .single()
 
   if (member?.organizations) {
-    orgId = (member.organizations as any)?.id
-    orgName = (member.organizations as any)?.name || 'Your Venue'
+    orgId = (member.organizations as unknown as { id: string, name: string })?.id
+    orgName = (member.organizations as unknown as { id: string, name: string })?.name || 'Your Venue'
   } else {
     const { data: org } = await supabase
       .from('organizations')

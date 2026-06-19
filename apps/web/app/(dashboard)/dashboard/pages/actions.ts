@@ -79,7 +79,7 @@ export async function createCustomPage(formData: FormData): Promise<void> {
     .eq('location_id', location_id)
 
   const { getFreePagesLimit } = await import('@/lib/utils/billing')
-  const freeLimit = await getFreePagesLimit(org?.subscription_tier || 'starter')
+  const freeLimit = await getFreePagesLimit(org?.subscription_tier || 'lite')
 
   // 3. Primary pages are always free; only charge for extras beyond free limit
   if (!is_primary && (count || 0) >= freeLimit) {

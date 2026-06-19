@@ -1,5 +1,17 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { z } from 'zod'
+
+const subscribeSchema = z.object({
+  deviceName: z.string().optional().nullable(),
+  subscription: z.object({
+    endpoint: z.string().url('Invalid endpoint'),
+    keys: z.object({
+      p256dh: z.string().optional(),
+      auth: z.string().optional()
+    }).optional().nullable()
+  })
+})
 
 /**
  * POST /api/notifications/subscribe
@@ -14,10 +26,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { subscription, deviceName } = await req.json()
-    if (!subscription?.endpoint) {
-      return NextResponse.json({ error: 'Invalid subscription' }, { status: 400 })
+    const body = await req.json()
+    const parsed = subscribeSchema.safeParse(body)
+    
+    if (!parsed.success) {
+      return NextResponse.json({ error: 'Invalid payload', details: parsed.error.format() }, { status: 400 })
     }
+
+    const { subscription, deviceName } = parsed.data
 
     // Get org ID for this user
     const { data: member } = await supabase
@@ -37,8 +53,8 @@ export async function POST(req: Request) {
         user_id: userData.user.id,
         organization_id: orgId,
         endpoint: subscription.endpoint,
-        p256dh: subscription.keys?.p256dh,
-        auth: subscription.keys?.auth,
+        p256dh: subscription.keys?.p256dh || '',
+        auth: subscription.keys?.auth || '',
         device_name: deviceName || 'Browser',
       },
       { onConflict: 'endpoint' }
@@ -56,6 +72,10 @@ export async function POST(req: Request) {
   }
 }
 
+const unsubscribeSchema = z.object({
+  endpoint: z.string().url('Invalid endpoint')
+})
+
 /**
  * DELETE /api/notifications/subscribe
  * Removes a push subscription (user unsubscribes or revokes permission).
@@ -68,10 +88,14 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { endpoint } = await req.json()
-    if (!endpoint) {
-      return NextResponse.json({ error: 'Missing endpoint' }, { status: 400 })
+    const body = await req.json()
+    const parsed = unsubscribeSchema.safeParse(body)
+    
+    if (!parsed.success) {
+      return NextResponse.json({ error: 'Invalid payload', details: parsed.error.format() }, { status: 400 })
     }
+
+    const { endpoint } = parsed.data
 
     await supabase
       .from('push_subscriptions')

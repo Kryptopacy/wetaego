@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
+
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
@@ -15,7 +15,7 @@ export async function updateSetting(formData: FormData) {
   const key = formData.get('key') as string
   const isJson = formData.get('is_json') === 'true'
 
-  let value: any = {}
+  let value: Record<string, unknown> = {}
 
   if (isJson) {
     const rawJson = formData.get('json_value') as string

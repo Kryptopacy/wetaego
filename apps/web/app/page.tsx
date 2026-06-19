@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars, react/no-unescaped-entities */
+
 import Image from 'next/image'
 import { startInteractiveDemo } from './login/actions'
 import {
@@ -13,16 +13,22 @@ import { FeatureTabs } from './components/feature-tabs'
 import { TrustedBy } from './components/trusted-by'
 import { DirectorySearch } from './components/directory-search'
 
+import { getUsdToNgnRate } from '@/lib/payments/exchange'
+
 async function Pricing() {
   const pricing = await getPricingSettings()
   const planLimits = await getPlanLimits()
+  const rate = await getUsdToNgnRate()
+
+  const litePrice = rate ? Math.round(12 * rate) : (pricing.lite_monthly_ngn || 15000)
+  const proPrice = rate ? Math.round(39 * rate) : (pricing.pro_monthly_ngn || 49000)
 
   const plans = [
     {
       name: 'Lite',
-      price: '₦0',
-      period: 'for first 30 days',
-      description: 'Perfect for testing the platform at your venue. Paid subscription required after trial.',
+      price: `₦${litePrice.toLocaleString()}`,
+      period: 'per month',
+      description: 'Perfect for testing the platform at your venue. 30-day free trial included.',
       features: ['AI Waiter (guest-facing chat)', 'Edge Translator (40+ languages)', 'Up to 2 QR codes', '1 active location'],
       cta: 'Start Free Trial',
       href: '/dashboard',
@@ -30,7 +36,7 @@ async function Pricing() {
     },
     {
       name: 'Pro',
-      price: `₦${pricing.pro_monthly_ngn.toLocaleString()}`,
+      price: `₦${proPrice.toLocaleString()}`,
       period: 'per month',
       description: 'For serious operators who want every edge.',
       features: [
@@ -75,11 +81,10 @@ async function Pricing() {
         </FadeIn>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
           {plans.map((plan, i) => (
-            <FadeIn key={plan.name} delay={i * 0.1} className={`relative rounded-3xl p-10 flex flex-col gap-8 transition-all duration-500 ${
-              plan.highlighted
+            <FadeIn key={plan.name} delay={i * 0.1} className={`relative rounded-3xl p-10 flex flex-col gap-8 transition-all duration-500 ${plan.highlighted
                 ? 'bg-gradient-to-b from-violet-900/30 to-[#0a0a0f] border border-violet-500/40 shadow-2xl shadow-violet-900/20 md:-translate-y-4'
                 : 'bg-white/[0.02] border border-white/[0.05] hover:border-white/10'
-            }`}>
+              }`}>
               {plan.highlighted && (
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-5 py-1.5 rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-xs font-bold shadow-lg shadow-violet-900/50">Most Popular</div>
               )}
@@ -99,11 +104,10 @@ async function Pricing() {
                   </li>
                 ))}
               </ul>
-              <a href={plan.href} className={`flex items-center justify-center gap-2 py-4 rounded-2xl text-sm font-bold transition-all duration-300 ${
-                plan.highlighted
+              <a href={plan.href} className={`flex items-center justify-center gap-2 py-4 rounded-2xl text-sm font-bold transition-all duration-300 ${plan.highlighted
                   ? 'bg-white text-black hover:scale-105 shadow-[0_0_20px_rgba(255,255,255,0.2)]'
                   : 'bg-white/5 border border-white/10 text-white hover:bg-white/10'
-              }`}>
+                }`}>
                 {plan.cta} <ArrowRight className="w-4 h-4" aria-hidden="true" />
               </a>
             </FadeIn>
@@ -116,29 +120,27 @@ async function Pricing() {
             <h3 className="text-3xl md:text-4xl font-black text-white tracking-tight mb-4">Need more AI power?</h3>
             <p className="text-zinc-400 text-lg">Top up your workspace with AI credits. Credits never expire.</p>
           </FadeIn>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
-              { amount: 10, price: pricing.credits_10_ngn || 15000, popular: false },
-              { amount: 25, price: pricing.credits_25_ngn || 33000, popular: true },
-              { amount: 50, price: pricing.credits_50_ngn || 60000, popular: false }
+              { amount: 10, price: rate ? Math.round(12 * rate) : (pricing.credits_10_ngn || 15000), popular: false },
+              { amount: 25, price: rate ? Math.round(26 * rate) : (pricing.credits_25_ngn || 33000), popular: true },
+              { amount: 50, price: rate ? Math.round(48 * rate) : (pricing.credits_50_ngn || 60000), popular: false }
             ].map((pack, i) => (
-              <FadeIn key={pack.amount} delay={i * 0.1} className={`relative rounded-3xl p-8 flex flex-col items-center text-center transition-all duration-300 ${
-                pack.popular 
-                  ? 'bg-gradient-to-b from-violet-900/20 to-zinc-900/50 border border-violet-500/30 shadow-lg shadow-violet-900/10' 
+              <FadeIn key={pack.amount} delay={i * 0.1} className={`relative rounded-3xl p-8 flex flex-col items-center text-center transition-all duration-300 ${pack.popular
+                  ? 'bg-gradient-to-b from-violet-900/20 to-zinc-900/50 border border-violet-500/30 shadow-lg shadow-violet-900/10'
                   : 'bg-white/[0.02] border border-white/[0.05] hover:border-white/10'
-              }`}>
+                }`}>
                 {pack.popular && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-violet-600 text-white text-[10px] font-bold uppercase tracking-wider">Most Popular</div>
                 )}
                 <Zap className={`w-8 h-8 mb-6 ${pack.popular ? 'text-violet-400' : 'text-zinc-500'}`} aria-hidden="true" />
                 <h4 className="text-2xl font-bold text-white mb-2">{pack.amount} Credits</h4>
                 <div className="text-3xl font-black text-white mb-8">₦{pack.price.toLocaleString()}</div>
-                <a href="/dashboard/billing" className={`w-full py-3 rounded-xl text-sm font-bold transition-all duration-300 ${
-                  pack.popular
+                <a href="/dashboard/billing" className={`w-full py-3 rounded-xl text-sm font-bold transition-all duration-300 ${pack.popular
                     ? 'bg-white text-black hover:scale-105'
                     : 'bg-white/5 text-white hover:bg-white/10 border border-white/10'
-                }`}>
+                  }`}>
                   Buy Pack
                 </a>
               </FadeIn>
@@ -210,7 +212,7 @@ export default async function HomePage() {
             </h1>
             <p className="text-lg md:text-xl text-zinc-300 max-w-xl font-light leading-relaxed mb-10">
               <strong>OurMenu OS is the complete platform to build your online presence, manage operations, and engage customers.</strong><br /><br />
-              Ditch the expensive custom websites and terrible PDF links. A 'menu' isn't just for food—it's any assortment of offerings your business provides. Whether you're processing restaurant orders, booking salon appointments, or listing consulting services, our flexible templates instantly give you a stunning digital storefront without the hassle of building from scratch. Delight your clients with a personalized AI Assistant that handles inquiries and processes payments, while your team stays seamlessly synced with live management dashboards and staff alerts.
+              Ditch the expensive custom websites and terrible PDF links. A 'menu' isn't just for food, it's any assortment of offerings your business provides. Whether you're processing restaurant orders, bookings/appointments, or listing consulting services, our flexible templates instantly give you a stunning digital storefront without the hassle of building from scratch. Delight your clients with a personalized AI Assistant that handles inquiries and processes payments, while your team stays seamlessly synced with live management dashboards and staff alerts.
             </p>
             <div className="flex flex-col sm:flex-row items-start gap-4">
               <a href="/dashboard" className="flex items-center gap-2 px-8 py-3.5 rounded-full bg-white text-black text-sm font-bold hover:scale-105 transition-all duration-300 shadow-[0_0_30px_rgba(255,255,255,0.15)]">

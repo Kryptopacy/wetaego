@@ -1,16 +1,21 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, react/no-unescaped-entities */
+import { Database } from '@/lib/supabase/types'
 'use client'
 
 import { useState } from 'react'
 import { generateQrBatch, deleteQrCode, assignQrTable } from './actions'
 import { toast } from 'sonner'
 
-export function QrClient({ organizationId, locations, qrCodes, baseUrl }: any) {
+export function QrClient({ organizationId, locations, qrCodes, baseUrl }: {
+  organizationId: string
+  locations: Database['public']['Tables']['locations']['Row'][]
+  qrCodes: Database['public']['Tables']['qr_codes']['Row'][]
+  baseUrl: string
+}) {
   const [isGenerating, setIsGenerating] = useState(false)
   
   // Modal state for assigning tables
   const [assignModalOpen, setAssignModalOpen] = useState(false)
-  const [assigningQr, setAssigningQr] = useState<any>(null)
+  const [assigningQr, setAssigningQr] = useState<Database['public']['Tables']['qr_codes']['Row'] | null>(null)
   const [tableInput, setTableInput] = useState('')
 
   async function handleGenerate(e: React.FormEvent<HTMLFormElement>) {
@@ -43,7 +48,7 @@ export function QrClient({ organizationId, locations, qrCodes, baseUrl }: any) {
           <input type="hidden" name="organization_id" value={organizationId} />
           
           <select name="location_id" className="bg-zinc-950 border border-zinc-800 text-white rounded-lg px-4 py-2" required>
-            {locations.map((loc: any) => (
+            {locations.map((loc) => (
               <option key={loc.id} value={loc.id}>{loc.name}</option>
             ))}
           </select>
@@ -78,8 +83,8 @@ export function QrClient({ organizationId, locations, qrCodes, baseUrl }: any) {
 
       {/* Grid of QR Codes */}
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6 print:grid-cols-4 print:gap-8 print:p-0">
-        {qrCodes.map((qr: any) => {
-          const loc = locations.find((l: any) => l.id === qr.location_id)
+        {qrCodes.map((qr) => {
+          const loc = locations.find((l) => l.id === qr.location_id)
           const themeColor = loc?.theme_color || '#000000'
           const hexColor = themeColor.replace('#', '')
           

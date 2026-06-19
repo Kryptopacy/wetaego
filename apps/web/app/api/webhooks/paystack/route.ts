@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
+
 import { NextResponse } from 'next/server'
 import crypto from 'crypto'
 import { createClient } from '@/lib/supabase/server'
@@ -27,7 +27,7 @@ export async function POST(req: Request) {
     if (event.event === 'charge.success') {
       const rawReference = event.data.reference as string
       const amountPaidMinor = event.data.amount as number
-      const supabase: any = await createClient()
+      const supabase = await createClient()
 
       // Idempotency check
       const { data: existingEvent } = await supabase
@@ -128,6 +128,24 @@ export async function POST(req: Request) {
         return NextResponse.json({ status: 'booking_confirmed' }, { status: 200 })
       }
 
+      // ── Subscription payment ───────────────────────────────────────────────
+      if (event.data.metadata?.is_subscription) {
+        const orgId = event.data.metadata.organization_id
+        const planType = event.data.metadata.plan_type
+        
+        if (orgId) {
+          const updateData: any = { subscription_status: 'active' }
+          if (planType) {
+            updateData.subscription_plan = planType
+          }
+          await supabase
+            .from('organizations')
+            .update(updateData)
+            .eq('id', orgId)
+        }
+        return NextResponse.json({ status: 'subscription_confirmed' }, { status: 200 })
+      }
+
       // ── Standard order payment ───────────────────────────────────────────────
       const orderId = rawReference.split('_split_')[0]
 
@@ -175,8 +193,8 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ status: 'ignored' }, { status: 200 })
 
-  } catch (error: any) {
-    console.error('Webhook Error:', error.message)
+  } catch (error: unknown) {
+    console.error('Webhook Error:', (error as Error).message)
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
   }
 }

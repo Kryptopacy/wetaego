@@ -1,4 +1,4 @@
-﻿/* eslint-disable @typescript-eslint/no-explicit-any */
+
 'use client'
 
 import { useState, useRef } from 'react'
@@ -35,8 +35,8 @@ export function AddItemForm({ orgId, categoryId, categoryName }: { orgId: string
       if (data.allergen_tags) setAllergens(data.allergen_tags)
       
       toast.success('AI magic applied successfully!')
-    } catch (err: any) {
-      toast.error(err.message || 'AI request failed.')
+    } catch (err: unknown) {
+      toast.error((err as Error).message || 'AI request failed.')
     } finally {
       setIsGenerating(false)
     }
@@ -57,7 +57,7 @@ export function AddItemForm({ orgId, categoryId, categoryName }: { orgId: string
   }
 
   return (
-    <form ref={formRef} action={handleSubmit as any} className="flex flex-col gap-4">
+    <form ref={formRef} action={handleSubmit} className="flex flex-col gap-4">
       <input type="hidden" name="organization_id" value={orgId} />
       <input type="hidden" name="category_id" value={categoryId} />
       <input type="hidden" name="dietary_tags" value={JSON.stringify(dietaryTags)} />

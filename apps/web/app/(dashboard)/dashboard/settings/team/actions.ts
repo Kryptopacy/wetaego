@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+
 'use server'
 
 import { revalidatePath } from 'next/cache'
@@ -105,8 +105,8 @@ export async function createInviteAction(
 
     revalidatePath('/dashboard/settings/team')
     return { success: true, token: data.token }
-  } catch (err: any) {
-    return { error: err.message || 'An error occurred' }
+  } catch (err: unknown) {
+    return { error: (err as Error).message || 'An error occurred' }
   }
 }
 
@@ -132,8 +132,8 @@ export async function revokeInviteAction(orgId: string, inviteId: string) {
 
     revalidatePath('/dashboard/settings/team')
     return { success: true }
-  } catch (err: any) {
-    return { error: err.message || 'An error occurred' }
+  } catch (err: unknown) {
+    return { error: (err as Error).message || 'An error occurred' }
   }
 }
 
@@ -163,8 +163,8 @@ export async function removeMemberAction(orgId: string, userIdToDelete: string) 
 
     revalidatePath('/dashboard/settings/team')
     return { success: true }
-  } catch (err: any) {
-    return { error: err.message || 'An error occurred' }
+  } catch (err: unknown) {
+    return { error: (err as Error).message || 'An error occurred' }
   }
 }
 

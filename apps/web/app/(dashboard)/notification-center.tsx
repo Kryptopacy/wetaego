@@ -1,4 +1,4 @@
-/* eslint-disable react/no-unescaped-entities, @typescript-eslint/no-explicit-any */
+/* eslint-disable react/no-unescaped-entities */
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
@@ -31,7 +31,7 @@ export function NotificationCenter() {
         .select('organizations(id)')
         .eq('user_id', data.user.id)
         .single()
-        .then(({ data: m }: any) => {
+        .then(({ data: m }) => {
           const id = m?.organizations?.id
           if (id) { setOrgId(id); return }
           // Fallback: owner who is not a member record
@@ -40,50 +40,50 @@ export function NotificationCenter() {
             .select('id')
             .eq('created_by', data.user.id)
             .single()
-            .then(({ data: org }: any) => { if (org?.id) setOrgId(org.id) })
+            .then(({ data: org }) => { if (org?.id) setOrgId(org.id) })
         })
     })
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Convert raw rows into NotificationItems ──────────────────────────────────
-  const toOrderItem = (o: any): NotificationItem => ({
-    id: o.id,
+  const toOrderItem = (o: Record<string, unknown>): NotificationItem => ({
+    id: o.id as string,
     type: 'order',
     title: 'New Order',
-    subtitle: `Table ${o.table_identifier || 'Takeaway'} · ₦${((o.total_amount_minor || 0) / 100).toLocaleString()}`,
+    subtitle: `Table ${o.table_identifier || 'Takeaway'} · ₦${((o.total_amount_minor as number || 0) / 100).toLocaleString()}`,
     href: '/dashboard/orders',
     color: 'blue',
-    timestamp: o.created_at,
+    timestamp: o.created_at as string,
   })
 
-  const toRequestItem = (r: any): NotificationItem => ({
-    id: r.id,
+  const toRequestItem = (r: Record<string, unknown>): NotificationItem => ({
+    id: r.id as string,
     type: 'service_request',
     title: `Table ${r.table_identifier}`,
     subtitle: `Needs ${r.request_type}`,
     href: '/dashboard/orders',
     color: 'yellow',
-    timestamp: r.created_at,
+    timestamp: r.created_at as string,
   })
 
-  const toBookingItem = (b: any): NotificationItem => ({
-    id: b.id,
+  const toBookingItem = (b: Record<string, unknown>): NotificationItem => ({
+    id: b.id as string,
     type: 'booking',
     title: 'New Booking',
-    subtitle: `${b.customer_name} · ${b.location_pages?.title || 'Booking'}`,
+    subtitle: `${b.customer_name} · ${(b.location_pages as { title: string })?.title || 'Booking'}`,
     href: '/dashboard/manage/bookings',
     color: 'violet',
-    timestamp: b.created_at,
+    timestamp: b.created_at as string,
   })
 
-  const toInquiryItem = (i: any): NotificationItem => ({
-    id: i.id,
+  const toInquiryItem = (i: Record<string, unknown>): NotificationItem => ({
+    id: i.id as string,
     type: 'inquiry',
     title: 'New Enquiry',
-    subtitle: `${i.customer_name} · ${i.location_pages?.title || 'Page'}`,
+    subtitle: `${i.customer_name} · ${(i.location_pages as { title: string })?.title || 'Page'}`,
     href: '/dashboard/manage/properties',
     color: 'emerald',
-    timestamp: i.created_at,
+    timestamp: i.created_at as string,
   })
 
   // ── Initial data fetch ───────────────────────────────────────────────────────
@@ -142,13 +142,13 @@ export function NotificationCenter() {
     const channel = supabase
       .channel('notification-center-v2')
       // Orders
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: `organization_id=eq.${orgId}` }, (payload: any) => {
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: `organization_id=eq.${orgId}` }, (payload: { eventType: string, new: Record<string, unknown> }) => {
         if (payload.eventType === 'INSERT') {
-          if (['pending', 'paid'].includes(payload.new.status)) {
+          if (['pending', 'paid'].includes(payload.new.status as string)) {
             setItems(prev => [toOrderItem(payload.new), ...prev])
           }
         } else if (payload.eventType === 'UPDATE') {
-          if (['pending', 'paid'].includes(payload.new.status)) {
+          if (['pending', 'paid'].includes(payload.new.status as string)) {
             setItems(prev => {
               const exists = prev.find(i => i.id === payload.new.id)
               return exists
@@ -161,7 +161,7 @@ export function NotificationCenter() {
         }
       })
       // Service requests
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'service_requests', filter: `organization_id=eq.${orgId}` }, (payload: any) => {
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'service_requests', filter: `organization_id=eq.${orgId}` }, (payload: { eventType: string, new: Record<string, unknown> }) => {
         if (payload.eventType === 'INSERT' && payload.new.status === 'pending') {
           setItems(prev => [toRequestItem(payload.new), ...prev])
         } else if (payload.eventType === 'UPDATE') {
@@ -176,29 +176,29 @@ export function NotificationCenter() {
         }
       })
       // Bookings — join via page_id → location → org
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'page_bookings' }, (payload: any) => {
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'page_bookings' }, (payload: { new: { id: string } }) => {
         // We'll do a quick verify: fetch with org context
         supabase
           .from('page_bookings')
           .select('id, customer_name, created_at, location_pages(title, locations(organization_id))')
           .eq('id', payload.new.id)
           .single()
-          .then(({ data }: any) => {
-            if (data?.location_pages?.locations?.organization_id === orgId) {
-              setItems(prev => [toBookingItem(data), ...prev])
+          .then(({ data }) => {
+            if ((data as unknown as { location_pages?: { locations?: { organization_id?: string } } })?.location_pages?.locations?.organization_id === orgId) {
+              setItems(prev => [toBookingItem(data as Record<string, unknown>), ...prev])
             }
           })
       })
       // Inquiries
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'page_inquiries' }, (payload: any) => {
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'page_inquiries' }, (payload: { new: { id: string } }) => {
         supabase
           .from('page_inquiries')
           .select('id, customer_name, created_at, location_pages(title, locations(organization_id))')
           .eq('id', payload.new.id)
           .single()
-          .then(({ data }: any) => {
-            if (data?.location_pages?.locations?.organization_id === orgId) {
-              setItems(prev => [toInquiryItem(data), ...prev])
+          .then(({ data }) => {
+            if ((data as unknown as { location_pages?: { locations?: { organization_id?: string } } })?.location_pages?.locations?.organization_id === orgId) {
+              setItems(prev => [toInquiryItem(data as Record<string, unknown>), ...prev])
             }
           })
       })
@@ -211,9 +211,9 @@ export function NotificationCenter() {
   useEffect(() => {
     if ('setAppBadge' in navigator) {
       if (items.length > 0) {
-        (navigator as any).setAppBadge(items.length).catch(console.error)
+        (navigator as unknown as { setAppBadge: (v: number) => Promise<void> }).setAppBadge(items.length).catch(console.error)
       } else {
-        (navigator as any).clearAppBadge().catch(console.error)
+        (navigator as unknown as { clearAppBadge: () => Promise<void> }).clearAppBadge().catch(console.error)
       }
     }
   }, [items.length])

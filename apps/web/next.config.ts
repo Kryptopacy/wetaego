@@ -27,5 +27,12 @@ const nextConfig: NextConfig = {
   },
 };
 
-// Temporarily bypassing Sentry until they release a patch for Next 16
-export default withPWA(nextConfig);
+export default withSentryConfig(withPWA(nextConfig), {
+  silent: !process.env.CI,
+  widenClientFileUpload: true,
+  reactComponentAnnotation: { enabled: true },
+  tunnelRoute: "/monitoring",
+  sourcemaps: { disable: true },
+  disableLogger: true,
+  automaticVercelMonitors: true,
+});

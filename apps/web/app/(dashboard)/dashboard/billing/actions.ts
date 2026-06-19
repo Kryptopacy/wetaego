@@ -4,6 +4,35 @@ import { createClient } from '@/lib/supabase/server'
 import { getOrCreateBillingPlan, initializeSubscription } from '@/lib/payments/billing'
 import { redirect } from 'next/navigation'
 
+import { getPricingSettings } from '@/lib/utils/settings'
+import { getUsdToNgnRate } from '@/lib/payments/exchange'
+
+export async function subscribeToLite(formData: FormData) {
+  const supabase = await createClient()
+  
+  const { data: userData } = await supabase.auth.getUser()
+  if (!userData?.user) throw new Error('Not authenticated')
+
+  const orgId = formData.get('organization_id') as string
+  
+  const { data: org } = await supabase
+    .from('organizations')
+    .select('name')
+    .eq('id', orgId)
+    .single()
+
+  if (!org) throw new Error('Organization not found')
+
+  const rate = await getUsdToNgnRate()
+  const pricing = await getPricingSettings()
+  const amountNgn = rate ? Math.round(12 * rate) : (pricing.lite_monthly_ngn || 15000)
+
+  const planCode = await getOrCreateBillingPlan(orgId, org.name, 'lite', amountNgn)
+  const authUrl = await initializeSubscription(userData.user.email!, planCode, orgId, 'lite')
+
+  redirect(authUrl)
+}
+
 export async function subscribeToPro(formData: FormData) {
   const supabase = await createClient()
   
@@ -20,8 +49,12 @@ export async function subscribeToPro(formData: FormData) {
 
   if (!org) throw new Error('Organization not found')
 
-  const planCode = await getOrCreateBillingPlan(orgId, org.name)
-  const authUrl = await initializeSubscription(userData.user.email!, planCode, orgId)
+  const rate = await getUsdToNgnRate()
+  const pricing = await getPricingSettings()
+  const amountNgn = rate ? Math.round(39 * rate) : (pricing.pro_monthly_ngn || 49000)
+
+  const planCode = await getOrCreateBillingPlan(orgId, org.name, 'pro', amountNgn)
+  const authUrl = await initializeSubscription(userData.user.email!, planCode, orgId, 'pro')
 
   redirect(authUrl)
 }

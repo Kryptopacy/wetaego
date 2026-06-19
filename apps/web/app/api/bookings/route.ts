@@ -1,6 +1,21 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { notifyBusiness } from '@/lib/notifications/dispatcher'
+import { z } from 'zod'
+
+const bookingSchema = z.object({
+  page_id: z.string().uuid('Invalid page ID'),
+  item_id: z.string().uuid().optional().nullable(),
+  customer_name: z.string().min(1, 'Name is required'),
+  customer_email: z.string().email('Invalid email format').optional().nullable().or(z.literal('')),
+  customer_phone: z.string().min(1, 'Phone is required'),
+  booking_date: z.string().optional().nullable(),
+  booking_end_date: z.string().optional().nullable(),
+  booking_time: z.string().optional().nullable(),
+  booking_end_time: z.string().optional().nullable(),
+  number_of_guests: z.number().int().positive().optional().nullable(),
+  booking_notes: z.string().optional().nullable(),
+})
 
 /**
  * POST /api/bookings
@@ -11,6 +26,12 @@ import { notifyBusiness } from '@/lib/notifications/dispatcher'
 export async function POST(req: Request) {
   try {
     const body = await req.json()
+    const parsed = bookingSchema.safeParse(body)
+
+    if (!parsed.success) {
+      return NextResponse.json({ error: 'Invalid payload', details: parsed.error.format() }, { status: 400 })
+    }
+
     const {
       page_id,
       item_id,
@@ -23,11 +44,7 @@ export async function POST(req: Request) {
       booking_end_time,
       number_of_guests,
       booking_notes,
-    } = body
-
-    if (!page_id || !customer_name || !customer_phone) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
-    }
+    } = parsed.data
 
     const supabase = await createClient()
 

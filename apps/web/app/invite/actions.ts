@@ -1,4 +1,4 @@
-﻿/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
+
 'use server'
 
 import { revalidatePath } from 'next/cache'
@@ -29,7 +29,7 @@ export async function acceptInviteAction(token: string) {
 
     revalidatePath('/dashboard', 'layout')
     return { success: true }
-  } catch (err: any) {
-    return { error: err.message || 'An unexpected error occurred.' }
+  } catch (err: unknown) {
+    return { error: (err as Error).message || 'An unexpected error occurred.' }
   }
 }

@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Database } from '@/lib/supabase/types'
 import { createClient } from '@/lib/supabase/server'
 import { QrClient } from './qr-client'
 import { redirect } from 'next/navigation'
@@ -18,10 +18,10 @@ export default async function QRCodeBatchPage() {
 
   const userId = user?.id || 'demo-user-id'
 
-  let org: any = null
+  let org: { id: string } | null = null
   let role = 'viewer'
-  let locations: any[] = []
-  let qrCodes: any[] = []
+  let locations: Database['public']['Tables']['locations']['Row'][] = []
+  let qrCodes: Database['public']['Tables']['qr_codes']['Row'][] = []
 
   if (isDemo) {
     org = { id: 'demo-org' }
@@ -41,7 +41,7 @@ export default async function QRCodeBatchPage() {
       .single()
 
     if (member && member.organizations) {
-      org = member.organizations
+      org = member.organizations as unknown as { id: string }
       role = member.role
     } else {
       const { data } = await supabase

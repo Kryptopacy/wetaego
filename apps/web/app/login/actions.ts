@@ -1,8 +1,6 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 'use server'
 
 import { revalidatePath } from 'next/cache'
-// @ts-ignore
 import { redirect } from 'next/navigation'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { sendWelcomeEmail } from '@/lib/notifications/email'
@@ -176,18 +174,18 @@ export async function startInteractiveDemo() {
   // 7. Add Menu Items
   const { error: itemsError } = await adminClient.from('menu_items').insert([
     // Starters
-    { organization_id: org.id, category_id: cat1.id, name: 'Spicy Asun Rolls', description: 'Smoked goat meat wrapped in crispy pastry, served with pepper sauce.', price_minor: 650000, is_featured: true },
-    { organization_id: org.id, category_id: cat1.id, name: 'Truffle Plantain Fries', description: 'Crispy plantain tossed in truffle oil and parmesan.', price_minor: 450000, is_featured: false },
+    { organization_id: org.id, category_id: cat1.id, name: 'Spicy Asun Rolls', description: 'Smoked goat meat wrapped in crispy pastry, served with pepper sauce.', price_minor: 650000, is_featured: true, availability_status: 'available' },
+    { organization_id: org.id, category_id: cat1.id, name: 'Truffle Plantain Fries', description: 'Crispy plantain tossed in truffle oil and parmesan.', price_minor: 450000, is_featured: false, availability_status: 'available' },
     // Mains
-    { organization_id: org.id, category_id: cat2.id, name: '24-Hour Suya Steak', description: 'Prime ribeye marinated in our signature suya spice blend, grilled to perfection.', price_minor: 2800000, is_featured: true },
-    { organization_id: org.id, category_id: cat2.id, name: 'Jollof Paella', description: 'Rich, smoky jollof rice mixed with grilled prawns, calamari, and spicy chorizo.', price_minor: 1850000, is_featured: false },
+    { organization_id: org.id, category_id: cat2.id, name: '24-Hour Suya Steak', description: 'Prime ribeye marinated in our signature suya spice blend, grilled to perfection.', price_minor: 2800000, is_featured: true, availability_status: 'available' },
+    { organization_id: org.id, category_id: cat2.id, name: 'Jollof Paella', description: 'Rich, smoky jollof rice mixed with grilled prawns, calamari, and spicy chorizo.', price_minor: 1850000, is_featured: false, availability_status: 'available' },
     { organization_id: org.id, category_id: cat2.id, name: 'Charcoal Grilled Croaker', description: 'Whole croaker fish stuffed with herbs, served with roasted yam.', price_minor: 1500000, is_featured: false, availability_status: 'sold_out' },
     // Cocktails
-    { organization_id: org.id, category_id: cat3.id, name: 'Lagos Sunset', description: 'Vodka, passion fruit puree, fresh lime, and a splash of cranberry.', price_minor: 700000, is_featured: true },
-    { organization_id: org.id, category_id: cat3.id, name: 'Smoked Hibiscus Margarita', description: 'Tequila, zobo extract, triple sec, smoked sea salt rim.', price_minor: 850000, is_featured: false },
+    { organization_id: org.id, category_id: cat3.id, name: 'Zobo Margarita', description: 'Tequila, fresh zobo extract, lime, and a spicy salt rim.', price_minor: 550000, is_featured: true, availability_status: 'available' },
+    { organization_id: org.id, category_id: cat3.id, name: 'Palm Wine Spritz', description: 'Fresh palm wine, prosecco, and a splash of elderflower.', price_minor: 600000, is_featured: false, availability_status: 'available' },
     // Desserts
-    { organization_id: org.id, category_id: cat4.id, name: 'Puff-Puff Beignets', description: 'Warm, fluffy dough dusted with cinnamon sugar, served with chocolate dip.', price_minor: 400000, is_featured: false },
-    { organization_id: org.id, category_id: cat4.id, name: 'Mango Sorbet', description: 'Fresh, icy mango sorbet made in-house.', price_minor: 350000, is_featured: false }
+    { organization_id: org.id, category_id: cat4.id, name: 'Puff-Puff Beignets', description: 'Warm puff-puff served with rich dark chocolate dipping sauce.', price_minor: 400000, is_featured: true, availability_status: 'available' },
+    { organization_id: org.id, category_id: cat4.id, name: 'Mango Sorbet', description: 'Fresh, icy mango sorbet made in-house.', price_minor: 350000, is_featured: false, availability_status: 'available' }
   ])
 
   if (itemsError) {
@@ -202,27 +200,69 @@ export async function startInteractiveDemo() {
     created_by: userId
   })
 
-  // 9. Add Demo Custom Pages for them to preview
-  const { error: pagesError } = await adminClient.from('location_pages').insert([
+  // 9. Add Demo Custom Pages for them to preview the multi-template architecture
+  const { data: pages, error: pagesError } = await adminClient.from('location_pages').insert([
     {
       location_id: loc.id,
-      slug: 'vip-tables',
-      title: 'VIP Table Reservations',
-      template_type: 'rate-card',
-      content: JSON.stringify({
-        items: [
-          { name: 'Standard VIP Table', price: '₦250,000', description: 'Includes 1 premium spirit, 1 champagne, seating for 4.' },
-          { name: 'VVIP Cabana', price: '₦750,000', description: 'Includes 3 premium spirits, 2 champagnes, dedicated hostess, seating for 8.' }
-        ]
-      }),
+      slug: 'pacy-media',
+      title: 'Pacy Media & Creators',
+      template_type: 'rate_card',
+      business_type_preset: 'influencer',
       is_published: true,
       randomizer_enabled: false
     },
     {
       location_id: loc.id,
+      slug: 'pacy-wellness',
+      title: 'Pacy Wellness Spa',
+      template_type: 'booking',
+      business_type_preset: 'spa_wellness',
+      billing_enabled: true,
+      billing_mode: 'standard_checkout',
+      payment_mode: 'deposit',
+      deposit_percentage: 30,
+      is_published: true,
+    },
+    {
+      location_id: loc.id,
+      slug: 'pacy-stays',
+      title: 'Pacy Stays',
+      template_type: 'listing',
+      business_type_preset: 'short_stay',
+      billing_enabled: true,
+      billing_mode: 'standard_checkout',
+      payment_mode: 'deposit',
+      deposit_percentage: 50,
+      is_published: true,
+    },
+    {
+      location_id: loc.id,
+      slug: 'pacy-boutique',
+      title: 'Pacy Fashion',
+      template_type: 'catalog',
+      business_type_preset: 'boutique',
+      billing_enabled: true,
+      billing_mode: 'standard_checkout',
+      payment_mode: 'full',
+      is_published: true,
+    },
+    {
+      location_id: loc.id,
+      slug: 'pacy-hotels',
+      title: 'Pacy Hotels',
+      template_type: 'booking',
+      business_type_preset: 'hotel',
+      billing_enabled: true,
+      billing_mode: 'standard_checkout',
+      payment_mode: 'deposit',
+      deposit_percentage: 30,
+      is_published: true,
+    },
+    {
+      location_id: loc.id,
       slug: 'links',
       title: 'Our Links',
-      template_type: 'link-in-bio',
+      template_type: 'info',
       content: JSON.stringify({
         links: [
           { label: 'Follow our Instagram', url: 'https://instagram.com/pacygrills' },
@@ -232,10 +272,58 @@ export async function startInteractiveDemo() {
       is_published: true,
       randomizer_enabled: false
     }
-  ])
+  ]).select('id, slug')
 
-  if (pagesError) {
+  if (pagesError || !pages) {
     console.error('Failed to insert demo pages', pagesError)
+  } else {
+    // Insert page items for the demo templates
+    const pageItems = []
+
+    const mediaPage = pages.find((p: { id: string, slug: string }) => p.slug === 'pacy-media')
+    if (mediaPage) {
+      pageItems.push(
+        { page_id: mediaPage.id, title: 'Dedicated Instagram Reel', description: 'Up to 60 seconds. High-quality editing included.', price_minor: 15000000, sort_order: 0, availability_status: 'available' },
+        { page_id: mediaPage.id, title: 'TikTok Integration', description: 'Brand integration in a lifestyle TikTok video.', price_minor: 10000000, sort_order: 1, availability_status: 'available' }
+      )
+    }
+
+    const wellnessPage = pages.find((p: { id: string, slug: string }) => p.slug === 'pacy-wellness')
+    if (wellnessPage) {
+      pageItems.push(
+        { page_id: wellnessPage.id, title: 'Deep Tissue Massage', description: '60-minute intensive muscle therapy.', price_minor: 3500000, sort_order: 0, availability_status: 'available' },
+        { page_id: wellnessPage.id, title: 'Signature Facial', description: '45-minute glow restoration facial.', price_minor: 2500000, sort_order: 1, availability_status: 'available' }
+      )
+    }
+
+    const staysPage = pages.find((p: { id: string, slug: string }) => p.slug === 'pacy-stays')
+    if (staysPage) {
+      pageItems.push(
+        { page_id: staysPage.id, title: 'Lekki Penthouse', subtitle: '3 Bed / 3.5 Bath', description: 'Stunning ocean views with private chef access.', price_minor: 15000000, price_display: '₦150,000 / night', sort_order: 0, availability_status: 'available' },
+        { page_id: staysPage.id, title: 'Ikoyi Studio', subtitle: '1 Bed / 1 Bath', description: 'Cozy luxury studio in the heart of Ikoyi.', price_minor: 6500000, price_display: '₦65,000 / night', sort_order: 1, availability_status: 'available' }
+      )
+    }
+
+    const boutiquePage = pages.find((p: { id: string, slug: string }) => p.slug === 'pacy-boutique')
+    if (boutiquePage) {
+      pageItems.push(
+        { page_id: boutiquePage.id, title: 'Silk Wrap Dress', description: 'Emerald green 100% silk dress.', price_minor: 4500000, sort_order: 0, availability_status: 'available' },
+        { page_id: boutiquePage.id, title: 'Leather Tote Bag', description: 'Handcrafted genuine leather tote.', price_minor: 8500000, sort_order: 1, availability_status: 'available' }
+      )
+    }
+
+    const hotelsPage = pages.find((p: { id: string, slug: string }) => p.slug === 'pacy-hotels')
+    if (hotelsPage) {
+      pageItems.push(
+        { page_id: hotelsPage.id, title: 'Ocean View Suite', subtitle: 'King Bed / Balcony', description: 'Luxury suite with panoramic ocean views and complementary breakfast.', price_minor: 12000000, price_display: '₦120,000 / night', sort_order: 0, availability_status: 'available' },
+        { page_id: hotelsPage.id, title: 'Standard Double', subtitle: 'Queen Bed', description: 'Comfortable room perfect for business travelers.', price_minor: 4500000, price_display: '₦45,000 / night', sort_order: 1, availability_status: 'available' }
+      )
+    }
+
+    if (pageItems.length > 0) {
+      const { error: piError } = await adminClient.from('page_items').insert(pageItems)
+      if (piError) console.error('Failed to insert page items', piError)
+    }
   }
 
   // We are fully logged in and provisioned!

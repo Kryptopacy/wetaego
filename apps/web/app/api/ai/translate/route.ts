@@ -1,10 +1,16 @@
-﻿/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { google } from '@ai-sdk/google'
 import { generateObject } from 'ai'
 import { z } from 'zod'
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { chargeCredits } from '@/lib/payments/credits'
+
+const translateSchema = z.object({
+  targetLanguage: z.string().min(1, 'Target language is required'),
+  menuData: z.any(),
+  organizationId: z.string().uuid('Invalid organization ID')
+})
 
 export async function POST(req: Request) {
   try {
@@ -14,11 +20,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
     }
 
-    const { targetLanguage, menuData, organizationId } = await req.json()
-
-    if (!targetLanguage || !menuData || !organizationId) {
-      return NextResponse.json({ error: 'Missing targetLanguage, menuData, or organizationId' }, { status: 400 })
+    const body = await req.json()
+    const parsed = translateSchema.safeParse(body)
+    
+    if (!parsed.success) {
+      return NextResponse.json({ error: 'Invalid payload', details: parsed.error.format() }, { status: 400 })
     }
+
+    const { targetLanguage, menuData, organizationId } = parsed.data
 
     // Verify user belongs to org
     const { data: member } = await supabase

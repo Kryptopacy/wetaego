@@ -1,4 +1,3 @@
-/* eslint-disable */
 'use client'
 
 import { useCartStore } from '@/lib/store/cart'
@@ -20,7 +19,7 @@ interface CartFABProps {
   manualPaymentInstructions?: string
   globalDiscountEnabled?: boolean | null
   globalDiscountPercentage?: number | null
-  menuItems?: any[]
+  menuItems?: { id: string, name: string, price_minor: number }[]
   templateType?: string
 }
 
@@ -149,15 +148,15 @@ export function CartFAB({
         paymentFractionMinor,
         paymentMethod,
         discountAmountMinor
-      )) as any
+      )) as { checkoutUrl?: string, orderId?: string, error?: string }
 
       if (error) {
-        toast.error(error)
+        toast.error(error || 'Checkout failed')
         return
       }
 
       clearCart()
-      localStorage.setItem('activeOrderId', orderId)
+      localStorage.setItem('activeOrderId', orderId as string)
       
       if (paymentMethod === 'transfer' && manualPaymentEnabled) {
         const currentSlug = window.location.pathname.split('/')[2]
@@ -178,12 +177,13 @@ export function CartFAB({
         )
         setShowCheckoutModal(false)
       }
-    } catch (e: any) {
+    } catch (e: unknown) {
       setIsCheckingOut(false)
-      if (typeof window !== 'undefined' && (!window.navigator.onLine || e.message?.includes('fetch') || e.message?.includes('Network'))) {
+      const err = e as Error
+      if (typeof window !== 'undefined' && (!window.navigator.onLine || err.message?.includes('fetch') || err.message?.includes('Network'))) {
         toast.error("You're offline. Your cart is saved! Please connect to a stronger network to send your order to the kitchen.", { duration: 6000 })
       } else {
-        toast.error(e.message || 'Could not initialize checkout. Please try again.')
+        toast.error(err.message || 'Could not initialize checkout. Please try again.')
       }
     }
   }
@@ -242,7 +242,7 @@ export function CartFAB({
             >
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-bold text-white">Complete Order</h2>
-                <button onClick={() => setShowCheckoutModal(false)} className="w-8 h-8 flex items-center justify-center rounded-full bg-zinc-800 text-zinc-400 hover:text-white">✕</button>
+                <button onClick={() => setShowCheckoutModal(false)} className="w-8 h-8 flex items-center justify-center rounded-full bg-zinc-800 text-zinc-400 hover:text-white" aria-label="Close checkout modal">✕</button>
               </div>
 
               <div className="space-y-6">

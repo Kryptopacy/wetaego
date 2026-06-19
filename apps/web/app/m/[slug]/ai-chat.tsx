@@ -1,4 +1,3 @@
-/* eslint-disable */
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
@@ -8,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 import { useCartStore } from '@/lib/store/cart'
 import { callStaffFromAi } from './actions'
+import { getBusinessMode, resolvePersona } from '@/lib/templates/ai-personas'
 
 interface MenuItem {
   id: string
@@ -42,8 +42,7 @@ export function AIChat({
   const [limitReached, setLimitReached] = useState(false)
   const chatEndRef = useRef<HTMLDivElement>(null)
 
-  const { getBusinessMode, resolvePersona } = require('@/lib/templates/ai-personas')
-  const mode = getBusinessMode(templateType, billingMode, businessTypePreset)
+  const mode = getBusinessMode(templateType, billingMode || 'table_service', businessTypePreset || 'restaurant')
   const persona = resolvePersona(mode, aiName)
 
 
@@ -52,7 +51,7 @@ export function AIChat({
   const clearCart = useCartStore((state) => state.clearCart)
 
   const [input, setInput] = useState('')
-  const handleInputChange = (e: any) => setInput(e.target.value)
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => setInput(e.target.value)
 
   const { messages, sendMessage, status, error, addToolResult } = useChat({
     transport: new DefaultChatTransport({
@@ -64,7 +63,7 @@ export function AIChat({
         businessTypePreset
       }
     }),
-    async onToolCall({ toolCall }: { toolCall: any }) {
+    async onToolCall({ toolCall }: any) {
       try {
         if (toolCall.toolName === 'addToCart') {
           const { itemId, quantity } = toolCall.args as { itemId: string; quantity: number }
@@ -74,10 +73,10 @@ export function AIChat({
               addItem({ id: item.id, name: item.name, price_minor: item.price_minor })
             }
             toast.success(`Added ${quantity}x ${item.name} to cart`)
-            addToolResult({ tool: toolCall.toolName as any, toolCallId: toolCall.toolCallId, output: `Successfully added ${quantity}x ${item.name} to cart.` })
+            addToolResult({ tool: toolCall.toolName as never, toolCallId: toolCall.toolCallId, output: `Successfully added ${quantity}x ${item.name} to cart.` })
             return
           }
-          addToolResult({ tool: toolCall.toolName as any, toolCallId: toolCall.toolCallId, output: 'Item not found in menu.' })
+          addToolResult({ tool: toolCall.toolName as never, toolCallId: toolCall.toolCallId, output: 'Item not found in menu.' })
           return
         }
 
@@ -87,17 +86,17 @@ export function AIChat({
           if (item) {
             removeItem(itemId)
             toast.success(`Removed ${item.name} from cart`)
-            addToolResult({ tool: toolCall.toolName as any, toolCallId: toolCall.toolCallId, output: `Successfully removed ${item.name} from cart.` })
+            addToolResult({ tool: toolCall.toolName as never, toolCallId: toolCall.toolCallId, output: `Successfully removed ${item.name} from cart.` })
             return
           }
-          addToolResult({ tool: toolCall.toolName as any, toolCallId: toolCall.toolCallId, output: 'Item not found in cart.' })
+          addToolResult({ tool: toolCall.toolName as never, toolCallId: toolCall.toolCallId, output: 'Item not found in cart.' })
           return
         }
 
         if (toolCall.toolName === 'clearCart') {
           clearCart()
           toast.success('Cleared cart')
-          addToolResult({ tool: toolCall.toolName as any, toolCallId: toolCall.toolCallId, output: 'Successfully cleared cart.' })
+          addToolResult({ tool: toolCall.toolName as never, toolCallId: toolCall.toolCallId, output: 'Successfully cleared cart.' })
           return
         }
 
@@ -111,31 +110,31 @@ export function AIChat({
           )
           if (res.success) {
             toast.success(`Called staff for ${requestType}`)
-            addToolResult({ tool: toolCall.toolName as any, toolCallId: toolCall.toolCallId, output: `Successfully requested ${requestType} service.` })
+            addToolResult({ tool: toolCall.toolName as never, toolCallId: toolCall.toolCallId, output: `Successfully requested ${requestType} service.` })
             return
           }
-          addToolResult({ tool: toolCall.toolName as any, toolCallId: toolCall.toolCallId, output: `Failed to request service: ${res.error}` })
+          addToolResult({ tool: toolCall.toolName as never, toolCallId: toolCall.toolCallId, output: `Failed to request service: ${res.error}` })
           return
         }
 
         if (toolCall.toolName === 'checkout') {
           window.dispatchEvent(new CustomEvent('open-checkout-modal'))
           setIsOpen(false) // close AI chat to reveal payment modal
-          addToolResult({ tool: toolCall.toolName as any, toolCallId: toolCall.toolCallId, output: 'Successfully opened payment checkout modal.' })
+          addToolResult({ tool: toolCall.toolName as never, toolCallId: toolCall.toolCallId, output: 'Successfully opened payment checkout modal.' })
           return
         }
-      } catch (err: any) {
-        addToolResult({ tool: toolCall.toolName as any, toolCallId: toolCall.toolCallId, state: 'output-error', errorText: err.message })
+      } catch (err: unknown) {
+        addToolResult({ tool: toolCall.toolName as never, toolCallId: toolCall.toolCallId, state: 'output-error', errorText: (err as Error).message })
       }
     },
   })
 
   const isLoading = status === 'streaming' || status === 'submitted'
 
-  const handleSubmit = (e: any) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!input.trim()) return
-    sendMessage({ role: 'user', content: input } as any)
+    sendMessage({ role: 'user', content: input } as never)
     setInput('')
   }
 

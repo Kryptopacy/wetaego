@@ -10,7 +10,7 @@ export async function updateQrConfig(
   const supabase = await createClient();
 
   const updatePayload: any = {
-    qr_text: config.qr_text,
+    qr_text: config.qr_text ? config.qr_text.substring(0, 2) : null,
     qr_color: config.qr_color,
     logo_url: config.logo_url,
   };

@@ -1,16 +1,23 @@
-﻿/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { google } from '@ai-sdk/google'
 import { generateObject } from 'ai'
 import { z } from 'zod'
 import { NextResponse } from 'next/server'
 
+const triageSchema = z.object({
+  requestText: z.string().min(1, 'Request text is required')
+})
+
 export async function POST(req: Request) {
   try {
-    const { requestText } = await req.json()
-
-    if (!requestText) {
-      return NextResponse.json({ error: 'Missing requestText' }, { status: 400 })
+    const body = await req.json()
+    const parsed = triageSchema.safeParse(body)
+    
+    if (!parsed.success) {
+      return NextResponse.json({ error: 'Invalid payload', details: parsed.error.format() }, { status: 400 })
     }
+
+    const { requestText } = parsed.data
 
     const { object } = await generateObject({
       model: google('gemini-3.1-flash'),

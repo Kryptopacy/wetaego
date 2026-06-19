@@ -1,4 +1,4 @@
-﻿/* eslint-disable @typescript-eslint/no-explicit-any */
+
 'use client'
 
 import { useState } from 'react'
@@ -189,7 +189,7 @@ export default function TeamManager({
               <label className="mb-2 block text-xs font-semibold text-zinc-400 uppercase tracking-wider">Role</label>
               <select
                 value={inviteRole}
-                onChange={(e) => setInviteRole(e.target.value as any)}
+                onChange={(e) => setInviteRole(e.target.value as 'manager' | 'editor' | 'viewer')}
                 className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               >
                 <option value="viewer">Viewer (Host/Service Staff)</option>

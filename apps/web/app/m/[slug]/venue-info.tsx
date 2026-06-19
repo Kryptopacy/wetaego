@@ -1,11 +1,10 @@
-﻿/* eslint-disable */
 'use client'
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 interface VenueInfoProps {
-  location: any
+  location: { slug: string, name: string, operating_hours?: string, wifi_network?: string, wifi_password?: string, instagram_handle?: string }
 }
 
 export function VenueInfoModal({ location }: VenueInfoProps) {

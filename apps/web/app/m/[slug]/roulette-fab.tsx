@@ -150,7 +150,7 @@ export function RouletteFAB() {
             <div className="relative z-10 flex flex-col h-full">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-white font-black text-xl">Payment Roulette</h3>
-                <button onClick={() => setIsOpen(false)} className="text-zinc-500 hover:text-white">
+                <button onClick={() => setIsOpen(false)} className="text-zinc-500 hover:text-white" aria-label="Close roulette">
                   <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
               </div>
@@ -303,6 +303,7 @@ export function RouletteFAB() {
         whileTap={{ scale: 0.9 }}
         onClick={() => setIsOpen(!isOpen)}
         className="fixed bottom-[136px] right-6 z-[45] h-14 w-14 rounded-full bg-zinc-900 border border-zinc-700 shadow-xl flex items-center justify-center text-purple-400 transition-colors group"
+        aria-label={isOpen ? "Close roulette" : "Open roulette"}
       >
         <span className="absolute right-[115%] whitespace-nowrap bg-zinc-800 text-white font-semibold text-[13px] px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-lg">
           Roulette

@@ -1,11 +1,6 @@
-/* eslint-disable */
-'use client'
-
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { motion, AnimatePresence } from 'framer-motion'
-import { toast } from 'sonner'
-import { processCheckout } from './actions'
 
 interface LiveOrderTrackerProps {
   organizationId: string
@@ -14,7 +9,7 @@ interface LiveOrderTrackerProps {
 
 export function LiveOrderTracker({ organizationId, locationId }: LiveOrderTrackerProps) {
   const supabase = createClient()
-  const [order, setOrder] = useState<any>(null)
+  const [order, setOrder] = useState<{ id: string, status: string, estimated_ready_at: string, estimated_prep_time_minutes: number } | null>(null)
   const [timeLeft, setTimeLeft] = useState<number>(0)
   
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -27,7 +22,7 @@ export function LiveOrderTracker({ organizationId, locationId }: LiveOrderTracke
     const fetchOrder = async () => {
       const { data } = await supabase.from('orders').select('*').eq('id', activeOrderId).single()
       if (data) {
-        setOrder(data)
+        setOrder(data as any)
       }
     }
     fetchOrder()

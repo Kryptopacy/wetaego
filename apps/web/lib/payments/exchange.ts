@@ -1,4 +1,4 @@
-export async function getUsdToNgnRate(): Promise<number> {
+export async function getUsdToNgnRate(): Promise<number | null> {
   try {
     const res = await fetch('https://open.er-api.com/v6/latest/USD', {
       next: { revalidate: 3600 } // cache for 1 hour
@@ -11,5 +11,5 @@ export async function getUsdToNgnRate(): Promise<number> {
   } catch (error) {
     console.error('Failed to fetch exchange rate', error)
   }
-  return 1500; // Fallback conservative rate
+  return null; // Fallback to DB settings handled by caller
 }

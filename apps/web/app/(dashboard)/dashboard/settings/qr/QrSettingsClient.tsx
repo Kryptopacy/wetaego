@@ -13,6 +13,35 @@ type Location = Database["public"]["Tables"]["locations"]["Row"] & {
   logo_url?: string | null;
 };
 
+function getLuminance(hex: string) {
+  let r = 0, g = 0, b = 0;
+  if (hex.length === 4) {
+    r = parseInt(hex[1] + hex[1], 16);
+    g = parseInt(hex[2] + hex[2], 16);
+    b = parseInt(hex[3] + hex[3], 16);
+  } else if (hex.length === 7) {
+    r = parseInt(hex.substring(1, 3), 16);
+    g = parseInt(hex.substring(3, 5), 16);
+    b = parseInt(hex.substring(5, 7), 16);
+  } else {
+    return 0;
+  }
+  
+  const [rs, gs, bs] = [r, g, b].map(c => {
+    c = c / 255;
+    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  });
+  return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
+}
+
+function getContrast(hex1: string, hex2: string) {
+  const lum1 = getLuminance(hex1);
+  const lum2 = getLuminance(hex2);
+  const brightest = Math.max(lum1, lum2);
+  const darkest = Math.min(lum1, lum2);
+  return (brightest + 0.05) / (darkest + 0.05);
+}
+
 export function QrSettingsClient({ location }: { location: Location }) {
   const [color, setColor] = useState(location.qr_color || location.theme_color || "#0f7b55");
   const [text, setText] = useState(location.qr_text || location.name.substring(0, 2).toUpperCase());
@@ -28,6 +57,22 @@ export function QrSettingsClient({ location }: { location: Location }) {
 
   const handleSave = async () => {
     setIsSaving(true);
+
+    if (logoUrl) {
+      try {
+        await new Promise((resolve, reject) => {
+          const img = new Image();
+          img.onload = resolve;
+          img.onerror = reject;
+          img.src = logoUrl;
+        });
+      } catch (e) {
+        toast.error("Invalid Logo URL. The image could not be loaded.");
+        setIsSaving(false);
+        return;
+      }
+    }
+
     try {
       await updateQrConfig(location.id, {
         qr_text: text,
@@ -144,6 +189,12 @@ export function QrSettingsClient({ location }: { location: Location }) {
                   className="flex-1 rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                 />
               </div>
+              {getContrast(color || "#0f7b55", "#ffffff") < 2.5 && (
+                <div className="mt-2 text-xs text-amber-400 bg-amber-400/10 p-2 rounded border border-amber-400/20 flex items-start gap-2">
+                  <span className="text-lg leading-none">⚠️</span>
+                  <span>This color is very light. The white QR dots may not have enough contrast to scan reliably. Consider a darker shade.</span>
+                </div>
+              )}
             </div>
 
             <div className="space-y-2">

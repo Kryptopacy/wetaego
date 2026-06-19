@@ -2,10 +2,9 @@ import { getUsdToNgnRate } from './exchange'
 
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY
 
-export async function getOrCreateBillingPlan(organizationId: string, orgName: string): Promise<string> {
-  // Calculate current NGN equivalent of $39
-  const rate = await getUsdToNgnRate()
-  const amountMinor = Math.round(39 * rate * 100) // in kobo
+export async function getOrCreateBillingPlan(organizationId: string, orgName: string, planType: string, amountNgn: number): Promise<string> {
+  const amountMinor = amountNgn * 100 // in kobo
+  const planDisplayName = planType === 'lite' ? 'OurMenu OS Lite' : 'OurMenu OS Pro'
 
   // In a real production scenario, you would check your DB to see if this org already has a plan_code.
   // For this implementation, we will create a dedicated plan for the organization.
@@ -17,7 +16,7 @@ export async function getOrCreateBillingPlan(organizationId: string, orgName: st
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      name: `OurMenu OS Pro - ${orgName}`,
+      name: `${planDisplayName} - ${orgName}`,
       interval: 'monthly',
       amount: amountMinor,
       currency: 'NGN'
@@ -33,7 +32,7 @@ export async function getOrCreateBillingPlan(organizationId: string, orgName: st
   return data.data.plan_code
 }
 
-export async function initializeSubscription(email: string, planCode: string, organizationId: string): Promise<string> {
+export async function initializeSubscription(email: string, planCode: string, organizationId: string, planType: string): Promise<string> {
   const response = await fetch('https://api.paystack.co/transaction/initialize', {
     method: 'POST',
     headers: {
@@ -47,7 +46,8 @@ export async function initializeSubscription(email: string, planCode: string, or
       callback_url: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard/billing/verify`,
       metadata: {
         organization_id: organizationId,
-        is_subscription: true
+        is_subscription: true,
+        plan_type: planType
       }
     }),
   })

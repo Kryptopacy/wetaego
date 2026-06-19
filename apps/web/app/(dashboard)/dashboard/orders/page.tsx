@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Database } from '@/lib/supabase/types'
 import { createClient } from '@/lib/supabase/server'
 import { OrdersClient } from './orders-client'
 import { cookies } from 'next/headers'
@@ -10,10 +10,10 @@ export default async function OrdersPage() {
   const { data: userData } = await supabase.auth.getUser()
   const userId = userData?.user?.id
 
-  let org = null
-  let orders: any[] = []
-  let serviceRequests: any[] = []
-  let menuItems: any[] = []
+  let org: { id: string } | null = null
+  let orders: (Database['public']['Tables']['orders']['Row'] & { order_items?: Database['public']['Tables']['order_items']['Row'][] })[] = []
+  let serviceRequests: Database['public']['Tables']['service_requests']['Row'][] = []
+  let menuItems: Database['public']['Tables']['menu_items']['Row'][] = []
   let activeLocationId = ''
   let billingMode = 'standard_checkout'
 

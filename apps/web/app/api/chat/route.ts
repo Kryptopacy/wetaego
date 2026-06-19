@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { google } from '@ai-sdk/google'
 import { streamText, tool, stepCountIs } from 'ai'
 import { z } from 'zod'
@@ -16,13 +16,24 @@ function getIp(req: Request) {
   return req.headers.get('x-real-ip') || 'unknown_ip'
 }
 
+const chatSchema = z.object({
+  messages: z.array(z.any()),
+  locationId: z.string().uuid('Invalid location ID'),
+  templateType: z.string().optional().default('catalog'),
+  billingMode: z.string().optional().default('table_service'),
+  businessTypePreset: z.string().optional().nullable()
+})
+
 export async function POST(req: Request) {
   try {
-    const { messages, locationId, templateType = 'catalog', billingMode = 'table_service', businessTypePreset } = await req.json()
-
-    if (!locationId) {
-      return new Response('Missing locationId', { status: 400 })
+    const body = await req.json()
+    const parsed = chatSchema.safeParse(body)
+    
+    if (!parsed.success) {
+      return new Response(JSON.stringify({ error: 'Invalid payload', details: parsed.error.format() }), { status: 400 })
     }
+
+    const { messages, locationId, templateType, billingMode, businessTypePreset } = parsed.data
 
     const { getBusinessMode, resolvePersona } = await import('@/lib/templates/ai-personas')
     const mode = getBusinessMode(templateType, billingMode, businessTypePreset)

@@ -1,16 +1,26 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
+import { Database } from '@/lib/supabase/types'
+import { ServiceRequestsPanel } from './components/service-requests-panel'
+import { ActiveOrdersGrid } from './components/active-orders-grid'
+import { StockManagementView } from './components/stock-management-view'
+
+type FullOrder = Database['public']['Tables']['orders']['Row'] & { order_items?: Database['public']['Tables']['order_items']['Row'][] }
+type ServiceRequestRow = Database['public']['Tables']['service_requests']['Row']
+type MenuItemRow = Database['public']['Tables']['menu_items']['Row']
+type OrderPayload = { eventType: string, new: Database['public']['Tables']['orders']['Row'] }
+type ServiceRequestPayload = { eventType: string, new: ServiceRequestRow }
+type MenuItemPayload = { eventType: string, new: MenuItemRow }
 
 interface OrdersClientProps {
   organizationId: string
   locationId: string
-  initialOrders: any[]
-  initialServiceRequests: any[]
-  initialMenuItems?: any[]
+  initialOrders: FullOrder[]
+  initialServiceRequests: ServiceRequestRow[]
+  initialMenuItems?: MenuItemRow[]
   currentUserId: string
   billingMode?: string
 }
@@ -31,29 +41,31 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
         schema: 'public', 
         table: 'orders',
         filter: `location_id=eq.${locationId}`
-      }, (payload: any) => {
+      }, (payload: unknown) => {
+        const orderPayload = payload as OrderPayload
         // Fetch full order with items if INSERT
-        if (payload.eventType === 'INSERT') {
+        if (orderPayload.eventType === 'INSERT') {
           supabase
             .from('orders')
             .select('*, order_items(*)')
-            .eq('id', payload.new.id)
+            .eq('id', orderPayload.new.id)
             .single()
-            .then(({ data }: { data: any }) => {
-              if (data) {
-                setOrders((prev) => [data, ...prev])
-                if (data.status === 'paid' || data.status === 'pending') {
-                  toast.success(`New Order Received! Table: ${data.table_identifier}`)
+            .then(({ data }: { data: unknown }) => {
+              const fullData = data as FullOrder | null
+              if (fullData) {
+                setOrders((prev) => [fullData, ...prev])
+                if (fullData.status === 'paid' || fullData.status === 'pending') {
+                  toast.success(`New Order Received! Table: ${fullData.table_identifier}`)
                 }
               }
             })
-        } else if (payload.eventType === 'UPDATE') {
+        } else if (orderPayload.eventType === 'UPDATE') {
           setOrders((prev) => {
-            const oldOrder = prev.find(o => o.id === payload.new.id)
-            if (oldOrder && oldOrder.status !== 'paid' && payload.new.status === 'paid') {
-              toast.success(`Payment Confirmed! Table: ${payload.new.table_identifier}`)
+            const oldOrder = prev.find(o => o.id === orderPayload.new.id)
+            if (oldOrder && oldOrder.status !== 'paid' && orderPayload.new.status === 'paid') {
+              toast.success(`Payment Confirmed! Table: ${orderPayload.new.table_identifier}`)
             }
-            return prev.map(o => o.id === payload.new.id ? { ...o, ...payload.new } : o)
+            return prev.map(o => o.id === orderPayload.new.id ? { ...o, ...orderPayload.new } : o)
           })
         }
       })
@@ -67,11 +79,12 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
         schema: 'public', 
         table: 'service_requests',
         filter: `location_id=eq.${locationId}`
-      }, (payload: any) => {
-        if (payload.eventType === 'INSERT') {
-          setServiceRequests((prev) => [...prev, payload.new])
-        } else if (payload.eventType === 'UPDATE') {
-          setServiceRequests((prev) => prev.map(r => r.id === payload.new.id ? payload.new : r))
+      }, (payload: unknown) => {
+        const srPayload = payload as ServiceRequestPayload
+        if (srPayload.eventType === 'INSERT') {
+          setServiceRequests((prev) => [...prev, srPayload.new])
+        } else if (srPayload.eventType === 'UPDATE') {
+          setServiceRequests((prev) => prev.map(r => r.id === srPayload.new.id ? srPayload.new : r))
         }
       })
       .subscribe()
@@ -86,8 +99,9 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
         schema: 'public', 
         table: 'menu_items',
         filter: `organization_id=eq.${organizationId}`
-      }, (payload: any) => {
-        setMenuItems((prev) => prev.map(item => item.id === payload.new.id ? { ...item, ...payload.new } : item))
+      }, (payload: unknown) => {
+        const itemPayload = payload as MenuItemPayload
+        setMenuItems((prev) => prev.map(item => item.id === itemPayload.new.id ? { ...item, ...itemPayload.new } : item))
       })
       .subscribe()
 
@@ -175,204 +189,23 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
 
       {activeTab === 'orders' ? (
         <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6 overflow-hidden">
-          
-          {/* Service Requests Column */}
-      <div className="col-span-1 border border-zinc-800 rounded-xl bg-zinc-900/30 flex flex-col overflow-hidden max-h-[400px] lg:max-h-full">
-        <div className="p-4 border-b border-zinc-800 bg-zinc-900">
-          <h2 className="font-bold text-white flex justify-between items-center">
-            Table Requests
-            <span className="px-2 py-0.5 rounded-full bg-zinc-800 text-xs">{pendingRequests.length}</span>
-          </h2>
+          <ServiceRequestsPanel 
+            pendingRequests={pendingRequests} 
+            onResolve={async (id) => { await supabase.from('service_requests').update({ status: 'resolved' }).eq('id', id) }} 
+          />
+          <ActiveOrdersGrid 
+            activeOrders={activeOrders} 
+            currentUserId={currentUserId} 
+            billingMode={billingMode} 
+            onClaimOrder={handleClaimOrder as any} 
+          />
         </div>
-        <div className="flex-1 overflow-y-auto p-4 space-y-3">
-          {pendingRequests.length === 0 ? (
-            <p className="text-center text-zinc-500 py-10">No pending requests.</p>
-          ) : (
-            pendingRequests.map(req => {
-              const isCritical = req.urgency_tier === 'critical'
-              const isLow = req.urgency_tier === 'low'
-              
-              const borderClass = isCritical ? 'border-red-500/80 shadow-[0_0_15px_rgba(239,68,68,0.3)] animate-pulse' : isLow ? 'border-blue-500/30' : 'border-yellow-500/30'
-              const bgClass = isCritical ? 'bg-red-500/10' : isLow ? 'bg-blue-500/10' : 'bg-yellow-500/10'
-              const accentClass = isCritical ? 'bg-red-500' : isLow ? 'bg-blue-500' : 'bg-yellow-500'
-              const textClass = isCritical ? 'text-red-400' : isLow ? 'text-blue-400' : 'text-yellow-400'
-              const btnClass = isCritical ? 'bg-red-500/20 hover:bg-red-500/30' : isLow ? 'bg-blue-500/20 hover:bg-blue-500/30' : 'bg-yellow-500/20 hover:bg-yellow-500/30'
-              const textMutedClass = isCritical ? 'text-red-500/70' : isLow ? 'text-blue-500/70' : 'text-yellow-500/70'
-              
-              return (
-              <div key={req.id} className={`p-4 rounded-lg border ${bgClass} relative overflow-hidden ${borderClass}`}>
-                <div className={`absolute left-0 top-0 bottom-0 w-1 ${accentClass}`}></div>
-                <div className="flex justify-between items-start mb-2">
-                  <span className={`font-bold ${textClass}`}>{req.table_identifier}</span>
-                  <span className={`text-xs ${textMutedClass} uppercase tracking-widest font-bold`}>{req.urgency_tier || 'STANDARD'}</span>
-                </div>
-                <p className="text-white font-medium capitalize">
-                  {req.request_type === 'custom' ? `"${req.custom_request_text}"` : `Needs ${req.request_type}`}
-                </p>
-                <button 
-                  onClick={() => supabase.from('service_requests').update({ status: 'resolved' }).eq('id', req.id)}
-                  className={`mt-3 w-full py-2 rounded ${btnClass} ${textClass} text-sm font-medium transition-colors`}
-                >
-                  Mark Resolved
-                </button>
-              </div>
-            )})
-          )}
-        </div>
-      </div>
-
-      {/* Orders Column */}
-      <div className="col-span-1 lg:col-span-2 border border-zinc-800 rounded-xl bg-zinc-900/30 flex flex-col overflow-hidden min-h-[500px]">
-        <div className="p-4 border-b border-zinc-800 bg-zinc-900">
-          <h2 className="font-bold text-white flex justify-between items-center">
-            Active Orders
-            <span className="px-2 py-0.5 rounded-full bg-zinc-800 text-xs">{activeOrders.length}</span>
-          </h2>
-        </div>
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          {activeOrders.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-zinc-500">
-              <p>Waiting for new orders...</p>
-              <p className="text-sm mt-2">Orders paid via Paystack will appear here instantly.</p>
-            </div>
-          ) : (
-            activeOrders.map(order => (
-              <div key={order.id} className={`p-5 rounded-lg border ${order.status === 'paid' ? 'border-blue-500/50 bg-blue-500/5' : 'border-zinc-800 bg-zinc-900/50'}`}>
-                <div className="flex justify-between items-start mb-4 border-b border-zinc-800/50 pb-4">
-                  <div>
-                    <div className="flex items-center gap-3 mb-1">
-                      <span className="font-bold text-xl text-white">{order.table_identifier || 'Takeaway'}</span>
-                      <span className="text-zinc-500">·</span>
-                      <span className="text-zinc-300 font-medium">{order.customer_name || 'Guest'}</span>
-                    </div>
-                    <span className="text-sm text-zinc-500">Order #{order.id.split('-')[0]}</span>
-                  </div>
-                  <div className="text-right">
-                    <div className="font-bold text-lg text-white">₦{(order.total_amount_minor / 100).toLocaleString()}</div>
-                    {order.tip_amount_minor > 0 && (
-                      <div className="text-sm text-blue-400 mb-1 font-medium">+ ₦{(order.tip_amount_minor / 100).toLocaleString()} Tip</div>
-                    )}
-                    <span className={`text-xs font-medium px-2 py-1 rounded-full ${order.status === 'paid' ? 'bg-green-500/20 text-green-400' : 'bg-zinc-800 text-zinc-400'}`}>
-                      {order.status.toUpperCase()}
-                    </span>
-                  </div>
-                </div>
-                
-                <div className="space-y-2 mb-4">
-                  {order.order_items?.map((item: any) => (
-                    <div key={item.id} className="flex justify-between text-zinc-300">
-                      <span><span className="text-zinc-500 mr-2">{item.quantity}x</span> {item.item_name}</span>
-                    </div>
-                  ))}
-                </div>
-
-                {order.customer_note && (
-                  <div className="bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 rounded-lg p-3 text-sm font-medium mb-4">
-                    ðŸ“ Note: {order.customer_note}
-                  </div>
-                )}
-
-                <div className="flex justify-end mt-4 pt-4 border-t border-zinc-800/50">
-                  {(!order.assigned_staff_id && (order.status === 'paid' || (order.status === 'pending' && billingMode === 'table_service'))) && (
-                    <button 
-                      onClick={() => handleClaimOrder(order.id)}
-                      className="px-6 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-medium transition-colors animate-pulse"
-                    >
-                      {order.status === 'pending' ? 'Accept (Pay After)' : 'Claim Order'}
-                    </button>
-                  )}
-                  {order.status === 'pending' && billingMode === 'standard_checkout' && (
-                    <div className="flex items-center gap-4">
-                      <span className="text-amber-500 text-sm font-medium flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-                        Waiting for payment
-                      </span>
-                      <button 
-                        onClick={async () => {
-                          const { markOrderPaidOffline } = await import('./actions')
-                          toast.promise(markOrderPaidOffline(order.id), {
-                            loading: 'Confirming payment...',
-                            success: 'Payment confirmed!',
-                            error: 'Failed to confirm payment'
-                          })
-                        }}
-                        className="px-4 py-2 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 font-medium transition-colors text-sm"
-                      >
-                        Force Paid Offline
-                      </button>
-                    </div>
-                  )}
-                  {order.status === 'pending' && billingMode === 'table_service' && (
-                    <button 
-                      onClick={async () => {
-                        const { markOrderPaidOffline } = await import('./actions')
-                        toast.promise(markOrderPaidOffline(order.id), {
-                          loading: 'Confirming payment...',
-                          success: 'Payment confirmed!',
-                          error: 'Failed to confirm payment'
-                        })
-                      }}
-                      className="px-6 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-medium transition-colors"
-                    >
-                      Mark Paid Offline
-                    </button>
-                  )}
-                  {order.status === 'preparing' && order.assigned_staff_id === currentUserId && (
-                    <button 
-                      onClick={async () => {
-                        const { completeOrderAction } = await import('./actions')
-                        toast.promise(completeOrderAction(order.id), {
-                          loading: 'Completing order...',
-                          success: 'Order completed! Feedback email sent.',
-                          error: 'Failed to complete order'
-                        })
-                      }}
-                      className="px-6 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium transition-colors"
-                    >
-                      Mark as Completed
-                    </button>
-                  )}
-                  {order.status === 'preparing' && order.assigned_staff_id !== currentUserId && (
-                    <div className="px-6 py-2 rounded-lg bg-zinc-800 text-zinc-400 font-medium">
-                      Claimed (Preparing)
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-      </div>
-
-    </div>
-    ) : (
-      <div className="flex-1 border border-zinc-800 rounded-xl bg-zinc-900/30 overflow-hidden min-h-[500px] flex flex-col">
-        <div className="p-4 border-b border-zinc-800 bg-zinc-900 flex justify-between items-center">
-          <h2 className="font-bold text-white">Stock Management</h2>
-          <span className="text-sm text-zinc-400">Updates sync instantly to guest menus</span>
-        </div>
-        <div className="flex-1 overflow-y-auto p-4 space-y-3">
-          {menuItems.length === 0 ? (
-            <p className="text-center text-zinc-500 py-10">No items on your menu yet.</p>
-          ) : (
-            menuItems.map(item => (
-              <div key={item.id} className="flex justify-between items-center p-4 bg-zinc-900/50 border border-zinc-800 rounded-lg">
-                <div>
-                  <div className="font-medium text-white">{item.name}</div>
-                  <div className="text-sm text-zinc-400">₦{(item.price_minor / 100).toLocaleString()}</div>
-                </div>
-                <button
-                  onClick={() => toggleStock(item.id, item.availability_status)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${item.availability_status === 'available' ? 'bg-green-500/10 border-green-500/20 text-green-400 hover:bg-green-500/20' : 'bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20'}`}
-                >
-                  {item.availability_status === 'available' ? 'Available' : 'Sold Out'}
-                </button>
-              </div>
-            ))
-          )}
-        </div>
-      </div>
-    )}
+      ) : (
+        <StockManagementView 
+          menuItems={menuItems} 
+          onToggleStock={toggleStock as any} 
+        />
+      )}
     </div>
   )
 }

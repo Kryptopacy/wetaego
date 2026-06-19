@@ -1,4 +1,3 @@
-/* eslint-disable */
 'use client'
 
 import { useCartStore } from '@/lib/store/cart'
@@ -6,7 +5,7 @@ import { useCartStore } from '@/lib/store/cart'
 import Image from 'next/image'
 
 interface ItemCardProps {
-  item: any
+  item: { id: string, name: string, description?: string, price_minor: number, image_url?: string, availability_status: string }
 }
 
 export function ItemCard({ item }: ItemCardProps) {

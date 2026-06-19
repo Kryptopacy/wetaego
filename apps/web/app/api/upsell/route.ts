@@ -4,17 +4,22 @@ import { z } from 'zod'
 
 export const maxDuration = 15 // Short duration since it's a quick upsell
 
+const upsellRequestSchema = z.object({
+  cartItems: z.array(z.any()).min(1, 'Cart is empty'),
+  availableItems: z.array(z.any()).min(1, 'No available items to upsell'),
+  templateType: z.string().optional().default('catalog')
+})
+
 export async function POST(req: Request) {
   try {
-    const { cartItems, availableItems, templateType = 'catalog' } = await req.json()
+    const body = await req.json()
+    const parsed = upsellRequestSchema.safeParse(body)
 
-    if (!cartItems || cartItems.length === 0) {
-      return new Response('Cart is empty', { status: 400 })
+    if (!parsed.success) {
+      return new Response('Invalid payload', { status: 400 })
     }
 
-    if (!availableItems || availableItems.length === 0) {
-      return new Response('No available items to upsell', { status: 400 })
-    }
+    const { cartItems, availableItems, templateType } = parsed.data
 
     const prompt = `
 You are an expert sales assistant powering the checkout flow for a business.

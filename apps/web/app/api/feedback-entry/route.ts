@@ -1,13 +1,20 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
+
+const searchParamsSchema = z.object({
+  qr_id: z.string().uuid('Invalid QR ID format')
+})
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
-  const qrId = searchParams.get('qr_id')
-
-  if (!qrId) {
-    return NextResponse.json({ error: 'Missing qr_id' }, { status: 400 })
+  const qrIdRaw = searchParams.get('qr_id')
+  
+  const parsed = searchParamsSchema.safeParse({ qr_id: qrIdRaw })
+  if (!parsed.success) {
+    return NextResponse.json({ error: 'Missing or invalid qr_id' }, { status: 400 })
   }
+  const qrId = parsed.data.qr_id
 
   const supabase = await createClient()
 

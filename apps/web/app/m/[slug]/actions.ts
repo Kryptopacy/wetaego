@@ -1,5 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 'use server'
+import { Database } from '@/lib/supabase/types'
+type RequestType = NonNullable<Database['public']['Tables']['service_requests']['Row']['request_type']> | 'waiter' | 'bill' | 'cleanup'
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
@@ -24,9 +25,9 @@ export async function submitServiceRequest(formData: FormData) {
     organization_id: orgId,
     location_id: locId,
     table_identifier: tableId,
-    request_type: requestType as any,
+    request_type: requestType as RequestType,
     custom_request_text: customRequestText,
-    urgency_tier: urgencyTier as any,
+    urgency_tier: urgencyTier as 'standard' | 'critical',
   })
 
   // Fetch the location's configured WhatsApp number
@@ -45,7 +46,7 @@ export async function submitServiceRequest(formData: FormData) {
 export async function processCheckout(
   orgId: string, 
   locationId: string, 
-  items: any[], 
+  items: { id: string, name: string, quantity: number, price_minor: number }[], 
   totalAmountMinor: number, 
   tipAmountMinor: number,
   tableIdentifier: string,
@@ -80,7 +81,7 @@ export async function processCheckout(
       discount_amount_minor: discountAmountMinor || 0,
       customer_note: customerNote || null,
       customer_email: customerEmail || null,
-    } as any).select('id').single()
+    } as never).select('id').single()
 
   if (orderError || !order) throw new Error('Failed to create order')
 
@@ -135,7 +136,7 @@ export async function callStaffFromAi(
     organization_id: orgId,
     location_id: locationId,
     table_identifier: tableIdentifier,
-    request_type: requestType as any,
+    request_type: requestType as RequestType,
   })
 
   if (error) return { error: error.message }
@@ -193,7 +194,7 @@ export async function processExistingOrderPayment(
     })
 
     return { checkoutUrl }
-  } catch (err: any) {
-    return { error: err.message || 'Failed to initialize payment' }
+  } catch (err: unknown) {
+    return { error: (err as Error).message || 'Failed to initialize payment' }
   }
 }

@@ -1,12 +1,15 @@
-﻿/* eslint-disable @typescript-eslint/no-explicit-any */
+
 'use client'
 
 import { useState } from 'react'
 import { AddItemForm } from './add-item-form'
 import { toggleItemStatus } from './actions'
 import { motion, AnimatePresence } from 'framer-motion'
+import { Database } from '@/lib/supabase/types'
 
-export function CategoryTabs({ categories, orgId }: { categories: any[], orgId: string }) {
+type Category = Database['public']['Tables']['menu_categories']['Row'] & { menu_items?: Database['public']['Tables']['menu_items']['Row'][] }
+
+export function CategoryTabs({ categories, orgId }: { categories: Category[], orgId: string }) {
   const [activeTab, setActiveTab] = useState(categories[0]?.id || '')
 
   if (categories.length === 0) {
@@ -59,7 +62,7 @@ export function CategoryTabs({ categories, orgId }: { categories: any[], orgId: 
             {activeCategory.menu_items?.length === 0 ? (
               <p className="text-zinc-500 text-center py-8">No items yet in this category.</p>
             ) : (
-              activeCategory.menu_items?.map((item: any) => (
+              activeCategory.menu_items?.map((item) => (
                 <div key={item.id} className="py-4 flex justify-between items-center first:pt-0 last:pb-0 group">
                   <div>
                     <h3 className="font-semibold text-white">

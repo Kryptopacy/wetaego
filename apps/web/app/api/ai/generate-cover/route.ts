@@ -1,9 +1,15 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+
 // @ts-ignore
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { chargeCredits } from '@/lib/payments/credits'
 import * as Sentry from '@sentry/nextjs'
+import { z } from 'zod'
+
+const generateCoverSchema = z.object({
+  locationId: z.string().uuid('Invalid location ID'),
+  prompt: z.string().optional().nullable()
+})
 
 // We will use standard fetch for Gemini Imagen to be perfectly safe, 
 // as `@ai-sdk/google` image generation might not be fully stable in this exact version.
@@ -16,8 +22,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
     }
 
-    const { locationId, prompt } = await req.json()
-    if (!locationId) return NextResponse.json({ error: 'Missing location ID' }, { status: 400 })
+    const body = await req.json()
+    const parsed = generateCoverSchema.safeParse(body)
+    
+    if (!parsed.success) {
+      return NextResponse.json({ error: 'Invalid payload', details: parsed.error.format() }, { status: 400 })
+    }
+
+    const { locationId, prompt } = parsed.data
 
     // 1. Fetch location and verify ownership
     const { data: loc, error: locError } = await supabase

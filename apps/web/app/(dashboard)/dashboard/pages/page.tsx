@@ -85,7 +85,7 @@ export default async function PagesManager() {
   }
 
   const { getFreePagesLimit } = await import('@/lib/utils/billing')
-  const freeLimit = await getFreePagesLimit((org.subscription_tier as Tier) || 'starter')
+  const freeLimit = await getFreePagesLimit((org.subscription_tier as Tier) || 'lite')
   const { getCreditCosts } = await import('@/lib/utils/settings')
   const creditCosts = await getCreditCosts() as Record<string, number>
   const pageCost = creditCosts.custom_page || 10
