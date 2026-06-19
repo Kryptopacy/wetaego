@@ -10,10 +10,7 @@ describe('Cart Zustand Store', () => {
     useCartStore.getState().addItem({
       id: 'item_1',
       name: 'Burger',
-      price: 1500,
-      quantity: 1,
-      image_url: null,
-      customizations: {}
+      price_minor: 1500,
     })
 
     const state = useCartStore.getState()
@@ -28,24 +25,24 @@ describe('Cart Zustand Store', () => {
     store.addItem({
       id: 'item_1',
       name: 'Burger',
-      price: 1500,
-      quantity: 2,
-      image_url: null,
-      customizations: {}
+      price_minor: 1500,
+    })
+    // Added twice to simulate quantity = 2
+    store.addItem({
+      id: 'item_1',
+      name: 'Burger',
+      price_minor: 1500,
     })
 
     store.addItem({
       id: 'item_2',
       name: 'Fries',
-      price: 500,
-      quantity: 1,
-      image_url: null,
-      customizations: {}
+      price_minor: 500,
     })
 
     // Subtotal: 1500*2 + 500 = 3500
     const state = useCartStore.getState()
-    expect(state.getTotal()).toBe(3500)
+    expect(state.totalAmountMinor()).toBe(3500)
   })
 
   it('should handle removing items', () => {
@@ -54,10 +51,7 @@ describe('Cart Zustand Store', () => {
     store.addItem({
       id: 'item_1',
       name: 'Burger',
-      price: 1500,
-      quantity: 1,
-      image_url: null,
-      customizations: {}
+      price_minor: 1500,
     })
     store.removeItem('item_1')
 
@@ -71,23 +65,18 @@ describe('Cart Zustand Store', () => {
     store.addItem({
       id: 'item_1',
       name: 'Steak',
-      price: 10000,
-      quantity: 1,
-      image_url: null,
-      customizations: {}
+      price_minor: 10000,
     })
 
     // Total should be 10000
-    expect(store.getTotal()).toBe(10000)
+    expect(store.totalAmountMinor()).toBe(10000)
 
-    store.setDiscount(1500)
+    store.setSpinnerDiscount(1500)
     
-    // Check if store allows discount getter
-    // Since discount logic might be handled in components or if setDiscount is implemented
-    expect(useCartStore.getState().discount).toBe(1500)
+    expect(useCartStore.getState().spinnerDiscount).toBe(1500)
 
     // Clear cart should also reset discount
     store.clearCart()
-    expect(useCartStore.getState().discount).toBe(0)
+    expect(useCartStore.getState().spinnerDiscount).toBeNull()
   })
 })

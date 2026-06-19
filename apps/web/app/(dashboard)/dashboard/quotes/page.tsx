@@ -25,10 +25,10 @@ export default async function QuotesDashboard() {
     .from('page_bookings')
     .select(`
       *,
-      location_pages!inner(id, title, template_type),
+      location_pages!inner(id, title, template_type, locations!inner(organization_id)),
       page_items(title)
     `)
-    .eq('organization_id', member.organization_id)
+    .eq('location_pages.locations.organization_id', member.organization_id)
     .in('location_pages.template_type', ['rate_card', 'info', 'custom'])
     .order('created_at', { ascending: false })
 
@@ -75,7 +75,7 @@ export default async function QuotesDashboard() {
                       {format(new Date(quote.created_at), 'MMM d, yyyy h:mm a')}
                     </td>
                     <td className="px-6 py-4 max-w-[200px] truncate">
-                      {quote.notes || <span className="text-zinc-600 italic">No message</span>}
+                      {quote.booking_notes || <span className="text-zinc-600 italic">No message</span>}
                     </td>
                     <td className="px-6 py-4">
                       <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-bold ${

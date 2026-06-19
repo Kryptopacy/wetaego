@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { sendPushToOrg, newBookingNotification } from '@/lib/notifications/push'
+import { notifyBusiness } from '@/lib/notifications/dispatcher'
 
 /**
  * POST /api/bookings
@@ -18,7 +18,9 @@ export async function POST(req: Request) {
       customer_email,
       customer_phone,
       booking_date,
+      booking_end_date,
       booking_time,
+      booking_end_time,
       number_of_guests,
       booking_notes,
     } = body
@@ -47,7 +49,7 @@ export async function POST(req: Request) {
     }
 
     // Get the selected item (if any) for pricing
-    let item: { id: string; title: string; price_minor: number; payment_mode: string; deposit_percentage: number } | null = null
+    let item: { id: string; title: string; price_minor: number | null; payment_mode: string | null; deposit_percentage: number | null } | null = null
     if (item_id) {
       const { data } = await supabase
         .from('page_items')
@@ -65,20 +67,36 @@ export async function POST(req: Request) {
       ? Math.round(basePrice * (depositPct / 100))
       : basePrice
 
+    // Check availability if this is tied to an item and has dates
+    if (item_id && booking_date) {
+      const { data: isAvailable, error: rpcError } = await supabase.rpc('check_item_availability', {
+        p_item_id: item_id,
+        p_start_date: booking_date,
+        p_end_date: booking_end_date || booking_date,
+      })
+
+      if (rpcError) {
+        console.error('Availability check error:', rpcError)
+      } else if (isAvailable === false) {
+        return NextResponse.json({ error: 'Selected dates are unavailable or sold out' }, { status: 409 })
+      }
+    }
+
     // Create the booking record (initially pending)
     const { data: booking, error: bookingError } = await supabase
       .from('page_bookings')
       .insert({
         page_id,
         item_id: item_id || null,
-        organization_id: location.organization_id,
         customer_name,
         customer_email: customer_email || null,
         customer_phone,
         booking_date: booking_date || null,
+        booking_end_date: booking_end_date || null,
         booking_time: booking_time || null,
+        booking_end_time: booking_end_time || null,
         number_of_guests: number_of_guests || 1,
-        notes: booking_notes || null,
+        booking_notes: booking_notes || null,
         total_amount_minor: basePrice,
         status: 'pending',
         payment_status: chargeAmount > 0 && page.billing_enabled ? 'awaiting_payment' : 'not_required',
@@ -137,11 +155,50 @@ export async function POST(req: Request) {
       }
     }
 
-    // No payment required — send push notification directly
-    await sendPushToOrg(
-      location.organization_id,
-      newBookingNotification(item?.title || page.title, customer_name)
-    ).catch(console.error)
+    // No payment required — send notification directly
+    await notifyBusiness(location.id, {
+      title: '📅 New Booking',
+      body: `${customer_name} booked ${item?.title || page.title}`,
+      url: '/dashboard/manage/bookings',
+      tag: 'new-booking'
+    })
+
+    // Update booking status to confirmed
+    await supabase
+      .from('page_bookings')
+      .update({ status: 'confirmed' })
+      .eq('id', booking.id)
+
+    // Decrement inventory if applicable
+    if (item_id) {
+      const guests = number_of_guests || 1
+      const { data: itemData } = await supabase
+        .from('page_items')
+        .select('inventory_count')
+        .eq('id', item_id)
+        .single()
+        
+      if (itemData && itemData.inventory_count !== null) {
+        const newCount = itemData.inventory_count - guests
+        const isSoldOut = newCount <= 0;
+        await supabase
+          .from('page_items')
+          .update({
+            inventory_count: newCount < 0 ? 0 : newCount,
+            availability_status: isSoldOut ? 'sold_out' : 'available'
+          })
+          .eq('id', item_id)
+
+        if (isSoldOut) {
+          await notifyBusiness(location.id, {
+            title: '🚨 Item Sold Out',
+            body: `An item has reached 0 inventory and is now marked as sold out.`,
+            url: '/dashboard/pages',
+            tag: 'inventory-alert'
+          }).catch(console.error)
+        }
+      }
+    }
 
     return NextResponse.json({ booking_id: booking.id, status: 'confirmed' })
 

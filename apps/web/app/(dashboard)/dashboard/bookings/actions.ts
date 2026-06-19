@@ -9,18 +9,21 @@ export async function updateBookingStatus(bookingId: string, action: 'mark_paid'
   const { data: userData, error: authError } = await supabase.auth.getUser()
   if (authError || !userData?.user) throw new Error('Not authenticated')
 
-  const { data: booking } = await supabase
-    .from('page_bookings' as any)
-    .select('organization_id')
+  const { data: bookingData } = await supabase
+    .from('page_bookings')
+    .select('location_pages!inner(locations!inner(organization_id))')
     .eq('id', bookingId)
     .single()
 
-  if (!booking) throw new Error('Booking not found')
+  if (!bookingData) throw new Error('Booking not found')
+  
+  // @ts-ignore
+  const orgId = bookingData.location_pages?.locations?.organization_id
 
   const { data: member } = await supabase
     .from('organization_members')
     .select('role')
-    .eq('organization_id', booking.organization_id)
+    .eq('organization_id', orgId)
     .eq('user_id', userData.user.id)
     .single()
 
@@ -29,7 +32,7 @@ export async function updateBookingStatus(bookingId: string, action: 'mark_paid'
     const { data: org } = await supabase
       .from('organizations')
       .select('id')
-      .eq('id', booking.organization_id)
+      .eq('id', orgId)
       .eq('created_by', userData.user.id)
       .single()
     isAuthorized = !!org

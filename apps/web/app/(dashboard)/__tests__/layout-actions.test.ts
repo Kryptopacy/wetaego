@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { describe, it, expect, vi } from 'vitest'
 import { setActiveLocation } from '../layout-actions'
 import * as cookiesModule from 'next/headers'
@@ -24,3 +25,4 @@ describe('Layout Actions (Branch Switcher)', () => {
     })
   })
 })
+

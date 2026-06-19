@@ -25,10 +25,10 @@ export default async function PropertiesDashboard() {
     .from('page_bookings')
     .select(`
       *,
-      location_pages!inner(id, title, template_type),
+      location_pages!inner(id, title, template_type, locations!inner(organization_id)),
       page_items(title)
     `)
-    .eq('organization_id', member.organization_id)
+    .eq('location_pages.locations.organization_id', member.organization_id)
     .eq('location_pages.template_type', 'listing')
     .order('created_at', { ascending: false })
 

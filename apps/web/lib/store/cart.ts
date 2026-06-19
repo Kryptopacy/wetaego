@@ -15,6 +15,7 @@ interface CartState {
   totalAmountMinor: () => number
   spinnerDiscount: number | null
   setSpinnerDiscount: (discount: number | null) => void
+  clearCart: () => void
 }
 
 export const useCartStore = create<CartState>()(

@@ -2,8 +2,8 @@
 import { NextResponse } from 'next/server'
 import crypto from 'crypto'
 import { createClient } from '@/lib/supabase/server'
+import { notifyBusiness } from '@/lib/notifications/dispatcher'
 import {
-  sendPushToOrg,
   newOrderNotification,
   newBookingNotification,
   paymentConfirmedNotification,
@@ -54,7 +54,7 @@ export async function POST(req: Request) {
 
         const { data: booking } = await supabase
           .from('page_bookings')
-          .select('id, page_id, total_amount_minor, customer_name, location_pages(location_id, title, locations(organization_id))')
+          .select('id, page_id, item_id, number_of_guests, total_amount_minor, customer_name, location_pages(location_id, title, locations(organization_id))')
           .eq('id', bookingId)
           .single()
 
@@ -77,15 +77,51 @@ export async function POST(req: Request) {
           })
           .eq('id', bookingId)
 
+        // If the booking is tied to an item, decrement inventory
+        if (booking.item_id) {
+          const guests = booking.number_of_guests || 1
+          const { data: itemData } = await supabase
+            .from('page_items')
+            .select('inventory_count')
+            .eq('id', booking.item_id)
+            .single()
+            
+          if (itemData && itemData.inventory_count !== null) {
+            const newCount = itemData.inventory_count - guests
+            const isSoldOut = newCount <= 0;
+            await supabase
+              .from('page_items')
+              .update({
+                inventory_count: newCount < 0 ? 0 : newCount,
+                availability_status: isSoldOut ? 'sold_out' : 'available'
+              })
+              .eq('id', booking.item_id)
+
+            if (isSoldOut && booking.location_pages?.location_id) {
+              await notifyBusiness(
+                booking.location_pages.location_id,
+                {
+                  title: '🚨 Item Sold Out',
+                  body: `An item has reached 0 inventory and is now marked as sold out.`,
+                  url: '/dashboard/pages',
+                  tag: 'inventory-alert'
+                }
+              ).catch(console.error)
+            }
+          }
+        }
+
         // Push notification to business
-        const orgId = booking.location_pages?.locations?.organization_id
-        if (orgId) {
-          await sendPushToOrg(
-            orgId,
-            newBookingNotification(
-              booking.location_pages?.title || 'Service',
-              booking.customer_name
-            )
+        const locationId = booking.location_pages?.location_id
+        if (locationId) {
+          await notifyBusiness(
+            locationId,
+            {
+              title: '📅 New Booking Paid',
+              body: `${booking.customer_name} paid for ${booking.location_pages?.title || 'a service'}`,
+              url: '/dashboard/manage/bookings',
+              tag: 'new-booking'
+            }
           ).catch(console.error) // non-blocking
         }
 
@@ -97,7 +133,7 @@ export async function POST(req: Request) {
 
       const { data: order } = await supabase
         .from('orders')
-        .select('id, status, total_amount_minor, organization_id, table_identifier')
+        .select('id, status, total_amount_minor, location_id, table_identifier')
         .eq('id', orderId)
         .single()
 
@@ -122,10 +158,15 @@ export async function POST(req: Request) {
       }
 
       // Push notification to business
-      if (order.organization_id) {
-        await sendPushToOrg(
-          order.organization_id,
-          newOrderNotification(order.table_identifier || 'Takeaway', amountPaidMinor)
+      if (order.location_id) {
+        await notifyBusiness(
+          order.location_id,
+          {
+            title: '✅ New Order Paid',
+            body: `₦${(amountPaidMinor / 100).toLocaleString()} received for ${order.table_identifier || 'Takeaway'}`,
+            url: '/dashboard',
+            tag: 'payment-confirmed'
+          }
         ).catch(console.error) // non-blocking
       }
 

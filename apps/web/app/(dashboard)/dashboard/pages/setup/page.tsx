@@ -36,7 +36,7 @@ export default async function BusinessTypeSetupPage({
       .single()
 
     if (member?.organizations) {
-      org = member.organizations as typeof org
+      org = member.organizations as unknown as typeof org
     } else {
       const { data } = await supabase
         .from('organizations')

@@ -2,8 +2,10 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+// @ts-ignore
 import { redirect } from 'next/navigation'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
+import { sendWelcomeEmail } from '@/lib/notifications/email'
 
 export async function login(formData: FormData) {
   const supabase = await createClient()
@@ -40,6 +42,9 @@ export async function signup(formData: FormData) {
   if (error) {
     redirect(`/login?message=Could not sign up user&redirectTo=${encodeURIComponent(redirectTo)}`)
   }
+
+  // Trigger welcome email in the background
+  sendWelcomeEmail(data.email).catch(console.error)
 
   revalidatePath('/', 'layout')
   redirect(redirectTo)
@@ -91,6 +96,11 @@ export async function startInteractiveDemo() {
     redirect(`/login?message=Could not sign into demo workspace`)
   }
 
+  if (!authData.user) {
+    redirect(`/login?message=Could not sign into demo workspace`)
+    return
+  }
+
   const userId = authData.user.id
 
   // 2. Provision the 'Pacy Grills' Org
@@ -103,6 +113,7 @@ export async function startInteractiveDemo() {
   if (orgError || !org) {
     console.error(orgError)
     redirect(`/login?message=Could not create demo organization`)
+    return
   }
 
   // 3. Make them Owner
@@ -198,12 +209,12 @@ export async function startInteractiveDemo() {
       slug: 'vip-tables',
       title: 'VIP Table Reservations',
       template_type: 'rate-card',
-      content: {
+      content: JSON.stringify({
         items: [
           { name: 'Standard VIP Table', price: '₦250,000', description: 'Includes 1 premium spirit, 1 champagne, seating for 4.' },
           { name: 'VVIP Cabana', price: '₦750,000', description: 'Includes 3 premium spirits, 2 champagnes, dedicated hostess, seating for 8.' }
         ]
-      },
+      }),
       is_published: true,
       randomizer_enabled: false
     },
@@ -212,12 +223,12 @@ export async function startInteractiveDemo() {
       slug: 'links',
       title: 'Our Links',
       template_type: 'link-in-bio',
-      content: {
+      content: JSON.stringify({
         links: [
           { label: 'Follow our Instagram', url: 'https://instagram.com/pacygrills' },
           { label: 'Leave a Review', url: 'https://google.com' }
         ]
-      },
+      }),
       is_published: true,
       randomizer_enabled: false
     }

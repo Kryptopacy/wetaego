@@ -39,7 +39,7 @@ export async function updateSetting(formData: FormData) {
   }
 
   const { error } = await supabase
-    .from('system_settings')
+    .from('system_settings' as any)
     .upsert({
       key,
       value,

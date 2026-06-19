@@ -8,6 +8,7 @@ import { RateCardRenderer } from './templates/rate-card-renderer'
 import { InfoRenderer } from './templates/info-renderer'
 import { AIChat } from '../../ai-chat'
 import { RouletteFAB } from '../../roulette-fab'
+import { EcosystemNav } from '@/components/layout/ecosystem-nav'
 
 export async function generateMetadata({
   params,
@@ -21,7 +22,7 @@ export async function generateMetadata({
     .from('locations')
     .select('id, name, cover_image_url')
     .eq('slug', slug)
-    .returns<any>()
+    .returns<Record<string, any>[]>()
     .single()
   if (!loc) return { title: 'Not Found' }
 
@@ -31,7 +32,7 @@ export async function generateMetadata({
     .eq('location_id', loc.id)
     .eq('slug', pageSlug)
     .eq('is_published', true)
-    .returns<any>()
+    .returns<Record<string, any>[]>()
     .single()
   if (!page) return { title: 'Not Found' }
 
@@ -73,7 +74,7 @@ export default async function PublicPageView({
     .from('locations')
     .select('id, name, organization_id, theme_color, cover_image_url, ai_enabled, ai_name, instagram_handle, whatsapp_number, phone_number, organizations(logo_url), manual_payment_enabled, manual_payment_bank_name, manual_payment_account_name, manual_payment_account_number, manual_payment_instructions')
     .eq('slug', slug)
-    .returns<any>()
+    .returns<Record<string, any>[]>()
     .single()
 
   if (!loc) notFound()
@@ -85,7 +86,7 @@ export default async function PublicPageView({
     .eq('location_id', loc.id)
     .eq('slug', pageSlug)
     .eq('is_published', true)
-    .returns<any>()
+    .returns<Record<string, any>[]>()
     .single()
 
   if (!page) notFound()
@@ -97,7 +98,7 @@ export default async function PublicPageView({
     .eq('page_id', page.id)
     .eq('is_published', true)
     .order('sort_order')
-    .returns<any>()
+    .returns<Record<string, any>[]>()
 
   // 4. Payment Settings
   const { data: paymentSettings } = await supabase
@@ -107,9 +108,9 @@ export default async function PublicPageView({
     .single()
 
   const sharedProps = {
-    location: loc,
-    page,
-    items: items || [],
+    location: loc as any,
+    page: page as any,
+    items: (items as any[]) || [],
     locationSlug: slug,
     referralSource: ref,
     paymentIsLive: paymentSettings?.is_active ?? false,
@@ -140,6 +141,7 @@ export default async function PublicPageView({
   return (
     <>
       {RendererContent}
+      <EcosystemNav locationId={loc.id} slug={slug} currentPath={page.slug} />
       {loc.ai_enabled && (
         <AIChat
           locationId={loc.id}

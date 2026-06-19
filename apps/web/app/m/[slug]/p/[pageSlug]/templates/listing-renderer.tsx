@@ -25,6 +25,7 @@ interface ListingRendererProps {
     id: string
     title: string
     content?: string
+    slug?: string
   }
   items: PageItem[]
   locationSlug: string

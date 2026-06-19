@@ -43,6 +43,7 @@ interface BookingRendererProps {
     payment_mode?: string
     deposit_percentage?: number
     business_type_preset?: string
+    slug?: string
   }
   items: PageItem[]
   locationSlug: string
@@ -70,7 +71,9 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
     customer_email: '',
     customer_phone: '',
     booking_date: '',
+    booking_end_date: '',
     booking_time: '',
+    booking_end_time: '',
     number_of_guests: '1',
     booking_notes: '',
   })
@@ -187,7 +190,7 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">Preferred Date</label>
+                  <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">Start Date</label>
                   <input
                     value={form.booking_date}
                     onChange={e => setForm(f => ({ ...f, booking_date: e.target.value }))}
@@ -197,10 +200,32 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">Preferred Time</label>
+                  <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">End Date (Optional)</label>
+                  <input
+                    value={form.booking_end_date}
+                    onChange={e => setForm(f => ({ ...f, booking_end_date: e.target.value }))}
+                    type="date"
+                    min={form.booking_date || new Date().toISOString().split('T')[0]}
+                    className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-violet-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">Start Time</label>
                   <input
                     value={form.booking_time}
                     onChange={e => setForm(f => ({ ...f, booking_time: e.target.value }))}
+                    type="time"
+                    className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-violet-500 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">End Time (Optional)</label>
+                  <input
+                    value={form.booking_end_time}
+                    onChange={e => setForm(f => ({ ...f, booking_end_time: e.target.value }))}
                     type="time"
                     className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-violet-500 focus:outline-none"
                   />

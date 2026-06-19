@@ -105,7 +105,7 @@ export default async function PageEditDashboard({
               <p className="text-xs text-zinc-400 mt-0.5">Enable the "Surprise Me" spinning wheel for customers who can't decide.</p>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" name="randomizer_enabled" value="true" defaultChecked={page.randomizer_enabled} className="sr-only peer" />
+              <input type="checkbox" name="randomizer_enabled" value="true" defaultChecked={page.randomizer_enabled || false} className="sr-only peer" />
               <div className="w-11 h-6 bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-500"></div>
             </label>
           </div>
@@ -122,7 +122,7 @@ export default async function PageEditDashboard({
         <PageBuilderForm 
           pageId={page.id} 
           templateType={page.template_type} 
-          initialItems={items || []} 
+          initialItems={(items as any[]) || []} 
         />
       </div>
     </div>

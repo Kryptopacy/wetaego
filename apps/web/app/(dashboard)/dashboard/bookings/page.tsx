@@ -22,13 +22,13 @@ export default async function BookingsDashboard() {
 
   // Fetch bookings linked to 'booking' template pages
   const { data: bookings } = await supabase
-    .from('page_bookings' as any)
+    .from('page_bookings')
     .select(`
       *,
-      location_pages!inner(id, title, template_type),
+      location_pages!inner(id, title, template_type, locations!inner(organization_id)),
       page_items(title)
     `)
-    .eq('organization_id', member.organization_id)
+    .eq('location_pages.locations.organization_id', member.organization_id)
     .eq('location_pages.template_type', 'booking')
     .order('created_at', { ascending: false })
 

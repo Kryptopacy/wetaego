@@ -29,7 +29,7 @@ export function TimeclockWidget({ locationId }: { locationId: string }) {
       const { data } = await supabase
         .from('staff_shifts')
         .select('id')
-        .eq('profile_id', user.id)
+        .eq('user_id', user.id)
         .eq('status', 'active')
         .limit(1)
         .single()
@@ -53,7 +53,7 @@ export function TimeclockWidget({ locationId }: { locationId: string }) {
           const { data } = await supabase
             .from('staff_shifts')
             .select('id')
-            .eq('profile_id', user.id)
+            .eq('user_id', user.id)
             .eq('status', 'active')
             .limit(1)
             .single()

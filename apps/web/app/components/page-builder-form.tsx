@@ -16,6 +16,7 @@ interface PageItem {
   item_data: any
   deposit_percentage: number | null
   payment_mode: string
+  inventory_count: number | null
 }
 
 interface PageBuilderFormProps {
@@ -172,6 +173,12 @@ export function PageBuilderForm({ pageId, templateType, initialItems }: PageBuil
             <input name="price_display" defaultValue={item?.price_display || ''} className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white" placeholder="e.g. Starting from ₦5,000" />
           </div>
         </div>
+
+        <div>
+          <label className="block text-xs font-medium text-zinc-400 mb-1">Inventory / Stock (Optional)</label>
+          <input type="number" name="inventory_count" defaultValue={item?.inventory_count ?? ''} className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white" placeholder="e.g. 50" />
+          <p className="text-[10px] text-zinc-500 mt-1">Leave empty for unlimited. Setting this will automatically mark item as Sold Out when it hits 0.</p>
+        </div>
       </div>
     )
   }
@@ -250,6 +257,14 @@ export function PageBuilderForm({ pageId, templateType, initialItems }: PageBuil
                       <span className="text-zinc-500 text-xs">Display: {item.price_display}</span>
                     )}
                   </div>
+                  {item.inventory_count !== null && (
+                    <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-zinc-800/50 border border-zinc-700/50">
+                      <div className={`w-1.5 h-1.5 rounded-full ${item.inventory_count > 0 ? 'bg-emerald-500' : 'bg-red-500'}`}></div>
+                      <span className="text-[10px] font-medium text-zinc-300">
+                        {item.inventory_count > 0 ? `${item.inventory_count} in stock` : 'Sold out'}
+                      </span>
+                    </div>
+                  )}
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <button onClick={() => setEditingId(item.id)} disabled={isSaving} className="p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors">

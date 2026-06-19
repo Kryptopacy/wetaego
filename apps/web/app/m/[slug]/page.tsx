@@ -11,6 +11,8 @@ import { LiveOrderTracker } from './live-order-tracker'
 import { RouletteFAB } from './roulette-fab'
 import { ShareButton } from '@/app/components/share-button'
 import { SpinnerModal } from '../../components/spinner-modal'
+import { PortalRenderer } from './portal-renderer'
+import { EcosystemNav } from '@/components/layout/ecosystem-nav'
 
 // Revalidate this page every 60 seconds (Incremental Static Regeneration)
 // This ensures edge caching handles high traffic seamlessly
@@ -39,7 +41,7 @@ export default async function PublicMenuPage({
   searchParams
 }: { 
   params: Promise<{ slug: string }>,
-  searchParams: Promise<{ qr_id?: string }>
+  searchParams: Promise<{ qr_id?: string, view?: string }>
 }) {
   const resolvedParams = await params
   const resolvedSearchParams = await searchParams
@@ -110,6 +112,20 @@ export default async function PublicMenuPage({
     }
 
     tableIdentifier = qrCode.table_identifier
+  }
+
+  // 1.8 Check location_pages for Portal mode
+  const { data: locationPages } = await supabase
+    .from('location_pages')
+    .select('id, slug, title, template_type, is_published')
+    .eq('location_id', location.id)
+    .eq('is_published', true)
+
+  const view = resolvedSearchParams.view;
+  const hasPortalMode = locationPages && locationPages.length > 0;
+
+  if (hasPortalMode && view !== 'menu') {
+    return <PortalRenderer location={location} pages={locationPages} />
   }
 
   // 2. Find the active menu for this location
@@ -367,6 +383,7 @@ export default async function PublicMenuPage({
         {location.spinner_enabled && location.spinner_config && (
           <SpinnerModal locationId={location.id} config={location.spinner_config as any} />
         )}
+        <EcosystemNav locationId={location.id} slug={slug} currentPath="menu" />
         <CartFAB 
           organizationId={location.organization_id} 
           locationId={location.id} 

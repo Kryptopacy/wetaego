@@ -1,4 +1,5 @@
-﻿/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// @ts-ignore
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { chargeCredits } from '@/lib/payments/credits'

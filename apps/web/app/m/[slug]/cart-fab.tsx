@@ -101,8 +101,7 @@ export function CartFAB({
       addItem({
         id: upsellItemDetails.id,
         name: upsellItemDetails.name,
-        priceMinor: upsellItemDetails.price_minor,
-        quantity: 1
+        price_minor: upsellItemDetails.price_minor || 0
       })
       toast.success(`Added ${upsellItemDetails.name}`)
       setUpsellData(null) // Remove upsell after adding
@@ -120,8 +119,8 @@ export function CartFAB({
   const discountAmountMinor = Math.floor(subtotalMinor * discountMultiplier)
   const discountedSubtotalMinor = subtotalMinor - discountAmountMinor
   
-  // Final total
-  const finalTotalMinor = discountedSubtotalMinor + (tipAmount || 0)
+  const tipAmount = 0
+  const finalTotalMinor = discountedSubtotalMinor + tipAmount
 
   const handleCheckout = async () => {
     if (isCheckingOut || !tableNumber) {

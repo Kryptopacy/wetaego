@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { POST } from '../app/api/webhooks/paystack/route'
 import crypto from 'crypto'
@@ -157,4 +158,5 @@ describe('Paystack B2C Webhook (POST)', () => {
     expect(mockUpdate).toHaveBeenCalledWith({ status: 'failed' })
   })
 })
+
 

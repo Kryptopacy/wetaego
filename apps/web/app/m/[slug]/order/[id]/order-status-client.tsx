@@ -32,10 +32,12 @@ export function OrderStatusClient({
         table: 'orders',
         filter: `id=eq.${order.id}`
       }, (payload: any) => {
-        setOrder((prev: any) => ({ ...prev, ...payload.new }))
-        if (payload.new.status === 'paid' && prev.status === 'pending') {
-          toast.success('Payment confirmed by cashier! Your food is being prepared.')
-        }
+        setOrder((prev: any) => {
+          if (payload.new.status === 'paid' && prev.status === 'pending') {
+            toast.success('Payment confirmed by cashier! Your food is being prepared.')
+          }
+          return { ...prev, ...payload.new }
+        })
       })
       .subscribe()
 

@@ -15,7 +15,7 @@ export async function clockIn(locationId: string) {
   const { data: activeShifts } = await supabase
     .from('staff_shifts')
     .select('id, location_id')
-    .eq('profile_id', user.id)
+    .eq('user_id', user.id)
     .eq('status', 'active')
 
   if (activeShifts && activeShifts.length > 0) {
@@ -30,7 +30,7 @@ export async function clockIn(locationId: string) {
     .from('staff_shifts')
     .insert({
       location_id: locationId,
-      profile_id: user.id,
+      user_id: user.id,
       status: 'active'
     })
 
@@ -71,7 +71,7 @@ export async function clockOut(shiftId: string) {
       total_hours: parseFloat(hours.toFixed(2))
     })
     .eq('id', shiftId)
-    .eq('profile_id', user.id) // Security check
+    .eq('user_id', user.id) // Security check
 
   if (error) {
     console.error('Clock out error:', error)

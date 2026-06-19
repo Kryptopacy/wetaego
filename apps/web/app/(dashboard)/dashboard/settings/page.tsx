@@ -245,21 +245,22 @@ export default async function SettingsPage({
               </form>
             </div>
 
-            <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
-              <h2 className="text-lg font-semibold text-white mb-2 flex items-center gap-2">
-                Manual Transfer Fallback
-                {location.manual_payment_enabled && (
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400">Enabled</span>
-                )}
-              </h2>
-              <p className="text-sm text-zinc-400 mb-6">
-                If your Paystack account isn't live yet or the provider experiences downtime, the system will automatically fall back to showing these manual bank transfer details so you never lose a booking.
-              </p>
-              
-              <form action={saveManualPaymentSettings} className="flex flex-col gap-4">
-                <input type="hidden" name="locationId" value={location.id} />
+            {location && (
+              <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
+                <h2 className="text-lg font-semibold text-white mb-2 flex items-center gap-2">
+                  Manual Transfer Fallback
+                  {location.manual_payment_enabled && (
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400">Enabled</span>
+                  )}
+                </h2>
+                <p className="text-sm text-zinc-400 mb-6">
+                  If your Paystack account isn't live yet or the provider experiences downtime, the system will automatically fall back to showing these manual bank transfer details so you never lose a booking.
+                </p>
                 
-                <div>
+                <form action={saveManualPaymentSettings} className="flex flex-col gap-4">
+                  <input type="hidden" name="locationId" value={location.id} />
+                  
+                  <div>
                   <label className="mb-2 block text-sm font-medium text-zinc-300">Status</label>
                   <select name="manualPaymentEnabled" defaultValue={location.manual_payment_enabled ? 'true' : 'false'} className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
                     <option value="false">Disabled</option>
@@ -318,11 +319,12 @@ export default async function SettingsPage({
 
                 <div className="mt-2 flex items-center justify-between">
                   <button type="submit" className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium transition-colors">
-                    Save Fallback Details
+                    Save Fallback Settings
                   </button>
                 </div>
               </form>
             </div>
+            )}
           </div>
         )}
           </>
@@ -474,7 +476,7 @@ export default async function SettingsPage({
                   <p className="text-xs text-zinc-400 mt-0.5">Enable the "Surprise Me" spinning wheel on your main menu for customers who can't decide.</p>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" name="randomizerEnabled" value="true" defaultChecked={location.randomizer_enabled} className="sr-only peer" />
+                  <input type="checkbox" name="randomizerEnabled" value="true" defaultChecked={location.randomizer_enabled || false} className="sr-only peer" />
                   <div className="w-11 h-6 bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
                 </label>
               </div>
@@ -503,7 +505,7 @@ export default async function SettingsPage({
                   type="checkbox" 
                   id="global_discount_enabled"
                   name="global_discount_enabled" 
-                  defaultChecked={location.global_discount_enabled}
+                  defaultChecked={location.global_discount_enabled || false}
                   className="w-5 h-5 rounded border-zinc-600 text-blue-500 bg-zinc-800"
                 />
                 <label htmlFor="global_discount_enabled" className="text-sm font-medium text-white flex-1 cursor-pointer">
@@ -551,7 +553,7 @@ export default async function SettingsPage({
                     type="checkbox" 
                     id="spinner_enabled"
                     name="spinner_enabled" 
-                    defaultChecked={location.spinner_enabled}
+                    defaultChecked={location.spinner_enabled || false}
                     className="w-5 h-5 rounded border-zinc-600 text-purple-500 bg-zinc-800"
                   />
                   <label htmlFor="spinner_enabled" className="text-sm font-medium text-white flex-1 cursor-pointer">

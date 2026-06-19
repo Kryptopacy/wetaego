@@ -184,6 +184,9 @@ export async function addPageItem(formData: FormData): Promise<void> {
     ? parseInt(formData.get('deposit_percentage') as string)
     : null
   const payment_mode = (formData.get('payment_mode') as string) || 'full'
+  const inventory_count = formData.get('inventory_count')
+    ? parseInt(formData.get('inventory_count') as string)
+    : null
 
   const { data: userData } = await supabase.auth.getUser()
   if (!userData?.user) throw new Error('Not authenticated')
@@ -199,6 +202,7 @@ export async function addPageItem(formData: FormData): Promise<void> {
     item_data,
     deposit_percentage,
     payment_mode,
+    inventory_count,
   })
 
   if (error) throw new Error(error.message)
@@ -220,13 +224,16 @@ export async function updatePageItem(formData: FormData): Promise<void> {
   const item_data = formData.get('item_data')
     ? JSON.parse(formData.get('item_data') as string)
     : null
+  const inventory_count = formData.get('inventory_count')
+    ? parseInt(formData.get('inventory_count') as string)
+    : null
 
   const { data: userData } = await supabase.auth.getUser()
   if (!userData?.user) throw new Error('Not authenticated')
 
   const { error } = await supabase
     .from('page_items')
-    .update({ title, subtitle, description, price_minor, price_display, availability_status, item_data })
+    .update({ title, subtitle, description, price_minor, price_display, availability_status, item_data, inventory_count })
     .eq('id', itemId)
 
   if (error) throw new Error(error.message)
