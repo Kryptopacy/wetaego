@@ -70,7 +70,6 @@ async function Pricing() {
     <section id="pricing" className="py-32 px-6 bg-[#050505]">
       <div className="max-w-6xl mx-auto">
         <FadeIn className="text-center mb-20">
-          <span className="inline-block px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold uppercase tracking-widest mb-6">Simple Pricing</span>
           <h2 className="text-4xl md:text-6xl font-black text-white tracking-tight mb-6">Pay for what you need.</h2>
           <p className="text-zinc-400 text-lg md:text-xl font-light">No hidden fees. Cancel any time.</p>
         </FadeIn>
@@ -121,9 +120,7 @@ export default async function HomePage() {
       {/* â”€â”€ Navbar â”€â”€ */}
       <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-12 h-16 bg-black/40 backdrop-blur-xl border-b border-white/[0.04]">
         <div className="flex items-center gap-3">
-          <div className="w-6 h-6 rounded-md bg-gradient-to-br from-white to-zinc-300 flex items-center justify-center shadow-[0_0_15px_rgba(255,255,255,0.3)]">
-            <Zap className="w-3.5 h-3.5 text-black" aria-hidden="true" />
-          </div>
+          <Image src="/ourmenu-qr-icon.svg" alt="OurMenu Logo" width={28} height={28} className="object-contain" />
           <span className="font-semibold text-white tracking-tight">OurMenu OS</span>
         </div>
         <div className="hidden md:flex items-center gap-8 text-sm font-medium text-zinc-400">
@@ -162,15 +159,14 @@ export default async function HomePage() {
         {/* Content grid */}
         <div className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-12 pt-24 pb-16 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center min-h-screen">
 
+          {/* Top right Search Bar */}
+          <div className="absolute top-32 right-6 md:right-12 z-50 w-full max-w-sm hidden lg:block">
+            <DirectorySearch />
+          </div>
+
           {/* Left — Copy */}
           <FadeIn className="flex flex-col justify-center">
-            <div className="mb-8">
-              <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-zinc-300 text-xs font-medium backdrop-blur-sm">
-                <Zap className="w-3 h-3 text-violet-400" />
-                Smart Menu + Live KDS + Automated Payments
-              </span>
-            </div>
-            <h1 className="text-5xl md:text-7xl font-black text-white tracking-[-0.04em] leading-[1.02] mb-6">
+            <h1 className="text-5xl md:text-7xl font-black text-white tracking-[-0.04em] leading-[1.02] mb-6 mt-8">
               The ultimate digital menu.<br />
               <span className="text-transparent bg-clip-text bg-gradient-to-br from-violet-300 via-white to-zinc-400">
                 A complete management suite.
@@ -191,10 +187,6 @@ export default async function HomePage() {
               </form>
             </div>
 
-            <div className="mt-8 pt-8 border-t border-white/10 w-full max-w-md">
-              <p className="text-zinc-400 text-sm font-medium mb-3">Are you a guest looking for a venue's menu?</p>
-              <DirectorySearch />
-            </div>
           </FadeIn>
 
           {/* Right — Phone mockup with actual guest menu screen */}
@@ -251,7 +243,6 @@ export default async function HomePage() {
       {/* â”€â”€ FEATURES: Full Bento Grid â”€â”€ */}
       <section id="features" className="py-24 px-6 max-w-7xl mx-auto relative z-10">
         <FadeIn className="text-center mb-20">
-          <span className="inline-block px-4 py-1.5 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-300 text-xs font-bold uppercase tracking-widest mb-6">10 Integrated Modules</span>
           <h2 className="text-4xl md:text-6xl font-black text-white mb-6 tracking-tight">
             Not features.<br /><span className="text-zinc-400">A complete hospitality suite.</span>
           </h2>
@@ -298,12 +289,10 @@ export default async function HomePage() {
       <footer className="border-t border-white/[0.04] py-12 px-6">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-3">
-            <div className="w-5 h-5 rounded-md bg-white flex items-center justify-center">
-              <Zap className="w-3 h-3 text-black" aria-hidden="true" />
-            </div>
+            <Image src="/ourmenu-qr-icon.svg" alt="OurMenu Logo" width={20} height={20} className="object-contain grayscale opacity-70" />
             <span className="font-semibold text-white text-sm">OurMenu</span>
           </div>
-          <p className="text-zinc-600 text-sm">© {new Date().getFullYear()} OurMenu. Built for African hospitality.</p>
+          <p className="text-zinc-600 text-sm">© {new Date().getFullYear()} OurMenu. A CruiseHQ concept.</p>
           <div className="flex items-center gap-6 text-zinc-500 text-sm">
             <a href="/privacy" className="hover:text-white transition-colors">Privacy</a>
             <a href="/terms" className="hover:text-white transition-colors">Terms</a>

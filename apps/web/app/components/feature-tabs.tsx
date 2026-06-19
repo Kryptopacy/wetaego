@@ -10,6 +10,28 @@ import { StaggerContainer, StaggerItem } from './animations'
 
 const categories = [
   {
+    id: 'architecture',
+    label: 'Flexible Architecture',
+    features: [
+      {
+        icon: Globe,
+        color: 'from-blue-600 to-indigo-600',
+        tag: 'Multi-template/Multibusiness',
+        badge: 'Any business type',
+        title: 'Built for more than just restaurants.',
+        description: 'Our multi-template architecture supports custom templates for restaurants, salons, consulting, and hotels. Your digital storefront adapts exactly to your business model.',
+      },
+      {
+        icon: FileText,
+        color: 'from-violet-600 to-fuchsia-600',
+        tag: 'Custom Flows & Structure',
+        badge: 'Tailored to you',
+        title: 'Design your own operational flows.',
+        description: 'Define varied data structures, custom checkout steps, and unique operational flows to match the precise way your team works.',
+      }
+    ]
+  },
+  {
     id: 'command-center',
     label: 'Command Center',
     features: [
