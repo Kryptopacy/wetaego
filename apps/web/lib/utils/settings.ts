@@ -2,7 +2,7 @@ import { createAnonClient } from '@/lib/supabase/server'
 import { unstable_cache } from 'next/cache'
 
 // Default fallbacks in case the DB is unreachable or row is missing
-const DEFAULT_PRICING = { pro_monthly_ngn: 49000, credits_10_ngn: 15000, credits_50_ngn: 60000 }
+const DEFAULT_PRICING = { pro_monthly_ngn: 49000, credits_10_ngn: 15000, credits_25_ngn: 33000, credits_50_ngn: 60000 }
 const DEFAULT_CREDIT_COSTS = { ai_cover: 5, copywriter: 1, translation_per_category: 2, custom_page: 10 }
 const DEFAULT_PLAN_LIMITS = {
   starter: { credits: 0, pages: 0 },

@@ -20,9 +20,11 @@ export function QrSettingsClient({ location }: { location: Location }) {
   const [isSaving, setIsSaving] = useState(false);
   const svgRef = useRef<HTMLDivElement>(null);
 
-  // In a real app we'd fetch location_pages and let them select a page.
-  // For now, we assume the QR links to their portal.
-  const portalUrl = typeof window !== 'undefined' ? `${window.location.origin}/m/${location.slug}` : `https://ourmenuos.online/m/${location.slug}`;
+  const [portalUrl, setPortalUrl] = useState(`https://ourmenuos.online/m/${location.slug}`);
+
+  useEffect(() => {
+    setPortalUrl(`${window.location.origin}/m/${location.slug}`);
+  }, [location.slug]);
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -40,10 +42,33 @@ export function QrSettingsClient({ location }: { location: Location }) {
     }
   };
 
-  const handleDownloadPNG = () => {
+  const handleDownloadPNG = async () => {
     if (!svgRef.current) return;
-    const svgElement = svgRef.current.querySelector("svg");
-    if (!svgElement) return;
+    const originalSvg = svgRef.current.querySelector("svg");
+    if (!originalSvg) return;
+
+    // Clone the SVG to avoid mutating the DOM
+    const svgElement = originalSvg.cloneNode(true) as SVGSVGElement;
+
+    // Convert <image href="..."> to base64 to avoid tainted canvas errors
+    const imageTags = svgElement.querySelectorAll("image");
+    for (const img of imageTags) {
+      const href = img.getAttribute("href");
+      if (href && href.startsWith("http")) {
+        try {
+          const response = await fetch(href);
+          const blob = await response.blob();
+          const base64 = await new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.readAsDataURL(blob);
+          });
+          img.setAttribute("href", base64);
+        } catch (e) {
+          console.error("Failed to fetch image for base64 conversion. Export might fail or omit the image.", e);
+        }
+      }
+    }
 
     const svgData = new XMLSerializer().serializeToString(svgElement);
     const canvas = document.createElement("canvas");
@@ -61,13 +86,18 @@ export function QrSettingsClient({ location }: { location: Location }) {
       ctx.drawImage(img, 0, 0, 2048, 2048);
       URL.revokeObjectURL(url);
       
-      const pngUrl = canvas.toDataURL("image/png");
-      const a = document.createElement("a");
-      a.href = pngUrl;
-      a.download = `${location.slug}-qr.png`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+      try {
+        const pngUrl = canvas.toDataURL("image/png");
+        const a = document.createElement("a");
+        a.href = pngUrl;
+        a.download = `${location.slug}-qr.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      } catch (e) {
+        console.error(e);
+        toast.error("Failed to export PNG. Cross-origin image issue. Please use SVG download.");
+      }
     };
     img.src = url;
   };

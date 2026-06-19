@@ -19,10 +19,10 @@ async function Pricing() {
 
   const plans = [
     {
-      name: 'Starter',
+      name: 'Lite',
       price: '₦0',
-      period: '30-day trial',
-      description: 'Perfect for testing the platform at your venue.',
+      period: 'for first 30 days',
+      description: 'Perfect for testing the platform at your venue. Paid subscription required after trial.',
       features: ['AI Waiter (guest-facing chat)', 'Edge Translator (40+ languages)', 'Up to 2 QR codes', '1 active location'],
       cta: 'Start Free Trial',
       href: '/dashboard',
@@ -34,7 +34,7 @@ async function Pricing() {
       period: 'per month',
       description: 'For serious operators who want every edge.',
       features: [
-        'Everything in Starter',
+        'Everything in Lite',
         `Includes ${planLimits.pro?.credits || 50} Credits/mo`,
         'AI Copywriter & Image Studio',
         'Smart Request Triaging (KDS)',
@@ -108,6 +108,42 @@ async function Pricing() {
               </a>
             </FadeIn>
           ))}
+        </div>
+
+        {/* Credit Packs */}
+        <div className="mt-32 max-w-5xl mx-auto">
+          <FadeIn className="text-center mb-12">
+            <h3 className="text-3xl md:text-4xl font-black text-white tracking-tight mb-4">Need more AI power?</h3>
+            <p className="text-zinc-400 text-lg">Top up your workspace with AI credits. Credits never expire.</p>
+          </FadeIn>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              { amount: 10, price: pricing.credits_10_ngn || 15000, popular: false },
+              { amount: 25, price: pricing.credits_25_ngn || 33000, popular: true },
+              { amount: 50, price: pricing.credits_50_ngn || 60000, popular: false }
+            ].map((pack, i) => (
+              <FadeIn key={pack.amount} delay={i * 0.1} className={`relative rounded-3xl p-8 flex flex-col items-center text-center transition-all duration-300 ${
+                pack.popular 
+                  ? 'bg-gradient-to-b from-violet-900/20 to-zinc-900/50 border border-violet-500/30 shadow-lg shadow-violet-900/10' 
+                  : 'bg-white/[0.02] border border-white/[0.05] hover:border-white/10'
+              }`}>
+                {pack.popular && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-violet-600 text-white text-[10px] font-bold uppercase tracking-wider">Most Popular</div>
+                )}
+                <Zap className={`w-8 h-8 mb-6 ${pack.popular ? 'text-violet-400' : 'text-zinc-500'}`} aria-hidden="true" />
+                <h4 className="text-2xl font-bold text-white mb-2">{pack.amount} Credits</h4>
+                <div className="text-3xl font-black text-white mb-8">₦{pack.price.toLocaleString()}</div>
+                <a href="/dashboard/billing" className={`w-full py-3 rounded-xl text-sm font-bold transition-all duration-300 ${
+                  pack.popular
+                    ? 'bg-white text-black hover:scale-105'
+                    : 'bg-white/5 text-white hover:bg-white/10 border border-white/10'
+                }`}>
+                  Buy Pack
+                </a>
+              </FadeIn>
+            ))}
+          </div>
         </div>
       </div>
     </section>
