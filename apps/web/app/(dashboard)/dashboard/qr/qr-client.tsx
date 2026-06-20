@@ -1,6 +1,6 @@
-import { Database } from '@/lib/supabase/types'
 'use client'
 
+import { Database } from '@/lib/supabase/types'
 import { useState } from 'react'
 import { generateQrBatch, deleteQrCode, assignQrTable } from './actions'
 import { toast } from 'sonner'
