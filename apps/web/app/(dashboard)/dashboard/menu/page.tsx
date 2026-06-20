@@ -48,7 +48,7 @@ export default async function MenuManagerPage() {
 
   let locationId = savedLocId
   if (!locationId) {
-    const { data: loc } = await supabase.from('locations').select('id').eq('organization_id', org?.id).limit(1).single()
+    const { data: loc } = await supabase.from('locations').select('id').eq('organization_id', org?.id || '').limit(1).single()
     locationId = loc?.id
   }
   const activeLocationId = locationId || ''
