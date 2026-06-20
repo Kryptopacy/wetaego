@@ -140,7 +140,7 @@ export function NotificationCenter() {
     if (!orgId) return
 
     const channel = supabase
-      .channel('notification-center-v2')
+      .channel(`notification-${orgId}-${Math.random()}`)
       // Orders
       .on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: `organization_id=eq.${orgId}` }, (payload: { eventType: string, new: Record<string, unknown> }) => {
         if (payload.eventType === 'INSERT') {
