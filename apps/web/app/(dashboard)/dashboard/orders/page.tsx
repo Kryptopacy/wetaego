@@ -77,7 +77,7 @@ export default async function OrdersPage() {
       // Fetch Menu Items (usually org-wide)
       const { data: itemsData } = await supabase
         .from('menu_items')
-        .select('id, name, availability_status, price_minor')
+        .select('*')
         .eq('organization_id', org.id)
         .order('name')
       
