@@ -7,165 +7,53 @@ import {
   Users, MessageCircle, CreditCard,
   Bell, FileText, ShieldCheck
 } from 'lucide-react'
-import { getPricingSettings, getPlanLimits } from '@/lib/utils/settings'
 import { FadeIn } from './components/animations'
 import { FeatureTabs } from './components/feature-tabs'
 import { TrustedBy } from './components/trusted-by'
 import { DirectorySearch } from './components/directory-search'
+import { Pricing } from './components/pricing'
 
-import { getUsdToNgnRate } from '@/lib/payments/exchange'
 
-async function Pricing() {
-  const pricing = await getPricingSettings()
-  const planLimits = await getPlanLimits()
-  const rate = await getUsdToNgnRate()
-
-  const litePrice = rate ? Math.round(12 * rate) : (pricing.lite_monthly_ngn || 15000)
-  const proPrice = rate ? Math.round(39 * rate) : (pricing.pro_monthly_ngn || 49000)
-
-  const plans = [
-    {
-      name: 'Lite',
-      price: `₦${litePrice.toLocaleString()}`,
-      period: 'per month',
-      description: 'Perfect for testing the platform at your venue. 30-day free trial included.',
-      features: ['AI Waiter (guest-facing chat)', 'Edge Translator (40+ languages)', 'Up to 2 QR codes', '1 active location'],
-      cta: 'Start Free Trial',
-      href: '/dashboard',
-      highlighted: false,
-    },
-    {
-      name: 'Pro',
-      price: `₦${proPrice.toLocaleString()}`,
-      period: 'per month',
-      description: 'For serious operators who want every edge.',
-      features: [
-        'Everything in Lite',
-        `Includes ${planLimits.pro?.credits || 50} Credits/mo`,
-        'AI Copywriter & Image Studio',
-        'Smart Request Triaging (KDS)',
-        'Demand Forecasting Engine',
-        '1 Custom Page (+10 credits/extra)',
-        'Priority WhatsApp support',
-      ],
-      cta: 'Get Pro',
-      href: '/dashboard',
-      highlighted: true,
-    },
-    {
-      name: 'Enterprise',
-      price: 'Custom',
-      period: 'contact us',
-      description: 'For hotel chains and multi-location brands.',
-      features: [
-        'Everything in Pro',
-        `Includes ${planLimits.enterprise?.credits || 200} Credits/mo`,
-        'Dedicated AI model fine-tuning',
-        'Multi-location dashboard',
-        'API access for PMS integration',
-        'Dedicated account manager',
-        'Custom SLA & onboarding',
-      ],
-      cta: 'Contact Sales',
-      href: '/dashboard',
-      highlighted: false,
-    },
-  ]
-
-  return (
-    <section id="pricing" className="py-32 px-6 bg-[#050505]">
-      <div className="max-w-6xl mx-auto">
-        <FadeIn className="text-center mb-20">
-          <h2 className="text-4xl md:text-6xl font-black text-white tracking-tight mb-6">Pay for what you need.</h2>
-          <p className="text-zinc-400 text-lg md:text-xl font-light">No hidden fees. Cancel any time.</p>
-        </FadeIn>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
-          {plans.map((plan, i) => (
-            <FadeIn key={plan.name} delay={i * 0.1} className={`relative rounded-3xl p-10 flex flex-col gap-8 transition-all duration-500 ${plan.highlighted
-                ? 'bg-gradient-to-b from-violet-900/30 to-[#0a0a0f] border border-violet-500/40 shadow-2xl shadow-violet-900/20 md:-translate-y-4'
-                : 'bg-white/[0.02] border border-white/[0.05] hover:border-white/10'
-              }`}>
-              {plan.highlighted && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-5 py-1.5 rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-xs font-bold shadow-lg shadow-violet-900/50">Most Popular</div>
-              )}
-              <div>
-                <p className="text-sm font-bold text-zinc-400 uppercase tracking-wider mb-4">{plan.name}</p>
-                <div className="flex items-baseline gap-2 mb-4">
-                  <span className="text-5xl font-black text-white tracking-tight">{plan.price}</span>
-                  <span className="text-zinc-500 text-base">/ {plan.period}</span>
-                </div>
-                <p className="text-zinc-400 text-sm leading-relaxed">{plan.description}</p>
-              </div>
-              <ul className="space-y-4 flex-1">
-                {plan.features.map((f) => (
-                  <li key={f} className="flex items-start gap-3 text-sm text-zinc-300 font-light">
-                    <Check className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" aria-hidden="true" />
-                    {f}
-                  </li>
-                ))}
-              </ul>
-              <a href={plan.href} className={`flex items-center justify-center gap-2 py-4 rounded-2xl text-sm font-bold transition-all duration-300 ${plan.highlighted
-                  ? 'bg-white text-black hover:scale-105 shadow-[0_0_20px_rgba(255,255,255,0.2)]'
-                  : 'bg-white/5 border border-white/10 text-white hover:bg-white/10'
-                }`}>
-                {plan.cta} <ArrowRight className="w-4 h-4" aria-hidden="true" />
-              </a>
-            </FadeIn>
-          ))}
-        </div>
-
-        {/* Credit Packs */}
-        <div className="mt-32 max-w-5xl mx-auto">
-          <FadeIn className="text-center mb-12">
-            <h3 className="text-3xl md:text-4xl font-black text-white tracking-tight mb-4">Need more AI power?</h3>
-            <p className="text-zinc-400 text-lg">Top up your workspace with AI credits. Credits never expire.</p>
-          </FadeIn>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              { amount: 10, price: rate ? Math.round(12 * rate) : (pricing.credits_10_ngn || 15000), popular: false },
-              { amount: 25, price: rate ? Math.round(26 * rate) : (pricing.credits_25_ngn || 33000), popular: true },
-              { amount: 50, price: rate ? Math.round(48 * rate) : (pricing.credits_50_ngn || 60000), popular: false }
-            ].map((pack, i) => (
-              <FadeIn key={pack.amount} delay={i * 0.1} className={`relative rounded-3xl p-8 flex flex-col items-center text-center transition-all duration-300 ${pack.popular
-                  ? 'bg-gradient-to-b from-violet-900/20 to-zinc-900/50 border border-violet-500/30 shadow-lg shadow-violet-900/10'
-                  : 'bg-white/[0.02] border border-white/[0.05] hover:border-white/10'
-                }`}>
-                {pack.popular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-violet-600 text-white text-[10px] font-bold uppercase tracking-wider">Most Popular</div>
-                )}
-                <Zap className={`w-8 h-8 mb-6 ${pack.popular ? 'text-violet-400' : 'text-zinc-500'}`} aria-hidden="true" />
-                <h4 className="text-2xl font-bold text-white mb-2">{pack.amount} Credits</h4>
-                <div className="text-3xl font-black text-white mb-8">₦{pack.price.toLocaleString()}</div>
-                <a href="/dashboard/billing" className={`w-full py-3 rounded-xl text-sm font-bold transition-all duration-300 ${pack.popular
-                    ? 'bg-white text-black hover:scale-105'
-                    : 'bg-white/5 text-white hover:bg-white/10 border border-white/10'
-                  }`}>
-                  Buy Pack
-                </a>
-              </FadeIn>
-            ))}
-          </div>
-        </div>
-      </div>
-    </section>
-  )
-}
 
 export default async function HomePage() {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "OurMenu OS",
+    "operatingSystem": "Web",
+    "applicationCategory": "BusinessApplication",
+    "description": "The complete platform to build your online presence, manage operations, and engage customers. Designed for restaurants, salons, and service businesses.",
+    "url": "https://ourmenuos.online",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD",
+      "description": "Free Starter Plan available"
+    },
+    "provider": {
+      "@type": "Organization",
+      "name": "CruiseHQ"
+    }
+  };
+
   return (
-    <div className="bg-[#050505] min-h-screen selection:bg-violet-500/30 selection:text-white">
-      {/* â”€â”€ Navbar â”€â”€ */}
-      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-12 h-16 bg-black/40 backdrop-blur-xl border-b border-white/[0.04]">
-        <div className="flex items-center gap-3">
-          <Image src="/ourmenu-qr-icon.svg" alt="OurMenu Logo" width={28} height={28} className="object-contain" />
-          <span className="font-semibold text-white tracking-tight">OurMenu OS</span>
-        </div>
-        <div className="hidden md:flex items-center gap-8 text-sm font-medium text-zinc-400">
-          <a href="#features" className="hover:text-white transition-colors">Platform</a>
-          <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
-          <a href="#testimonials" className="hover:text-white transition-colors">Customers</a>
-        </div>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <main className="bg-[#050505] min-h-screen selection:bg-violet-500/30 selection:text-white">
+        {/* ── Navbar ── */}
+        <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-12 h-16 bg-black/40 backdrop-blur-xl border-b border-white/[0.04]">
+          <div className="flex items-center gap-3">
+            <Image src="/ourmenu-qr-icon.svg" alt="OurMenu Logo" width={28} height={28} className="object-contain" />
+            <span className="font-semibold text-white tracking-tight">OurMenu OS</span>
+          </div>
+          <div className="hidden md:flex items-center gap-8 text-sm font-medium text-zinc-400">
+            <a href="#features" className="hover:text-white transition-colors">Platform</a>
+            <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
+            <a href="#testimonials" className="hover:text-white transition-colors">Customers</a>
+          </div>
         <div className="flex items-center gap-2 md:gap-4">
           <a className="text-sm font-medium text-zinc-400 hover:text-white transition-colors hidden lg:block" href="/dashboard">Log in</a>
           <form action={startInteractiveDemo} className="hidden sm:block">
@@ -185,9 +73,10 @@ export default async function HomePage() {
             src="/hero_restaurant_bg.png"
             alt=""
             fill
+            sizes="100vw"
             className="object-cover object-center"
             priority
-            quality={90}
+            quality={75}
           />
           {/* Multi-layer gradient overlay for text legibility on left, reveal on right */}
           <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-black/20" />
@@ -246,7 +135,7 @@ export default async function HomePage() {
                       alt="OurMenu guest menu interface"
                       fill
                       className="object-cover object-top"
-                      quality={95}
+                      sizes="(max-width: 1024px) 100vw, 300px"
                     />
                   </div>
                   {/* Side buttons */}
@@ -338,6 +227,7 @@ export default async function HomePage() {
           </div>
         </div>
       </footer>
-    </div>
+    </main>
+    </>
   )
 }

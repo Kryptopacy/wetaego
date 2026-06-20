@@ -14,8 +14,15 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "OurMenu OS",
-  description: "Digital Menus & Operations for Hospitality",
+  metadataBase: new URL('https://ourmenuos.online'),
+  title: {
+    default: "OurMenu OS",
+    template: "%s | OurMenu OS"
+  },
+  description: "The complete platform to build your online presence, manage operations, and engage customers. Digital menus, ordering, and operations for hospitality and services.",
+  keywords: ["digital menu", "restaurant os", "qr menu", "hospitality software", "online ordering", "service booking"],
+  authors: [{ name: "CruiseHQ" }],
+  creator: "CruiseHQ",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -28,6 +35,28 @@ export const metadata: Metadata = {
       { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
     ],
     apple: "/apple-touch-icon.png",
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://ourmenuos.online',
+    title: 'OurMenu OS - The ultimate digital menu & operations suite',
+    description: 'A complete management suite for restaurants, salons, and service businesses. Ditch the expensive custom websites and terrible PDF links.',
+    siteName: 'OurMenu OS',
+    images: [
+      {
+        url: '/hero_restaurant_bg.png',
+        width: 1200,
+        height: 630,
+        alt: 'OurMenu OS Dashboard and Guest Experience',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'OurMenu OS',
+    description: 'The ultimate digital menu & operations suite for hospitality and services.',
+    images: ['/hero_restaurant_bg.png'],
   },
 };
 

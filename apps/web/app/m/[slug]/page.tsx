@@ -22,17 +22,46 @@ export const revalidate = 60;
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const resolvedParams = await params
   const supabase = await createClient()
-  const { data: location } = await supabase.from('locations').select('name').eq('slug', resolvedParams.slug).single()
+  const { data: locationData } = await supabase.from('locations').select('id, name, cover_image_url').eq('slug', resolvedParams.slug).single()
   
-  if (!location) return { title: 'Not Found' }
+  if (!locationData) return { title: 'Not Found' }
   
+  const { data: locationPages } = await supabase
+    .from('location_pages')
+    .select('template_type')
+    .eq('location_id', locationData.id)
+    .eq('is_published', true)
+    
+  let templateName = "Menu";
+  if (locationPages && locationPages.length > 0) {
+     const types = locationPages.map(p => p.template_type);
+     if (types.some(t => ['services', 'consulting', 'salon', 'spa'].includes(t))) {
+         templateName = "Services";
+     } else if (types.some(t => ['catalog', 'retail'].includes(t))) {
+         templateName = "Catalog";
+     }
+  }
+
+  const title = `${locationData.name} - ${templateName} | OurMenu OS`;
+  const description = `View the live ${templateName.toLowerCase()} and order directly at ${locationData.name}.`;
+
   return {
-    title: `${location.name} - Menu | OurMenu OS`,
-    description: `View the live menu and order directly from your table at ${location.name}.`,
+    title,
+    description,
+    alternates: {
+      canonical: `https://ourmenuos.online/m/${resolvedParams.slug}`
+    },
     openGraph: {
-      title: `${location.name} Menu`,
-      description: `View the live menu and order directly from your table at ${location.name}.`,
+      title,
+      description,
       type: 'website',
+      images: locationData.cover_image_url ? [locationData.cover_image_url] : undefined,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: locationData.cover_image_url ? [locationData.cover_image_url] : undefined,
     }
   }
 }
@@ -136,11 +165,21 @@ export default async function PublicMenuPage({
     }))
   )
 
-  // Generate JSON-LD Schema
+  // Generate JSON-LD Schema dynamically based on business type
+  const templateType = locationPages && locationPages.length > 0 ? locationPages[0].template_type : 'restaurant';
+  let schemaType = "Restaurant";
+  if (['services', 'consulting'].includes(templateType)) schemaType = "ProfessionalService";
+  if (['salon', 'spa'].includes(templateType)) schemaType = "HealthAndBeautyBusiness";
+  if (['catalog', 'retail'].includes(templateType)) schemaType = "LocalBusiness";
+
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "Restaurant",
+    "@type": schemaType,
     "name": location.name,
+    "image": location.cover_image_url || undefined,
+    "logo": location.organizations?.logo_url || undefined,
+    "telephone": location.phone_number || location.whatsapp_number || undefined,
+    "url": `https://ourmenuos.online/m/${slug}`,
     "hasMenu": {
       "@type": "Menu",
       "hasMenuSection": categories.map(cat => ({
@@ -150,6 +189,7 @@ export default async function PublicMenuPage({
           "@type": "MenuItem",
           "name": item.name,
           "description": item.description,
+          "image": item.image_url || undefined,
           "offers": {
             "@type": "Offer",
             "price": item.price_minor / 100,

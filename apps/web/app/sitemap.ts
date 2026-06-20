@@ -18,6 +18,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }))
 
+  // Fetch all published location pages (portal pages)
+  const { data: locationPages } = await supabase
+    .from('location_pages')
+    .select('slug, updated_at, locations(slug)')
+    .eq('is_published', true)
+
+  const portalUrls = (locationPages || []).map((page: any) => ({
+    url: `${baseUrl}/m/${page.locations?.slug}/p/${page.slug}`,
+    lastModified: new Date(page.updated_at || new Date()),
+    changeFrequency: 'weekly' as const,
+    priority: 0.6,
+  }))
+
   return [
     {
       url: baseUrl,
@@ -25,6 +38,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'yearly',
       priority: 1,
     },
+    {
+      url: `${baseUrl}/privacy`,
+      lastModified: new Date(),
+      changeFrequency: 'yearly',
+      priority: 0.5,
+    },
+    {
+      url: `${baseUrl}/terms`,
+      lastModified: new Date(),
+      changeFrequency: 'yearly',
+      priority: 0.5,
+    },
     ...menuUrls,
+    ...portalUrls,
   ]
 }
