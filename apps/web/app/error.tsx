@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import { AlertCircle, RotateCcw } from 'lucide-react'
+import * as Sentry from '@sentry/nextjs'
 
 export default function ErrorBoundary({
   error,
@@ -11,7 +12,8 @@ export default function ErrorBoundary({
   reset: () => void
 }) {
   useEffect(() => {
-    // Log the error to an error reporting service like Sentry
+    // Log the error to Sentry
+    Sentry.captureException(error)
     console.error('Global Error Boundary caught:', error)
   }, [error])
 

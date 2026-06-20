@@ -134,7 +134,7 @@ export async function POST(req: Request) {
         const planType = event.data.metadata.plan_type
         
         if (orgId) {
-          const updateData: any = { subscription_status: 'active' }
+          const updateData: Record<string, string> = { subscription_status: 'active' }
           if (planType) {
             updateData.subscription_plan = planType
           }

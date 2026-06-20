@@ -69,14 +69,14 @@ export async function POST(req: Request) {
           .eq('id', metadata.organization_id)
           .single()
         
-        const org: any = orgRaw
+        const org = orgRaw as { extra_pages_purchased?: number } | null;
           
         if (org) {
           await supabase
             .from('organizations')
             .update({
               extra_pages_purchased: (org.extra_pages_purchased || 0) + 1
-            } as any)
+            })
             .eq('id', metadata.organization_id)
         }
       }

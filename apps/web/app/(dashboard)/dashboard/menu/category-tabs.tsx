@@ -9,6 +9,46 @@ import { Database } from '@/lib/supabase/types'
 
 type Category = Database['public']['Tables']['menu_categories']['Row'] & { menu_items?: Database['public']['Tables']['menu_items']['Row'][] }
 
+import { useOptimistic, startTransition } from 'react'
+
+function OptimisticItem({ item }: { item: NonNullable<Category['menu_items']>[0] }) {
+  const [optimisticStatus, addOptimisticStatus] = useOptimistic(
+    item.availability_status,
+    (state: string, newStatus: string) => newStatus
+  );
+
+  const isAvailable = optimisticStatus === 'available';
+
+  return (
+    <div className="py-4 flex justify-between items-center first:pt-0 last:pb-0 group">
+      <div>
+        <h3 className="font-semibold text-white">
+          {item.name} 
+          <span className="text-zinc-400 font-normal ml-2">₦{(item.price_minor / 100).toLocaleString()}</span>
+        </h3>
+        {item.description && <p className="text-sm text-zinc-400 mt-1">{item.description}</p>}
+      </div>
+      <div>
+        <form action={async () => {
+          const nextStatus = isAvailable ? 'sold_out' : 'available';
+          startTransition(() => {
+            addOptimisticStatus(nextStatus);
+          });
+          await toggleItemStatus(item.id, optimisticStatus);
+        }}>
+          <button type="submit" className={`px-4 py-1.5 rounded-full text-xs font-bold border transition-colors ${
+            isAvailable 
+              ? 'border-green-500/30 text-green-400 bg-green-500/10 hover:bg-green-500/20' 
+              : 'border-red-500/30 text-red-400 bg-red-500/10 hover:bg-red-500/20'
+          }`}>
+            {isAvailable ? 'In Stock' : 'Sold Out'}
+          </button>
+        </form>
+      </div>
+    </div>
+  )
+}
+
 export function CategoryTabs({ categories, orgId }: { categories: Category[], orgId: string }) {
   const [activeTab, setActiveTab] = useState(categories[0]?.id || '')
 
@@ -63,26 +103,7 @@ export function CategoryTabs({ categories, orgId }: { categories: Category[], or
               <p className="text-zinc-500 text-center py-8">No items yet in this category.</p>
             ) : (
               activeCategory.menu_items?.map((item) => (
-                <div key={item.id} className="py-4 flex justify-between items-center first:pt-0 last:pb-0 group">
-                  <div>
-                    <h3 className="font-semibold text-white">
-                      {item.name} 
-                      <span className="text-zinc-400 font-normal ml-2">₦{(item.price_minor / 100).toLocaleString()}</span>
-                    </h3>
-                    {item.description && <p className="text-sm text-zinc-400 mt-1">{item.description}</p>}
-                  </div>
-                  <div>
-                    <form action={toggleItemStatus.bind(null, item.id, item.availability_status)}>
-                      <button type="submit" className={`px-4 py-1.5 rounded-full text-xs font-bold border transition-colors ${
-                        item.availability_status === 'available' 
-                          ? 'border-green-500/30 text-green-400 bg-green-500/10 hover:bg-green-500/20' 
-                          : 'border-red-500/30 text-red-400 bg-red-500/10 hover:bg-red-500/20'
-                      }`}>
-                        {item.availability_status === 'available' ? 'In Stock' : 'Sold Out'}
-                      </button>
-                    </form>
-                  </div>
-                </div>
+                <OptimisticItem key={item.id} item={item} />
               ))
             )}
           </div>
