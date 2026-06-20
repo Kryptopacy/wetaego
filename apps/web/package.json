@@ -8,6 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
     "paystack:listen": "paystack webhook listen localhost:3000/api/webhooks/paystack"
   },
   "dependencies": {
