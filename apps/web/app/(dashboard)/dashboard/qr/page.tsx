@@ -27,11 +27,11 @@ export default async function QRCodeBatchPage() {
     org = { id: 'demo-org' }
     role = 'owner'
     locations = [
-      { id: 'demo-loc', name: 'Demo Venue', slug: 'demo-venue', theme_color: '#3b82f6' }
+      { id: 'demo-loc', name: 'Demo Venue', slug: 'demo-venue', theme_color: '#3b82f6' } as any
     ]
     qrCodes = [
-      { id: 'qr-1', table_identifier: 'Table 1', location_id: 'demo-loc', organization_id: 'demo-org', is_active: true },
-      { id: 'qr-2', table_identifier: 'Bar A', location_id: 'demo-loc', organization_id: 'demo-org', is_active: true }
+      { id: 'qr-1', table_identifier: 'Table 1', location_id: 'demo-loc', organization_id: 'demo-org', is_active: true } as any,
+      { id: 'qr-2', table_identifier: 'Bar A', location_id: 'demo-loc', organization_id: 'demo-org', is_active: true } as any
     ]
   } else {
     const { data: member } = await supabase
@@ -60,7 +60,7 @@ export default async function QRCodeBatchPage() {
 
     const { data: locs } = await supabase
       .from('locations')
-      .select('id, name, slug, theme_color')
+      .select('*')
       .eq('organization_id', org.id)
     
     locations = locs || []
