@@ -1,13 +1,8 @@
-
 import Image from 'next/image'
+import Link from 'next/link'
 import { startInteractiveDemo } from './login/actions'
 import { DemoSubmitButton } from '../components/DemoSubmitButton'
-import {
-  Zap, ChefHat, Globe, BarChart3, ClipboardList,
-  QrCode, ArrowRight, Check, Star,
-  Users, MessageCircle, CreditCard,
-  Bell, FileText, ShieldCheck
-} from 'lucide-react'
+import { ArrowRight, Star } from 'lucide-react'
 import { FadeIn } from './components/animations'
 import { FeatureTabs } from './components/feature-tabs'
 import { TrustedBy } from './components/trusted-by'
@@ -46,7 +41,7 @@ export default async function HomePage() {
         {/* ── Navbar ── */}
         <LandingNavbar />
 
-      {/* â”€â”€ HERO: Cinematic full-bleed background composition â”€â”€ */}
+      {/* ── HERO: Cinematic full-bleed background composition ── */}
       <section className="relative min-h-screen flex items-center overflow-hidden">
         {/* Background image */}
         <div className="absolute inset-0 z-0">
@@ -82,12 +77,12 @@ export default async function HomePage() {
             </h1>
             <p className="text-lg md:text-xl text-zinc-300 max-w-xl font-light leading-relaxed mb-10">
               <strong>OurMenu OS is the complete platform to build your online presence, manage operations, and engage customers.</strong><br /><br />
-              Ditch the expensive custom websites and terrible PDF links. A 'menu' isn't just for food, it's any assortment of offerings your business provides. Whether you're processing restaurant orders, bookings/appointments, or listing consulting services, our flexible templates instantly give you a stunning digital storefront without the hassle of building from scratch. Delight your clients with a personalized AI Assistant that handles inquiries and processes payments, while your team stays seamlessly synced with live management dashboards and staff alerts.
+              Ditch the expensive custom websites and terrible PDF links. A &apos;menu&apos; isn&apos;t just for food, it&apos;s any assortment of offerings your business provides. Whether you&apos;re processing restaurant orders, bookings/appointments, or listing consulting services, our flexible templates instantly give you a stunning digital storefront without the hassle of building from scratch. Delight your clients with a personalized AI Assistant that handles inquiries and processes payments, while your team stays seamlessly synced with live management dashboards and staff alerts.
             </p>
             <div className="flex flex-col sm:flex-row items-start gap-4">
-              <a href="/dashboard" className="flex items-center gap-2 px-8 py-3.5 rounded-full bg-white text-black text-sm font-bold hover:scale-105 transition-all duration-300 shadow-[0_0_30px_rgba(255,255,255,0.15)]">
+              <Link href="/dashboard" className="flex items-center gap-2 px-8 py-3.5 rounded-full bg-white text-black text-sm font-bold hover:scale-105 transition-all duration-300 shadow-[0_0_30px_rgba(255,255,255,0.15)]">
                 Start Building <ArrowRight className="w-4 h-4" />
-              </a>
+              </Link>
               <form action={startInteractiveDemo}>
                 <DemoSubmitButton className="flex items-center gap-2 px-8 py-3.5 rounded-full bg-white/5 border border-white/15 text-white text-sm font-semibold hover:bg-white/10 backdrop-blur-md transition-all duration-300">
                   Experience Demo Mode
@@ -148,7 +143,7 @@ export default async function HomePage() {
         <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#050505] to-transparent pointer-events-none z-10" />
       </section>
 
-      {/* â”€â”€ FEATURES: Full Bento Grid â”€â”€ */}
+      {/* ── FEATURES: Full Bento Grid ── */}
       <section id="features" className="py-24 px-6 max-w-7xl mx-auto relative z-10">
         <FadeIn className="text-center mb-20">
           <h2 className="text-4xl md:text-6xl font-black text-white mb-6 tracking-tight">
@@ -178,9 +173,9 @@ export default async function HomePage() {
           <p className="text-zinc-400 text-lg md:text-xl max-w-2xl mx-auto font-light mb-10">
             Join our affiliate program and earn a percentage of the revenue for every venue you refer. Rack up invites, track your conversions, and get paid out automatically via our transparent dashboard.
           </p>
-          <a href="/affiliates" className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-white/5 border border-white/10 text-white text-sm font-semibold hover:bg-white/10 transition-colors">
+          <Link href="/affiliates" className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-white/5 border border-white/10 text-white text-sm font-semibold hover:bg-white/10 transition-colors">
             Learn about Affiliates <ArrowRight className="w-4 h-4 text-zinc-400" />
-          </a>
+          </Link>
         </div>
       </section>
 
@@ -199,9 +194,9 @@ export default async function HomePage() {
             Join 500+ venues already running on OurMenu. Setup takes under 10 minutes.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <a href="/dashboard" className="flex items-center gap-2 px-10 py-4 rounded-full bg-white text-black text-base font-bold hover:scale-105 transition-all duration-300 shadow-[0_0_40px_rgba(255,255,255,0.15)]">
+            <Link href="/dashboard" className="flex items-center gap-2 px-10 py-4 rounded-full bg-white text-black text-base font-bold hover:scale-105 transition-all duration-300 shadow-[0_0_40px_rgba(255,255,255,0.15)]">
               Start Free — No Card Required <ArrowRight className="w-5 h-5" />
-            </a>
+            </Link>
             <form action={startInteractiveDemo}>
               <DemoSubmitButton className="flex items-center gap-2 px-10 py-4 rounded-full bg-white/5 border border-white/10 text-white text-base font-semibold hover:bg-white/10 backdrop-blur-md transition-all duration-300">
                 Try Demo Mode
@@ -211,7 +206,7 @@ export default async function HomePage() {
         </FadeIn>
       </section>
 
-      {/* â”€â”€ FOOTER â”€â”€ */}
+      {/* ── FOOTER ── */}
       <footer className="border-t border-white/[0.04] py-12 px-6">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-3">
@@ -220,8 +215,8 @@ export default async function HomePage() {
           </div>
           <p className="text-zinc-600 text-sm">© {new Date().getFullYear()} OurMenu. A CruiseHQ concept.</p>
           <div className="flex items-center gap-6 text-zinc-500 text-sm">
-            <a href="/privacy" className="hover:text-white transition-colors">Privacy</a>
-            <a href="/terms" className="hover:text-white transition-colors">Terms</a>
+            <Link href="/privacy" className="hover:text-white transition-colors">Privacy</Link>
+            <Link href="/terms" className="hover:text-white transition-colors">Terms</Link>
             <a href="mailto:support@ourmenuos.online" className="hover:text-white transition-colors">Contact</a>
           </div>
         </div>

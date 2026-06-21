@@ -7,7 +7,7 @@ import { Compass, X, Utensils, Calendar, Info, FileText, LayoutList } from "luci
 
 interface EcosystemNavClientProps {
   slug: string;
-  pages: any[];
+  pages: { id: string; slug: string; template_type: string; title: string }[];
   currentPath: string; // e.g., 'menu' or 'booking'
 }
 

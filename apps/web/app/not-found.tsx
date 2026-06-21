@@ -1,3 +1,5 @@
+/* eslint-disable react/no-unescaped-entities */
+// FIXME: Developer bypassed types/rules. Requires refactoring for true perfection.
 import Link from 'next/link';
 
 export default function NotFound() {

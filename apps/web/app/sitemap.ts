@@ -24,7 +24,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .select('slug, updated_at, locations(slug)')
     .eq('is_published', true)
 
-  const portalUrls = (locationPages || []).map((page: any) => ({
+  interface LocationPage {
+    slug: string
+    updated_at: string
+    locations?: { slug: string } | null
+  }
+
+  const portalUrls = ((locationPages as unknown as LocationPage[]) || []).map((page) => ({
     url: `${baseUrl}/m/${page.locations?.slug}/p/${page.slug}`,
     lastModified: new Date(page.updated_at || new Date()),
     changeFrequency: 'weekly' as const,

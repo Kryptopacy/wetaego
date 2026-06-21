@@ -195,29 +195,31 @@ export function CartFAB({
       <AnimatePresence>
         {totalItems > 0 && !showCheckoutModal && (
           <motion.button
+            layout
             initial={{ opacity: 0, scale: 0.8, y: 50 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 50 }}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 25 }}
             onClick={() => setShowCheckoutModal(true)}
             className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-[#0f7b55] hover:bg-[#095a3d] dark:bg-zinc-100 dark:hover:bg-white text-white dark:text-[#17201b] font-bold h-14 px-8 rounded-full shadow-[0_8px_30px_rgba(15,123,85,0.4)] dark:shadow-[0_8px_30px_rgba(255,255,255,0.15)] flex items-center gap-3 transition-colors whitespace-nowrap overflow-hidden"
           >
-            <div className="flex items-center gap-2">
-              <div className="bg-white dark:bg-[#17201b] text-[#0f7b55] dark:text-white w-6 h-6 rounded-full flex items-center justify-center text-xs">
+            <motion.div layout className="flex items-center gap-2">
+              <motion.div layout className="bg-white dark:bg-[#17201b] text-[#0f7b55] dark:text-white w-6 h-6 rounded-full flex items-center justify-center text-xs">
                 {totalItems}
-              </div>
+              </motion.div>
               <svg className="w-5 h-5 hidden sm:block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
               </svg>
               <span>View Order</span>
-            </div>
-            <span className="text-base flex items-center gap-2">
+            </motion.div>
+            <motion.span layout className="text-base flex items-center gap-2">
               {discountAmountMinor > 0 && (
                 <span className="line-through text-white/50 text-xs">₦{(subtotalMinor / 100).toLocaleString()}</span>
               )}
               ₦{(discountedSubtotalMinor / 100).toLocaleString()}
-            </span>
+            </motion.span>
           </motion.button>
         )}
       </AnimatePresence>

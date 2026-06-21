@@ -5,14 +5,29 @@ import { processExistingOrderPayment } from '../../m/[slug]/actions'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 
+export interface Organization {
+  name: string
+  slug: string
+}
+
+export interface Order {
+  id: string
+  status: string
+  total_amount_minor: number
+  amount_paid_minor: number | null
+  table_identifier: string | null
+  created_at: string
+  organization_id: string
+  location_id: string
+  organizations: Organization | Organization[] | null
+}
+
 export default function PayClient({
   order: initialOrder,
-  splitCount,
-  orgSlug
+  splitCount
 }: {
-  order: any
+  order: Order
   splitCount: number
-  orgSlug: string
 }) {
   const [order, setOrder] = useState(initialOrder)
   const [isProcessing, setIsProcessing] = useState(false)
@@ -31,7 +46,7 @@ export default function PayClient({
           filter: `id=eq.${order.id}`
         },
         (payload) => {
-          setOrder((prev: any) => ({ ...prev, ...payload.new }))
+          setOrder((prev: Order) => ({ ...prev, ...payload.new } as Order))
         }
       )
       .subscribe()
@@ -69,7 +84,7 @@ export default function PayClient({
       if (checkoutUrl) {
         window.location.href = checkoutUrl
       }
-    } catch (e) {
+    } catch {
       toast.error('Failed to initialize payment')
       setIsProcessing(false)
     }

@@ -54,34 +54,20 @@ export async function processCheckout(
   customerEmail?: string,
   paymentFractionMinor?: number,
   paymentMethod?: 'card' | 'transfer',
-  discountAmountMinor?: number
+  discountAmountMinor?: number,
+  idempotencyKey?: string
 ) {
   const supabase = await createClient()
 
-  // --- Rate Limiting (Bot Protection) ---
-  if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
-    try {
-      const { Ratelimit } = await import('@upstash/ratelimit');
-      const { Redis } = await import('@upstash/redis');
-      const { headers } = await import('next/headers');
-      
-      const redis = Redis.fromEnv();
-      const ratelimit = new Ratelimit({
-        redis,
-        limiter: Ratelimit.slidingWindow(5, '1 m'), // 5 orders per minute per IP
-      });
-
-      const ip = (await headers()).get('x-forwarded-for') || 'anonymous';
-      const { success } = await ratelimit.limit(`order_rate_limit_${ip}`);
-
-      if (!success) {
-        throw new Error('Too many requests. Please wait a minute before placing another order.');
-      }
-    } catch (error) {
-      console.error('Rate limiting error:', error);
-      // Fail open if Redis crashes so we don't block legitimate sales
-    }
+  // --- Rate Limiting & Idempotency ---
+  const { checkRateLimit, withIdempotency } = await import('@/lib/upstash');
+  const { success } = await checkRateLimit('checkout');
+  if (!success) {
+    throw new Error('Too many requests. Please wait a minute before placing another order.');
   }
+
+  const checkoutLogic = async () => {
+
   // ----------------------------------------
 
   // 1. Fetch Payment Settings
@@ -143,7 +129,14 @@ export async function processCheckout(
   const { sendPushToOrg, newOrderNotification } = await import('@/lib/notifications/push')
   waitUntil(sendPushToOrg(orgId, newOrderNotification(tableIdentifier || 'Takeaway', totalAmountMinor)))
 
-  return { orderId: order.id }
+    return { orderId: order.id };
+  };
+
+  if (idempotencyKey) {
+    return await withIdempotency(idempotencyKey, checkoutLogic);
+  } else {
+    return await checkoutLogic();
+  }
 }
 
 export async function callStaffFromAi(

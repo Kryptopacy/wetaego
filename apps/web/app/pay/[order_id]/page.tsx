@@ -1,6 +1,23 @@
 import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import PayClient from './pay-client'
+
+interface Organization {
+  name: string
+  slug: string
+}
+
+interface Order {
+  id: string
+  status: string
+  total_amount_minor: number
+  amount_paid_minor: number | null
+  table_identifier: string | null
+  created_at: string
+  organization_id: string
+  location_id: string
+  organizations: Organization | Organization[] | null
+}
 
 export default async function SharedPaymentPage({
   params,
@@ -28,7 +45,7 @@ export default async function SharedPaymentPage({
     .eq('id', params.order_id)
     .single()
 
-  const order: any = orderRaw
+  const order = orderRaw as unknown as Order
 
   if (!order) {
     return (
@@ -39,8 +56,11 @@ export default async function SharedPaymentPage({
   }
 
   const splitCount = parseInt(searchParams.split || '1')
-  const orgName = (order.organizations as any)?.name || 'Restaurant'
-  const orgSlug = (order.organizations as any)?.slug || ''
+  
+  // handle array or single object for organizations
+  const org = Array.isArray(order.organizations) ? order.organizations[0] : order.organizations
+  const orgName = org?.name || 'Restaurant'
+  const orgSlug = org?.slug || ''
 
   if (order.status === 'paid' || order.status === 'completed') {
     return (
@@ -50,9 +70,9 @@ export default async function SharedPaymentPage({
         </div>
         <h1 className="text-3xl font-black text-white mb-2">Fully Paid!</h1>
         <p className="text-zinc-400 max-w-sm mb-8">This bill has been completely settled. Thank you for dining with us!</p>
-        <a href={`/m/${orgSlug}`} className="px-6 py-3 bg-zinc-800 text-white rounded-xl font-medium hover:bg-zinc-700">
+        <Link href={`/m/${orgSlug}`} className="px-6 py-3 bg-zinc-800 text-white rounded-xl font-medium hover:bg-zinc-700">
           Return to Menu
-        </a>
+        </Link>
       </div>
     )
   }
@@ -112,7 +132,6 @@ export default async function SharedPaymentPage({
         <PayClient 
           order={order}
           splitCount={splitCount}
-          orgSlug={orgSlug}
         />
       </div>
     </div>

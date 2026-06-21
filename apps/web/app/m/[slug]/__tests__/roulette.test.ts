@@ -15,7 +15,7 @@ function simulateChaosMode(names: string[]) {
 
 function simulateSurvivorMode(names: string[]) {
   let available = [...names]
-  let safe: string[] = []
+  const safe: string[] = []
   
   while (available.length > 1) {
     const savedIndex = Math.floor(Math.random() * available.length)

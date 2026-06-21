@@ -42,3 +42,14 @@ next-env.d.ts
 
 # Ignore the accidental node_modules backup
 trash2/
+
+# Scratch and utility scripts
+*.js
+*.mjs
+!eslint.config.mjs
+!postcss.config.mjs
+
+# Linting output logs
+lint_output.txt
+lint_results.json
+lint.json
