@@ -1,7 +1,7 @@
 // @ts-ignore
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { chargeCredits } from '@/lib/payments/credits'
+import { chargeCredits, refundCredits } from '@/lib/payments/credits'
 import * as Sentry from '@sentry/nextjs'
 import { z } from 'zod'
 
@@ -85,51 +85,56 @@ CRITICAL RULES:
 - Must be a single beautiful shot of the item, perfectly lit, mouth-watering.
 - Clean background or natural restaurant setting.`
 
-    // Direct fetch to Gemini Imagen
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:predict?key=${apiKey}`
-    const aiRes = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        instances: [{ prompt: systemPrompt }],
-        parameters: { sampleCount: 1, aspectRatio: "1:1" }
-      })
-    })
-
-    if (!aiRes.ok) {
-      const err = await aiRes.text()
-      console.error('Gemini error:', err)
-      throw new Error('Failed to generate image from AI provider.')
-    }
-
-    const aiData = await aiRes.json()
-    const base64Image = aiData.predictions?.[0]?.bytesBase64Encoded || aiData.predictions?.[0]?.bytes || null
-
-    if (!base64Image) {
-      throw new Error('AI provider returned an empty image.')
-    }
-
-    // 4. Upload to Supabase Storage
-    const buffer = Buffer.from(base64Image, 'base64')
-    const fileName = `items/${organizationId}/${Date.now()}.png`
-
-    const { error: uploadError } = await supabase
-      .storage
-      .from('menu-images')
-      .upload(fileName, buffer, {
-        contentType: 'image/png',
-        upsert: true
+    try {
+      // Direct fetch to Gemini Imagen
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:predict?key=${apiKey}`
+      const aiRes = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          instances: [{ prompt: systemPrompt }],
+          parameters: { sampleCount: 1, aspectRatio: "1:1" }
+        })
       })
 
-    if (uploadError) {
-      throw uploadError
+      if (!aiRes.ok) {
+        const err = await aiRes.text()
+        console.error('Gemini error:', err)
+        throw new Error('Failed to generate image from AI provider.')
+      }
+
+      const aiData = await aiRes.json()
+      const base64Image = aiData.predictions?.[0]?.bytesBase64Encoded || aiData.predictions?.[0]?.bytes || null
+
+      if (!base64Image) {
+        throw new Error('AI provider returned an empty image.')
+      }
+
+      // 4. Upload to Supabase Storage
+      const buffer = Buffer.from(base64Image, 'base64')
+      const fileName = `items/${organizationId}/${Date.now()}.png`
+
+      const { error: uploadError } = await supabase
+        .storage
+        .from('menu-images')
+        .upload(fileName, buffer, {
+          contentType: 'image/png',
+          upsert: true
+        })
+
+      if (uploadError) {
+        throw uploadError
+      }
+
+      const { data: publicUrlData } = supabase.storage.from('menu-images').getPublicUrl(fileName)
+      const publicUrl = publicUrlData.publicUrl
+
+      return NextResponse.json({ success: true, url: publicUrl, remaining: charge.remaining })
+    } catch (apiError: any) {
+      // Refund credits if anything fails after deduction
+      await refundCredits(organizationId, cost, 'AI Image Generation Failed', userData.user.id)
+      throw new Error(apiError.message || 'Generation or storage failed, credits refunded.')
     }
-
-    const { data: publicUrlData } = supabase.storage.from('menu-images').getPublicUrl(fileName)
-    const publicUrl = publicUrlData.publicUrl
-
-    return NextResponse.json({ success: true, url: publicUrl, remaining: charge.remaining })
-
   } catch (error: any) {
     Sentry.captureException(error)
     return NextResponse.json({ error: error.message || 'An unexpected error occurred.' }, { status: 500 })

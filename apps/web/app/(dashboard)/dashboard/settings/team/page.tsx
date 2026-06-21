@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { cookies } from 'next/headers'
 import TeamManager from './team-manager'
+import DangerZone from './danger-zone'
 
 export default async function TeamPage() {
   const supabase = await createClient()
@@ -118,6 +119,7 @@ export default async function TeamPage() {
           members={members}
           invites={invites}
         />
+        <DangerZone orgId={organization.id} isOwner={role === 'owner'} />
       </div>
     </div>
   )

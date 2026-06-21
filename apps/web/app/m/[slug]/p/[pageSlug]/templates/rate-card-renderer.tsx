@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 
 interface PageItem {
   id: string
@@ -84,7 +85,9 @@ export function RateCardRenderer({ location, page, items, locationSlug }: RateCa
         <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-black/20 to-transparent" />
         <div className="absolute bottom-0 left-0 right-0 p-6 max-w-2xl mx-auto flex items-end gap-4">
           {location.organizations?.logo_url && (
-            <img src={location.organizations.logo_url} alt="" className="w-16 h-16 rounded-xl object-contain bg-black/40 p-1 border border-white/10 shrink-0" />
+            <div className="relative w-16 h-16 rounded-xl overflow-hidden shrink-0 bg-black/40 p-1 border border-white/10">
+              <Image src={location.organizations.logo_url} alt="" fill className="object-contain" />
+            </div>
           )}
           <div>
             <h1 className="text-3xl font-black text-white tracking-tight drop-shadow-lg">{page.title}</h1>

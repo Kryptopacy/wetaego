@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 
 interface PageItem {
   id: string
@@ -42,14 +43,16 @@ export function ListingRenderer({ location, page, items, locationSlug }: Listing
       {/* Hero */}
       <div className="relative w-full h-[35vh] min-h-[240px] max-h-[380px] overflow-hidden">
         {location.cover_image_url ? (
-          <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${location.cover_image_url})` }} />
+          <Image src={location.cover_image_url} alt={location.name} fill className="object-cover" priority />
         ) : (
           <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${themeColor}30 0%, #0a0a0f 100%)` }} />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-black/30 to-transparent" />
         <div className="absolute bottom-0 left-0 right-0 p-6 max-w-5xl mx-auto">
           {location.organizations?.logo_url && (
-            <img src={location.organizations.logo_url} alt="" className="h-10 w-auto mb-3 drop-shadow-lg" />
+            <div className="relative h-10 w-24 mb-3 drop-shadow-lg">
+              <Image src={location.organizations.logo_url} alt="" fill className="object-contain" />
+            </div>
           )}
           <h1 className="text-3xl font-black text-white tracking-tight drop-shadow-lg">{page.title}</h1>
           {page.content && <p className="text-white/60 text-sm mt-1 max-w-lg">{page.content}</p>}
@@ -82,7 +85,7 @@ export function ListingRenderer({ location, page, items, locationSlug }: Listing
                   {/* Image placeholder */}
                   <div className="h-44 relative overflow-hidden" style={{ background: `linear-gradient(135deg, ${themeColor}20, #0a0a0f)` }}>
                     {item.images?.[0] ? (
-                      <img src={item.images[0]} alt={item.title} className="w-full h-full object-cover transition-transform hover:scale-105 duration-500" />
+                      <Image src={item.images[0]} alt={item.title} fill sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw" className="object-cover transition-transform hover:scale-105 duration-500" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
                         <svg className="w-12 h-12 text-zinc-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">

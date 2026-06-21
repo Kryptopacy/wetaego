@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import { ShareButton } from '@/app/components/share-button'
 
 interface VenueHeaderProps {
@@ -56,8 +57,9 @@ export function VenueHeader({ location, slug, tableIdentifier }: VenueHeaderProp
       <div className="absolute bottom-0 left-0 right-0 p-6 max-w-2xl mx-auto flex flex-col justify-end h-full">
         {location.organizations?.logo_url && (
           <div className="mb-4">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={location.organizations.logo_url} alt="Logo" className="h-16 w-auto object-contain rounded-lg drop-shadow-md" />
+            <div className="relative h-16 w-32 shrink-0 drop-shadow-md overflow-hidden rounded-lg">
+              <Image src={location.organizations.logo_url} alt="Logo" fill className="object-contain" />
+            </div>
           </div>
         )}
         

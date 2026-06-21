@@ -165,7 +165,31 @@ export async function removeMemberAction(orgId: string, userIdToDelete: string) 
     return { success: true }
   } catch (err: unknown) {
     return { error: (err as Error).message || 'An error occurred' }
+  }export async function deleteOrganizationAction(orgId: string) {
+  try {
+    const currentUserId = await verifyOwner(orgId)
+    const supabase = await createClient()
+
+    if (orgId === 'demo-org') {
+      return { error: 'You cannot delete the demo organization.' }
+    }
+
+    // Because of foreign keys, deleting the organization should cascade to:
+    // menus, menu_categories, menu_items, locations, custom_pages, etc.
+    // Ensure the DB has ON DELETE CASCADE for all org relations.
+    // If not, we might need an RPC function. Assuming cascade is set up:
+    const { error } = await supabase
+      .from('organizations')
+      .delete()
+      .eq('id', orgId)
+      .eq('created_by', currentUserId) // extra safety: only the creator can delete
+
+    if (error) {
+      return { error: error.message }
+    }
+
+    return { success: true }
+  } catch (err: unknown) {
+    return { error: (err as Error).message || 'An error occurred' }
   }
 }
-
-

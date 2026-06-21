@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 
 // The catalog page renderer is a light version for pages created via the pages builder
 // (NOT the main /m/[slug] menu — that stays as is).
@@ -75,7 +76,9 @@ export function CatalogPageRenderer({ location, page, items, locationSlug }: Cat
         <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-black/30 to-transparent" />
         <div className="absolute bottom-0 left-0 right-0 p-5 max-w-4xl mx-auto">
           {location.organizations?.logo_url && (
-            <img src={location.organizations.logo_url} alt="" className="h-10 w-auto mb-3 drop-shadow" />
+            <div className="relative h-10 w-24 mb-3 drop-shadow-lg">
+              <Image src={location.organizations.logo_url} alt="" fill className="object-contain" />
+            </div>
           )}
           <h1 className="text-3xl font-black text-white">{page.title}</h1>
           {page.content && <p className="text-white/60 text-sm mt-1">{page.content}</p>}

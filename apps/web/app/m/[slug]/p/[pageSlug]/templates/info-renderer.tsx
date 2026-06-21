@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 
 interface InfoRendererProps {
   location: {
@@ -60,7 +61,9 @@ export function InfoRenderer({ location, page, locationSlug }: InfoRendererProps
         <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-black/40 to-transparent" />
         <div className="absolute bottom-0 left-0 right-0 p-6 max-w-2xl mx-auto">
           {location.organizations?.logo_url && (
-            <img src={location.organizations.logo_url} alt="" className="h-10 w-auto object-contain mb-3 drop-shadow-lg" />
+            <div className="relative h-10 w-24 mb-3 drop-shadow-lg">
+              <Image src={location.organizations.logo_url} alt="" fill className="object-contain" />
+            </div>
           )}
           <h1 className="text-3xl font-black text-white tracking-tight drop-shadow-lg">{page.title}</h1>
         </div>

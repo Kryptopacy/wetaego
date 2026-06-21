@@ -80,3 +80,47 @@ export async function chargeCredits(organizationId: string, cost: number, reason
     return { success: false, error: (error as any).message || 'An unexpected error occurred while processing credits.' }
   }
 }
+
+/**
+ * Refunds credits for an organization if an action failed after charge.
+ */
+export async function refundCredits(organizationId: string, amountToRefund: number, reason: string, userId?: string) {
+  try {
+    const supabase = await createClient()
+
+    const { data: org, error: orgError } = await supabase
+      .from('organizations')
+      .select('purchased_credits, monthly_free_credits_used')
+      .eq('id', organizationId)
+      .single()
+
+    if (orgError || !org) return { success: false, error: 'Organization not found' }
+
+    // First try to refund into monthly free pool (reduce the usage)
+    let amountToFreePool = Math.min(amountToRefund, org.monthly_free_credits_used)
+    let amountToPurchased = amountToRefund - amountToFreePool
+
+    const { error: updateError } = await supabase
+      .from('organizations')
+      .update({
+        monthly_free_credits_used: Math.max(0, org.monthly_free_credits_used - amountToFreePool),
+        purchased_credits: org.purchased_credits + amountToPurchased
+      })
+      .eq('id', organizationId)
+
+    if (updateError) throw updateError
+
+    // Log the refund transaction
+    await supabase.from('credit_transactions').insert({
+      organization_id: organizationId,
+      amount: amountToRefund,
+      reason: `Refund: ${reason}`,
+      created_by: userId
+    })
+
+    return { success: true }
+  } catch (error) {
+    Sentry.captureException(error)
+    return { success: false, error: 'Failed to refund credits' }
+  }
+}
