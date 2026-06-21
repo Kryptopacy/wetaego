@@ -1,4 +1,4 @@
-﻿export type Json =
+export type Json =
   | string
   | number
   | boolean
@@ -39,6 +39,108 @@ export type Database = {
   }
   public: {
     Tables: {
+      affiliate_earnings: {
+        Row: {
+          id: string
+          affiliate_id: string
+          organization_id: string
+          amount_minor: number
+          status: string
+          created_at: string
+          paid_at: string | null
+          billing_payment_id: string | null
+        }
+        Insert: {
+          id?: string
+          affiliate_id: string
+          organization_id: string
+          amount_minor: number
+          status?: string
+          created_at?: string
+          paid_at?: string | null
+          billing_payment_id?: string | null
+        }
+        Update: {
+          id?: string
+          affiliate_id?: string
+          organization_id?: string
+          amount_minor?: number
+          status?: string
+          created_at?: string
+          paid_at?: string | null
+          billing_payment_id?: string | null
+        }
+        Relationships: []
+      }
+      affiliates: {
+        Row: {
+          id: string
+          user_id: string
+          referral_code: string
+          bank_name: string | null
+          account_number: string | null
+          account_name: string | null
+          paystack_subaccount_code: string | null
+          status: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          referral_code: string
+          bank_name?: string | null
+          account_number?: string | null
+          account_name?: string | null
+          paystack_subaccount_code?: string | null
+          status?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          referral_code?: string
+          bank_name?: string | null
+          account_number?: string | null
+          account_name?: string | null
+          paystack_subaccount_code?: string | null
+          status?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+      billing_payments: {
+        Row: {
+          id: string
+          organization_id: string
+          amount_minor: number
+          currency: string
+          provider_reference: string
+          payment_purpose: string
+          status: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          amount_minor: number
+          currency?: string
+          provider_reference: string
+          payment_purpose: string
+          status?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          amount_minor?: number
+          currency?: string
+          provider_reference?: string
+          payment_purpose?: string
+          status?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
       audit_logs: {
         Row: {
           action: string
@@ -864,6 +966,7 @@ export type Database = {
           max_concurrent_orders: number
           monthly_free_credits_used: number
           name: string
+          referred_by_affiliate_id: string | null
           plan: string
           purchased_credits: number
           slug: string
@@ -883,6 +986,7 @@ export type Database = {
           max_concurrent_orders?: number
           monthly_free_credits_used?: number
           name: string
+          referred_by_affiliate_id?: string | null
           plan?: string
           purchased_credits?: number
           slug: string
@@ -902,6 +1006,7 @@ export type Database = {
           max_concurrent_orders?: number
           monthly_free_credits_used?: number
           name?: string
+          referred_by_affiliate_id?: string | null
           plan?: string
           purchased_credits?: number
           slug?: string

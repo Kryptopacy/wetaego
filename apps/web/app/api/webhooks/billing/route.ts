@@ -72,11 +72,12 @@ export async function POST(req: Request) {
         const org = orgRaw as { extra_pages_purchased?: number } | null;
           
         if (org) {
+          const updatePayload: any = {
+            extra_pages_purchased: (org.extra_pages_purchased || 0) + 1
+          };
           await supabase
             .from('organizations')
-            .update({
-              extra_pages_purchased: (org.extra_pages_purchased || 0) + 1
-            })
+            .update(updatePayload)
             .eq('id', metadata.organization_id)
         }
       }

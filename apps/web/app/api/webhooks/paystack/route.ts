@@ -134,7 +134,7 @@ export async function POST(req: Request) {
         const planType = event.data.metadata.plan_type
         
         if (orgId) {
-          const updateData: Record<string, string> = { subscription_status: 'active' }
+          const updateData: any = { subscription_status: 'active' }
           if (planType) {
             updateData.subscription_plan = planType
           }
@@ -142,6 +142,56 @@ export async function POST(req: Request) {
             .from('organizations')
             .update(updateData)
             .eq('id', orgId)
+
+          // 1. Record billing payment
+          const { data: paymentRecord } = await supabase
+            .from('billing_payments')
+            .insert({
+              organization_id: orgId,
+              amount_minor: amountPaidMinor,
+              currency: event.data.currency || 'NGN',
+              payment_purpose: `subscription_${planType || 'pro'}`,
+              provider_reference: event.data.reference
+            })
+            .select('id')
+            .single()
+
+          if (paymentRecord) {
+            // 2. Affiliate Logic: Check if it's the >= 2nd payment and if there's an affiliate
+            const { count } = await supabase
+              .from('billing_payments')
+              .select('*', { count: 'exact', head: true })
+              .eq('organization_id', orgId)
+              .like('payment_purpose', 'subscription_%')
+
+            const { data: orgData } = await supabase
+              .from('organizations')
+              .select('referred_by_affiliate_id')
+              .eq('id', orgId)
+              .single()
+
+            if (orgData?.referred_by_affiliate_id && count && count >= 2) {
+              // Get affiliate percentage
+              const { data: affiliateSettings } = await supabase
+                .from('system_settings')
+                .select('value')
+                .eq('key', 'affiliate')
+                .single()
+              
+              const percentage = (affiliateSettings?.value as any)?.default_percentage || 10
+              const earningsMinor = Math.floor((amountPaidMinor * percentage) / 100)
+
+              await supabase
+                .from('affiliate_earnings')
+                .insert({
+                  affiliate_id: orgData.referred_by_affiliate_id,
+                  organization_id: orgId,
+                  billing_payment_id: paymentRecord.id,
+                  amount_minor: earningsMinor,
+                  status: 'pending'
+                })
+            }
+          }
         }
         return NextResponse.json({ status: 'subscription_confirmed' }, { status: 200 })
       }

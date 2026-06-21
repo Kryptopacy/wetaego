@@ -2,7 +2,7 @@ import { createAnonClient } from '@/lib/supabase/server'
 import { unstable_cache } from 'next/cache'
 
 // Default fallbacks in case the DB is unreachable or row is missing
-const DEFAULT_PRICING = { lite_monthly_ngn: 15000, pro_monthly_ngn: 49000, credits_10_ngn: 15000, credits_25_ngn: 33000, credits_50_ngn: 60000 }
+const DEFAULT_PRICING = { lite_monthly_ngn: 19999, pro_monthly_ngn: 49999, credits_10_ngn: 15000, credits_25_ngn: 33000, credits_50_ngn: 60000 }
 const DEFAULT_CREDIT_COSTS = { ai_cover: 5, copywriter: 1, translation_per_category: 2, custom_page: 10 }
 const DEFAULT_PLAN_LIMITS = {
   starter: { credits: 0, pages: 0 },
@@ -11,6 +11,8 @@ const DEFAULT_PLAN_LIMITS = {
   enterprise: { credits: 200, pages: 5 }
 }
 const DEFAULT_AI_MODELS = { text_generation: "gemini-3.1-flash", image_generation: "imagen-3.0-generate-001" }
+const DEFAULT_EXCHANGE_RATES = { usd_to_ngn: 1500 }
+const DEFAULT_AFFILIATE = { default_percentage: 10 }
 
 async function fetchSystemSettingFromDB<T>(key: string, fallback: T): Promise<T> {
   try {
@@ -53,4 +55,16 @@ export const getAiModels = unstable_cache(
   async () => fetchSystemSettingFromDB('ai_models', DEFAULT_AI_MODELS),
   ['system_setting_ai_models'],
   { revalidate: 86400, tags: ['ai_models'] }
+)
+
+export const getExchangeRates = unstable_cache(
+  async () => fetchSystemSettingFromDB('exchange_rates', DEFAULT_EXCHANGE_RATES),
+  ['system_setting_exchange_rates'],
+  { revalidate: 86400, tags: ['exchange_rates'] }
+)
+
+export const getAffiliateSettings = unstable_cache(
+  async () => fetchSystemSettingFromDB('affiliate', DEFAULT_AFFILIATE),
+  ['system_setting_affiliate'],
+  { revalidate: 86400, tags: ['affiliate'] }
 )

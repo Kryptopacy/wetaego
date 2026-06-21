@@ -44,12 +44,32 @@ export async function updateOrganization(formData: FormData) {
       if (error) throw new Error('Could not update organization')
     } else {
       // Create new org
+      let referredByAffiliateId: string | null = null
+      
+      // Try to read the referral cookie
+      const { cookies } = await import('next/headers')
+      const cookieStore = await cookies()
+      const refCode = cookieStore.get('ourmenu_ref')?.value
+      
+      if (refCode) {
+        const { data: affiliate } = await supabase
+          .from('affiliates')
+          .select('id')
+          .eq('referral_code', refCode)
+          .single()
+          
+        if (affiliate) {
+          referredByAffiliateId = affiliate.id
+        }
+      }
+
       const { data: newOrg, error } = await supabase
         .from('organizations')
         .insert({
           name: validatedData.name,
           slug: validatedData.slug,
           created_by: userData.user.id,
+          referred_by_affiliate_id: referredByAffiliateId
         })
         .select('id')
         .single()

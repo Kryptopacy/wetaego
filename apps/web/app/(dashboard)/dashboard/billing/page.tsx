@@ -2,7 +2,12 @@ import { createClient } from '@/lib/supabase/server'
 import { subscribeToLite, subscribeToPro, buyCredits } from './actions'
 import { getUsdToNgnRate } from '@/lib/payments/exchange'
 
-export default async function BillingPage() {
+import Link from 'next/link'
+
+export default async function BillingPage(props: { searchParams: Promise<{ currency?: string }> }) {
+  const searchParams = await props.searchParams
+  const currency = searchParams?.currency === 'USD' ? 'USD' : 'NGN'
+  
   const supabase = await createClient()
 
   const { data: userData } = await supabase.auth.getUser()
@@ -33,17 +38,33 @@ export default async function BillingPage() {
   const { getPricingSettings } = await import('@/lib/utils/settings')
   const pricing = await getPricingSettings()
   
-  const litePrice = rate ? Math.round(12 * rate) : (pricing.lite_monthly_ngn || 15000)
-  const proPrice = rate ? Math.round(39 * rate) : (pricing.pro_monthly_ngn || 49000)
+  const liteBase = pricing.lite_monthly_ngn || 19999
+  const proBase = pricing.pro_monthly_ngn || 49999
+  const c10Base = pricing.credits_10_ngn || 15000
+  const c25Base = pricing.credits_25_ngn || 33000
+  const c50Base = pricing.credits_50_ngn || 60000
   
-  const credits10Price = rate ? Math.round(12 * rate) : (pricing.credits_10_ngn || 15000)
-  const credits25Price = rate ? Math.round(26 * rate) : (pricing.credits_25_ngn || 33000)
-  const credits50Price = rate ? Math.round(48 * rate) : (pricing.credits_50_ngn || 60000)
+  const convertPrice = (base: number) => currency === 'USD' ? Math.round(base / rate) : base
+  const formatPrice = (amount: number) => currency === 'USD' ? `$${amount}` : `₦${amount.toLocaleString()}`
+
+  const litePrice = convertPrice(liteBase)
+  const proPrice = convertPrice(proBase)
+  const credits10Price = convertPrice(c10Base)
+  const credits25Price = convertPrice(c25Base)
+  const credits50Price = convertPrice(c50Base)
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
-      <h1 className="text-2xl font-bold text-white mb-2">Billing & Subscription</h1>
-      <p className="text-zinc-400">Manage your OurMenu OS subscription and payment methods.</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-white mb-2">Billing & Subscription</h1>
+          <p className="text-zinc-400">Manage your OurMenu OS subscription and payment methods.</p>
+        </div>
+        <div className="flex bg-zinc-900 border border-zinc-800 rounded-lg p-1">
+          <Link href="/dashboard/billing?currency=NGN" className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${currency === 'NGN' ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}>NGN</Link>
+          <Link href="/dashboard/billing?currency=USD" className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${currency === 'USD' ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}>USD</Link>
+        </div>
+      </div>
 
       <div className="grid md:grid-cols-2 gap-6 mt-8">
         {/* Current Status */}
@@ -71,7 +92,7 @@ export default async function BillingPage() {
         <div className="bg-gradient-to-br from-zinc-900 to-zinc-950 border border-zinc-800 rounded-2xl p-6 relative overflow-hidden">
           <h2 className="text-2xl font-bold text-white mb-2 relative z-10">OurMenu OS Lite</h2>
           <div className="flex items-baseline gap-2 mb-4 relative z-10">
-            <span className="text-4xl font-extrabold text-white">₦{litePrice.toLocaleString()}</span>
+            <span className="text-4xl font-extrabold text-white">{formatPrice(litePrice)}</span>
             <span className="text-zinc-500">/mo</span>
           </div>
           
@@ -90,6 +111,7 @@ export default async function BillingPage() {
 
           <form action={subscribeToLite} className="relative z-10">
             <input type="hidden" name="organization_id" value={org.id} />
+            <input type="hidden" name="currency" value={currency} />
             <button 
               type="submit" 
               disabled={org.subscription_status === 'active' && org.subscription_plan === 'lite'}
@@ -108,7 +130,7 @@ export default async function BillingPage() {
           
           <h2 className="text-2xl font-bold text-white mb-2 relative z-10">OurMenu OS Pro</h2>
           <div className="flex items-baseline gap-2 mb-4 relative z-10">
-            <span className="text-4xl font-extrabold text-white">₦{proPrice.toLocaleString()}</span>
+            <span className="text-4xl font-extrabold text-white">{formatPrice(proPrice)}</span>
             <span className="text-zinc-500">/mo</span>
           </div>
           
@@ -127,6 +149,7 @@ export default async function BillingPage() {
 
           <form action={subscribeToPro} className="relative z-10">
             <input type="hidden" name="organization_id" value={org.id} />
+            <input type="hidden" name="currency" value={currency} />
             <button 
               type="submit" 
               disabled={org.subscription_status === 'active' && org.subscription_plan === 'pro'}
@@ -148,7 +171,7 @@ export default async function BillingPage() {
           <div className="flex items-center justify-between py-4 border-b border-zinc-800">
             <div>
               <div className="font-semibold text-white">10 Credits</div>
-              <div className="text-xs text-zinc-500">₦{credits10Price.toLocaleString()}</div>
+              <div className="text-xs text-zinc-500">{formatPrice(credits10Price)}</div>
             </div>
             <form action={buyCredits} className="relative z-10">
               <input type="hidden" name="organization_id" value={org.id} />
@@ -162,7 +185,7 @@ export default async function BillingPage() {
           <div className="flex items-center justify-between py-4 border-b border-zinc-800">
             <div>
               <div className="font-semibold text-white">25 Credits</div>
-              <div className="text-xs text-violet-400 font-medium">Most Popular — ₦{credits25Price.toLocaleString()}</div>
+              <div className="text-xs text-violet-400 font-medium">Most Popular — {formatPrice(credits25Price)}</div>
             </div>
             <form action={buyCredits} className="relative z-10">
               <input type="hidden" name="organization_id" value={org.id} />
@@ -176,7 +199,7 @@ export default async function BillingPage() {
           <div className="flex items-center justify-between py-4 border-b border-zinc-800">
             <div>
               <div className="font-semibold text-white">50 Credits</div>
-              <div className="text-xs text-zinc-500">₦{credits50Price.toLocaleString()}</div>
+              <div className="text-xs text-zinc-500">{formatPrice(credits50Price)}</div>
             </div>
             <form action={buyCredits} className="relative z-10">
               <input type="hidden" name="organization_id" value={org.id} />
@@ -189,7 +212,7 @@ export default async function BillingPage() {
 
           <div className="mt-4 p-4 bg-blue-900/20 border border-blue-800/50 rounded-xl">
             <p className="text-xs text-blue-200">
-              💡 <strong className="font-bold text-blue-400">Pro Tip:</strong> Upgrading to Pro gives you 50 Credits included every month for only ₦{proPrice.toLocaleString()}—a massive saving over buying standalone credits!
+              💡 <strong className="font-bold text-blue-400">Pro Tip:</strong> Upgrading to Pro gives you 50 Credits included every month for only {formatPrice(proPrice)}—a massive saving over buying standalone credits!
             </p>
           </div>
         </div>

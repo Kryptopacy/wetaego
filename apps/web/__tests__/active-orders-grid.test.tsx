@@ -28,7 +28,7 @@ describe('ActiveOrdersGrid', () => {
           item_id: 'menu-1',
           item_name: 'Burger',
           quantity: 2,
-          unit_price_minor: 250000,
+          price_minor: 250000,
           created_at: '2026-06-19T10:00:00Z'
         }
       ]

@@ -14,6 +14,7 @@ export async function subscribeToLite(formData: FormData) {
   if (!userData?.user) throw new Error('Not authenticated')
 
   const orgId = formData.get('organization_id') as string
+  const currency = (formData.get('currency') as string) || 'NGN'
   
   const { data: org } = await supabase
     .from('organizations')
@@ -25,10 +26,18 @@ export async function subscribeToLite(formData: FormData) {
 
   const rate = await getUsdToNgnRate()
   const pricing = await getPricingSettings()
-  const amountNgn = rate ? Math.round(12 * rate) : (pricing.lite_monthly_ngn || 15000)
+  
+  const baseNgn = pricing.lite_monthly_ngn || 19999
+  let amountMinor = 0
+  if (currency === 'USD') {
+    const amountUsd = baseNgn / rate
+    amountMinor = Math.round(amountUsd * 100) // cents
+  } else {
+    amountMinor = baseNgn * 100 // kobo
+  }
 
-  const planCode = await getOrCreateBillingPlan(orgId, org.name, 'lite', amountNgn)
-  const authUrl = await initializeSubscription(userData.user.email!, planCode, orgId, 'lite')
+  const planCode = await getOrCreateBillingPlan(orgId, org.name, 'lite', amountMinor, currency)
+  const authUrl = await initializeSubscription(userData.user.email!, planCode, orgId, 'lite', currency)
 
   redirect(authUrl)
 }
@@ -40,6 +49,7 @@ export async function subscribeToPro(formData: FormData) {
   if (!userData?.user) throw new Error('Not authenticated')
 
   const orgId = formData.get('organization_id') as string
+  const currency = (formData.get('currency') as string) || 'NGN'
   
   const { data: org } = await supabase
     .from('organizations')
@@ -51,10 +61,18 @@ export async function subscribeToPro(formData: FormData) {
 
   const rate = await getUsdToNgnRate()
   const pricing = await getPricingSettings()
-  const amountNgn = rate ? Math.round(39 * rate) : (pricing.pro_monthly_ngn || 49000)
+  
+  const baseNgn = pricing.pro_monthly_ngn || 49999
+  let amountMinor = 0
+  if (currency === 'USD') {
+    const amountUsd = baseNgn / rate
+    amountMinor = Math.round(amountUsd * 100) // cents
+  } else {
+    amountMinor = baseNgn * 100 // kobo
+  }
 
-  const planCode = await getOrCreateBillingPlan(orgId, org.name, 'pro', amountNgn)
-  const authUrl = await initializeSubscription(userData.user.email!, planCode, orgId, 'pro')
+  const planCode = await getOrCreateBillingPlan(orgId, org.name, 'pro', amountMinor, currency)
+  const authUrl = await initializeSubscription(userData.user.email!, planCode, orgId, 'pro', currency)
 
   redirect(authUrl)
 }
