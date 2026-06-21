@@ -4,8 +4,10 @@ import { useCartStore } from '@/lib/store/cart'
 
 import Image from 'next/image'
 
+import { Tables } from '../../../../../types'
+
 interface ItemCardProps {
-  item: { id: string, name: string, description?: string, price_minor: number, image_url?: string, availability_status: string }
+  item: Tables<'menu_items'>
 }
 
 export function ItemCard({ item }: ItemCardProps) {

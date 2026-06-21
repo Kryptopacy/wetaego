@@ -10,6 +10,11 @@ import { RouletteFAB } from './roulette-fab'
 import { SpinnerModal } from '../../components/spinner-modal'
 import { PortalRenderer } from './portal-renderer'
 import { EcosystemNav } from '@/components/layout/ecosystem-nav'
+import { Tables } from '../../../../../types'
+
+type CategoryWithItems = Tables<'menu_categories'> & {
+  menu_items: Tables<'menu_items'>[]
+}
 
 import { VenueHeader } from './components/venue-header'
 import { InvalidQrMessage, UnassignedTableMessage } from './components/qr-state-messages'
@@ -138,7 +143,7 @@ export default async function PublicMenuPage({
   }
 
   // 2. Find the active menu for this location
-  let categories: any[] = []
+  let categories: CategoryWithItems[] = []
 
   const { data: menu } = await supabase
     .from('menus')
@@ -158,7 +163,7 @@ export default async function PublicMenuPage({
   }
 
   const allMenuItems = categories.flatMap(cat => 
-    (cat.menu_items || []).map((item: any) => ({
+    (cat.menu_items || []).map(item => ({
       id: item.id,
       name: item.name,
       price_minor: item.price_minor
@@ -185,7 +190,7 @@ export default async function PublicMenuPage({
       "hasMenuSection": categories.map(cat => ({
         "@type": "MenuSection",
         "name": cat.name,
-        "hasMenuItem": (cat.menu_items || []).map((item: any) => ({
+        "hasMenuItem": (cat.menu_items || []).map(item => ({
           "@type": "MenuItem",
           "name": item.name,
           "description": item.description,

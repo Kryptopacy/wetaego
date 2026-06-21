@@ -4,6 +4,11 @@ import { streamText, tool, stepCountIs } from 'ai'
 import { z } from 'zod'
 import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
+import { Tables } from '../../../../../types'
+
+type CategoryWithItems = Tables<'menu_categories'> & {
+  menu_items: Tables<'menu_items'>[]
+}
 
 export const maxDuration = 30
 
@@ -103,7 +108,7 @@ export async function POST(req: Request) {
     let pagesText = ''
     if (customPages && customPages.length > 0) {
       pagesText = '\n\n[ADDITIONAL VENUE INFORMATION (POLICIES, EVENTS, ETC)]\n' + 
-        customPages.map((p: any) => `--- ${p.title} ---\n${p.content}`).join('\n\n')
+        customPages.map(p => `--- ${p.title} ---\n${p.content}`).join('\n\n')
     }
 
     // 5. Fetch live menu catalog (Instant awareness)
@@ -126,10 +131,10 @@ export async function POST(req: Request) {
       if (categories && categories.length > 0) {
         // Build readable text catalog for LLM reasoning
         catalogText = categories
-          .map((cat: any) => {
+          .map(cat => {
             const itemsList = (cat.menu_items || [])
-              .filter((item: any) => item.availability_status !== 'hidden')
-              .map((item: any) => 
+              .filter(item => item.availability_status !== 'hidden')
+              .map(item => 
                 `- [ID: ${item.id}] ${item.name}: ₦${(item.price_minor / 100).toLocaleString()} | Availability: ${item.availability_status} | Description: ${item.description || 'No description'}`
               )
               .join('\n')
@@ -138,10 +143,10 @@ export async function POST(req: Request) {
           .join('\n\n')
 
         // Build flat array of items with IDs for tool matching
-        const allItems = categories.flatMap((cat: any) => 
+        const allItems = categories.flatMap(cat => 
           (cat.menu_items || [])
-            .filter((item: any) => item.availability_status !== 'hidden')
-            .map((item: any) => ({
+            .filter(item => item.availability_status !== 'hidden')
+            .map(item => ({
               id: item.id,
               name: item.name,
               price: item.price_minor / 100

@@ -3,8 +3,13 @@
 import { useState, useEffect } from 'react'
 import { ItemCard } from './item-card'
 import { toast } from 'sonner'
+import { Tables } from '../../../../../types'
 
-export function MenuRenderer({ initialCategories }: { initialCategories: { id: string, name: string, menu_items?: { id: string, name: string, description?: string, price_minor: number, image_url?: string, availability_status: string }[] }[] }) {
+export type CategoryWithItems = Tables<'menu_categories'> & {
+  menu_items?: Tables<'menu_items'>[]
+}
+
+export function MenuRenderer({ initialCategories }: { initialCategories: CategoryWithItems[] }) {
   const [categories, setCategories] = useState(initialCategories)
   const [isTranslating, setIsTranslating] = useState(false)
   const [targetLang, setTargetLang] = useState<string | null>(null)
@@ -53,7 +58,7 @@ export function MenuRenderer({ initialCategories }: { initialCategories: { id: s
     const payload = initialCategories.map(cat => ({
       id: cat.id,
       name: cat.name,
-      items: (cat.menu_items || []).map((item: { id: string, name: string, description?: string }) => ({
+      items: (cat.menu_items || []).map(item => ({
         id: item.id,
         name: item.name,
         description: item.description
@@ -73,14 +78,14 @@ export function MenuRenderer({ initialCategories }: { initialCategories: { id: s
       
       // Merge translated fields back into the full categories array so we don't lose prices, images, etc.
       const newCategories = initialCategories.map(cat => {
-        const translatedCat = translatedCategories.find((tc: { id: string, name: string, items?: { id: string, name: string, description?: string }[] }) => tc.id === cat.id)
+        const translatedCat = translatedCategories.find((tc: any) => tc.id === cat.id)
         if (!translatedCat) return cat
         
         return {
           ...cat,
           name: translatedCat.name || cat.name,
           menu_items: (cat.menu_items || []).map((item: any) => {
-            const tItem = translatedCat.items?.find((ti: { id: string, name: string, description?: string }) => ti.id === item.id)
+            const tItem = translatedCat.items?.find((ti: any) => ti.id === item.id)
             if (!tItem) return item
             return {
               ...item,
@@ -195,7 +200,7 @@ export function MenuRenderer({ initialCategories }: { initialCategories: { id: s
           // If searching, filter items
           if (searchQuery) {
             const query = searchQuery.toLowerCase()
-            const filteredItems = category.menu_items?.filter((item: { name: string, description?: string }) => 
+            const filteredItems = category.menu_items?.filter(item => 
               item.name.toLowerCase().includes(query) || 
               item.description?.toLowerCase().includes(query)
             )
@@ -211,7 +216,7 @@ export function MenuRenderer({ initialCategories }: { initialCategories: { id: s
             {category.menu_items?.length === 0 && (
               <p className="text-sm text-zinc-500 italic py-4">No items available.</p>
             )}
-            {category.menu_items?.map((item: { id: string, name: string, description?: string, price_minor: number, image_url?: string, availability_status: string }) => (
+            {category.menu_items?.map(item => (
               <ItemCard key={item.id} item={item} />
             ))}
           </div>
@@ -222,7 +227,7 @@ export function MenuRenderer({ initialCategories }: { initialCategories: { id: s
         <p className="text-center text-[#69746c] dark:text-zinc-500 py-12">This menu is currently empty.</p>
       )}
 
-      {searchQuery && categories.every(cat => !cat.menu_items?.some((item: { name: string, description?: string }) => item.name.toLowerCase().includes(searchQuery.toLowerCase()) || item.description?.toLowerCase().includes(searchQuery.toLowerCase()))) && (
+      {searchQuery && categories.every(cat => !cat.menu_items?.some(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()) || item.description?.toLowerCase().includes(searchQuery.toLowerCase()))) && (
         <div className="text-center py-12">
           <p className="text-[#17201b] dark:text-zinc-300 font-medium text-lg">No matches found</p>
           <p className="text-[#69746c] dark:text-zinc-500 text-sm mt-1">We couldn't find any items matching "{searchQuery}"</p>
