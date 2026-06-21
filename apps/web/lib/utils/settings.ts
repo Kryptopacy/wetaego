@@ -3,12 +3,11 @@ import { unstable_cache } from 'next/cache'
 
 // Default fallbacks in case the DB is unreachable or row is missing
 const DEFAULT_PRICING = { lite_monthly_ngn: 19999, pro_monthly_ngn: 49999, credits_10_ngn: 15000, credits_25_ngn: 33000, credits_50_ngn: 60000 }
-const DEFAULT_CREDIT_COSTS = { ai_cover: 5, copywriter: 1, translation_per_category: 2, custom_page: 10 }
+const DEFAULT_CREDIT_COSTS = { ai_cover: 5, copywriter: 1, translation_per_category: 2, custom_page: 10, qr_code: 1 }
 const DEFAULT_PLAN_LIMITS = {
-  starter: { credits: 0, pages: 0 },
-  lite: { credits: 0, pages: 0 },
-  pro: { credits: 50, pages: 1 },
-  enterprise: { credits: 200, pages: 5 }
+  lite: { credits: 10, pages: 0, qr_codes: 2 },
+  pro: { credits: 50, pages: 1, qr_codes: 9999 },
+  enterprise: { credits: 200, pages: 5, qr_codes: 9999 }
 }
 const DEFAULT_AI_MODELS = { text_generation: "gemini-3.1-flash", image_generation: "imagen-3.0-generate-001" }
 const DEFAULT_EXCHANGE_RATES = { usd_to_ngn: 1500 }

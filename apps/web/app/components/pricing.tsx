@@ -17,7 +17,7 @@ export async function Pricing() {
       price: `₦${litePrice.toLocaleString()}`,
       period: 'per month',
       description: 'Perfect for testing the platform at your venue. 30-day free trial included.',
-      features: ['AI Waiter (guest-facing chat)', 'Edge Translator (40+ languages)', 'Up to 2 QR codes', '1 active location'],
+      features: ['Includes 10 Credits/mo', 'AI Waiter (guest-facing chat)', 'Edge Translator (40+ languages)', 'Up to 2 QR codes', '1 active location'],
       cta: 'Start Free Trial',
       href: '/dashboard',
       highlighted: false,
@@ -33,7 +33,7 @@ export async function Pricing() {
         'AI Copywriter & Image Studio',
         'Smart Request Triaging (KDS)',
         'Demand Forecasting Engine',
-        '1 Custom Page (+10 credits/extra)',
+        '1 Extra Custom Page (+10 credits/extra)',
         'Priority WhatsApp support',
       ],
       cta: 'Get Pro',
@@ -111,8 +111,8 @@ export async function Pricing() {
         {/* Credit Packs */}
         <div className="mt-32 max-w-5xl mx-auto">
           <FadeIn className="text-center mb-12">
-            <h3 className="text-3xl md:text-4xl font-black text-white tracking-tight mb-4">Need more AI power?</h3>
-            <p className="text-zinc-400 text-lg">Top up your workspace with AI credits. Credits never expire.</p>
+            <h3 className="text-3xl md:text-4xl font-black text-white tracking-tight mb-4">Need more power?</h3>
+            <p className="text-zinc-400 text-lg">Top up your workspace with credits. Credits never expire.</p>
           </FadeIn>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

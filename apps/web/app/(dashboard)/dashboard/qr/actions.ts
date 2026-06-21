@@ -27,6 +27,48 @@ export async function generateQrBatch(formData: FormData) {
     return { error: 'Location not found' }
   }
 
+  // Check limits and charge credits if necessary
+  const { data: userData } = await supabase.auth.getUser()
+  if (!userData?.user) return { error: 'Not authenticated' }
+
+  const { data: org } = await supabase
+    .from('organizations')
+    .select('subscription_tier')
+    .eq('id', orgId)
+    .single()
+
+  const { count } = await supabase
+    .from('qr_codes')
+    .select('id', { count: 'exact' })
+    .eq('organization_id', orgId)
+
+  const { getFreeQrLimit } = await import('@/lib/utils/billing')
+  const freeLimit = await getFreeQrLimit(org?.subscription_tier || 'lite')
+
+  const currentCount = count || 0
+  const totalAfterGeneration = currentCount + quantity
+
+  if (totalAfterGeneration > freeLimit) {
+    const excess = totalAfterGeneration - Math.max(currentCount, freeLimit)
+    if (excess > 0) {
+      const { getCreditCosts } = await import('@/lib/utils/settings')
+      const creditCosts = await getCreditCosts() as Record<string, number>
+      const qrCost = creditCosts.qr_code || 1
+      const totalCost = excess * qrCost
+
+      const { chargeCredits } = await import('@/lib/payments/credits')
+      const charge = await chargeCredits(
+        orgId,
+        totalCost,
+        `Generated ${excess} extra QR code(s)`,
+        userData.user.id
+      )
+      if (!charge.success) {
+        return { error: `Insufficient credits to generate extra QR codes. You need ${totalCost} credits for the extra ${excess} codes. Buy a credit pack or upgrade your plan.` }
+      }
+    }
+  }
+
   // Generate generic QR codes
   const qrCodes = Array.from({ length: quantity }).map((__, _i) => {
     return {
