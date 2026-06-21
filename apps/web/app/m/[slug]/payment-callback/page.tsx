@@ -31,7 +31,7 @@ export default async function PaymentCallbackPage({
     return (
       <div className="flex flex-col items-center justify-center min-h-screen p-6 text-center space-y-4">
         <h1 className="text-2xl font-bold text-red-500">Order Not Found</h1>
-        <p className="text-zinc-400">We couldn't find the order associated with this payment.</p>
+            <p className="text-zinc-400 mt-2">We couldn&apos;t verify your payment. Please try again or contact staff.</p>
         <Link href={`/m/${slug}`} className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-full">
           Return to Menu
         </Link>

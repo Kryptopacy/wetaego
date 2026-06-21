@@ -1,4 +1,3 @@
-// @ts-ignore
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { chargeCredits, refundCredits } from '@/lib/payments/credits'

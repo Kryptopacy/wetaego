@@ -1,5 +1,3 @@
-/* eslint-disable react/no-unescaped-entities */
-// FIXME: Developer bypassed types/rules. Requires refactoring for true perfection.
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -117,7 +115,7 @@ export default async function AffiliateDashboardPage() {
             </div>
           ) : (
             <div className="p-12 text-center text-zinc-500">
-              You haven't referred any businesses yet. Share your link to get started!
+              You haven&apos;t referred any businesses yet. Share your link to get started!
             </div>
           )}
         </div>

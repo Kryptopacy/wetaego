@@ -26,6 +26,7 @@ export function RouletteFAB() {
   const [currentDisplay, setCurrentDisplay] = useState('?')
 
   const [isMounted, setIsMounted] = useState(false)
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setIsMounted(true), [])
 
   const namesList = namesText.split(',').map(n => n.trim()).filter(n => n.length > 0)
@@ -274,7 +275,7 @@ export function RouletteFAB() {
                               <span className="text-purple-400 font-bold">{r.percentage}%</span>
                             </div>
                           ))}
-                          <p className="text-zinc-500 text-xs text-center mt-2">Use the "Custom Amount" box at checkout.</p>
+                          <p className="text-zinc-500 text-xs text-center mt-2">Use the &quot;Custom Amount&quot; box at checkout.</p>
                         </div>
                       )}
 

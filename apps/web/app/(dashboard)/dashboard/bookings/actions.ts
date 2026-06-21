@@ -19,8 +19,7 @@ export async function updateBookingStatus(bookingId: string, action: 'mark_paid'
 
   if (!bookingData) throw new Error('Booking not found')
   
-  // @ts-ignore
-  const orgId = bookingData.location_pages?.locations?.organization_id
+  const orgId = (bookingData.location_pages as any)?.locations?.organization_id
 
   const { data: member } = await supabase
     .from('organization_members')

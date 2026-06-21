@@ -1,4 +1,3 @@
-// FIXME: Developer bypassed types/rules. Requires refactoring for true perfection.
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
@@ -12,6 +11,7 @@ import { SpinnerModal } from '../../components/spinner-modal'
 import { PortalRenderer } from './portal-renderer'
 import { EcosystemNav } from '@/components/layout/ecosystem-nav'
 import { Tables } from '../../../../../types'
+import { withCache } from '@/lib/redis-cache'
 
 type CategoryWithItems = Tables<'menu_categories'> & {
   menu_items: Tables<'menu_items'>[]
@@ -86,17 +86,22 @@ export default async function PublicMenuPage({
 
   const supabase = await createClient()
 
-  const { data: locationData } = await supabase
-    .from('locations')
-    .select('id, name, organization_id, ai_enabled, ai_name, theme_color, cover_image_url, operating_hours, wifi_network, wifi_password, instagram_handle, twitter_handle, facebook_handle, whatsapp_number, phone_number, google_maps_url, randomizer_enabled, spinner_enabled, spinner_config, global_discount_enabled, global_discount_banner_text, global_discount_percentage, manual_payment_enabled, manual_payment_bank_name, manual_payment_account_name, manual_payment_account_number, manual_payment_instructions, organizations(logo_url)')
-    .eq('slug', slug)
-    .single()
+  const locationFetcher = async () => {
+    const { data } = await supabase
+      .from('locations')
+      .select('id, name, organization_id, ai_enabled, ai_name, theme_color, cover_image_url, operating_hours, wifi_network, wifi_password, instagram_handle, twitter_handle, facebook_handle, whatsapp_number, phone_number, google_maps_url, randomizer_enabled, spinner_enabled, spinner_config, global_discount_enabled, global_discount_banner_text, global_discount_percentage, manual_payment_enabled, manual_payment_bank_name, manual_payment_account_name, manual_payment_account_number, manual_payment_instructions, organizations(logo_url)')
+      .eq('slug', slug)
+      .single()
+    return data;
+  }
+
+  const locationData = await withCache(`location_${slug}`, locationFetcher, 60);
 
   if (!locationData) {
     notFound()
   }
 
-  const location = locationData as any // temporary until global DB types are generated
+  const location = locationData;
 
   // 1.2 Fetch Payment Settings
   const { data: paymentSettings } = await supabase
@@ -140,7 +145,7 @@ export default async function PublicMenuPage({
   const hasPortalMode = locationPages && locationPages.length > 0;
 
   if (hasPortalMode && view !== 'menu') {
-    return <PortalRenderer location={location} pages={locationPages} />
+    return <PortalRenderer location={location as unknown as Parameters<typeof PortalRenderer>[0]['location']} pages={locationPages} />
   }
 
   // 2. Find the active menu for this location
@@ -215,7 +220,7 @@ export default async function PublicMenuPage({
       <main className="min-h-screen bg-[#f5f7f5] dark:bg-zinc-950 font-sans text-[#17201b] dark:text-zinc-100 pb-32 transition-colors">
         {/* Elevated Cover Image Hero Section */}
         <VenueHeader 
-          location={location} 
+          location={location as unknown as Parameters<typeof VenueHeader>[0]['location']} 
           slug={slug} 
           tableIdentifier={tableIdentifier} 
         />
@@ -224,7 +229,7 @@ export default async function PublicMenuPage({
           {location.global_discount_enabled && location.global_discount_banner_text && (
             <GlobalDiscountBanner 
               bannerText={location.global_discount_banner_text} 
-              percentage={location.global_discount_percentage} 
+              percentage={location.global_discount_percentage || 0} 
             />
           )}
           <LiveOrderTracker organizationId={location.organization_id} locationId={location.id} />
@@ -242,7 +247,7 @@ export default async function PublicMenuPage({
         <CallStaffFAB organizationId={location.organization_id} locationId={location.id} tableIdentifier={tableIdentifier} />
         {location.randomizer_enabled && <RouletteFAB />}
         {location.spinner_enabled && location.spinner_config && (
-          <SpinnerModal locationId={location.id} config={location.spinner_config as any} />
+          <SpinnerModal locationId={location.id} config={location.spinner_config as unknown as Parameters<typeof SpinnerModal>[0]['config']} />
         )}
         <EcosystemNav locationId={location.id} slug={slug} currentPath="menu" />
         <CartFAB 
@@ -250,13 +255,13 @@ export default async function PublicMenuPage({
           locationId={location.id} 
           tableIdentifier={tableIdentifier}
           paymentIsLive={!!isPaystackLive}
-          manualPaymentEnabled={location.manual_payment_enabled}
-          manualPaymentBankName={location.manual_payment_bank_name}
-          manualPaymentAccountName={location.manual_payment_account_name}
-          manualPaymentAccountNumber={location.manual_payment_account_number}
-          manualPaymentInstructions={location.manual_payment_instructions}
-          globalDiscountEnabled={location.global_discount_enabled}
-          globalDiscountPercentage={location.global_discount_percentage}
+          manualPaymentEnabled={location.manual_payment_enabled || false}
+          manualPaymentBankName={location.manual_payment_bank_name || undefined}
+          manualPaymentAccountName={location.manual_payment_account_name || undefined}
+          manualPaymentAccountNumber={location.manual_payment_account_number || undefined}
+          manualPaymentInstructions={location.manual_payment_instructions || undefined}
+          globalDiscountEnabled={location.global_discount_enabled || false}
+          globalDiscountPercentage={(location.global_discount_percentage as number) || 0}
           menuItems={allMenuItems}
           templateType="catalog"
         />

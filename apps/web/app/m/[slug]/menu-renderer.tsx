@@ -1,8 +1,5 @@
 'use client'
 
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, react-hooks/set-state-in-effect, @typescript-eslint/ban-ts-comment, react/no-unescaped-entities */
-// FIXME: Developer bypassed types/rules. Requires refactoring for true perfection.
-
 
 import { useState, useEffect } from 'react'
 import { ItemCard } from './item-card'
@@ -82,14 +79,14 @@ export function MenuRenderer({ initialCategories }: { initialCategories: Categor
       
       // Merge translated fields back into the full categories array so we don't lose prices, images, etc.
       const newCategories = initialCategories.map(cat => {
-        const translatedCat = translatedCategories.find((tc: any) => tc.id === cat.id)
+        const translatedCat = translatedCategories.find((tc: { id: string; name?: string; items?: { id: string; name?: string; description?: string }[] }) => tc.id === cat.id)
         if (!translatedCat) return cat
         
         return {
           ...cat,
           name: translatedCat.name || cat.name,
-          menu_items: (cat.menu_items || []).map((item: any) => {
-            const tItem = translatedCat.items?.find((ti: any) => ti.id === item.id)
+          menu_items: (cat.menu_items || []).map((item: Tables<'menu_items'>) => {
+            const tItem = translatedCat.items?.find((ti: { id: string; name?: string; description?: string }) => ti.id === item.id)
             if (!tItem) return item
             return {
               ...item,
@@ -234,7 +231,7 @@ export function MenuRenderer({ initialCategories }: { initialCategories: Categor
       {searchQuery && categories.every(cat => !cat.menu_items?.some(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()) || item.description?.toLowerCase().includes(searchQuery.toLowerCase()))) && (
         <div className="text-center py-12">
           <p className="text-[#17201b] dark:text-zinc-300 font-medium text-lg">No matches found</p>
-          <p className="text-[#69746c] dark:text-zinc-500 text-sm mt-1">We couldn't find any items matching "{searchQuery}"</p>
+          <p className="text-[#69746c] dark:text-zinc-500 text-sm mt-1">We couldn&apos;t find any items matching &quot;{searchQuery}&quot;</p>
         </div>
       )}
     </div>
