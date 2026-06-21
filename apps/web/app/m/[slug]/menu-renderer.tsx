@@ -62,7 +62,7 @@ export function MenuRenderer({ initialCategories }: { initialCategories: Categor
     const payload = initialCategories.map(cat => ({
       id: cat.id,
       name: cat.name,
-      items: (cat.menu_items || []).map(item => ({
+      items: (cat.menu_items || []).map((item: Tables<'menu_items'>) => ({
         id: item.id,
         name: item.name,
         description: item.description

@@ -1,12 +1,9 @@
 'use client'
 
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, react-hooks/set-state-in-effect, @typescript-eslint/ban-ts-comment */
-// FIXME: Developer bypassed types/rules. Requires refactoring for true perfection.
-
-
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { motion, AnimatePresence } from 'framer-motion'
+import { Tables } from '../../../../../types'
 
 interface LiveOrderTrackerProps {
   organizationId: string
@@ -15,7 +12,7 @@ interface LiveOrderTrackerProps {
 
 export function LiveOrderTracker({ organizationId, locationId }: LiveOrderTrackerProps) {
   const supabase = createClient()
-  const [order, setOrder] = useState<{ id: string, status: string, estimated_ready_at: string, estimated_prep_time_minutes: number } | null>(null)
+  const [order, setOrder] = useState<Tables<'orders'> | null>(null)
   const [timeLeft, setTimeLeft] = useState<number>(0)
   
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -28,7 +25,7 @@ export function LiveOrderTracker({ organizationId, locationId }: LiveOrderTracke
     const fetchOrder = async () => {
       const { data } = await supabase.from('orders').select('*').eq('id', activeOrderId).single()
       if (data) {
-        setOrder(data as any)
+        setOrder(data)
       }
     }
     fetchOrder()
@@ -41,8 +38,8 @@ export function LiveOrderTracker({ organizationId, locationId }: LiveOrderTracke
         schema: 'public',
         table: 'orders',
         filter: `id=eq.${activeOrderId}`
-      }, (payload: any) => {
-        setOrder(payload.new)
+      }, (payload) => {
+        setOrder(payload.new as Tables<'orders'>)
       })
       .subscribe()
 
@@ -56,7 +53,7 @@ export function LiveOrderTracker({ organizationId, locationId }: LiveOrderTracke
     if (!order || order.status !== 'preparing' || !order.estimated_ready_at) return
 
     const interval = setInterval(() => {
-      const target = new Date(order.estimated_ready_at).getTime()
+      const target = order.estimated_ready_at ? new Date(order.estimated_ready_at).getTime() : 0
       const now = new Date().getTime()
       const diff = Math.max(0, Math.floor((target - now) / 1000))
       setTimeLeft(diff)
@@ -88,7 +85,7 @@ export function LiveOrderTracker({ organizationId, locationId }: LiveOrderTracke
             {/* Progress Bar Background */}
             <div 
               className="absolute inset-0 bg-blue-500/20" 
-              style={{ width: `${Math.min(100, Math.max(0, 100 - (timeLeft / (order.estimated_prep_time_minutes * 60)) * 100))}%`, transition: 'width 1s linear' }} 
+              style={{ width: `${Math.min(100, Math.max(0, 100 - (timeLeft / ((order.estimated_prep_time_minutes || 1) * 60)) * 100))}%`, transition: 'width 1s linear' }} 
             />
             
             <div className="relative z-10 flex items-center gap-3">

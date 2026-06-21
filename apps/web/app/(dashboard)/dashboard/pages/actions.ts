@@ -1,7 +1,5 @@
 'use server'
 
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, react-hooks/set-state-in-effect, @typescript-eslint/ban-ts-comment */
-// FIXME: Developer bypassed types/rules. Requires refactoring for true perfection.
 
 
 import { createClient } from '@/lib/supabase/server'
@@ -129,7 +127,7 @@ export async function createCustomPage(formData: FormData): Promise<void> {
     is_published: true,
   })
 
-  if (error) throw new Error(error.message)
+  if (error) throw new Error((error as Error).message)
 
   revalidatePath('/dashboard/pages')
   redirect('/dashboard/pages')
@@ -163,7 +161,7 @@ export async function updatePage(formData: FormData): Promise<void> {
     .update({ title, content, billing_enabled, billing_mode, payment_mode, deposit_percentage, randomizer_enabled })
     .eq('id', pageId)
 
-  if (error) throw new Error(error.message)
+  if (error) throw new Error((error as Error).message)
 
   revalidatePath('/dashboard/pages')
 }
@@ -230,7 +228,7 @@ export async function addPageItem(formData: FormData): Promise<void> {
     images
   })
 
-  if (error) throw new Error(error.message)
+  if (error) throw new Error((error as Error).message)
 
   revalidatePath('/dashboard/pages')
 }
@@ -282,7 +280,7 @@ export async function updatePageItem(formData: FormData): Promise<void> {
     .update(updatePayload)
     .eq('id', itemId)
 
-  if (error) throw new Error(error.message)
+  if (error) throw new Error((error as Error).message)
 
   revalidatePath('/dashboard/pages')
 }

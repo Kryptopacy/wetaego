@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, react-hooks/set-state-in-effect, @typescript-eslint/ban-ts-comment */
-// FIXME: Developer bypassed types/rules. Requires refactoring for true perfection.
+import { QueryData } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
@@ -20,22 +19,22 @@ export async function generateMetadata({
   const { slug, pageSlug } = await params
   const supabase = await createClient()
 
-  const { data: loc } = await supabase
+  const locQuery = supabase
     .from('locations')
     .select('id, name, cover_image_url')
     .eq('slug', slug)
-    .returns<Record<string, any>[]>()
     .single()
+  const { data: loc } = await locQuery
   if (!loc) return { title: 'Not Found' }
 
-  const { data: page } = await supabase
+  const pageQuery = supabase
     .from('location_pages')
     .select('title, content, template_type')
     .eq('location_id', loc.id)
     .eq('slug', pageSlug)
     .eq('is_published', true)
-    .returns<Record<string, any>[]>()
     .single()
+  const { data: page } = await pageQuery
   if (!page) return { title: 'Not Found' }
 
   const description = page.content
@@ -72,35 +71,35 @@ export default async function PublicPageView({
   const supabase = await createClient()
 
   // 1. Location
-  const { data: loc } = await supabase
+  const locQuery = supabase
     .from('locations')
     .select('id, name, organization_id, theme_color, cover_image_url, ai_enabled, ai_name, instagram_handle, whatsapp_number, phone_number, organizations(logo_url), manual_payment_enabled, manual_payment_bank_name, manual_payment_account_name, manual_payment_account_number, manual_payment_instructions')
     .eq('slug', slug)
-    .returns<Record<string, any>[]>()
     .single()
+  const { data: loc } = await locQuery
 
   if (!loc) notFound()
 
   // 2. Page
-  const { data: page } = await supabase
+  const pageQuery = supabase
     .from('location_pages')
     .select('id, title, slug, content, template_type, billing_enabled, billing_mode, payment_mode, deposit_percentage, business_type_preset, randomizer_enabled')
     .eq('location_id', loc.id)
     .eq('slug', pageSlug)
     .eq('is_published', true)
-    .returns<Record<string, any>[]>()
     .single()
+  const { data: page } = await pageQuery
 
   if (!page) notFound()
 
   // 3. Items (for catalog, booking, listing, rate_card)
-  const { data: items } = await supabase
+  const itemsQuery = supabase
     .from('page_items')
     .select('*')
     .eq('page_id', page.id)
     .eq('is_published', true)
     .order('sort_order')
-    .returns<Record<string, any>[]>()
+  const { data: items } = await itemsQuery
 
   // 4. Payment Settings
   const { data: paymentSettings } = await supabase
@@ -110,9 +109,9 @@ export default async function PublicPageView({
     .single()
 
   const sharedProps = {
-    location: loc as any,
-    page: page as any,
-    items: (items as any[]) || [],
+    location: { ...loc, cover_image_url: loc.cover_image_url ?? undefined } as unknown as any,
+    page: page as unknown as any,
+    items: items as unknown as any[],
     locationSlug: slug,
     referralSource: ref,
     paymentIsLive: paymentSettings?.is_active ?? false,
@@ -151,7 +150,7 @@ export default async function PublicPageView({
           aiName={loc.ai_name || ''}
           themeColor={loc.theme_color || '#7c3aed'}
           tableIdentifier="QR Scan" // Standard fallback for generic pages
-          menuItems={items as any}
+          menuItems={(items as QueryData<typeof itemsQuery>).map(i => ({ id: i.id, name: i.title, price_minor: i.price_minor || 0 })) || []}
           templateType={page.template_type}
           billingMode={page.billing_mode}
           businessTypePreset={page.business_type_preset}

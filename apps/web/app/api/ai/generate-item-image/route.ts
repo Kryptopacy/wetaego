@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, react-hooks/set-state-in-effect, @typescript-eslint/ban-ts-comment */
-// FIXME: Developer bypassed types/rules. Requires refactoring for true perfection.
 // @ts-ignore
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
@@ -132,13 +130,13 @@ CRITICAL RULES:
       const publicUrl = publicUrlData.publicUrl
 
       return NextResponse.json({ success: true, url: publicUrl, remaining: charge.remaining })
-    } catch (apiError: any) {
+    } catch (apiError: unknown) {
       // Refund credits if anything fails after deduction
       await refundCredits(organizationId, cost, 'AI Image Generation Failed', userData.user.id)
-      throw new Error(apiError.message || 'Generation or storage failed, credits refunded.')
+      throw new Error((apiError as Error).message || 'Generation or storage failed, credits refunded.')
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     Sentry.captureException(error)
-    return NextResponse.json({ error: error.message || 'An unexpected error occurred.' }, { status: 500 })
+    return NextResponse.json({ error: (error as Error).message || 'An unexpected error occurred.' }, { status: 500 })
   }
 }

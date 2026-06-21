@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, react-hooks/set-state-in-effect, @typescript-eslint/ban-ts-comment */
-// FIXME: Developer bypassed types/rules. Requires refactoring for true perfection.
 
 'use server'
 
@@ -86,7 +84,7 @@ export async function generateQrBatch(formData: FormData) {
   const { error } = await supabase.from('qr_codes').insert(qrCodes)
 
   if (error) {
-    return { error: error.message }
+    return { error: (error as Error).message }
   }
 
   revalidatePath('/dashboard/qr')
@@ -98,7 +96,7 @@ export async function deleteQrCode(qrId: string) {
   
   const { error } = await supabase.from('qr_codes').delete().eq('id', qrId)
   
-  if (error) return { error: error.message }
+  if (error) return { error: (error as Error).message }
   
   revalidatePath('/dashboard/qr')
   return { success: true }
@@ -112,7 +110,7 @@ export async function assignQrTable(qrId: string, tableIdentifier: string | null
     .update({ table_identifier: tableIdentifier || null })
     .eq('id', qrId)
   
-  if (error) return { error: error.message }
+  if (error) return { error: (error as Error).message }
   
   revalidatePath('/dashboard/qr')
   return { success: true }

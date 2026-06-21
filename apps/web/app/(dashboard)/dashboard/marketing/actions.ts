@@ -1,7 +1,5 @@
 'use server'
 
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, react-hooks/set-state-in-effect, @typescript-eslint/ban-ts-comment */
-// FIXME: Developer bypassed types/rules. Requires refactoring for true perfection.
 
 
 import { createClient } from '@/lib/supabase/server'
@@ -92,8 +90,8 @@ export async function sendBroadcastAction(formData: FormData) {
 
     revalidatePath('/dashboard/marketing')
     return { success: true, count: totalSent }
-  } catch (err: any) {
-    return { error: err.message || 'An unknown error occurred.' }
+  } catch (err: unknown) {
+    return { error: (err as Error).message || 'An unknown error occurred.' }
   }
 }
 

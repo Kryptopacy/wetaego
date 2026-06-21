@@ -70,7 +70,7 @@ export async function createInviteAction(
     }
 
     if (error) {
-      return { error: error.message }
+      return { error: (error as Error).message }
     }
 
     // Fetch org name
@@ -127,7 +127,7 @@ export async function revokeInviteAction(orgId: string, inviteId: string) {
     }
 
     if (error) {
-      return { error: error.message }
+      return { error: (error as Error).message }
     }
 
     revalidatePath('/dashboard/settings/team')
@@ -158,7 +158,7 @@ export async function removeMemberAction(orgId: string, userIdToDelete: string) 
     }
 
     if (error) {
-      return { error: error.message }
+      return { error: (error as Error).message }
     }
 
     revalidatePath('/dashboard/settings/team')
@@ -188,7 +188,7 @@ export async function deleteOrganizationAction(orgId: string) {
       .eq('created_by', currentUserId) // extra safety: only the creator can delete
 
     if (error) {
-      return { error: error.message }
+      return { error: (error as Error).message }
     }
 
     return { success: true }

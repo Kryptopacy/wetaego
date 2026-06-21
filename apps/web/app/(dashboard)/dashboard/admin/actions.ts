@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, react-hooks/set-state-in-effect, @typescript-eslint/ban-ts-comment */
-// FIXME: Developer bypassed types/rules. Requires refactoring for true perfection.
 
 'use server'
 
@@ -17,7 +15,7 @@ export async function updateSetting(formData: FormData) {
   const key = formData.get('key') as string
   const isJson = formData.get('is_json') === 'true'
 
-  let value: Record<string, unknown> = {}
+  let value: any = {}
 
   if (isJson) {
     const rawJson = formData.get('json_value') as string

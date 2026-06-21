@@ -1,7 +1,5 @@
 'use server'
 
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, react-hooks/set-state-in-effect, @typescript-eslint/ban-ts-comment */
-// FIXME: Developer bypassed types/rules. Requires refactoring for true perfection.
 
 
 import { createClient } from '@/lib/supabase/server'
@@ -41,7 +39,7 @@ export async function saveLocationPromotions(formData: FormData) {
     })
     .eq('id', locationId)
 
-  if (error) throw new Error(error.message)
+  if (error) throw new Error((error as Error).message)
 
   revalidatePath('/dashboard/settings')
   // We don't have the slug here easily, but the location settings update so next time it loads it will cache bust

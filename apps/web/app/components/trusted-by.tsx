@@ -30,8 +30,7 @@ export async function TrustedBy() {
           {marqueeItems.map((org, i) => (
             <div key={`${org.name}-${i}`} className="flex items-center justify-center min-w-[120px] opacity-50 hover:opacity-100 transition-opacity duration-300 grayscale hover:grayscale-0">
               {org.logo_url ? (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img src={org.logo_url} alt={org.name} className="h-8 md:h-10 object-contain" />
+                                <img src={org.logo_url} alt={org.name} className="h-8 md:h-10 object-contain" />
               ) : (
                 <span className="text-xl md:text-2xl font-black tracking-tight text-white">{org.name}</span>
               )}

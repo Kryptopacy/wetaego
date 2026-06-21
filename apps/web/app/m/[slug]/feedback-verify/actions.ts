@@ -1,7 +1,5 @@
 'use server'
 
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, react-hooks/set-state-in-effect, @typescript-eslint/ban-ts-comment */
-// FIXME: Developer bypassed types/rules. Requires refactoring for true perfection.
 
 
 import { createClient } from '@/lib/supabase/server'
@@ -35,7 +33,7 @@ export async function verifyFeedbackPin(orgSlug: string, pin: string) {
     .from('orders')
     .select('id')
     .eq('organization_id', org.id)
-    .eq('feedback_pin' as any, pin)
+    .eq('feedback_pin', pin)
     .gte('created_at', yesterday.toISOString())
     .in('status', ['paid', 'completed'])
     .order('created_at', { ascending: false })

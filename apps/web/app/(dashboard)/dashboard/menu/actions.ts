@@ -23,7 +23,7 @@ export async function createCategory(formData: FormData) {
     name,
   })
 
-  if (error) return { error: error.message }
+  if (error) return { error: (error as Error).message }
 
   revalidatePath('/dashboard/menu')
   return { success: true }
@@ -80,7 +80,7 @@ export async function createItem(formData: FormData) {
     allergen_tags
   })
 
-  if (error) return { error: error.message }
+  if (error) return { error: (error as Error).message }
 
   revalidatePath('/dashboard/menu')
   return { success: true }

@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, react-hooks/set-state-in-effect, @typescript-eslint/ban-ts-comment, @next/next/no-img-element */
-// FIXME: Developer bypassed types/rules. Requires refactoring for true perfection.
+import { Tables } from '../../../../../types'
 import Link from "next/link";
 import { ArrowRight, Utensils, Calendar, Info, FileText, LayoutList } from "lucide-react";
 
@@ -27,8 +26,8 @@ export function PortalRenderer({
   location,
   pages,
 }: {
-  location: any;
-  pages: any[];
+  location: Tables<'locations'> & { organizations?: { logo_url: string | null } | null };
+  pages: { id: string; slug: string; title: string; template_type: string; is_published: boolean }[];
 }) {
   const themeColor = location.theme_color || '#0f7b55';
   const isLight = getLuminance(themeColor) > 0.5;

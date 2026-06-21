@@ -1,5 +1,3 @@
-/* eslint-disable react/no-unescaped-entities */
-// FIXME: Developer bypassed types/rules. Requires refactoring for true perfection.
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'

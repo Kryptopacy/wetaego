@@ -1,7 +1,5 @@
 'use client'
 
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, react-hooks/set-state-in-effect, @typescript-eslint/ban-ts-comment */
-// FIXME: Developer bypassed types/rules. Requires refactoring for true perfection.
 
 
 import { useState, useEffect } from 'react'
@@ -140,7 +138,7 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
     if (error) {
       // Rollback on failure
       setMenuItems(previousItems)
-      toast.error('Failed to update stock status: ' + error.message)
+      toast.error('Failed to update stock status: ' + (error as Error).message)
     } else {
       toast.success(`Item marked as ${newStatus === 'available' ? 'Available' : 'Sold Out'}`)
     }
@@ -162,7 +160,7 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
     })
 
     if (error) {
-      toast.error('Failed to claim order: ' + error.message)
+      toast.error('Failed to claim order: ' + (error as Error).message)
       return
     }
 
@@ -201,13 +199,13 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
             activeOrders={activeOrders} 
             currentUserId={currentUserId} 
             billingMode={billingMode} 
-            onClaimOrder={handleClaimOrder as any} 
+            onClaimOrder={handleClaimOrder} 
           />
         </div>
       ) : (
         <StockManagementView 
           menuItems={menuItems} 
-          onToggleStock={toggleStock as any} 
+          onToggleStock={toggleStock} 
         />
       )}
     </div>

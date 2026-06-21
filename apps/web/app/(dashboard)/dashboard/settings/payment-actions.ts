@@ -114,7 +114,7 @@ export async function saveManualPaymentSettings(formData: FormData) {
     })
     .eq('id', locationId)
 
-  if (error) throw new Error(error.message)
+  if (error) throw new Error((error as Error).message)
 
   revalidatePath('/dashboard/settings')
 }

@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, react-hooks/set-state-in-effect, @typescript-eslint/ban-ts-comment, react/no-unescaped-entities */
-// FIXME: Developer bypassed types/rules. Requires refactoring for true perfection.
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
@@ -17,7 +15,7 @@ export default async function TeamPerformancePage() {
     .eq('user_id', userData.user.id)
     .single()
 
-  const orgId = (member?.organizations as any)?.id
+  const orgId = (member?.organizations as { id: string })?.id
   if (!orgId) redirect('/dashboard')
 
   // Get active location
@@ -52,7 +50,7 @@ export default async function TeamPerformancePage() {
     .eq('organization_id', orgId)
     .eq('location_id', activeLocationId)
     .order('created_at', { ascending: false })
-  const reviews: any[] = reviewsRaw || []
+  const reviews: { id: string; staff_id: string | null; staff_rating: number; staff_feedback: string | null; business_rating: number | null; business_feedback: string | null; created_at: string }[] = reviewsRaw as any || []
 
   // 3. Fetch tips (Orders with assigned staff and tip > 0)
   const { data: ordersWithTipsRaw } = await supabase
@@ -61,7 +59,7 @@ export default async function TeamPerformancePage() {
     .eq('organization_id', orgId)
     .eq('location_id', activeLocationId)
     .gt('tip_amount_minor', 0)
-  const ordersWithTips: any[] = ordersWithTipsRaw || []
+  const ordersWithTips: { id: string; assigned_staff_id: string | null; tip_amount_minor: number | null; created_at: string }[] = ordersWithTipsRaw as any || []
 
   // Calculate stats per staff
   const staffStats = staffMembers?.map((staff) => {
@@ -74,7 +72,7 @@ export default async function TeamPerformancePage() {
       : 0
 
     const staffTips = ordersWithTips?.filter(o => o.assigned_staff_id === userId) || []
-    const totalTipsMinor = staffTips.reduce((sum, o) => sum + o.tip_amount_minor, 0)
+    const totalTipsMinor = staffTips.reduce((sum, o) => sum + (o.tip_amount_minor || 0), 0)
 
     return {
       userId,
@@ -104,7 +102,7 @@ export default async function TeamPerformancePage() {
         <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-6">
           <h3 className="text-zinc-500 font-bold uppercase tracking-wider text-xs mb-1">Total Tips Collected</h3>
           <div className="text-4xl font-black text-blue-500">
-            ₦{((ordersWithTips?.reduce((sum, o) => sum + o.tip_amount_minor, 0) || 0) / 100).toLocaleString()}
+            ₦{((ordersWithTips?.reduce((sum, o) => sum + (o.tip_amount_minor || 0), 0) || 0) / 100).toLocaleString()}
           </div>
         </div>
         <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-6">

@@ -1,7 +1,6 @@
 'use client'
 
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, react-hooks/set-state-in-effect, @typescript-eslint/ban-ts-comment */
-// FIXME: Developer bypassed types/rules. Requires refactoring for true perfection.
+
 
 
 import { useState, useEffect, useRef } from 'react'
@@ -67,10 +66,10 @@ export function AIChat({
         businessTypePreset
       }
     }),
-    async onToolCall({ toolCall }: any) {
+    async onToolCall({ toolCall }) {
       try {
         if (toolCall.toolName === 'addToCart') {
-          const { itemId, quantity } = toolCall.args as { itemId: string; quantity: number }
+          const { itemId, quantity } = (toolCall as unknown as { args: { itemId: string; quantity: number } }).args
           const item = menuItems.find((i) => i.id === itemId)
           if (item) {
             for (let i = 0; i < quantity; i++) {
@@ -85,7 +84,7 @@ export function AIChat({
         }
 
         if (toolCall.toolName === 'removeFromCart') {
-          const { itemId } = toolCall.args as { itemId: string }
+          const { itemId } = (toolCall as unknown as { args: { itemId: string } }).args
           const item = menuItems.find((i) => i.id === itemId)
           if (item) {
             removeItem(itemId)
@@ -105,7 +104,7 @@ export function AIChat({
         }
 
         if (toolCall.toolName === 'callStaff') {
-          const { requestType } = toolCall.args as { requestType: 'waiter' | 'bill' | 'cleanup' }
+          const { requestType } = (toolCall as unknown as { args: { requestType: Extract<Parameters<typeof callStaffFromAi>[3], string> } }).args
           const res = await callStaffFromAi(
             organizationId,
             locationId,
@@ -234,7 +233,8 @@ export function AIChat({
                   </div>
                 )}
 
-                {messages.map((m: any) => {
+                {messages.map((msg) => {
+                  const m = msg as unknown as { id: string; role: string; content: string };
                   if (m.role === 'user') {
                     return (
                       <div key={m.id} className="flex justify-end">

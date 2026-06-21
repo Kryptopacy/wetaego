@@ -1,7 +1,5 @@
 'use client'
 
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, react-hooks/set-state-in-effect, @typescript-eslint/ban-ts-comment, react/no-unescaped-entities */
-// FIXME: Developer bypassed types/rules. Requires refactoring for true perfection.
 
 
 import { useState, useEffect } from 'react'
@@ -25,14 +23,14 @@ export function PwaInstallPrompt() {
 
   useEffect(() => {
     // Detect if already installed/standalone
-    if (window.matchMedia('(display-mode: standalone)').matches || (navigator as any).standalone) {
+    if (window.matchMedia('(display-mode: standalone)').matches || ('standalone' in navigator && (navigator as { standalone?: boolean }).standalone)) {
       setIsStandalone(true)
       return
     }
 
     // Detect iOS for manual instruction fallback
     const ua = window.navigator.userAgent
-    const ios = /iPad|iPhone|iPod/.test(ua) && !(window as any).MSStream
+    const ios = /iPad|iPhone|iPod/.test(ua) && !('MSStream' in window)
     setIsIos(ios)
 
     // Listen for the install prompt event

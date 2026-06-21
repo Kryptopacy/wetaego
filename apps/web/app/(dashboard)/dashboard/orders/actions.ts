@@ -1,7 +1,5 @@
 'use server'
 
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, react-hooks/set-state-in-effect, @typescript-eslint/ban-ts-comment */
-// FIXME: Developer bypassed types/rules. Requires refactoring for true perfection.
 
 
 import { createClient } from '@/lib/supabase/server'
@@ -37,8 +35,8 @@ export async function completeOrderAction(orderId: string) {
 
   // 3. Dispatch Feedback Email asynchronously if customer email exists
   if (order.customer_email) {
-    const orgName = (order.organizations as any)?.name || 'the restaurant'
-    const orgSlug = (order.organizations as any)?.slug || ''
+    const orgName = (order.organizations as unknown as { name?: string })?.name || 'the restaurant'
+    const orgSlug = (order.organizations as unknown as { slug?: string })?.slug || ''
     const feedbackUrl = `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL || 'ourmenuos.online'}/m/${orgSlug}/feedback/${order.id}`
 
     waitUntil((async () => {

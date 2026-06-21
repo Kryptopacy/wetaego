@@ -1,7 +1,5 @@
 'use client'
 
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, react-hooks/set-state-in-effect, @typescript-eslint/ban-ts-comment, @next/next/no-img-element */
-// FIXME: Developer bypassed types/rules. Requires refactoring for true perfection.
 
 
 import Link from 'next/link'
@@ -22,7 +20,7 @@ import { TimeclockWidget } from './timeclock-widget'
 interface NavItem {
   href: string
   label: string
-  icon: any
+  icon: React.ElementType
   badge?: string
   exact?: boolean
 }
@@ -40,7 +38,7 @@ const managerItems: NavItem[] = [
 ]
 
 function NavLink({ href, label, icon: Icon, badge, exact, onClick }: {
-  href: string; label: string; icon: any; badge?: string; exact?: boolean; onClick?: () => void
+  href: string; label: string; icon: React.ElementType; badge?: string; exact?: boolean; onClick?: () => void
 }) {
   const pathname = usePathname()
   const isActive = exact ? pathname === href : pathname.startsWith(href)
@@ -104,12 +102,12 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           .select('role, organizations(id, name)')
           .eq('user_id', userData.user.id)
           .single()
-        if (member && (member.organizations as any)?.name) {
-          setOrgName((member.organizations as any).name)
+        if (member && (member.organizations as unknown as Record<string, unknown>)?.name) {
+          setOrgName((member.organizations as { name: string }).name)
           setIsOwnerOrManager(['owner', 'manager'].includes(member.role))
         }
         
-        const orgId = (member?.organizations as any)?.id
+        const orgId = (member?.organizations as { id: string })?.id
         if (orgId) {
           const { data: locs } = await supabase
             .from('locations')
@@ -122,7 +120,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             // Extract cookie safely on client side
             const match = document.cookie.match(new RegExp('(^| )ourmenu_active_location_id=([^;]+)'))
             const savedId = match ? match[2] : null
-            const activeLoc = locs.find((l: any) => l.id === savedId) || locs[0]
+            const activeLoc = locs.find((l: { id: string }) => l.id === savedId) || locs[0]
             
             setActiveLocationId(activeLoc.id)
             setLocationSlug(activeLoc.slug)

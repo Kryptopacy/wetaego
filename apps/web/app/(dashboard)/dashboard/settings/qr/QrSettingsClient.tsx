@@ -1,7 +1,5 @@
 "use client";
 
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, react-hooks/set-state-in-effect, @typescript-eslint/ban-ts-comment */
-// FIXME: Developer bypassed types/rules. Requires refactoring for true perfection.
 
 
 import { useState, useRef, useEffect } from "react";
@@ -84,8 +82,8 @@ export function QrSettingsClient({ location }: { location: Location }) {
         logo_url: logoUrl,
       });
       toast.success("QR settings saved.");
-    } catch (e: any) {
-      toast.error("Failed to save: " + e.message);
+    } catch (e: unknown) {
+      toast.error("Failed to save: " + (e as Error).message);
     } finally {
       setIsSaving(false);
     }

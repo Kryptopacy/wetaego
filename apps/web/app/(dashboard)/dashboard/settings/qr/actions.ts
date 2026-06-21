@@ -1,7 +1,5 @@
 "use server";
 
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, react-hooks/set-state-in-effect, @typescript-eslint/ban-ts-comment */
-// FIXME: Developer bypassed types/rules. Requires refactoring for true perfection.
 
 
 import { createClient } from "@/lib/supabase/server";
@@ -25,7 +23,7 @@ export async function updateQrConfig(
     .eq("id", locationId);
 
   if (error) {
-    throw new Error(error.message);
+    throw new Error((error as Error).message);
   }
 
   revalidatePath("/dashboard/settings/qr");

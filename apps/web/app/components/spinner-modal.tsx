@@ -1,7 +1,5 @@
 'use client'
 
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, react-hooks/set-state-in-effect, @typescript-eslint/ban-ts-comment */
-// FIXME: Developer bypassed types/rules. Requires refactoring for true perfection.
 
 
 import { useState, useEffect } from 'react'
@@ -27,7 +25,7 @@ export function SpinnerModal({ locationId, config }: SpinnerModalProps) {
   const [isSpinning, setIsSpinning] = useState(false)
   const [rotation, setRotation] = useState(0)
   const [result, setResult] = useState<SpinnerSegment | null>(null)
-  const setSpinnerDiscount = useCartStore((state) => (state as any).setSpinnerDiscount)
+  const setSpinnerDiscount = useCartStore((state: any) => state.setSpinnerDiscount)
   
   useEffect(() => {
     // Check if user has already spun for this location today

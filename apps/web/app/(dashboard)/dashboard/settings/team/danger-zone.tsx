@@ -1,7 +1,5 @@
 'use client'
 
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, react-hooks/set-state-in-effect, @typescript-eslint/ban-ts-comment */
-// FIXME: Developer bypassed types/rules. Requires refactoring for true perfection.
 
 
 import { useState } from 'react'
@@ -24,8 +22,8 @@ export default function DangerZone({ orgId, isOwner }: { orgId: string, isOwner:
       if (res.error) throw new Error(res.error)
       toast.success('Organization deleted successfully.')
       router.push('/dashboard') // Or landing page if they have no other orgs
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to delete organization')
+    } catch (err: unknown) {
+      toast.error((err as Error).message || 'Failed to delete organization')
       setIsDeleting(false)
     }
   }

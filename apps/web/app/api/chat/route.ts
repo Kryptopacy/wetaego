@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, react-hooks/set-state-in-effect, @typescript-eslint/ban-ts-comment */
-// FIXME: Developer bypassed types/rules. Requires refactoring for true perfection.
 
 import { google } from '@ai-sdk/google'
 import { streamText, tool, stepCountIs } from 'ai'
@@ -235,8 +233,8 @@ ${itemsJson}`
     })
 
     return (result as any).toDataStreamResponse()
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Chat error:', err)
-    return new Response(err.message || 'Internal Server Error', { status: 500 })
+    return new Response((err as Error).message || 'Internal Server Error', { status: 500 })
   }
 }

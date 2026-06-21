@@ -20,7 +20,7 @@ export async function assignQrCode(formData: FormData) {
     .eq('id', qrId)
 
   if (error) {
-    return { error: error.message }
+    return { error: (error as Error).message }
   }
 
   revalidatePath('/dashboard/qr')

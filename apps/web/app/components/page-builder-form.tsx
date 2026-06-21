@@ -1,7 +1,5 @@
 'use client'
 
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, react-hooks/set-state-in-effect, @typescript-eslint/ban-ts-comment */
-// FIXME: Developer bypassed types/rules. Requires refactoring for true perfection.
 
 
 import { useState } from 'react'
@@ -17,7 +15,7 @@ interface PageItem {
   price_minor: number | null
   price_display: string | null
   availability_status: string
-  item_data: any
+  item_data: Record<string, string>
   deposit_percentage: number | null
   payment_mode: string
   inventory_count: number | null

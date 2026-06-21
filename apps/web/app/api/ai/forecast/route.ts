@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, react-hooks/set-state-in-effect, @typescript-eslint/ban-ts-comment */
-// FIXME: Developer bypassed types/rules. Requires refactoring for true perfection.
 
 import { google } from '@ai-sdk/google'
 import { generateObject } from 'ai'
@@ -92,7 +90,7 @@ ${JSON.stringify(aggregated, null, 2)}`
     })
 
     return NextResponse.json(object)
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Forecast Error:', error)
     return NextResponse.json({ error: 'Failed to generate forecast' }, { status: 500 })
   }

@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, react-hooks/set-state-in-effect, @typescript-eslint/ban-ts-comment, @next/next/no-img-element */
-// FIXME: Developer bypassed types/rules. Requires refactoring for true perfection.
+import { QueryData } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
@@ -14,13 +13,14 @@ export async function generateMetadata({
   const { slug, itemId } = await params
   const supabase = await createClient()
 
-  const { data: item } = await supabase
+  const itemQuery = supabase
     .from('page_items')
     .select('title, description, images, location_pages!inner(locations!inner(slug))')
     .eq('id', itemId)
     .single()
+  const { data: item } = await itemQuery
 
-  if (!item || (item.location_pages as any).locations.slug !== slug) return { title: 'Not Found' }
+  if (!item || (item.location_pages as { locations: { slug: string } }).locations.slug !== slug) return { title: 'Not Found' }
 
   return {
     title: item.title,
@@ -42,16 +42,17 @@ export default async function ItemDetailsPage({
   const supabase = await createClient()
 
   // 1. Get location
-  const { data: loc } = await supabase
+  const locQuery = supabase
     .from('locations')
     .select('id, name, theme_color, whatsapp_number')
     .eq('slug', slug)
     .single()
+  const { data: loc } = await locQuery
 
   if (!loc) notFound()
 
   // 2. Get item and verify it belongs to this page
-  const { data: item } = await supabase
+  const itemQuery = supabase
     .from('page_items')
     .select(`
       *,
@@ -60,10 +61,11 @@ export default async function ItemDetailsPage({
     .eq('id', itemId)
     .eq('is_published', true)
     .single()
+  const { data: item } = await itemQuery
 
-  if (!item || (item.location_pages as any).slug !== pageSlug) notFound()
+  if (!item || (item.location_pages as { slug: string }).slug !== pageSlug) notFound()
 
-  const pageInfo = item.location_pages as any
+  const pageInfo = item.location_pages as { template_type: string }
   const themeColor = loc.theme_color || '#7c3aed'
   const isAvailable = item.availability_status === 'available'
 

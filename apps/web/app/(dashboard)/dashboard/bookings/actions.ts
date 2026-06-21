@@ -1,7 +1,5 @@
 'use server'
 
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, react-hooks/set-state-in-effect, @typescript-eslint/ban-ts-comment */
-// FIXME: Developer bypassed types/rules. Requires refactoring for true perfection.
 
 
 import { createClient } from '@/lib/supabase/server'
@@ -45,9 +43,9 @@ export async function updateBookingStatus(bookingId: string, action: 'mark_paid'
   if (!isAuthorized) throw new Error('Unauthorized')
 
   if (action === 'mark_paid') {
-    await supabase.from('page_bookings' as any).update({ payment_status: 'paid', status: 'confirmed' }).eq('id', bookingId)
+    await supabase.from('page_bookings').update({ payment_status: 'paid', status: 'confirmed' }).eq('id', bookingId)
   } else if (action === 'cancel') {
-    await supabase.from('page_bookings' as any).update({ status: 'cancelled' }).eq('id', bookingId)
+    await supabase.from('page_bookings').update({ status: 'cancelled' }).eq('id', bookingId)
   }
 
   revalidatePath('/dashboard/bookings')

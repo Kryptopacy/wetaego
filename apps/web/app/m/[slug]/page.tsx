@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, react-hooks/set-state-in-effect, @typescript-eslint/ban-ts-comment */
 // FIXME: Developer bypassed types/rules. Requires refactoring for true perfection.
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
@@ -184,7 +183,7 @@ export default async function PublicMenuPage({
     "@type": schemaType,
     "name": location.name,
     "image": location.cover_image_url || undefined,
-    "logo": location.organizations?.logo_url || undefined,
+    "logo": location.organizations && !Array.isArray(location.organizations) ? location.organizations.logo_url : undefined,
     "telephone": location.phone_number || location.whatsapp_number || undefined,
     "url": `https://ourmenuos.online/m/${slug}`,
     "hasMenu": {
