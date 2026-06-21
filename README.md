@@ -57,7 +57,7 @@ Close the loop on customer satisfaction natively:
 
 OurMenu OS offers three tiered subscription plans, driven by a unified credit system that seamlessly up-sells usage into Pro and Enterprise plans.
 
-### 🟢 Starter Plan (₦0 / 30-day trial)
+### 🟢 Lite Plan (₦19,999 / month)
 *Perfect for testing the system at a single venue.*
 - **Credits:** 0 Monthly Credits (Pay-as-you-go required for premium tools and extra pages)
 - **Locations:** 1 active location
@@ -65,12 +65,12 @@ OurMenu OS offers three tiered subscription plans, driven by a unified credit sy
 - **AI Waiter:** Guest-facing conversational AI chat assistant
 - **Edge Translator:** Real-time menu translation for 40+ languages
 
-### 🔵 Pro Plan (₦49,000 / month)
+### 🔵 Pro Plan (₦49,999 / month)
 *For serious operators who want every edge.*
 - **Credits:** 50 Monthly Credits (Refreshes every month)
 - **Locations:** 1 active location
 - **QR Codes:** Unlimited QR codes/tables
-- **Features included from Starter:** AI Waiter, Edge Translator
+- **Features included from Lite:** AI Waiter, Edge Translator
 - **Premium AI Tools:** AI Copywriter (Menu Descriptions) & AI Image Studio (Venue Covers)
 - **KDS & Operations:** Smart Request Triaging (Instant urgency classification)
 - **Custom Pages:** 1 Page included (Additional pages cost 10 Credits each)
@@ -82,6 +82,13 @@ OurMenu OS offers three tiered subscription plans, driven by a unified credit sy
 - **Locations:** Multi-location dashboard (Manage multiple venues under one org)
 - **Features included from Pro:** All premium AI tools, unlimited QR codes, custom pages
 - **Integrations:** Direct API access for PMS (Property Management System) integration
+
+## 🤝 Affiliate & Referral System
+
+OurMenu OS features a built-in Affiliate system designed for B2B growth:
+- **Affiliate Dashboard:** Affiliates register and receive a unique referral code.
+- **Organization Linking:** New organizations that register via referral links are permanently tied to their affiliate.
+- **Automated Commissions:** Webhooks calculate a percentage commission (default 10%) on every subscription renewal and log it in `affiliate_earnings`.
 
 ## Repo Layout
 

@@ -81,5 +81,5 @@ values (
 insert into public.system_settings (key, value)
 values (
     'exchange_rates',
-    '{"usd_to_ngn": 1500}'
+    '{"usd_to_ngn": 1250}'
 ) on conflict (key) do nothing;

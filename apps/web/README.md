@@ -65,9 +65,17 @@ To add members, the Owner generates a single-use secure invite link from the **T
 To monetize the platform, OurMenu OS integrates a full subscription lifecycle:
 1. **30-Day Free Trial:** New organizations get 30 days of free access.
 2. **Subscription Enforcer:** Once the trial expires, a layout-level banner blocks access to dashboard functions and public guest ordering is automatically suspended.
-3. **Paystack Integration:** Owners can initiate a monthly billing checkout ($39/mo).
-4. **USD/NGN Exchange Rate:** To ensure local Nigerian businesses pay the exact NGN equivalent of $39/mo, checkouts dynamically fetch and cache live exchange rates from Open Exchange Rates APIs.
-5. **Webhook Lifecycle:** `/api/webhooks/billing` listens for Paystack subscription creation and status changes, keeping Supabase synced in real time.
+3. **Paystack Integration:** Owners can initiate a monthly billing checkout. The default pricing is NGN-First: Lite (₦19,999/mo), Pro (₦49,999/mo), and Custom Enterprise. We also offer usage-based Credit Packs.
+4. **Currency Toggle & Exchange Rate:** Businesses with international cards can toggle billing to USD. Checkouts dynamically fetch and cache live exchange rates (or fall back to a system default) to ensure price parity.
+5. **Webhook Lifecycle:** `/api/webhooks/paystack/route.ts` listens for Paystack payments and subscription changes, keeping Supabase synced in real time.
+
+## 🤝 Affiliate & Referral System
+
+OurMenu OS features a built-in Affiliate system designed for B2B growth:
+1. **Affiliate Dashboard:** Affiliates register at `/affiliate/register` and receive a unique referral code.
+2. **Link Tracking:** Clicking an affiliate link (e.g., `/ref/[code]`) securely drops an HTTP-only cookie tracking the referral source.
+3. **Organization Linking:** When a new organization registers, it is permanently linked to the referring affiliate.
+4. **Automated Commissions:** Whenever the referred organization renews its subscription, the Paystack webhook calculates the commission (default 10%) and logs the earnings in `affiliate_earnings`. Affiliates can track their lifetime earnings via their dedicated dashboard.
 
 ## 🚀 Getting Started
 

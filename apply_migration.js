@@ -9,9 +9,9 @@ async function applyMigration() {
   try {
     await client.connect();
     console.log('Connected to DB');
-    const sql = fs.readFileSync('supabase/migrations/20260621000000_affiliate_system.sql', 'utf8');
+    const sql = `update public.system_settings set value = '{"usd_to_ngn": 1250}' where key = 'exchange_rates';`;
     await client.query(sql);
-    console.log('Migration applied successfully.');
+    console.log('Exchange rate updated successfully.');
   } catch (err) {
     console.error('Error applying migration:', err);
   } finally {
