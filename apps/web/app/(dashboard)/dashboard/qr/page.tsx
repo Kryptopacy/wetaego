@@ -22,10 +22,12 @@ export default async function QRCodeBatchPage() {
   let role = 'viewer'
   let locations: Database['public']['Tables']['locations']['Row'][] = []
   let qrCodes: Database['public']['Tables']['qr_codes']['Row'][] = []
+  let orgLogo: string | null = null
 
   if (isDemo) {
     org = { id: 'demo-org' }
     role = 'owner'
+    orgLogo = 'https://picsum.photos/200'
     locations = [
       { id: 'demo-loc', name: 'Demo Venue', slug: 'demo-venue', theme_color: '#3b82f6' } as any
     ]
@@ -57,6 +59,13 @@ export default async function QRCodeBatchPage() {
     if (!isOwnerOrManager || !org) {
       redirect('/dashboard')
     }
+
+    const { data: orgData } = await supabase
+      .from('organizations')
+      .select('logo_url')
+      .eq('id', org.id)
+      .single()
+    orgLogo = orgData?.logo_url || null
 
     const { data: locs } = await supabase
       .from('locations')
@@ -93,6 +102,7 @@ export default async function QRCodeBatchPage() {
       <h1 className="text-2xl font-bold text-white mb-8 print:hidden">QR Codes</h1>
       <QrClient 
         organizationId={org.id} 
+        orgLogo={orgLogo}
         locations={locations} 
         qrCodes={qrCodes || []} 
         baseUrl={baseUrl} 

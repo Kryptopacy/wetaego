@@ -8,7 +8,7 @@ type FullOrder = Database['public']['Tables']['orders']['Row'] & { order_items?:
 describe('ActiveOrdersGrid', () => {
   const mockCurrentUserId = 'staff-123'
   
-  const mockOrders: FullOrder[] = [
+  const mockOrders = [
     {
       id: 'order-1',
       created_at: '2026-06-19T10:00:00Z',
@@ -17,9 +17,7 @@ describe('ActiveOrdersGrid', () => {
       total_amount_minor: 500000,
       tip_amount_minor: 50000,
       status: 'pending',
-      payment_status: 'pending',
       assigned_staff_id: null,
-      venue_id: 'venue-1',
       customer_note: 'No onions please',
       order_items: [
         {
@@ -33,7 +31,7 @@ describe('ActiveOrdersGrid', () => {
         }
       ]
     }
-  ]
+  ] as unknown as FullOrder[]
 
   it('renders the active orders header with correct count', () => {
     render(

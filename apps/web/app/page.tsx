@@ -12,8 +12,7 @@ import { FeatureTabs } from './components/feature-tabs'
 import { TrustedBy } from './components/trusted-by'
 import { DirectorySearch } from './components/directory-search'
 import { Pricing } from './components/pricing'
-
-
+import { LandingNavbar } from '../components/LandingNavbar'
 
 export default async function HomePage() {
   const jsonLd = {
@@ -44,26 +43,7 @@ export default async function HomePage() {
       />
       <main className="bg-[#050505] min-h-screen selection:bg-violet-500/30 selection:text-white">
         {/* ── Navbar ── */}
-        <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-12 h-16 bg-black/40 backdrop-blur-xl border-b border-white/[0.04]">
-          <div className="flex items-center gap-3">
-            <Image src="/ourmenu-qr-icon.svg" alt="OurMenu Logo" width={28} height={28} className="object-contain" />
-            <span className="font-semibold text-white tracking-tight">OurMenu OS</span>
-          </div>
-          <div className="hidden md:flex items-center gap-8 text-sm font-medium text-zinc-400">
-            <a href="#features" className="hover:text-white transition-colors">Platform</a>
-            <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
-            <a href="#testimonials" className="hover:text-white transition-colors">Customers</a>
-          </div>
-        <div className="flex items-center gap-2 md:gap-4">
-          <a className="text-sm font-medium text-zinc-400 hover:text-white transition-colors hidden lg:block" href="/dashboard">Log in</a>
-          <form action={startInteractiveDemo} className="hidden sm:block">
-            <button type="submit" className="text-sm font-medium text-zinc-300 hover:text-white transition-colors px-4 py-1.5 rounded-full border border-white/10 bg-white/5 hover:bg-white/10">
-              Try Demo
-            </button>
-          </form>
-          <a className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-white text-black text-sm font-semibold hover:bg-zinc-200 hover:scale-105 transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.2)]" href="/dashboard">Get Started</a>
-        </div>
-      </nav>
+        <LandingNavbar />
 
       {/* â”€â”€ HERO: Cinematic full-bleed background composition â”€â”€ */}
       <section className="relative min-h-screen flex items-center overflow-hidden">
@@ -179,13 +159,31 @@ export default async function HomePage() {
         <FeatureTabs />
       </section>
 
-      {/* â”€â”€ DYNAMIC TRUSTED BY â”€â”€ */}
+      {/* ── DYNAMIC TRUSTED BY ── */}
       <TrustedBy />
 
-      {/* â”€â”€ PRICING â”€â”€ */}
+      {/* ── PRICING ── */}
       <Pricing />
 
-      {/* â”€â”€ FINAL CTA â”€â”€ */}
+      {/* ── AFFILIATES TEASER ── */}
+      <section className="py-24 px-6 border-t border-white/[0.04] relative">
+        <div className="max-w-4xl mx-auto text-center relative z-10">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold mb-6">
+            <Star className="w-3.5 h-3.5" /> Partner Program
+          </div>
+          <h2 className="text-4xl md:text-5xl font-black text-white mb-6 tracking-tight">
+            Grow with us. <span className="text-zinc-400">Earn recurring revenue.</span>
+          </h2>
+          <p className="text-zinc-400 text-lg md:text-xl max-w-2xl mx-auto font-light mb-10">
+            Join our affiliate program and earn a percentage of the revenue for every venue you refer. Rack up invites, track your conversions, and get paid out automatically via our transparent dashboard.
+          </p>
+          <a href="/affiliates" className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-white/5 border border-white/10 text-white text-sm font-semibold hover:bg-white/10 transition-colors">
+            Learn about Affiliates <ArrowRight className="w-4 h-4 text-zinc-400" />
+          </a>
+        </div>
+      </section>
+
+      {/* ── FINAL CTA ── */}
       <section className="py-32 px-6 bg-[#050505] relative overflow-hidden">
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div className="w-[600px] h-[600px] bg-violet-600/10 blur-[120px] rounded-full" />

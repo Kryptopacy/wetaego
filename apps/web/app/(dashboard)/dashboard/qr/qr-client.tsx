@@ -5,8 +5,9 @@ import { useState } from 'react'
 import { generateQrBatch, deleteQrCode, assignQrTable } from './actions'
 import { toast } from 'sonner'
 
-export function QrClient({ organizationId, locations, qrCodes, baseUrl }: {
+export function QrClient({ organizationId, orgLogo, locations, qrCodes, baseUrl }: {
   organizationId: string
+  orgLogo?: string | null
   locations: Database['public']['Tables']['locations']['Row'][]
   qrCodes: Database['public']['Tables']['qr_codes']['Row'][]
   baseUrl: string
@@ -47,23 +48,27 @@ export function QrClient({ organizationId, locations, qrCodes, baseUrl }: {
         <form onSubmit={handleGenerate} className="flex gap-3">
           <input type="hidden" name="organization_id" value={organizationId} />
           
-          <select name="location_id" className="bg-zinc-950 border border-zinc-800 text-white rounded-lg px-4 py-2" required>
+          <select name="location_id" className="bg-zinc-950 border border-zinc-800 text-white rounded-lg px-4 py-2 focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-all" required>
             {locations.map((loc) => (
               <option key={loc.id} value={loc.id}>{loc.name}</option>
             ))}
           </select>
 
-          <select name="quantity" className="bg-zinc-950 border border-zinc-800 text-white rounded-lg px-4 py-2">
-            <option value="1">Generate 1</option>
-            <option value="10">Generate 10</option>
-            <option value="50">Generate 50</option>
-            <option value="100">Generate 100</option>
-          </select>
+          <input 
+            type="number" 
+            name="quantity" 
+            min="1" 
+            max="200" 
+            defaultValue="10" 
+            className="w-24 bg-zinc-950 border border-zinc-800 text-white rounded-lg px-4 py-2 focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-all"
+            required
+            title="Number of QR codes to generate"
+          />
 
           <button 
             disabled={isGenerating}
             type="submit" 
-            className="bg-blue-600 hover:bg-blue-500 text-white font-medium px-6 py-2 rounded-lg transition-colors disabled:opacity-50"
+            className="bg-white hover:bg-zinc-200 text-black font-bold px-6 py-2 rounded-lg shadow-lg transition-all disabled:opacity-50 whitespace-nowrap"
           >
             {isGenerating ? 'Generating...' : 'Generate'}
           </button>
@@ -74,7 +79,7 @@ export function QrClient({ organizationId, locations, qrCodes, baseUrl }: {
         <h3 className="text-lg font-medium text-white">Generated QR Codes ({qrCodes.length})</h3>
         <button 
           onClick={() => window.print()}
-          className="bg-zinc-100 hover:bg-white text-zinc-900 font-medium px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
+          className="bg-zinc-100 hover:bg-white text-zinc-900 font-bold px-4 py-2 rounded-lg shadow-lg transition-colors flex items-center gap-2"
         >
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
           Print All
@@ -94,45 +99,57 @@ export function QrClient({ organizationId, locations, qrCodes, baseUrl }: {
           const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(fullUrl)}&color=${hexColor}`
 
           return (
-            <div key={qr.id} className="relative group border border-zinc-800 rounded-xl p-4 bg-zinc-900/30 flex flex-col items-center print:border-zinc-300 print:bg-white print:break-inside-avoid">
+            <div key={qr.id} className="relative group border-2 border-zinc-800 rounded-2xl p-6 bg-gradient-to-b from-zinc-900/80 to-zinc-950 flex flex-col items-center print:border print:border-zinc-300 print:bg-white print:rounded-lg print:p-8 print:break-inside-avoid shadow-2xl transition-all hover:border-zinc-600 overflow-hidden">
               
+              {/* Brand Accent Bar */}
+              <div className="absolute top-0 left-0 right-0 h-2 print:h-3" style={{ backgroundColor: `#${hexColor}` }} />
+
+              {orgLogo && (
+                <div className="mt-1 mb-3 print:mt-2">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={orgLogo} alt="Venue Logo" className="h-8 md:h-10 object-contain print:h-12" crossOrigin="anonymous" />
+                </div>
+              )}
+
               {/* Delete Button (Hidden during print) */}
               <button 
                 onClick={async () => await deleteQrCode(qr.id)}
-                className="absolute top-2 right-2 p-1.5 rounded-full bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white opacity-0 group-hover:opacity-100 transition-all print:hidden"
+                className="absolute top-4 right-4 p-2 rounded-full bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white opacity-0 group-hover:opacity-100 transition-all print:hidden"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
               </button>
 
-              <div className="bg-white p-2 rounded-lg mb-2 print:p-0">
+              <div className="bg-white p-3 rounded-xl mb-4 print:p-0 shadow-[0_0_15px_rgba(255,255,255,0.1)] print:shadow-none w-full max-w-[200px]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={qrImageUrl} alt="QR Code" className="w-full aspect-square" crossOrigin="anonymous" />
               </div>
               
-              <div className="text-center w-full mb-3 print:mb-4 flex flex-col items-center">
-                <div className="print:flex hidden items-center gap-1.5 mb-1.5 text-zinc-800 bg-zinc-100 border border-zinc-300 rounded-full px-2.5 py-0.5">
-                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                  <span className="text-[9px] font-black uppercase tracking-widest leading-tight">Scan with Camera</span>
+              <div className="text-center w-full mb-4 print:mb-6 flex flex-col items-center">
+                <div className="print:flex hidden items-center gap-1.5 mb-3 text-zinc-800 bg-zinc-100 border border-zinc-300 rounded-full px-3 py-1">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                  <span className="text-[10px] font-black uppercase tracking-widest leading-tight">Scan with Camera</span>
                 </div>
-                <p className="font-bold text-white print:text-black text-sm truncate">{loc?.name || 'Unknown'}</p>
-                <p className="text-zinc-500 print:text-zinc-600 text-xs truncate mt-1">
-                  {qr.table_identifier ? `Table: ${qr.table_identifier}` : 'Unassigned'}
+                <h2 className="font-extrabold text-white print:text-black text-xl md:text-2xl tracking-tight leading-tight w-full" style={{ color: `#${hexColor}` }}>
+                  {loc?.name || 'Unknown'}
+                </h2>
+                <p className="text-zinc-400 print:text-zinc-600 text-sm md:text-base font-semibold mt-2 uppercase tracking-widest">
+                  {qr.table_identifier ? qr.table_identifier : 'Scan to Order'}
                 </p>
                 
                 {/* Fallback URL */}
-                <div className="mt-2 text-center w-full print:block hidden">
-                  <p className="text-[8px] uppercase tracking-wider text-zinc-500 mb-0.5">Or visit link:</p>
-                  <p className="text-[10px] font-mono font-bold text-black border border-zinc-300 bg-zinc-50 rounded px-1.5 py-0.5 inline-block mx-auto truncate max-w-full">{displayUrl}</p>
+                <div className="mt-4 text-center w-full print:block hidden">
+                  <p className="text-[9px] uppercase tracking-widest text-zinc-400 mb-1">Or visit link:</p>
+                  <p className="text-xs font-mono font-bold text-black border-2 border-zinc-200 bg-zinc-50 rounded-lg px-3 py-1.5 inline-block mx-auto max-w-full break-all">{displayUrl}</p>
                 </div>
               </div>
 
               {/* Secondary Feedback QR */}
-              <div className="w-full border-t border-zinc-800 print:border-zinc-300 pt-3 flex flex-col items-center">
-                <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-500 print:text-zinc-600 mb-2 text-center leading-tight">
+              <div className="w-full border-t border-zinc-800/50 print:border-zinc-200 pt-4 flex flex-col items-center">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 print:text-zinc-500 mb-2 text-center leading-relaxed">
                   Scan to Rate & Tip<br/>
-                  <span className="text-[7px] lowercase normal-case">(Requires 4-digit PIN from receipt)</span>
+                  <span className="text-[8px] tracking-normal font-medium">(Requires 4-digit PIN from receipt)</span>
                 </p>
-                <div className="bg-white p-1 rounded-md print:p-0 w-16 h-16">
+                <div className="bg-white p-1.5 rounded-lg print:p-0 w-20 h-20 shadow-inner">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img 
                     src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`${baseUrl}/api/feedback-entry?qr_id=${qr.id}`)}&color=000000`}
@@ -142,19 +159,23 @@ export function QrClient({ organizationId, locations, qrCodes, baseUrl }: {
                   />
                 </div>
               </div>
+              
+              <div className="w-full mt-6 pt-4 border-t border-zinc-800/30 print:border-zinc-100 flex justify-center print:block hidden">
+                 <p className="text-[8px] font-medium text-zinc-400 uppercase tracking-widest text-center">Powered by OurMenu OS</p>
+              </div>
 
-              <div className="text-center w-full mt-3">
+              <div className="text-center w-full mt-4 flex flex-col items-center">
                 <button
                   onClick={() => {
                     setAssigningQr(qr)
                     setTableInput(qr.table_identifier || '')
                     setAssignModalOpen(true)
                   }}
-                  className="mt-2 text-[10px] bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-3 py-1 rounded-full print:hidden transition-colors"
+                  className="mt-2 text-[11px] font-medium bg-zinc-800 hover:bg-white hover:text-black text-zinc-300 px-4 py-1.5 rounded-full print:hidden transition-all shadow-md"
                 >
                   {qr.table_identifier ? 'Change Table' : 'Assign Table'}
                 </button>
-                <p className="text-zinc-700 print:text-zinc-400 text-[10px] font-mono mt-2 truncate">{qr.id.split('-')[0]}</p>
+                <p className="text-zinc-700 print:text-zinc-400 text-[9px] font-mono mt-3 truncate opacity-50">{qr.id.split('-')[0]}</p>
               </div>
             </div>
           )
@@ -191,7 +212,7 @@ export function QrClient({ organizationId, locations, qrCodes, baseUrl }: {
                 type="text" 
                 value={tableInput}
                 onChange={(e) => setTableInput(e.target.value)}
-                className="w-full bg-zinc-950 border border-zinc-800 text-white rounded-lg px-4 py-3 mb-6 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                className="w-full bg-zinc-950 border border-zinc-800 text-white rounded-lg px-4 py-3 mb-6 focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-all shadow-inner"
                 placeholder="e.g. Table 14"
                 autoFocus
               />
@@ -205,7 +226,7 @@ export function QrClient({ organizationId, locations, qrCodes, baseUrl }: {
                 </button>
                 <button 
                   type="submit"
-                  className="bg-blue-600 hover:bg-blue-500 text-white font-medium px-6 py-2 rounded-lg transition-colors"
+                  className="bg-white hover:bg-zinc-200 text-black font-bold px-6 py-2 rounded-lg transition-colors shadow-lg"
                 >
                   Save
                 </button>

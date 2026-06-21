@@ -9,9 +9,9 @@ async function applyMigration() {
   try {
     await client.connect();
     console.log('Connected to DB');
-    const sql = `update public.system_settings set value = '{"usd_to_ngn": 1250}' where key = 'exchange_rates';`;
+    const sql = `INSERT INTO supabase_migrations.schema_migrations (version, statements) VALUES ('20260621100000', ARRAY['-- lint fixes']) ON CONFLICT DO NOTHING;`;
     await client.query(sql);
-    console.log('Exchange rate updated successfully.');
+    console.log('Migration tracked successfully.');
   } catch (err) {
     console.error('Error applying migration:', err);
   } finally {
