@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Menu, X, ArrowRight } from "lucide-react";
+import Link from "next/link";
 import { startInteractiveDemo } from "../app/login/actions";
 import { DemoSubmitButton } from "./DemoSubmitButton";
 import { AnimatePresence, motion } from "framer-motion";
@@ -41,32 +42,32 @@ export function LandingNavbar() {
             height={28}
             className="object-contain"
           />
-          <a href="/" className="font-semibold text-white tracking-tight">
+          <Link href="/" className="font-semibold text-white tracking-tight">
             OurMenu OS
-          </a>
+          </Link>
         </div>
 
         {/* Desktop Links */}
         <div className="hidden md:flex items-center gap-8 text-sm font-medium text-zinc-400">
           {navLinks.map((link) => (
-            <a
+            <Link
               key={link.name}
               href={link.href}
               className="hover:text-white transition-colors"
             >
               {link.name}
-            </a>
+            </Link>
           ))}
         </div>
 
         {/* Desktop & Mobile Actions */}
         <div className="flex items-center gap-2 md:gap-4">
-          <a
+          <Link
             className="text-sm font-medium text-zinc-400 hover:text-white transition-colors hidden lg:block"
             href="/dashboard"
           >
             Log in
-          </a>
+          </Link>
           <form action={startInteractiveDemo} className="hidden sm:block">
             <DemoSubmitButton
               className="text-sm font-medium text-zinc-300 hover:text-white transition-colors px-4 py-1.5 rounded-full border border-white/10 bg-white/5 hover:bg-white/10"
@@ -75,12 +76,12 @@ export function LandingNavbar() {
               Try Demo
             </DemoSubmitButton>
           </form>
-          <a
+          <Link
             className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-white text-black text-sm font-semibold hover:bg-zinc-200 hover:scale-105 transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.2)]"
             href="/dashboard"
           >
             Get Started
-          </a>
+          </Link>
 
           {/* Mobile Menu Toggle */}
           <button
@@ -127,22 +128,22 @@ export function LandingNavbar() {
 
             <div className="flex flex-col gap-6 mt-12 text-2xl font-semibold">
               {navLinks.map((link) => (
-                <a
+                <Link
                   key={link.name}
                   href={link.href}
                   onClick={() => setIsOpen(false)}
                   className="text-zinc-300 hover:text-white border-b border-white/10 pb-4"
                 >
                   {link.name}
-                </a>
+                </Link>
               ))}
-              <a
+              <Link
                 href="/dashboard"
                 onClick={() => setIsOpen(false)}
                 className="text-zinc-300 hover:text-white border-b border-white/10 pb-4"
               >
                 Log in
-              </a>
+              </Link>
               <form action={startInteractiveDemo} className="w-full mt-4">
                 <DemoSubmitButton
                   className="w-full flex items-center justify-between px-6 py-4 rounded-2xl bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-colors"

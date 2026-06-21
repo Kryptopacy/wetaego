@@ -16,7 +16,10 @@ const eslintConfig = defineConfig([
     "test-results/**",
     "playwright-report/**",
     "trash2/**",
-    "trash4/**"
+    "trash4/**",
+    // Manual testing scripts
+    "*.js",
+    "test_demo_*.ts"
   ]),
 ]);
 

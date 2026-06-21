@@ -55,9 +55,6 @@ const nextConfig: NextConfig = {
 export default withSentryConfig(withPWA(nextConfig), {
   silent: !process.env.CI,
   widenClientFileUpload: true,
-  reactComponentAnnotation: { enabled: true },
   tunnelRoute: "/monitoring",
   sourcemaps: { disable: true },
-  disableLogger: true,
-  automaticVercelMonitors: true,
 });

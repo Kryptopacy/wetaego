@@ -15,6 +15,7 @@ vi.mock('next/server', () => {
 // Mock the Termii and Vercel functions
 vi.mock('@vercel/functions', () => ({ waitUntil: vi.fn() }))
 vi.mock('@/lib/notifications/termii', () => ({ sendWhatsAppMessage: vi.fn() }))
+vi.mock('@/lib/notifications/dispatcher', () => ({ notifyBusiness: vi.fn(() => Promise.resolve()) }))
 
 // Mock Supabase
 const mockEq = vi.fn()
@@ -77,8 +78,6 @@ describe('Paystack B2C Webhook (POST)', () => {
         location_id: 'loc_123' 
       } 
     })
-    // 3. Location Fetch for WhatsApp (returns location)
-    mockSingle.mockResolvedValueOnce({ data: { whatsapp_number: '1234567890' } })
 
     mockEq.mockReturnValue({ single: mockSingle })
 
@@ -87,45 +86,18 @@ describe('Paystack B2C Webhook (POST)', () => {
     expect(res.body).toEqual({ status: 'success' })
     expect(res.init?.status).toBe(200)
     
-    // Verify Supabase was called to update the order to paid
-    expect(mockUpdate).toHaveBeenCalledWith({ status: 'paid' })
-    expect(mockEq).toHaveBeenCalledWith('id', 'order_123')
+    // Verify Supabase was called to insert payment to order_payments
+    expect(mockFrom).toHaveBeenCalledWith('webhook_events')
+    expect(mockFrom).toHaveBeenCalledWith('orders')
+    expect(mockFrom).toHaveBeenCalledWith('order_payments')
+    expect(mockInsert).toHaveBeenCalledWith(expect.objectContaining({
+      order_id: 'order_123',
+      amount_minor: 5000,
+      provider_reference: 'order_123',
+    }))
   })
 
-  it('ignores overpayments without calculating as tip (as per Paystack best practice)', async () => {
-    const payload = JSON.stringify({ event: 'charge.success', data: { reference: 'order_123', amount: 6000 } })
-    const hash = crypto.createHmac('sha512', 'test_secret').update(payload).digest('hex')
-    
-    const req = {
-      text: async () => payload,
-      headers: new Headers({
-        'x-paystack-signature': hash
-      })
-    } as any
-
-    mockSingle.mockResolvedValueOnce({ data: null })
-    // Fetch Order: Total amount is 5000, user overpaid 6000
-    mockSingle.mockResolvedValueOnce({ 
-      data: { 
-        id: 'order_123', 
-        status: 'pending', 
-        total_amount_minor: 5000, 
-        location_id: 'loc_123' 
-      } 
-    })
-    mockSingle.mockResolvedValueOnce({ data: null })
-
-    mockEq.mockReturnValue({ single: mockSingle })
-
-    const res = await POST(req)
-    
-    expect(res.body).toEqual({ status: 'success' })
-    
-    // Verify Supabase update just sets it to paid
-    expect(mockUpdate).toHaveBeenCalledWith({ status: 'paid' })
-  })
-
-  it('fails the order if underpaid', async () => {
+  it('processes partial payments and leaves status handling to DB trigger', async () => {
     const payload = JSON.stringify({ event: 'charge.success', data: { reference: 'order_123', amount: 4000 } })
     const hash = crypto.createHmac('sha512', 'test_secret').update(payload).digest('hex')
     
@@ -136,8 +108,9 @@ describe('Paystack B2C Webhook (POST)', () => {
       })
     } as any
 
+    // 1. Idempotency Check (returns null)
     mockSingle.mockResolvedValueOnce({ data: null })
-    // Order was 5000, but they paid 4000
+    // 2. Fetch Order Check (returns order)
     mockSingle.mockResolvedValueOnce({ 
       data: { 
         id: 'order_123', 
@@ -151,11 +124,15 @@ describe('Paystack B2C Webhook (POST)', () => {
 
     const res = await POST(req)
     
-    expect(res.body).toEqual({ error: 'Amount mismatch' })
-    expect(res.init?.status).toBe(400)
+    expect(res.body).toEqual({ status: 'success' })
+    expect(res.init?.status).toBe(200)
     
-    // Order marked as failed
-    expect(mockUpdate).toHaveBeenCalledWith({ status: 'failed' })
+    // Inserts the partial payment to the ledger
+    expect(mockInsert).toHaveBeenCalledWith(expect.objectContaining({
+      order_id: 'order_123',
+      amount_minor: 4000,
+      provider_reference: 'order_123',
+    }))
   })
 })
 

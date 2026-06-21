@@ -22,7 +22,7 @@ describe('Generate Content API', () => {
     expect(res.status).toBe(400)
     
     const data = await res.json()
-    expect(data.error).toBe('Title is required')
+    expect(data.error).toBe('Invalid payload')
   })
 
   it('calls generateText with correct parameters', async () => {

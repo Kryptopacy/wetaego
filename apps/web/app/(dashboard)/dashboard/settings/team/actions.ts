@@ -165,7 +165,10 @@ export async function removeMemberAction(orgId: string, userIdToDelete: string) 
     return { success: true }
   } catch (err: unknown) {
     return { error: (err as Error).message || 'An error occurred' }
-  }export async function deleteOrganizationAction(orgId: string) {
+  }
+}
+
+export async function deleteOrganizationAction(orgId: string) {
   try {
     const currentUserId = await verifyOwner(orgId)
     const supabase = await createClient()

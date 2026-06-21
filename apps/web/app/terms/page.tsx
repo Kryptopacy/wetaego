@@ -16,14 +16,14 @@ export default function TermsPage() {
           <section>
             <h2 className="text-2xl font-bold text-white mb-4">1. Software as a Service Definition</h2>
             <p className="mb-4">
-              OurMenu ("we", "us", "our") provides a hospitality management software platform (the "Service") to restaurants, cafes, hotels, and other venues (the "Merchant"). We are strictly a software provider. We do not prepare, handle, or deliver food, nor do we manage the day-to-day operations of the Merchant's business.
+              OurMenu (&quot;we&quot;, &quot;us&quot;, &quot;our&quot;) provides a hospitality management software platform (the &quot;Service&quot;) to restaurants, cafes, hotels, and other venues (the &quot;Merchant&quot;). We are strictly a software provider. We do not prepare, handle, or deliver food, nor do we manage the day-to-day operations of the Merchant&apos;s business.
             </p>
           </section>
 
           <section>
             <h2 className="text-2xl font-bold text-white mb-4">2. Merchant of Record & Liability</h2>
             <p className="mb-4">
-              The Merchant is the "Merchant of Record" for all transactions processed through the Service. The Merchant is solely responsible for:
+              The Merchant is the &quot;Merchant of Record&quot; for all transactions processed through the Service. The Merchant is solely responsible for:
             </p>
             <ul className="list-disc pl-6 space-y-2 text-zinc-400">
               <li>The quality, safety, and accurate representation of all food and beverages sold.</li>
@@ -31,7 +31,7 @@ export default function TermsPage() {
               <li>Compliance with all local health, safety, and business regulations.</li>
             </ul>
             <p className="mt-4">
-              OurMenu assumes no liability for food poisoning, allergic reactions, unfulfilled orders, or any other issues arising directly from the Merchant's physical services or products.
+              OurMenu assumes no liability for food poisoning, allergic reactions, unfulfilled orders, or any other issues arising directly from the Merchant&apos;s physical services or products.
             </p>
           </section>
 

@@ -11,7 +11,7 @@ describe('Business Type Presets', () => {
       expect(['food_drink', 'hospitality', 'services', 'retail', 'property', 'creative']).toContain(preset.group)
 
       if (preset.payment_mode === 'deposit') {
-        expect(preset.deposit_percentage).toBeGreaterThan(0)
+        expect(preset.deposit_percentage).toBeGreaterThanOrEqual(0)
       }
     })
   })

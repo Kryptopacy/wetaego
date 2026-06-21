@@ -16,7 +16,7 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-2xl font-bold text-white mb-4">1. Introduction & Compliance</h2>
             <p className="mb-4">
-              OurMenu ("we", "us", "our") is committed to protecting the privacy of the restaurants that use our platform (Merchants) and the guests who interact with our digital menus (End-Users).
+              OurMenu (&quot;we&quot;, &quot;us&quot;, &quot;our&quot;) is committed to protecting the privacy of the restaurants that use our platform (Merchants) and the guests who interact with our digital menus (End-Users).
             </p>
             <p className="mb-4">
               This Privacy Policy details our data processing practices and is designed to comply with both the <strong>Nigerian Data Protection Regulation (NDPR)</strong> and the international <strong>General Data Protection Regulation (GDPR)</strong>.
@@ -63,7 +63,7 @@ export default function PrivacyPage() {
             <ul className="list-disc pl-6 space-y-2 text-zinc-400">
               <li>Request access to the personal data we hold about you.</li>
               <li>Request correction of inaccurate data.</li>
-              <li>Request deletion of your data ("Right to be Forgotten").</li>
+              <li>Request deletion of your data (&quot;Right to be Forgotten&quot;).</li>
               <li>Withdraw consent for data processing at any time.</li>
             </ul>
             <p className="mt-4">

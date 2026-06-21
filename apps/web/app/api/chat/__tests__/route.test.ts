@@ -31,7 +31,8 @@ describe('Chat API', () => {
 
     const res = await POST(req)
     expect(res.status).toBe(400)
-    expect(await res.text()).toBe('Missing locationId')
+    const data = await res.json()
+    expect(data.error).toBe('Invalid payload')
   })
 
   it('enforces session rate limits', async () => {
@@ -43,7 +44,7 @@ describe('Chat API', () => {
 
     const req = new Request('http://localhost/api/chat', {
       method: 'POST',
-      body: JSON.stringify({ messages: [], locationId: 'loc_123' }),
+      body: JSON.stringify({ messages: [], locationId: '123e4567-e89b-12d3-a456-426614174000' }),
     })
 
     const res = await POST(req)
@@ -71,7 +72,7 @@ describe('Chat API', () => {
 
     const req = new Request('http://localhost/api/chat', {
       method: 'POST',
-      body: JSON.stringify({ messages: [], locationId: 'loc_123' }),
+      body: JSON.stringify({ messages: [], locationId: '123e4567-e89b-12d3-a456-426614174000' }),
     })
 
     const res = await POST(req)
