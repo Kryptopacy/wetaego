@@ -11,6 +11,8 @@ export function AddItemForm({ orgId, categoryId, categoryName }: { orgId: string
   const [dietaryTags, setDietaryTags] = useState<string[]>([])
   const [allergens, setAllergens] = useState<string[]>([])
   const [isGenerating, setIsGenerating] = useState(false)
+  const [isGeneratingImg, setIsGeneratingImg] = useState(false)
+  const [aiImageUrl, setAiImageUrl] = useState<string | null>(null)
   const formRef = useRef<HTMLFormElement>(null)
 
   async function handleMagicFill() {
@@ -42,6 +44,38 @@ export function AddItemForm({ orgId, categoryId, categoryName }: { orgId: string
     }
   }
 
+  async function handleGenerateImage() {
+    if (!name) {
+      toast.error('Please enter an Item Name first to guide the AI!')
+      return
+    }
+    
+    if (!confirm('This will cost 5 AI Credits. Are you sure?')) return
+
+    setIsGeneratingImg(true)
+    try {
+      const res = await fetch('/api/ai/generate-item-image', {
+        method: 'POST',
+        body: JSON.stringify({ itemName: name, itemContext: description, organizationId: orgId }),
+        headers: { 'Content-Type': 'application/json' }
+      })
+
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || 'Failed to generate image')
+      }
+      
+      const data = await res.json()
+      if (data.url) setAiImageUrl(data.url)
+      
+      toast.success('AI Image generated successfully!')
+    } catch (err: unknown) {
+      toast.error((err as Error).message || 'AI request failed.')
+    } finally {
+      setIsGeneratingImg(false)
+    }
+  }
+
   async function handleSubmit(formData: FormData) {
     const res = await createItem(formData)
     if (res?.error) {
@@ -52,6 +86,7 @@ export function AddItemForm({ orgId, categoryId, categoryName }: { orgId: string
       setDescription('')
       setDietaryTags([])
       setAllergens([])
+      setAiImageUrl(null)
       formRef.current?.reset()
     }
   }
@@ -81,8 +116,33 @@ export function AddItemForm({ orgId, categoryId, categoryName }: { orgId: string
         <div className="w-24">
           <input type="number" step="0.01" name="price" required placeholder="Price" className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2 text-white outline-none focus:border-blue-500" />
         </div>
-        <div className="w-48">
-          <input type="file" name="image" accept="image/*" className="w-full text-xs text-zinc-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-medium file:bg-zinc-800 file:text-zinc-300 hover:file:bg-zinc-700 cursor-pointer" />
+        <div className="w-48 relative flex flex-col gap-2">
+          {aiImageUrl ? (
+            <div className="relative w-full aspect-square rounded-lg overflow-hidden border border-zinc-700">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={aiImageUrl} alt="AI Generated" className="object-cover w-full h-full" />
+              <button 
+                type="button" 
+                onClick={() => setAiImageUrl(null)}
+                className="absolute top-1 right-1 bg-black/60 rounded-full p-1 hover:bg-red-500/80 transition-colors"
+              >
+                <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+          ) : (
+            <>
+              <input type="file" name="image" accept="image/*" className="w-full text-xs text-zinc-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-medium file:bg-zinc-800 file:text-zinc-300 hover:file:bg-zinc-700 cursor-pointer" />
+              <button 
+                type="button"
+                onClick={handleGenerateImage}
+                disabled={isGeneratingImg || !name}
+                className="w-full px-3 py-1.5 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white rounded-lg text-xs font-bold transition-all disabled:opacity-50 disabled:grayscale flex items-center justify-center gap-1 shadow-lg"
+              >
+                {isGeneratingImg ? 'Generating...' : '✨ AI Image Studio'}
+              </button>
+            </>
+          )}
+          {aiImageUrl && <input type="hidden" name="ai_image_url" value={aiImageUrl} />}
         </div>
         <button type="submit" className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium transition-colors">Add Item</button>
       </div>

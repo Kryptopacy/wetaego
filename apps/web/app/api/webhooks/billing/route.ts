@@ -50,8 +50,10 @@ export async function POST(req: Request) {
       console.log('Subscription disabled:', event.data.subscription_code)
     }
 
-    if (event.event === 'charge.success') {
+      if (event.event === 'charge.success') {
       const metadata = event.data.metadata
+      const amountStr = `₦${(event.data.amount / 100).toLocaleString()}`
+      
       if (metadata && metadata.is_subscription && metadata.organization_id) {
         // This is a successful recurring charge!
         await supabase
@@ -61,6 +63,15 @@ export async function POST(req: Request) {
             current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // roughly 30 days
           })
           .eq('id', metadata.organization_id)
+          
+        if (event.data.customer?.email) {
+          const { sendEmailNotification } = await import('@/lib/notifications/email')
+          await sendEmailNotification(
+            event.data.customer.email, 
+            'Your OurMenu OS Subscription Receipt', 
+            `Your subscription has been successfully renewed. You were charged ${amountStr}.\n\nThank you for using OurMenu OS!`
+          )
+        }
       } else if (metadata && metadata.is_addon && metadata.addon_type === 'extra_page' && metadata.organization_id) {
         // This is a successful one-off add-on purchase
         const { data: orgRaw } = await supabase
@@ -79,6 +90,15 @@ export async function POST(req: Request) {
             .from('organizations')
             .update(updatePayload)
             .eq('id', metadata.organization_id)
+            
+          if (event.data.customer?.email) {
+            const { sendEmailNotification } = await import('@/lib/notifications/email')
+            await sendEmailNotification(
+              event.data.customer.email, 
+              'Receipt for OurMenu OS Add-on', 
+              `Your purchase of 1 Extra Custom Page was successful. You were charged ${amountStr}.\n\nThank you for using OurMenu OS!`
+            )
+          }
         }
       }
     }

@@ -164,7 +164,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             </div>
             <div className="flex flex-col">
               <span className="text-white font-bold tracking-tight leading-tight">{orgName}</span>
-              <span className="text-zinc-500 text-[10px] uppercase tracking-widest font-bold">OS Version 1.0</span>
+              {/* OS Version removed as requested */}
             </div>
           </Link>
           {locations.length > 0 && (

@@ -1,6 +1,7 @@
 
 import Image from 'next/image'
 import { startInteractiveDemo } from './login/actions'
+import { DemoSubmitButton } from '../components/DemoSubmitButton'
 import {
   Zap, ChefHat, Globe, BarChart3, ClipboardList,
   QrCode, ArrowRight, Check, Star,
@@ -88,9 +89,9 @@ export default async function HomePage() {
                 Start Building <ArrowRight className="w-4 h-4" />
               </a>
               <form action={startInteractiveDemo}>
-                <button type="submit" className="flex items-center gap-2 px-8 py-3.5 rounded-full bg-white/5 border border-white/15 text-white text-sm font-semibold hover:bg-white/10 backdrop-blur-md transition-all duration-300">
+                <DemoSubmitButton className="flex items-center gap-2 px-8 py-3.5 rounded-full bg-white/5 border border-white/15 text-white text-sm font-semibold hover:bg-white/10 backdrop-blur-md transition-all duration-300">
                   Experience Demo Mode
-                </button>
+                </DemoSubmitButton>
               </form>
             </div>
 
@@ -202,9 +203,9 @@ export default async function HomePage() {
               Start Free — No Card Required <ArrowRight className="w-5 h-5" />
             </a>
             <form action={startInteractiveDemo}>
-              <button type="submit" className="flex items-center gap-2 px-10 py-4 rounded-full bg-white/5 border border-white/10 text-white text-base font-semibold hover:bg-white/10 backdrop-blur-md transition-all duration-300">
+              <DemoSubmitButton className="flex items-center gap-2 px-10 py-4 rounded-full bg-white/5 border border-white/10 text-white text-base font-semibold hover:bg-white/10 backdrop-blur-md transition-all duration-300">
                 Try Demo Mode
-              </button>
+              </DemoSubmitButton>
             </form>
           </div>
         </FadeIn>

@@ -8,8 +8,8 @@ export async function Pricing() {
   const planLimits = await getPlanLimits()
   const rate = await getUsdToNgnRate()
 
-  const litePrice = rate ? Math.round(12 * rate) : (pricing.lite_monthly_ngn || 15000)
-  const proPrice = rate ? Math.round(39 * rate) : (pricing.pro_monthly_ngn || 49000)
+  const litePrice = rate ? Math.round(12 * rate) : (pricing.lite_monthly_ngn || 14999)
+  const proPrice = rate ? Math.round(39 * rate) : (pricing.pro_monthly_ngn || 49999)
 
   const plans = [
     {
@@ -17,7 +17,7 @@ export async function Pricing() {
       price: `₦${litePrice.toLocaleString()}`,
       period: 'per month',
       description: 'Perfect for testing the platform at your venue. 30-day free trial included.',
-      features: ['Includes 10 Credits/mo', 'AI Waiter (guest-facing chat)', 'Edge Translator (40+ languages)', 'Up to 2 QR codes', '1 active location'],
+      features: ['Includes 10 Credits/mo', 'AI Waiter (guest-facing chat)', 'Edge Translator (40+ languages)', 'Up to 2 QR codes', '1 active location', '0 Extra Custom Pages (10 credits/page)'],
       cta: 'Start Free Trial',
       href: '/dashboard',
       highlighted: false,
@@ -33,7 +33,7 @@ export async function Pricing() {
         'AI Copywriter & Image Studio',
         'Smart Request Triaging (KDS)',
         'Demand Forecasting Engine',
-        '1 Extra Custom Page (+10 credits/extra)',
+        '1 Extra Custom Page (10 credits/page)',
         'Priority WhatsApp support',
       ],
       cta: 'Get Pro',
@@ -51,6 +51,7 @@ export async function Pricing() {
         'Dedicated AI model fine-tuning',
         'Multi-location dashboard',
         'API access for PMS integration',
+        'Unlimited Extra Custom Pages',
         'Dedicated account manager',
         'Custom SLA & onboarding',
       ],
@@ -61,9 +62,9 @@ export async function Pricing() {
   ]
 
   const creditPacks = [
-    { amount: 10, price: rate ? Math.round(12 * rate) : (pricing.credits_10_ngn || 15000), popular: false },
-    { amount: 25, price: rate ? Math.round(26 * rate) : (pricing.credits_25_ngn || 33000), popular: true },
-    { amount: 50, price: rate ? Math.round(48 * rate) : (pricing.credits_50_ngn || 60000), popular: false }
+    { amount: 10, price: rate ? Math.round(5 * rate) : (pricing.credits_10_ngn || 6000), popular: false },
+    { amount: 25, price: rate ? Math.round(10 * rate) : (pricing.credits_25_ngn || 12000), popular: true },
+    { amount: 50, price: rate ? Math.round(18 * rate) : (pricing.credits_50_ngn || 20000), popular: false }
   ]
 
   return (

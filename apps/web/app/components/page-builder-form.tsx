@@ -23,9 +23,10 @@ interface PageBuilderFormProps {
   pageId: string
   templateType: string
   initialItems: PageItem[]
+  orgId: string
 }
 
-export function PageBuilderForm({ pageId, templateType, initialItems }: PageBuilderFormProps) {
+export function PageBuilderForm({ pageId, templateType, initialItems, orgId }: PageBuilderFormProps) {
   const [items, setItems] = useState<PageItem[]>(initialItems)
   const [isAdding, setIsAdding] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -172,6 +173,49 @@ export function PageBuilderForm({ pageId, templateType, initialItems }: PageBuil
             <label className="block text-xs font-medium text-zinc-400 mb-1">Price Display (Optional)</label>
             <input name="price_display" defaultValue={item?.price_display || ''} className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white" placeholder="e.g. Starting from ₦5,000" />
           </div>
+        </div>
+
+        <div>
+          <label className="block text-xs font-medium text-zinc-400 mb-1">Image / Photo (Optional)</label>
+          <div className="flex gap-4 items-start">
+            <input type="file" name="image" accept="image/*" className="w-full text-xs text-zinc-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-medium file:bg-zinc-800 file:text-zinc-300 hover:file:bg-zinc-700 cursor-pointer" />
+            <button 
+              type="button"
+              onClick={async () => {
+                const form = document.getElementById(formId) as HTMLFormElement
+                const title = (form.elements.namedItem('title') as HTMLInputElement)?.value
+                const desc = (form.elements.namedItem('description') as HTMLTextAreaElement)?.value
+                if (!title) return alert('Enter a title first')
+                if (!confirm('This will cost 5 AI Credits. Continue?')) return
+                try {
+                  const res = await fetch('/api/ai/generate-item-image', {
+                    method: 'POST',
+                    body: JSON.stringify({ itemName: title, itemContext: desc, organizationId: orgId }), 
+                    headers: { 'Content-Type': 'application/json' }
+                  })
+                  if (!res.ok) throw new Error(await res.text())
+                  const data = await res.json()
+                  if (data.url) {
+                    let hidden = form.elements.namedItem('ai_image_url') as HTMLInputElement
+                    if (!hidden) {
+                      hidden = document.createElement('input')
+                      hidden.type = 'hidden'
+                      hidden.name = 'ai_image_url'
+                      form.appendChild(hidden)
+                    }
+                    hidden.value = data.url
+                    alert('AI Image Generated! It will be saved when you submit.')
+                  }
+                } catch(e) {
+                  alert('AI generation failed.')
+                }
+              }}
+              className="px-3 py-1.5 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white rounded-lg text-xs font-bold transition-all whitespace-nowrap"
+            >
+              ✨ AI Image Studio
+            </button>
+          </div>
+          <p className="text-[10px] text-zinc-500 mt-1">Upload a photo or generate one. Existing image will be replaced.</p>
         </div>
 
         <div>

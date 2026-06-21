@@ -33,19 +33,19 @@ export default async function AdminPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-zinc-400 mb-1">Lite Monthly (NGN)</label>
-                <input type="number" name="lite_monthly_ngn" defaultValue={(pricing as Record<string, number>).lite_monthly_ngn || 15000} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white" />
+                <input type="number" name="lite_monthly_ngn" defaultValue={(pricing as Record<string, number>).lite_monthly_ngn || 14999} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-zinc-400 mb-1">Pro Monthly (NGN)</label>
-                <input type="number" name="pro_monthly_ngn" defaultValue={(pricing as Record<string, number>).pro_monthly_ngn || 49000} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white" />
+                <label className="block text-xs font-medium text-zinc-400 mb-1">Pro Plan (Monthly)</label>
+                <input type="number" name="pro_monthly_ngn" defaultValue={(pricing as Record<string, number>).pro_monthly_ngn || 49999} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-zinc-400 mb-1">Enterprise Monthly (NGN)</label>
+                <label className="block text-xs font-medium text-zinc-400 mb-1">Enterprise Plan (Monthly)</label>
                 <input type="number" name="enterprise_monthly_ngn" defaultValue={(pricing as Record<string, number>).enterprise_monthly_ngn || 150000} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-zinc-400 mb-1">10 Credits Pack (NGN)</label>
-                <input type="number" name="credits_10_ngn" defaultValue={(pricing as Record<string, number>).credits_10_ngn || 15000} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white" />
+                <label className="block text-xs font-medium text-zinc-400 mb-1">10 Credits Pack</label>
+                <input type="number" name="credits_10_ngn" defaultValue={(pricing as Record<string, number>).credits_10_ngn || 6000} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-zinc-400 mb-1">50 Credits Pack (NGN)</label>

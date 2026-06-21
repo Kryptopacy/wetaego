@@ -27,7 +27,7 @@ export async function subscribeToLite(formData: FormData) {
   const rate = await getUsdToNgnRate()
   const pricing = await getPricingSettings()
   
-  const baseNgn = pricing.lite_monthly_ngn || 19999
+  const baseNgn = pricing.lite_monthly_ngn || 14999
   let amountMinor = 0
   if (currency === 'USD') {
     const amountUsd = baseNgn / rate

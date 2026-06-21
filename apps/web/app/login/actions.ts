@@ -171,21 +171,21 @@ export async function startInteractiveDemo() {
 
   if (!cat1 || !cat2 || !cat3 || !cat4) throw new Error('Failed to create categories')
 
-  // 7. Add Menu Items
+  // 7. Add Menu Items (Zero latency image seeding)
   const { error: itemsError } = await adminClient.from('menu_items').insert([
     // Starters
-    { organization_id: org.id, category_id: cat1.id, name: 'Spicy Asun Rolls', description: 'Smoked goat meat wrapped in crispy pastry, served with pepper sauce.', price_minor: 650000, is_featured: true, availability_status: 'available' },
-    { organization_id: org.id, category_id: cat1.id, name: 'Truffle Plantain Fries', description: 'Crispy plantain tossed in truffle oil and parmesan.', price_minor: 450000, is_featured: false, availability_status: 'available' },
+    { organization_id: org.id, category_id: cat1.id, name: 'Spicy Asun Rolls', description: 'Smoked goat meat wrapped in crispy pastry, served with pepper sauce.', price_minor: 650000, is_featured: true, availability_status: 'available', image_url: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80' },
+    { organization_id: org.id, category_id: cat1.id, name: 'Truffle Plantain Fries', description: 'Crispy plantain tossed in truffle oil and parmesan.', price_minor: 450000, is_featured: false, availability_status: 'available', image_url: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=800&q=80' },
     // Mains
-    { organization_id: org.id, category_id: cat2.id, name: '24-Hour Suya Steak', description: 'Prime ribeye marinated in our signature suya spice blend, grilled to perfection.', price_minor: 2800000, is_featured: true, availability_status: 'available' },
-    { organization_id: org.id, category_id: cat2.id, name: 'Jollof Paella', description: 'Rich, smoky jollof rice mixed with grilled prawns, calamari, and spicy chorizo.', price_minor: 1850000, is_featured: false, availability_status: 'available' },
-    { organization_id: org.id, category_id: cat2.id, name: 'Charcoal Grilled Croaker', description: 'Whole croaker fish stuffed with herbs, served with roasted yam.', price_minor: 1500000, is_featured: false, availability_status: 'sold_out' },
+    { organization_id: org.id, category_id: cat2.id, name: '24-Hour Suya Steak', description: 'Prime ribeye marinated in our signature suya spice blend, grilled to perfection.', price_minor: 2800000, is_featured: true, availability_status: 'available', image_url: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=800&q=80' },
+    { organization_id: org.id, category_id: cat2.id, name: 'Jollof Paella', description: 'Rich, smoky jollof rice mixed with grilled prawns, calamari, and spicy chorizo.', price_minor: 1850000, is_featured: false, availability_status: 'available', image_url: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=800&q=80' },
+    { organization_id: org.id, category_id: cat2.id, name: 'Charcoal Grilled Croaker', description: 'Whole croaker fish stuffed with herbs, served with roasted yam.', price_minor: 1500000, is_featured: false, availability_status: 'sold_out', image_url: 'https://images.unsplash.com/photo-1482049016688-2d3e1b311543?auto=format&fit=crop&w=800&q=80' },
     // Cocktails
-    { organization_id: org.id, category_id: cat3.id, name: 'Zobo Margarita', description: 'Tequila, fresh zobo extract, lime, and a spicy salt rim.', price_minor: 550000, is_featured: true, availability_status: 'available' },
-    { organization_id: org.id, category_id: cat3.id, name: 'Palm Wine Spritz', description: 'Fresh palm wine, prosecco, and a splash of elderflower.', price_minor: 600000, is_featured: false, availability_status: 'available' },
+    { organization_id: org.id, category_id: cat3.id, name: 'Zobo Margarita', description: 'Tequila, fresh zobo extract, lime, and a spicy salt rim.', price_minor: 550000, is_featured: true, availability_status: 'available', image_url: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=800&q=80' },
+    { organization_id: org.id, category_id: cat3.id, name: 'Palm Wine Spritz', description: 'Fresh palm wine, prosecco, and a splash of elderflower.', price_minor: 600000, is_featured: false, availability_status: 'available', image_url: 'https://images.unsplash.com/photo-1551538827-9c037cb4f32a?auto=format&fit=crop&w=800&q=80' },
     // Desserts
-    { organization_id: org.id, category_id: cat4.id, name: 'Puff-Puff Beignets', description: 'Warm puff-puff served with rich dark chocolate dipping sauce.', price_minor: 400000, is_featured: true, availability_status: 'available' },
-    { organization_id: org.id, category_id: cat4.id, name: 'Mango Sorbet', description: 'Fresh, icy mango sorbet made in-house.', price_minor: 350000, is_featured: false, availability_status: 'available' }
+    { organization_id: org.id, category_id: cat4.id, name: 'Puff-Puff Beignets', description: 'Warm puff-puff served with rich dark chocolate dipping sauce.', price_minor: 400000, is_featured: true, availability_status: 'available', image_url: 'https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=800&q=80' },
+    { organization_id: org.id, category_id: cat4.id, name: 'Mango Sorbet', description: 'Fresh, icy mango sorbet made in-house.', price_minor: 350000, is_featured: false, availability_status: 'available', image_url: 'https://images.unsplash.com/photo-1563805042-7684c8a9e9cb?auto=format&fit=crop&w=800&q=80' }
   ])
 
   if (itemsError) {
@@ -283,40 +283,40 @@ export async function startInteractiveDemo() {
     const mediaPage = pages.find((p: { id: string, slug: string }) => p.slug === 'pacy-media')
     if (mediaPage) {
       pageItems.push(
-        { page_id: mediaPage.id, title: 'Dedicated Instagram Reel', description: 'Up to 60 seconds. High-quality editing included.', price_minor: 15000000, sort_order: 0, availability_status: 'available' },
-        { page_id: mediaPage.id, title: 'TikTok Integration', description: 'Brand integration in a lifestyle TikTok video.', price_minor: 10000000, sort_order: 1, availability_status: 'available' }
+        { page_id: mediaPage.id, title: 'Dedicated Instagram Reel', description: 'Up to 60 seconds. High-quality editing included.', price_minor: 15000000, sort_order: 0, availability_status: 'available', images: ['https://images.unsplash.com/photo-1616469829581-73993eb86b02?auto=format&fit=crop&w=800&q=80'] },
+        { page_id: mediaPage.id, title: 'TikTok Integration', description: 'Brand integration in a lifestyle TikTok video.', price_minor: 10000000, sort_order: 1, availability_status: 'available', images: ['https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?auto=format&fit=crop&w=800&q=80'] }
       )
     }
 
     const wellnessPage = pages.find((p: { id: string, slug: string }) => p.slug === 'pacy-wellness')
     if (wellnessPage) {
       pageItems.push(
-        { page_id: wellnessPage.id, title: 'Deep Tissue Massage', description: '60-minute intensive muscle therapy.', price_minor: 3500000, sort_order: 0, availability_status: 'available' },
-        { page_id: wellnessPage.id, title: 'Signature Facial', description: '45-minute glow restoration facial.', price_minor: 2500000, sort_order: 1, availability_status: 'available' }
+        { page_id: wellnessPage.id, title: 'Deep Tissue Massage', description: '60-minute intensive muscle therapy.', price_minor: 3500000, sort_order: 0, availability_status: 'available', images: ['https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=800&q=80'] },
+        { page_id: wellnessPage.id, title: 'Signature Facial', description: '45-minute glow restoration facial.', price_minor: 2500000, sort_order: 1, availability_status: 'available', images: ['https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=800&q=80'] }
       )
     }
 
     const staysPage = pages.find((p: { id: string, slug: string }) => p.slug === 'pacy-stays')
     if (staysPage) {
       pageItems.push(
-        { page_id: staysPage.id, title: 'Lekki Penthouse', subtitle: '3 Bed / 3.5 Bath', description: 'Stunning ocean views with private chef access.', price_minor: 15000000, price_display: '₦150,000 / night', sort_order: 0, availability_status: 'available' },
-        { page_id: staysPage.id, title: 'Ikoyi Studio', subtitle: '1 Bed / 1 Bath', description: 'Cozy luxury studio in the heart of Ikoyi.', price_minor: 6500000, price_display: '₦65,000 / night', sort_order: 1, availability_status: 'available' }
+        { page_id: staysPage.id, title: 'Lekki Penthouse', subtitle: '3 Bed / 3.5 Bath', description: 'Stunning ocean views with private chef access.', price_minor: 15000000, price_display: '₦150,000 / night', sort_order: 0, availability_status: 'available', item_data: { beds: 3, baths: 3.5, sqft: 2500 }, images: ['https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80'] },
+        { page_id: staysPage.id, title: 'Ikoyi Studio', subtitle: '1 Bed / 1 Bath', description: 'Cozy luxury studio in the heart of Ikoyi.', price_minor: 6500000, price_display: '₦65,000 / night', sort_order: 1, availability_status: 'available', item_data: { beds: 1, baths: 1, sqft: 600 }, images: ['https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=80'] }
       )
     }
 
     const boutiquePage = pages.find((p: { id: string, slug: string }) => p.slug === 'pacy-boutique')
     if (boutiquePage) {
       pageItems.push(
-        { page_id: boutiquePage.id, title: 'Silk Wrap Dress', description: 'Emerald green 100% silk dress.', price_minor: 4500000, sort_order: 0, availability_status: 'available' },
-        { page_id: boutiquePage.id, title: 'Leather Tote Bag', description: 'Handcrafted genuine leather tote.', price_minor: 8500000, sort_order: 1, availability_status: 'available' }
+        { page_id: boutiquePage.id, title: 'Silk Wrap Dress', description: 'Emerald green 100% silk dress.', price_minor: 4500000, sort_order: 0, availability_status: 'available', images: ['https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&w=800&q=80'] },
+        { page_id: boutiquePage.id, title: 'Leather Tote Bag', description: 'Handcrafted genuine leather tote.', price_minor: 8500000, sort_order: 1, availability_status: 'available', images: ['https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=800&q=80'] }
       )
     }
 
     const hotelsPage = pages.find((p: { id: string, slug: string }) => p.slug === 'pacy-hotels')
     if (hotelsPage) {
       pageItems.push(
-        { page_id: hotelsPage.id, title: 'Ocean View Suite', subtitle: 'King Bed / Balcony', description: 'Luxury suite with panoramic ocean views and complementary breakfast.', price_minor: 12000000, price_display: '₦120,000 / night', sort_order: 0, availability_status: 'available' },
-        { page_id: hotelsPage.id, title: 'Standard Double', subtitle: 'Queen Bed', description: 'Comfortable room perfect for business travelers.', price_minor: 4500000, price_display: '₦45,000 / night', sort_order: 1, availability_status: 'available' }
+        { page_id: hotelsPage.id, title: 'Ocean View Suite', subtitle: 'King Bed / Balcony', description: 'Luxury suite with panoramic ocean views and complementary breakfast.', price_minor: 12000000, price_display: '₦120,000 / night', sort_order: 0, availability_status: 'available', item_data: { beds: 1, occupancy: 2 }, images: ['https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&w=800&q=80'] },
+        { page_id: hotelsPage.id, title: 'Standard Double', subtitle: 'Queen Bed', description: 'Comfortable room perfect for business travelers.', price_minor: 4500000, price_display: '₦45,000 / night', sort_order: 1, availability_status: 'available', item_data: { beds: 1, occupancy: 2 }, images: ['https://images.unsplash.com/photo-1566665797739-1674de7a421a?auto=format&fit=crop&w=800&q=80'] }
       )
     }
 
@@ -325,6 +325,14 @@ export async function startInteractiveDemo() {
       if (piError) console.error('Failed to insert page items', piError)
     }
   }
+
+  // Clean up old demo organizations (asynchronous, fire-and-forget, zero latency cost)
+  const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+  adminClient.from('organizations')
+    .delete()
+    .ilike('name', 'Pacy Grills%')
+    .lt('created_at', twentyFourHoursAgo)
+    .then(({ error }) => { if (error) console.error('Cleanup error:', error) })
 
   // We are fully logged in and provisioned!
   revalidatePath('/', 'layout')

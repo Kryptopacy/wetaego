@@ -38,11 +38,11 @@ export default async function BillingPage(props: { searchParams: Promise<{ curre
   const { getPricingSettings } = await import('@/lib/utils/settings')
   const pricing = await getPricingSettings()
   
-  const liteBase = pricing.lite_monthly_ngn || 19999
+  const liteBase = pricing.lite_monthly_ngn || 14999
   const proBase = pricing.pro_monthly_ngn || 49999
-  const c10Base = pricing.credits_10_ngn || 15000
-  const c25Base = pricing.credits_25_ngn || 33000
-  const c50Base = pricing.credits_50_ngn || 60000
+  const c10Base = pricing.credits_10_ngn || 6000
+  const c25Base = pricing.credits_25_ngn || 12000
+  const c50Base = pricing.credits_50_ngn || 20000
   
   const convertPrice = (base: number) => currency === 'USD' ? Math.round(base / rate) : base
   const formatPrice = (amount: number) => currency === 'USD' ? `$${amount}` : `₦${amount.toLocaleString()}`

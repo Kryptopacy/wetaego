@@ -40,6 +40,7 @@ export async function createItem(formData: FormData) {
   const dietaryTagsRaw = formData.get('dietary_tags') as string
   const allergensRaw = formData.get('allergens') as string
   const image = formData.get('image') as File | null
+  const aiImageUrl = formData.get('ai_image_url') as string | null
 
   if (!orgId || !categoryId || !name || !price) return { error: 'Missing required fields' }
   if (orgId === 'demo-org') {
@@ -50,7 +51,7 @@ export async function createItem(formData: FormData) {
   const dietary_tags = dietaryTagsRaw ? JSON.parse(dietaryTagsRaw) : []
   const allergen_tags = allergensRaw ? JSON.parse(allergensRaw) : []
 
-  let image_url = null
+  let image_url = aiImageUrl || null
 
   if (image && image.size > 0) {
     const fileExt = image.name.split('.').pop()

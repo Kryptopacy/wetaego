@@ -188,8 +188,28 @@ export async function addPageItem(formData: FormData): Promise<void> {
     ? parseInt(formData.get('inventory_count') as string)
     : null
 
+  const image = formData.get('image') as File | null
+  const aiImageUrl = formData.get('ai_image_url') as string | null
+
   const { data: userData } = await supabase.auth.getUser()
   if (!userData?.user) throw new Error('Not authenticated')
+
+  // Handle image upload
+  let images: string[] = []
+  if (aiImageUrl) {
+    images = [aiImageUrl]
+  } else if (image && image.size > 0) {
+    const fileExt = image.name.split('.').pop()
+    const fileName = `page-items/${userData.user.id}-${Date.now()}.${fileExt}`
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from('public-assets')
+      .upload(fileName, image)
+      
+    if (!uploadError && uploadData) {
+      const { data: publicUrlData } = supabase.storage.from('public-assets').getPublicUrl(fileName)
+      images = [publicUrlData.publicUrl]
+    }
+  }
 
   const { error } = await supabase.from('page_items').insert({
     page_id,
@@ -203,6 +223,7 @@ export async function addPageItem(formData: FormData): Promise<void> {
     deposit_percentage,
     payment_mode,
     inventory_count,
+    images
   })
 
   if (error) throw new Error(error.message)
@@ -228,12 +249,33 @@ export async function updatePageItem(formData: FormData): Promise<void> {
     ? parseInt(formData.get('inventory_count') as string)
     : null
 
+  const image = formData.get('image') as File | null
+  const aiImageUrl = formData.get('ai_image_url') as string | null
+
   const { data: userData } = await supabase.auth.getUser()
   if (!userData?.user) throw new Error('Not authenticated')
 
+  const updatePayload: any = { title, subtitle, description, price_minor, price_display, availability_status, item_data, inventory_count }
+
+  // Handle image upload
+  if (aiImageUrl) {
+    updatePayload.images = [aiImageUrl]
+  } else if (image && image.size > 0) {
+    const fileExt = image.name.split('.').pop()
+    const fileName = `page-items/${userData.user.id}-${Date.now()}.${fileExt}`
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from('public-assets')
+      .upload(fileName, image)
+      
+    if (!uploadError && uploadData) {
+      const { data: publicUrlData } = supabase.storage.from('public-assets').getPublicUrl(fileName)
+      updatePayload.images = [publicUrlData.publicUrl]
+    }
+  }
+
   const { error } = await supabase
     .from('page_items')
-    .update({ title, subtitle, description, price_minor, price_display, availability_status, item_data, inventory_count })
+    .update(updatePayload)
     .eq('id', itemId)
 
   if (error) throw new Error(error.message)
