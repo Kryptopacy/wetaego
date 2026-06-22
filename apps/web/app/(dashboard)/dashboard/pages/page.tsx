@@ -183,7 +183,7 @@ export default async function PagesManager() {
                 <ShareButton
                   url={fullUrl}
                   title={`Check out ${page.title}`}
-                  description={`View our live ${templateTypeLabel(page.template_type).toLowerCase()} at ${org?.name || 'Our Venue'}.`}
+                  description={`View our live ${templateTypeLabel(page.template_type).toLowerCase()} at Our Venue.`}
                   className="p-2 rounded-lg text-zinc-500 hover:text-violet-400 hover:bg-violet-500/10 transition-colors"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
