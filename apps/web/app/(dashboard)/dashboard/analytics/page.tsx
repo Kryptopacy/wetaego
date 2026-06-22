@@ -23,7 +23,7 @@ export default async function AnalyticsDashboardPage() {
     .eq('user_id', user.id)
     .single()
 
-  const orgId = member?.organizations ? (member.organizations as unknown as { id: string }).id : null
+  const orgId = member?.organizations ? (member.organizations as any as { id: string }).id : null
 
   if (!orgId) {
     return <div>No organization found.</div>

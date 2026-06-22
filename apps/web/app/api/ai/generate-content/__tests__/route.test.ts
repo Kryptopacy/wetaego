@@ -27,7 +27,7 @@ describe('Generate Content API', () => {
   })
 
   it('calls generateText with correct parameters', async () => {
-    vi.mocked(ai.generateText).mockResolvedValueOnce({ text: 'A premium description.' } as unknown)
+    vi.mocked(ai.generateText).mockResolvedValueOnce({ text: 'A premium description.' } as any)
 
     const req = new Request('http://localhost/api/ai/generate-content', {
       method: 'POST',

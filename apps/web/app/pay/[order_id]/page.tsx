@@ -45,7 +45,7 @@ export default async function SharedPaymentPage({
     .eq('id', params.order_id)
     .single()
 
-  const order = orderRaw as unknown as Order
+  const order = orderRaw as any as Order
 
   if (!order) {
     return (
@@ -108,7 +108,7 @@ export default async function SharedPaymentPage({
                   <span className="text-zinc-500 font-medium">{item.quantity}x</span>
                   <span className="text-white text-sm">{item.item_name}</span>
                 </div>
-                <span className="text-zinc-400 text-sm">₦{(item.price_minor / 100).toLocaleString()}</span>
+                <span className="text-zinc-400 text-sm">{formatCurrency(item.price_minor )}</span>
               </div>
             ))}
           </div>
@@ -116,15 +116,15 @@ export default async function SharedPaymentPage({
           <div className="border-t border-zinc-800 pt-4 space-y-2">
             <div className="flex justify-between text-sm text-zinc-400">
               <span>Total Bill</span>
-              <span>₦{(order.total_amount_minor / 100).toLocaleString()}</span>
+              <span>{formatCurrency(order.total_amount_minor )}</span>
             </div>
             <div className="flex justify-between text-sm text-green-400 font-medium">
               <span>Amount Paid</span>
-              <span>- ₦{((order.amount_paid_minor || 0) / 100).toLocaleString()}</span>
+              <span>- {formatCurrency((order.amount_paid_minor || 0) )}</span>
             </div>
             <div className="flex justify-between text-lg text-white font-black pt-2 border-t border-zinc-800">
               <span>Remaining</span>
-              <span>₦{((order.total_amount_minor - (order.amount_paid_minor || 0)) / 100).toLocaleString()}</span>
+              <span>{formatCurrency((order.total_amount_minor - (order.amount_paid_minor || 0)) )}</span>
             </div>
           </div>
         </div>

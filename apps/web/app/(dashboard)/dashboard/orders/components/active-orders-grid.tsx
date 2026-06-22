@@ -1,5 +1,6 @@
 import { Database } from '@/lib/supabase/types'
 import { toast } from 'sonner'
+import { formatCurrency } from '@/lib/utils/currency'
 
 type FullOrder = Database['public']['Tables']['orders']['Row'] & { order_items?: Database['public']['Tables']['order_items']['Row'][] }
 
@@ -38,9 +39,9 @@ export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, onC
                     <span className="text-sm text-zinc-500">Order #{order.id.split('-')[0]}</span>
                   </div>
                   <div className="text-right">
-                    <div className="font-bold text-lg text-white">₦{(order.total_amount_minor / 100).toLocaleString()}</div>
+                    <div className="font-bold text-lg text-white">{formatCurrency(order.total_amount_minor )}</div>
                     {(order.tip_amount_minor || 0) > 0 && (
-                      <div className="text-sm text-blue-400 mb-1 font-medium">+ ₦{((order.tip_amount_minor || 0) / 100).toLocaleString()} Tip</div>
+                      <div className="text-sm text-blue-400 mb-1 font-medium">+ {formatCurrency(order.tip_amount_minor || 0)} Tip</div>
                     )}
                     <span className={`text-xs font-medium px-2 py-1 rounded-full ${order.status === 'paid' ? 'bg-green-500/20 text-green-400' : 'bg-zinc-800 text-zinc-400'}`}>
                       {order.status.toUpperCase()}

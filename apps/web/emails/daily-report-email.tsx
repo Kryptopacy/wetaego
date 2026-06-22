@@ -12,6 +12,7 @@ import {
   Tailwind,
 } from '@react-email/components';
 import * as React from 'react';
+import { formatCurrency } from '@/lib/utils/currency';
 
 interface DailyReportEmailProps {
   organizationName: string;
@@ -26,7 +27,7 @@ export const DailyReportEmail = ({
   totalRevenueMinor,
   dateString,
 }: DailyReportEmailProps) => {
-  const formattedRevenue = `₦${(totalRevenueMinor / 100).toLocaleString()}`;
+  const formattedRevenue = formatCurrency($1);
 
   return (
     <Html>

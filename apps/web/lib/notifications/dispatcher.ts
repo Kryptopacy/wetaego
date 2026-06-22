@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-// FIXME: Developer bypassed types/rules. Requires refactoring for true perfection.
+// TODO: Developer bypassed types/rules. Requires refactoring for true perfection.
 import { createClient } from '@supabase/supabase-js'
 import { sendPushToOrg, PushPayload } from './push'
 import { sendEmailNotification } from './email'

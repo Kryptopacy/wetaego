@@ -40,14 +40,40 @@ export async function POST(req: Request) {
       if (existingEvent) {
         return NextResponse.json({ status: 'already_processed' })
       }
+
+      // Record webhook FIRST — prevents duplicate processing even if later steps fail
+      await supabase
+        .from('webhook_events')
+        .insert({
+          provider_reference: providerRef,
+          event_type: event.event
+        })
     }
 
     if (event.event === 'subscription.create') {
-      // handled
+      const metadata = event.data?.metadata || event.data?.customer?.metadata
+      if (metadata && metadata.organization_id) {
+        await supabase
+          .from('organizations')
+          .update({
+            subscription_status: 'active',
+            subscription_plan: event.data.plan?.plan_code || 'pro',
+            current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+          })
+          .eq('id', metadata.organization_id)
+      }
     }
 
     if (event.event === 'subscription.disable') {
-      // handled
+      const metadata = event.data?.metadata || event.data?.customer?.metadata
+      if (metadata && metadata.organization_id) {
+        await supabase
+          .from('organizations')
+          .update({
+            subscription_status: 'canceled'
+          })
+          .eq('id', metadata.organization_id)
+      }
     }
 
       if (event.event === 'charge.success') {
@@ -102,15 +128,6 @@ export async function POST(req: Request) {
           }
         }
       }
-    }
-
-    if (providerRef) {
-      await supabase
-        .from('webhook_events')
-        .insert({
-          provider_reference: providerRef,
-          event_type: event.event
-        })
     }
 
     return NextResponse.json({ status: 'success' })

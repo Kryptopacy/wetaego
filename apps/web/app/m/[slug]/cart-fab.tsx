@@ -1,6 +1,7 @@
 'use client'
 
 import { useCartStore } from '@/lib/store/cart'
+import { formatCurrency } from '@/lib/utils/currency'
 import { useState, useEffect, useRef } from 'react'
 import { toast } from 'sonner'
 import { processCheckout } from './actions'
@@ -199,7 +200,7 @@ export function CartFAB({
                   <span className="text-[15px]">View Order</span>
                   {discountAmountMinor > 0 && (
                     <span className="text-[11px] text-zinc-400 dark:text-zinc-500 font-medium tracking-wide">
-                      Saved ₦{(discountAmountMinor / 100).toLocaleString()}!
+                      Saved {formatCurrency(discountAmountMinor )}!
                     </span>
                   )}
                 </div>
@@ -207,7 +208,7 @@ export function CartFAB({
 
               <div className="relative flex items-center gap-3 pr-4">
                 <span className="text-[17px] font-black tracking-tight">
-                  ₦{(finalTotalMinor / 100).toLocaleString()}
+                  {formatCurrency(finalTotalMinor )}
                 </span>
               </div>
             </button>
@@ -292,7 +293,7 @@ export function CartFAB({
                             <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">Pairs well</span>
                           </div>
                           <p className="text-[14px] text-zinc-900 dark:text-white font-semibold leading-tight">{upsellData.pitch}</p>
-                          <p className="text-[13px] text-zinc-500 dark:text-zinc-400 mt-1">{upsellItemDetails.name} • ₦{(upsellItemDetails.price_minor / 100).toLocaleString()}</p>
+                          <p className="text-[13px] text-zinc-500 dark:text-zinc-400 mt-1">{upsellItemDetails.name} • {formatCurrency(upsellItemDetails.price_minor )}</p>
                         </div>
                         <button 
                           onClick={handleAddUpsell}
@@ -313,7 +314,7 @@ export function CartFAB({
                       <div key={item.id} className="flex justify-between items-center group">
                         <div className="flex-1 min-w-0 pr-4">
                           <h4 className="text-[14px] font-medium text-zinc-900 dark:text-white truncate">{item.name}</h4>
-                          <span className="text-[13px] text-zinc-500">₦{(item.price_minor / 100).toLocaleString()}</span>
+                          <span className="text-[13px] text-zinc-500">{formatCurrency(item.price_minor )}</span>
                         </div>
                         <div className="flex items-center gap-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-full p-1 shadow-sm opacity-100 transition-opacity">
                           <button onClick={() => updateQuantity(item.id, -1)} className="w-6 h-6 flex items-center justify-center bg-zinc-100 dark:bg-zinc-800 rounded-full text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700"><Minus className="w-3 h-3" /></button>
@@ -331,17 +332,17 @@ export function CartFAB({
                       <>
                         <div className="flex justify-between items-center text-zinc-500 text-[14px]">
                           <span>Subtotal</span>
-                          <span className="line-through">₦{(subtotalMinor / 100).toLocaleString()}</span>
+                          <span className="line-through">{formatCurrency(subtotalMinor )}</span>
                         </div>
                         <div className="flex justify-between items-center text-emerald-600 dark:text-emerald-400 font-medium text-[14px]">
                           <span>Discount ({effectivePercent}%) {spinnerDiscount === effectivePercent && '🎲'}</span>
-                          <span>-₦{(discountAmountMinor / 100).toLocaleString()}</span>
+                          <span>-{formatCurrency(discountAmountMinor )}</span>
                         </div>
                       </>
                     )}
                     <div className="flex justify-between items-end pt-2">
                       <span className="text-[15px] font-bold text-zinc-900 dark:text-white">Total</span>
-                      <span className="text-2xl font-black text-zinc-900 dark:text-white tracking-tight">₦{(finalTotalMinor / 100).toLocaleString()}</span>
+                      <span className="text-2xl font-black text-zinc-900 dark:text-white tracking-tight">{formatCurrency(finalTotalMinor )}</span>
                     </div>
                   </div>
                 </div>
@@ -351,7 +352,7 @@ export function CartFAB({
                   <div>
                     <span className="text-[14px] font-bold text-zinc-900 dark:text-white block">Split Bill?</span>
                     {splitCount > 1 && (
-                      <span className="text-xs text-zinc-500">₦{(Math.ceil(finalTotalMinor / splitCount) / 100).toLocaleString()} per person</span>
+                      <span className="text-xs text-zinc-500">{formatCurrency(Math.ceil(finalTotalMinor / splitCount))} per person</span>
                     )}
                   </div>
                   <div className="flex items-center gap-3 bg-zinc-50 dark:bg-zinc-800 rounded-full p-1 border border-zinc-200 dark:border-zinc-700">
@@ -415,7 +416,7 @@ export function CartFAB({
                     <>
                       {paymentMethod === 'transfer' 
                         ? 'Place Order' 
-                        : (splitCount > 1 ? `Pay My Share (₦${(Math.ceil(finalTotalMinor / splitCount) / 100).toLocaleString()})` : `Pay ₦${(finalTotalMinor / 100).toLocaleString()}`)}
+                        : (splitCount > 1 ? `Pay My Share (${formatCurrency(Math.ceil(finalTotalMinor / splitCount))})` : `Pay ${formatCurrency(finalTotalMinor )}`)}
                       <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                     </>
                   )}

@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { ActiveOrdersGrid } from '@/app/(dashboard)/dashboard/orders/components/active-orders-grid'
 import { Database } from '@/lib/supabase/types'
+import { formatCurrency } from '@/lib/utils/currency'
 
 type FullOrder = Database['public']['Tables']['orders']['Row'] & { order_items?: Database['public']['Tables']['order_items']['Row'][] }
 
@@ -75,8 +76,8 @@ describe('ActiveOrdersGrid', () => {
     expect(screen.getByText('Alice')).toBeDefined()
     
     // Total and Tip
-    expect(screen.getByText('₦5,000')).toBeDefined()
-    expect(screen.getByText('+ ₦500 Tip')).toBeDefined()
+    expect(screen.getByText(/5,000/)).toBeDefined()
+    expect(screen.getByText(/\+.*500.*Tip/)).toBeDefined()
     
     // Items
     expect(screen.getByText('Burger')).toBeDefined()

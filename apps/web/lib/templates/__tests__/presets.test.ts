@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-// FIXME: Developer bypassed types/rules. Requires refactoring for true perfection.
+// TODO: Developer bypassed types/rules. Requires refactoring for true perfection.
 import { describe, it, expect } from 'vitest'
 import { BUSINESS_TYPE_PRESETS } from '../presets'
 

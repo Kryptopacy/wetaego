@@ -4,19 +4,43 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { sendWelcomeEmail } from '@/lib/notifications/email'
+import { z } from 'zod'
+
+const loginSchema = z.object({
+  email: z.string().email('Please enter a valid email address'),
+  password: z.string().min(1, 'Password is required'),
+})
+
+const signupSchema = z.object({
+  email: z.string().email('Please enter a valid email address'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+})
+
+/** Sanitize redirect target to prevent open redirect attacks */
+function sanitizeRedirect(target: string | null): string {
+  if (!target || !target.startsWith('/') || target.startsWith('//')) {
+    return '/dashboard'
+  }
+  return target
+}
 
 export async function login(formData: FormData) {
   const supabase = await createClient()
 
-  // type-casting here for convenience
-  // in production, use a validation library like zod
-  const data = {
-    email: formData.get('email') as string,
-    password: formData.get('password') as string,
-  }
-  const redirectTo = (formData.get('redirectTo') as string) || '/dashboard'
+  const parsed = loginSchema.safeParse({
+    email: formData.get('email'),
+    password: formData.get('password'),
+  })
 
-  const { error } = await supabase.auth.signInWithPassword(data)
+  if (!parsed.success) {
+    const message = parsed.error.errors[0]?.message || 'Invalid input'
+    redirect(`/login?message=${encodeURIComponent(message)}`)
+  }
+
+  const { email, password } = parsed.data
+  const redirectTo = sanitizeRedirect(formData.get('redirectTo') as string | null)
+
+  const { error } = await supabase.auth.signInWithPassword({ email, password })
 
   if (error) {
     redirect(`/login?message=Could not authenticate user&redirectTo=${encodeURIComponent(redirectTo)}`)
@@ -29,20 +53,27 @@ export async function login(formData: FormData) {
 export async function signup(formData: FormData) {
   const supabase = await createClient()
 
-  const data = {
-    email: formData.get('email') as string,
-    password: formData.get('password') as string,
-  }
-  const redirectTo = (formData.get('redirectTo') as string) || '/dashboard'
+  const parsed = signupSchema.safeParse({
+    email: formData.get('email'),
+    password: formData.get('password'),
+  })
 
-  const { error } = await supabase.auth.signUp(data)
+  if (!parsed.success) {
+    const message = parsed.error.errors[0]?.message || 'Invalid input'
+    redirect(`/login?message=${encodeURIComponent(message)}`)
+  }
+
+  const { email, password } = parsed.data
+  const redirectTo = sanitizeRedirect(formData.get('redirectTo') as string | null)
+
+  const { error } = await supabase.auth.signUp({ email, password })
 
   if (error) {
     redirect(`/login?message=Could not sign up user&redirectTo=${encodeURIComponent(redirectTo)}`)
   }
 
   // Trigger welcome email in the background
-  sendWelcomeEmail(data.email).catch(console.error)
+  sendWelcomeEmail(email).catch(console.error)
 
   revalidatePath('/', 'layout')
   redirect(redirectTo)
@@ -107,6 +138,7 @@ export async function startInteractiveDemo() {
     name: 'Pacy Grills',
     slug: `pacy-grills-${uid}`,
     created_by: userId,
+    is_demo: true,
   }).select('id').single()
 
   if (orgError || !org) {
@@ -328,10 +360,11 @@ export async function startInteractiveDemo() {
   }
 
   // Clean up old demo organizations (asynchronous, fire-and-forget, zero latency cost)
+  // Uses the is_demo flag to safely target only demo orgs (never real businesses)
   const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
   adminClient.from('organizations')
     .delete()
-    .ilike('name', 'Pacy Grills%')
+    .eq('is_demo', true)
     .lt('created_at', twentyFourHoursAgo)
     .then(({ error }) => { if (error) console.error('Cleanup error:', error) })
 

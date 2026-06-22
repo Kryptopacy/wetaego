@@ -25,8 +25,9 @@ const nextConfig: NextConfig = {
         hostname: 'api.dicebear.com',
       },
       {
+        // Supabase Storage — user-uploaded images
         protocol: 'https',
-        hostname: '**',
+        hostname: '*.supabase.co',
       },
     ],
   },
@@ -50,6 +51,10 @@ const nextConfig: NextConfig = {
           {
             key: 'Strict-Transport-Security',
             value: 'max-age=31536000; includeSubDomains; preload',
+          },
+          {
+            key: 'Content-Security-Policy',
+            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.paystack.co https://checkout.paystack.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.unsplash.com https://api.dicebear.com *.supabase.co; font-src 'self' data:; connect-src 'self' *.supabase.co https://api.paystack.co; frame-src 'self' https://checkout.paystack.com;"
           },
         ],
       },

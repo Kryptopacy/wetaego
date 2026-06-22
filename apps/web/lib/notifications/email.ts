@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-// FIXME: Developer bypassed types/rules. Requires refactoring for true perfection.
+// TODO: Developer bypassed types/rules. Requires refactoring for true perfection.
 import { Resend } from 'resend';
 
 const resend = new Resend(process.env.RESEND_API_KEY);

@@ -12,6 +12,7 @@ import {
   Tailwind,
 } from '@react-email/components';
 import * as React from 'react';
+import { formatCurrency } from '@/lib/utils/currency';
 
 interface ReceiptEmailProps {
   organizationName: string;
@@ -30,7 +31,7 @@ export const ReceiptEmail = ({
   totalAmountMinor,
   items,
 }: ReceiptEmailProps) => {
-  const formattedTotal = `₦${(totalAmountMinor / 100).toLocaleString()}`;
+  const formattedTotal = formatCurrency($1);
   const shortOrderId = orderId.substring(0, 8);
 
   return (
@@ -71,7 +72,7 @@ export const ReceiptEmail = ({
                     <span className="font-semibold">{item.quantity}x</span> {item.name}
                   </Text>
                   <Text className="text-gray-500 text-sm m-0">
-                    ₦{(item.priceMinor / 100).toLocaleString()}
+                    {formatCurrency($1)}
                   </Text>
                 </Row>
               ))}

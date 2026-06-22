@@ -13,7 +13,7 @@ describe('Layout Actions (Branch Switcher)', () => {
     const mockSet = vi.fn()
     vi.mocked(cookiesModule.cookies).mockResolvedValue({
       set: mockSet,
-    } as unknown as Record<string, unknown>)
+    } as any as Record<string, unknown>)
 
     await setActiveLocationCookie('loc_123')
 

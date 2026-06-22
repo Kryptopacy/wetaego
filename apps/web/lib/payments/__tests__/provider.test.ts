@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// FIXME: Developer bypassed types/rules. Requires refactoring for true perfection.
+// TODO: Developer bypassed types/rules. Requires refactoring for true perfection.
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { paystackProvider } from '../paystack'
 

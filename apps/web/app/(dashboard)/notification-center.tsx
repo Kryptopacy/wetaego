@@ -4,6 +4,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Bell } from 'lucide-react'
+import { useAudioAlert } from '@/lib/hooks/use-audio'
+import { formatCurrency } from '@/lib/utils/currency'
 import Link from 'next/link'
 
 type NotificationItem = {
@@ -21,6 +23,7 @@ export function NotificationCenter() {
   const [orgId, setOrgId] = useState<string | null>(null)
   const [items, setItems] = useState<NotificationItem[]>([])
   const [isOpen, setIsOpen] = useState(false)
+  const { playChime } = useAudioAlert()
 
   // ── Initial org fetch ────────────────────────────────────────────────────────
   useEffect(() => {
@@ -50,7 +53,7 @@ export function NotificationCenter() {
     id: o.id as string,
     type: 'order',
     title: 'New Order',
-    subtitle: `Table ${o.table_identifier || 'Takeaway'} · ₦${((o.total_amount_minor as number || 0) / 100).toLocaleString()}`,
+    subtitle: `Table ${o.table_identifier || 'Takeaway'} · ${formatCurrency((o.total_amount_minor as number) || 0, o.currency_code as string || 'NGN')}`,
     href: '/dashboard/orders',
     color: 'blue',
     timestamp: o.created_at as string,
@@ -146,6 +149,7 @@ export function NotificationCenter() {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: `organization_id=eq.${orgId}` }, (payload: { eventType: string, new: Record<string, unknown> }) => {
         if (payload.eventType === 'INSERT') {
           if (['pending', 'paid'].includes(payload.new.status as string)) {
+            playChime()
             setItems(prev => [toOrderItem(payload.new), ...prev])
           }
         } else if (payload.eventType === 'UPDATE') {
@@ -164,6 +168,7 @@ export function NotificationCenter() {
       // Service requests
       .on('postgres_changes', { event: '*', schema: 'public', table: 'service_requests', filter: `organization_id=eq.${orgId}` }, (payload: { eventType: string, new: Record<string, unknown> }) => {
         if (payload.eventType === 'INSERT' && payload.new.status === 'pending') {
+          playChime()
           setItems(prev => [toRequestItem(payload.new), ...prev])
         } else if (payload.eventType === 'UPDATE') {
           if (payload.new.status === 'pending') {
@@ -185,7 +190,8 @@ export function NotificationCenter() {
           .eq('id', payload.new.id)
           .single()
           .then(({ data }) => {
-            if ((data as unknown as { location_pages?: { locations?: { organization_id?: string } } })?.location_pages?.locations?.organization_id === orgId) {
+            if ((data as any as { location_pages?: { locations?: { organization_id?: string } } })?.location_pages?.locations?.organization_id === orgId) {
+              playChime()
               setItems(prev => [toBookingItem(data as Record<string, unknown>), ...prev])
             }
           })
@@ -198,7 +204,8 @@ export function NotificationCenter() {
           .eq('id', payload.new.id)
           .single()
           .then(({ data }) => {
-            if ((data as unknown as { location_pages?: { locations?: { organization_id?: string } } })?.location_pages?.locations?.organization_id === orgId) {
+            if ((data as any as { location_pages?: { locations?: { organization_id?: string } } })?.location_pages?.locations?.organization_id === orgId) {
+              playChime()
               setItems(prev => [toInquiryItem(data as Record<string, unknown>), ...prev])
             }
           })
@@ -212,9 +219,9 @@ export function NotificationCenter() {
   useEffect(() => {
     if ('setAppBadge' in navigator) {
       if (items.length > 0) {
-        (navigator as unknown as { setAppBadge: (v: number) => Promise<void> }).setAppBadge(items.length).catch(console.error)
+        (navigator as any as { setAppBadge: (v: number) => Promise<void> }).setAppBadge(items.length).catch(console.error)
       } else {
-        (navigator as unknown as { clearAppBadge: () => Promise<void> }).clearAppBadge().catch(console.error)
+        (navigator as any as { clearAppBadge: () => Promise<void> }).clearAppBadge().catch(console.error)
       }
     }
   }, [items.length])

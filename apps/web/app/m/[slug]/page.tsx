@@ -145,7 +145,7 @@ export default async function PublicMenuPage({
   const hasPortalMode = locationPages && locationPages.length > 0;
 
   if (hasPortalMode && view !== 'menu') {
-    return <PortalRenderer location={location as unknown as Parameters<typeof PortalRenderer>[0]['location']} pages={locationPages} />
+    return <PortalRenderer location={location as any as Parameters<typeof PortalRenderer>[0]['location']} pages={locationPages} />
   }
 
   // 2. Find the active menu for this location
@@ -220,7 +220,7 @@ export default async function PublicMenuPage({
       <main className="min-h-screen bg-[#f5f7f5] dark:bg-zinc-950 font-sans text-[#17201b] dark:text-zinc-100 pb-32 transition-colors">
         {/* Elevated Cover Image Hero Section */}
         <VenueHeader 
-          location={location as unknown as Parameters<typeof VenueHeader>[0]['location']} 
+          location={location as any as Parameters<typeof VenueHeader>[0]['location']} 
           slug={slug} 
           tableIdentifier={tableIdentifier} 
         />
@@ -247,7 +247,7 @@ export default async function PublicMenuPage({
         <CallStaffFAB organizationId={location.organization_id} locationId={location.id} tableIdentifier={tableIdentifier} />
         {location.randomizer_enabled && <RouletteFAB />}
         {location.spinner_enabled && location.spinner_config && (
-          <SpinnerModal locationId={location.id} config={location.spinner_config as unknown as Parameters<typeof SpinnerModal>[0]['config']} />
+          <SpinnerModal locationId={location.id} config={location.spinner_config as any as Parameters<typeof SpinnerModal>[0]['config']} />
         )}
         <EcosystemNav locationId={location.id} slug={slug} currentPath="menu" />
         <CartFAB 

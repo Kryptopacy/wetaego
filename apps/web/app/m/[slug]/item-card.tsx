@@ -1,6 +1,7 @@
 'use client'
 
 import { useCartStore } from '@/lib/store/cart'
+import { formatCurrency } from '@/lib/utils/currency'
 import { useState } from 'react'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -75,7 +76,7 @@ export function ItemCard({ item }: ItemCardProps) {
               </h4>
               {isAvailable ? (
                 <span className="font-bold text-[15px] text-zinc-900 dark:text-white shrink-0">
-                  ₦{(item.price_minor / 100).toLocaleString()}
+                  {formatCurrency(item.price_minor )}
                 </span>
               ) : (
                 <span className="text-[11px] px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-500/10 text-red-600 dark:text-red-400 font-bold shrink-0">Sold Out</span>
@@ -157,7 +158,7 @@ export function ItemCard({ item }: ItemCardProps) {
               
               <div className="mb-6 pr-10">
                 <h3 className="text-2xl font-black text-zinc-900 dark:text-white tracking-tight">{item.name}</h3>
-                <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400 mt-1">₦{(item.price_minor / 100).toLocaleString()}</p>
+                <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400 mt-1">{formatCurrency(item.price_minor )}</p>
               </div>
 
               <div className="mb-8 bg-zinc-50 dark:bg-zinc-800/50 rounded-2xl p-4 border border-zinc-100 dark:border-zinc-800">

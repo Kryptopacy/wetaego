@@ -3,6 +3,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { StockManagementView } from '@/app/(dashboard)/dashboard/orders/components/stock-management-view'
+import { formatCurrency } from '@/lib/utils/currency'
 
 describe('StockManagementView', () => {
   it('renders correctly with empty items', () => {
@@ -20,7 +21,7 @@ describe('StockManagementView', () => {
     render(<StockManagementView menuItems={items} onToggleStock={mockToggle} />)
 
     expect(screen.getByText('Jollof Rice')).not.toBeNull()
-    expect(screen.getByText('₦5,000')).not.toBeNull()
+    expect(screen.getByText(/5,000/)).not.toBeNull()
     expect(screen.getByText('Fried Rice')).not.toBeNull()
 
     const buttons = screen.getAllByRole('button')

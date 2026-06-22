@@ -6,80 +6,93 @@ export type PlanType = 'lite' | 'pro' | 'enterprise' | string
 
 /**
  * Attempts to charge credits for an organization.
+ * Uses an atomic PostgreSQL function (charge_credits_atomic) to prevent race conditions.
  * @returns { success: boolean, remaining?: number, error?: string }
  */
 export async function chargeCredits(organizationId: string, cost: number, reason: string, userId?: string) {
   try {
     const supabase = await createClient()
 
-    // 1. Fetch current org state
-    const { data: org, error: orgError } = await supabase
-      .from('organizations')
-      .select('subscription_tier, purchased_credits, monthly_free_credits_used')
-      .eq('id', organizationId)
-      .single()
-
-    if (orgError || !org) {
-      throw new Error('Organization not found')
-    }
-
-    const tier = (org.subscription_tier || 'lite') as string
-    const dynamicPlanLimits = await getPlanLimits() as Record<string, { credits: number, pages: number }>
-    const monthlyLimit = dynamicPlanLimits[tier]?.credits || 0
-    const availableFree = Math.max(0, monthlyLimit - org.monthly_free_credits_used)
-    
-    const totalAvailable = availableFree + org.purchased_credits
-
-    // 2. Check if they have enough
-    if (totalAvailable < cost) {
-      return { 
-        success: false, 
-        error: "Insufficient credits. Please upgrade your plan or purchase additional credits." 
-      }
-    }
-
-    // 3. Deduct correctly
-    let newFreeUsed = org.monthly_free_credits_used
-    let newPurchased = org.purchased_credits
-
-    if (availableFree >= cost) {
-      newFreeUsed += cost
-    } else {
-      // Consume all remaining free credits
-      newFreeUsed += availableFree
-      const remainingCost = cost - availableFree
-      // Consume from purchased
-      newPurchased -= remainingCost
-    }
-
-    // 4. Update the organization in a transaction-like way
-    // (Using RPC is better, but since we are early stage we can just do an update. 
-    // For absolute safety, Supabase RPC should be used to prevent race conditions).
-    const { error: updateError } = await supabase
-      .from('organizations')
-      .update({
-        monthly_free_credits_used: newFreeUsed,
-        purchased_credits: newPurchased
-      })
-      .eq('id', organizationId)
-
-    if (updateError) throw updateError
-
-    // 5. Log transaction
-    await supabase.from('credit_transactions').insert({
-      organization_id: organizationId,
-      amount: -cost,
-      reason,
-      created_by: userId
+    // Use the atomic RPC function (prevents race conditions via SELECT ... FOR UPDATE)
+    const { data, error: rpcError } = await supabase.rpc('charge_credits_atomic', {
+      p_organization_id: organizationId,
+      p_cost: cost,
+      p_reason: reason,
+      p_user_id: userId || null,
     })
 
-    return { success: true, remaining: (newPurchased + Math.max(0, monthlyLimit - newFreeUsed)) }
+    if (rpcError) {
+      // If the RPC function doesn't exist yet (migration not applied), fall back to non-atomic
+      if (rpcError.message?.includes('function') && rpcError.message?.includes('does not exist')) {
+        console.warn('charge_credits_atomic RPC not found — using fallback. Apply the 20260622100000_atomic_credits migration.')
+        return await chargeCreditsFallback(organizationId, cost, reason, userId)
+      }
+      throw new Error(rpcError.message)
+    }
+
+    const result = data as { success: boolean; remaining?: number; error?: string }
+    return result
 
   } catch (error) {
     Sentry.captureException(error)
     return { success: false, error: (error as Error).message || 'An unexpected error occurred while processing credits.' }
   }
 }
+
+/**
+ * Non-atomic fallback for environments where the migration hasn't been applied.
+ * @deprecated Use the atomic RPC once the migration is applied.
+ */
+async function chargeCreditsFallback(organizationId: string, cost: number, reason: string, userId?: string) {
+  const supabase = await createClient()
+
+  const { data: org, error: orgError } = await supabase
+    .from('organizations')
+    .select('subscription_tier, purchased_credits, monthly_free_credits_used')
+    .eq('id', organizationId)
+    .single()
+
+  if (orgError || !org) {
+    throw new Error('Organization not found')
+  }
+
+  const tier = (org.subscription_tier || 'lite') as string
+  const dynamicPlanLimits = await getPlanLimits() as Record<string, { credits: number, pages: number }>
+  const monthlyLimit = dynamicPlanLimits[tier]?.credits || 0
+  const availableFree = Math.max(0, monthlyLimit - org.monthly_free_credits_used)
+  const totalAvailable = availableFree + org.purchased_credits
+
+  if (totalAvailable < cost) {
+    return { success: false, error: "Insufficient credits. Please upgrade your plan or purchase additional credits." }
+  }
+
+  let newFreeUsed = org.monthly_free_credits_used
+  let newPurchased = org.purchased_credits
+
+  if (availableFree >= cost) {
+    newFreeUsed += cost
+  } else {
+    newFreeUsed += availableFree
+    newPurchased -= (cost - availableFree)
+  }
+
+  const { error: updateError } = await supabase
+    .from('organizations')
+    .update({ monthly_free_credits_used: newFreeUsed, purchased_credits: newPurchased })
+    .eq('id', organizationId)
+
+  if (updateError) throw updateError
+
+  await supabase.from('credit_transactions').insert({
+    organization_id: organizationId,
+    amount: -cost,
+    reason,
+    created_by: userId
+  })
+
+  return { success: true, remaining: (newPurchased + Math.max(0, monthlyLimit - newFreeUsed)) }
+}
+
 
 /**
  * Refunds credits for an organization if an action failed after charge.

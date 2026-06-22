@@ -188,7 +188,7 @@ self.addEventListener('pushsubscriptionchange', (event) => {
     self.registration.pushManager
       .subscribe({
         userVisibleOnly: true,
-        applicationServerKey: self.VAPID_PUBLIC_KEY,
+        applicationServerKey: new URL(self.location.href).searchParams.get('vapid') || undefined,
       })
       .then((subscription) =>
         fetch('/api/notifications/subscribe', {

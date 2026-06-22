@@ -173,7 +173,7 @@ export default async function HomePage() {
           <p className="text-zinc-400 text-lg md:text-xl max-w-2xl mx-auto font-light mb-10">
             Join our affiliate program and earn a percentage of the revenue for every venue you refer. Rack up invites, track your conversions, and get paid out automatically via our transparent dashboard.
           </p>
-          <Link href="/affiliates" className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-white/5 border border-white/10 text-white text-sm font-semibold hover:bg-white/10 transition-colors">
+          <Link href="/affiliate" className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-white/5 border border-white/10 text-white text-sm font-semibold hover:bg-white/10 transition-colors">
             Learn about Affiliates <ArrowRight className="w-4 h-4 text-zinc-400" />
           </Link>
         </div>
@@ -191,7 +191,7 @@ export default async function HomePage() {
             <span className="text-transparent bg-clip-text bg-gradient-to-br from-violet-300 via-white to-zinc-400">better infrastructure.</span>
           </h2>
           <p className="text-zinc-400 text-xl font-light mb-12 max-w-2xl mx-auto">
-            Join 500+ venues already running on OurMenu. Setup takes under 10 minutes.
+            Join forward-thinking venues running on OurMenu. Setup takes under 10 minutes.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link href="/dashboard" className="flex items-center gap-2 px-10 py-4 rounded-full bg-white text-black text-base font-bold hover:scale-105 transition-all duration-300 shadow-[0_0_40px_rgba(255,255,255,0.15)]">

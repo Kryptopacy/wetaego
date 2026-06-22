@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation'
 
 function playChime(type: 'order' | 'service') {
   try {
-    const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
+    const AudioContextClass = window.AudioContext || (window as any as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
     const ctx = new AudioContextClass()
     const osc = ctx.createOscillator()
     const gain = ctx.createGain()

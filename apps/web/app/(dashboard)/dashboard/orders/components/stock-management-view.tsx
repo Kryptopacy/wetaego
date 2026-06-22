@@ -1,4 +1,5 @@
 import { Database } from '@/lib/supabase/types'
+import { formatCurrency } from '@/lib/utils/currency'
 
 type MenuItemRow = Database['public']['Tables']['menu_items']['Row']
 
@@ -22,7 +23,7 @@ export function StockManagementView({ menuItems, onToggleStock }: StockManagemen
               <div key={item.id} className="flex justify-between items-center p-4 bg-zinc-900/50 border border-zinc-800 rounded-lg">
                 <div>
                   <div className="font-medium text-white">{item.name}</div>
-                  <div className="text-sm text-zinc-400">₦{(item.price_minor / 100).toLocaleString()}</div>
+                  <div className="text-sm text-zinc-400">{formatCurrency(item.price_minor )}</div>
                 </div>
                 <button
                   onClick={() => onToggleStock(item.id, item.availability_status)}

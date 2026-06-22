@@ -16,9 +16,10 @@ export function ServiceWorkerRegistration() {
   useEffect(() => {
     if (!('serviceWorker' in navigator)) return
 
-    // Register the SW
+    // Register the SW and pass the VAPID key so it can be used for pushsubscriptionchange
+    const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || ''
     navigator.serviceWorker
-      .register('/sw.js', { scope: '/' })
+      .register(`/sw.js?vapid=${encodeURIComponent(vapidKey)}`, { scope: '/' })
       .then(async (registration) => {
         console.log('[OurMenu SW] Registered:', registration.scope)
 
@@ -58,7 +59,7 @@ async function subscribeToPush(registration: ServiceWorkerRegistration) {
 
     const subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(vapidPublicKey) as unknown as BufferSource,
+      applicationServerKey: urlBase64ToUint8Array(vapidPublicKey) as any as BufferSource,
     })
 
     await syncSubscription(subscription)

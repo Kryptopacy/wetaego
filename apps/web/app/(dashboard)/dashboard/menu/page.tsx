@@ -97,7 +97,7 @@ export default async function MenuManagerPage() {
 
       <div className="mb-8 rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
         <h2 className="text-lg font-semibold text-white mb-4">Add Category</h2>
-        <form action={createCategory as unknown as (payload: FormData) => void} className="flex gap-4 items-end">
+        <form action={createCategory as any as (payload: FormData) => void} className="flex gap-4 items-end">
           <input type="hidden" name="organization_id" value={org.id} />
           <input type="hidden" name="menu_id" value={menu.id} />
           <div className="flex-1">

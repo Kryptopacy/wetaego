@@ -69,7 +69,7 @@ export function AIChat({
     async onToolCall({ toolCall }) {
       try {
         if (toolCall.toolName === 'addToCart') {
-          const { itemId, quantity } = (toolCall as unknown as { args: { itemId: string; quantity: number } }).args
+          const { itemId, quantity } = (toolCall as any as { args: { itemId: string; quantity: number } }).args
           const item = menuItems.find((i) => i.id === itemId)
           if (item) {
             for (let i = 0; i < quantity; i++) {
@@ -84,7 +84,7 @@ export function AIChat({
         }
 
         if (toolCall.toolName === 'removeFromCart') {
-          const { itemId } = (toolCall as unknown as { args: { itemId: string } }).args
+          const { itemId } = (toolCall as any as { args: { itemId: string } }).args
           const item = menuItems.find((i) => i.id === itemId)
           if (item) {
             removeItem(itemId)
@@ -104,7 +104,7 @@ export function AIChat({
         }
 
         if (toolCall.toolName === 'callStaff') {
-          const { requestType } = (toolCall as unknown as { args: { requestType: Extract<Parameters<typeof callStaffFromAi>[3], string> } }).args
+          const { requestType } = (toolCall as any as { args: { requestType: Extract<Parameters<typeof callStaffFromAi>[3], string> } }).args
           const res = await callStaffFromAi(
             organizationId,
             locationId,
@@ -237,7 +237,7 @@ export function AIChat({
                 )}
 
                 {messages.map((msg) => {
-                  const m = msg as unknown as { id: string; role: string; content: string };
+                  const m = msg as any as { id: string; role: string; content: string };
                   if (m.role === 'user') {
                     return (
                       <div key={m.id} className="flex justify-end">

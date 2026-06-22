@@ -11,6 +11,7 @@ import {
   Tailwind,
 } from '@react-email/components';
 import * as React from 'react';
+import { formatCurrency } from '@/lib/utils/currency';
 
 interface FallbackEmailProps {
   organizationName: string;
@@ -25,7 +26,7 @@ export const FallbackEmail = ({
   amountMinor,
   message,
 }: FallbackEmailProps) => {
-  const formattedTotal = `₦${(amountMinor / 100).toLocaleString()}`;
+  const formattedTotal = formatCurrency($1);
 
   return (
     <Html>

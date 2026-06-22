@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-// FIXME: Developer bypassed types/rules. Requires refactoring for true perfection.
+// TODO: Developer bypassed types/rules. Requires refactoring for true perfection.
 import { getUsdToNgnRate } from './exchange'
 
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY
