@@ -219,9 +219,9 @@ export function NotificationCenter() {
   useEffect(() => {
     if ('setAppBadge' in navigator) {
       if (items.length > 0) {
-        (navigator as any as { setAppBadge: (v: number) => Promise<void> }).setAppBadge(items.length).catch(console.error)
+        (navigator as unknown as { setAppBadge: (v: number) => Promise<void> }).setAppBadge(items.length).catch(console.error)
       } else {
-        (navigator as any as { clearAppBadge: () => Promise<void> }).clearAppBadge().catch(console.error)
+        (navigator as unknown as { clearAppBadge: () => Promise<void> }).clearAppBadge().catch(console.error)
       }
     }
   }, [items.length])

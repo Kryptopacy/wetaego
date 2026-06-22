@@ -1,23 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
+import { formatCurrency } from '@/lib/utils/currency'
 import PayClient from './pay-client'
-
-interface Organization {
-  name: string
-  slug: string
-}
-
-interface Order {
-  id: string
-  status: string
-  total_amount_minor: number
-  amount_paid_minor: number | null
-  table_identifier: string | null
-  created_at: string
-  organization_id: string
-  location_id: string
-  organizations: Organization | Organization[] | null
-}
+import { mapSupabaseOrderToUI } from '@/lib/utils/transformers'
 
 export default async function SharedPaymentPage({
   params,
@@ -45,7 +30,7 @@ export default async function SharedPaymentPage({
     .eq('id', params.order_id)
     .single()
 
-  const order = orderRaw as any as Order
+  const order = orderRaw ? mapSupabaseOrderToUI(orderRaw) : null
 
   if (!order) {
     return (

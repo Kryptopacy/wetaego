@@ -1,6 +1,8 @@
 import { Database } from '@/lib/supabase/types'
 import { createClient } from '@/lib/supabase/server'
 import { OrdersClient } from './orders-client'
+import { mapSupabaseOrderToUI } from '@/lib/utils/transformers'
+import { UIOrder } from '@/lib/types/frontend'
 import { cookies } from 'next/headers'
 
 export default async function OrdersPage() {
@@ -11,7 +13,7 @@ export default async function OrdersPage() {
   const userId = userData?.user?.id
 
   let org: { id: string } | null = null
-  let orders: (Database['public']['Tables']['orders']['Row'] & { order_items?: Database['public']['Tables']['order_items']['Row'][] })[] = []
+  let orders: UIOrder[] = []
   let serviceRequests: Database['public']['Tables']['service_requests']['Row'][] = []
   let menuItems: Database['public']['Tables']['menu_items']['Row'][] = []
   let activeLocationId = ''
@@ -51,7 +53,7 @@ export default async function OrdersPage() {
           .order('created_at', { ascending: false })
           .limit(50)
         
-        orders = ordersData || []
+        orders = (ordersData || []).map(mapSupabaseOrderToUI)
 
         // Fetch Service Requests
         const { data: requestsData } = await supabase

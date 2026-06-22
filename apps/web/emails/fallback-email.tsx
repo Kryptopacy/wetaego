@@ -26,7 +26,7 @@ export const FallbackEmail = ({
   amountMinor,
   message,
 }: FallbackEmailProps) => {
-  const formattedTotal = formatCurrency($1);
+  const formattedTotal = formatCurrency(amountMinor);
 
   return (
     <Html>

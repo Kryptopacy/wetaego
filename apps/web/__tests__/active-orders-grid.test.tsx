@@ -3,6 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import { ActiveOrdersGrid } from '@/app/(dashboard)/dashboard/orders/components/active-orders-grid'
 import { Database } from '@/lib/supabase/types'
 import { formatCurrency } from '@/lib/utils/currency'
+import { UIOrder } from '@/lib/types/frontend'
 
 type FullOrder = Database['public']['Tables']['orders']['Row'] & { order_items?: Database['public']['Tables']['order_items']['Row'][] }
 
@@ -32,7 +33,7 @@ describe('ActiveOrdersGrid', () => {
         }
       ]
     }
-  ] as unknown as FullOrder[]
+  ] as unknown as UIOrder[]
 
   it('renders the active orders header with correct count', () => {
     render(

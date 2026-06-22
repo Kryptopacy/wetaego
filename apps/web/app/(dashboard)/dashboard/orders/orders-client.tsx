@@ -9,18 +9,20 @@ import { Database } from '@/lib/supabase/types'
 import { ServiceRequestsPanel } from './components/service-requests-panel'
 import { ActiveOrdersGrid } from './components/active-orders-grid'
 import { StockManagementView } from './components/stock-management-view'
+import { mapSupabaseOrderToUI } from '@/lib/utils/transformers'
+import { UIOrder } from '@/lib/types/frontend'
 
 type FullOrder = Database['public']['Tables']['orders']['Row'] & { order_items?: Database['public']['Tables']['order_items']['Row'][] }
 type ServiceRequestRow = Database['public']['Tables']['service_requests']['Row']
 type MenuItemRow = Database['public']['Tables']['menu_items']['Row']
-type OrderPayload = { eventType: string, new: Database['public']['Tables']['orders']['Row'] }
+type OrderPayload = { eventType: string, new: any }
 type ServiceRequestPayload = { eventType: string, new: ServiceRequestRow }
 type MenuItemPayload = { eventType: string, new: MenuItemRow }
 
 interface OrdersClientProps {
   organizationId: string
   locationId: string
-  initialOrders: FullOrder[]
+  initialOrders: UIOrder[]
   initialServiceRequests: ServiceRequestRow[]
   initialMenuItems?: MenuItemRow[]
   currentUserId: string
@@ -53,7 +55,7 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
             .eq('id', orderPayload.new.id)
             .single()
             .then(({ data }: { data: unknown }) => {
-              const fullData = data as FullOrder | null
+              const fullData = data ? mapSupabaseOrderToUI(data) : null
               if (fullData) {
                 setOrders((prev) => [fullData, ...prev])
                 if (fullData.status === 'paid' || fullData.status === 'pending') {

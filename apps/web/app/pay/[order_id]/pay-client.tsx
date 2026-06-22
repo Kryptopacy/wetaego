@@ -4,29 +4,14 @@ import { useState, useEffect } from 'react'
 import { processExistingOrderPayment } from '../../m/[slug]/actions'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
-
-export interface Organization {
-  name: string
-  slug: string
-}
-
-export interface Order {
-  id: string
-  status: string
-  total_amount_minor: number
-  amount_paid_minor: number | null
-  table_identifier: string | null
-  created_at: string
-  organization_id: string
-  location_id: string
-  organizations: Organization | Organization[] | null
-}
+import { formatCurrency } from '@/lib/utils/currency'
+import { UIOrder } from '@/lib/types/frontend'
 
 export default function PayClient({
   order: initialOrder,
   splitCount
 }: {
-  order: Order
+  order: UIOrder
   splitCount: number
 }) {
   const [order, setOrder] = useState(initialOrder)
@@ -46,7 +31,7 @@ export default function PayClient({
           filter: `id=eq.${order.id}`
         },
         (payload) => {
-          setOrder((prev: Order) => ({ ...prev, ...payload.new } as Order))
+          setOrder((prev: UIOrder) => ({ ...prev, ...payload.new } as UIOrder))
         }
       )
       .subscribe()

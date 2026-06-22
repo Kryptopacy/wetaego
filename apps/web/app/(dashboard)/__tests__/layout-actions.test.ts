@@ -1,4 +1,4 @@
-// @ts-expect-error test mock typing issue
+
 import { describe, it, expect, vi } from 'vitest'
 import { setActiveLocationCookie } from '../layout-actions'
 import * as cookiesModule from 'next/headers'
@@ -13,7 +13,7 @@ describe('Layout Actions (Branch Switcher)', () => {
     const mockSet = vi.fn()
     vi.mocked(cookiesModule.cookies).mockResolvedValue({
       set: mockSet,
-    } as any as Record<string, unknown>)
+    } as any)
 
     await setActiveLocationCookie('loc_123')
 

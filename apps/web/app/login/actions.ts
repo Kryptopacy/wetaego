@@ -33,7 +33,7 @@ export async function login(formData: FormData) {
   })
 
   if (!parsed.success) {
-    const message = parsed.error.errors[0]?.message || 'Invalid input'
+    const message = parsed.error.issues[0]?.message || 'Invalid input'
     redirect(`/login?message=${encodeURIComponent(message)}`)
   }
 
@@ -59,7 +59,7 @@ export async function signup(formData: FormData) {
   })
 
   if (!parsed.success) {
-    const message = parsed.error.errors[0]?.message || 'Invalid input'
+    const message = parsed.error.issues[0]?.message || 'Invalid input'
     redirect(`/login?message=${encodeURIComponent(message)}`)
   }
 
@@ -139,7 +139,7 @@ export async function startInteractiveDemo() {
     slug: `pacy-grills-${uid}`,
     created_by: userId,
     is_demo: true,
-  }).select('id').single()
+  } as any).select('id').single()
 
   if (orgError || !org) {
     console.error(orgError)
@@ -364,7 +364,7 @@ export async function startInteractiveDemo() {
   const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
   adminClient.from('organizations')
     .delete()
-    .eq('is_demo', true)
+    .eq('is_demo' as any, true)
     .lt('created_at', twentyFourHoursAgo)
     .then(({ error }) => { if (error) console.error('Cleanup error:', error) })
 

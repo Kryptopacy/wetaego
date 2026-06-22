@@ -31,7 +31,7 @@ export const ReceiptEmail = ({
   totalAmountMinor,
   items,
 }: ReceiptEmailProps) => {
-  const formattedTotal = formatCurrency($1);
+  const formattedTotal = formatCurrency(totalAmountMinor);
   const shortOrderId = orderId.substring(0, 8);
 
   return (
@@ -72,7 +72,7 @@ export const ReceiptEmail = ({
                     <span className="font-semibold">{item.quantity}x</span> {item.name}
                   </Text>
                   <Text className="text-gray-500 text-sm m-0">
-                    {formatCurrency($1)}
+                    {formatCurrency(item.priceMinor)}
                   </Text>
                 </Row>
               ))}

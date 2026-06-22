@@ -27,7 +27,7 @@ export const DailyReportEmail = ({
   totalRevenueMinor,
   dateString,
 }: DailyReportEmailProps) => {
-  const formattedRevenue = formatCurrency($1);
+  const formattedRevenue = formatCurrency(totalRevenueMinor);
 
   return (
     <Html>
