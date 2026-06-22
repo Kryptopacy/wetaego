@@ -45,7 +45,9 @@ export async function proxy(request: NextRequest) {
   const isProtectedRoute = request.nextUrl.pathname.startsWith('/dashboard')
   const isAffiliateDashboard = request.nextUrl.pathname.startsWith('/affiliate/dashboard')
 
-  if (!user && (isProtectedRoute || isAffiliateDashboard)) {
+  const isDemoMode = request.cookies.get('demo_mode')?.value === '1'
+
+  if (!user && !isDemoMode && (isProtectedRoute || isAffiliateDashboard)) {
     const loginUrl = request.nextUrl.clone()
     loginUrl.pathname = '/login'
     loginUrl.searchParams.set('redirectTo', request.nextUrl.pathname)
