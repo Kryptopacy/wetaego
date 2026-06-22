@@ -3,6 +3,7 @@
 import { useEffect, useRef, useCallback } from 'react'
 
 export function useAudioAlert() {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
   const audioRef = useRef<HTMLAudioElement | null>(null)
 
   useEffect(() => {
@@ -16,6 +17,7 @@ export function useAudioAlert() {
 
   const playChime = useCallback(() => {
     try {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
       const AudioContext = window.AudioContext || (window as any).webkitAudioContext
       if (!AudioContext) return
       

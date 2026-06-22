@@ -190,7 +190,7 @@ export function NotificationCenter() {
           .eq('id', payload.new.id)
           .single()
           .then(({ data }) => {
-            if ((data as any as { location_pages?: { locations?: { organization_id?: string } } })?.location_pages?.locations?.organization_id === orgId) {
+            if ((data as unknown as { location_pages?: { locations?: { organization_id?: string } } })?.location_pages?.locations?.organization_id === orgId) {
               playChime()
               setItems(prev => [toBookingItem(data as Record<string, unknown>), ...prev])
             }
@@ -204,7 +204,7 @@ export function NotificationCenter() {
           .eq('id', payload.new.id)
           .single()
           .then(({ data }) => {
-            if ((data as any as { location_pages?: { locations?: { organization_id?: string } } })?.location_pages?.locations?.organization_id === orgId) {
+            if ((data as unknown as { location_pages?: { locations?: { organization_id?: string } } })?.location_pages?.locations?.organization_id === orgId) {
               playChime()
               setItems(prev => [toInquiryItem(data as Record<string, unknown>), ...prev])
             }

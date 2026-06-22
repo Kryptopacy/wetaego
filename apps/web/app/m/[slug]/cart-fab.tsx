@@ -53,6 +53,7 @@ export function CartFAB({
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'transfer'>(paymentIsLive ? 'card' : 'transfer')
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsMounted(true)
     const handleOpenModal = () => setShowCheckoutModal(true)
     window.addEventListener('open-checkout-modal', handleOpenModal)

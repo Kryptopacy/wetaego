@@ -59,7 +59,7 @@ async function subscribeToPush(registration: ServiceWorkerRegistration) {
 
     const subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(vapidPublicKey) as any as BufferSource,
+      applicationServerKey: urlBase64ToUint8Array(vapidPublicKey) as unknown as BufferSource,
     })
 
     await syncSubscription(subscription)

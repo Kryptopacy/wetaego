@@ -145,7 +145,7 @@ export default async function PublicMenuPage({
   const hasPortalMode = locationPages && locationPages.length > 0;
 
   if (hasPortalMode && view !== 'menu') {
-    return <PortalRenderer location={location as any as Parameters<typeof PortalRenderer>[0]['location']} pages={locationPages} />
+    return <PortalRenderer location={location as unknown as Parameters<typeof PortalRenderer>[0]['location']} pages={locationPages} />
   }
 
   // 2. Find the active menu for this location

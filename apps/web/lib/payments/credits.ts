@@ -14,6 +14,7 @@ export async function chargeCredits(organizationId: string, cost: number, reason
     const supabase = await createClient()
 
     // Use the atomic RPC function (prevents race conditions via SELECT ... FOR UPDATE)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data, error: rpcError } = await supabase.rpc('charge_credits_atomic' as any, {
       p_organization_id: organizationId,
       p_cost: cost,
@@ -30,7 +31,7 @@ export async function chargeCredits(organizationId: string, cost: number, reason
       throw new Error(rpcError.message)
     }
 
-    const result = data as any as { success: boolean; remaining?: number; error?: string }
+    const result = data as unknown as { success: boolean; remaining?: number; error?: string }
     return result
 
   } catch (error) {

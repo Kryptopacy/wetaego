@@ -3,7 +3,6 @@ import { toast } from 'sonner'
 import { formatCurrency } from '@/lib/utils/currency'
 import { UIOrder } from '@/lib/types/frontend'
 
-type FullOrder = Database['public']['Tables']['orders']['Row'] & { order_items?: Database['public']['Tables']['order_items']['Row'][] }
 
 interface ActiveOrdersGridProps {
   activeOrders: UIOrder[]

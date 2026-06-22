@@ -23,7 +23,7 @@ describe('Payment Provider Abstraction', () => {
       }),
     }
     
-    ;(global.fetch as any).mockResolvedValueOnce(mockResponse)
+    ;(global.fetch as unknown as any).mockResolvedValueOnce(mockResponse)
 
     const result = await paystackProvider.initiatePayment({
       amountMinor: 50000, // NGN 500.00
@@ -64,7 +64,7 @@ describe('Payment Provider Abstraction', () => {
       }),
     }
     
-    ;(global.fetch as any).mockResolvedValueOnce(mockResponse)
+    ;(global.fetch as unknown as any).mockResolvedValueOnce(mockResponse)
 
     const result = await paystackProvider.verifyPayment('test_ref_123')
 

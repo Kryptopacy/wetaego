@@ -41,7 +41,8 @@ describe('Chat API', () => {
     vi.mocked(cookiesModule.cookies).mockResolvedValue({
       get: () => ({ value: '20' }),
       set: vi.fn(),
-    } as any)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as unknown as any)
 
     const req = new Request('http://localhost/api/chat', {
       method: 'POST',
@@ -57,7 +58,8 @@ describe('Chat API', () => {
     vi.mocked(cookiesModule.cookies).mockResolvedValue({
       get: () => ({ value: '5' }),
       set: vi.fn(),
-    } as any)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as unknown as any)
 
     const mockSupabase = {
       from: vi.fn().mockReturnValue({
@@ -69,6 +71,7 @@ describe('Chat API', () => {
         })
       })
     }
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.mocked(supabaseServer.createClient).mockResolvedValue(mockSupabase as any)
 
     const req = new Request('http://localhost/api/chat', {

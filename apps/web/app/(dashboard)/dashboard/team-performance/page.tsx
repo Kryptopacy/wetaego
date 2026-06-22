@@ -51,7 +51,7 @@ export default async function TeamPerformancePage() {
     .eq('location_id', activeLocationId)
     .order('created_at', { ascending: false })
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const reviews: { id: string; staff_id: string | null; staff_rating: number; staff_feedback: string | null; business_rating: number | null; business_feedback: string | null; created_at: string }[] = reviewsRaw as any || []
+  const reviews: { id: string; staff_id: string | null; staff_rating: number; staff_feedback: string | null; business_rating: number | null; business_feedback: string | null; created_at: string }[] = reviewsRaw as unknown as any || []
 
   // 3. Fetch tips (Orders with assigned staff and tip > 0)
   const { data: ordersWithTipsRaw } = await supabase
@@ -61,7 +61,7 @@ export default async function TeamPerformancePage() {
     .eq('location_id', activeLocationId)
     .gt('tip_amount_minor', 0)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const ordersWithTips: { id: string; assigned_staff_id: string | null; tip_amount_minor: number | null; created_at: string }[] = ordersWithTipsRaw as any || []
+  const ordersWithTips: { id: string; assigned_staff_id: string | null; tip_amount_minor: number | null; created_at: string }[] = ordersWithTipsRaw as unknown as any || []
 
   // Calculate stats per staff
   const staffStats = staffMembers?.map((staff) => {

@@ -82,7 +82,7 @@ export function MenuRenderer({ initialCategories }: { initialCategories: Categor
         const languageNames = new Intl.DisplayNames(['en'], { type: 'language' })
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setTargetLang(languageNames.of(lang) || lang)
-        // eslint-disable-next-line react-hooks/set-state-in-effect
+         
         setShowPrompt(true)
       }
     } catch (e) {

@@ -27,7 +27,8 @@ describe('Generate Content API', () => {
   })
 
   it('calls generateText with correct parameters', async () => {
-    vi.mocked(ai.generateText).mockResolvedValueOnce({ text: 'A premium description.' } as any)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+    vi.mocked(ai.generateText).mockResolvedValueOnce({ text: 'A premium description.' } as unknown as any)
 
     const req = new Request('http://localhost/api/ai/generate-content', {
       method: 'POST',

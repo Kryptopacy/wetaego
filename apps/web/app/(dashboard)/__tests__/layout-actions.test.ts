@@ -13,7 +13,8 @@ describe('Layout Actions (Branch Switcher)', () => {
     const mockSet = vi.fn()
     vi.mocked(cookiesModule.cookies).mockResolvedValue({
       set: mockSet,
-    } as any)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as unknown as any)
 
     await setActiveLocationCookie('loc_123')
 

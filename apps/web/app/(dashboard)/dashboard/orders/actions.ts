@@ -35,8 +35,8 @@ export async function completeOrderAction(orderId: string) {
 
   // 3. Dispatch Feedback Email asynchronously if customer email exists
   if (order.customer_email) {
-    const orgName = (order.organizations as any as { name?: string })?.name || 'the restaurant'
-    const orgSlug = (order.organizations as any as { slug?: string })?.slug || ''
+    const orgName = (order.organizations as unknown as { name?: string })?.name || 'the restaurant'
+    const orgSlug = (order.organizations as unknown as { slug?: string })?.slug || ''
     const feedbackUrl = `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL || 'ourmenuos.online'}/m/${orgSlug}/feedback/${order.id}`
 
     waitUntil((async () => {

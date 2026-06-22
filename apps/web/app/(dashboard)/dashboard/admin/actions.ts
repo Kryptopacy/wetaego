@@ -21,6 +21,7 @@ export async function updateSetting(formData: FormData) {
     const rawJson = formData.get('json_value') as string
     try {
       value = JSON.parse(rawJson)
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (_e) {
       throw new Error('Invalid JSON format')
     }

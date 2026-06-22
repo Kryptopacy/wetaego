@@ -109,7 +109,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           .eq('user_id', userData.user.id)
           .single()
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        if (member && (member.organizations as any)?.name) {
+        if (member && (member.organizations as unknown as Record<string, any>)?.name) {
           setOrgName((member.organizations as { name: string }).name)
           setIsOwnerOrManager(['owner', 'manager'].includes(member.role))
         }

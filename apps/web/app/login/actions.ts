@@ -139,7 +139,8 @@ export async function startInteractiveDemo() {
     slug: `pacy-grills-${uid}`,
     created_by: userId,
     is_demo: true,
-  } as any).select('id').single()
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } as unknown as any).select('id').single()
 
   if (orgError || !org) {
     console.error(orgError)
@@ -364,6 +365,7 @@ export async function startInteractiveDemo() {
   const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
   adminClient.from('organizations')
     .delete()
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
     .eq('is_demo' as any, true)
     .lt('created_at', twentyFourHoursAgo)
     .then(({ error }) => { if (error) console.error('Cleanup error:', error) })

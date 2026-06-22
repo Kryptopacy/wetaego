@@ -37,7 +37,8 @@ describe('Booking Flow (updateBookingStatus)', () => {
       }
     })
 
-    ;(createClient as any).mockResolvedValue({
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ;(createClient as unknown as any).mockResolvedValue({
       from: mockFrom,
       auth: { getUser: mockAuthGetUser }
     })

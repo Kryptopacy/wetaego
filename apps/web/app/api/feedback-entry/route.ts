@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const orgSlug = (qrData.organizations as any)?.slug
+  const orgSlug = (qrData.organizations as unknown as Record<string, any>)?.slug
   const locationId = qrData.location_id
   const tableIdentifier = qrData.table_identifier
 

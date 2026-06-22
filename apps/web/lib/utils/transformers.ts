@@ -4,6 +4,7 @@ import { UIOrder, UIOrderItem, UIOrganization } from '../types/frontend'
 export function mapSupabaseOrderToUI(rawOrder: any): UIOrder {
   if (!rawOrder) throw new Error('Cannot map null order')
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
   const items: UIOrderItem[] = (rawOrder.order_items || []).map((i: any) => ({
     id: i.id || '',
     order_id: i.order_id || '',

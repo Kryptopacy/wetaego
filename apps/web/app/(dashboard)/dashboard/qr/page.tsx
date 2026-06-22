@@ -30,13 +30,13 @@ export default async function QRCodeBatchPage() {
     orgLogo = 'https://picsum.photos/200'
     locations = [
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      { id: 'demo-loc', name: 'Demo Venue', slug: 'demo-venue', theme_color: '#3b82f6' } as any
+      { id: 'demo-loc', name: 'Demo Venue', slug: 'demo-venue', theme_color: '#3b82f6' } as unknown as any
     ]
     qrCodes = [
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      { id: 'qr-1', table_identifier: 'Table 1', location_id: 'demo-loc', organization_id: 'demo-org', is_active: true } as any,
+      { id: 'qr-1', table_identifier: 'Table 1', location_id: 'demo-loc', organization_id: 'demo-org', is_active: true } as unknown as any,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      { id: 'qr-2', table_identifier: 'Bar A', location_id: 'demo-loc', organization_id: 'demo-org', is_active: true } as any
+      { id: 'qr-2', table_identifier: 'Bar A', location_id: 'demo-loc', organization_id: 'demo-org', is_active: true } as unknown as any
     ]
   } else {
     const { data: member } = await supabase
@@ -46,8 +46,8 @@ export default async function QRCodeBatchPage() {
       .single()
 
     if (member && member.organizations) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      org = member.organizations as any as { id: string }
+       
+      org = member.organizations as unknown as { id: string }
       role = member.role
     } else {
       const { data } = await supabase

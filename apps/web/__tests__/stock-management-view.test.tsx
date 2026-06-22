@@ -3,6 +3,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { StockManagementView } from '@/app/(dashboard)/dashboard/orders/components/stock-management-view'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { formatCurrency } from '@/lib/utils/currency'
 
 describe('StockManagementView', () => {

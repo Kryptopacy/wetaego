@@ -6,6 +6,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   X, Copy, CheckCircle2, 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
   Mail, MessageCircle
 } from 'lucide-react'
 

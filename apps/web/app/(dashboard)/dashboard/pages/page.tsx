@@ -45,7 +45,7 @@ export default async function PagesManager() {
       .single()
 
     if (member && member.organizations) {
-      org = member.organizations as any as typeof org
+      org = member.organizations as unknown as typeof org
       role = member.role
     } else {
       const { data } = await supabase

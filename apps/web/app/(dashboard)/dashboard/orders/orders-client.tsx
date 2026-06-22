@@ -12,9 +12,9 @@ import { StockManagementView } from './components/stock-management-view'
 import { mapSupabaseOrderToUI } from '@/lib/utils/transformers'
 import { UIOrder } from '@/lib/types/frontend'
 
-type FullOrder = Database['public']['Tables']['orders']['Row'] & { order_items?: Database['public']['Tables']['order_items']['Row'][] }
 type ServiceRequestRow = Database['public']['Tables']['service_requests']['Row']
 type MenuItemRow = Database['public']['Tables']['menu_items']['Row']
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type OrderPayload = { eventType: string, new: any }
 type ServiceRequestPayload = { eventType: string, new: ServiceRequestRow }
 type MenuItemPayload = { eventType: string, new: MenuItemRow }

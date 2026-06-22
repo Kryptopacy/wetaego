@@ -50,7 +50,7 @@ describe('Paystack B2C Webhook (POST)', () => {
       headers: new Headers({
         'x-paystack-signature': 'invalid_signature_hash'
       })
-    } as any
+    } as unknown as any
 
     const res = await POST(req)
     expect(res.body).toEqual({ error: 'Invalid signature' })
@@ -66,7 +66,7 @@ describe('Paystack B2C Webhook (POST)', () => {
       headers: new Headers({
         'x-paystack-signature': hash
       })
-    } as any
+    } as unknown as any
 
     // Setup Supabase mocks for a successful flow
     // 1. Idempotency Check (returns null)
@@ -108,7 +108,7 @@ describe('Paystack B2C Webhook (POST)', () => {
       headers: new Headers({
         'x-paystack-signature': hash
       })
-    } as any
+    } as unknown as any
 
     // 1. Idempotency Check (returns null)
     mockSingle.mockResolvedValueOnce({ data: null })

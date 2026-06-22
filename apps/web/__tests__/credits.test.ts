@@ -24,13 +24,15 @@ describe('Credit System', () => {
     vi.clearAllMocks()
     
     // Setup Supabase mock
-    ;(createClient as any).mockResolvedValue({
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ;(createClient as unknown as any).mockResolvedValue({
       rpc: mockRpc,
       from: mockFrom,
     })
     
     // Setup plan limits mock
-    ;(getPlanLimits as any).mockResolvedValue({
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ;(getPlanLimits as unknown as any).mockResolvedValue({
       lite: { credits: 0, pages: 1 },
       pro: { credits: 50, pages: 5 },
       enterprise: { credits: 200, pages: 20 },
