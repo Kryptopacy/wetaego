@@ -305,6 +305,8 @@ export type Database = {
           google_maps_url: string | null
           id: string
           instagram_handle: string | null
+          x_handle: string | null
+          tiktok_handle: string | null
           manual_payment_account_name: string | null
           manual_payment_account_number: string | null
           manual_payment_bank_name: string | null
@@ -344,6 +346,8 @@ export type Database = {
           google_maps_url?: string | null
           id?: string
           instagram_handle?: string | null
+          x_handle?: string | null
+          tiktok_handle?: string | null
           manual_payment_account_name?: string | null
           manual_payment_account_number?: string | null
           manual_payment_bank_name?: string | null
@@ -383,6 +387,8 @@ export type Database = {
           google_maps_url?: string | null
           id?: string
           instagram_handle?: string | null
+          x_handle?: string | null
+          tiktok_handle?: string | null
           manual_payment_account_name?: string | null
           manual_payment_account_number?: string | null
           manual_payment_bank_name?: string | null

@@ -145,7 +145,7 @@ export function AIChat({
   useEffect(() => {
     if (error && error.message.includes('429')) {
       setLimitReached(true)
-      toast.error('Dining session AI limit reached (Max 20 messages).')
+      toast.error('AI session limit reached (Max 20 messages).')
     }
   }, [error])
 
@@ -159,9 +159,11 @@ export function AIChat({
       {/* Floating Trigger Button */}
       <motion.button
         onClick={() => setIsOpen(!isOpen)}
-        whileHover={{ scale: 1.05 }}
+        animate={{ scale: [1, 1.05, 1], boxShadow: ["0 8px 30px rgba(0,0,0,0.2)", "0 8px 30px rgba(0,0,0,0.5)", "0 8px 30px rgba(0,0,0,0.2)"] }}
+        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+        whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
-        className="fixed bottom-6 right-6 z-40 h-14 w-14 rounded-full shadow-xl flex items-center justify-center cursor-pointer border border-black/5 dark:border-white/10 transition-transform group"
+        className="fixed bottom-6 right-6 z-40 h-14 w-14 rounded-full shadow-xl flex items-center justify-center cursor-pointer border border-black/5 dark:border-white/10 group"
         style={{
           backgroundColor: themeColor || '#0f7b55',
           boxShadow: `0 8px 30px ${(themeColor || '#0f7b55') + '50'}`,
@@ -185,7 +187,7 @@ export function AIChat({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsOpen(false)}
-              className="absolute inset-0 bg-black/40 backdrop-blur-sm pointer-events-auto"
+              className="absolute inset-0 bg-black/60 backdrop-blur-md pointer-events-auto"
             />
 
             {/* Chat Container */}
@@ -274,7 +276,7 @@ export function AIChat({
               <div className="p-4 border-t border-zinc-850 bg-zinc-950 shrink-0">
                 {limitReached ? (
                   <div className="text-center text-xs text-red-400 bg-red-950/20 border border-red-900/30 p-2.5 rounded-xl font-medium">
-                    AI dining assistant session limit reached.
+                    AI assistant session limit reached.
                   </div>
                 ) : (
                   <form onSubmit={handleSubmit} className="flex gap-2">

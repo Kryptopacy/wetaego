@@ -3,6 +3,7 @@
 
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { ReactNode, useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -102,7 +103,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           .select('role, organizations(id, name)')
           .eq('user_id', userData.user.id)
           .single()
-        if (member && (member.organizations as unknown as Record<string, unknown>)?.name) {
+        if (member && (member.organizations as any)?.name) {
           setOrgName((member.organizations as { name: string }).name)
           setIsOwnerOrManager(['owner', 'manager'].includes(member.role))
         }
@@ -178,7 +179,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         <div className="p-6 pb-2">
           <Link href="/dashboard" className="flex items-center gap-3 group mb-4" onClick={onClose}>
             <div className="w-10 h-10 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
-              <img src="/ourmenu-qr-icon.svg" alt="OurMenu Logo" className="w-8 h-8 object-contain" />
+              <Image src="/ourmenu-qr-icon.svg" alt="OurMenu Logo" width={32} height={32} className="object-contain" />
             </div>
             <div className="flex flex-col">
               <span className="text-white font-bold tracking-tight leading-tight">{orgName}</span>
@@ -267,7 +268,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-[#0a0a0a]/90 backdrop-blur-md border-b border-white/5 z-50 flex items-center justify-between px-4 print:hidden">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 flex items-center justify-center">
-            <img src="/ourmenu-qr-icon.svg" alt="OurMenu Logo" className="w-6 h-6 object-contain" />
+            <Image src="/ourmenu-qr-icon.svg" alt="OurMenu Logo" width={24} height={24} className="object-contain" />
           </div>
           <span className="text-white font-bold tracking-tight">{orgName}</span>
         </div>

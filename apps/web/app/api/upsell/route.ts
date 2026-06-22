@@ -50,7 +50,7 @@ Examples:
     })
 
     // Verify the item exists
-    const itemExists = availableItems.find((i: any) => i.id === object.suggestedItemId)
+    const itemExists = availableItems.find((i: { id: string }) => i.id === object.suggestedItemId)
     if (!itemExists) {
       return new Response('Failed to find a valid upsell item', { status: 400 })
     }

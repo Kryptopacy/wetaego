@@ -40,7 +40,8 @@ export function CartFAB({
 }: CartFABProps) {
   const { items, totalAmountMinor } = useCartStore()
   const clearCart = useCartStore((state) => state.clearCart)
-  const spinnerDiscount = useCartStore((state: any) => state.spinnerDiscount)
+  const updateQuantity = useCartStore((state) => state.updateQuantity)
+  const spinnerDiscount = useCartStore((state) => state.spinnerDiscount)
   const [isCheckingOut, setIsCheckingOut] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
   
@@ -158,6 +159,16 @@ export function CartFAB({
       clearCart()
       localStorage.setItem('activeOrderId', orderId as string)
       
+      try {
+        const previousItemsJson = localStorage.getItem('pastOrderedItemIds')
+        const previousItems: string[] = previousItemsJson ? JSON.parse(previousItemsJson) : []
+        const currentItemIds = items.map(item => item.id)
+        const newPastItems = Array.from(new Set([...previousItems, ...currentItemIds]))
+        localStorage.setItem('pastOrderedItemIds', JSON.stringify(newPastItems))
+      } catch (e) {
+        console.error('Failed to save past orders to local storage', e)
+      }
+      
       if (paymentMethod === 'transfer' && manualPaymentEnabled) {
         const currentSlug = window.location.pathname.split('/')[2]
         window.location.href = `/m/${currentSlug}/order/${orderId}`
@@ -249,18 +260,20 @@ export function CartFAB({
 
               <div className="space-y-6">
                 <div>
-                  <label className="block text-sm font-medium text-zinc-400 mb-2">Location / Table</label>
-                  {tableIdentifier ? (
+                  <label className="block text-sm font-medium text-zinc-400 mb-2">
+                    {templateType === 'catalog' ? 'Shipping Address' : 'Location / Table'}
+                  </label>
+                  {tableIdentifier && templateType !== 'catalog' ? (
                     <div className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white font-bold opacity-75">
                       {tableIdentifier}
                     </div>
                   ) : (
-                    <input 
-                      type="text" 
+                    <textarea 
                       value={tableNumber}
                       onChange={(e) => setTableNumber(e.target.value)}
-                      placeholder="e.g. Table 12 or 'Takeaway'"
-                      className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white outline-none focus:border-blue-500"
+                      placeholder={templateType === 'catalog' ? "Full delivery address..." : "e.g. Table 12 or 'Takeaway'"}
+                      className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white outline-none focus:border-blue-500 resize-none min-h-[48px]"
+                      rows={templateType === 'catalog' ? 2 : 1}
                     />
                   )}
                 </div>
@@ -313,9 +326,38 @@ export function CartFAB({
                   )}
                 </AnimatePresence>
 
-                <div className="bg-zinc-800/50 rounded-xl p-4 space-y-4">
+                <div className="bg-zinc-800/50 rounded-xl p-4 space-y-4 max-h-[40vh] overflow-y-auto">
+                  {/* Cart Items List */}
+                  <div className="space-y-3 mb-2">
+                    {items.map(item => (
+                      <div key={item.id} className="flex justify-between items-center bg-zinc-900/80 border border-zinc-700/50 rounded-lg p-3">
+                        <div className="flex-1 min-w-0 pr-4">
+                          <h4 className="text-sm font-bold text-white truncate">{item.name}</h4>
+                          <span className="text-xs text-zinc-400">₦{(item.price_minor / 100).toLocaleString()}</span>
+                        </div>
+                        <div className="flex items-center gap-3 bg-zinc-800 rounded-lg p-1 shrink-0">
+                          <button 
+                            type="button"
+                            onClick={() => updateQuantity(item.id, -1)}
+                            className="w-7 h-7 flex items-center justify-center bg-zinc-700 rounded text-white hover:bg-zinc-600 transition-colors"
+                          >-</button>
+                          <span className="text-white font-bold text-sm w-4 text-center">{item.quantity}</span>
+                          <button 
+                            type="button"
+                            onClick={() => updateQuantity(item.id, 1)}
+                            className="w-7 h-7 flex items-center justify-center bg-zinc-700 rounded text-white hover:bg-zinc-600 transition-colors"
+                          >+</button>
+                        </div>
+                      </div>
+                    ))}
+                    {items.length === 0 && (
+                      <div className="text-center py-4 text-zinc-500 text-sm">Cart is empty</div>
+                    )}
+                  </div>
+                  
+                  <div className="border-t border-zinc-700/50 mt-4 mb-2"></div>
                   {discountAmountMinor > 0 && (
-                    <div className="flex justify-between items-center text-zinc-400 text-sm mt-2">
+                    <div className="flex justify-between items-center text-zinc-400 text-sm">
                       <span>Subtotal</span>
                       <span className="line-through">₦{(subtotalMinor / 100).toLocaleString()}</span>
                     </div>

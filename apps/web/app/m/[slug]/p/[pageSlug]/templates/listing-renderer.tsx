@@ -1,5 +1,9 @@
+'use client'
+
+import { useState, useMemo, useTransition } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { motion, AnimatePresence } from 'framer-motion'
 
 interface PageItem {
   id: string
@@ -35,8 +39,78 @@ interface ListingRendererProps {
 
 export function ListingRenderer({ location, page, items, locationSlug }: ListingRendererProps) {
   const themeColor = location.theme_color || '#7c3aed'
-  const available = items.filter(i => i.availability_status === 'available')
-  const unavailable = items.filter(i => i.availability_status !== 'available')
+
+  // Dynamic Filters
+  const filterOptions = useMemo(() => {
+    const options: Record<string, Set<string>> = {}
+    items.forEach(item => {
+      if (item.item_data) {
+        Object.entries(item.item_data).forEach(([key, value]) => {
+          if (!options[key]) options[key] = new Set()
+          options[key].add(value)
+        })
+      }
+    })
+    return Object.fromEntries(
+      Object.entries(options).map(([k, v]) => [k, Array.from(v).sort()])
+    )
+  }, [items])
+
+  const [activeFilters, setActiveFilters] = useState<Record<string, string>>({})
+
+  const filteredItems = useMemo(() => {
+    return items.filter(item => {
+      return Object.entries(activeFilters).every(([key, value]) => {
+        if (!value) return true // no filter selected for this key
+        return item.item_data?.[key] === value
+      })
+    })
+  }, [items, activeFilters])
+
+  const available = filteredItems.filter(i => i.availability_status === 'available')
+  const unavailable = filteredItems.filter(i => i.availability_status !== 'available')
+
+  // Lead Capture Modal State
+  const [showLeadForm, setShowLeadForm] = useState(false)
+  const [selectedItem, setSelectedItem] = useState<PageItem | null>(null)
+  const [isPending, startTransition] = useTransition()
+  const [form, setForm] = useState({
+    customer_name: '',
+    customer_phone: '',
+    customer_email: '',
+  })
+
+  function handleEnquire(item: PageItem) {
+    setSelectedItem(item)
+    setShowLeadForm(true)
+  }
+
+  function submitLead(e: React.FormEvent) {
+    e.preventDefault()
+    if (!selectedItem || !form.customer_name || !form.customer_phone) return
+
+    startTransition(async () => {
+      const res = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          page_id: page.id,
+          item_id: selectedItem.id,
+          customer_name: form.customer_name,
+          customer_phone: form.customer_phone,
+          customer_email: form.customer_email,
+        }),
+      })
+
+      if (res.ok) {
+        setShowLeadForm(false)
+        const waLink = `https://wa.me/${(location.whatsapp_number || '').replace(/[^0-9]/g, '')}?text=Hi, I'm ${form.customer_name}. I'm interested in: ${selectedItem.title}`
+        window.open(waLink, '_blank')
+      } else {
+        alert('Something went wrong. Please try again.')
+      }
+    })
+  }
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white font-sans">
@@ -69,18 +143,115 @@ export function ListingRenderer({ location, page, items, locationSlug }: Listing
 
         {/* Stats bar */}
         <div className="flex gap-4 mb-6 text-xs text-zinc-500 font-medium">
-          <span>{items.length} properties</span>
+          <span>{filteredItems.length} properties</span>
           <span>·</span>
           <span className="text-emerald-400">{available.length} available</span>
           {unavailable.length > 0 && <><span>·</span><span>{unavailable.length} unavailable</span></>}
         </div>
 
+        {/* Dynamic Filters */}
+        {Object.keys(filterOptions).length > 0 && (
+          <div className="flex flex-wrap gap-3 mb-8 p-4 rounded-xl border border-zinc-800 bg-zinc-900/30">
+            {Object.entries(filterOptions).map(([filterKey, options]) => (
+              <div key={filterKey} className="flex flex-col gap-1.5">
+                <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider pl-1">{filterKey.replace('_', ' ')}</label>
+                <select
+                  className="bg-zinc-800 border border-zinc-700 text-white text-sm rounded-lg px-3 py-2 outline-none focus:border-violet-500 min-w-[120px]"
+                  value={activeFilters[filterKey] || ''}
+                  onChange={e => setActiveFilters(prev => ({ ...prev, [filterKey]: e.target.value }))}
+                >
+                  <option value="">Any {filterKey.replace('_', ' ')}</option>
+                  {options.map(opt => (
+                    <option key={opt} value={opt}>{opt}</option>
+                  ))}
+                </select>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Lead Capture Modal */}
+        <AnimatePresence>
+        {showLeadForm && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/80 backdrop-blur-sm" 
+              onClick={() => setShowLeadForm(false)} 
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="relative w-full max-w-sm bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-2xl"
+            >
+              <button onClick={() => setShowLeadForm(false)} className="absolute top-4 right-4 text-zinc-500 hover:text-white transition-colors">✕</button>
+              <h2 className="text-xl font-bold text-white mb-1">Enquire about</h2>
+              <p className="text-sm text-zinc-400 mb-6">{selectedItem?.title}</p>
+              
+              <form onSubmit={submitLead} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">Your Name *</label>
+                  <input
+                    value={form.customer_name}
+                    onChange={e => setForm(f => ({ ...f, customer_name: e.target.value }))}
+                    required
+                    placeholder="Full name"
+                    className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-violet-500 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">Phone Number *</label>
+                  <input
+                    value={form.customer_phone}
+                    onChange={e => setForm(f => ({ ...f, customer_phone: e.target.value }))}
+                    required
+                    type="tel"
+                    placeholder="Phone number"
+                    className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-violet-500 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">Email (Optional)</label>
+                  <input
+                    value={form.customer_email}
+                    onChange={e => setForm(f => ({ ...f, customer_email: e.target.value }))}
+                    type="email"
+                    placeholder="Email address"
+                    className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-violet-500 focus:outline-none"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={isPending || !form.customer_name || !form.customer_phone}
+                  className="w-full mt-6 py-3.5 rounded-xl font-bold text-white text-sm disabled:opacity-50 transition-all flex justify-center items-center gap-2"
+                  style={{ background: `linear-gradient(135deg, ${themeColor}, ${themeColor}cc)` }}
+                >
+                  {isPending ? 'Sending...' : 'Continue to WhatsApp'}
+                  {!isPending && <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M11.97 0C5.36 0 0 5.361 0 11.971c0 2.639.851 5.08 2.308 7.09L.432 24l5.068-1.834A11.933 11.933 0 0011.97 23.94c6.61 0 11.971-5.36 11.971-11.97C23.94 5.36 18.58 0 11.97 0z"/></svg>}
+                </button>
+              </form>
+            </motion.div>
+          </div>
+        )}
+        </AnimatePresence>
+
         {/* Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {items.map(item => {
+        <motion.div 
+          initial="hidden" animate="show"
+          variants={{ hidden: {}, show: { transition: { staggerChildren: 0.1 } } }}
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+        >
+          {filteredItems.map(item => {
             const isAvail = item.availability_status === 'available'
             return (
-              <div key={item.id} className={`rounded-2xl border overflow-hidden transition-all ${isAvail ? 'border-zinc-800 bg-zinc-900/50 hover:border-zinc-700' : 'border-zinc-800/40 bg-zinc-900/20 opacity-60'}`}>
+              <motion.div 
+                variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}
+                whileHover={isAvail ? { y: -4, boxShadow: "0 10px 30px -10px rgba(0,0,0,0.5)" } : {}}
+                key={item.id} 
+                className={`rounded-2xl border overflow-hidden transition-all ${isAvail ? 'border-zinc-800 bg-zinc-900/50 hover:border-zinc-700' : 'border-zinc-800/40 bg-zinc-900/20 opacity-60'}`}
+              >
                 <Link href={`/m/${locationSlug}/p/${page.slug || page.id}/${item.id}`} className="block">
                   {/* Image placeholder */}
                   <div className="h-44 relative overflow-hidden" style={{ background: `linear-gradient(135deg, ${themeColor}20, #0a0a0f)` }}>
@@ -130,24 +301,22 @@ export function ListingRenderer({ location, page, items, locationSlug }: Listing
                   )}
 
                   {isAvail && (
-                    <a
-                      href={`https://wa.me/${(location.whatsapp_number || '').replace(/[^0-9]/g, '')}?text=Hi, I'm interested in: ${item.title}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <button
+                      onClick={() => handleEnquire(item)}
                       className="mt-4 flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-bold text-white transition-all"
                       style={{ background: `linear-gradient(135deg, ${themeColor}cc, ${themeColor}88)` }}
                     >
                       Enquire →
-                    </a>
+                    </button>
                   )}
                 </div>
-              </div>
+              </motion.div>
             )
           })}
-        </div>
+        </motion.div>
 
-        {items.length === 0 && (
-          <div className="text-center py-16 text-zinc-600 text-sm">No listings yet.</div>
+        {filteredItems.length === 0 && (
+          <div className="text-center py-16 text-zinc-600 text-sm">No listings found matching your criteria.</div>
         )}
 
         <div className="mt-12 text-center">

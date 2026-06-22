@@ -25,7 +25,7 @@ export function SpinnerModal({ locationId, config }: SpinnerModalProps) {
   const [isSpinning, setIsSpinning] = useState(false)
   const [rotation, setRotation] = useState(0)
   const [result, setResult] = useState<SpinnerSegment | null>(null)
-  const setSpinnerDiscount = useCartStore((state: any) => state.setSpinnerDiscount)
+  const setSpinnerDiscount = useCartStore((state) => state.setSpinnerDiscount)
   
   useEffect(() => {
     // Check if user has already spun for this location today
@@ -96,12 +96,14 @@ export function SpinnerModal({ locationId, config }: SpinnerModalProps) {
 
   return (
     <>
-      <button 
+      <motion.button 
+        initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', damping: 15 }}
+        whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
         onClick={() => setIsOpen(true)}
         className="fixed bottom-28 right-6 z-40 w-14 h-14 bg-gradient-to-tr from-yellow-400 to-orange-500 rounded-full shadow-2xl flex items-center justify-center animate-bounce border-2 border-white/20 text-2xl"
       >
         🎁
-      </button>
+      </motion.button>
 
       <AnimatePresence>
         {isOpen && (
@@ -163,11 +165,14 @@ export function SpinnerModal({ locationId, config }: SpinnerModalProps) {
               </div>
 
               {result ? (
-                <div className="text-center h-14">
+                <motion.div 
+                  initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', bounce: 0.6 }}
+                  className="text-center h-14"
+                >
                   <h3 className={`text-2xl font-bold ${result.type === 'win' ? 'text-green-400' : 'text-zinc-400'}`}>
                     {result.type === 'win' ? `🎉 ${result.label}!` : `😢 ${result.label}`}
                   </h3>
-                </div>
+                </motion.div>
               ) : (
                 <button
                   onClick={spinWheel}

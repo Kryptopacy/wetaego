@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { Tier } from '@/lib/utils/billing'
 import { togglePageStatus, deletePage } from './actions'
 import Link from 'next/link'
+import Image from 'next/image'
 import { cookies } from 'next/headers'
 import { BUSINESS_TYPE_PRESETS } from '@/lib/templates/presets'
 
@@ -143,7 +144,7 @@ export default async function PagesManager() {
                 {/* QR */}
                 <div className="bg-zinc-950 p-1.5 rounded-lg border border-zinc-800 shrink-0">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={qrImageUrl} alt="QR Code" className="w-14 h-14 rounded-md" crossOrigin="anonymous" />
+                  <Image src={qrImageUrl} alt="QR Code" width={56} height={56} className="w-14 h-14 rounded-md" crossOrigin="anonymous" />
                 </div>
 
                 <div>

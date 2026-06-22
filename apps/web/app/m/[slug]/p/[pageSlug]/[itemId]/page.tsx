@@ -3,7 +3,9 @@ import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 import Link from 'next/link'
+import Image from 'next/image'
 import { ShareButton } from '@/app/components/share-button'
+import { ClientCTA } from './client-cta'
 
 export async function generateMetadata({
   params,
@@ -90,7 +92,7 @@ export default async function ItemDetailsPage({
           <div className="space-y-4">
             <div className="aspect-[4/3] md:aspect-square rounded-2xl overflow-hidden bg-zinc-900 border border-zinc-800 relative">
               {item.images?.[0] ? (
-                <img src={item.images[0]} alt={item.title} className="w-full h-full object-cover" />
+                <Image src={item.images[0]} alt={item.title} width={600} height={600} className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full flex flex-col items-center justify-center text-zinc-700">
                   <svg className="w-16 h-16 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -112,7 +114,7 @@ export default async function ItemDetailsPage({
               <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
                 {item.images.map((img: string, i: number) => (
                   <div key={i} className="w-20 h-20 shrink-0 rounded-xl overflow-hidden border border-zinc-800 bg-zinc-900">
-                    <img src={img} alt="" className="w-full h-full object-cover" />
+                    <Image src={img} alt="" width={80} height={80} className="w-full h-full object-cover" />
                   </div>
                 ))}
               </div>
@@ -161,26 +163,14 @@ export default async function ItemDetailsPage({
 
             {/* CTA section */}
             <div className="mt-8">
-              {pageInfo.template_type === 'listing' ? (
-                <a
-                  href={`https://wa.me/${(loc.whatsapp_number || '').replace(/[^0-9]/g, '')}?text=Hi, I'm interested in: ${item.title}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 w-full py-4 rounded-xl text-base font-bold text-white transition-all shadow-lg"
-                  style={{ background: isAvailable ? `linear-gradient(135deg, ${themeColor}, ${themeColor}cc)` : '#27272a', pointerEvents: isAvailable ? 'auto' : 'none', opacity: isAvailable ? 1 : 0.5 }}
-                >
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M11.97 0C5.36 0 0 5.361 0 11.971c0 2.639.851 5.08 2.308 7.09L.432 24l5.068-1.834A11.933 11.933 0 0011.97 23.94c6.61 0 11.971-5.36 11.971-11.97C23.94 5.36 18.58 0 11.97 0z"/></svg>
-                  {isAvailable ? 'Enquire via WhatsApp' : 'Currently Unavailable'}
-                </a>
-              ) : (
-                <Link
-                  href={`/m/${slug}/p/${pageSlug}`}
-                  className="flex items-center justify-center w-full py-4 rounded-xl text-base font-bold text-white transition-all shadow-lg"
-                  style={{ background: isAvailable ? `linear-gradient(135deg, ${themeColor}, ${themeColor}cc)` : '#27272a' }}
-                >
-                  {isAvailable ? 'Return to Booking Form' : 'Back to Services'}
-                </Link>
-              )}
+              <ClientCTA 
+                item={item}
+                pageInfo={pageInfo as { template_type: string, billing_enabled: boolean, slug: string }}
+                location={loc}
+                isAvailable={isAvailable}
+                themeColor={themeColor}
+                slug={slug}
+              />
             </div>
           </div>
         </div>

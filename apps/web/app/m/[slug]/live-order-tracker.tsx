@@ -77,9 +77,11 @@ export function LiveOrderTracker({ organizationId, locationId }: LiveOrderTracke
       <AnimatePresence>
         {order.status === 'preparing' && (
           <motion.div
+            layout
             initial={{ opacity: 0, y: -50, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -50, scale: 0.95 }}
+            transition={{ type: 'spring', damping: 25 }}
             className="sticky top-4 z-40 w-full bg-zinc-900/90 backdrop-blur-xl border border-blue-500/30 rounded-2xl py-3 px-5 shadow-[0_10px_40px_rgba(0,0,0,0.5)] overflow-hidden flex items-center justify-between mb-6"
           >
             {/* Progress Bar Background */}

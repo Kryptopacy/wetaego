@@ -58,13 +58,13 @@ export async function submitFeedbackAndTip(
     const { error: reviewError } = await supabase.from('order_reviews').insert({
       organization_id: organizationId,
       location_id: locationId,
-      order_id: orderId, // could be null
-      staff_id: assignedStaffId, // could be null
-      staff_rating: staffRating || null,
+      order_id: orderId as string,
+      staff_id: assignedStaffId || undefined,
+      staff_rating: staffRating || 0,
       staff_feedback: staffFeedback || null,
       business_rating: businessRating || null,
       business_feedback: businessFeedback || null,
-    } as any)
+    })
 
     if (reviewError) {
       console.error('Failed to submit review:', reviewError)
@@ -93,7 +93,7 @@ export async function submitFeedbackAndTip(
         )
         
         return { checkoutUrl }
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Failed to initialize tip payment:', err)
         return { error: 'Failed to initialize tip checkout.' }
       }

@@ -4,7 +4,8 @@
 
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
-
+import Image from 'next/image'
+import { motion, AnimatePresence } from 'framer-motion'
 interface PageItem {
   id: string
   title: string
@@ -35,6 +36,9 @@ interface BookingRendererProps {
     manual_payment_account_number?: string
     manual_payment_instructions?: string
     organizations?: { logo_url?: string }
+    instagram_handle?: string
+    x_handle?: string
+    tiktok_handle?: string
   }
   page: {
     id: string
@@ -63,7 +67,7 @@ const AVAILABILITY_LABELS: Record<string, { label: string; color: string }> = {
 export function BookingRenderer({ location, page, items, locationSlug, paymentIsLive }: BookingRendererProps) {
   const themeColor = location.theme_color || '#7c3aed'
   const availableItems = items.filter(i => i.availability_status === 'available')
-  const [selectedItem, setSelectedItem] = useState<PageItem | null>(null)
+  const [selectedItems, setSelectedItems] = useState<PageItem[]>([])
   const [showBookingForm, setShowBookingForm] = useState(false)
   const [formSuccess, setFormSuccess] = useState(false)
   const [isPending, startTransition] = useTransition()
@@ -80,15 +84,24 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
     booking_notes: '',
   })
 
-  function handleSelectItem(item: PageItem) {
-    setSelectedItem(item)
+  function handleToggleItem(item: PageItem) {
+    setSelectedItems(prev => {
+      if (prev.find(i => i.id === item.id)) {
+        return prev.filter(i => i.id !== item.id)
+      }
+      return [...prev, item]
+    })
+  }
+
+  function handleProceed() {
+    if (selectedItems.length === 0) return
     setShowBookingForm(true)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!selectedItem || !form.customer_name || !form.customer_phone) return
+    if (selectedItems.length === 0 || !form.customer_name || !form.customer_phone) return
 
     startTransition(async () => {
       const res = await fetch('/api/bookings', {
@@ -96,7 +109,7 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           page_id: page.id,
-          item_id: selectedItem.id,
+          item_ids: selectedItems.map(i => i.id),
           ...form,
           number_of_guests: parseInt(form.number_of_guests),
         }),
@@ -125,7 +138,7 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
         <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-black/40 to-transparent" />
         <div className="absolute bottom-0 left-0 right-0 p-6 max-w-2xl mx-auto">
           {location.organizations?.logo_url && (
-            <img src={location.organizations.logo_url} alt="Logo" className="h-12 w-auto object-contain mb-3 drop-shadow-lg" />
+            <Image src={location.organizations.logo_url} alt="Logo" width={100} height={48} className="h-12 w-auto object-contain mb-3 drop-shadow-lg" />
           )}
           <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight drop-shadow-lg">{page.title}</h1>
           {page.content && (
@@ -144,14 +157,25 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
         </Link>
 
         {/* Booking form overlay */}
-        {showBookingForm && !formSuccess && (
-          <div className="mb-8 rounded-2xl border border-zinc-800 bg-zinc-900/60 backdrop-blur-sm p-6">
-            <div className="flex items-center justify-between mb-5">
-              <div>
-                <h2 className="text-lg font-bold text-white">Book: {selectedItem?.title}</h2>
-                {selectedItem?.subtitle && <p className="text-xs text-zinc-500 mt-0.5">{selectedItem.subtitle}</p>}
+        <AnimatePresence>
+          {showBookingForm && !formSuccess && (
+            <motion.div 
+              initial={{ opacity: 0, y: 20, height: 0 }} 
+              animate={{ opacity: 1, y: 0, height: 'auto' }} 
+              exit={{ opacity: 0, y: -20, height: 0 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="mb-8 rounded-2xl border border-zinc-800 bg-zinc-900/60 backdrop-blur-xl p-6 shadow-2xl overflow-hidden"
+            >
+              <div className="flex items-center justify-between mb-5">
+                <div>
+                  <h2 className="text-lg font-bold text-white">
+                    {selectedItems.length > 1 ? `Booking ${selectedItems.length} Services` : `Book: ${selectedItems[0]?.title}`}
+                </h2>
+                {selectedItems.length === 1 && selectedItems[0]?.subtitle && (
+                  <p className="text-xs text-zinc-500 mt-0.5">{selectedItems[0].subtitle}</p>
+                )}
               </div>
-              <button onClick={() => { setShowBookingForm(false); setSelectedItem(null) }} className="text-zinc-500 hover:text-white p-1">✕</button>
+              <button onClick={() => setShowBookingForm(false)} className="text-zinc-500 hover:text-white p-1">✕</button>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -190,60 +214,121 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">Start Date</label>
-                  <input
-                    value={form.booking_date}
-                    onChange={e => setForm(f => ({ ...f, booking_date: e.target.value }))}
-                    type="date"
-                    min={new Date().toISOString().split('T')[0]}
-                    className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-violet-500 focus:outline-none"
-                  />
+              {/* Date & Time Section */}
+              {page.business_type_preset === 'accommodation' && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">Check-in Date *</label>
+                    <input
+                      value={form.booking_date}
+                      onChange={e => setForm(f => ({ ...f, booking_date: e.target.value }))}
+                      required
+                      type="date"
+                      min={new Date().toISOString().split('T')[0]}
+                      className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-violet-500 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">Check-out Date *</label>
+                    <input
+                      value={form.booking_end_date}
+                      onChange={e => setForm(f => ({ ...f, booking_end_date: e.target.value }))}
+                      required
+                      type="date"
+                      min={form.booking_date || new Date().toISOString().split('T')[0]}
+                      className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-violet-500 focus:outline-none"
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">End Date (Optional)</label>
-                  <input
-                    value={form.booking_end_date}
-                    onChange={e => setForm(f => ({ ...f, booking_end_date: e.target.value }))}
-                    type="date"
-                    min={form.booking_date || new Date().toISOString().split('T')[0]}
-                    className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-violet-500 focus:outline-none"
-                  />
-                </div>
-              </div>
+              )}
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">Start Time</label>
-                  <input
-                    value={form.booking_time}
-                    onChange={e => setForm(f => ({ ...f, booking_time: e.target.value }))}
-                    type="time"
-                    className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-violet-500 focus:outline-none"
-                  />
+              {page.business_type_preset === 'salon' && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">Date *</label>
+                    <input
+                      value={form.booking_date}
+                      onChange={e => setForm(f => ({ ...f, booking_date: e.target.value }))}
+                      required
+                      type="date"
+                      min={new Date().toISOString().split('T')[0]}
+                      className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-violet-500 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">Time *</label>
+                    <input
+                      value={form.booking_time}
+                      onChange={e => setForm(f => ({ ...f, booking_time: e.target.value }))}
+                      required
+                      type="time"
+                      className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-violet-500 focus:outline-none"
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">End Time (Optional)</label>
-                  <input
-                    value={form.booking_end_time}
-                    onChange={e => setForm(f => ({ ...f, booking_end_time: e.target.value }))}
-                    type="time"
-                    className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-violet-500 focus:outline-none"
-                  />
-                </div>
-              </div>
+              )}
 
-              <div>
-                <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">Guests</label>
-                <select
-                  value={form.number_of_guests}
-                  onChange={e => setForm(f => ({ ...f, number_of_guests: e.target.value }))}
-                  className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-violet-500 focus:outline-none appearance-none"
-                >
-                  {[1,2,3,4,5,6,7,8,9,10].map(n => <option key={n} value={n}>{n} {n === 1 ? 'guest' : 'guests'}</option>)}
-                </select>
-              </div>
+              {(!page.business_type_preset || !['accommodation', 'salon', 'event'].includes(page.business_type_preset)) && (
+                <>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">Start Date</label>
+                      <input
+                        value={form.booking_date}
+                        onChange={e => setForm(f => ({ ...f, booking_date: e.target.value }))}
+                        type="date"
+                        min={new Date().toISOString().split('T')[0]}
+                        className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-violet-500 focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">End Date (Optional)</label>
+                      <input
+                        value={form.booking_end_date}
+                        onChange={e => setForm(f => ({ ...f, booking_end_date: e.target.value }))}
+                        type="date"
+                        min={form.booking_date || new Date().toISOString().split('T')[0]}
+                        className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-violet-500 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">Start Time</label>
+                      <input
+                        value={form.booking_time}
+                        onChange={e => setForm(f => ({ ...f, booking_time: e.target.value }))}
+                        type="time"
+                        className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-violet-500 focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">End Time (Optional)</label>
+                      <input
+                        value={form.booking_end_time}
+                        onChange={e => setForm(f => ({ ...f, booking_end_time: e.target.value }))}
+                        type="time"
+                        className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-violet-500 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {page.business_type_preset !== 'salon' && (
+                <div>
+                  <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">
+                    {page.business_type_preset === 'event' ? 'Quantity' : 'Guests'}
+                  </label>
+                  <select
+                    value={form.number_of_guests}
+                    onChange={e => setForm(f => ({ ...f, number_of_guests: e.target.value }))}
+                    className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-violet-500 focus:outline-none appearance-none"
+                  >
+                    {[1,2,3,4,5,6,7,8,9,10].map(n => <option key={n} value={n}>{n}</option>)}
+                  </select>
+                </div>
+              )}
 
               <div>
                 <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">Special Requests (optional)</label>
@@ -257,19 +342,27 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
               </div>
 
               {/* Price summary */}
-              {selectedItem?.price_minor && (
+              {selectedItems.some(i => i.price_minor) && (
                 <div className="rounded-xl bg-zinc-800/50 border border-zinc-700 p-4 space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-zinc-400">{selectedItem.title}</span>
-                    <span className="text-white font-semibold">₦{(selectedItem.price_minor / 100).toLocaleString()}</span>
+                  {selectedItems.map((i, idx) => (
+                    <div key={idx} className="flex justify-between text-sm">
+                      <span className="text-zinc-400">{i.title}</span>
+                      <span className="text-white font-semibold">₦{((i.price_minor || 0) / 100).toLocaleString()}</span>
+                    </div>
+                  ))}
+                  
+                  <div className="flex justify-between text-sm border-t border-zinc-700 pt-2 font-bold">
+                    <span className="text-zinc-300">Total</span>
+                    <span className="text-white">₦{(selectedItems.reduce((sum, i) => sum + (i.price_minor || 0), 0) / 100).toLocaleString()}</span>
                   </div>
-                  {(selectedItem.payment_mode === 'deposit' || page.payment_mode === 'deposit') && (
+
+                  {(selectedItems.some(i => i.payment_mode === 'deposit') || page.payment_mode === 'deposit') && (
                     <div className="flex justify-between text-sm border-t border-zinc-700 pt-2">
                       <span className="text-amber-400 font-medium">
-                        Due now ({selectedItem.deposit_percentage || page.deposit_percentage || 30}% deposit)
+                        Due now ({Math.max(...selectedItems.map(i => i.deposit_percentage || 0), page.deposit_percentage || 30)}% deposit)
                       </span>
                       <span className="text-amber-400 font-bold">
-                        ₦{Math.round(selectedItem.price_minor * ((selectedItem.deposit_percentage || page.deposit_percentage || 30) / 100) / 100).toLocaleString()}
+                        ₦{Math.round(selectedItems.reduce((sum, i) => sum + (i.price_minor || 0), 0) * (Math.max(...selectedItems.map(i => i.deposit_percentage || 0), page.deposit_percentage || 30) / 100) / 100).toLocaleString()}
                       </span>
                     </div>
                   )}
@@ -283,7 +376,7 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
                 style={{ background: `linear-gradient(135deg, ${themeColor}, ${themeColor}cc)` }}
               >
                 {isPending ? 'Processing…' : (page.billing_enabled && paymentIsLive) ? (
-                  (selectedItem?.payment_mode === 'deposit' || page.payment_mode === 'deposit')
+                  (selectedItems.some(i => i.payment_mode === 'deposit') || page.payment_mode === 'deposit')
                     ? `Pay Deposit & Confirm Booking`
                     : `Pay & Confirm Booking`
                 ) : 'Confirm Booking'}
@@ -303,22 +396,35 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
                 </div>
               )}
             </form>
-          </div>
+          </motion.div>
         )}
+        </AnimatePresence>
 
         {/* Success state */}
-        {formSuccess && (
-          <div className="mb-8 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-8 text-center">
-            <div className="text-4xl mb-4">✅</div>
-            <h2 className="text-xl font-bold text-white mb-2">Booking Requested!</h2>
-            <p className="text-zinc-400 text-sm mb-4">
+        <AnimatePresence>
+          {formSuccess && (
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }} 
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ type: 'spring', damping: 20 }}
+              className="mb-8 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-8 text-center backdrop-blur-md"
+            >
+              <motion.div 
+                initial={{ scale: 0 }} 
+                animate={{ scale: 1 }} 
+                transition={{ type: 'spring', delay: 0.1 }}
+                className="text-4xl mb-4"
+              >✅</motion.div>
+              <h2 className="text-xl font-bold text-white mb-2">Booking Requested!</h2>
+              <p className="text-zinc-400 text-sm mb-4">
               We'll confirm your booking shortly. Check your phone for updates from {location.name}.
             </p>
-            <button onClick={() => { setFormSuccess(false); setShowBookingForm(false); setSelectedItem(null) }} className="text-zinc-400 text-sm hover:text-white">
+            <button onClick={() => { setFormSuccess(false); setShowBookingForm(false); setSelectedItems([]) }} className="text-zinc-400 text-sm hover:text-white transition-colors">
               ← View other services
             </button>
-          </div>
+          </motion.div>
         )}
+        </AnimatePresence>
 
         {/* Services grid */}
         {!showBookingForm && (
@@ -327,12 +433,23 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
               {availableItems.length > 0 ? 'Our Services' : 'Services'}
             </h2>
 
+            <motion.div 
+              initial="hidden" animate="show" 
+              variants={{ hidden: {}, show: { transition: { staggerChildren: 0.1 } } }}
+              className="space-y-4"
+            >
+
             {items.map(item => {
               const avail = AVAILABILITY_LABELS[item.availability_status] || AVAILABILITY_LABELS.available
               const isAvailable = item.availability_status === 'available'
 
               return (
-                <div key={item.id} className={`rounded-2xl border transition-all ${isAvailable ? 'border-zinc-800 bg-zinc-900/50 hover:border-zinc-700' : 'border-zinc-800/50 bg-zinc-900/20 opacity-60'}`}>
+                <motion.div 
+                  variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}
+                  whileHover={isAvailable ? { y: -4, boxShadow: "0 10px 30px -10px rgba(0,0,0,0.5)", scale: 1.01 } : {}}
+                  key={item.id} 
+                  className={`rounded-2xl border transition-all ${isAvailable ? 'border-zinc-800 bg-zinc-900/50 hover:border-zinc-700 backdrop-blur-sm' : 'border-zinc-800/50 bg-zinc-900/20 opacity-60'}`}
+                >
                   <div className="p-5">
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1 min-w-0">
@@ -358,24 +475,24 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
                     {isAvailable && (
                       <div className="mt-4 flex items-center gap-3">
                         <button
-                          onClick={() => handleSelectItem(item)}
-                          className="flex-1 py-2.5 rounded-xl text-sm font-bold transition-all text-white"
-                          style={{ background: `linear-gradient(135deg, ${themeColor}cc, ${themeColor}88)` }}
+                          onClick={() => handleToggleItem(item)}
+                          className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition-all border ${selectedItems.some(i => i.id === item.id) ? 'bg-white text-black border-white' : 'border-zinc-700 bg-zinc-800 text-white hover:bg-zinc-700'}`}
                         >
-                          Book Now
+                          {selectedItems.some(i => i.id === item.id) ? 'Selected ✓' : 'Select Service'}
                         </button>
                         <Link
                           href={`/m/${locationSlug}/p/${page.slug || page.id}/${item.id}`}
-                          className="px-4 py-2.5 rounded-xl text-sm font-bold transition-all text-zinc-300 bg-zinc-800 hover:bg-zinc-700 whitespace-nowrap"
+                          className="px-4 py-2.5 rounded-xl text-sm font-bold transition-all text-zinc-300 bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 whitespace-nowrap"
                         >
                           Details
                         </Link>
                       </div>
                     )}
                   </div>
-                </div>
+                </motion.div>
               )
             })}
+            </motion.div>
 
             {items.length === 0 && (
               <div className="text-center py-12 text-zinc-600">
@@ -385,8 +502,27 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
           </div>
         )}
 
+        {/* Floating Proceed Bar */}
+        {!showBookingForm && selectedItems.length > 0 && (
+          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-full max-w-[calc(100%-3rem)] sm:max-w-md">
+            <button
+              onClick={handleProceed}
+              className="w-full shadow-2xl flex items-center justify-between px-6 py-4 rounded-2xl font-bold text-white transition-all hover:scale-[1.02] active:scale-[0.98]"
+              style={{ background: `linear-gradient(135deg, ${themeColor}, ${themeColor}cc)` }}
+            >
+              <div className="flex items-center gap-3">
+                <div className="bg-white/20 px-3 py-1 rounded-lg text-sm">{selectedItems.length}</div>
+                <span>Proceed to Book</span>
+              </div>
+              <span className="opacity-90">
+                ₦{(selectedItems.reduce((sum, i) => sum + (i.price_minor || 0), 0) / 100).toLocaleString()} →
+              </span>
+            </button>
+          </div>
+        )}
+
         {/* Contact strip */}
-        {(location.whatsapp_number || location.phone_number) && (
+        {(location.whatsapp_number || location.phone_number || location.instagram_handle || location.x_handle || location.tiktok_handle) && (
           <div className="mt-10 pt-6 border-t border-zinc-800 flex flex-wrap gap-3 justify-center">
             {location.whatsapp_number && (
               <a
@@ -402,6 +538,21 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
             {location.phone_number && (
               <a href={`tel:${location.phone_number}`} className="flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-300 text-sm font-medium hover:bg-zinc-700 transition-colors">
                 📞 Call to book
+              </a>
+            )}
+            {location.instagram_handle && (
+              <a href={`https://instagram.com/${location.instagram_handle.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 rounded-full bg-pink-500/10 border border-pink-500/20 text-pink-400 text-sm font-medium hover:bg-pink-500/20 transition-colors">
+                Instagram
+              </a>
+            )}
+            {location.x_handle && (
+              <a href={`https://x.com/${location.x_handle.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-300 text-sm font-medium hover:bg-zinc-700 transition-colors">
+                𝕏 Twitter
+              </a>
+            )}
+            {location.tiktok_handle && (
+              <a href={`https://tiktok.com/@${location.tiktok_handle.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-300 text-sm font-medium hover:bg-zinc-700 transition-colors">
+                🎵 TikTok
               </a>
             )}
           </div>

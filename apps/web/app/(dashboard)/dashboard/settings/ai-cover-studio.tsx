@@ -4,6 +4,7 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { Loader2, Wand2, ImageIcon } from 'lucide-react'
+import Image from 'next/image'
 
 export function AICoverStudio({ 
   locationId, 
@@ -73,9 +74,11 @@ export function AICoverStudio({
         {coverUrl && (
           <div className="mb-6 relative w-full h-48 sm:h-64 rounded-lg overflow-hidden border border-zinc-800 bg-zinc-900">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img 
+            <Image 
               src={coverUrl} 
               alt="Generated Cover" 
+              width={800}
+              height={400}
               className="w-full h-full object-cover"
             />
           </div>

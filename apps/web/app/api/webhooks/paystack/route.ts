@@ -72,6 +72,12 @@ export async function POST(req: Request) {
             ? 'fully_paid'
             : 'deposit_paid'
 
+        // Fetch all related bookings (parent + children)
+        const { data: relatedBookings } = await supabase
+          .from('page_bookings')
+          .select('id, item_id, number_of_guests')
+          .or(`id.eq.${bookingId},booking_notes.like.%[SYSTEM_CHILD_OF:${bookingId}]%`)
+
         await supabase
           .from('page_bookings')
           .update({
@@ -80,38 +86,41 @@ export async function POST(req: Request) {
             amount_paid_minor: amountPaidMinor,
             payment_reference: rawReference,
           })
-          .eq('id', bookingId)
+          .or(`id.eq.${bookingId},booking_notes.like.%[SYSTEM_CHILD_OF:${bookingId}]%`)
 
-        // If the booking is tied to an item, decrement inventory
-        if (booking.item_id) {
-          const guests = booking.number_of_guests || 1
-          const { data: itemData } = await supabase
-            .from('page_items')
-            .select('inventory_count')
-            .eq('id', booking.item_id)
-            .single()
-            
-          if (itemData && itemData.inventory_count !== null) {
-            const newCount = itemData.inventory_count - guests
-            const isSoldOut = newCount <= 0;
-            await supabase
+        // If the booking(s) are tied to an item, decrement inventory
+        if (relatedBookings && relatedBookings.length > 0) {
+          for (const b of relatedBookings) {
+            if (!b.item_id) continue;
+            const guests = b.number_of_guests || 1
+            const { data: itemData } = await supabase
               .from('page_items')
-              .update({
-                inventory_count: newCount < 0 ? 0 : newCount,
-                availability_status: isSoldOut ? 'sold_out' : 'available'
-              })
-              .eq('id', booking.item_id)
+              .select('inventory_count')
+              .eq('id', b.item_id)
+              .single()
+              
+            if (itemData && itemData.inventory_count !== null) {
+              const newCount = itemData.inventory_count - guests
+              const isSoldOut = newCount <= 0;
+              await supabase
+                .from('page_items')
+                .update({
+                  inventory_count: newCount < 0 ? 0 : newCount,
+                  availability_status: isSoldOut ? 'sold_out' : 'available'
+                })
+                .eq('id', b.item_id)
 
-            if (isSoldOut && booking.location_pages?.location_id) {
-              await notifyBusiness(
-                booking.location_pages.location_id,
-                {
-                  title: '🚨 Item Sold Out',
-                  body: `An item has reached 0 inventory and is now marked as sold out.`,
-                  url: '/dashboard/pages',
-                  tag: 'inventory-alert'
-                }
-              ).catch(console.error)
+              if (isSoldOut && booking.location_pages?.location_id) {
+                await notifyBusiness(
+                  booking.location_pages.location_id,
+                  {
+                    title: '🚨 Item Sold Out',
+                    body: `An item has reached 0 inventory and is now marked as sold out.`,
+                    url: '/dashboard/pages',
+                    tag: 'inventory-alert'
+                  }
+                ).catch(console.error)
+              }
             }
           }
         }

@@ -2,6 +2,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
+import Image from 'next/image'
 import { createItem } from './actions'
 import { toast } from 'sonner'
 
@@ -120,7 +121,7 @@ export function AddItemForm({ orgId, categoryId, categoryName }: { orgId: string
           {aiImageUrl ? (
             <div className="relative w-full aspect-square rounded-lg overflow-hidden border border-zinc-700">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={aiImageUrl} alt="AI Generated" className="object-cover w-full h-full" />
+              <Image src={aiImageUrl} alt="AI Generated" width={300} height={300} className="object-cover w-full h-full" />
               <button 
                 type="button" 
                 onClick={() => setAiImageUrl(null)}

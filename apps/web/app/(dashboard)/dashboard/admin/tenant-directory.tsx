@@ -8,8 +8,17 @@ import { MoreHorizontal, ShieldAlert, CreditCard } from 'lucide-react'
 import { overrideTenantPlan } from './actions'
 import { useRouter } from 'next/navigation'
 
-export function TenantDirectory({ organizations }: { organizations: any[] }) {
-  const [editingOrg, setEditingOrg] = useState<any | null>(null)
+export interface OrgTenant {
+  id: string
+  name: string
+  subscription_plan?: string
+  subscription_status?: string
+  purchased_credits?: number
+  [key: string]: unknown
+}
+
+export function TenantDirectory({ organizations }: { organizations: OrgTenant[] }) {
+  const [editingOrg, setEditingOrg] = useState<OrgTenant | null>(null)
   const router = useRouter()
 
   const handleOverride = async (e: React.FormEvent<HTMLFormElement>) => {

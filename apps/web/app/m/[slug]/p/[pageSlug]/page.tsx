@@ -73,7 +73,7 @@ export default async function PublicPageView({
   // 1. Location
   const locQuery = supabase
     .from('locations')
-    .select('id, name, organization_id, theme_color, cover_image_url, ai_enabled, ai_name, instagram_handle, whatsapp_number, phone_number, organizations(logo_url), manual_payment_enabled, manual_payment_bank_name, manual_payment_account_name, manual_payment_account_number, manual_payment_instructions')
+    .select('id, name, organization_id, theme_color, cover_image_url, ai_enabled, ai_name, instagram_handle, x_handle, tiktok_handle, whatsapp_number, phone_number, organizations(logo_url), manual_payment_enabled, manual_payment_bank_name, manual_payment_account_name, manual_payment_account_number, manual_payment_instructions')
     .eq('slug', slug)
     .single()
   const { data: loc } = await locQuery

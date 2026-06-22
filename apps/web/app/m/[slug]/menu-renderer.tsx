@@ -2,6 +2,7 @@
 
 
 import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
 import { ItemCard } from './item-card'
 import { toast } from 'sonner'
 import { Tables } from '../../../../../types'
@@ -17,6 +18,44 @@ export function MenuRenderer({ initialCategories }: { initialCategories: Categor
   const [showPrompt, setShowPrompt] = useState(false)
   const [activeCat, setActiveCat] = useState<string>(initialCategories[0]?.id || '')
   const [searchQuery, setSearchQuery] = useState('')
+  const [recommendedItems, setRecommendedItems] = useState<Tables<'menu_items'>[]>([])
+  const [isPersonalizing, setIsPersonalizing] = useState(false)
+
+  // AI Personalization
+  useEffect(() => {
+    const fetchPersonalization = async () => {
+      try {
+        const pastStr = localStorage.getItem('pastOrderedItemIds')
+        if (!pastStr) return
+        const pastItemIds = JSON.parse(pastStr)
+        if (!Array.isArray(pastItemIds) || pastItemIds.length === 0) return
+
+        setIsPersonalizing(true)
+
+        // Flatten available items
+        const availableItems = initialCategories.flatMap(c => c.menu_items || [])
+
+        const res = await fetch('/api/ai/personalize', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ pastItemIds, availableItems })
+        })
+
+        if (res.ok) {
+          const { recommendedItemIds } = await res.json()
+          if (recommendedItemIds && recommendedItemIds.length > 0) {
+            const recs = availableItems.filter((i) => recommendedItemIds.includes(i.id))
+            setRecommendedItems(recs)
+          }
+        }
+      } catch (e) {
+        console.error('Personalization failed', e)
+      } finally {
+        setIsPersonalizing(false)
+      }
+    }
+    fetchPersonalization()
+  }, [initialCategories])
 
   useEffect(() => {
     const handleScroll = () => {
@@ -195,6 +234,24 @@ export function MenuRenderer({ initialCategories }: { initialCategories: Categor
         </div>
       )}
 
+      {/* Recommended Section */}
+      {!isTranslating && !searchQuery && (recommendedItems.length > 0 || isPersonalizing) && (
+        <motion.section 
+          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ type: 'spring' }}
+          className="mb-8 p-4 bg-gradient-to-br from-indigo-50/50 to-purple-50/50 dark:from-indigo-950/20 dark:to-purple-950/20 rounded-2xl border border-indigo-100 dark:border-indigo-900/50"
+        >
+          <h2 className="text-[18px] font-black text-indigo-900 dark:text-indigo-300 mb-2 flex items-center gap-2">
+            ✨ Recommended for You
+            {isPersonalizing && <div className="w-4 h-4 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>}
+          </h2>
+          <div className="space-y-0">
+            {recommendedItems.map(item => (
+              <ItemCard key={`rec-${item.id}`} item={item} />
+            ))}
+          </div>
+        </motion.section>
+      )}
+
       {/* Render Categories */}
       {!isTranslating && categories
         .map(category => {
@@ -211,7 +268,10 @@ export function MenuRenderer({ initialCategories }: { initialCategories: Categor
         })
         .filter(category => !searchQuery || (category.menu_items && category.menu_items.length > 0))
         .map((category) => (
-          <section key={category.id} id={`cat-${category.id}`} className="scroll-mt-40 mb-8">
+          <motion.section 
+            initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
+            key={category.id} id={`cat-${category.id}`} className="scroll-mt-40 mb-8"
+          >
             <h2 className="text-[18px] font-black text-[#17201b] dark:text-zinc-100 mb-2">{category.name}</h2>
             <div className="space-y-0">
             {category.menu_items?.length === 0 && (
@@ -221,7 +281,7 @@ export function MenuRenderer({ initialCategories }: { initialCategories: Categor
               <ItemCard key={item.id} item={item} />
             ))}
           </div>
-        </section>
+        </motion.section>
       ))}
 
       {categories.length === 0 && !searchQuery && (

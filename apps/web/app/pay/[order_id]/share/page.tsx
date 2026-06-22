@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
 import { useSearchParams } from 'next/navigation'
+import Image from 'next/image'
 
 export default function SharingHubPage({
   params
@@ -68,8 +69,7 @@ export default function SharingHubPage({
 
           <div className="bg-white p-3 rounded-2xl mx-auto w-fit shadow-xl">
             {qrUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={qrUrl} alt="Payment QR Code" className="w-48 h-48" crossOrigin="anonymous" />
+              <Image src={qrUrl} alt="Payment QR Code" width={192} height={192} className="w-48 h-48" crossOrigin="anonymous" />
             ) : (
               <div className="w-48 h-48 bg-zinc-100 animate-pulse rounded-xl" />
             )}

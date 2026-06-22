@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { FadeIn } from './animations'
+import Image from 'next/image'
 
 export async function TrustedBy() {
   const supabase = await createClient()
@@ -30,7 +31,7 @@ export async function TrustedBy() {
           {marqueeItems.map((org, i) => (
             <div key={`${org.name}-${i}`} className="flex items-center justify-center min-w-[120px] opacity-50 hover:opacity-100 transition-opacity duration-300 grayscale hover:grayscale-0">
               {org.logo_url ? (
-                                <img src={org.logo_url} alt={org.name} className="h-8 md:h-10 object-contain" />
+                <Image src={org.logo_url} alt={org.name} width={120} height={40} className="h-8 md:h-10 w-auto object-contain" />
               ) : (
                 <span className="text-xl md:text-2xl font-black tracking-tight text-white">{org.name}</span>
               )}

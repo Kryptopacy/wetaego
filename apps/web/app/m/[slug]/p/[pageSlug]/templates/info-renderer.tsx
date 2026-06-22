@@ -7,6 +7,11 @@ interface InfoRendererProps {
     theme_color?: string
     cover_image_url?: string
     organizations?: { logo_url?: string }
+    whatsapp_number?: string
+    phone_number?: string
+    instagram_handle?: string
+    x_handle?: string
+    tiktok_handle?: string
   }
   page: {
     title: string
@@ -80,6 +85,46 @@ export function InfoRenderer({ location, page, locationSlug }: InfoRendererProps
         <div className="prose-custom space-y-1">
           {lines.map((line, i) => renderLine(line, i))}
         </div>
+
+        {/* Contact Strip */}
+        {(location.whatsapp_number || location.phone_number || location.instagram_handle || location.x_handle || location.tiktok_handle) && (
+          <div className="mt-12 pt-8 border-t border-zinc-800/50">
+            <h3 className="text-sm font-bold text-white mb-4 text-center">Connect with us</h3>
+            <div className="flex flex-wrap gap-3 justify-center">
+              {location.whatsapp_number && (
+                <a
+                  href={`https://wa.me/${location.whatsapp_number.replace(/[^0-9]/g, '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm font-medium hover:bg-emerald-500/20 transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M11.97 0C5.36 0 0 5.361 0 11.971c0 2.639.851 5.08 2.308 7.09L.432 24l5.068-1.834A11.933 11.933 0 0011.97 23.94c6.61 0 11.971-5.36 11.971-11.97C23.94 5.36 18.58 0 11.97 0z"/></svg>
+                  WhatsApp
+                </a>
+              )}
+              {location.phone_number && (
+                <a href={`tel:${location.phone_number}`} className="flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-300 text-sm font-medium hover:bg-zinc-700 transition-colors">
+                  📞 Call
+                </a>
+              )}
+              {location.instagram_handle && (
+                <a href={`https://instagram.com/${location.instagram_handle.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 rounded-full bg-pink-500/10 border border-pink-500/20 text-pink-400 text-sm font-medium hover:bg-pink-500/20 transition-colors">
+                  Instagram
+                </a>
+              )}
+              {location.x_handle && (
+                <a href={`https://x.com/${location.x_handle.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-300 text-sm font-medium hover:bg-zinc-700 transition-colors">
+                  𝕏 Twitter
+                </a>
+              )}
+              {location.tiktok_handle && (
+                <a href={`https://tiktok.com/@${location.tiktok_handle.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-300 text-sm font-medium hover:bg-zinc-700 transition-colors">
+                  🎵 TikTok
+                </a>
+              )}
+            </div>
+          </div>
+        )}
 
         <div className="mt-12 text-center">
           <a href="https://ourmenuos.online" className="text-xs text-zinc-700 hover:text-zinc-500 transition-colors">

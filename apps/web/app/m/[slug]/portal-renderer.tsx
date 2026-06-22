@@ -1,5 +1,9 @@
+'use client'
+
 import { Tables } from '../../../../../types'
 import Link from "next/link";
+import { motion } from 'framer-motion';
+import Image from "next/image";
 import { ArrowRight, Utensils, Calendar, Info, FileText, LayoutList } from "lucide-react";
 
 function getLuminance(hex: string) {
@@ -61,9 +65,11 @@ export function PortalRenderer({
       
       <div className="relative z-10 w-full max-w-md mt-12 flex flex-col items-center">
         {location.organizations?.logo_url ? (
-          <img 
+          <Image 
             src={location.organizations.logo_url} 
             alt={location.name} 
+            width={96}
+            height={96}
             className="w-24 h-24 rounded-full object-cover border-4 border-zinc-800 shadow-xl mb-6"
             onError={(e) => { e.currentTarget.style.display = 'none'; }}
           />
@@ -81,9 +87,14 @@ export function PortalRenderer({
           <p className="text-zinc-400 text-center mb-8 w-full px-4 truncate">{location.tagline}</p>
         )}
 
-        <div className="w-full space-y-4">
+        <motion.div 
+          initial="hidden" animate="show"
+          variants={{ hidden: {}, show: { transition: { staggerChildren: 0.1 } } }}
+          className="w-full space-y-4"
+        >
           {/* Main Menu Button */}
-          <Link href={`/m/${location.slug}?view=menu`} className="block w-full group">
+          <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}>
+            <Link href={`/m/${location.slug}?view=menu`} className="block w-full group">
             <div 
               className={`w-full p-4 rounded-2xl flex items-center justify-between ${textColor} shadow-lg transition-transform hover:scale-[1.02]`}
               style={{ backgroundColor: themeColor }}
@@ -96,11 +107,13 @@ export function PortalRenderer({
               </div>
               <ArrowRight className="w-5 h-5 opacity-70 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
             </div>
-          </Link>
+            </Link>
+          </motion.div>
 
           {/* Dynamic Pages */}
           {pages.map((page) => (
-            <Link key={page.id} href={`/m/${location.slug}/p/${page.slug}`} className="block w-full group">
+            <motion.div key={page.id} variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}>
+              <Link href={`/m/${location.slug}/p/${page.slug}`} className="block w-full group">
               <div className="w-full p-4 rounded-2xl bg-zinc-900/80 backdrop-blur-md border border-zinc-800 flex items-center justify-between text-zinc-100 hover:bg-zinc-800 transition-colors">
                 <div className="flex items-center gap-4">
                   <div className="p-2 bg-zinc-800 rounded-xl text-zinc-400 group-hover:text-white transition-colors" style={{ color: location.theme_color }}>
@@ -110,9 +123,10 @@ export function PortalRenderer({
                 </div>
                 <ArrowRight className="w-5 h-5 text-zinc-600 group-hover:text-zinc-300 group-hover:translate-x-1 transition-all" />
               </div>
-            </Link>
+              </Link>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </div>
   );

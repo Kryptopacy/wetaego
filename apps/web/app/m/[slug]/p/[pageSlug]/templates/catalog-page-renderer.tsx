@@ -1,5 +1,10 @@
+'use client'
+
 import Link from 'next/link'
 import Image from 'next/image'
+import { useCartStore } from '@/lib/store/cart'
+import { motion } from 'framer-motion'
+import { CartFAB } from '../../../cart-fab'
 
 // The catalog page renderer is a light version for pages created via the pages builder
 // (NOT the main /m/[slug] menu — that stays as is).
@@ -18,6 +23,8 @@ interface PageItem {
 
 interface CatalogPageRendererProps {
   location: {
+    id: string
+    organization_id: string
     name: string
     theme_color?: string
     cover_image_url?: string
@@ -32,6 +39,7 @@ interface CatalogPageRendererProps {
     billing_enabled?: boolean
     billing_mode?: string
   }
+  paymentIsLive?: boolean
   items: PageItem[]
   locationSlug: string
   referralSource?: string
@@ -51,8 +59,9 @@ const AVAILABILITY_LABELS: Record<string, string> = {
   unavailable: 'Unavailable',
 }
 
-export function CatalogPageRenderer({ location, page, items, locationSlug }: CatalogPageRendererProps) {
+export function CatalogPageRenderer({ location, page, items, locationSlug, paymentIsLive }: CatalogPageRendererProps) {
   const themeColor = location.theme_color || '#7c3aed'
+  const { addItem } = useCartStore()
 
   // Group by category if any items have one
   const categories = [...new Set(items.map(i => i.item_data?.category).filter(Boolean) as string[])]
@@ -111,11 +120,20 @@ export function CatalogPageRenderer({ location, page, items, locationSlug }: Cat
               {hasCategories && cat !== 'all' && (
                 <h2 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-4 capitalize">{cat}</h2>
               )}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <motion.div 
+                initial="hidden" animate="show"
+                variants={{ hidden: {}, show: { transition: { staggerChildren: 0.05 } } }}
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"
+              >
                 {catItems.map(item => {
                   const isAvail = item.availability_status === 'available'
                   return (
-                    <div key={item.id} className={`rounded-2xl border p-4 transition-all ${isAvail ? 'border-zinc-800 bg-zinc-900/50' : 'border-zinc-800/40 bg-zinc-900/20 opacity-60'}`}>
+                    <motion.div 
+                      variants={{ hidden: { opacity: 0, scale: 0.95 }, show: { opacity: 1, scale: 1 } }}
+                      whileHover={isAvail ? { scale: 1.02, boxShadow: "0 10px 30px -10px rgba(0,0,0,0.5)" } : {}}
+                      key={item.id} 
+                      className={`rounded-2xl border p-4 transition-all ${isAvail ? 'border-zinc-800 bg-zinc-900/50 hover:border-zinc-700 backdrop-blur-sm' : 'border-zinc-800/40 bg-zinc-900/20 opacity-60'}`}
+                    >
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex-1 min-w-0">
                           <h3 className="font-bold text-white text-sm">{item.title}</h3>
@@ -134,7 +152,19 @@ export function CatalogPageRenderer({ location, page, items, locationSlug }: Cat
                         </div>
                       </div>
 
-                      {isAvail && location.whatsapp_number && (
+                      {isAvail && page.billing_enabled && item.price_minor ? (
+                        <button
+                          onClick={() => addItem({
+                            id: item.id,
+                            name: item.title,
+                            price_minor: item.price_minor || 0
+                          })}
+                          className="mt-3 flex items-center justify-center gap-2 w-full py-2 rounded-xl text-xs font-bold text-white transition-all"
+                          style={{ background: `linear-gradient(135deg, ${themeColor}cc, ${themeColor}88)` }}
+                        >
+                          Add to Cart
+                        </button>
+                      ) : isAvail && location.whatsapp_number ? (
                         <a
                           href={`https://wa.me/${location.whatsapp_number.replace(/[^0-9]/g, '')}?text=Hi, I'm interested in: ${item.title}`}
                           target="_blank"
@@ -143,11 +173,11 @@ export function CatalogPageRenderer({ location, page, items, locationSlug }: Cat
                         >
                           Enquire
                         </a>
-                      )}
-                    </div>
+                      ) : null}
+                    </motion.div>
                   )
                 })}
-              </div>
+              </motion.div>
             </div>
           ))}
 
@@ -178,6 +208,16 @@ export function CatalogPageRenderer({ location, page, items, locationSlug }: Cat
           </a>
         </div>
       </div>
+
+      {page.billing_enabled && (
+        <CartFAB 
+          organizationId={location.organization_id}
+          locationId={location.id}
+          paymentIsLive={paymentIsLive}
+          templateType="catalog"
+          menuItems={items.map(i => ({ id: i.id, name: i.title, price_minor: i.price_minor || 0 }))}
+        />
+      )}
     </div>
   )
 }

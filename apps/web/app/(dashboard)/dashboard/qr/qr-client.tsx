@@ -2,6 +2,7 @@
 
 import { Database } from '@/lib/supabase/types'
 import { useState } from 'react'
+import Image from 'next/image'
 import { generateQrBatch, deleteQrCode, assignQrTable } from './actions'
 import { toast } from 'sonner'
 
@@ -107,7 +108,7 @@ export function QrClient({ organizationId, orgLogo, locations, qrCodes, baseUrl 
               {orgLogo && (
                 <div className="mt-1 mb-3 print:mt-2">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={orgLogo} alt="Venue Logo" className="h-8 md:h-10 object-contain print:h-12" crossOrigin="anonymous" />
+                  <Image src={orgLogo} alt="Venue Logo" width={120} height={48} className="h-8 md:h-10 w-auto object-contain print:h-12" crossOrigin="anonymous" />
                 </div>
               )}
 
@@ -121,7 +122,7 @@ export function QrClient({ organizationId, orgLogo, locations, qrCodes, baseUrl 
 
               <div className="bg-white p-3 rounded-xl mb-4 print:p-0 shadow-[0_0_15px_rgba(255,255,255,0.1)] print:shadow-none w-full max-w-[200px]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={qrImageUrl} alt="QR Code" className="w-full aspect-square" crossOrigin="anonymous" />
+                <Image src={qrImageUrl} alt="QR Code" width={300} height={300} className="w-full aspect-square" crossOrigin="anonymous" />
               </div>
               
               <div className="text-center w-full mb-4 print:mb-6 flex flex-col items-center">
@@ -151,9 +152,11 @@ export function QrClient({ organizationId, orgLogo, locations, qrCodes, baseUrl 
                 </p>
                 <div className="bg-white p-1.5 rounded-lg print:p-0 w-20 h-20 shadow-inner">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img 
+                  <Image 
                     src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`${baseUrl}/api/feedback-entry?qr_id=${qr.id}`)}&color=000000`}
                     alt="Feedback QR" 
+                    width={150}
+                    height={150}
                     className="w-full h-full" 
                     crossOrigin="anonymous" 
                   />

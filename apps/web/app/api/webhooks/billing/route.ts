@@ -43,11 +43,11 @@ export async function POST(req: Request) {
     }
 
     if (event.event === 'subscription.create') {
-      console.log('Subscription created:', event.data.subscription_code)
+      // handled
     }
 
     if (event.event === 'subscription.disable') {
-      console.log('Subscription disabled:', event.data.subscription_code)
+      // handled
     }
 
       if (event.event === 'charge.success') {

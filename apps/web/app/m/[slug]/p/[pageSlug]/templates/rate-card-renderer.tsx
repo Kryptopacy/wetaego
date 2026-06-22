@@ -1,7 +1,9 @@
 'use client'
 
+import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { motion, AnimatePresence } from 'framer-motion'
 
 interface PageItem {
   id: string
@@ -11,6 +13,8 @@ interface PageItem {
   price_minor?: number
   price_display?: string
   availability_status: string
+  payment_mode?: string
+  deposit_percentage?: number
   item_data?: {
     category?: string     // 'basic' | 'standard' | 'premium' | 'addon'
     includes?: string     // comma-separated list
@@ -21,13 +25,21 @@ interface PageItem {
 
 interface RateCardRendererProps {
   location: {
+    id: string
     name: string
     theme_color?: string
     cover_image_url?: string
     instagram_handle?: string
+    x_handle?: string
+    tiktok_handle?: string
     whatsapp_number?: string
     phone_number?: string
     organizations?: { logo_url?: string }
+    manual_payment_enabled?: boolean
+    manual_payment_bank_name?: string
+    manual_payment_account_name?: string
+    manual_payment_account_number?: string
+    manual_payment_instructions?: string
   }
   page: {
     id: string
@@ -40,6 +52,7 @@ interface RateCardRendererProps {
   items: PageItem[]
   locationSlug: string
   referralSource?: string
+  paymentIsLive?: boolean
 }
 
 const CATEGORY_ORDER = ['basic', 'standard', 'premium', 'addon']
@@ -50,8 +63,64 @@ const CATEGORY_LABELS: Record<string, { label: string; color: string; bg: string
   addon: { label: 'Add-on', color: 'text-violet-300', bg: 'bg-violet-500/10' },
 }
 
-export function RateCardRenderer({ location, page, items, locationSlug }: RateCardRendererProps) {
+export function RateCardRenderer({ location, page, items, locationSlug, paymentIsLive }: RateCardRendererProps) {
   const themeColor = location.theme_color || '#7c3aed'
+
+  const [selectedItems, setSelectedItems] = useState<PageItem[]>([])
+  const [showCheckout, setShowCheckout] = useState(false)
+  const [formSuccess, setFormSuccess] = useState(false)
+  const [isPending, startTransition] = useTransition()
+  const [form, setForm] = useState({
+    customer_name: '',
+    customer_email: '',
+    customer_phone: '',
+    booking_notes: '',
+  })
+
+  function handleToggleItem(item: PageItem) {
+    setSelectedItems(prev => {
+      if (prev.find(i => i.id === item.id)) return prev.filter(i => i.id !== item.id)
+      return [...prev, item]
+    })
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (selectedItems.length === 0 || !form.customer_name || !form.customer_phone) return
+
+    startTransition(async () => {
+      const res = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          page_id: page.id,
+          item_ids: selectedItems.map(i => i.id),
+          customer_name: form.customer_name,
+          customer_email: form.customer_email,
+          customer_phone: form.customer_phone,
+          booking_notes: form.booking_notes,
+        }),
+      })
+
+      if (res.ok) {
+        const data = await res.json()
+        if (data.payment_url) {
+          window.location.href = data.payment_url
+        } else {
+          setFormSuccess(true)
+          setShowCheckout(false)
+        }
+      } else {
+        alert('Something went wrong submitting your project request.')
+      }
+    })
+  }
+
+  // Calculate combined turnaround time safely
+  const combinedTurnaround = selectedItems
+    .map(i => i.item_data?.turnaround)
+    .filter(Boolean)
+    .join(' + ')
 
   // Group items by category
   const grouped: Record<string, PageItem[]> = {}
@@ -97,6 +166,16 @@ export function RateCardRenderer({ location, page, items, locationSlug }: RateCa
                   @{location.instagram_handle.replace('@', '')}
                 </a>
               )}
+              {location.x_handle && (
+                <a href={`https://x.com/${location.x_handle.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="text-xs text-white/60 hover:text-white transition-colors">
+                  𝕏 {location.x_handle}
+                </a>
+              )}
+              {location.tiktok_handle && (
+                <a href={`https://tiktok.com/@${location.tiktok_handle.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="text-xs text-white/60 hover:text-white transition-colors">
+                  🎵 {location.tiktok_handle}
+                </a>
+              )}
             </div>
           </div>
         </div>
@@ -128,6 +207,20 @@ export function RateCardRenderer({ location, page, items, locationSlug }: RateCa
           </div>
         )}
 
+        {/* Success state */}
+        {formSuccess && (
+          <div className="mb-8 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-8 text-center">
+            <div className="text-4xl mb-4">🎉</div>
+            <h2 className="text-xl font-bold text-white mb-2">Project Requested!</h2>
+            <p className="text-zinc-400 text-sm mb-4">
+              We have received your project requirements. We'll be in touch shortly.
+            </p>
+            <button onClick={() => { setFormSuccess(false); setSelectedItems([]) }} className="text-zinc-400 text-sm hover:text-white">
+              ← View rate card
+            </button>
+          </div>
+        )}
+
         {/* Rate sections */}
         <div className="space-y-8">
           {sections.map(({ key, items: sectionItems }) => {
@@ -141,63 +234,228 @@ export function RateCardRenderer({ location, page, items, locationSlug }: RateCa
                   <div className="h-px flex-1 bg-zinc-800" />
                 </div>
                 <div className="space-y-3">
-                  {sectionItems.map(item => (
-                    <div key={item.id} className="flex items-start justify-between gap-4 rounded-xl border border-zinc-800 bg-zinc-900/30 p-4">
-                      <div className="flex-1 min-w-0">
-                        <div className="font-semibold text-white text-sm">{item.title}</div>
-                        {item.subtitle && <div className="text-xs text-zinc-500 mt-0.5">{item.subtitle}</div>}
-                        {item.description && <div className="text-xs text-zinc-400 mt-1.5 leading-relaxed">{item.description}</div>}
-                        {item.item_data?.includes && (
-                          <div className="flex flex-wrap gap-1.5 mt-2">
-                            {item.item_data.includes.split(',').map((inc, i) => (
-                              <span key={i} className="text-[10px] bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded-full">✓ {inc.trim()}</span>
-                            ))}
+                  {sectionItems.map(item => {
+                    const isSelected = selectedItems.some(i => i.id === item.id)
+                    const isAvail = item.availability_status === 'available'
+                    return (
+                      <div 
+                        key={item.id} 
+                        onClick={() => isAvail && handleToggleItem(item)}
+                        className={`flex items-start gap-4 rounded-xl border transition-all p-4 ${!isAvail ? 'opacity-50 cursor-not-allowed border-zinc-800 bg-zinc-900/10' : isSelected ? 'border-violet-500 bg-violet-500/10' : 'border-zinc-800 bg-zinc-900/30 hover:border-zinc-700 cursor-pointer'}`}
+                      >
+                        <div className={`mt-0.5 shrink-0 w-5 h-5 rounded border flex items-center justify-center transition-colors ${isSelected ? 'bg-violet-500 border-violet-500' : 'border-zinc-600 bg-zinc-800'}`}>
+                          {isSelected && <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
+                        </div>
+                        <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:justify-between gap-4">
+                          <div>
+                            <div className="font-semibold text-white text-sm">{item.title}</div>
+                            {item.subtitle && <div className="text-xs text-zinc-500 mt-0.5">{item.subtitle}</div>}
+                            {item.description && <div className="text-xs text-zinc-400 mt-1.5 leading-relaxed">{item.description}</div>}
+                            {item.item_data?.includes && (
+                              <div className="flex flex-wrap gap-1.5 mt-2">
+                                {item.item_data.includes.split(',').map((inc, i) => (
+                                  <span key={i} className="text-[10px] bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded-full">✓ {inc.trim()}</span>
+                                ))}
+                              </div>
+                            )}
+                            {item.item_data?.turnaround && (
+                              <div className="text-xs text-zinc-500 mt-1.5">⏱ {item.item_data.turnaround}</div>
+                            )}
                           </div>
-                        )}
-                        {item.item_data?.turnaround && (
-                          <div className="text-xs text-zinc-500 mt-1.5">⏱ {item.item_data.turnaround}</div>
-                        )}
+                          <div className="text-left sm:text-right shrink-0">
+                            {item.price_display ? (
+                              <div className="font-bold text-white">{item.price_display}</div>
+                            ) : item.price_minor ? (
+                              <div className="font-bold text-white">₦{(item.price_minor / 100).toLocaleString()}</div>
+                            ) : (
+                              <div className="text-xs text-zinc-500 italic">Price on request</div>
+                            )}
+                            {item.payment_mode === 'deposit' && item.deposit_percentage && (
+                              <div className="text-[10px] text-amber-400 mt-0.5">{item.deposit_percentage}% deposit req.</div>
+                            )}
+                          </div>
+                        </div>
                       </div>
-                      <div className="text-right shrink-0">
-                        {item.price_display ? (
-                          <div className="font-bold text-white">{item.price_display}</div>
-                        ) : item.price_minor ? (
-                          <div className="font-bold text-white">₦{(item.price_minor / 100).toLocaleString()}</div>
-                        ) : (
-                          <div className="text-xs text-zinc-500 italic">Price on request</div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               </div>
             )
           })}
         </div>
 
-        {/* CTA strip */}
-        <div className="mt-10 rounded-2xl border border-zinc-800 bg-zinc-900/40 p-5 text-center">
-          <p className="text-sm text-zinc-400 mb-4">Ready to work together?</p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            {location.whatsapp_number && (
-              <a
-                href={`https://wa.me/${location.whatsapp_number.replace(/[^0-9]/g, '')}?text=Hi, I'd like to discuss a project`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold text-sm text-white transition-all"
-                style={{ background: `linear-gradient(135deg, ${themeColor}, ${themeColor}cc)` }}
-              >
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M11.97 0C5.36 0 0 5.361 0 11.971c0 2.639.851 5.08 2.308 7.09L.432 24l5.068-1.834A11.933 11.933 0 0011.97 23.94c6.61 0 11.971-5.36 11.971-11.97C23.94 5.36 18.58 0 11.97 0z"/></svg>
-                WhatsApp
-              </a>
-            )}
-            {location.phone_number && (
-              <a href={`tel:${location.phone_number}`} className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold text-sm text-zinc-300 bg-zinc-800 hover:bg-zinc-700 transition-all">
-                📞 Call
-              </a>
-            )}
+        {/* Contact Strip */}
+        {(location.whatsapp_number || location.phone_number || location.instagram_handle || location.x_handle || location.tiktok_handle) && (
+          <div className="mt-12 pt-8 border-t border-zinc-800/50">
+            <h3 className="text-sm font-bold text-white mb-4 text-center">Connect with us</h3>
+            <div className="flex flex-wrap gap-3 justify-center">
+              {location.whatsapp_number && (
+                <a
+                  href={`https://wa.me/${location.whatsapp_number.replace(/[^0-9]/g, '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm font-medium hover:bg-emerald-500/20 transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M11.97 0C5.36 0 0 5.361 0 11.971c0 2.639.851 5.08 2.308 7.09L.432 24l5.068-1.834A11.933 11.933 0 0011.97 23.94c6.61 0 11.971-5.36 11.971-11.97C23.94 5.36 18.58 0 11.97 0z"/></svg>
+                  WhatsApp
+                </a>
+              )}
+              {location.phone_number && (
+                <a href={`tel:${location.phone_number}`} className="flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-300 text-sm font-medium hover:bg-zinc-700 transition-colors">
+                  📞 Call
+                </a>
+              )}
+              {location.instagram_handle && (
+                <a href={`https://instagram.com/${location.instagram_handle.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 rounded-full bg-pink-500/10 border border-pink-500/20 text-pink-400 text-sm font-medium hover:bg-pink-500/20 transition-colors">
+                  Instagram
+                </a>
+              )}
+              {location.x_handle && (
+                <a href={`https://x.com/${location.x_handle.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-300 text-sm font-medium hover:bg-zinc-700 transition-colors">
+                  𝕏 Twitter
+                </a>
+              )}
+              {location.tiktok_handle && (
+                <a href={`https://tiktok.com/@${location.tiktok_handle.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-300 text-sm font-medium hover:bg-zinc-700 transition-colors">
+                  🎵 TikTok
+                </a>
+              )}
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* Floating Proceed Bar */}
+        <AnimatePresence>
+        {!showCheckout && !formSuccess && selectedItems.length > 0 && (
+          <motion.div 
+            initial={{ opacity: 0, y: 100 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 100 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-full max-w-[calc(100%-3rem)] sm:max-w-md"
+          >
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setShowCheckout(true)}
+              className="w-full shadow-2xl flex items-center justify-between px-6 py-4 rounded-2xl font-bold text-white transition-all hover:scale-[1.02] active:scale-[0.98]"
+              style={{ background: `linear-gradient(135deg, ${themeColor}, ${themeColor}cc)` }}
+            >
+              <div className="flex items-center gap-3">
+                <div className="bg-white/20 px-3 py-1 rounded-lg text-sm">{selectedItems.length}</div>
+                <span>Start Project</span>
+              </div>
+              <span className="opacity-90">
+                ₦{(selectedItems.reduce((sum, i) => sum + (i.price_minor || 0), 0) / 100).toLocaleString()} →
+              </span>
+            </motion.button>
+          </motion.div>
+        )}
+        </AnimatePresence>
+
+        {/* Checkout Modal */}
+        <AnimatePresence>
+        {showCheckout && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/80 backdrop-blur-sm" 
+              onClick={() => setShowCheckout(false)} 
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="relative w-full max-w-md max-h-[90vh] overflow-y-auto bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-2xl"
+            >
+              <button onClick={() => setShowCheckout(false)} className="absolute top-4 right-4 text-zinc-500 hover:text-white transition-colors">✕</button>
+              
+              <h2 className="text-xl font-bold text-white mb-4">Project Requirements</h2>
+              
+              <div className="mb-6 bg-zinc-800/50 rounded-xl p-4 border border-zinc-700 space-y-2">
+                <div className="flex justify-between text-sm text-zinc-300">
+                  <span>Selected Packages:</span>
+                  <span className="text-white font-bold">{selectedItems.length}</span>
+                </div>
+                {combinedTurnaround && (
+                  <div className="flex justify-between text-sm text-zinc-300">
+                    <span>Est. Turnaround:</span>
+                    <span className="text-white font-bold">{combinedTurnaround}</span>
+                  </div>
+                )}
+                <div className="flex justify-between text-sm text-zinc-300 pt-2 border-t border-zinc-700">
+                  <span>Total Base Price:</span>
+                  <span className="text-white font-bold">₦{(selectedItems.reduce((sum, i) => sum + (i.price_minor || 0), 0) / 100).toLocaleString()}</span>
+                </div>
+                {(selectedItems.some(i => i.payment_mode === 'deposit') || page.payment_mode === 'deposit') && (
+                  <div className="flex justify-between text-sm pt-2">
+                    <span className="text-amber-400 font-medium">Deposit to start:</span>
+                    <span className="text-amber-400 font-bold">
+                      ₦{Math.round(selectedItems.reduce((sum, i) => sum + (i.price_minor || 0), 0) * (Math.max(...selectedItems.map(i => i.deposit_percentage || 0), page.deposit_percentage || 30) / 100) / 100).toLocaleString()}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">Your Name *</label>
+                  <input
+                    value={form.customer_name}
+                    onChange={e => setForm(f => ({ ...f, customer_name: e.target.value }))}
+                    required
+                    placeholder="Full name or Company"
+                    className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-violet-500 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">Phone Number *</label>
+                  <input
+                    value={form.customer_phone}
+                    onChange={e => setForm(f => ({ ...f, customer_phone: e.target.value }))}
+                    required
+                    type="tel"
+                    placeholder="+234 800 000 0000"
+                    className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-violet-500 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">Email *</label>
+                  <input
+                    value={form.customer_email}
+                    onChange={e => setForm(f => ({ ...f, customer_email: e.target.value }))}
+                    required
+                    type="email"
+                    placeholder="Email address"
+                    className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-violet-500 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">Project Details (Optional)</label>
+                  <textarea
+                    value={form.booking_notes}
+                    onChange={e => setForm(f => ({ ...f, booking_notes: e.target.value }))}
+                    rows={3}
+                    placeholder="Briefly describe your project goals..."
+                    className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-violet-500 focus:outline-none resize-none"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={isPending || !form.customer_name || !form.customer_phone || !form.customer_email}
+                  className="w-full py-3.5 rounded-xl font-bold text-white text-sm disabled:opacity-50 transition-all"
+                  style={{ background: `linear-gradient(135deg, ${themeColor}, ${themeColor}cc)` }}
+                >
+                  {isPending ? 'Processing…' : (page.billing_enabled && paymentIsLive) ? (
+                    (selectedItems.some(i => i.payment_mode === 'deposit') || page.payment_mode === 'deposit')
+                      ? `Pay Deposit & Start`
+                      : `Pay & Start Project`
+                  ) : 'Submit Request'}
+                </button>
+              </form>
+            </motion.div>
+          </div>
+        )}
+        </AnimatePresence>
 
         <div className="mt-10 text-center">
           <a href="https://ourmenuos.online" className="text-xs text-zinc-700 hover:text-zinc-500 transition-colors">

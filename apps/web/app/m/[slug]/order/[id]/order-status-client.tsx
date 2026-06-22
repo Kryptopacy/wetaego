@@ -6,6 +6,9 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
+import type { Database } from '@/lib/supabase/types'
+
+type OrderRow = Database['public']['Tables']['orders']['Row']
 
 export function OrderStatusClient({ 
   initialOrder, 
@@ -15,7 +18,7 @@ export function OrderStatusClient({
   manualPaymentInstructions,
   slug 
 }: { 
-  initialOrder: any
+  initialOrder: OrderRow
   manualPaymentBankName?: string
   manualPaymentAccountName?: string
   manualPaymentAccountNumber?: string
@@ -33,8 +36,8 @@ export function OrderStatusClient({
         schema: 'public',
         table: 'orders',
         filter: `id=eq.${order.id}`
-      }, (payload: any) => {
-        setOrder((prev: any) => {
+      }, (payload: { new: Partial<OrderRow> }) => {
+        setOrder((prev: OrderRow) => {
           if (payload.new.status === 'paid' && prev.status === 'pending') {
             toast.success('Payment confirmed by cashier! Your food is being prepared.')
           }

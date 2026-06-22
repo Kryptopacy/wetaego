@@ -36,7 +36,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ forecasts: [], message: 'Not enough order history to generate a forecast. Check back after a few days of sales.' })
     }
 
-    const orderIds = recentOrders.map((o: any) => o.id)
+    const orderIds = recentOrders.map((o: { id: string }) => o.id)
 
     const { data: orderItems } = await supabase
       .from('order_items')

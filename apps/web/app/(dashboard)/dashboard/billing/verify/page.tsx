@@ -32,7 +32,7 @@ export default async function BillingVerifyPage({
     
     if (orgId) {
       const supabase = await createClient()
-      const updateData: any = { subscription_status: 'active' }
+      const updateData: { subscription_status: string; subscription_plan?: string } = { subscription_status: 'active' }
       if (planType) {
         updateData.subscription_plan = planType
       }

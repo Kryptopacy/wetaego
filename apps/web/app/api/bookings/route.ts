@@ -6,6 +6,7 @@ import { z } from 'zod'
 const bookingSchema = z.object({
   page_id: z.string().uuid('Invalid page ID'),
   item_id: z.string().uuid().optional().nullable(),
+  item_ids: z.array(z.string().uuid()).optional().nullable(),
   customer_name: z.string().min(1, 'Name is required'),
   customer_email: z.string().email('Invalid email format').optional().nullable().or(z.literal('')),
   customer_phone: z.string().min(1, 'Phone is required'),
@@ -44,6 +45,7 @@ export async function POST(req: Request) {
       booking_end_time,
       number_of_guests,
       booking_notes,
+      item_ids,
     } = parsed.data
 
     const supabase = await createClient()
@@ -65,37 +67,52 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Location not found' }, { status: 404 })
     }
 
-    // Get the selected item (if any) for pricing
-    let item: { id: string; title: string; price_minor: number | null; payment_mode: string | null; deposit_percentage: number | null } | null = null
-    if (item_id) {
-      const { data } = await supabase
+    // Handle multiple items
+    let basePrice = 0
+    let paymentMode = page.payment_mode || 'full'
+    let depositPct = page.deposit_percentage || 30
+    
+    const targetItemIds = item_ids && item_ids.length > 0 ? item_ids : (item_id ? [item_id] : [])
+    let firstItem = null
+
+    if (targetItemIds.length > 0) {
+      const { data: items } = await supabase
         .from('page_items')
         .select('id, title, price_minor, payment_mode, deposit_percentage')
-        .eq('id', item_id)
-        .single()
-      item = data
+        .in('id', targetItemIds)
+      
+      if (items && items.length > 0) {
+        firstItem = items[0]
+        basePrice = items.reduce((sum, i) => sum + (i.price_minor || 0), 0)
+        // Use the strictest payment mode from items or page
+        if (items.some(i => i.payment_mode === 'full')) paymentMode = 'full'
+        else if (items.some(i => i.payment_mode === 'deposit')) paymentMode = 'deposit'
+        
+        // Use the highest deposit percentage
+        const maxDeposit = Math.max(...items.map(i => i.deposit_percentage || 0))
+        if (maxDeposit > 0) depositPct = maxDeposit
+      }
     }
 
-    // Calculate the amount to charge
-    const basePrice = item?.price_minor || 0
-    const paymentMode = item?.payment_mode || page.payment_mode || 'full'
-    const depositPct = item?.deposit_percentage || page.deposit_percentage || 30
     const chargeAmount = paymentMode === 'deposit'
       ? Math.round(basePrice * (depositPct / 100))
       : basePrice
 
     // Check availability if this is tied to an item and has dates
-    if (item_id && booking_date) {
-      const { data: isAvailable, error: rpcError } = await supabase.rpc('check_item_availability', {
-        p_item_id: item_id,
-        p_start_date: booking_date,
-        p_end_date: booking_end_date || booking_date,
-      })
+    // Check availability if tied to items and has dates
+    if (targetItemIds.length > 0 && booking_date) {
+      for (const id of targetItemIds) {
+        const { data: isAvailable, error: rpcError } = await supabase.rpc('check_item_availability', {
+          p_item_id: id,
+          p_start_date: booking_date,
+          p_end_date: booking_end_date || booking_date,
+        })
 
-      if (rpcError) {
-        console.error('Availability check error:', rpcError)
-      } else if (isAvailable === false) {
-        return NextResponse.json({ error: 'Selected dates are unavailable or sold out' }, { status: 409 })
+        if (rpcError) {
+          console.error('Availability check error:', rpcError)
+        } else if (isAvailable === false) {
+          return NextResponse.json({ error: 'Selected dates are unavailable or sold out for some items' }, { status: 409 })
+        }
       }
     }
 
@@ -104,7 +121,7 @@ export async function POST(req: Request) {
       .from('page_bookings')
       .insert({
         page_id,
-        item_id: item_id || null,
+        item_id: targetItemIds.length === 1 ? targetItemIds[0] : null,
         customer_name,
         customer_email: customer_email || null,
         customer_phone,
@@ -113,7 +130,7 @@ export async function POST(req: Request) {
         booking_time: booking_time || null,
         booking_end_time: booking_end_time || null,
         number_of_guests: number_of_guests || 1,
-        booking_notes: booking_notes || null,
+        booking_notes: (targetItemIds.length > 1 ? `Multi-item Booking: ${targetItemIds.length} items.\n\n` : '') + (booking_notes || ''),
         total_amount_minor: basePrice,
         status: 'pending',
         payment_status: chargeAmount > 0 && page.billing_enabled ? 'awaiting_payment' : 'not_required',
@@ -124,6 +141,30 @@ export async function POST(req: Request) {
     if (bookingError || !booking) {
       console.error('Booking insert error:', bookingError)
       return NextResponse.json({ error: 'Failed to create booking' }, { status: 500 })
+    }
+
+    // Insert child bookings for inventory locking if there are multiple items
+    if (targetItemIds.length > 1) {
+      const childBookings = targetItemIds.map(id => ({
+        page_id,
+        item_id: id,
+        customer_name,
+        customer_email: customer_email || null,
+        customer_phone,
+        booking_date: booking_date || null,
+        booking_end_date: booking_end_date || null,
+        booking_time: booking_time || null,
+        booking_end_time: booking_end_time || null,
+        number_of_guests: number_of_guests || 1,
+        booking_notes: `[SYSTEM_CHILD_OF:${booking.id}]`,
+        total_amount_minor: 0,
+        status: 'pending',
+        payment_status: 'not_required',
+      }))
+      const { error: childError } = await supabase.from('page_bookings').insert(childBookings)
+      if (childError) {
+        console.error('Child bookings insert error:', childError)
+      }
     }
 
     // Check if org has active Paystack integration
@@ -175,7 +216,7 @@ export async function POST(req: Request) {
     // No payment required — send notification directly
     await notifyBusiness(location.id, {
       title: '📅 New Booking',
-      body: `${customer_name} booked ${item?.title || page.title}`,
+      body: `${customer_name} booked ${targetItemIds.length > 1 ? `${targetItemIds.length} items` : (firstItem?.title || page.title)}`,
       url: '/dashboard/manage/bookings',
       tag: 'new-booking'
     })
@@ -187,32 +228,34 @@ export async function POST(req: Request) {
       .eq('id', booking.id)
 
     // Decrement inventory if applicable
-    if (item_id) {
+    if (targetItemIds.length > 0) {
       const guests = number_of_guests || 1
-      const { data: itemData } = await supabase
-        .from('page_items')
-        .select('inventory_count')
-        .eq('id', item_id)
-        .single()
-        
-      if (itemData && itemData.inventory_count !== null) {
-        const newCount = itemData.inventory_count - guests
-        const isSoldOut = newCount <= 0;
-        await supabase
+      for (const id of targetItemIds) {
+        const { data: itemData } = await supabase
           .from('page_items')
-          .update({
-            inventory_count: newCount < 0 ? 0 : newCount,
-            availability_status: isSoldOut ? 'sold_out' : 'available'
-          })
-          .eq('id', item_id)
+          .select('inventory_count')
+          .eq('id', id)
+          .single()
+          
+        if (itemData && itemData.inventory_count !== null) {
+          const newCount = itemData.inventory_count - guests
+          const isSoldOut = newCount <= 0;
+          await supabase
+            .from('page_items')
+            .update({
+              inventory_count: newCount < 0 ? 0 : newCount,
+              availability_status: isSoldOut ? 'sold_out' : 'available'
+            })
+            .eq('id', id)
 
-        if (isSoldOut) {
-          await notifyBusiness(location.id, {
-            title: '🚨 Item Sold Out',
-            body: `An item has reached 0 inventory and is now marked as sold out.`,
-            url: '/dashboard/pages',
-            tag: 'inventory-alert'
-          }).catch(console.error)
+          if (isSoldOut) {
+            await notifyBusiness(location.id, {
+              title: '🚨 Item Sold Out',
+              body: `An item has reached 0 inventory and is now marked as sold out.`,
+              url: '/dashboard/pages',
+              tag: 'inventory-alert'
+            }).catch(console.error)
+          }
         }
       }
     }
