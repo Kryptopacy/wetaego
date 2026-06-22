@@ -11,6 +11,7 @@ import { PlanType } from '@/lib/payments/credits'
 import { getPlanLimits } from '@/lib/utils/settings'
 import { savePaymentSettings, saveManualPaymentSettings } from './payment-actions'
 import { cookies } from 'next/headers'
+import { CurrencySelector } from './currency-selector'
 
 export default async function SettingsPage({
   searchParams,
@@ -141,6 +142,14 @@ export default async function SettingsPage({
           }`}
         >
           Promotions
+        </Link>
+        <Link 
+          href="?tab=loyalty"
+          className={`px-4 py-2.5 text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${
+            tab === 'loyalty' ? 'border-blue-500 text-white' : 'border-transparent text-zinc-400 hover:text-zinc-200 hover:border-zinc-700'
+          }`}
+        >
+          Loyalty & CRM
         </Link>
       </div>
 

@@ -6,7 +6,9 @@ export default async function TeamPerformancePage() {
   const supabase = await createClient()
 
   const { data: userData } = await supabase.auth.getUser()
-  if (!userData?.user) redirect('/login')
+  const isDemo = !userData?.user && (await cookies()).get('demo_mode')?.value === '1'
+  if (!userData?.user && !isDemo) redirect('/login')
+  const user = userData?.user
 
   // Fetch organization
   const { data: member } = await supabase

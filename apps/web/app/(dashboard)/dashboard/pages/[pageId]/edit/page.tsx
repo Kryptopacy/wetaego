@@ -1,3 +1,4 @@
+import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
@@ -13,7 +14,9 @@ export default async function PageEditDashboard({
   const supabase = await createClient()
 
   const { data: userData } = await supabase.auth.getUser()
-  if (!userData?.user) redirect('/login')
+  const isDemo = !userData?.user && (await cookies()).get('demo_mode')?.value === '1'
+  if (!userData?.user && !isDemo) redirect('/login')
+  const user = userData?.user
 
   // 1. Fetch page and verify org
   const { data: page } = await supabase

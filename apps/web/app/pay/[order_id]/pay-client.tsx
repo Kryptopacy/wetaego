@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { processExistingOrderPayment } from '../../m/[slug]/actions'
+import { processExistingOrderPayment, optInMarketing } from '../../m/[slug]/actions'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import { formatCurrency } from '@/lib/utils/currency'
@@ -17,6 +17,7 @@ export default function PayClient({
   const [order, setOrder] = useState(initialOrder)
   const [isProcessing, setIsProcessing] = useState(false)
   const [customAmount, setCustomAmount] = useState('')
+  const [optIn, setOptIn] = useState(false)
   const supabase = createClient()
 
   useEffect(() => {
@@ -54,6 +55,11 @@ export default function PayClient({
     }
 
     setIsProcessing(true)
+    
+    if (optIn) {
+      await optInMarketing(order.id).catch(console.error)
+    }
+
     try {
       const { checkoutUrl, error } = await processExistingOrderPayment(
         order.id,
@@ -125,6 +131,25 @@ export default function PayClient({
           >
             Pay
           </button>
+        </div>
+
+        <div className="pt-2 flex items-start gap-3">
+          <div className="flex h-6 items-center">
+            <input
+              id="marketingOptIn"
+              name="marketingOptIn"
+              type="checkbox"
+              checked={optIn}
+              onChange={(e) => setOptIn(e.target.checked)}
+              className="h-4 w-4 rounded border-zinc-700 bg-zinc-800/50 text-blue-500 focus:ring-blue-500 focus:ring-offset-black"
+            />
+          </div>
+          <div className="text-xs text-zinc-400">
+            <label htmlFor="marketingOptIn" className="font-medium text-zinc-300">
+              Join Loyalty & Get Updates
+            </label>
+            <p className="mt-0.5">I agree to receive promotional emails and earn loyalty rewards. (Optional)</p>
+          </div>
         </div>
       </div>
     </div>

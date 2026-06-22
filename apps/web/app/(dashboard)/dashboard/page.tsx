@@ -1,6 +1,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { cookies } from 'next/headers'
 import Link from 'next/link'
 import {
   BarChart3, BookOpen, ClipboardList, FileText,
@@ -12,7 +13,10 @@ export default async function DashboardOverviewPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) {
+  const cookieStore = await cookies()
+  const isDemo = !user && cookieStore.get('demo_mode')?.value === '1'
+
+  if (!user && !isDemo) {
     redirect('/login')
   }
 

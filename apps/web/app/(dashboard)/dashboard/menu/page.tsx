@@ -14,7 +14,8 @@ export default async function MenuManagerPage() {
     // We handle the redirect below
   }
 
-  if (!user) {
+  const isDemo = !user && (await cookies()).get('demo_mode')?.value === '1'
+  if (!user && !isDemo) {
     redirect('/login')
   }
   const userId = user.id

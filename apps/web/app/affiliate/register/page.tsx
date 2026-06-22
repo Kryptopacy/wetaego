@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { registerAffiliate } from '../actions'
 import { redirect } from 'next/navigation'
+import Image from 'next/image'
 
 export default async function AffiliateRegisterPage() {
   const supabase = await createClient()
@@ -24,7 +25,8 @@ export default async function AffiliateRegisterPage() {
   return (
     <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-4">
       <div className="max-w-md w-full space-y-8 bg-zinc-900 border border-zinc-800 p-8 rounded-2xl">
-        <div className="text-center">
+        <div className="flex flex-col items-center text-center">
+          <Image src="/ourmenu-qr-icon.svg" alt="OurMenu Logo" width={48} height={48} className="mb-4 object-contain" />
           <h1 className="text-3xl font-bold">Become an Affiliate</h1>
           <p className="text-zinc-400 mt-2">Earn 10% lifetime recurring commissions on every business you refer.</p>
         </div>

@@ -196,6 +196,7 @@ export async function saveLocationAiSettings(formData: FormData): Promise<void> 
 
 const locationInfoSchema = z.object({
   locationId: z.string().uuid(),
+  currencyCode: z.string().min(3).max(3).optional(),
   wifiNetwork: z.string().max(100).optional().nullable(),
   wifiPassword: z.string().max(100).optional().nullable(),
   instagramHandle: z.string().max(50).optional().nullable(),
@@ -220,6 +221,7 @@ export async function saveLocationInfoSettings(formData: FormData): Promise<void
     // Validate
     const validatedData = locationInfoSchema.parse({
       locationId,
+      currencyCode: formData.get('currency_code') || null,
       wifiNetwork: formData.get('wifiNetwork') || null,
       wifiPassword: formData.get('wifiPassword') || null,
       instagramHandle: formData.get('instagramHandle') || null,
@@ -265,6 +267,7 @@ export async function saveLocationInfoSettings(formData: FormData): Promise<void
     const { error: updateError } = await supabase
       .from('locations')
       .update({
+        currency_code: validatedData.currencyCode || undefined,
         wifi_network: validatedData.wifiNetwork,
         wifi_password: validatedData.wifiPassword,
         instagram_handle: validatedData.instagramHandle,
@@ -281,6 +284,76 @@ export async function saveLocationInfoSettings(formData: FormData): Promise<void
     if (updateError) throw new Error(updateError.message)
 
     revalidatePath('/dashboard/settings')
+  } catch (error) {
+    Sentry.captureException(error)
+    throw error
+  }
+}
+
+
+const loyaltySettingsSchema = z.object({
+  organizationId: z.string().uuid(),
+  isEnabled: z.boolean(),
+  pointsPerMajorUnit: z.number().min(1).max(1000000),
+  rewardThreshold: z.number().min(1).max(1000000),
+  rewardDiscountMinor: z.number().min(0),
+})
+
+export async function saveLoyaltySettings(formData: FormData): Promise<void> {
+  try {
+    const supabase = await createClient()
+
+    const { data: userData, error: authError } = await supabase.auth.getUser()
+    if (authError || !userData?.user) throw new Error('Not authenticated')
+
+    const organizationId = formData.get('organizationId') as string
+    
+    // Validate
+    const validatedData = loyaltySettingsSchema.parse({
+      organizationId,
+      isEnabled: formData.get('isEnabled') === 'true',
+      pointsPerMajorUnit: parseInt(formData.get('pointsPerMajorUnit') as string) || 1,
+      rewardThreshold: parseInt(formData.get('rewardThreshold') as string) || 100,
+      rewardDiscountMinor: parseInt(formData.get('rewardDiscountMinor') as string) || 0,
+    })
+
+    // Verify auth
+    const { data: member } = await supabase
+      .from('organization_members')
+      .select('role')
+      .eq('organization_id', validatedData.organizationId)
+      .eq('user_id', userData.user.id)
+      .single()
+
+    let isAuthorized = member?.role === 'owner' || member?.role === 'manager'
+    if (!member) {
+      const { data: org } = await supabase
+        .from('organizations')
+        .select('id')
+        .eq('id', validatedData.organizationId)
+        .eq('created_by', userData.user.id)
+        .single()
+      isAuthorized = !!org
+    }
+
+    if (!isAuthorized) throw new Error('Only owners and managers can modify loyalty settings.')
+
+    // Upsert settings
+    const { error: upsertError } = await supabase
+      .from('loyalty_settings')
+      .upsert({
+        organization_id: validatedData.organizationId,
+        is_enabled: validatedData.isEnabled,
+        points_per_major_unit: validatedData.pointsPerMajorUnit,
+        reward_threshold: validatedData.rewardThreshold,
+        reward_discount_minor: validatedData.rewardDiscountMinor,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'organization_id' })
+
+    if (upsertError) throw new Error(upsertError.message)
+
+    revalidatePath('/dashboard/settings')
+    revalidatePath('/dashboard/customers')
   } catch (error) {
     Sentry.captureException(error)
     throw error

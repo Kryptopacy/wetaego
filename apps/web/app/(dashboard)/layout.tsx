@@ -35,7 +35,8 @@ const baseNavItems: NavItem[] = [
 ]
 
 const managerItems: NavItem[] = [
-  { href: '/dashboard/team-performance', label: 'Team Performance', icon: Users },
+  { href: '/dashboard/customers', label: 'CRM & Loyalty', icon: Users },
+  { href: '/dashboard/team-performance', label: 'Team Performance', icon: BarChart3 },
   { href: '/dashboard/qr', label: 'QR Generator', icon: QrCode },
   { href: '/dashboard/menu', label: 'Catalog Manager', icon: BookOpen },
   { href: '/dashboard/pages', label: 'Your Pages', icon: FileText },

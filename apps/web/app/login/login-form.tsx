@@ -2,6 +2,7 @@
 
 import { useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
+import Image from 'next/image'
 import { login, signup, signInWithGoogle } from './actions'
 
 function LoginFormInner() {
@@ -12,7 +13,8 @@ function LoginFormInner() {
 
   return (
     <div className="w-full max-w-sm rounded-2xl bg-zinc-900/50 p-8 shadow-2xl ring-1 ring-white/10 backdrop-blur-xl">
-      <div className="mb-8 text-center">
+      <div className="mb-8 flex flex-col items-center text-center">
+        <Image src="/ourmenu-qr-icon.svg" alt="OurMenu Logo" width={48} height={48} className="mb-4 object-contain" />
         <h1 className="text-3xl font-bold tracking-tight text-white">OurMenu OS</h1>
         <p className="mt-2 text-sm text-zinc-400">
           {isLogin ? 'Sign in to your dashboard' : 'Create a new account'}
