@@ -6,6 +6,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { cookies } from 'next/headers'
 import { BUSINESS_TYPE_PRESETS } from '@/lib/templates/presets'
+import { ShareButton } from '@/components/ShareButton'
 
 export default async function PagesManager() {
   const supabase = await createClient()
@@ -179,15 +180,16 @@ export default async function PagesManager() {
               {/* Actions */}
               <div className="flex items-center gap-2 shrink-0">
                 {/* Share button */}
-                <Link
-                  href={`/dashboard/pages/${page.id}/share`}
+                <ShareButton
+                  url={fullUrl}
+                  title={`Check out ${page.title}`}
+                  description={`View our live ${templateTypeLabel(page.template_type).toLowerCase()} at ${org?.name || 'Our Venue'}.`}
                   className="p-2 rounded-lg text-zinc-500 hover:text-violet-400 hover:bg-violet-500/10 transition-colors"
-                  title="Share"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
                   </svg>
-                </Link>
+                </ShareButton>
 
                 {/* Edit button */}
                 <Link

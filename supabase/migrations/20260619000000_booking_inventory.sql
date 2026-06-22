@@ -1,11 +1,11 @@
 -- Add inventory tracking to items
 ALTER TABLE public.page_items 
-ADD COLUMN inventory_count integer NULL;
+ADD COLUMN IF NOT EXISTS inventory_count integer NULL;
 
 -- Add end date/time to bookings for multi-day reservations
 ALTER TABLE public.page_bookings
-ADD COLUMN booking_end_date date NULL,
-ADD COLUMN booking_end_time time NULL;
+ADD COLUMN IF NOT EXISTS booking_end_date date NULL,
+ADD COLUMN IF NOT EXISTS booking_end_time time NULL;
 
 -- Create availability checking function
 CREATE OR REPLACE FUNCTION public.check_item_availability(

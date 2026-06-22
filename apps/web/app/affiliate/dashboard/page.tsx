@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { ShareButton } from '@/components/ShareButton'
 
 export default async function AffiliateDashboardPage() {
   const supabase = await createClient()
@@ -80,10 +81,14 @@ export default async function AffiliateDashboardPage() {
               value={referralLink} 
               className="flex-1 bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-3 text-sm text-zinc-300 outline-none"
             />
-            {/* Note: In a real app, you'd make this a client component with a "Copy" button */}
-            <button className="px-6 py-3 bg-violet-600 hover:bg-violet-500 rounded-lg font-medium transition-colors">
-              Copy Link
-            </button>
+            <ShareButton
+              url={referralLink}
+              title="Join OurMenu OS - Partner Program"
+              description="Sign up for OurMenu OS using my referral link and transform your restaurant's digital experience."
+              className="px-6 py-3 bg-violet-600 hover:bg-violet-500 rounded-lg font-medium transition-colors"
+            >
+              Share Link
+            </ShareButton>
           </div>
           <p className="text-xs text-zinc-500 mt-3">Share this link. When businesses sign up and complete their second renewal, you start earning!</p>
         </div>
