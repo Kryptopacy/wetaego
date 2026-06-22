@@ -11,6 +11,10 @@ const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy')
 export async function sendBroadcastAction(formData: FormData) {
   const supabase = await createClient()
   const { data: userData } = await supabase.auth.getUser()
+  const { cookies } = await import('next/headers')
+  if ((await cookies()).get('demo_mode')?.value === '1') {
+    return { success: true }
+  }
   if (!userData?.user) throw new Error('Not authenticated')
 
   const orgId = formData.get('organization_id') as string

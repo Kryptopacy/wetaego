@@ -8,8 +8,6 @@ export default async function TeamPerformancePage() {
   const { data: userData } = await supabase.auth.getUser()
   const isDemo = !userData?.user && (await cookies()).get('demo_mode')?.value === '1'
   if (!userData?.user && !isDemo) redirect('/login')
-  const user = userData?.user
-
   // Fetch organization
   const { data: member } = await supabase
     .from('organization_members')

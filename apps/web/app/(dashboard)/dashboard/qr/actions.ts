@@ -16,6 +16,23 @@ export async function generateQrBatch(formData: FormData) {
     return { error: 'Invalid parameters' }
   }
 
+  const { cookies } = await import('next/headers')
+  const cookieStore = await cookies()
+  const isDemo = cookieStore.get('demo_mode')?.value === '1'
+
+  if (isDemo && orgId === 'demo-org') {
+    const { getFreeQrLimit } = await import('@/lib/utils/billing')
+    const freeLimit = await getFreeQrLimit('lite')
+    const currentCount = 2 // hardcoded demo QR count
+    const totalAfterGeneration = currentCount + quantity
+    
+    if (totalAfterGeneration > freeLimit) {
+      const excess = totalAfterGeneration - Math.max(currentCount, freeLimit)
+      return { error: `Insufficient credits to generate extra QR codes. You need ${excess} credits for the extra ${excess} codes. Buy a credit pack or upgrade your plan.` }
+    }
+    return { success: true }
+  }
+
   // Fetch the location slug
   const { data: loc, error: locError } = await supabase
     .from('locations')
@@ -94,6 +111,12 @@ export async function generateQrBatch(formData: FormData) {
 }
 
 export async function deleteQrCode(qrId: string) {
+  const { cookies } = await import('next/headers')
+  const cookieStore = await cookies()
+  if (cookieStore.get('demo_mode')?.value === '1' && qrId.startsWith('qr-')) {
+    return { success: true }
+  }
+
   const supabase = await createClient()
   
   const { error } = await supabase.from('qr_codes').delete().eq('id', qrId)
@@ -105,6 +128,12 @@ export async function deleteQrCode(qrId: string) {
 }
 
 export async function assignQrTable(qrId: string, tableIdentifier: string | null) {
+  const { cookies } = await import('next/headers')
+  const cookieStore = await cookies()
+  if (cookieStore.get('demo_mode')?.value === '1' && qrId.startsWith('qr-')) {
+    return { success: true }
+  }
+
   const supabase = await createClient()
   
   const { error } = await supabase

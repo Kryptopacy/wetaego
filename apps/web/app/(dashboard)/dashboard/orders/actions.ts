@@ -60,6 +60,10 @@ export async function markOrderPaidOffline(orderId: string) {
   const supabase = await createClient()
 
   const { data: userData } = await supabase.auth.getUser()
+  const { cookies } = await import('next/headers')
+  if ((await cookies()).get('demo_mode')?.value === '1') {
+    return { success: true }
+  }
   if (!userData?.user) return { error: 'Not authenticated' }
 
   // 1. Fetch order details to verify org

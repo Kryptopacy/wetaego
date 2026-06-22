@@ -8,6 +8,10 @@ export async function savePaymentSettings(formData: FormData) {
   const supabase = await createClient()
 
   const { data: userData, error: authError } = await supabase.auth.getUser()
+  const { cookies } = await import('next/headers')
+  if ((await cookies()).get('demo_mode')?.value === '1') {
+    return { success: true }
+  }
   if (authError || !userData?.user) throw new Error('Not authenticated')
 
   // Find existing org for this user
@@ -64,6 +68,10 @@ export async function saveManualPaymentSettings(formData: FormData) {
   const supabase = await createClient()
 
   const { data: userData, error: authError } = await supabase.auth.getUser()
+  const { cookies } = await import('next/headers')
+  if ((await cookies()).get('demo_mode')?.value === '1') {
+    return { success: true }
+  }
   if (authError || !userData?.user) throw new Error('Not authenticated')
 
   const locationId = formData.get('locationId') as string

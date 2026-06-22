@@ -16,6 +16,17 @@ export async function POST(req: Request) {
   try {
     const supabase = await createClient()
 
+    const { cookies } = await import('next/headers')
+    const isDemo = (await cookies()).get('demo_mode')?.value === '1'
+
+    if (isDemo) {
+      return NextResponse.json({
+        success: true,
+        url: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?q=80&w=1200&h=400&fit=crop',
+        remaining: 100
+      })
+    }
+
     const { data: userData, error: authError } = await supabase.auth.getUser()
     if (authError || !userData?.user) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })

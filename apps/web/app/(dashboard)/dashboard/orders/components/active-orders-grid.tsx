@@ -1,4 +1,4 @@
-import { Database } from '@/lib/supabase/types'
+
 import { toast } from 'sonner'
 import { formatCurrency } from '@/lib/utils/currency'
 import { UIOrder } from '@/lib/types/frontend'

@@ -8,6 +8,10 @@ import { revalidatePath } from 'next/cache'
 export async function saveLocationPromotions(formData: FormData) {
   const supabase = await createClient()
   const { data: userData } = await supabase.auth.getUser()
+  const { cookies } = await import('next/headers')
+  if ((await cookies()).get('demo_mode')?.value === '1') {
+    return { success: true }
+  }
   if (!userData?.user) throw new Error('Not authenticated')
 
   const locationId = formData.get('locationId') as string

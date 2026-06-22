@@ -1,9 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { ActiveOrdersGrid } from '@/app/(dashboard)/dashboard/orders/components/active-orders-grid'
-import { Database } from '@/lib/supabase/types'
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { formatCurrency } from '@/lib/utils/currency'
 import { UIOrder } from '@/lib/types/frontend'
 
 

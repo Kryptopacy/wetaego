@@ -38,6 +38,7 @@ interface CatalogPageRendererProps {
     content?: string
     billing_enabled?: boolean
     billing_mode?: string
+    template_data?: Record<string, any>
   }
   paymentIsLive?: boolean
   items: PageItem[]
@@ -216,6 +217,7 @@ export function CatalogPageRenderer({ location, page, items, locationSlug, payme
           paymentIsLive={paymentIsLive}
           templateType="catalog"
           menuItems={items.map(i => ({ id: i.id, name: i.title, price_minor: i.price_minor || 0 }))}
+          hideAddressField={page.template_data?.hide_delivery === true}
         />
       )}
     </div>

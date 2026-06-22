@@ -15,10 +15,11 @@ interface CartFABProps {
   tableIdentifier?: string
   paymentIsLive?: boolean
   manualPaymentEnabled?: boolean
-  manualPaymentBankName?: string
-  manualPaymentAccountName?: string
-  manualPaymentAccountNumber?: string
-  manualPaymentInstructions?: string
+  manualPaymentBankName?: string | null
+  manualPaymentAccountName?: string | null
+  manualPaymentAccountNumber?: string | null
+  manualPaymentInstructions?: string | null
+  hideAddressField?: boolean
   globalDiscountEnabled?: boolean | null
   globalDiscountPercentage?: number | null
   menuItems?: { id: string, name: string, price_minor: number }[]
@@ -35,6 +36,7 @@ export function CartFAB({
   manualPaymentAccountName,
   manualPaymentAccountNumber,
   manualPaymentInstructions,
+  hideAddressField = false,
   globalDiscountEnabled,
   globalDiscountPercentage,
   menuItems = [],
@@ -111,8 +113,10 @@ export function CartFAB({
   const finalTotalMinor = discountedSubtotalMinor
 
   const handleCheckout = async () => {
-    if (isCheckingOut || !tableNumber) {
-      toast.error(templateType === 'catalog' ? 'Please enter your delivery address' : 'Please enter your table number')
+    if (isCheckingOut) return
+    
+    if (!hideAddressField && !tableNumber && templateType !== 'catalog') {
+      toast.error('Please enter your table number')
       return
     }
 
@@ -243,25 +247,27 @@ export function CartFAB({
 
               <div className="overflow-y-auto overflow-x-hidden -mx-6 px-6 pb-6 space-y-6 flex-1">
                 {/* Location / Table Input */}
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">
-                    {templateType === 'catalog' ? 'Delivery Address' : 'Table Number / Location'}
-                  </label>
-                  {tableIdentifier && templateType !== 'catalog' ? (
-                    <div className="w-full bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 rounded-xl px-4 py-3.5 text-emerald-700 dark:text-emerald-400 font-bold flex items-center justify-between">
-                      <span>Table {tableIdentifier}</span>
-                      <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                    </div>
-                  ) : (
-                    <textarea 
-                      value={tableNumber}
-                      onChange={(e) => setTableNumber(e.target.value)}
-                      placeholder={templateType === 'catalog' ? "123 Main St, Apt 4B..." : "e.g. Table 12 or 'Takeaway'"}
-                      className="w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-3 text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 resize-none placeholder:text-zinc-400 text-[15px]"
-                      rows={templateType === 'catalog' ? 2 : 1}
-                    />
-                  )}
-                </div>
+                {!hideAddressField && (
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">
+                      {templateType === 'catalog' ? 'Delivery Address (Optional)' : 'Table Number / Location'}
+                    </label>
+                    {tableIdentifier && templateType !== 'catalog' ? (
+                      <div className="w-full bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 rounded-xl px-4 py-3.5 text-emerald-700 dark:text-emerald-400 font-bold flex items-center justify-between">
+                        <span>Table {tableIdentifier}</span>
+                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                      </div>
+                    ) : (
+                      <textarea 
+                        value={tableNumber}
+                        onChange={(e) => setTableNumber(e.target.value)}
+                        placeholder={templateType === 'catalog' ? "123 Main St, Apt 4B..." : "e.g. Table 12 or 'Takeaway'"}
+                        className="w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-3 text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 resize-none placeholder:text-zinc-400 text-[15px]"
+                        rows={templateType === 'catalog' ? 2 : 1}
+                      />
+                    )}
+                  </div>
+                )}
 
                 {/* Optional Email & Note */}
                 <div className="space-y-4">
@@ -405,7 +411,7 @@ export function CartFAB({
               <div className="pt-4 mt-auto shrink-0 bg-white dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800 -mx-6 px-6 -mb-6 pb-6 sm:mb-0 sm:pb-0 sm:border-t-0 sm:pt-0">
                 <button 
                   onClick={handleCheckout}
-                  disabled={isCheckingOut || !tableNumber}
+                  disabled={isCheckingOut || (!hideAddressField && !tableNumber && templateType !== 'catalog')}
                   className="group w-full bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-bold h-14 rounded-2xl shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 transition-all active:scale-95 text-[15px]"
                 >
                   {isCheckingOut ? (

@@ -15,6 +15,11 @@ export async function updateOrganization(formData: FormData) {
     const supabase = await createClient()
 
     const { data: userData, error: authError } = await supabase.auth.getUser()
+    const { cookies } = await import('next/headers')
+    if ((await cookies()).get('demo_mode')?.value === '1') {
+      revalidatePath('/dashboard/settings')
+      return { success: true }
+    }
     if (authError || !userData?.user) throw new Error('Not authenticated')
 
     const rawData = {
@@ -127,6 +132,11 @@ export async function saveLocationAiSettings(formData: FormData): Promise<void> 
     const supabase = await createClient()
 
     const { data: userData, error: authError } = await supabase.auth.getUser()
+    const { cookies } = await import('next/headers')
+    if ((await cookies()).get('demo_mode')?.value === '1') {
+      revalidatePath('/dashboard/settings')
+      return { success: true }
+    }
     if (authError || !userData?.user) throw new Error('Not authenticated')
 
     const locationId = formData.get('locationId') as string
@@ -214,6 +224,11 @@ export async function saveLocationInfoSettings(formData: FormData): Promise<void
     const supabase = await createClient()
 
     const { data: userData, error: authError } = await supabase.auth.getUser()
+    const { cookies } = await import('next/headers')
+    if ((await cookies()).get('demo_mode')?.value === '1') {
+      revalidatePath('/dashboard/settings')
+      return { success: true }
+    }
     if (authError || !userData?.user) throw new Error('Not authenticated')
 
     const locationId = formData.get('locationId') as string
@@ -304,6 +319,11 @@ export async function saveLoyaltySettings(formData: FormData): Promise<void> {
     const supabase = await createClient()
 
     const { data: userData, error: authError } = await supabase.auth.getUser()
+    const { cookies } = await import('next/headers')
+    if ((await cookies()).get('demo_mode')?.value === '1') {
+      revalidatePath('/dashboard/settings')
+      return { success: true }
+    }
     if (authError || !userData?.user) throw new Error('Not authenticated')
 
     const organizationId = formData.get('organizationId') as string

@@ -105,8 +105,6 @@ export default async function PageEditDashboard({
           <div className="flex items-center justify-between p-4 bg-zinc-900 border border-zinc-800 rounded-xl">
             <div>
               <p className="text-sm font-bold text-white">Payment Roulette Add-on</p>
-  { }
-  { }
   {/* eslint-disable-next-line react/no-unescaped-entities */}
               <p className="text-xs text-zinc-400 mt-0.5">Enable the "Surprise Me" spinning wheel for customers who can't decide.</p>
             </div>
@@ -115,6 +113,20 @@ export default async function PageEditDashboard({
               <div className="w-11 h-6 bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-500"></div>
             </label>
           </div>
+
+          {page.template_type === 'catalog' && (
+            <div className="flex items-center justify-between p-4 bg-zinc-900 border border-zinc-800 rounded-xl mt-4">
+              <div>
+                <p className="text-sm font-bold text-white">Hide Delivery Address Field</p>
+                <p className="text-xs text-zinc-400 mt-0.5">Remove the delivery address input entirely from the checkout modal.</p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                {/* @ts-ignore - JSONB typing issues */}
+                <input type="checkbox" name="hide_delivery" value="true" defaultChecked={page.template_data?.hide_delivery || false} className="sr-only peer" />
+                <div className="w-11 h-6 bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-500"></div>
+              </label>
+            </div>
+          )}
 
           <div className="pt-2">
             <button type="submit" className="px-4 py-2 bg-white text-black text-sm font-bold rounded-lg hover:bg-zinc-200 transition-colors">

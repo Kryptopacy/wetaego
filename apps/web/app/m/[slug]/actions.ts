@@ -249,7 +249,7 @@ export async function optInMarketing(orderId: string): Promise<{ success?: boole
     if (error) throw error
 
     return { success: true }
-  } catch (err: any) {
-    return { error: err.message || 'Failed to opt in' }
+  } catch (err: unknown) {
+    return { error: err instanceof Error ? err.message : 'Failed to opt in' }
   }
 }

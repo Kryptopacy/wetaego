@@ -22,6 +22,12 @@ export async function setBusinessTypeAction(formData: FormData): Promise<void> {
 
   const supabase = await createClient()
   const { data: userData } = await supabase.auth.getUser()
+  const { cookies } = await import('next/headers')
+  if ((await cookies()).get('demo_mode')?.value === '1') {
+    revalidatePath('/dashboard/pages')
+    return
+  }
+
   if (!userData?.user) throw new Error('Not authenticated')
 
   // If primary mode, set the org's business_type
@@ -59,6 +65,12 @@ export async function createCustomPage(formData: FormData): Promise<void> {
   }
 
   const { data: userData } = await supabase.auth.getUser()
+  const { cookies } = await import('next/headers')
+  if ((await cookies()).get('demo_mode')?.value === '1') {
+    revalidatePath('/dashboard/pages')
+    return
+  }
+
   if (!userData?.user) throw new Error('Not authenticated')
 
   // 1. Get organization ID for this location
@@ -149,6 +161,7 @@ export async function updatePage(formData: FormData): Promise<void> {
     ? parseInt(formData.get('deposit_percentage') as string)
     : null
   const randomizer_enabled = formData.get('randomizer_enabled') === 'true'
+  const hide_delivery = formData.get('hide_delivery') === 'true'
 
   if (pageId.startsWith('page-')) {
     revalidatePath('/dashboard/pages')
@@ -156,11 +169,20 @@ export async function updatePage(formData: FormData): Promise<void> {
   }
 
   const { data: userData } = await supabase.auth.getUser()
+  const { cookies } = await import('next/headers')
+  if ((await cookies()).get('demo_mode')?.value === '1') {
+    revalidatePath('/dashboard/pages')
+    return
+  }
+
   if (!userData?.user) throw new Error('Not authenticated')
+
+  const { data: existing } = await supabase.from('location_pages').select('template_data').eq('id', pageId).single()
+  const template_data = { ...((existing?.template_data as Record<string, any>) || {}), hide_delivery }
 
   const { error } = await supabase
     .from('location_pages')
-    .update({ title, content, billing_enabled, billing_mode, payment_mode, deposit_percentage, randomizer_enabled })
+    .update({ title, content, billing_enabled, billing_mode, payment_mode, deposit_percentage, randomizer_enabled, template_data })
     .eq('id', pageId)
 
   if (error) throw new Error((error as Error).message)
@@ -196,6 +218,12 @@ export async function addPageItem(formData: FormData): Promise<void> {
   const aiImageUrl = formData.get('ai_image_url') as string | null
 
   const { data: userData } = await supabase.auth.getUser()
+  const { cookies } = await import('next/headers')
+  if ((await cookies()).get('demo_mode')?.value === '1') {
+    revalidatePath('/dashboard/pages')
+    return
+  }
+
   if (!userData?.user) throw new Error('Not authenticated')
 
   // Handle image upload
@@ -257,6 +285,12 @@ export async function updatePageItem(formData: FormData): Promise<void> {
   const aiImageUrl = formData.get('ai_image_url') as string | null
 
   const { data: userData } = await supabase.auth.getUser()
+  const { cookies } = await import('next/headers')
+  if ((await cookies()).get('demo_mode')?.value === '1') {
+    revalidatePath('/dashboard/pages')
+    return
+  }
+
   if (!userData?.user) throw new Error('Not authenticated')
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -293,6 +327,12 @@ export async function deletePageItem(formData: FormData): Promise<void> {
   const itemId = formData.get('itemId') as string
 
   const { data: userData } = await supabase.auth.getUser()
+  const { cookies } = await import('next/headers')
+  if ((await cookies()).get('demo_mode')?.value === '1') {
+    revalidatePath('/dashboard/pages')
+    return
+  }
+
   if (!userData?.user) throw new Error('Not authenticated')
 
   await supabase.from('page_items').delete().eq('id', itemId)
@@ -305,6 +345,12 @@ export async function updateItemAvailability(formData: FormData): Promise<void> 
   const status = formData.get('status') as string
 
   const { data: userData } = await supabase.auth.getUser()
+  const { cookies } = await import('next/headers')
+  if ((await cookies()).get('demo_mode')?.value === '1') {
+    revalidatePath('/dashboard/pages')
+    return
+  }
+
   if (!userData?.user) throw new Error('Not authenticated')
 
   await supabase
@@ -357,6 +403,12 @@ export async function updateBookingStatus(formData: FormData): Promise<void> {
   const status = formData.get('status') as string
 
   const { data: userData } = await supabase.auth.getUser()
+  const { cookies } = await import('next/headers')
+  if ((await cookies()).get('demo_mode')?.value === '1') {
+    revalidatePath('/dashboard/pages')
+    return
+  }
+
   if (!userData?.user) throw new Error('Not authenticated')
 
   await supabase
@@ -375,6 +427,12 @@ export async function updateInquiryStatus(formData: FormData): Promise<void> {
   const status = formData.get('status') as string
 
   const { data: userData } = await supabase.auth.getUser()
+  const { cookies } = await import('next/headers')
+  if ((await cookies()).get('demo_mode')?.value === '1') {
+    revalidatePath('/dashboard/pages')
+    return
+  }
+
   if (!userData?.user) throw new Error('Not authenticated')
 
   await supabase

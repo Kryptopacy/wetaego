@@ -83,7 +83,7 @@ export default async function PublicPageView({
   // 2. Page
   const pageQuery = supabase
     .from('location_pages')
-    .select('id, title, slug, content, template_type, billing_enabled, billing_mode, payment_mode, deposit_percentage, business_type_preset, randomizer_enabled')
+    .select('id, title, slug, content, template_type, billing_enabled, billing_mode, payment_mode, deposit_percentage, business_type_preset, randomizer_enabled, template_data')
     .eq('location_id', loc.id)
     .eq('slug', pageSlug)
     .eq('is_published', true)

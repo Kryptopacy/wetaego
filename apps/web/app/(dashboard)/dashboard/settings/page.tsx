@@ -11,7 +11,7 @@ import { PlanType } from '@/lib/payments/credits'
 import { getPlanLimits } from '@/lib/utils/settings'
 import { savePaymentSettings, saveManualPaymentSettings } from './payment-actions'
 import { cookies } from 'next/headers'
-import { CurrencySelector } from './currency-selector'
+
 
 export default async function SettingsPage({
   searchParams,
@@ -179,7 +179,7 @@ export default async function SettingsPage({
                   name="slug"
                   defaultValue={organization?.slug || ''}
                   required
-                  pattern="[a-z0-9-]+"
+                  pattern="[a-z0-9\-]+"
                   className="w-full bg-transparent py-2.5 text-white outline-none"
                   placeholder="my-lounge"
                 />

@@ -14,6 +14,17 @@ export async function POST(req: Request) {
   try {
     const supabase = await createClient()
 
+    const { cookies } = await import('next/headers')
+    const isDemo = (await cookies()).get('demo_mode')?.value === '1'
+
+    if (isDemo) {
+      return NextResponse.json({
+        success: true,
+        url: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=600&h=600&fit=crop',
+        remaining: 100
+      })
+    }
+
     const { data: userData, error: authError } = await supabase.auth.getUser()
     if (authError || !userData?.user) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
@@ -27,10 +38,6 @@ export async function POST(req: Request) {
     }
 
     const { organizationId, itemName, itemContext } = parsed.data
-
-    if (organizationId === 'demo-org') {
-      return NextResponse.json({ success: true, url: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=600&h=600&fit=crop', remaining: 100 })
-    }
 
     // 1. Verify membership
     const { data: member } = await supabase

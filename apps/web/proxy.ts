@@ -9,7 +9,7 @@ import { NextResponse, type NextRequest } from 'next/server'
  * 2. Protects /dashboard/* routes — redirects unauthenticated users to /login
  * 3. Allows all public routes (/m/*, /api/*, /login, /, etc.) without auth
  */
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(
@@ -45,9 +45,7 @@ export async function middleware(request: NextRequest) {
   const isProtectedRoute = request.nextUrl.pathname.startsWith('/dashboard')
   const isAffiliateDashboard = request.nextUrl.pathname.startsWith('/affiliate/dashboard')
 
-  const isDemoMode = request.cookies.get('demo_mode')?.value === '1'
-
-  if (!user && !isDemoMode && (isProtectedRoute || isAffiliateDashboard)) {
+  if (!user && (isProtectedRoute || isAffiliateDashboard)) {
     const loginUrl = request.nextUrl.clone()
     loginUrl.pathname = '/login'
     loginUrl.searchParams.set('redirectTo', request.nextUrl.pathname)

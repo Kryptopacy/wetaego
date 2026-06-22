@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { formatCurrency } from '@/lib/utils/currency'
-import { Users, Mail, TrendingUp, Award, ExternalLink } from 'lucide-react'
+import { Users, Mail, TrendingUp, Award } from 'lucide-react'
 import Link from 'next/link'
 import { cookies } from 'next/headers'
 

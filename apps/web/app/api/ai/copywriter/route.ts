@@ -15,6 +15,17 @@ const copywriterSchema = z.object({
 export async function POST(req: Request) {
   try {
     const supabase = await createClient()
+    const { cookies } = await import('next/headers')
+    const isDemo = (await cookies()).get('demo_mode')?.value === '1'
+
+    if (isDemo) {
+      return NextResponse.json({
+        description: 'A delicious, hand-crafted culinary masterpiece guaranteed to delight your senses.',
+        dietary_tags: ['Vegetarian'],
+        allergen_tags: ['Dairy']
+      })
+    }
+
     const { data: userData, error: authError } = await supabase.auth.getUser()
     if (authError || !userData?.user) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })

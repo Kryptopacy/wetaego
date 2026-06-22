@@ -10,6 +10,12 @@ import { getUsdToNgnRate } from '@/lib/payments/exchange'
 export async function subscribeToLite(formData: FormData) {
   const supabase = await createClient()
   
+  const { cookies } = await import('next/headers')
+  const cookieStore = await cookies()
+  if (cookieStore.get('demo_mode')?.value === '1') {
+    throw new Error('Billing is disabled in Demo Mode')
+  }
+
   const { data: userData } = await supabase.auth.getUser()
   if (!userData?.user) throw new Error('Not authenticated')
 
