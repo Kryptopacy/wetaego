@@ -10,7 +10,7 @@ export async function savePaymentSettings(formData: FormData) {
   const { data: userData, error: authError } = await supabase.auth.getUser()
   const { cookies } = await import('next/headers')
   if ((await cookies()).get('demo_mode')?.value === '1') {
-    return { success: true }
+    return
   }
   if (authError || !userData?.user) throw new Error('Not authenticated')
 
@@ -70,7 +70,7 @@ export async function saveManualPaymentSettings(formData: FormData) {
   const { data: userData, error: authError } = await supabase.auth.getUser()
   const { cookies } = await import('next/headers')
   if ((await cookies()).get('demo_mode')?.value === '1') {
-    return { success: true }
+    return
   }
   if (authError || !userData?.user) throw new Error('Not authenticated')
 

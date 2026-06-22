@@ -10,6 +10,7 @@ import { InfoRenderer } from './templates/info-renderer'
 import { AIChat } from '../../ai-chat'
 import { RouletteFAB } from '../../roulette-fab'
 import { EcosystemNav } from '@/components/layout/ecosystem-nav'
+import { withCache } from '@/lib/redis-cache'
 
 export async function generateMetadata({
   params,
@@ -71,35 +72,44 @@ export default async function PublicPageView({
   const supabase = await createClient()
 
   // 1. Location
-  const locQuery = supabase
-    .from('locations')
-    .select('id, name, organization_id, theme_color, cover_image_url, ai_enabled, ai_name, instagram_handle, x_handle, tiktok_handle, whatsapp_number, phone_number, organizations(logo_url), manual_payment_enabled, manual_payment_bank_name, manual_payment_account_name, manual_payment_account_number, manual_payment_instructions')
-    .eq('slug', slug)
-    .single()
-  const { data: loc } = await locQuery
+  const fetchLocation = async () => {
+    const { data } = await supabase
+      .from('locations')
+      .select('id, name, organization_id, theme_color, cover_image_url, ai_enabled, ai_name, instagram_handle, x_handle, tiktok_handle, whatsapp_number, phone_number, organizations(logo_url), manual_payment_enabled, manual_payment_bank_name, manual_payment_account_name, manual_payment_account_number, manual_payment_instructions')
+      .eq('slug', slug)
+      .single()
+    return data
+  }
+  const loc = await withCache(`location_${slug}`, fetchLocation, 60)
 
   if (!loc) notFound()
 
   // 2. Page
-  const pageQuery = supabase
-    .from('location_pages')
-    .select('id, title, slug, content, template_type, billing_enabled, billing_mode, payment_mode, deposit_percentage, business_type_preset, randomizer_enabled, template_data')
-    .eq('location_id', loc.id)
-    .eq('slug', pageSlug)
-    .eq('is_published', true)
-    .single()
-  const { data: page } = await pageQuery
+  const fetchPage = async () => {
+    const { data } = await supabase
+      .from('location_pages')
+      .select('id, title, slug, content, template_type, billing_enabled, billing_mode, payment_mode, deposit_percentage, business_type_preset, randomizer_enabled, template_data')
+      .eq('location_id', loc.id)
+      .eq('slug', pageSlug)
+      .eq('is_published', true)
+      .single()
+    return data
+  }
+  const page = await withCache(`location_page_${loc.id}_${pageSlug}`, fetchPage, 60)
 
   if (!page) notFound()
 
   // 3. Items (for catalog, booking, listing, rate_card)
-  const itemsQuery = supabase
-    .from('page_items')
-    .select('*')
-    .eq('page_id', page.id)
-    .eq('is_published', true)
-    .order('sort_order')
-  const { data: items } = await itemsQuery
+  const fetchItems = async () => {
+    const { data } = await supabase
+      .from('page_items')
+      .select('*')
+      .eq('page_id', page.id)
+      .eq('is_published', true)
+      .order('sort_order')
+    return data || []
+  }
+  const items = await withCache(`page_items_${page.id}`, fetchItems, 60)
 
   // 4. Payment Settings
   const { data: paymentSettings } = await supabase
@@ -153,7 +163,7 @@ export default async function PublicPageView({
           aiName={loc.ai_name || ''}
           themeColor={loc.theme_color || '#7c3aed'}
           tableIdentifier="QR Scan" // Standard fallback for generic pages
-          menuItems={(items as QueryData<typeof itemsQuery>).map(i => ({ id: i.id, name: i.title, price_minor: i.price_minor || 0 })) || []}
+          menuItems={((items as Record<string, any>[]) || []).map(i => ({ id: i.id, name: i.title, price_minor: i.price_minor || 0 }))}
           templateType={page.template_type}
           billingMode={page.billing_mode}
           businessTypePreset={page.business_type_preset}

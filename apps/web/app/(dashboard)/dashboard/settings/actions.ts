@@ -18,7 +18,7 @@ export async function updateOrganization(formData: FormData) {
     const { cookies } = await import('next/headers')
     if ((await cookies()).get('demo_mode')?.value === '1') {
       revalidatePath('/dashboard/settings')
-      return { success: true }
+      return
     }
     if (authError || !userData?.user) throw new Error('Not authenticated')
 
@@ -135,7 +135,7 @@ export async function saveLocationAiSettings(formData: FormData): Promise<void> 
     const { cookies } = await import('next/headers')
     if ((await cookies()).get('demo_mode')?.value === '1') {
       revalidatePath('/dashboard/settings')
-      return { success: true }
+      return
     }
     if (authError || !userData?.user) throw new Error('Not authenticated')
 
@@ -227,7 +227,7 @@ export async function saveLocationInfoSettings(formData: FormData): Promise<void
     const { cookies } = await import('next/headers')
     if ((await cookies()).get('demo_mode')?.value === '1') {
       revalidatePath('/dashboard/settings')
-      return { success: true }
+      return
     }
     if (authError || !userData?.user) throw new Error('Not authenticated')
 
@@ -322,7 +322,7 @@ export async function saveLoyaltySettings(formData: FormData): Promise<void> {
     const { cookies } = await import('next/headers')
     if ((await cookies()).get('demo_mode')?.value === '1') {
       revalidatePath('/dashboard/settings')
-      return { success: true }
+      return
     }
     if (authError || !userData?.user) throw new Error('Not authenticated')
 

@@ -21,15 +21,7 @@ export async function generateQrBatch(formData: FormData) {
   const isDemo = cookieStore.get('demo_mode')?.value === '1'
 
   if (isDemo && orgId === 'demo-org') {
-    const { getFreeQrLimit } = await import('@/lib/utils/billing')
-    const freeLimit = await getFreeQrLimit('lite')
-    const currentCount = 2 // hardcoded demo QR count
-    const totalAfterGeneration = currentCount + quantity
-    
-    if (totalAfterGeneration > freeLimit) {
-      const excess = totalAfterGeneration - Math.max(currentCount, freeLimit)
-      return { error: `Insufficient credits to generate extra QR codes. You need ${excess} credits for the extra ${excess} codes. Buy a credit pack or upgrade your plan.` }
-    }
+    // In Demo Mode, allow unlimited generation just to demonstrate the UI
     return { success: true }
   }
 

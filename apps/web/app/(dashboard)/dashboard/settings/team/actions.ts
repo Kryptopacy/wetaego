@@ -11,7 +11,7 @@ async function verifyOwner(orgId: string) {
     if (orgId === 'demo-org') return 'demo-user-id'
     const { cookies } = await import('next/headers')
     if ((await cookies()).get('demo_mode')?.value === '1') {
-      return { success: true }
+      return 'demo-user-id'
     }
     throw new Error('Not authenticated')
   }

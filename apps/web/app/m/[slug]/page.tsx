@@ -135,11 +135,16 @@ export default async function PublicMenuPage({
   }
 
   // 1.8 Check location_pages for Portal mode
-  const { data: locationPages } = await supabase
-    .from('location_pages')
-    .select('id, slug, title, template_type, is_published')
-    .eq('location_id', location.id)
-    .eq('is_published', true)
+  const fetchLocationPages = async () => {
+    const { data } = await supabase
+      .from('location_pages')
+      .select('id, slug, title, template_type, is_published')
+      .eq('location_id', location.id)
+      .eq('is_published', true)
+    return data
+  }
+  
+  const locationPages = await withCache(`location_pages_${location.id}`, fetchLocationPages, 60)
 
   const view = resolvedSearchParams.view;
   const hasPortalMode = locationPages && locationPages.length > 0;
@@ -149,24 +154,25 @@ export default async function PublicMenuPage({
   }
 
   // 2. Find the active menu for this location
-  let categories: CategoryWithItems[] = []
+  const fetchMenuCategories = async () => {
+    const { data: menuData } = await supabase
+      .from('menus')
+      .select('id')
+      .eq('location_id', location.id)
+      .single()
 
-  const { data: menu } = await supabase
-    .from('menus')
-    .select('id')
-    .eq('location_id', location.id)
-    .single()
+    if (!menuData) return []
 
-  if (menu) {
-    // 3. Fetch categories and items
     const { data } = await supabase
       .from('menu_categories')
       .select('*, menu_items(*)')
-      .eq('menu_id', menu.id)
+      .eq('menu_id', menuData.id)
       .order('sort_order')
     
-    categories = data || []
+    return data || []
   }
+
+  const categories = await withCache(`menu_categories_${location.id}`, fetchMenuCategories, 60)
 
   const allMenuItems = categories.flatMap(cat => 
     (cat.menu_items || []).map(item => ({
