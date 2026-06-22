@@ -178,7 +178,7 @@ export async function updatePage(formData: FormData): Promise<void> {
   if (!userData?.user) throw new Error('Not authenticated')
 
   const { data: existing } = await supabase.from('location_pages').select('template_data').eq('id', pageId).single()
-  const template_data = { ...((existing?.template_data as Record<string, any>) || {}), hide_delivery }
+  const template_data = { ...((existing?.template_data as Record<string, unknown>) || {}), hide_delivery }
 
   const { error } = await supabase
     .from('location_pages')

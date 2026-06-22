@@ -5,6 +5,15 @@ process.env.RESEND_API_KEY = 're_test_key_123'
 process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://xtplllmegnsozginzpqh.supabase.co'
 process.env.SUPABASE_SERVICE_ROLE_KEY = 'test_service_key'
 
+// Mock next/headers
+vi.mock('next/headers', () => ({
+  cookies: vi.fn().mockResolvedValue({
+    get: vi.fn().mockReturnValue(undefined),
+    set: vi.fn(),
+    delete: vi.fn(),
+  }),
+}))
+
 // Mock matchMedia
 Object.defineProperty(window, 'matchMedia', {
   writable: true,

@@ -10,12 +10,9 @@ import { RouletteFAB } from './roulette-fab'
 import { SpinnerModal } from '../../components/spinner-modal'
 import { PortalRenderer } from './portal-renderer'
 import { EcosystemNav } from '@/components/layout/ecosystem-nav'
-import { Tables } from '../../../../../types'
+
 import { withCache } from '@/lib/redis-cache'
 
-type CategoryWithItems = Tables<'menu_categories'> & {
-  menu_items: Tables<'menu_items'>[]
-}
 
 import { VenueHeader } from './components/venue-header'
 import { InvalidQrMessage, UnassignedTableMessage } from './components/qr-state-messages'

@@ -1,4 +1,4 @@
-import { QueryData } from '@supabase/supabase-js'
+
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
@@ -163,7 +163,7 @@ export default async function PublicPageView({
           aiName={loc.ai_name || ''}
           themeColor={loc.theme_color || '#7c3aed'}
           tableIdentifier="QR Scan" // Standard fallback for generic pages
-          menuItems={((items as Record<string, any>[]) || []).map(i => ({ id: i.id, name: i.title, price_minor: i.price_minor || 0 }))}
+          menuItems={((items as Record<string, unknown>[]) || []).map(i => ({ id: i.id as string, name: i.title as string, price_minor: (i.price_minor as number) || 0 }))}
           templateType={page.template_type}
           billingMode={page.billing_mode}
           businessTypePreset={page.business_type_preset}

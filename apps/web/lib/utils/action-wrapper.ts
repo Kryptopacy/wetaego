@@ -2,7 +2,7 @@ import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { User } from '@supabase/supabase-js'
 
-export type ActionResponse<T = any> = T | { error: string } | { success: boolean, message?: string }
+export type ActionResponse<T = unknown> = T | { error: string } | { success: boolean, message?: string }
 
 /**
  * A wrapper for Server Actions that automatically handles Demo Mode bypassing

@@ -38,7 +38,7 @@ interface CatalogPageRendererProps {
     content?: string
     billing_enabled?: boolean
     billing_mode?: string
-    template_data?: Record<string, any>
+    template_data?: Record<string, unknown>
   }
   paymentIsLive?: boolean
   items: PageItem[]
