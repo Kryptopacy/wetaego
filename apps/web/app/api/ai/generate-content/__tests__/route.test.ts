@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { POST } from '../route'
 import * as ai from 'ai'
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { NextResponse } from 'next/server'
 
 vi.mock('ai', () => ({
@@ -26,7 +27,7 @@ describe('Generate Content API', () => {
   })
 
   it('calls generateText with correct parameters', async () => {
-    vi.mocked(ai.generateText).mockResolvedValueOnce({ text: 'A premium description.' } as any)
+    vi.mocked(ai.generateText).mockResolvedValueOnce({ text: 'A premium description.' } as unknown)
 
     const req = new Request('http://localhost/api/ai/generate-content', {
       method: 'POST',

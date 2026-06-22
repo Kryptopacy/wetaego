@@ -109,7 +109,7 @@ export default async function AnalyticsDashboardPage() {
   // Fake chart data for the timeline
   const chartBars = Array.from({ length: 14 }).map((_, i) => ({
     day: i + 1,
-    height: Math.floor(Math.random() * 80) + 20
+    height: Math.floor(Math.abs(Math.sin(i)) * 80) + 20
   }))
 
   return (

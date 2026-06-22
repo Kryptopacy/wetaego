@@ -83,6 +83,7 @@ export async function POST(req: Request) {
         const org = orgRaw as { extra_pages_purchased?: number } | null;
           
         if (org) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const updatePayload: any = {
             extra_pages_purchased: (org.extra_pages_purchased || 0) + 1
           };

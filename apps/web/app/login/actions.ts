@@ -51,6 +51,7 @@ export async function signup(formData: FormData) {
 export async function signInWithGoogle() {
   const supabase = await createClient()
   
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {

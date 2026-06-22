@@ -112,7 +112,7 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
       supabase.removeChannel(serviceRequestsSubscription)
       supabase.removeChannel(menuSubscription)
     }
-  }, [organizationId, supabase])
+  }, [organizationId, locationId, supabase])  
 
   const urgencyWeight: Record<string, number> = { 'critical': 3, 'standard': 2, 'low': 1 }
   const pendingRequests = serviceRequests

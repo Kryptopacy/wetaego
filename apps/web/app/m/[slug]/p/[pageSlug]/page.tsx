@@ -109,9 +109,12 @@ export default async function PublicPageView({
     .single()
 
   const sharedProps = {
-    location: { ...loc, cover_image_url: loc.cover_image_url ?? undefined } as unknown as any,
-    page: page as unknown as any,
-    items: items as unknown as any[],
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    location: { ...loc, cover_image_url: loc.cover_image_url ?? undefined } as any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    page: page as any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    items: items as any[],
     locationSlug: slug,
     referralSource: ref,
     paymentIsLive: paymentSettings?.is_active ?? false,

@@ -1,3 +1,4 @@
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { QueryData } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'

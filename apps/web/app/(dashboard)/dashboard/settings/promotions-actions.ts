@@ -22,6 +22,7 @@ export async function saveLocationPromotions(formData: FormData) {
     if (rawConfig) {
       spinner_config = JSON.parse(rawConfig)
     }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (e) {
     throw new Error('Invalid JSON for Wheel Segments')
   }

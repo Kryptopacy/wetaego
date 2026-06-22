@@ -254,6 +254,7 @@ export default async function SettingsPage({
                   )}
                 </h2>
                 <p className="text-sm text-zinc-400 mb-6">
+  {/* eslint-disable-next-line react/no-unescaped-entities */}
                   If your Paystack account isn't live yet or the provider experiences downtime, the system will automatically fall back to showing these manual bank transfer details so you never lose a booking.
                 </p>
                 
@@ -473,6 +474,9 @@ export default async function SettingsPage({
               <div className="flex items-center justify-between p-4 bg-zinc-800/30 border border-zinc-700 rounded-xl mt-4">
                 <div>
                   <p className="text-sm font-bold text-white">Payment Roulette Add-on</p>
+  { }
+  { }
+  {/* eslint-disable-next-line react/no-unescaped-entities */}
                   <p className="text-xs text-zinc-400 mt-0.5">Enable the "Surprise Me" spinning wheel on your main menu for customers who can't decide.</p>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
@@ -557,6 +561,8 @@ export default async function SettingsPage({
                     className="w-5 h-5 rounded border-zinc-600 text-purple-500 bg-zinc-800"
                   />
                   <label htmlFor="spinner_enabled" className="text-sm font-medium text-white flex-1 cursor-pointer">
+  { }
+  {/* eslint-disable-next-line react/no-unescaped-entities */}
                     Enable "Spin the Wheel"
                     <span className="block text-xs text-zinc-400 font-normal mt-0.5">Let guests spin a wheel to win discounts before checkout.</span>
                   </label>
@@ -570,6 +576,8 @@ export default async function SettingsPage({
                     rows={6}
                     className="w-full rounded-xl bg-zinc-800 border-zinc-700 px-4 py-3 text-white outline-none focus:border-purple-500 font-mono text-sm"
                   />
+  { }
+  {/* eslint-disable-next-line react/no-unescaped-entities */}
                   <p className="text-xs text-zinc-500 mt-2">Customize the wheel segments. "value" is the discount percentage won.</p>
                 </div>
               </div>

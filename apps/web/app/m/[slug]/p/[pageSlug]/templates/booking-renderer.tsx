@@ -417,7 +417,7 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
               >✅</motion.div>
               <h2 className="text-xl font-bold text-white mb-2">Booking Requested!</h2>
               <p className="text-zinc-400 text-sm mb-4">
-              We'll confirm your booking shortly. Check your phone for updates from {location.name}.
+              We&apos;ll confirm your booking shortly. Check your phone for updates from {location.name}.
             </p>
             <button onClick={() => { setFormSuccess(false); setShowBookingForm(false); setSelectedItems([]) }} className="text-zinc-400 text-sm hover:text-white transition-colors">
               ← View other services

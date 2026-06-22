@@ -213,7 +213,7 @@ export function RateCardRenderer({ location, page, items, locationSlug, paymentI
             <div className="text-4xl mb-4">🎉</div>
             <h2 className="text-xl font-bold text-white mb-2">Project Requested!</h2>
             <p className="text-zinc-400 text-sm mb-4">
-              We have received your project requirements. We'll be in touch shortly.
+              We have received your project requirements. We&apos;ll be in touch shortly.
             </p>
             <button onClick={() => { setFormSuccess(false); setSelectedItems([]) }} className="text-zinc-400 text-sm hover:text-white">
               ← View rate card

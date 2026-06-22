@@ -73,7 +73,7 @@ export function AICoverStudio({
 
         {coverUrl && (
           <div className="mb-6 relative w-full h-48 sm:h-64 rounded-lg overflow-hidden border border-zinc-800 bg-zinc-900">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
+            { }
             <Image 
               src={coverUrl} 
               alt="Generated Cover" 

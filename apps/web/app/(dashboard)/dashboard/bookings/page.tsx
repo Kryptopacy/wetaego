@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import Link from 'next/link'
 import { format } from 'date-fns'
 

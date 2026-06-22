@@ -120,7 +120,7 @@ export function AddItemForm({ orgId, categoryId, categoryName }: { orgId: string
         <div className="w-48 relative flex flex-col gap-2">
           {aiImageUrl ? (
             <div className="relative w-full aspect-square rounded-lg overflow-hidden border border-zinc-700">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
+              { }
               <Image src={aiImageUrl} alt="AI Generated" width={300} height={300} className="object-cover w-full h-full" />
               <button 
                 type="button" 

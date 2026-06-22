@@ -39,6 +39,7 @@ export async function updateSetting(formData: FormData) {
   }
 
   const { error } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     .from('system_settings' as any)
     .upsert({
       key,

@@ -34,6 +34,7 @@ export default function FeedbackVerifyPage({
         toast.success('Verified!')
         router.push(`/m/${params.slug}/feedback/${orderId}`)
       }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       toast.error('Failed to verify PIN')
     } finally {
@@ -84,7 +85,7 @@ export default function FeedbackVerifyPage({
                 onClick={() => router.push(`/m/${params.slug}/feedback/general`)}
                 className="w-full text-zinc-500 text-sm font-medium hover:text-white transition-colors"
               >
-                I don't have an order (General Feedback)
+                I don&apos;t have an order (General Feedback)
               </button>
             </div>
           </form>

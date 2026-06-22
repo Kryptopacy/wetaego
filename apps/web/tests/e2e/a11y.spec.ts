@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-// @ts-ignore - Ignore IDE module resolution issues
+// @ts-expect-error - Ignore IDE module resolution issues
 import AxeBuilder from '@axe-core/playwright';
 
 test.describe('Accessibility Audits', () => {

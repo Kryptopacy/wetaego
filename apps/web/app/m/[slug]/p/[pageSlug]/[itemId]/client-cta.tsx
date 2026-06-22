@@ -9,6 +9,7 @@ interface ClientCTAProps {
     id: string
     title: string
     price_minor: number | null
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     item_data?: any
   }
   pageInfo: {

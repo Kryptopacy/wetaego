@@ -1,11 +1,11 @@
 'use client'
 
-
-import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { useState, useEffect, useMemo } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { ItemCard } from './item-card'
 import { toast } from 'sonner'
 import { Tables } from '../../../../../types'
+import { Sparkles, Search, X, Globe, ChevronRight } from 'lucide-react'
 
 export type CategoryWithItems = Tables<'menu_categories'> & {
   menu_items?: Tables<'menu_items'>[]
@@ -20,6 +20,7 @@ export function MenuRenderer({ initialCategories }: { initialCategories: Categor
   const [searchQuery, setSearchQuery] = useState('')
   const [recommendedItems, setRecommendedItems] = useState<Tables<'menu_items'>[]>([])
   const [isPersonalizing, setIsPersonalizing] = useState(false)
+  const [isScrolled, setIsScrolled] = useState(false)
 
   // AI Personalization
   useEffect(() => {
@@ -31,8 +32,6 @@ export function MenuRenderer({ initialCategories }: { initialCategories: Categor
         if (!Array.isArray(pastItemIds) || pastItemIds.length === 0) return
 
         setIsPersonalizing(true)
-
-        // Flatten available items
         const availableItems = initialCategories.flatMap(c => c.menu_items || [])
 
         const res = await fetch('/api/ai/personalize', {
@@ -57,10 +56,12 @@ export function MenuRenderer({ initialCategories }: { initialCategories: Categor
     fetchPersonalization()
   }, [initialCategories])
 
+  // Scroll detection for sticky header and active category
   useEffect(() => {
     const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20)
       const sections = categories.map(c => document.getElementById(`cat-${c.id}`))
-      const scrollPos = window.scrollY + 150 // Offset for sticky header
+      const scrollPos = window.scrollY + 200 // Offset for sticky header
       
       for (const section of sections) {
         if (!section) continue
@@ -70,17 +71,18 @@ export function MenuRenderer({ initialCategories }: { initialCategories: Categor
         }
       }
     }
-    window.addEventListener('scroll', handleScroll)
+    window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
   }, [categories])
 
   useEffect(() => {
-    // Detect non-English browser language
     try {
       const lang = navigator.language.split('-')[0]
       if (lang && lang !== 'en') {
         const languageNames = new Intl.DisplayNames(['en'], { type: 'language' })
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setTargetLang(languageNames.of(lang) || lang)
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setShowPrompt(true)
       }
     } catch (e) {
@@ -94,7 +96,6 @@ export function MenuRenderer({ initialCategories }: { initialCategories: Categor
     setShowPrompt(false)
     toast.info(`Translating menu to ${targetLang}...`)
     
-    // We only send the exact data we need translated to save tokens and speed up the response
     const payload = initialCategories.map(cat => ({
       id: cat.id,
       name: cat.name,
@@ -116,7 +117,6 @@ export function MenuRenderer({ initialCategories }: { initialCategories: Categor
       
       const { categories: translatedCategories } = await res.json()
       
-      // Merge translated fields back into the full categories array so we don't lose prices, images, etc.
       const newCategories = initialCategories.map(cat => {
         const translatedCat = translatedCategories.find((tc: { id: string; name?: string; items?: { id: string; name?: string; description?: string }[] }) => tc.id === cat.id)
         if (!translatedCat) return cat
@@ -137,7 +137,7 @@ export function MenuRenderer({ initialCategories }: { initialCategories: Categor
       })
       
       setCategories(newCategories)
-      toast.success('Menu translated successfully!')
+      toast.success(`Menu is now in ${targetLang} ✨`)
     } catch (err) {
       console.error(err)
       toast.error('Failed to translate menu. Please try again.')
@@ -146,154 +146,195 @@ export function MenuRenderer({ initialCategories }: { initialCategories: Categor
     }
   }
 
+  // Filter categories based on search
+  const filteredCategories = useMemo(() => {
+    if (!searchQuery) return categories
+    const query = searchQuery.toLowerCase()
+    return categories
+      .map(category => ({
+        ...category,
+        menu_items: category.menu_items?.filter(item => 
+          item.name.toLowerCase().includes(query) || 
+          item.description?.toLowerCase().includes(query)
+        )
+      }))
+      .filter(category => category.menu_items && category.menu_items.length > 0)
+  }, [categories, searchQuery])
+
   return (
-    <div className="space-y-10 relative">
-      {/* Edge Translation Prompt */}
-      {showPrompt && (
-        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-top-4 fade-in duration-500">
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-5 py-3 rounded-full shadow-2xl flex items-center gap-4 border border-white/10 backdrop-blur-md">
-            <div className="text-sm font-medium flex items-center gap-2">
-              <span className="text-xl">🌍</span> Translate menu to <span className="font-bold">{targetLang}</span>?
+    <div className="relative pb-32">
+      <AnimatePresence>
+        {showPrompt && (
+          <motion.div 
+            initial={{ opacity: 0, y: -20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.95 }}
+            className="fixed top-24 left-1/2 -translate-x-1/2 z-[60] w-[90%] max-w-sm"
+          >
+            <div className="bg-zinc-900/95 dark:bg-white/95 backdrop-blur-xl text-white dark:text-zinc-900 p-4 rounded-2xl shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] border border-white/10 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center shrink-0">
+                  <Globe className="w-5 h-5 text-blue-400" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold">Translate Menu?</p>
+                  <p className="text-xs text-zinc-400 dark:text-zinc-500">Switch to {targetLang}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={() => setShowPrompt(false)}
+                  className="p-2 text-zinc-400 hover:text-white transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+                <button 
+                  onClick={handleTranslate}
+                  className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-lg shadow-blue-500/25 transition-all"
+                >
+                  Yes
+                </button>
+              </div>
             </div>
-            <div className="flex items-center gap-2 ml-2">
-              <button 
-                onClick={handleTranslate}
-                className="bg-white text-indigo-900 px-4 py-1.5 rounded-full text-xs font-bold hover:bg-zinc-100 transition-colors shadow-sm"
-              >
-                Translate
-              </button>
-              <button 
-                onClick={() => setShowPrompt(false)}
-                className="text-white/60 hover:text-white px-2 py-1 text-xs transition-colors"
-              >
-                ✕
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {isTranslating && (
-        <div className="flex items-center justify-center py-20">
-          <div className="animate-pulse flex flex-col items-center gap-4">
-            <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-            <p className="text-blue-400 font-medium">Translating culinary terms...</p>
-          </div>
-        </div>
-      )}
-
-      {/* Search Bar */}
-      {!isTranslating && categories.length > 0 && (
-        <div className="sticky top-0 z-50 bg-[#f5f7f5]/90 dark:bg-zinc-950/90 backdrop-blur-xl border-b border-zinc-200 dark:border-zinc-800 -mx-6 px-6 pt-2 pb-3 mb-6 shadow-sm">
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg className="w-5 h-5 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
+      {/* Sticky Header with Search & Navigation */}
+      <div className={`sticky top-0 z-40 transition-all duration-300 ${isScrolled ? 'bg-zinc-50/90 dark:bg-zinc-950/90 backdrop-blur-2xl shadow-sm border-b border-zinc-200/50 dark:border-zinc-800/50 pt-3 pb-3' : 'bg-transparent pt-4 pb-4'}`}>
+        <div className="max-w-3xl mx-auto px-4 sm:px-6">
+          <div className="relative group">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <Search className="w-5 h-5 text-zinc-400 group-focus-within:text-emerald-500 transition-colors" />
             </div>
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search menu items..."
-              className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#0f7b55]/50 transition-shadow text-[#17201b] dark:text-zinc-100 placeholder:text-zinc-400"
+              placeholder="Search dishes, ingredients..."
+              className="w-full pl-12 pr-12 py-3.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-[15px] outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500/50 transition-all text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 shadow-sm"
             />
             {searchQuery && (
               <button 
                 onClick={() => setSearchQuery('')}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
+                className="absolute inset-y-0 right-0 pr-4 flex items-center text-zinc-400 hover:text-zinc-600 transition-colors"
               >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <X className="w-5 h-5" />
               </button>
             )}
           </div>
 
-          {/* Sticky Category Navigation (Only show if not searching) */}
-          {!searchQuery && (
-            <div className="flex gap-2 mt-3 overflow-x-auto no-scrollbar">
-              {categories.map((category) => (
-                <button
-                  key={category.id}
-                  onClick={() => {
-                    const el = document.getElementById(`cat-${category.id}`)
-                    if (el) window.scrollTo({ top: el.offsetTop - 150, behavior: 'smooth' })
-                  }}
-                  className={`shrink-0 px-4 py-1.5 rounded-full text-[13px] font-bold transition-all ${
-                    activeCat === category.id 
-                      ? 'bg-[#17201b] dark:bg-white text-white dark:text-black shadow-md' 
-                      : 'bg-black/5 dark:bg-white/5 text-[#69746c] dark:text-zinc-400 hover:text-[#17201b] dark:hover:text-white border border-transparent dark:border-white/5'
-                  }`}
-                >
-                  {category.name}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Recommended Section */}
-      {!isTranslating && !searchQuery && (recommendedItems.length > 0 || isPersonalizing) && (
-        <motion.section 
-          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ type: 'spring' }}
-          className="mb-8 p-4 bg-gradient-to-br from-indigo-50/50 to-purple-50/50 dark:from-indigo-950/20 dark:to-purple-950/20 rounded-2xl border border-indigo-100 dark:border-indigo-900/50"
-        >
-          <h2 className="text-[18px] font-black text-indigo-900 dark:text-indigo-300 mb-2 flex items-center gap-2">
-            ✨ Recommended for You
-            {isPersonalizing && <div className="w-4 h-4 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>}
-          </h2>
-          <div className="space-y-0">
-            {recommendedItems.map(item => (
-              <ItemCard key={`rec-${item.id}`} item={item} />
-            ))}
-          </div>
-        </motion.section>
-      )}
-
-      {/* Render Categories */}
-      {!isTranslating && categories
-        .map(category => {
-          // If searching, filter items
-          if (searchQuery) {
-            const query = searchQuery.toLowerCase()
-            const filteredItems = category.menu_items?.filter(item => 
-              item.name.toLowerCase().includes(query) || 
-              item.description?.toLowerCase().includes(query)
-            )
-            return { ...category, menu_items: filteredItems }
-          }
-          return category
-        })
-        .filter(category => !searchQuery || (category.menu_items && category.menu_items.length > 0))
-        .map((category) => (
-          <motion.section 
-            initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
-            key={category.id} id={`cat-${category.id}`} className="scroll-mt-40 mb-8"
-          >
-            <h2 className="text-[18px] font-black text-[#17201b] dark:text-zinc-100 mb-2">{category.name}</h2>
-            <div className="space-y-0">
-            {category.menu_items?.length === 0 && (
-              <p className="text-sm text-zinc-500 italic py-4">No items available.</p>
+          <AnimatePresence>
+            {!searchQuery && !isTranslating && categories.length > 0 && (
+              <motion.div 
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="flex gap-2 mt-4 overflow-x-auto no-scrollbar pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 scroll-smooth"
+              >
+                {categories.map((category) => {
+                  const isActive = activeCat === category.id
+                  return (
+                    <button
+                      key={category.id}
+                      onClick={() => {
+                        const el = document.getElementById(`cat-${category.id}`)
+                        if (el) {
+                          const y = el.getBoundingClientRect().top + window.scrollY - 180
+                          window.scrollTo({ top: y, behavior: 'smooth' })
+                        }
+                      }}
+                      className={`shrink-0 px-5 py-2 rounded-xl text-[14px] font-semibold transition-all duration-300 ${
+                        isActive 
+                          ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-md transform scale-105' 
+                          : 'bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800'
+                      }`}
+                    >
+                      {category.name}
+                    </button>
+                  )
+                })}
+              </motion.div>
             )}
-            {category.menu_items?.map(item => (
-              <ItemCard key={item.id} item={item} />
-            ))}
-          </div>
-        </motion.section>
-      ))}
-
-      {categories.length === 0 && !searchQuery && (
-        <p className="text-center text-[#69746c] dark:text-zinc-500 py-12">This menu is currently empty.</p>
-      )}
-
-      {searchQuery && categories.every(cat => !cat.menu_items?.some(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()) || item.description?.toLowerCase().includes(searchQuery.toLowerCase()))) && (
-        <div className="text-center py-12">
-          <p className="text-[#17201b] dark:text-zinc-300 font-medium text-lg">No matches found</p>
-          <p className="text-[#69746c] dark:text-zinc-500 text-sm mt-1">We couldn&apos;t find any items matching &quot;{searchQuery}&quot;</p>
+          </AnimatePresence>
         </div>
-      )}
+      </div>
+
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 mt-6">
+        {isTranslating && (
+          <div className="flex flex-col items-center justify-center py-32 space-y-6">
+            <div className="relative w-16 h-16">
+              <div className="absolute inset-0 border-4 border-zinc-100 dark:border-zinc-800 rounded-full"></div>
+              <div className="absolute inset-0 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+            <p className="text-zinc-500 dark:text-zinc-400 font-medium animate-pulse">Translating culinary terms...</p>
+          </div>
+        )}
+
+        <AnimatePresence mode="wait">
+          {!isTranslating && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="space-y-12"
+            >
+              {!searchQuery && (recommendedItems.length > 0 || isPersonalizing) && (
+                <section className="scroll-mt-40">
+                  <div className="flex items-center gap-2 mb-6">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                      <Sparkles className="w-4 h-4 text-white" />
+                    </div>
+                    <h2 className="text-2xl font-black tracking-tight text-zinc-900 dark:text-white">
+                      For You
+                    </h2>
+                    {isPersonalizing && (
+                      <div className="ml-2 w-4 h-4 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+                    )}
+                  </div>
+                  <div className="grid gap-4">
+                    {recommendedItems.map(item => (
+                      <ItemCard key={`rec-${item.id}`} item={item} />
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {filteredCategories.map((category) => (
+                <section 
+                  key={category.id} 
+                  id={`cat-${category.id}`} 
+                  className="scroll-mt-[180px]"
+                >
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl font-black tracking-tight text-zinc-900 dark:text-white flex items-center gap-2">
+                      {category.name}
+                      <ChevronRight className="w-5 h-5 text-zinc-300 dark:text-zinc-700" />
+                    </h2>
+                    <div className="h-px flex-1 bg-zinc-200 dark:bg-zinc-800 ml-4"></div>
+                  </div>
+                  
+                  <div className="grid gap-4">
+                    {category.menu_items?.map(item => (
+                      <ItemCard key={item.id} item={item} />
+                    ))}
+                  </div>
+                </section>
+              ))}
+
+              {filteredCategories.length === 0 && (
+                <div className="flex flex-col items-center justify-center py-20 text-center">
+                  <div className="w-16 h-16 bg-zinc-100 dark:bg-zinc-900 rounded-full flex items-center justify-center mb-4">
+                    <Search className="w-8 h-8 text-zinc-400" />
+                  </div>
+                  <p className="text-zinc-900 dark:text-white font-bold text-lg">No matches found</p>
+                  <p className="text-zinc-500 mt-2 max-w-sm">We couldn&apos;t find any items matching &quot;{searchQuery}&quot;</p>
+                </div>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   )
 }

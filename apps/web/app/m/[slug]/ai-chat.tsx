@@ -144,6 +144,7 @@ export function AIChat({
   // Detect rate limit 429
   useEffect(() => {
     if (error && error.message.includes('429')) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLimitReached(true)
       toast.error('AI session limit reached (Max 20 messages).')
     }

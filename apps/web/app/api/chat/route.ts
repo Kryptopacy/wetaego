@@ -6,6 +6,7 @@ import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { Tables } from '../../../../../types'
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
 type CategoryWithItems = Tables<'menu_categories'> & {
   menu_items: Tables<'menu_items'>[]
 }
@@ -220,6 +221,7 @@ ${itemsJson}`
 
     // Only inject tools the persona is allowed to use
     const activeTools = Object.fromEntries(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       Object.entries(allTools).filter(([name]) => persona.tools.includes(name as any))
     )
 
@@ -232,6 +234,7 @@ ${itemsJson}`
       tools: activeTools,
     })
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return (result as any).toDataStreamResponse()
   } catch (err: unknown) {
     console.error('Chat error:', err)

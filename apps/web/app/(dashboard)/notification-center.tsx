@@ -132,6 +132,7 @@ export function NotificationCenter() {
 
   useEffect(() => {
     if (!orgId) return
+      // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchAll(orgId)
   }, [orgId, fetchAll])
 

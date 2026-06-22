@@ -1,4 +1,4 @@
-// @ts-nocheck
+// @ts-expect-error test mock typing issue
 import { describe, it, expect, vi } from 'vitest'
 import { setActiveLocationCookie } from '../layout-actions'
 import * as cookiesModule from 'next/headers'

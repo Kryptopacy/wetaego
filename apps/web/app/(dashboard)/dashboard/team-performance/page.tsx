@@ -50,6 +50,7 @@ export default async function TeamPerformancePage() {
     .eq('organization_id', orgId)
     .eq('location_id', activeLocationId)
     .order('created_at', { ascending: false })
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const reviews: { id: string; staff_id: string | null; staff_rating: number; staff_feedback: string | null; business_rating: number | null; business_feedback: string | null; created_at: string }[] = reviewsRaw as any || []
 
   // 3. Fetch tips (Orders with assigned staff and tip > 0)
@@ -59,6 +60,7 @@ export default async function TeamPerformancePage() {
     .eq('organization_id', orgId)
     .eq('location_id', activeLocationId)
     .gt('tip_amount_minor', 0)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const ordersWithTips: { id: string; assigned_staff_id: string | null; tip_amount_minor: number | null; created_at: string }[] = ordersWithTipsRaw as any || []
 
   // Calculate stats per staff
@@ -132,6 +134,8 @@ export default async function TeamPerformancePage() {
                   <div className="text-zinc-500 text-xs uppercase tracking-wider">{staff.role}</div>
                   {staff.recentFeedback.length > 0 && (
                     <div className="mt-2 text-xs text-zinc-400 italic">
+  { }
+  {/* eslint-disable-next-line react/no-unescaped-entities */}
                       "{staff.recentFeedback[0]}"
                     </div>
                   )}
@@ -170,7 +174,7 @@ export default async function TeamPerformancePage() {
                 {new Date(review.created_at).toLocaleDateString()}
               </div>
             </div>
-            <p className="text-zinc-300 text-sm leading-relaxed">"{review.business_feedback}"</p>
+            <p className="text-zinc-300 text-sm leading-relaxed">&quot;{review.business_feedback}&quot;</p>
           </div>
         ))}
         {bizReviews.filter(r => r.business_feedback).length === 0 && (

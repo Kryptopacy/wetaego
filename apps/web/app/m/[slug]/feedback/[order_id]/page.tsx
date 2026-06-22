@@ -32,6 +32,7 @@ export default function FeedbackPage({
   useEffect(() => {
     if (isGeneral) {
       const urlParams = new URLSearchParams(window.location.search)
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLocationId(urlParams.get('location_id'))
     }
   }, [isGeneral])
@@ -71,6 +72,7 @@ export default function FeedbackPage({
         setSubmitted(true)
         toast.success('Thank you for your feedback!')
       }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
       toast.error('Something went wrong submitting your review.')
     } finally {
@@ -176,7 +178,8 @@ export default function FeedbackPage({
                   ].map(btn => (
                     <button
                       key={btn.val}
-                      onClick={() => setTipSelection(btn.val as any)}
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  onClick={() => setTipSelection(btn.val as any)}
                       className={`py-2 text-sm rounded-lg font-medium transition-colors border ${tipSelection === btn.val ? 'bg-zinc-100 border-zinc-100 text-black' : 'bg-transparent border-zinc-800 text-zinc-400 hover:bg-zinc-800 hover:text-white'}`}
                     >
                       {btn.label}

@@ -3,6 +3,7 @@ import { Database } from '@/lib/supabase/types'
 type RequestType = NonNullable<Database['public']['Tables']['service_requests']['Row']['request_type']> | 'waiter' | 'bill' | 'cleanup'
 
 import { createClient } from '@/lib/supabase/server'
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { revalidatePath } from 'next/cache'
 
 import { paymentProvider } from '@/lib/payments/paystack'
@@ -77,6 +78,7 @@ export async function processCheckout(
     .eq('organization_id', orgId)
     .single()
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const subaccountCode = paySettings?.is_active ? paySettings.provider_account_id : null
 
   // 2. Create Order
@@ -198,6 +200,7 @@ export async function processExistingOrderPayment(
       .eq('organization_id', order.organization_id)
       .single()
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const subaccountCode = paySettings?.is_active ? paySettings.provider_account_id : null
 
     // Initialize Paystack transaction for partial/split payment

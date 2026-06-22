@@ -1,17 +1,15 @@
 'use client'
 
 import { useCartStore } from '@/lib/store/cart'
-
+import { useState } from 'react'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
-
 import { Tables } from '../../../../../types'
+import { Plus, Minus, ShoppingBag, X } from 'lucide-react'
 
 interface ItemCardProps {
   item: Tables<'menu_items'>
 }
-
-import { useState } from 'react'
 
 export function ItemCard({ item }: ItemCardProps) {
   const { items, addItem, updateQuantity } = useCartStore()
@@ -25,10 +23,6 @@ export function ItemCard({ item }: ItemCardProps) {
     if (modifiers.trim()) {
       finalName = `${item.name} (${modifiers.trim()})`
     }
-    // We add to cart using the original item.id but the modified name.
-    // Wait, if they add multiple of the same item with DIFFERENT modifiers, 
-    // the store checks by id. It will just increment quantity of the first one!
-    // To support unique modifiers, we need a unique ID for the cart item.
     const cartItemId = modifiers.trim() ? `${item.id}-${Date.now()}` : item.id
     
     addItem({ 
@@ -47,130 +41,147 @@ export function ItemCard({ item }: ItemCardProps) {
   if (isHidden) return null
 
   return (
-    <div className={`group flex gap-4 py-4 border-b border-zinc-200 dark:border-zinc-800 transition-colors ${!isAvailable ? 'opacity-60' : ''}`}>
-      {/* Product Image on the Left */}
-      {item.image_url ? (
-        <div className="w-[72px] h-[72px] shrink-0 relative rounded-xl overflow-hidden bg-zinc-200 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 animate-pulse">
-          <Image 
-            src={item.image_url} 
-            alt={item.name}
-            fill
-            className="object-cover transition-opacity duration-500"
-            sizes="72px"
-            placeholder="blur"
-            blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mN88B8AAsUB4ZtvxwAAAABJRU5ErkJggg=="
-            onLoad={(e) => {
-              const target = e.target as HTMLElement;
-              target.parentElement?.classList.remove('animate-pulse');
-            }}
-          />
-        </div>
-      ) : (
-        <div className="w-[72px] h-[72px] shrink-0 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 flex items-center justify-center text-zinc-400 font-bold text-[10px] uppercase">
-          {item.name.slice(0, 2)}
-        </div>
-      )}
+    <>
+      <motion.div 
+        whileHover={{ scale: 1.01 }}
+        whileTap={{ scale: 0.99 }}
+        className={`group relative flex gap-4 p-4 bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-100 dark:border-zinc-800 shadow-sm hover:shadow-md transition-all duration-300 ${!isAvailable ? 'opacity-60 grayscale-[0.5]' : ''}`}
+      >
+        {/* Product Image */}
+        {item.image_url ? (
+          <div className="w-[88px] h-[88px] shrink-0 relative rounded-xl overflow-hidden bg-zinc-100 dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-800">
+            <Image 
+              src={item.image_url} 
+              alt={item.name}
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-500"
+              sizes="88px"
+              placeholder="blur"
+              blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mN88B8AAsUB4ZtvxwAAAABJRU5ErkJggg=="
+            />
+          </div>
+        ) : (
+          <div className="w-[88px] h-[88px] shrink-0 rounded-xl bg-gradient-to-br from-zinc-50 to-zinc-100 dark:from-zinc-800 dark:to-zinc-900 border border-zinc-100 dark:border-zinc-800 flex items-center justify-center text-zinc-300 dark:text-zinc-600 font-black text-2xl uppercase shadow-inner">
+            {item.name.slice(0, 1)}
+          </div>
+        )}
 
-      {/* Product Details */}
-      <div className="flex-1 flex flex-col justify-between py-0.5">
-        <div>
-          <h4 className={`font-bold text-[15px] text-[#17201b] dark:text-zinc-100 leading-snug ${!isAvailable ? 'line-through' : ''}`}>
-            {item.name}
-          </h4>
-          {item.description && (
-            <p className="text-[13px] text-[#69746c] dark:text-zinc-400 line-clamp-2 leading-relaxed mt-1">{item.description}</p>
-          )}
-          {(item.dietary_tags?.length > 0 || item.allergen_tags?.length > 0) && (
-            <div className="flex flex-wrap gap-1.5 mt-2">
-              {item.dietary_tags?.map(tag => (
-                <span key={tag} className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">{tag}</span>
-              ))}
-              {item.allergen_tags?.map(tag => (
-                <span key={tag} className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 uppercase tracking-wider">Contains {tag}</span>
-              ))}
+        {/* Product Details */}
+        <div className="flex-1 flex flex-col justify-between py-0.5 min-w-0">
+          <div>
+            <div className="flex justify-between items-start gap-2">
+              <h4 className={`font-bold text-[16px] tracking-tight text-zinc-900 dark:text-white leading-tight truncate ${!isAvailable ? 'line-through opacity-70' : ''}`}>
+                {item.name}
+              </h4>
+              {isAvailable ? (
+                <span className="font-bold text-[15px] text-zinc-900 dark:text-white shrink-0">
+                  ₦{(item.price_minor / 100).toLocaleString()}
+                </span>
+              ) : (
+                <span className="text-[11px] px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-500/10 text-red-600 dark:text-red-400 font-bold shrink-0">Sold Out</span>
+              )}
             </div>
-          )}
-        </div>
-        
-        <div className="flex items-center justify-between mt-2 gap-2">
-          {isAvailable ? (
-            <span className="font-extrabold text-[14px] text-[#17201b] dark:text-zinc-100 shrink-0">₦{(item.price_minor / 100).toLocaleString()}</span>
-          ) : (
-            <span className="text-[11px] px-2 py-0.5 rounded-md bg-red-500/10 text-red-600 dark:text-red-400 font-bold shrink-0">Sold Out</span>
-          )}
 
-          {isAvailable && (
-            cartItem ? (
-              <div className="flex items-center gap-3 bg-[#0f7b55]/10 dark:bg-white/10 rounded-full px-2 py-1">
-                <button 
-                  onClick={() => updateQuantity(item.id, -1)}
-                  className="w-6 h-6 flex items-center justify-center rounded-full bg-[#0f7b55]/20 dark:bg-white/10 text-[#0f7b55] dark:text-white hover:bg-[#0f7b55] hover:text-white transition-colors"
-                >-</button>
-                <span className="text-[#0f7b55] dark:text-white font-bold text-sm min-w-[12px] text-center">{cartItem.quantity}</span>
-                <button 
-                  onClick={() => updateQuantity(item.id, 1)}
-                  className="w-6 h-6 flex items-center justify-center rounded-full bg-[#0f7b55] dark:bg-white text-white dark:text-black hover:opacity-90 transition-opacity"
-                >+</button>
+            {item.description && (
+              <p className="text-[13.5px] text-zinc-500 dark:text-zinc-400 line-clamp-2 leading-relaxed mt-1.5 pr-8">
+                {item.description}
+              </p>
+            )}
+            
+            {(item.dietary_tags?.length > 0 || item.allergen_tags?.length > 0) && (
+              <div className="flex flex-wrap gap-1.5 mt-2.5">
+                {item.dietary_tags?.map(tag => (
+                  <span key={tag} className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 uppercase tracking-wider border border-emerald-100 dark:border-emerald-500/20">{tag}</span>
+                ))}
+                {item.allergen_tags?.map(tag => (
+                  <span key={tag} className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400 uppercase tracking-wider border border-amber-100 dark:border-amber-500/20">{tag}</span>
+                ))}
               </div>
-            ) : (
-              <button 
-                onClick={() => setShowModifierModal(true)}
-                className="flex items-center justify-center w-8 h-8 rounded-full bg-[#0f7b55] hover:bg-[#095a3d] dark:bg-white/10 dark:hover:bg-white/20 text-white transition-colors active:scale-90"
-                aria-label="Customize and Add to Order"
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
-              </button>
-            )
-          )}
+            )}
+          </div>
+          
+          <div className="flex items-center justify-end mt-3 gap-2">
+            {isAvailable && (
+              cartItem ? (
+                <div className="flex items-center gap-3 bg-emerald-50 dark:bg-zinc-800 rounded-full p-1 border border-emerald-100 dark:border-zinc-700 shadow-sm">
+                  <button 
+                    onClick={() => updateQuantity(item.id, -1)}
+                    className="w-7 h-7 flex items-center justify-center rounded-full bg-white dark:bg-zinc-700 text-emerald-600 dark:text-emerald-400 shadow-sm hover:scale-105 transition-transform"
+                  >
+                    <Minus className="w-4 h-4" />
+                  </button>
+                  <span className="text-emerald-700 dark:text-white font-bold text-sm min-w-[16px] text-center">{cartItem.quantity}</span>
+                  <button 
+                    onClick={() => updateQuantity(item.id, 1)}
+                    className="w-7 h-7 flex items-center justify-center rounded-full bg-emerald-500 text-white shadow-sm hover:bg-emerald-600 hover:scale-105 transition-all"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                <button 
+                  onClick={() => setShowModifierModal(true)}
+                  className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-zinc-900 font-bold text-sm shadow-sm transition-all active:scale-95"
+                >
+                  <span>Add</span>
+                  <Plus className="w-4 h-4" />
+                </button>
+              )
+            )}
+          </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Modifier Modal */}
       <AnimatePresence>
         {showModifierModal && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4 sm:p-0">
             <motion.div 
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black/60 backdrop-blur-md" 
+              className="absolute inset-0 bg-black/40 backdrop-blur-sm" 
               onClick={() => setShowModifierModal(false)} 
             />
             <motion.div 
-              initial={{ opacity: 0, scale: 0.95, y: 10 }} 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }} 
               animate={{ opacity: 1, scale: 1, y: 0 }} 
-              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="relative w-full max-w-sm bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 shadow-2xl"
+              className="relative w-full max-w-md bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-[2rem] p-6 shadow-2xl z-10"
             >
-              <button onClick={() => setShowModifierModal(false)} className="absolute top-4 right-4 text-zinc-500 hover:text-zinc-800 dark:hover:text-white transition-colors">✕</button>
+              <button 
+                onClick={() => setShowModifierModal(false)} 
+                className="absolute top-6 right-6 w-8 h-8 flex items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
               
-              <h3 className="text-lg font-bold text-[#17201b] dark:text-white mb-1">Customize</h3>
-              <p className="text-sm text-[#69746c] dark:text-zinc-400 mb-4">{item.name}</p>
+              <div className="mb-6 pr-10">
+                <h3 className="text-2xl font-black text-zinc-900 dark:text-white tracking-tight">{item.name}</h3>
+                <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400 mt-1">₦{(item.price_minor / 100).toLocaleString()}</p>
+              </div>
 
-              <div className="mb-6">
-                <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Special Instructions</label>
+              <div className="mb-8 bg-zinc-50 dark:bg-zinc-800/50 rounded-2xl p-4 border border-zinc-100 dark:border-zinc-800">
+                <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-3">Special Instructions</label>
                 <textarea
                   value={modifiers}
                   onChange={e => setModifiers(e.target.value)}
                   placeholder="e.g., Extra cheese, no onions, allergies..."
                   rows={3}
-                  className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-3 text-sm text-[#17201b] dark:text-white focus:border-[#0f7b55] outline-none resize-none"
+                  className="w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-3 text-[15px] text-zinc-900 dark:text-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none resize-none transition-all placeholder:text-zinc-400"
                 />
               </div>
 
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+              <button
                 onClick={handleAddToCart}
-                className="w-full py-3.5 rounded-xl font-bold text-white text-sm bg-[#0f7b55] hover:bg-[#095a3d] transition-colors"
+                className="w-full py-4 rounded-xl font-bold text-white text-[15px] bg-emerald-500 hover:bg-emerald-600 shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2 transition-all active:scale-95"
               >
-                Add to Cart - ₦{(item.price_minor / 100).toLocaleString()}
-              </motion.button>
+                <ShoppingBag className="w-5 h-5" />
+                Add to Order
+              </button>
             </motion.div>
           </div>
         )}
       </AnimatePresence>
-    </div>
+    </>
   )
 }

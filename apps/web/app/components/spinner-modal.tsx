@@ -32,6 +32,7 @@ export function SpinnerModal({ locationId, config }: SpinnerModalProps) {
     const storageKey = `spinner_spun_${locationId}`
     const spun = localStorage.getItem(storageKey)
     if (!spun) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setHasSpun(false)
     }
   }, [locationId])

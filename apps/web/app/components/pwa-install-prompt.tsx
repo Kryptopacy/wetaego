@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 'use client'
 
 
@@ -24,6 +25,7 @@ export function PwaInstallPrompt() {
   useEffect(() => {
     // Detect if already installed/standalone
     if (window.matchMedia('(display-mode: standalone)').matches || ('standalone' in navigator && (navigator as { standalone?: boolean }).standalone)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsStandalone(true)
       return
     }
@@ -97,7 +99,7 @@ export function PwaInstallPrompt() {
           <h3 className="text-sm font-bold text-white mb-1">Install OurMenu App</h3>
           {isIos ? (
             <p className="text-xs text-zinc-400 leading-relaxed mb-2">
-              Tap the <b>Share</b> icon below and select <b>"Add to Home Screen"</b> for the full experience.
+              Tap the <b>Share</b> icon below and select <b>&quot;Add to Home Screen&quot;</b> for the full experience.
             </p>
           ) : (
             <p className="text-xs text-zinc-400 leading-relaxed mb-3">

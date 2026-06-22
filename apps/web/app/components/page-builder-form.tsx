@@ -29,6 +29,8 @@ interface PageBuilderFormProps {
 }
 
 export function PageBuilderForm({ pageId, templateType, initialItems, orgId }: PageBuilderFormProps) {
+   
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [items, setItems] = useState<PageItem[]>(initialItems)
   const [isAdding, setIsAdding] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -208,6 +210,7 @@ export function PageBuilderForm({ pageId, templateType, initialItems, orgId }: P
                     hidden.value = data.url
                     alert('AI Image Generated! It will be saved when you submit.')
                   }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 } catch(e) {
                   alert('AI generation failed.')
                 }

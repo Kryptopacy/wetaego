@@ -54,6 +54,7 @@ export function QrSettingsClient({ location }: { location: Location }) {
   const [portalUrl, setPortalUrl] = useState(`https://ourmenuos.online/m/${location.slug}`);
 
   useEffect(() => {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
     setPortalUrl(`${window.location.origin}/m/${location.slug}`);
   }, [location.slug]);
 
@@ -68,6 +69,7 @@ export function QrSettingsClient({ location }: { location: Location }) {
           img.onerror = reject;
           img.src = logoUrl;
         });
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (e) {
         toast.error("Invalid Logo URL. The image could not be loaded.");
         setIsSaving(false);

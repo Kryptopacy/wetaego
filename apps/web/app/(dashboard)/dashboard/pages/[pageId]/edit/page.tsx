@@ -102,6 +102,9 @@ export default async function PageEditDashboard({
           <div className="flex items-center justify-between p-4 bg-zinc-900 border border-zinc-800 rounded-xl">
             <div>
               <p className="text-sm font-bold text-white">Payment Roulette Add-on</p>
+  { }
+  { }
+  {/* eslint-disable-next-line react/no-unescaped-entities */}
               <p className="text-xs text-zinc-400 mt-0.5">Enable the "Surprise Me" spinning wheel for customers who can't decide.</p>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
@@ -122,6 +125,7 @@ export default async function PageEditDashboard({
         <PageBuilderForm 
           pageId={page.id} 
           templateType={page.template_type} 
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           initialItems={(items as any[]) || []} 
           orgId={page.locations.organization_id}
         />

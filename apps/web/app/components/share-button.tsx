@@ -18,6 +18,7 @@ export function ShareButton({ url, title, description, className }: ShareButtonP
   const [currentUrl, setCurrentUrl] = useState('')
 
   useEffect(() => {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
     setCurrentUrl(url || window.location.href)
   }, [url])
 

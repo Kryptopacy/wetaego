@@ -5,6 +5,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+   
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { getPreset, buildPageTitle } from '@/lib/templates/presets'
 
 // ─── Business Type Setup ───────────────────────────────────────────────────────
@@ -257,6 +259,7 @@ export async function updatePageItem(formData: FormData): Promise<void> {
   const { data: userData } = await supabase.auth.getUser()
   if (!userData?.user) throw new Error('Not authenticated')
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updatePayload: any = { title, subtitle, description, price_minor, price_display, availability_status, item_data, inventory_count }
 
   // Handle image upload

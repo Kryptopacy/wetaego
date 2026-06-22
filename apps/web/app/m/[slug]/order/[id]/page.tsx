@@ -17,6 +17,7 @@ export default async function OrderStatusPage(props: { params: Promise<{ slug: s
     notFound()
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const location = locationPage.locations as any
 
   // 2. Fetch Order

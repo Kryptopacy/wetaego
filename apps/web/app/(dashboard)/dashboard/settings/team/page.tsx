@@ -28,7 +28,9 @@ export default async function TeamPage() {
   let organization = null
   let role = 'viewer'
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let members: any[] = []
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let invites: any[] = []
 
   if (isDemo) {

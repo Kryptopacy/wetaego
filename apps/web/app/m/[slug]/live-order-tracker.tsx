@@ -10,11 +10,15 @@ interface LiveOrderTrackerProps {
   locationId: string
 }
 
+   
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function LiveOrderTracker({ organizationId, locationId }: LiveOrderTrackerProps) {
   const supabase = createClient()
   const [order, setOrder] = useState<Tables<'orders'> | null>(null)
   const [timeLeft, setTimeLeft] = useState<number>(0)
   
+   
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
