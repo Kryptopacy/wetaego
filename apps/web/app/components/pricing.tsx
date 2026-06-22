@@ -1,15 +1,13 @@
 import { Zap, Check, ArrowRight } from 'lucide-react'
 import { getPricingSettings, getPlanLimits } from '@/lib/utils/settings'
 import { FadeIn } from './animations'
-import { getUsdToNgnRate } from '@/lib/payments/exchange'
 
 export async function Pricing() {
   const pricing = await getPricingSettings()
   const planLimits = await getPlanLimits()
-  const rate = await getUsdToNgnRate()
 
-  const litePrice = rate ? Math.round(12 * rate) : (pricing.lite_monthly_ngn || 14999)
-  const proPrice = rate ? Math.round(39 * rate) : (pricing.pro_monthly_ngn || 49999)
+  const litePrice = pricing.lite_monthly_ngn || 14999
+  const proPrice = pricing.pro_monthly_ngn || 49999
 
   const plans = [
     {
@@ -17,7 +15,7 @@ export async function Pricing() {
       price: `₦${litePrice.toLocaleString()}`,
       period: 'per month',
       description: 'Perfect for testing the platform at your venue. 30-day free trial included.',
-      features: ['Includes 10 Credits/mo', 'AI Waiter (guest-facing chat)', 'Edge Translator (40+ languages)', 'Up to 2 QR codes', '1 active location', '0 Extra Custom Pages (10 credits/page)'],
+      features: ['Includes 10 Credits/mo', 'Customizable AI Assistant (guest-facing)', 'Edge Translator (40+ languages)', 'Up to 2 QR codes', '1 active location', '0 Extra Custom Pages (10 credits/page)'],
       cta: 'Start Free Trial',
       href: '/dashboard',
       highlighted: false,
@@ -62,9 +60,9 @@ export async function Pricing() {
   ]
 
   const creditPacks = [
-    { amount: 10, price: rate ? Math.round(5 * rate) : (pricing.credits_10_ngn || 6000), popular: false },
-    { amount: 25, price: rate ? Math.round(10 * rate) : (pricing.credits_25_ngn || 12000), popular: true },
-    { amount: 50, price: rate ? Math.round(18 * rate) : (pricing.credits_50_ngn || 20000), popular: false }
+    { amount: 10, price: pricing.credits_10_ngn || 6000, popular: false },
+    { amount: 25, price: pricing.credits_25_ngn || 12000, popular: true },
+    { amount: 50, price: pricing.credits_50_ngn || 20000, popular: false }
   ]
 
   return (

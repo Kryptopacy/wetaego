@@ -1,8 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
-import { subscribeToLite, subscribeToPro, buyCredits } from './actions'
+import { subscribeToLite, subscribeToPro, buyCredits, cancelSubscription } from './actions'
 import { getUsdToNgnRate } from '@/lib/payments/exchange'
 
 import Link from 'next/link'
+import { CancelButton } from './cancel-button'
 
 export default async function BillingPage(props: { searchParams: Promise<{ currency?: string }> }) {
   const searchParams = await props.searchParams
@@ -35,6 +36,10 @@ export default async function BillingPage(props: { searchParams: Promise<{ curre
   const isTrialActive = trialEnds > new Date()
   const trialDaysLeft = Math.ceil((trialEnds.getTime() - new Date().getTime()) / (1000 * 3600 * 24))
 
+  const planLimitsObj: Record<string, number> = { lite: 10, pro: 50, enterprise: 200 }
+  const availableFree = (planLimitsObj[org.subscription_tier || 'lite'] || 0) - (org.monthly_free_credits_used || 0)
+  const creditsRemaining = Math.max(0, availableFree) + (org.purchased_credits || 0)
+
   const { getPricingSettings } = await import('@/lib/utils/settings')
   const pricing = await getPricingSettings()
   
@@ -66,27 +71,44 @@ export default async function BillingPage(props: { searchParams: Promise<{ curre
         </div>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-6 mt-8">
-        {/* Current Status */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
-          <h2 className="text-lg font-bold text-white mb-4">Current Status</h2>
+      {/* Current Status */}
+      <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mt-8">
+        <h2 className="text-lg font-bold text-white mb-4">Current Status</h2>
+        
+        <div className="grid md:grid-cols-3 gap-6">
+          <div className="flex justify-between items-center py-3 border-b border-zinc-800">
+            <span className="text-zinc-400">Plan</span>
+            <span className="text-white font-medium capitalize px-3 py-1 bg-zinc-800 rounded-full text-sm">
+              {org.subscription_status === 'active' ? (org.subscription_plan || 'Pro') : 'Trial'}
+            </span>
+          </div>
           
-          <div className="space-y-4">
-            <div className="flex justify-between items-center py-3 border-b border-zinc-800">
-              <span className="text-zinc-400">Plan</span>
-              <span className="text-white font-medium capitalize px-3 py-1 bg-zinc-800 rounded-full text-sm">
-                {org.subscription_status === 'active' ? (org.subscription_plan || 'Pro') : 'Trial'}
-              </span>
-            </div>
-            
-            <div className="flex justify-between items-center py-3 border-b border-zinc-800">
-              <span className="text-zinc-400">Status</span>
-              <span className={`font-medium ${org.subscription_status === 'active' ? 'text-green-500' : isTrialActive ? 'text-yellow-500' : 'text-red-500'}`}>
-                {org.subscription_status === 'active' ? 'Active' : isTrialActive ? `${trialDaysLeft} days left` : 'Expired'}
-              </span>
-            </div>
+          <div className="flex justify-between items-center py-3 border-b border-zinc-800">
+            <span className="text-zinc-400">Status</span>
+            <span className={`font-medium ${org.subscription_status === 'active' ? 'text-green-500' : isTrialActive ? 'text-yellow-500' : 'text-red-500'}`}>
+              {org.subscription_status === 'active' ? 'Active' : isTrialActive ? `${trialDaysLeft} days left` : 'Expired'}
+            </span>
+          </div>
+
+          <div className="flex justify-between items-center py-3 border-b border-zinc-800">
+            <span className="text-zinc-400">Credits</span>
+            <span className="text-violet-400 font-bold">
+              {creditsRemaining}
+            </span>
           </div>
         </div>
+
+        {org.subscription_status === 'active' && (
+          <div className="mt-6 flex justify-end pt-4 border-t border-zinc-800">
+            <form action={cancelSubscription}>
+              <input type="hidden" name="organization_id" value={org.id} />
+              <CancelButton />
+            </form>
+          </div>
+        )}
+      </div>
+
+      <div className="grid md:grid-cols-3 gap-6 mt-8">
 
         {/* Lite Upgrade Card */}
         <div className="bg-gradient-to-br from-zinc-900 to-zinc-950 border border-zinc-800 rounded-2xl p-6 relative overflow-hidden">
@@ -101,7 +123,7 @@ export default async function BillingPage(props: { searchParams: Promise<{ curre
           </p>
 
           <ul className="space-y-3 mb-8 relative z-10">
-            {['AI Waiter (guest chat)', 'Edge Translator', 'Up to 2 QR codes', '1 active location'].map(feature => (
+            {['Customizable AI Assistant', 'Edge Translator', 'Up to 2 QR codes', '1 active location'].map(feature => (
               <li key={feature} className="flex items-center gap-3 text-zinc-300 text-sm">
                 <svg className="w-5 h-5 text-emerald-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                 {feature}
@@ -139,7 +161,7 @@ export default async function BillingPage(props: { searchParams: Promise<{ curre
           </p>
 
           <ul className="space-y-3 mb-8 relative z-10">
-            {['Everything in Lite', 'Unlimited Menus & Items', 'Live Kitchen Display System', 'Staff Role Management'].map(feature => (
+            {['Everything in Lite', 'Live Kitchen Display System', 'Demand Forecasting', 'Smart Triaging'].map(feature => (
               <li key={feature} className="flex items-center gap-3 text-zinc-300 text-sm">
                 <svg className="w-5 h-5 text-violet-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                 {feature}
@@ -158,6 +180,31 @@ export default async function BillingPage(props: { searchParams: Promise<{ curre
               {(org.subscription_status === 'active' && org.subscription_plan === 'pro') ? 'Current Plan' : 'Subscribe via Paystack'}
             </button>
           </form>
+        </div>
+
+        {/* Enterprise Upgrade Card */}
+        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 relative overflow-hidden flex flex-col">
+          <h2 className="text-2xl font-bold text-white mb-2 relative z-10">Enterprise</h2>
+          <div className="flex items-baseline gap-2 mb-4 relative z-10">
+            <span className="text-4xl font-extrabold text-white">Custom</span>
+          </div>
+          
+          <p className="text-sm text-zinc-400 mb-6 relative z-10">
+            For multi-location brands.
+          </p>
+
+          <ul className="space-y-3 mb-8 relative z-10 flex-1">
+            {['Everything in Pro', 'Multi-location dashboard', 'API access for PMS integration', 'Dedicated account manager'].map(feature => (
+              <li key={feature} className="flex items-center gap-3 text-zinc-300 text-sm">
+                <svg className="w-5 h-5 text-zinc-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                {feature}
+              </li>
+            ))}
+          </ul>
+
+          <a href="mailto:sales@ourmenu.os" className="block text-center w-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-3 rounded-xl transition-colors relative z-10 mt-auto">
+            Contact Sales
+          </a>
         </div>
       </div>
 

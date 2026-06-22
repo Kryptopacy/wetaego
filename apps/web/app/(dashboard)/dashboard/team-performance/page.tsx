@@ -14,7 +14,7 @@ export default async function TeamPerformancePage() {
   const { data: member } = await supabase
     .from('organization_members')
     .select('organizations(id, name)')
-    .eq('user_id', userData.user.id)
+    .eq('user_id', userData.user!.id)
     .single()
 
   const orgId = (member?.organizations as { id: string })?.id

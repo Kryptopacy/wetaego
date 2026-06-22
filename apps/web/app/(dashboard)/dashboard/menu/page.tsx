@@ -18,7 +18,7 @@ export default async function MenuManagerPage() {
   if (!user && !isDemo) {
     redirect('/login')
   }
-  const userId = user.id
+  const userId = user!.id
 
   let org: { id: string } | null = null
   let role = 'viewer'

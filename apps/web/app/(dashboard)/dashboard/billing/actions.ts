@@ -81,6 +81,24 @@ import { Resend } from 'resend'
 import InvoiceEmail from '../../../../emails/invoice-email'
 import { waitUntil } from '@vercel/functions'
 
+export async function cancelSubscription(formData: FormData) {
+  const supabase = await createClient()
+  const { data: userData } = await supabase.auth.getUser()
+  if (!userData?.user) throw new Error('Not authenticated')
+
+  const orgId = formData.get('organization_id') as string
+
+  await supabase
+    .from('organizations')
+    .update({ 
+      subscription_status: 'inactive',
+      subscription_plan: 'free'
+    })
+    .eq('id', orgId)
+
+  redirect('/dashboard/billing')
+}
+
 const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy')
 
 export async function buyCredits(formData: FormData): Promise<void> {

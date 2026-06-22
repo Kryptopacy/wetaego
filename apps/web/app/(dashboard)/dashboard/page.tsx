@@ -27,7 +27,7 @@ export default async function DashboardOverviewPage() {
   const { data: member } = await supabase
     .from('organization_members')
     .select('role, organizations(id, name)')
-    .eq('user_id', user.id)
+    .eq('user_id', user!.id)
     .single()
 
   if (member?.organizations) {
@@ -37,7 +37,7 @@ export default async function DashboardOverviewPage() {
     const { data: org } = await supabase
       .from('organizations')
       .select('id, name')
-      .eq('created_by', user.id)
+      .eq('created_by', user!.id)
       .single()
     orgId = org?.id || ''
     orgName = org?.name || 'Your Venue'

@@ -99,6 +99,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [dynamicNavItems, setDynamicNavItems] = useState<NavItem[]>(baseNavItems)
 
+  const [credits, setCredits] = useState<number | null>(null)
+
   useEffect(() => {
     const fetchOrg = async () => {
       const supabase = createClient()
@@ -106,13 +108,21 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       if (userData?.user) {
         const { data: member } = await supabase
           .from('organization_members')
-          .select('role, organizations(id, name)')
+          .select('role, organizations(id, name, subscription_tier, purchased_credits, monthly_free_credits_used)')
           .eq('user_id', userData.user.id)
           .single()
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         if (member && (member.organizations as unknown as Record<string, any>)?.name) {
           setOrgName((member.organizations as { name: string }).name)
           setIsOwnerOrManager(['owner', 'manager'].includes(member.role))
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const orgData = member.organizations as unknown as Record<string, any>
+          const planLimits: Record<string, number> = { lite: 10, pro: 50, enterprise: 200 }
+          const availableFree = (planLimits[orgData.subscription_tier] || 0) - (orgData.monthly_free_credits_used || 0)
+          const cb = Math.max(0, availableFree) + (orgData.purchased_credits || 0)
+          if (!isNaN(cb)) {
+            setCredits(cb)
+          }
         }
         
         const orgId = (member?.organizations as { id: string })?.id
@@ -238,6 +248,15 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         </div>
 
         <div className="p-4 mt-auto">
+          {credits !== null && (
+            <Link href="/dashboard/billing" className="flex items-center justify-between px-3 py-2.5 bg-violet-500/10 hover:bg-violet-500/20 rounded-xl border border-violet-500/20 mb-4 transition-colors group" onClick={onClose}>
+              <div className="flex items-center gap-2">
+                <Zap className="w-4 h-4 text-violet-400" />
+                <span className="text-xs font-bold text-violet-100">Credits</span>
+              </div>
+              <span className="text-xs font-black text-violet-400 group-hover:scale-110 transition-transform">{credits}</span>
+            </Link>
+          )}
           {locationSlug && (
             <a 
               href={`/m/${locationSlug}`} 

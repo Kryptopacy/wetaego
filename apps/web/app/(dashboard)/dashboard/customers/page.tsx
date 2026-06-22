@@ -129,7 +129,7 @@ export default async function CustomersPage() {
                     </td>
                     <td className="px-6 py-4 font-bold text-blue-400">{profile.loyalty_points || 0}</td>
                     <td className="px-6 py-4">
-                      {new Date(profile.last_visit_at).toLocaleDateString()}
+                      {profile.last_visit_at ? new Date(profile.last_visit_at).toLocaleDateString() : 'N/A'}
                     </td>
                     <td className="px-6 py-4 text-right">
                       {profile.marketing_opt_in ? (

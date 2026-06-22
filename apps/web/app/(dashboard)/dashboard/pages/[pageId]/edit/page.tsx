@@ -35,7 +35,7 @@ export default async function PageEditDashboard({
     .from('organization_members')
     .select('role')
     .eq('organization_id', page.locations.organization_id)
-    .eq('user_id', userData.user.id)
+    .eq('user_id', userData.user!.id)
     .single()
 
   if (!member) {
@@ -44,7 +44,7 @@ export default async function PageEditDashboard({
       .from('organizations')
       .select('id')
       .eq('id', page.locations.organization_id)
-      .eq('created_by', userData.user.id)
+      .eq('created_by', userData.user!.id)
       .single()
     
     if (!org) redirect('/dashboard')

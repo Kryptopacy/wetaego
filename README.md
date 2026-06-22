@@ -62,8 +62,16 @@ Close the loop on customer satisfaction natively:
 - **Premium Fluid Aesthetics:** Global use of `framer-motion` guarantees 60fps spring-physics animations, staggered layout reveals, and frosted-glass micro-interactions that rival high-end native applications.
 - **Real-Time Order Tracking:** Fluid, dynamic trackers that drop down and count down service/prep time seamlessly without page reloads.
 
-### 8. Back-of-House Operations Engine
+### 8. CRM & Loyalty Engine
+- **Customer Profiles & LTV:** Automatically builds rich customer profiles at checkout, tracking Lifetime Value (LTV), order counts, last visit dates, and marketing opt-ins.
+- **Loyalty & Rewards Program:** Organizations can launch bespoke point-based loyalty programs. Configurable metrics include points awarded per currency unit, welcome points for new signups, and minimum points required for redemption at checkout.
+
+### 9. Global Currency & Localization
+- **Dynamic Currency Configuration:** Organizations can select their base operating currency (NGN, USD, EUR, GBP, KES, ZAR, etc.), automatically localizing all storefront prices, dashboard analytics, and checkout modules. No business is forced to use dollar math if they operate locally.
+
+### 10. Back-of-House Operations Engine
 OurMenu OS is a true operating system, extending far beyond the customer-facing frontend into deep backend workflows:
+- **Demo Mode Bypass:** A dedicated `?demo=1` architectural flow that allows prospective users to experience the full dashboard, analytics, and CRM mock data without creating an account.
 - **AI Demand Forecasting (`/api/ai/forecast`):** Analyzes 30-day sales velocity and utilizes Gemini to predict 7-day demand trajectories, issuing smart inventory alerts (Critical, Order Soon, Sufficient).
 - **Smart Upselling Engine (`/api/upsell`):** Intelligent checkout add-on engine dynamically analyzes cart contents to suggest relevant cross-sells, maximizing Average Order Value (AOV).
 - **Decoupled QR Provisioning:** Print thousands of generic "dummy" QR codes in bulk, deploy them to tables or hotel rooms, and securely provision/re-map them remotely from the dashboard without ever reprinting.
@@ -76,12 +84,12 @@ OurMenu OS is a true operating system, extending far beyond the customer-facing 
 
 OurMenu OS offers three tiered subscription plans, driven by a unified credit system that seamlessly up-sells usage into Pro and Enterprise plans.
 
-### 🟢 Lite Plan (₦19,999 / month)
+### 🟢 Lite Plan (₦14,999 / month)
 *Perfect for testing the system at a single venue.*
-- **Credits:** 0 Monthly Credits (Pay-as-you-go required for premium tools and extra pages)
+- **Credits:** 10 Monthly Credits
 - **Locations:** 1 active location
 - **QR Codes:** Up to 2 active QR codes/tables
-- **AI Assistant:** Customer-facing conversational AI chat assistant
+- **AI Assistant:** Customizable, domain-specific AI Assistant (guest-facing chat)
 - **Edge Translator:** Real-time menu translation for 40+ languages
 
 ### 🔵 Pro Plan (₦49,999 / month)
@@ -92,6 +100,7 @@ OurMenu OS offers three tiered subscription plans, driven by a unified credit sy
 - **Features included from Lite:** AI Assistant, Edge Translator
 - **Premium AI Tools:** AI Copywriter (Menu Descriptions) & AI Image Studio (Venue Covers)
 - **KDS & Operations:** Smart Request Triaging (Instant urgency classification)
+- **Demand Forecasting:** AI-driven inventory and sales forecasting engine
 - **Custom Pages:** 1 Page included (Additional pages cost 10 Credits each)
 - **Team:** Role-based team management (Owners, Managers, Viewers)
 
@@ -101,6 +110,7 @@ OurMenu OS offers three tiered subscription plans, driven by a unified credit sy
 - **Locations:** Multi-location dashboard (Manage multiple venues under one org)
 - **Features included from Pro:** All premium AI tools, unlimited QR codes, custom pages
 - **Integrations:** Direct API access for PMS (Property Management System) integration
+- **Dedicated AI:** Dedicated AI model fine-tuning and custom SLA onboarding
 
 ## 🤝 Affiliate & Referral System
 

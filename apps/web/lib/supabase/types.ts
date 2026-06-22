@@ -39,6 +39,91 @@ export type Database = {
   }
   public: {
     Tables: {
+      customer_profiles: {
+          Row: {
+            id: string
+            organization_id: string
+            email: string
+            total_spend_minor: number
+            total_orders: number
+            loyalty_points: number
+            last_visit_at: string | null
+            marketing_opt_in: boolean
+            created_at: string
+            updated_at: string
+          }
+          Insert: {
+            id?: string
+            organization_id: string
+            email: string
+            total_spend_minor?: number
+            total_orders?: number
+            loyalty_points?: number
+            last_visit_at?: string | null
+            marketing_opt_in?: boolean
+            created_at?: string
+            updated_at?: string
+          }
+          Update: {
+            id?: string
+            organization_id?: string
+            email?: string
+            total_spend_minor?: number
+            total_orders?: number
+            loyalty_points?: number
+            last_visit_at?: string | null
+            marketing_opt_in?: boolean
+            created_at?: string
+            updated_at?: string
+          }
+          Relationships: [
+            {
+              foreignKeyName: "customer_profiles_organization_id_fkey"
+              columns: ["organization_id"]
+              isOneToOne: false
+              referencedRelation: "organizations"
+              referencedColumns: ["id"]
+            }
+          ]
+        }
+        loyalty_settings: {
+          Row: {
+            organization_id: string
+            points_per_major_unit: number
+            reward_threshold: number
+            reward_discount_minor: number
+            is_enabled: boolean
+            created_at: string
+            updated_at: string
+          }
+          Insert: {
+            organization_id: string
+            points_per_major_unit?: number
+            reward_threshold?: number
+            reward_discount_minor?: number
+            is_enabled?: boolean
+            created_at?: string
+            updated_at?: string
+          }
+          Update: {
+            organization_id?: string
+            points_per_major_unit?: number
+            reward_threshold?: number
+            reward_discount_minor?: number
+            is_enabled?: boolean
+            created_at?: string
+            updated_at?: string
+          }
+          Relationships: [
+            {
+              foreignKeyName: "loyalty_settings_organization_id_fkey"
+              columns: ["organization_id"]
+              isOneToOne: true
+              referencedRelation: "organizations"
+              referencedColumns: ["id"]
+            }
+          ]
+        }
       affiliate_earnings: {
         Row: {
           id: string
