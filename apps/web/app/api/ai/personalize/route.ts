@@ -1,3 +1,4 @@
+import { checkRateLimit } from '@/lib/upstash'
 import { google } from '@ai-sdk/google'
 import { generateObject } from 'ai'
 import { z } from 'zod'
@@ -7,6 +8,11 @@ export const maxDuration = 30
 
 export async function POST(req: Request) {
   try {
+    const { success: rlSuccess } = await checkRateLimit('ai_personalize');
+    if (!rlSuccess) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    }
+
     const { pastItemIds, availableItems } = await req.json()
 
     if (!pastItemIds || pastItemIds.length === 0 || !availableItems || availableItems.length === 0) {

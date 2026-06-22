@@ -1,3 +1,4 @@
+import { checkRateLimit } from '@/lib/upstash'
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { chargeCredits, refundCredits } from '@/lib/payments/credits'
@@ -12,6 +13,11 @@ const generateItemImageSchema = z.object({
 
 export async function POST(req: Request) {
   try {
+    const { success: rlSuccess } = await checkRateLimit('ai_generate-item-image');
+    if (!rlSuccess) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    }
+
     const supabase = await createClient()
 
     const { cookies } = await import('next/headers')

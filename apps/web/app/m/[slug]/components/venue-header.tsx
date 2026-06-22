@@ -38,10 +38,16 @@ export function VenueHeader({ location, slug, tableIdentifier }: VenueHeaderProp
   return (
     <header className="relative w-full h-[35vh] min-h-[280px] max-h-[400px] overflow-hidden">
       {location.cover_image_url ? (
-        <div 
-          className="absolute inset-0 bg-cover bg-center" 
-          style={{ backgroundImage: `url(${location.cover_image_url})` }}
-        />
+        <div className="absolute inset-0">
+          <Image 
+            src={location.cover_image_url} 
+            alt={`${location.name} cover`}
+            fill
+            className="object-cover object-center"
+            priority
+            sizes="100vw"
+          />
+        </div>
       ) : (
         <div 
           className="absolute inset-0"
@@ -58,7 +64,7 @@ export function VenueHeader({ location, slug, tableIdentifier }: VenueHeaderProp
         {location.organizations?.logo_url && (
           <div className="mb-4">
             <div className="relative h-16 w-32 shrink-0 drop-shadow-md overflow-hidden rounded-lg">
-              <Image src={location.organizations.logo_url} alt="Logo" fill className="object-contain" />
+              <Image src={location.organizations.logo_url} alt="Logo" fill className="object-contain" priority sizes="(max-width: 768px) 128px, 128px" />
             </div>
           </div>
         )}

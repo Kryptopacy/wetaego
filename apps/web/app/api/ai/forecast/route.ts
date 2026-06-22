@@ -1,3 +1,4 @@
+import { checkRateLimit } from '@/lib/upstash'
 
 import { google } from '@ai-sdk/google'
 import { generateObject } from 'ai'
@@ -11,6 +12,11 @@ const forecastSchema = z.object({
 
 export async function POST(req: Request) {
   try {
+    const { success: rlSuccess } = await checkRateLimit('ai_forecast');
+    if (!rlSuccess) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    }
+
     const body = await req.json()
     const parsed = forecastSchema.safeParse(body)
     

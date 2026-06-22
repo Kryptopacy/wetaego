@@ -1,3 +1,4 @@
+import { checkRateLimit } from '@/lib/upstash'
 
 import { google } from '@ai-sdk/google'
 import { generateObject } from 'ai'
@@ -14,6 +15,11 @@ const copywriterSchema = z.object({
 
 export async function POST(req: Request) {
   try {
+    const { success: rlSuccess } = await checkRateLimit('ai_copywriter');
+    if (!rlSuccess) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    }
+
     const supabase = await createClient()
     const { cookies } = await import('next/headers')
     const isDemo = (await cookies()).get('demo_mode')?.value === '1'

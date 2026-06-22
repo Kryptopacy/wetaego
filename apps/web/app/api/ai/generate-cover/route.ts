@@ -1,3 +1,4 @@
+import { checkRateLimit } from '@/lib/upstash'
 
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
@@ -14,6 +15,11 @@ const generateCoverSchema = z.object({
 // as `@ai-sdk/google` image generation might not be fully stable in this exact version.
 export async function POST(req: Request) {
   try {
+    const { success: rlSuccess } = await checkRateLimit('ai_generate-cover');
+    if (!rlSuccess) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    }
+
     const supabase = await createClient()
 
     const { cookies } = await import('next/headers')
