@@ -39,9 +39,9 @@ jobs:
       working-directory: ./apps/web
       run: pnpm tsc --noEmit
       
-    - name: Run Unit Tests
+    - name: Run Unit Tests with Coverage
       working-directory: ./apps/web
-      run: pnpm test
+      run: pnpm test -- --coverage
       
     - name: Run E2E Tests
       working-directory: ./apps/web

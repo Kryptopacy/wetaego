@@ -29,17 +29,24 @@ export function ShareModal({ isOpen, onClose, url, title, description }: ShareMo
   const encodedTitle = encodeURIComponent(title)
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="share-modal-title"
+    >
       <div 
         className="absolute inset-0" 
         onClick={onClose}
+        aria-hidden="true"
       />
       <div className="relative bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
         
         <div className="flex items-center justify-between p-5 border-b border-zinc-800/50">
-          <h3 className="text-lg font-bold text-white">Share Link</h3>
+          <h3 id="share-modal-title" className="text-lg font-bold text-white">Share Link</h3>
           <button 
             onClick={onClose}
+            aria-label="Close dialog"
             className="p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -116,6 +123,7 @@ export function ShareModal({ isOpen, onClose, url, title, description }: ShareMo
                 type="text" 
                 readOnly 
                 value={url}
+                aria-label="Share URL"
                 className="flex-1 bg-transparent border-none outline-none text-sm text-zinc-300 px-2 truncate"
               />
               <button 

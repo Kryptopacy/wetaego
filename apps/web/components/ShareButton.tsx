@@ -43,6 +43,8 @@ export function ShareButton({ url, title, description, className, children }: Sh
       <button 
         onClick={handleShare}
         className={className}
+        aria-haspopup="dialog"
+        aria-expanded={isOpen}
       >
         {children}
       </button>
