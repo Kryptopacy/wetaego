@@ -1,11 +1,22 @@
 import { UIOrder, UIOrderItem, UIOrganization } from '../types/frontend'
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function mapSupabaseOrderToUI(rawOrder: any): UIOrder {
+import { Database } from '../supabase/types'
+
+type SupabaseOrder = Database['public']['Tables']['orders']['Row']
+type SupabaseOrderItem = Database['public']['Tables']['order_items']['Row']
+type SupabaseOrg = Database['public']['Tables']['organizations']['Row']
+
+type RawOrderPayload = Partial<SupabaseOrder> & {
+  id: string;
+  order_items?: Partial<SupabaseOrderItem>[];
+  organizations?: Partial<SupabaseOrg> | null;
+  [key: string]: any;
+}
+
+export function mapSupabaseOrderToUI(rawOrder: RawOrderPayload): UIOrder {
   if (!rawOrder) throw new Error('Cannot map null order')
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const items: UIOrderItem[] = (rawOrder.order_items || []).map((i: any) => ({
+  const items: UIOrderItem[] = (rawOrder.order_items || []).map((i) => ({
     id: i.id || '',
     order_id: i.order_id || '',
     item_id: i.item_id || '',

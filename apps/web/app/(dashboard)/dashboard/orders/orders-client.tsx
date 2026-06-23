@@ -14,8 +14,7 @@ import { UIOrder } from '@/lib/types/frontend'
 
 type ServiceRequestRow = Database['public']['Tables']['service_requests']['Row']
 type MenuItemRow = Database['public']['Tables']['menu_items']['Row']
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type OrderPayload = { eventType: string, new: any }
+type OrderPayload = { eventType: string, new: Database['public']['Tables']['orders']['Row'] }
 type ServiceRequestPayload = { eventType: string, new: ServiceRequestRow }
 type MenuItemPayload = { eventType: string, new: MenuItemRow }
 
@@ -55,7 +54,7 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
             .eq('id', orderPayload.new.id)
             .single()
             .then(({ data }: { data: unknown }) => {
-              const fullData = data ? mapSupabaseOrderToUI(data) : null
+              const fullData = data ? mapSupabaseOrderToUI(data as any) : null
               if (fullData) {
                 setOrders((prev) => [fullData, ...prev])
                 if (fullData.status === 'paid' || fullData.status === 'pending') {

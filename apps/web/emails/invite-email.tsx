@@ -1,5 +1,3 @@
-/* eslint-disable react/no-unescaped-entities */
-// FIXME: Developer bypassed types/rules. Requires refactoring for true perfection.
 import {
   Body,
   Button,
@@ -36,7 +34,7 @@ export const InviteEmail = ({
             
             <Section className="text-center mb-6">
               <Heading className="text-black text-2xl font-bold text-center p-0 mb-4 mt-0 mx-0">
-                You've been invited!
+                You&apos;ve been invited!
               </Heading>
               <Text className="text-gray-600 text-base mt-0">
                 You have been invited to join <strong>{organizationName}</strong> as a <strong>{role}</strong> on OurMenu OS.

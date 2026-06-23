@@ -1,12 +1,9 @@
-/* eslint-disable @typescript-eslint/no-unused-vars, react/no-unescaped-entities */
-// FIXME: Developer bypassed types/rules. Requires refactoring for true perfection.
 import {
   Body,
   Container,
   Head,
   Heading,
   Html,
-  Link,
   Preview,
   Text,
   Button,
@@ -21,7 +18,6 @@ interface FeedbackEmailProps {
 
 export const FeedbackEmail = ({
   orgName,
-  orderId,
   feedbackUrl,
 }: FeedbackEmailProps) => {
   return (
@@ -35,7 +31,7 @@ export const FeedbackEmail = ({
             Thank you for dining with <strong>{orgName}</strong> today!
           </Text>
           <Text style={text}>
-            We'd love to hear about your experience. Your feedback helps our team improve, and you also have the option to leave a tip for the staff who served you.
+            We&apos;d love to hear about your experience. Your feedback helps our team improve, and you also have the option to leave a tip for the staff who served you.
           </Text>
 
           <Button

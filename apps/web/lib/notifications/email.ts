@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-// TODO: Developer bypassed types/rules. Requires refactoring for true perfection.
 import { Resend } from 'resend';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -14,7 +12,7 @@ export async function sendEmailNotification(toEmail: string, subject: string, me
   }
 
   try {
-    const { data, error } = await resend.emails.send({
+    const { error } = await resend.emails.send({
       from: 'OurMenu Notifications <notifications@ourmenuos.online>',
       to: [toEmail],
       subject: subject,

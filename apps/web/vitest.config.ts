@@ -11,7 +11,7 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './'),
     },
-    exclude: ['node_modules', 'tests/e2e/**'],
+    exclude: ['node_modules', 'tests/e2e/**', 'e2e/**'],
     pool: 'vmThreads',
     coverage: {
       provider: 'v8',

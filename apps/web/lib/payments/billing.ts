@@ -1,7 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-// TODO: Developer bypassed types/rules. Requires refactoring for true perfection.
-import { getUsdToNgnRate } from './exchange'
-
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY
 
 import { createClient } from '@/lib/supabase/server'

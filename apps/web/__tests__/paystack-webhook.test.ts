@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/ban-ts-comment */
-// TODO: Developer bypassed types/rules. Requires refactoring for true perfection.
-// @ts-nocheck
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { POST } from '../app/api/webhooks/paystack/route'
 import crypto from 'crypto'
@@ -50,9 +47,9 @@ describe('Paystack B2C Webhook (POST)', () => {
       headers: new Headers({
         'x-paystack-signature': 'invalid_signature_hash'
       })
-    } as unknown as any
+    } as unknown as Request
 
-    const res = await POST(req)
+    const res = await POST(req) as unknown as { body: any, init: any } as unknown as { body: any, init: any }
     expect(res.body).toEqual({ error: 'Invalid signature' })
     expect(res.init?.status).toBe(400)
   })
@@ -66,7 +63,7 @@ describe('Paystack B2C Webhook (POST)', () => {
       headers: new Headers({
         'x-paystack-signature': hash
       })
-    } as unknown as any
+    } as unknown as Request
 
     // Setup Supabase mocks for a successful flow
     // 1. Idempotency Check (returns null)
@@ -83,7 +80,7 @@ describe('Paystack B2C Webhook (POST)', () => {
 
     mockEq.mockReturnValue({ single: mockSingle })
 
-    const res = await POST(req)
+    const res = await POST(req) as unknown as { body: any, init: any }
     
     expect(res.body).toEqual({ status: 'success' })
     expect(res.init?.status).toBe(200)
@@ -108,7 +105,7 @@ describe('Paystack B2C Webhook (POST)', () => {
       headers: new Headers({
         'x-paystack-signature': hash
       })
-    } as unknown as any
+    } as unknown as Request
 
     // 1. Idempotency Check (returns null)
     mockSingle.mockResolvedValueOnce({ data: null })
@@ -124,7 +121,7 @@ describe('Paystack B2C Webhook (POST)', () => {
 
     mockEq.mockReturnValue({ single: mockSingle })
 
-    const res = await POST(req)
+    const res = await POST(req) as unknown as { body: any, init: any }
     
     expect(res.body).toEqual({ status: 'success' })
     expect(res.init?.status).toBe(200)

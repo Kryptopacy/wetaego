@@ -1,10 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// FIXME: Developer bypassed types/rules. Requires refactoring for true perfection.
 import { describe, it, expect, vi } from 'vitest'
+import { Database } from '@/lib/supabase/types'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { StockManagementView } from '@/app/(dashboard)/dashboard/orders/components/stock-management-view'
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { formatCurrency } from '@/lib/utils/currency'
 
 describe('StockManagementView', () => {
   it('renders correctly with empty items', () => {
@@ -17,7 +14,7 @@ describe('StockManagementView', () => {
     const items = [
       { id: '1', name: 'Jollof Rice', price_minor: 500000, availability_status: 'available' },
       { id: '2', name: 'Fried Rice', price_minor: 400000, availability_status: 'sold_out' }
-    ] as any
+    ] as unknown as Database['public']['Tables']['menu_items']['Row'][]
 
     render(<StockManagementView menuItems={items} onToggleStock={mockToggle} />)
 
