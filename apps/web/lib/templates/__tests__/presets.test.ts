@@ -1,11 +1,9 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-// TODO: Developer bypassed types/rules. Requires refactoring for true perfection.
 import { describe, it, expect } from 'vitest'
 import { BUSINESS_TYPE_PRESETS } from '../presets'
 
 describe('Business Type Presets', () => {
   it('should have valid configurations for all presets', () => {
-    Object.entries(BUSINESS_TYPE_PRESETS).forEach(([key, preset]) => {
+    Object.values(BUSINESS_TYPE_PRESETS).forEach((preset) => {
       expect(preset).toBeDefined()
       expect(preset.label).toBeDefined()
       expect(preset.template_type).toBeDefined()

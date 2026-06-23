@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 'use client'
 
 
@@ -62,7 +61,7 @@ export function PwaInstallPrompt() {
     deferredPrompt.prompt()
     const { outcome } = await deferredPrompt.userChoice
     if (outcome === 'accepted') {
-      console.log('User accepted the A2HS prompt')
+      // User accepted the A2HS prompt
     }
     setDeferredPrompt(null)
     setShowPrompt(false)

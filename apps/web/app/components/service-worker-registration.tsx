@@ -1,5 +1,5 @@
-/* eslint-disable no-console */
 'use client'
+import * as Sentry from '@sentry/nextjs'
 
 
 
@@ -21,8 +21,6 @@ export function ServiceWorkerRegistration() {
     navigator.serviceWorker
       .register(`/sw.js?vapid=${encodeURIComponent(vapidKey)}`, { scope: '/' })
       .then(async (registration) => {
-        console.log('[OurMenu SW] Registered:', registration.scope)
-
         // Request notification permission if not already granted
         if ('Notification' in window && Notification.permission === 'default') {
           const permission = await Notification.requestPermission()
@@ -35,7 +33,7 @@ export function ServiceWorkerRegistration() {
         }
       })
       .catch((err) => {
-        console.warn('[OurMenu SW] Registration failed:', err)
+        Sentry.captureException(err)
       })
   }, [])
 
@@ -46,7 +44,7 @@ async function subscribeToPush(registration: ServiceWorkerRegistration) {
   try {
     const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
     if (!vapidPublicKey) {
-      console.warn('[OurMenu Push] NEXT_PUBLIC_VAPID_PUBLIC_KEY not set')
+      Sentry.captureMessage('[OurMenu Push] NEXT_PUBLIC_VAPID_PUBLIC_KEY not set')
       return
     }
 
@@ -64,7 +62,7 @@ async function subscribeToPush(registration: ServiceWorkerRegistration) {
 
     await syncSubscription(subscription)
   } catch (err) {
-    console.warn('[OurMenu Push] Subscription failed:', err)
+    Sentry.captureException(err)
   }
 }
 
@@ -79,7 +77,7 @@ async function syncSubscription(subscription: PushSubscription) {
       }),
     })
   } catch (err) {
-    console.warn('[OurMenu Push] Sync failed:', err)
+    Sentry.captureException(err)
   }
 }
 

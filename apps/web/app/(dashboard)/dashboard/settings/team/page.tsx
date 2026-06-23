@@ -28,10 +28,8 @@ export default async function TeamPage() {
   let organization = null
   let role = 'viewer'
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let members: any[] = []
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let invites: any[] = []
+  let members: { user_id: string | null; email: string | null; role: string | null; created_at: string | null }[] = []
+  let invites: { id: string | null; email: string | null; role: string | null; token: string | null; expires_at: string | null }[] = []
 
   if (isDemo) {
     organization = { id: 'demo-org', name: 'Demo Venue', slug: 'demo-venue' }

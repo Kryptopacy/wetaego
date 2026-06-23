@@ -293,8 +293,17 @@ export async function updatePageItem(formData: FormData): Promise<void> {
 
   if (!userData?.user) throw new Error('Not authenticated')
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const updatePayload: any = { title, subtitle, description, price_minor, price_display, availability_status, item_data, inventory_count }
+  const updatePayload: {
+    title?: string
+    subtitle?: string | null
+    description?: string | null
+    price_minor?: number | null
+    price_display?: string | null
+    availability_status?: string
+    item_data?: unknown
+    inventory_count?: number | null
+    images?: string[]
+  } = { title, subtitle, description, price_minor, price_display, availability_status, item_data, inventory_count }
 
   // Handle image upload
   if (aiImageUrl) {

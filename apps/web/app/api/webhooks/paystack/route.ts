@@ -1,5 +1,5 @@
-
 import { NextResponse } from 'next/server'
+import * as Sentry from '@sentry/nextjs'
 import crypto from 'crypto'
 import { createClient } from '@/lib/supabase/server'
 import { notifyBusiness } from '@/lib/notifications/dispatcher'
@@ -156,8 +156,7 @@ export async function POST(req: Request) {
         const planType = event.data.metadata.plan_type
         
         if (orgId) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const updateData: any = { subscription_status: 'active' }
+          const updateData: { subscription_status: string; subscription_plan?: string } = { subscription_status: 'active' }
           if (planType) {
             updateData.subscription_plan = planType
           }
@@ -201,8 +200,7 @@ export async function POST(req: Request) {
                 .eq('key', 'affiliate')
                 .single()
               
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              const percentage = (affiliateSettings?.value as any)?.default_percentage || 10
+              const percentage = (affiliateSettings?.value as { default_percentage?: number })?.default_percentage || 10
               const earningsMinor = Math.floor((amountPaidMinor * percentage) / 100)
 
               await supabase
@@ -269,6 +267,7 @@ export async function POST(req: Request) {
 
   } catch (error: unknown) {
     console.error('Webhook Error:', (error as Error).message)
+    Sentry.captureException(error)
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
   }
 }

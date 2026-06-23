@@ -18,6 +18,7 @@ interface AnimatedDialogContentProps extends React.ComponentPropsWithoutRef<type
   isOpen: boolean;
   hideCloseButton?: boolean;
   children?: React.ReactNode;
+  className?: string;
 }
 
 export const AnimatedDialogContent = React.forwardRef<

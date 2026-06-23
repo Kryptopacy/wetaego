@@ -1,6 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// TODO: Developer bypassed types/rules. Requires refactoring for true perfection.
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, Mock } from 'vitest'
 import { paystackProvider } from '../paystack'
 
 // Mock fetch globally
@@ -23,7 +21,7 @@ describe('Payment Provider Abstraction', () => {
       }),
     }
     
-    ;(global.fetch as unknown as any).mockResolvedValueOnce(mockResponse)
+    ;(global.fetch as Mock).mockResolvedValueOnce(mockResponse)
 
     const result = await paystackProvider.initiatePayment({
       amountMinor: 50000, // NGN 500.00
@@ -64,7 +62,7 @@ describe('Payment Provider Abstraction', () => {
       }),
     }
     
-    ;(global.fetch as unknown as any).mockResolvedValueOnce(mockResponse)
+    ;(global.fetch as Mock).mockResolvedValueOnce(mockResponse)
 
     const result = await paystackProvider.verifyPayment('test_ref_123')
 

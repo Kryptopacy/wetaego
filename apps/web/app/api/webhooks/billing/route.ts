@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import * as Sentry from '@sentry/nextjs'
 import { createClient } from '@supabase/supabase-js'
 import crypto from 'crypto'
 import { Database } from '@/lib/supabase/types'
@@ -113,8 +114,7 @@ export async function POST(req: Request) {
         const org = orgRaw as { extra_pages_purchased?: number } | null;
           
         if (org) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const updatePayload: any = {
+          const updatePayload: { extra_pages_purchased?: number } = {
             extra_pages_purchased: (org.extra_pages_purchased || 0) + 1
           };
           await supabase
@@ -137,6 +137,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ status: 'success' })
   } catch (error) {
     console.error('Webhook processing error:', error)
+    Sentry.captureException(error)
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
   }
 }
