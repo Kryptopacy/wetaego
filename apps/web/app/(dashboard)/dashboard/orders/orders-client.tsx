@@ -54,7 +54,7 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
             .eq('id', orderPayload.new.id)
             .single()
             .then(({ data }: { data: unknown }) => {
-              const fullData = data ? mapSupabaseOrderToUI(data as any) : null
+              const fullData = data ? mapSupabaseOrderToUI(data as Parameters<typeof mapSupabaseOrderToUI>[0]) : null
               if (fullData) {
                 setOrders((prev) => [fullData, ...prev])
                 if (fullData.status === 'paid' || fullData.status === 'pending') {

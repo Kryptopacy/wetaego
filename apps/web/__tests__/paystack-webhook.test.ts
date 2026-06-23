@@ -49,7 +49,7 @@ describe('Paystack B2C Webhook (POST)', () => {
       })
     } as unknown as Request
 
-    const res = await POST(req) as unknown as { body: any, init: any } as unknown as { body: any, init: any }
+    const res = await POST(req) as unknown as { body: { status?: string, error?: string }, init?: { status?: number } }
     expect(res.body).toEqual({ error: 'Invalid signature' })
     expect(res.init?.status).toBe(400)
   })
@@ -80,7 +80,7 @@ describe('Paystack B2C Webhook (POST)', () => {
 
     mockEq.mockReturnValue({ single: mockSingle })
 
-    const res = await POST(req) as unknown as { body: any, init: any }
+    const res = await POST(req) as unknown as { body: { status?: string, error?: string }, init?: { status?: number } }
     
     expect(res.body).toEqual({ status: 'success' })
     expect(res.init?.status).toBe(200)
@@ -121,7 +121,7 @@ describe('Paystack B2C Webhook (POST)', () => {
 
     mockEq.mockReturnValue({ single: mockSingle })
 
-    const res = await POST(req) as unknown as { body: any, init: any }
+    const res = await POST(req) as unknown as { body: { status?: string, error?: string }, init?: { status?: number } }
     
     expect(res.body).toEqual({ status: 'success' })
     expect(res.init?.status).toBe(200)

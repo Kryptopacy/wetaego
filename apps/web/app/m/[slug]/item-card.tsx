@@ -4,9 +4,10 @@ import { useCartStore } from '@/lib/store/cart'
 import { formatCurrency } from '@/lib/utils/currency'
 import { useState } from 'react'
 import Image from 'next/image'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { Tables } from '../../../../../types'
 import { Plus, Minus, ShoppingBag, X } from 'lucide-react'
+import { AnimatedDialog, AnimatedDialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 
 interface ItemCardProps {
   item: Tables<'menu_items'>
@@ -134,55 +135,45 @@ export function ItemCard({ item }: ItemCardProps) {
       </motion.div>
 
       {/* Modifier Modal */}
-      <AnimatePresence>
-        {showModifierModal && (
-          <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4 sm:p-0">
-            <motion.div 
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black/40 backdrop-blur-sm" 
-              onClick={() => setShowModifierModal(false)} 
-            />
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95, y: 20 }} 
-              animate={{ opacity: 1, scale: 1, y: 0 }} 
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="relative w-full max-w-md bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-[2rem] p-6 shadow-2xl z-10"
-            >
-              <button 
-                onClick={() => setShowModifierModal(false)} 
-                className="absolute top-6 right-6 w-8 h-8 flex items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
-              
-              <div className="mb-6 pr-10">
-                <h3 className="text-2xl font-black text-zinc-900 dark:text-white tracking-tight">{item.name}</h3>
-                <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400 mt-1">{formatCurrency(item.price_minor )}</p>
-              </div>
-
-              <div className="mb-8 bg-zinc-50 dark:bg-zinc-800/50 rounded-2xl p-4 border border-zinc-100 dark:border-zinc-800">
-                <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-3">Special Instructions</label>
-                <textarea
-                  value={modifiers}
-                  onChange={e => setModifiers(e.target.value)}
-                  placeholder="e.g., Extra cheese, no onions, allergies..."
-                  rows={3}
-                  className="w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-3 text-[15px] text-zinc-900 dark:text-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none resize-none transition-all placeholder:text-zinc-400"
-                />
-              </div>
-
-              <button
-                onClick={handleAddToCart}
-                className="w-full py-4 rounded-xl font-bold text-white text-[15px] bg-emerald-500 hover:bg-emerald-600 shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2 transition-all active:scale-95"
-              >
-                <ShoppingBag className="w-5 h-5" />
-                Add to Order
-              </button>
-            </motion.div>
+      <AnimatedDialog open={showModifierModal} onOpenChange={setShowModifierModal}>
+        <AnimatedDialogContent isOpen={showModifierModal} hideCloseButton>
+          <DialogTitle className="sr-only">{item.name} Options</DialogTitle>
+          <DialogDescription className="sr-only">Customize your order for {item.name}</DialogDescription>
+          
+          <button 
+            onClick={() => setShowModifierModal(false)} 
+            className="absolute top-6 right-6 w-8 h-8 flex items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+            aria-label="Close dialog"
+          >
+            <X className="w-4 h-4" />
+          </button>
+          
+          <div className="mb-6 pr-10">
+            <h3 className="text-2xl font-black text-zinc-900 dark:text-white tracking-tight">{item.name}</h3>
+            <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400 mt-1">{formatCurrency(item.price_minor )}</p>
           </div>
-        )}
-      </AnimatePresence>
+
+          <div className="mb-8 bg-zinc-50 dark:bg-zinc-800/50 rounded-2xl p-4 border border-zinc-100 dark:border-zinc-800">
+            <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-3" htmlFor="special-instructions">Special Instructions</label>
+            <textarea
+              id="special-instructions"
+              value={modifiers}
+              onChange={e => setModifiers(e.target.value)}
+              placeholder="e.g., Extra cheese, no onions, allergies..."
+              rows={3}
+              className="w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-3 text-[15px] text-zinc-900 dark:text-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none resize-none transition-all placeholder:text-zinc-400"
+            />
+          </div>
+
+          <button
+            onClick={handleAddToCart}
+            className="w-full py-4 rounded-xl font-bold text-white text-[15px] bg-emerald-500 hover:bg-emerald-600 shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2 transition-all active:scale-95 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 dark:focus:ring-offset-zinc-900"
+          >
+            <ShoppingBag className="w-5 h-5" />
+            Add to Order
+          </button>
+        </AnimatedDialogContent>
+      </AnimatedDialog>
     </>
   )
 }

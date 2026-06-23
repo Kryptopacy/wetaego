@@ -10,7 +10,7 @@ type RawOrderPayload = Partial<SupabaseOrder> & {
   id: string;
   order_items?: Partial<SupabaseOrderItem>[];
   organizations?: Partial<SupabaseOrg> | null;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export function mapSupabaseOrderToUI(rawOrder: RawOrderPayload): UIOrder {
@@ -40,16 +40,16 @@ export function mapSupabaseOrderToUI(rawOrder: RawOrderPayload): UIOrder {
     organization_id: rawOrder.organization_id || '',
     location_id: rawOrder.location_id || '',
     table_identifier: rawOrder.table_identifier || null,
-    customer_name: rawOrder.customer_name || null,
-    customer_email: rawOrder.customer_email || null,
-    customer_phone: rawOrder.customer_phone || null,
+    customer_name: (rawOrder.customer_name as string) || null,
+    customer_email: (rawOrder.customer_email as string) || null,
+    customer_phone: (rawOrder.customer_phone as string) || null,
     total_amount_minor: rawOrder.total_amount_minor || 0,
     tip_amount_minor: rawOrder.tip_amount_minor || null,
     amount_paid_minor: rawOrder.amount_paid_minor || null,
     status: (rawOrder.status as UIOrder['status']) || 'pending',
-    payment_method: rawOrder.payment_method || null,
-    customer_note: rawOrder.customer_note || null,
-    assigned_staff_id: rawOrder.assigned_staff_id || null,
+    payment_method: (rawOrder.payment_method as string) || null,
+    customer_note: (rawOrder.customer_note as string) || null,
+    assigned_staff_id: (rawOrder.assigned_staff_id as string) || null,
     created_at: rawOrder.created_at || new Date().toISOString(),
     order_items: items,
     organizations: org
