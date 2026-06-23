@@ -133,7 +133,7 @@ async function run() {
     throw new Error('Failed to insert demo pages: ' + JSON.stringify(pagesError))
   }
 
-  console.log('SUCCESS!');
+
 }
 
 run().then(() => process.exit(0)).catch(err => { console.error(err); process.exit(1); });

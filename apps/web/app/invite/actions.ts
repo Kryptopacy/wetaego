@@ -13,8 +13,7 @@ export async function acceptInviteAction(token: string) {
     if (!userData?.user) {
       return { error: 'You must be logged in to accept an invitation.' }
     }
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const user = userData.user
+
 
     // 2. Call the secure RPC to accept the invite
     const { data: success, error: rpcError } = await supabase

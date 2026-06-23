@@ -55,8 +55,7 @@ export function CartFAB({
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'transfer'>(paymentIsLive ? 'card' : 'transfer')
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setIsMounted(true)
+    queueMicrotask(() => setIsMounted(true))
     const handleOpenModal = () => setShowCheckoutModal(true)
     window.addEventListener('open-checkout-modal', handleOpenModal)
     return () => window.removeEventListener('open-checkout-modal', handleOpenModal)
@@ -88,8 +87,7 @@ export function CartFAB({
       }
       fetchUpsell()
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showCheckoutModal, items.length])
+  }, [showCheckoutModal, items, items.length, menuItems, templateType, upsellData])
 
   const upsellItemDetails = upsellData ? menuItems.find(i => i.id === upsellData.suggestedItemId) : null
 

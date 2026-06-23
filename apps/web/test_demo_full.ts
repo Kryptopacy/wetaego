@@ -15,7 +15,7 @@ async function runDemoLogic() {
   const email = `demo-${uid}@pacygrills.com`
   const password = `demo-${crypto.randomUUID()}`
   
-  console.log('1. Creating user...')
+
   const { data: authData, error: signUpError } = await adminClient.auth.admin.createUser({
     email,
     password,
@@ -28,7 +28,7 @@ async function runDemoLogic() {
 
   const userId = authData.user.id
 
-  console.log('2. Creating org...')
+
   const { data: org, error: orgError } = await adminClient.from('organizations').insert({
     name: 'Pacy Grills',
     slug: `pacy-grills-${uid}`,
@@ -39,7 +39,7 @@ async function runDemoLogic() {
     return
   }
 
-  console.log('3. Organization member...')
+
   const { error: memberError } = await adminClient.from('organization_members').insert({
     organization_id: org.id,
     user_id: userId,
@@ -50,7 +50,7 @@ async function runDemoLogic() {
     return
   }
 
-  console.log('4. Location...')
+
   const { data: loc, error: locError } = await adminClient.from('locations').insert({
     organization_id: org.id,
     name: 'Downtown HQ',
@@ -67,7 +67,7 @@ async function runDemoLogic() {
     return
   }
 
-  console.log('5. Menu...')
+
   const { data: menu, error: menuError } = await adminClient.from('menus').insert({
     organization_id: org.id,
     location_id: loc.id,
@@ -79,7 +79,7 @@ async function runDemoLogic() {
     return
   }
 
-  console.log('6. Categories...')
+
   const { data: cat1, error: cat1Error } = await adminClient.from('categories').insert({ menu_id: menu.id, name: 'Grills', sort_order: 1 }).select('id').single()
   const { data: cat2, error: cat2Error } = await adminClient.from('categories').insert({ menu_id: menu.id, name: 'Drinks', sort_order: 2 }).select('id').single()
   if (cat1Error || cat2Error) {
@@ -87,7 +87,7 @@ async function runDemoLogic() {
     return
   }
 
-  console.log('7. Items...')
+
   const { error: itemsError } = await adminClient.from('items').insert([
     { menu_id: menu.id, category_id: cat1.id, name: 'Spicy Suya', description: 'Classic beef suya with onions.', price: 4500, is_available: true },
     { menu_id: menu.id, category_id: cat1.id, name: 'Grilled Catfish', description: 'Whole catfish roasted in spices.', price: 12000, is_available: true },
@@ -99,7 +99,7 @@ async function runDemoLogic() {
     return
   }
 
-  console.log('8. Credits...')
+
   const { error: creditsError } = await adminClient.from('credit_transactions').insert({
     organization_id: org.id,
     amount: 150,
@@ -111,7 +111,7 @@ async function runDemoLogic() {
     return
   }
 
-  console.log('9. Location Pages...')
+
   const { error: pagesError } = await adminClient.from('location_pages').insert([
     { location_id: loc.id, slug: 'vip-tables', title: 'VIP Table Reservations', template_type: 'rate_card', content: JSON.stringify({ description: 'Book VIP tables' }), is_published: true },
     { location_id: loc.id, slug: 'about-us', title: 'About Us', template_type: 'info', content: JSON.stringify({ description: 'Welcome' }), is_published: true }
@@ -121,7 +121,7 @@ async function runDemoLogic() {
     return
   }
 
-  console.log('10. Custom Domain Settings...')
+
   const { error: domainError } = await adminClient.from('location_custom_domains').insert({
     location_id: loc.id,
     domain: `demo-${uid}.ourmenu.com`,
@@ -132,7 +132,7 @@ async function runDemoLogic() {
     return
   }
 
-  console.log('Demo workspace initialized successfully!')
+
 }
 
 runDemoLogic().then(() => process.exit(0)).catch((err) => { console.error(err); process.exit(1); })

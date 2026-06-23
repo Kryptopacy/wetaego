@@ -1,7 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { POST } from '../route'
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import * as ai from 'ai'
+
 import * as cookiesModule from 'next/headers'
 import * as supabaseServer from '@/lib/supabase/server'
 
@@ -41,8 +40,7 @@ describe('Chat API', () => {
     vi.mocked(cookiesModule.cookies).mockResolvedValue({
       get: () => ({ value: '20' }),
       set: vi.fn(),
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as unknown as any)
+    } as never)
 
     const req = new Request('http://localhost/api/chat', {
       method: 'POST',
@@ -58,8 +56,7 @@ describe('Chat API', () => {
     vi.mocked(cookiesModule.cookies).mockResolvedValue({
       get: () => ({ value: '5' }),
       set: vi.fn(),
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as unknown as any)
+    } as never)
 
     const mockSupabase = {
       from: vi.fn().mockReturnValue({
@@ -71,8 +68,7 @@ describe('Chat API', () => {
         })
       })
     }
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-    vi.mocked(supabaseServer.createClient).mockResolvedValue(mockSupabase as any)
+    vi.mocked(supabaseServer.createClient).mockResolvedValue(mockSupabase as never)
 
     const req = new Request('http://localhost/api/chat', {
       method: 'POST',

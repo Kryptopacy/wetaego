@@ -21,8 +21,7 @@ export function CallStaffFAB({ organizationId, locationId, tableIdentifier }: Ca
   const [isCalling, setIsCalling] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
 
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => setIsMounted(true), [])
+  useEffect(() => queueMicrotask(() => setIsMounted(true)), [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

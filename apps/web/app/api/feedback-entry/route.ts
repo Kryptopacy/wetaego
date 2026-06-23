@@ -29,8 +29,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid QR Code' }, { status: 404 })
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const orgSlug = (qrData.organizations as unknown as Record<string, any>)?.slug
+  const orgSlug = (qrData.organizations as unknown as { slug?: string })?.slug
   const locationId = qrData.location_id
   const tableIdentifier = qrData.table_identifier
 

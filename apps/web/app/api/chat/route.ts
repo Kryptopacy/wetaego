@@ -4,12 +4,7 @@ import { streamText, tool, stepCountIs } from 'ai'
 import { z } from 'zod'
 import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
-import { Tables } from '../../../../../types'
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-type CategoryWithItems = Tables<'menu_categories'> & {
-  menu_items: Tables<'menu_items'>[]
-}
+// cleaned up unused type
 
 export const maxDuration = 30
 
@@ -221,8 +216,7 @@ ${itemsJson}`
 
     // Only inject tools the persona is allowed to use
     const activeTools = Object.fromEntries(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      Object.entries(allTools).filter(([name]) => persona.tools.includes(name as any))
+      Object.entries(allTools).filter(([name]) => persona.tools.includes(name as never))
     )
 
     // 7. Initialize streaming text session with tools
@@ -234,8 +228,7 @@ ${itemsJson}`
       tools: activeTools,
     })
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (result as any).toDataStreamResponse()
+    return (result as unknown as { toDataStreamResponse: () => Response }).toDataStreamResponse()
   } catch (err: unknown) {
     console.error('Chat error:', err)
     return new Response((err as Error).message || 'Internal Server Error', { status: 500 })
