@@ -6,6 +6,9 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function sendEmailNotification(toEmail: string, subject: string, message: string) {
   if (!process.env.RESEND_API_KEY) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('RESEND_API_KEY is missing in production environment');
+    }
     console.warn(`RESEND_API_KEY missing. Mocking email to ${toEmail}: ${subject}`);
     return true;
   }
@@ -39,6 +42,9 @@ export async function sendEmailNotification(toEmail: string, subject: string, me
 
 export async function sendWelcomeEmail(toEmail: string, name?: string) {
   if (!process.env.RESEND_API_KEY) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('RESEND_API_KEY is missing in production environment');
+    }
     console.warn(`RESEND_API_KEY missing. Mocking Welcome email to ${toEmail}`);
     return true;
   }

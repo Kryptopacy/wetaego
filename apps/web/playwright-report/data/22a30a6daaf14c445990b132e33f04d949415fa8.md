@@ -1,0 +1,24 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: guest-flow.spec.ts >> Guest Checkout Flow >> should allow a guest to view menu, add to cart, and reach checkout
+- Location: tests\e2e\guest-flow.spec.ts:4:7
+
+# Error details
+
+```
+Error: browserType.launch: Executable doesn't exist at C:\Users\pacy.dev\AppData\Local\ms-playwright\webkit-2311\Playwright.exe
+╔════════════════════════════════════════════════════════════╗
+║ Looks like Playwright was just installed or updated.       ║
+║ Please run the following command to download new browsers: ║
+║                                                            ║
+║     pnpm exec playwright install                           ║
+║                                                            ║
+║ <3 Playwright Team                                         ║
+╚════════════════════════════════════════════════════════════╝
+```

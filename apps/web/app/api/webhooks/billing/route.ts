@@ -42,12 +42,16 @@ export async function POST(req: Request) {
       }
 
       // Record webhook FIRST — prevents duplicate processing even if later steps fail
-      await supabase
+      const { error: insertError } = await supabase
         .from('webhook_events')
         .insert({
           provider_reference: providerRef,
           event_type: event.event
         })
+        
+      if (insertError) {
+        return NextResponse.json({ status: 'already_processed' })
+      }
     }
 
     if (event.event === 'subscription.create') {

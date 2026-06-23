@@ -49,10 +49,15 @@ export async function POST(req: Request) {
       }
 
       // Record webhook first (prevents duplicate processing even if later steps fail)
-      await supabase.from('webhook_events').insert({
+      const { error: insertError } = await supabase.from('webhook_events').insert({
         provider_reference: event.data.reference,
         event_type: 'charge.success',
       })
+
+      if (insertError) {
+        // If it fails, likely due to a unique constraint from a concurrent request, we consider it already processed
+        return NextResponse.json({ status: 'already_processed' }, { status: 200 })
+      }
 
       // ── Determine what was paid: order or booking ────────────────────────────
 

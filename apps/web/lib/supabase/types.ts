@@ -1048,6 +1048,7 @@ export type Database = {
       }
       organizations: {
         Row: {
+          billing_plan_code: string | null
           business_type: string | null
           created_at: string
           created_by: string
@@ -1068,6 +1069,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          billing_plan_code?: string | null
           business_type?: string | null
           created_at?: string
           created_by: string
@@ -1088,6 +1090,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          billing_plan_code?: string | null
           business_type?: string | null
           created_at?: string
           created_by?: string
