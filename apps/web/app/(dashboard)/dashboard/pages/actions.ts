@@ -5,6 +5,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import type { Json } from '@/lib/supabase/types'
    
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { getPreset, buildPageTitle } from '@/lib/templates/presets'
@@ -300,7 +301,7 @@ export async function updatePageItem(formData: FormData): Promise<void> {
     price_minor?: number | null
     price_display?: string | null
     availability_status?: string
-    item_data?: unknown
+    item_data?: Json
     inventory_count?: number | null
     images?: string[]
   } = { title, subtitle, description, price_minor, price_display, availability_status, item_data, inventory_count }

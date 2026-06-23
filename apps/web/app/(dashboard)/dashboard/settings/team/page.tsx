@@ -28,8 +28,8 @@ export default async function TeamPage() {
   let organization = null
   let role = 'viewer'
 
-  let members: { user_id: string | null; email: string | null; role: string | null; created_at: string | null }[] = []
-  let invites: { id: string | null; email: string | null; role: string | null; token: string | null; expires_at: string | null }[] = []
+  let members: { user_id: string; email: string; role: string; created_at: string }[] = []
+  let invites: { id: string; email: string; role: string; token: string; expires_at: string }[] = []
 
   if (isDemo) {
     organization = { id: 'demo-org', name: 'Demo Venue', slug: 'demo-venue' }
@@ -67,10 +67,10 @@ export default async function TeamPage() {
       .eq('organization_id', organization?.id || '')
 
     members = (membersRaw || []).map((m) => ({
-      user_id: m.user_id,
-      email: m.email,
-      role: m.role,
-      created_at: m.created_at,
+      user_id: m.user_id as string,
+      email: m.email as string,
+      role: m.role as string,
+      created_at: m.created_at as string,
     }))
 
     const { data: invitesRaw } = await supabase
@@ -80,11 +80,11 @@ export default async function TeamPage() {
       .order('created_at', { ascending: false })
 
     invites = (invitesRaw || []).map((i) => ({
-      id: i.id,
-      email: i.email,
-      role: i.role,
-      token: i.token,
-      expires_at: i.expires_at,
+      id: i.id as string,
+      email: i.email as string,
+      role: i.role as string,
+      token: i.token as string,
+      expires_at: i.expires_at as string,
     }))
   }
 
