@@ -1,6 +1,7 @@
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
+import { formatCurrency } from '@/lib/utils/currency'
 
 export default async function TeamPerformancePage() {
   const supabase = await createClient()
@@ -61,6 +62,14 @@ export default async function TeamPerformancePage() {
       </div>
     )
   }
+
+  // Fetch currency code from active location
+  const { data: locData } = await supabase
+    .from('locations')
+    .select('currency_code')
+    .eq('id', activeLocationId)
+    .single()
+  const currencyCode = locData?.currency_code || 'NGN'
 
   // 1. Fetch staff members
   const { data: staffMembers } = await supabase
@@ -150,7 +159,7 @@ export default async function TeamPerformancePage() {
           <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-6">
             <h3 className="text-zinc-500 font-bold uppercase tracking-wider text-xs mb-1">Your Tips Earned</h3>
             <div className="text-4xl font-black text-green-400">
-              ₦{(myStats.totalTipsMinor / 100).toLocaleString()}
+              {formatCurrency(myStats.totalTipsMinor, currencyCode)}
             </div>
           </div>
           <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-6">
@@ -191,7 +200,7 @@ export default async function TeamPerformancePage() {
         <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-6">
           <h3 className="text-zinc-500 font-bold uppercase tracking-wider text-xs mb-1">Total Tips Collected</h3>
           <div className="text-4xl font-black text-blue-500">
-            ₦{((ordersWithTips?.reduce((sum, o) => sum + (o.tip_amount_minor || 0), 0) || 0) / 100).toLocaleString()}
+            {formatCurrency(ordersWithTips?.reduce((sum, o) => sum + (o.tip_amount_minor || 0), 0) || 0, currencyCode)}
           </div>
         </div>
         <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-6">
@@ -233,7 +242,7 @@ export default async function TeamPerformancePage() {
                 </td>
                 <td className="px-6 py-4 text-right">
                   <div className="font-bold text-green-400">
-                    ₦{(staff.totalTipsMinor / 100).toLocaleString()}
+                    {formatCurrency(staff.totalTipsMinor, currencyCode)}
                   </div>
                 </td>
               </tr>

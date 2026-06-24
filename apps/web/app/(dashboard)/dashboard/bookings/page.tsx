@@ -100,6 +100,17 @@ export default async function BookingsDashboard() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
+                        {booking.status === 'pending' && (
+                          <form action={async () => {
+                            'use server';
+                            const { updateBookingStatus } = await import('./actions');
+                            await updateBookingStatus(booking.id, 'confirm');
+                          }}>
+                            <button className="px-3 py-1.5 rounded bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 font-medium text-xs transition-colors">
+                              Confirm
+                            </button>
+                          </form>
+                        )}
                         {booking.payment_status !== 'paid' && booking.status !== 'cancelled' && (
                           <form action={async () => {
                             'use server';

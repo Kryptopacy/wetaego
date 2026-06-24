@@ -3,6 +3,7 @@ import { Database } from '@/lib/supabase/types'
 type RequestType = NonNullable<Database['public']['Tables']['service_requests']['Row']['request_type']> | 'waiter' | 'bill' | 'cleanup'
 
 import { createClient } from '@/lib/supabase/server'
+import { cookies } from 'next/headers'
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { revalidatePath } from 'next/cache'
 
@@ -63,16 +64,45 @@ export async function processCheckout(
 
   // --- Rate Limiting & Idempotency ---
   const { checkRateLimit, withIdempotency } = await import('@/lib/upstash');
-  const { success } = await checkRateLimit('checkout');
+  const cookieStore = await cookies();
+  const sessionId = cookieStore.get('session_id')?.value || 'anonymous';
+  const { success } = await checkRateLimit(`checkout:${sessionId}`);
   if (!success) {
     throw new Error('Too many requests. Please wait a minute before placing another order.');
   }
 
   const checkoutLogic = async () => {
+    // 1. Server-side price verification — never trust client-supplied totals
+    const itemIds = items.map(i => i.id).filter(Boolean)
+    const { data: dbItems, error: dbItemsError } = await supabase
+      .from('menu_items')
+      .select('id, price_minor')
+      .in('id', itemIds)
+    
+    if (dbItemsError || !dbItems) {
+      throw new Error('Could not verify item prices. Please refresh and try again.')
+    }
+
+    const priceMap = new Map(dbItems.map(i => [i.id, i.price_minor]))
+
+    // Recalculate authoritative subtotal from DB prices
+    const serverSubtotalMinor = items.reduce((sum, item) => {
+      return sum + ((priceMap.get(item.id) || 0) * item.quantity)
+    }, 0)
+
+    // Apply discount server-side, capped at subtotal to prevent negative totals
+    const clampedDiscountMinor = Math.min(discountAmountMinor || 0, serverSubtotalMinor)
+    const verifiedTotalMinor = Math.max(0, serverSubtotalMinor - clampedDiscountMinor)
+
+    // Guard: reject if client total deviates >5% from server-computed total (fraud detection)
+    const deviation = Math.abs(verifiedTotalMinor - totalAmountMinor) / Math.max(verifiedTotalMinor, 1)
+    if (deviation > 0.05 && verifiedTotalMinor > 0) {
+      throw new Error('Order total mismatch. Please refresh and try again.')
+    }
 
   // ----------------------------------------
 
-  // 1. Fetch Payment Settings
+  // 2. Fetch Payment Settings
   const { data: paySettings } = await supabase
     .from('organization_payment_settings')
     .select('provider_account_id, is_active')
@@ -82,7 +112,7 @@ export async function processCheckout(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const subaccountCode = staffSubaccountOverride || (paySettings?.is_active ? paySettings.provider_account_id : null)
 
-  // 2. Create Order
+  // 3. Create Order using server-verified total
   const { data: order, error: orderError } = await supabase
     .from('orders')
     .insert({
@@ -91,31 +121,37 @@ export async function processCheckout(
       customer_name: 'Guest',
       table_identifier: tableIdentifier || 'Takeaway',
       status: 'pending',
-      total_amount_minor: totalAmountMinor,
+      total_amount_minor: verifiedTotalMinor,
       tip_amount_minor: tipAmountMinor || 0,
-      discount_amount_minor: discountAmountMinor || 0,
-      customer_note: customerNote || null,
+      discount_amount_minor: clampedDiscountMinor,
+      customer_note: customerNote ? customerNote.slice(0, 500) : null,
       customer_email: customerEmail || null,
     } as never).select('id').single()
 
   if (orderError || !order) throw new Error('Failed to create order')
 
-  // 3. Create Order Items
+  // 4. Create Order Items using server-verified prices
   const orderItemsData = items.map(item => ({
     order_id: order.id,
     item_id: item.id,
     item_name: item.name,
     quantity: item.quantity,
-    price_minor: item.price_minor
+    price_minor: priceMap.get(item.id) ?? item.price_minor
   }))
 
-  await supabase.from('order_items').insert(orderItemsData)
+  const { error: itemsError } = await supabase.from('order_items').insert(orderItemsData)
+  if (itemsError) {
+    // Roll back the order to prevent a paid order with no items
+    await supabase.from('orders').delete().eq('id', order.id)
+    throw new Error('Failed to save order items. Please try again.')
+  }
 
-  // 4. Initialize Paystack Transaction if Active and method is card
+  // 5. Initialize Paystack Transaction if Active and method is card
   const isPaystackLive = paySettings?.is_active && paySettings?.provider_account_id
   
   if (isPaystackLive && paymentMethod !== 'transfer') {
-    const chargeAmountMinor = paymentFractionMinor ?? totalAmountMinor
+    // Use verified server total for Paystack — split payment uses fractional amount
+    const chargeAmountMinor = paymentFractionMinor ?? verifiedTotalMinor
     const email = customerEmail || `order_${order.id}@ourmenuos.online`
     const { authorizationUrl: checkoutUrl } = await paymentProvider.initiatePayment({
       amountMinor: chargeAmountMinor,
@@ -131,7 +167,7 @@ export async function processCheckout(
 
   // Fallback to manual payment: trigger push notification immediately
   const { sendPushToOrg, newOrderNotification } = await import('@/lib/notifications/push')
-  waitUntil(sendPushToOrg(orgId, newOrderNotification(tableIdentifier || 'Takeaway', totalAmountMinor)))
+  waitUntil(sendPushToOrg(orgId, newOrderNotification(tableIdentifier || 'Takeaway', verifiedTotalMinor)))
 
     return { orderId: order.id };
   };

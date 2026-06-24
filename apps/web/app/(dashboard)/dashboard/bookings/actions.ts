@@ -5,7 +5,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
-export async function updateBookingStatus(bookingId: string, action: 'mark_paid' | 'cancel') {
+export async function updateBookingStatus(bookingId: string, action: 'mark_paid' | 'cancel' | 'confirm') {
   const supabase = await createClient()
 
   const { data: userData, error: authError } = await supabase.auth.getUser()
@@ -48,6 +48,8 @@ export async function updateBookingStatus(bookingId: string, action: 'mark_paid'
 
   if (action === 'mark_paid') {
     await supabase.from('page_bookings').update({ payment_status: 'paid', status: 'confirmed' }).eq('id', bookingId)
+  } else if (action === 'confirm') {
+    await supabase.from('page_bookings').update({ status: 'confirmed' }).eq('id', bookingId)
   } else if (action === 'cancel') {
     await supabase.from('page_bookings').update({ status: 'cancelled' }).eq('id', bookingId)
   }

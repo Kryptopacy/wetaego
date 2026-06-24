@@ -19,12 +19,29 @@ export default async function BillingPage(props: { searchParams: Promise<{ curre
     return <div className="p-8 text-zinc-500">Please log in to manage billing.</div>
   }
 
-  // Fetch the user's organization
-  const { data: org } = await supabase
-    .from('organizations')
-    .select('*')
-    .eq('created_by', userId)
+  // Fetch the user's organization — check membership first, then creator fallback
+  // This allows invited managers to access billing (not just the account creator)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let org: any = null
+
+  const { data: memberOrg } = await supabase
+    .from('organization_members')
+    .select('organizations(*)')
+    .eq('user_id', userId)
+    .in('role', ['owner', 'manager'])
+    .limit(1)
     .single()
+
+  if (memberOrg?.organizations) {
+    org = memberOrg.organizations as typeof org
+  } else {
+    const { data: creatorOrg } = await supabase
+      .from('organizations')
+      .select('*')
+      .eq('created_by', userId)
+      .single()
+    org = creatorOrg
+  }
 
   if (!org) {
     return <div className="p-8 text-zinc-500">Please create an organization first.</div>

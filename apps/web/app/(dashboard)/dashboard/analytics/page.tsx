@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { TrendingUp, Users, CalendarDays, ShoppingBag, Star, DollarSign } from 'lucide-react'
 import type { Database } from '@/lib/supabase/types'
+import { formatCurrency } from '@/lib/utils/currency'
 
 type OrderRow = Database['public']['Tables']['orders']['Row']
 type OrderItemRow = Database['public']['Tables']['order_items']['Row']
@@ -47,6 +48,15 @@ export default async function AnalyticsDashboardPage() {
   const hasRateCard = activeModules.has('rate_card')
 
   // 2. Fetch Aggregated Data
+  // Fetch currency code from first location
+  const { data: firstLoc } = await supabase
+    .from('locations')
+    .select('currency_code')
+    .in('id', locIds)
+    .limit(1)
+    .single()
+  const currencyCode = firstLoc?.currency_code || 'NGN'
+
   // Fetch orders for the last 30 days
   const thirtyDaysAgo = new Date()
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
@@ -152,8 +162,10 @@ export default async function AnalyticsDashboardPage() {
     ? (allRatings.reduce((sum, r) => sum + (r.staff_rating || 0), 0) / allRatings.length).toFixed(1)
     : null
 
-  // Real bookings this month
+  // Real bookings this month + per-day breakdown for last 7 days
   let bookingsThisMonth = 0
+  let bookingBars: { date: string; count: number; height: number }[] = []
+
   if (hasBooking) {
     const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1).toISOString()
     const { count } = await supabase
@@ -162,6 +174,33 @@ export default async function AnalyticsDashboardPage() {
       .eq('location_pages.locations.organization_id', orgId)
       .gte('created_at', startOfMonth)
     bookingsThisMonth = count || 0
+
+    // Fetch last 7 days of bookings for per-day chart
+    const sevenDaysAgo = new Date(today)
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6)
+    const { data: recentBookings } = await supabase
+      .from('page_bookings')
+      .select('created_at, location_pages!inner(locations!inner(organization_id))')
+      .eq('location_pages.locations.organization_id', orgId)
+      .gte('created_at', sevenDaysAgo.toISOString())
+
+    // Build per-day count map
+    const bookingsByDay: Record<string, number> = {}
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(today)
+      d.setDate(d.getDate() - i)
+      bookingsByDay[d.toISOString().slice(0, 10)] = 0
+    }
+    recentBookings?.forEach(b => {
+      const day = new Date(b.created_at).toISOString().slice(0, 10)
+      if (day in bookingsByDay) bookingsByDay[day]++
+    })
+    const maxBookings = Math.max(...Object.values(bookingsByDay), 1)
+    bookingBars = Object.entries(bookingsByDay).map(([date, count]) => ({
+      date,
+      count,
+      height: Math.max(count > 0 ? 8 : 4, Math.round((count / maxBookings) * 100))
+    }))
   }
 
   return (
@@ -180,7 +219,7 @@ export default async function AnalyticsDashboardPage() {
         <div className="flex justify-between items-end mb-8">
           <div>
             <h2 className="text-sm font-bold text-zinc-400 uppercase tracking-widest mb-1">Total Revenue</h2>
-            <div className="text-5xl font-black text-white">₦{(totalRevenueMinor / 100).toLocaleString()}</div>
+            <div className="text-5xl font-black text-white">{formatCurrency(totalRevenueMinor, currencyCode)}</div>
           </div>
           <div className="text-right">
             {weekGrowthPct !== null ? (
@@ -210,7 +249,7 @@ export default async function AnalyticsDashboardPage() {
               >
                 <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-zinc-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-xl z-10">
                   {new Date(bar.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}<br />
-                  <span className="text-blue-400 font-bold">₦{(bar.rev / 100).toLocaleString()}</span>
+                  {bar.rev > 0 && <span className="text-blue-400 font-bold">{formatCurrency(bar.rev, currencyCode)}</span>}
                 </div>
               </div>
             </div>
@@ -244,7 +283,7 @@ export default async function AnalyticsDashboardPage() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-white font-bold">₦{(item.revenue / 100).toLocaleString()}</div>
+                    <div className="text-white font-bold">{formatCurrency(item.revenue, currencyCode)}</div>
                   </div>
                 </div>
               )) : (
@@ -267,7 +306,7 @@ export default async function AnalyticsDashboardPage() {
                 <div className="text-sm text-zinc-500 mb-1 flex items-center gap-2">
                   <DollarSign className="w-4 h-4 text-amber-400" /> Total Tips
                 </div>
-                <div className="text-2xl font-black text-white">₦{(totalTipsMinor / 100).toLocaleString()}</div>
+                <div className="text-2xl font-black text-white">{formatCurrency(totalTipsMinor, currencyCode)}</div>
               </div>
               <div className="bg-zinc-950 rounded-2xl p-4 border border-zinc-800/50">
                 <div className="text-sm text-zinc-500 mb-1 flex items-center gap-2">
@@ -292,7 +331,7 @@ export default async function AnalyticsDashboardPage() {
                   <div className="flex items-center gap-6">
                     <div className="text-right">
                       <div className="text-xs text-zinc-500">Tips</div>
-                      <div className="text-sm font-bold text-amber-400">₦{(staff.tips / 100).toLocaleString()}</div>
+                      <div className="text-sm font-bold text-amber-400">{formatCurrency(staff.tips, currencyCode)}</div>
                     </div>
                     <div className="text-right">
                       <div className="text-xs text-zinc-500">Rating</div>
@@ -325,16 +364,22 @@ export default async function AnalyticsDashboardPage() {
               </div>
               <div className="md:col-span-2 bg-zinc-950 p-6 rounded-2xl border border-zinc-800/50">
                 <h3 className="text-sm font-bold text-zinc-400 mb-4">Bookings — Last 7 Days</h3>
-                {bookingsThisMonth === 0 ? (
-                  <div className="h-24 flex items-center justify-center text-zinc-600 text-sm">No bookings yet this month.</div>
+                {bookingBars.length === 0 || bookingBars.every(b => b.count === 0) ? (
+                  <div className="h-24 flex items-center justify-center text-zinc-600 text-sm">No bookings in the last 7 days.</div>
                 ) : (
                   <div className="h-24 flex items-end gap-2">
-                    {chartBars.slice(-7).map((bar, i) => (
+                    {bookingBars.map((bar, i) => (
                       <div key={i} className="flex-1 flex flex-col items-center gap-1 group">
                         <div
-                          className="w-full bg-cyan-500/30 hover:bg-cyan-500/60 rounded-t-sm transition-colors"
+                          className="w-full bg-cyan-500/30 hover:bg-cyan-500/60 rounded-t-sm transition-colors relative"
                           style={{ height: `${bar.height}%` }}
-                        />
+                        >
+                          {bar.count > 0 && (
+                            <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-zinc-800 text-white text-[10px] py-0.5 px-1.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                              {bar.count} booking{bar.count !== 1 ? 's' : ''}
+                            </div>
+                          )}
+                        </div>
                         <span className="text-[9px] text-zinc-600">
                           {new Date(bar.date).toLocaleDateString('en-US', { weekday: 'short' })}
                         </span>

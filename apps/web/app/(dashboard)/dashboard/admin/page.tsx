@@ -45,8 +45,12 @@ export default async function AdminPage() {
                 <input type="number" name="enterprise_monthly_ngn" defaultValue={(pricing as Record<string, number>).enterprise_monthly_ngn || 150000} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white" />
               </div>
               <div>
-                <label className="block text-xs font-medium text-zinc-400 mb-1">10 Credits Pack</label>
+                <label className="block text-sm font-medium text-zinc-400 mb-1">10 Credits Pack</label>
                 <input type="number" name="credits_10_ngn" defaultValue={(pricing as Record<string, number>).credits_10_ngn || 6000} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-zinc-400 mb-1">25 Credits Pack</label>
+                <input type="number" name="credits_25_ngn" defaultValue={(pricing as Record<string, number>).credits_25_ngn || 12000} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-zinc-400 mb-1">50 Credits Pack (NGN)</label>
