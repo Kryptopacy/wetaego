@@ -1,6 +1,4 @@
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const revalidate = 60;
-import { QueryData } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'

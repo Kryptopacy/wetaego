@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { Metadata } from 'next'
-import { cookies } from 'next/headers'
+
 import { ForecastClient } from './forecast-client'
 
 export const metadata: Metadata = {
@@ -14,7 +14,7 @@ export default async function ForecastPage() {
 
   const { data: { user } } = await supabase.auth.getUser()
   
-  const cookieStore = await cookies()
+  
 
   if (!user) {
     redirect('/login')

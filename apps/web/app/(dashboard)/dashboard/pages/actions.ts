@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import type { Json } from '@/lib/supabase/types'
+import { z } from 'zod'
    
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { getPreset, buildPageTitle } from '@/lib/templates/presets'
@@ -150,19 +151,48 @@ export async function createCustomPage(formData: FormData): Promise<void> {
 
 // ─── Page Update ───────────────────────────────────────────────────────────────
 
+const updatePageSchema = z.object({
+  pageId: z.string().min(1),
+  title: z.string().min(1, "Title is required").max(100),
+  content: z.string().max(2000).optional(),
+  billing_enabled: z.boolean(),
+  billing_mode: z.string(),
+  payment_mode: z.string(),
+  deposit_percentage: z.number().min(0).max(100).nullable(),
+  randomizer_enabled: z.boolean(),
+  hide_delivery: z.boolean(),
+})
+
 export async function updatePage(formData: FormData): Promise<void> {
   const supabase = await createClient()
-  const pageId = formData.get('pageId') as string
-  const title = formData.get('title') as string
-  const content = (formData.get('content') as string) || null
-  const billing_enabled = formData.get('billing_enabled') === 'true'
-  const billing_mode = (formData.get('billing_mode') as string) || 'standard_checkout'
-  const payment_mode = (formData.get('payment_mode') as string) || 'full'
-  const deposit_percentage = formData.get('deposit_percentage')
-    ? parseInt(formData.get('deposit_percentage') as string)
-    : null
-  const randomizer_enabled = formData.get('randomizer_enabled') === 'true'
-  const hide_delivery = formData.get('hide_delivery') === 'true'
+
+  const parsed = updatePageSchema.safeParse({
+    pageId: formData.get('pageId'),
+    title: formData.get('title'),
+    content: formData.get('content') || undefined,
+    billing_enabled: formData.get('billing_enabled') === 'true',
+    billing_mode: formData.get('billing_mode') || 'standard_checkout',
+    payment_mode: formData.get('payment_mode') || 'full',
+    deposit_percentage: formData.get('deposit_percentage')
+      ? parseInt(formData.get('deposit_percentage') as string, 10)
+      : null,
+    randomizer_enabled: formData.get('randomizer_enabled') === 'true',
+    hide_delivery: formData.get('hide_delivery') === 'true',
+  })
+
+  if (!parsed.success) throw new Error(parsed.error.issues[0].message)
+
+  const {
+    pageId,
+    title,
+    content,
+    billing_enabled,
+    billing_mode,
+    payment_mode,
+    deposit_percentage,
+    randomizer_enabled,
+    hide_delivery
+  } = parsed.data
 
   if (pageId.startsWith('page-')) {
     revalidatePath('/dashboard/pages')
@@ -193,27 +223,60 @@ export async function updatePage(formData: FormData): Promise<void> {
 
 // ─── Page Items (Catalog, Booking, Listing, Rate Card) ────────────────────────
 
+const addPageItemSchema = z.object({
+  page_id: z.string().min(1),
+  title: z.string().min(1, "Title is required").max(100),
+  subtitle: z.string().max(200).optional(),
+  description: z.string().max(1000).optional(),
+  price_minor: z.number().min(0).nullable(),
+  price_display: z.string().max(50).optional(),
+  availability_status: z.string(),
+  item_data: z.any().nullable(),
+  deposit_percentage: z.number().min(0).max(100).nullable(),
+  payment_mode: z.string(),
+  inventory_count: z.number().min(0).nullable(),
+})
+
 export async function addPageItem(formData: FormData): Promise<void> {
   const supabase = await createClient()
-  const page_id = formData.get('page_id') as string
-  const title = formData.get('title') as string
-  const subtitle = (formData.get('subtitle') as string) || null
-  const description = (formData.get('description') as string) || null
-  const price_minor = formData.get('price_minor')
-    ? parseInt(formData.get('price_minor') as string)
-    : null
-  const price_display = (formData.get('price_display') as string) || null
-  const availability_status = (formData.get('availability_status') as string) || 'available'
-  const item_data = formData.get('item_data')
-    ? JSON.parse(formData.get('item_data') as string)
-    : null
-  const deposit_percentage = formData.get('deposit_percentage')
-    ? parseInt(formData.get('deposit_percentage') as string)
-    : null
-  const payment_mode = (formData.get('payment_mode') as string) || 'full'
-  const inventory_count = formData.get('inventory_count')
-    ? parseInt(formData.get('inventory_count') as string)
-    : null
+  
+  const parsed = addPageItemSchema.safeParse({
+    page_id: formData.get('page_id'),
+    title: formData.get('title'),
+    subtitle: formData.get('subtitle') || undefined,
+    description: formData.get('description') || undefined,
+    price_minor: formData.get('price_minor')
+      ? parseInt(formData.get('price_minor') as string, 10)
+      : null,
+    price_display: formData.get('price_display') || undefined,
+    availability_status: formData.get('availability_status') || 'available',
+    item_data: formData.get('item_data')
+      ? JSON.parse(formData.get('item_data') as string)
+      : null,
+    deposit_percentage: formData.get('deposit_percentage')
+      ? parseInt(formData.get('deposit_percentage') as string, 10)
+      : null,
+    payment_mode: formData.get('payment_mode') || 'full',
+    inventory_count: formData.get('inventory_count')
+      ? parseInt(formData.get('inventory_count') as string, 10)
+      : null,
+  })
+
+  if (!parsed.success) throw new Error(parsed.error.issues[0].message)
+
+  const {
+    page_id,
+    title,
+    subtitle,
+    description,
+    price_minor,
+    price_display,
+    availability_status,
+    item_data,
+    deposit_percentage,
+    payment_mode,
+    inventory_count
+  } = parsed.data
 
   const image = formData.get('image') as File | null
   const aiImageUrl = formData.get('ai_image_url') as string | null

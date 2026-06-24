@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { assignQrCode } from './actions'
-import { cookies } from 'next/headers'
+
 
 export default async function QRProvisionPage({
   searchParams

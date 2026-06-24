@@ -32,7 +32,7 @@ export async function savePaymentSettings(formData: FormData) {
     const { getPlatformFees } = await import('@/lib/utils/settings')
     const platformFees = await getPlatformFees() as { business_subaccount: number }
     subaccountCode = await createSubaccount(bankName, accountNumber, businessName, platformFees.business_subaccount ?? 5)
-  } catch (err) {
+  } catch {
     return { error: 'Unknown error' }
   }
 

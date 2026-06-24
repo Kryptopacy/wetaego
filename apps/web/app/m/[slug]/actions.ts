@@ -114,7 +114,7 @@ export async function processCheckout(
     .eq('organization_id', orgId)
     .single()
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   const subaccountCode = staffSubaccountOverride || (paySettings?.is_active ? paySettings.provider_account_id : null)
 
   // 3. Create Order using server-verified total
@@ -185,7 +185,7 @@ export async function processCheckout(
       const feeAmountMinor = Math.floor(verifiedTotalMinor * (businessFeePercent / 100))
       
       if (feeAmountMinor > 0) {
-        await (supabase as any).from('platform_fee_ledger').insert({
+        await supabase.from('platform_fee_ledger').insert({
           organization_id: orgId,
           location_id: locationId,
           order_id: order.id,

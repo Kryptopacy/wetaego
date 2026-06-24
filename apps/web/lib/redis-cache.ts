@@ -35,3 +35,15 @@ export async function withCache<T>(
 
   return result;
 }
+
+/**
+ * Invalidates a specific cache key in Redis
+ */
+export async function invalidateCache(key: string): Promise<void> {
+  if (!redis) return;
+  try {
+    await redis.del(key);
+  } catch (error) {
+    console.error('Redis cache invalidation error:', error);
+  }
+}

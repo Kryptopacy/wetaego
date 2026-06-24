@@ -11,7 +11,7 @@ import { AICoverStudio } from './ai-cover-studio'
 import { PlanType } from '@/lib/payments/credits'
 import { getPlanLimits } from '@/lib/utils/settings'
 import { savePaymentSettings, saveManualPaymentSettings } from './payment-actions'
-import { cookies } from 'next/headers'
+
 
 
 export default async function SettingsPage({
@@ -26,7 +26,7 @@ export default async function SettingsPage({
   const { data: userData } = await supabase.auth.getUser()
   const user = userData?.user
   
-  const cookieStore = await cookies()
+  
 
   if (!user) {
     redirect('/login')
