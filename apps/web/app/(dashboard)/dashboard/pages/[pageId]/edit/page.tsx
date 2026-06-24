@@ -14,7 +14,6 @@ export default async function PageEditDashboard({
   const supabase = await createClient()
 
   const { data: userData } = await supabase.auth.getUser()
-  const isDemo = !userData?.user && (await cookies()).get('demo_mode')?.value === '1'
   if (!userData?.user) redirect('/login')
   // Removed unused user variable
 

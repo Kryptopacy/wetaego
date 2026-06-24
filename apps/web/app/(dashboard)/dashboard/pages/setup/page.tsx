@@ -20,34 +20,27 @@ export default async function BusinessTypeSetupPage({
   const { data: userData } = await supabase.auth.getUser()
   const user = userData?.user
 
-  const cookieStore = await cookies()
-  const isDemo = !user && cookieStore.get('demo_mode')?.value === '1'
-
   if (!user) redirect('/login')
 
-  const userId = user?.id || 'demo-user-id'
+  const userId = user.id
 
   let org: { id: string; name: string; business_type: string | null } | null = null
 
-  if (!isDemo) {
-    const { data: member } = await supabase
-      .from('organization_members')
-      .select('organizations(id, name, business_type)')
-      .eq('user_id', userId)
-      .single()
+  const { data: member } = await supabase
+    .from('organization_members')
+    .select('organizations(id, name, business_type)')
+    .eq('user_id', userId)
+    .single()
 
-    if (member?.organizations) {
-      org = member.organizations as unknown as typeof org
-    } else {
-      const { data } = await supabase
-        .from('organizations')
-        .select('id, name, business_type')
-        .eq('created_by', userId)
-        .single()
-      org = data
-    }
+  if (member?.organizations) {
+    org = member.organizations as unknown as typeof org
   } else {
-    org = { id: 'demo-org', name: 'Demo Business', business_type: null }
+    const { data } = await supabase
+      .from('organizations')
+      .select('id, name, business_type')
+      .eq('created_by', userId)
+      .single()
+    org = data
   }
 
   if (!org) redirect('/dashboard')

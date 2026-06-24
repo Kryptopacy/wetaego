@@ -16,7 +16,6 @@ export default async function TeamPage() {
   }
 
   const cookieStore = await cookies()
-  const isDemo = !user && cookieStore.get('demo_mode')?.value === '1'
 
   if (!user) {
     redirect('/login')
@@ -40,43 +39,31 @@ export default async function TeamPage() {
   }[] = []
   let invites: { id: string; email: string; role: string; token: string; expires_at: string }[] = []
 
-  if (isDemo) {
-    organization = { id: 'demo-org', name: 'Demo Venue', slug: 'demo-venue' }
-    role = 'owner'
-    members = [
-      { user_id: 'demo-user-id', email: 'owner@ourmenuos.online', role: 'owner', created_at: new Date(1718236800000 - 86400000 * 10).toISOString(), full_name: 'Pacy Owner', bank_name: 'GTBank', account_number: '0123456789' },
-      { user_id: 'manager-1', email: 'manager@ourmenuos.online', role: 'manager', created_at: new Date(1718236800000 - 86400000 * 5).toISOString(), full_name: 'Jane Manager' }
-    ]
-    invites = [
-      { id: 'invite-1', email: 'staff@ourmenuos.online', role: 'viewer', token: 'mock-token', expires_at: new Date(1718236800000 + 86400000 * 2).toISOString() }
-    ]
+  const { data: member } = await supabase
+    .from('organization_members')
+    .select('role, organizations(id, name, slug)')
+    .eq('user_id', userId)
+    .single()
+
+  if (member && member.organizations) {
+    organization = member.organizations as { id: string; name: string; slug: string }
+    role = member.role
   } else {
-    const { data: member } = await supabase
-      .from('organization_members')
-      .select('role, organizations(id, name, slug)')
-      .eq('user_id', userId)
+    const { data: org } = await supabase
+      .from('organizations')
+      .select('id, name, slug')
+      .eq('created_by', userId)
       .single()
+    organization = org
+    role = 'owner'
+  }
 
-    if (member && member.organizations) {
-      organization = member.organizations
-      role = member.role
-    } else {
-      const { data } = await supabase
-        .from('organizations')
-        .select('id, name, slug')
-        .eq('created_by', userId)
-        .single()
-      organization = data
-      role = 'owner'
-    }
+  const { data: membersRaw } = await supabase
+    .from('organization_member_details')
+    .select('*')
+    .eq('organization_id', organization?.id || '')
 
-    const { data: membersRaw } = await supabase
-      .from('organization_member_details')
-      .select('*')
-      .eq('organization_id', organization?.id || '')
-
-    // Fetch all user profiles for these members
-    const userIds = (membersRaw || []).map(m => m.user_id as string)
+  const userIds = (membersRaw || []).map(m => m.user_id as string)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: profiles } = await (supabase as any)
       .from('user_profiles')
@@ -113,7 +100,6 @@ export default async function TeamPage() {
       token: i.token as string,
       expires_at: i.expires_at as string,
     }))
-  }
 
   // Only owners and managers can access this page
   const isOwnerOrManager = role === 'owner' || role === 'manager'

@@ -3,6 +3,7 @@ import { getPricingSettings, getCreditCosts, getPlanLimits, getAiModels, getPlat
 import { updateSetting } from './actions'
 
 import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
 import { TenantDirectory } from './tenant-directory'
 
 export default async function AdminPage() {
@@ -13,6 +14,12 @@ export default async function AdminPage() {
   const platformFees = await getPlatformFees()
 
   const supabase = await createClient()
+  const { data: userData } = await supabase.auth.getUser()
+
+  if (userData?.user?.email !== (process.env.ADMIN_EMAIL || 'kryptopacy@gmail.com')) {
+    redirect('/dashboard')
+  }
+
   const { data: orgs } = await supabase
     .from('organizations')
     .select('id, name, subscription_plan, subscription_status, purchased_credits, created_at')

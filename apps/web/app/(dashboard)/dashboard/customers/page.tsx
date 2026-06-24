@@ -12,7 +12,6 @@ export default async function CustomersPage() {
   const user = userData?.user
 
   const cookieStore = await cookies()
-  const isDemo = !user && cookieStore.get('demo_mode')?.value === '1'
 
   if (!user) {
     redirect('/login')

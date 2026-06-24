@@ -21,8 +21,6 @@ export default async function QRProvisionPage({
   const { data: userData } = await supabase.auth.getUser()
   const user = userData?.user
   
-  const cookieStore = await cookies()
-  const isDemo = !user && cookieStore.get('demo_mode')?.value === '1'
 
   if (!user) {
     return redirect(`/login?next=/dashboard/qr/provision?id=${qrId}`)

@@ -7,7 +7,6 @@ export default async function TeamPerformancePage() {
   const supabase = await createClient()
 
   const { data: userData } = await supabase.auth.getUser()
-  const isDemo = !userData?.user && (await cookies()).get('demo_mode')?.value === '1'
   if (!userData?.user) redirect('/login')
 
   const userId = userData?.user?.id || 'demo-user-id'
@@ -15,30 +14,24 @@ export default async function TeamPerformancePage() {
   // Fetch organization and role
   let orgId = ''
   let role = 'viewer'
+  const { data: member } = await supabase
+    .from('organization_members')
+    .select('role, organizations(id, name)')
+    .eq('user_id', userId)
+    .maybeSingle()
 
-  if (isDemo) {
-    orgId = 'demo-org'
-    role = 'owner'
+  if (member && member.organizations) {
+    orgId = (member.organizations as { id: string }).id
+    role = member.role
   } else {
-    const { data: member } = await supabase
-      .from('organization_members')
-      .select('role, organizations(id, name)')
-      .eq('user_id', userId)
+    const { data: org } = await supabase
+      .from('organizations')
+      .select('id')
+      .eq('created_by', userId)
       .maybeSingle()
-
-    if (member && member.organizations) {
-      orgId = (member.organizations as { id: string }).id
-      role = member.role
-    } else {
-      const { data: org } = await supabase
-        .from('organizations')
-        .select('id')
-        .eq('created_by', userId)
-        .maybeSingle()
-      if (org) {
-        orgId = org.id
-        role = 'owner'
-      }
+    if (org) {
+      orgId = org.id
+      role = 'owner'
     }
   }
 
@@ -104,13 +97,11 @@ export default async function TeamPerformancePage() {
   const staffStatsRaw = await Promise.all((staffMembers || []).map(async (staff) => {
     const staffId = staff.user_id
     let fullName = undefined
-    
-    if (!isDemo) {
-      try {
-        const { data: userRecord } = await adminClient.auth.admin.getUserById(staffId)
-        fullName = userRecord?.user?.user_metadata?.full_name
-      } catch (e) {}
-    }
+    try {
+      const { data: userRecord } = await adminClient.auth.admin.getUserById(staffId)
+      fullName = userRecord?.user?.user_metadata?.full_name
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (_e) {}
 
     const name = fullName ? fullName : `Staff ${staffId.slice(0, 6).toUpperCase()}`
 

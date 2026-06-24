@@ -20,12 +20,15 @@ export const globalRateLimiter = redis
  * Validates request rate limit based on IP.
  * @returns { success: boolean, limit: number, remaining: number, reset: number }
  */
-export async function checkRateLimit(identifier?: string) {
+export async function checkRateLimit(actionName: string, customIdentifier?: string) {
   if (!globalRateLimiter) return { success: true };
   
   const reqHeaders = await headers();
   const ip = reqHeaders.get('x-forwarded-for') || 'anonymous';
-  const key = identifier ? `rate_limit_${identifier}_${ip}` : `rate_limit_global_${ip}`;
+  
+  // Use customIdentifier (like a session token) if provided, otherwise fallback to IP
+  const identity = customIdentifier || ip;
+  const key = `rate_limit_${actionName}_${identity}`;
   
   return await globalRateLimiter.limit(key);
 }

@@ -13,14 +13,11 @@ export default async function PagesManager() {
   const { data: userData } = await supabase.auth.getUser()
   const user = userData?.user
 
-  const cookieStore = await cookies()
-  const isDemo = !user && cookieStore.get('demo_mode')?.value === '1'
-
   if (!user) {
     redirect('/login')
   }
 
-  const userId = user?.id || 'demo-user-id'
+  const userId = user.id
 
   let org: { id: string; subscription_tier: string; purchased_credits: number; monthly_free_credits_used: number; business_type: string | null } | null = null
   let role = 'viewer'
@@ -30,52 +27,42 @@ export default async function PagesManager() {
     template_type: string; is_primary: boolean; created_at: string
   }[] = []
 
-  if (isDemo) {
-    org = { id: 'demo-org', subscription_tier: 'pro', purchased_credits: 0, monthly_free_credits_used: 0, business_type: 'restaurant' }
-    role = 'owner'
-    locData = { id: 'demo-loc', slug: 'demo-venue' }
-    pages = [
-      { id: 'page-1', title: "Demo Venue's Menu", slug: 'menu', is_published: true, template_type: 'catalog', is_primary: true, created_at: new Date().toISOString() },
-      { id: 'page-2', title: 'Allergen Information', slug: 'allergens', is_published: false, template_type: 'info', is_primary: false, created_at: new Date().toISOString() },
-    ]
+  const { data: member } = await supabase
+    .from('organization_members')
+    .select('role, organizations(id, subscription_tier, purchased_credits, monthly_free_credits_used, business_type)')
+    .eq('user_id', userId)
+    .single()
+
+  if (member && member.organizations) {
+    org = member.organizations as unknown as typeof org
+    role = member.role
   } else {
-    const { data: member } = await supabase
-      .from('organization_members')
-      .select('role, organizations(id, subscription_tier, purchased_credits, monthly_free_credits_used, business_type)')
-      .eq('user_id', userId)
+    const { data } = await supabase
+      .from('organizations')
+      .select('id, subscription_tier, purchased_credits, monthly_free_credits_used, business_type')
+      .eq('created_by', userId)
       .single()
+    org = data
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+    role = 'owner'
+  }
 
-    if (member && member.organizations) {
-      org = member.organizations as unknown as typeof org
-      role = member.role
-    } else {
-      const { data } = await supabase
-        .from('organizations')
-        .select('id, subscription_tier, purchased_credits, monthly_free_credits_used, business_type')
-        .eq('created_by', userId)
-        .single()
-      org = data
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      role = 'owner'
-    }
+  const { data: locDataResult } = await supabase
+    .from('locations')
+    .select('id, slug')
+    .eq('organization_id', org?.id || '')
+    .single()
+  locData = locDataResult
 
-    const { data: locDataResult } = await supabase
-      .from('locations')
-      .select('id, slug')
-      .eq('organization_id', org?.id || '')
-      .single()
-    locData = locDataResult
+  if (locData) {
+    const { data: pagesData } = await supabase
+      .from('location_pages')
+      .select('id, title, slug, is_published, template_type, is_primary, created_at')
+      .eq('location_id', locData.id)
+      .order('is_primary', { ascending: false })
+      .order('created_at', { ascending: false })
 
-    if (locData) {
-      const { data: pagesData } = await supabase
-        .from('location_pages')
-        .select('id, title, slug, is_published, template_type, is_primary, created_at')
-        .eq('location_id', locData.id)
-        .order('is_primary', { ascending: false })
-        .order('created_at', { ascending: false })
-
-      pages = (pagesData || []) as typeof pages
-    }
+    pages = (pagesData || []) as typeof pages
   }
 
   if (!org || !locData) {

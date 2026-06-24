@@ -10,7 +10,6 @@ export default async function QRCodeBatchPage() {
   const { data: userData } = await supabase.auth.getUser()
   const user = userData?.user
   const cookieStore = await cookies()
-  const isDemo = !user && cookieStore.get('demo_mode')?.value === '1'
 
   if (!user) {
     redirect('/login')
@@ -24,41 +23,25 @@ export default async function QRCodeBatchPage() {
   let qrCodes: Database['public']['Tables']['qr_codes']['Row'][] = []
   let orgLogo: string | null = null
 
-  if (isDemo) {
-    org = { id: 'demo-org' }
-    role = 'owner'
-    orgLogo = 'https://picsum.photos/200'
-    locations = [
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      { id: 'demo-loc', name: 'Demo Venue', slug: 'demo-venue', theme_color: '#3b82f6' } as unknown as any
-    ]
-    qrCodes = [
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      { id: 'qr-1', table_identifier: 'Table 1', location_id: 'demo-loc', organization_id: 'demo-org', is_active: true } as unknown as any,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      { id: 'qr-2', table_identifier: 'Bar A', location_id: 'demo-loc', organization_id: 'demo-org', is_active: true } as unknown as any
-    ]
+  const { data: member } = await supabase
+    .from('organization_members')
+    .select('role, organizations(id)')
+    .eq('user_id', userId)
+    .single()
+
+  if (member && member.organizations) {
+     
+    org = member.organizations as unknown as { id: string }
+    role = member.role
   } else {
-    const { data: member } = await supabase
-      .from('organization_members')
-      .select('role, organizations(id)')
-      .eq('user_id', userId)
+    const { data } = await supabase
+      .from('organizations')
+      .select('id')
+      .eq('created_by', userId)
       .single()
-
-    if (member && member.organizations) {
-       
-      org = member.organizations as unknown as { id: string }
-      role = member.role
-    } else {
-      const { data } = await supabase
-        .from('organizations')
-        .select('id')
-        .eq('created_by', userId)
-        .single()
-      org = data
-      role = 'owner'
-    }
-
+    org = data
+    role = 'owner'
+  }
     const isOwnerOrManager = role === 'owner' || role === 'manager'
     if (!isOwnerOrManager || !org) {
       redirect('/dashboard')
@@ -97,8 +80,6 @@ export default async function QRCodeBatchPage() {
     const { data: qrs } = await query.order('created_at', { ascending: false })
     
     qrCodes = qrs || []
-  }
-
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://ourmenuos.online'
 
   return (

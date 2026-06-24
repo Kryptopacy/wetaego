@@ -343,6 +343,7 @@ export function CartFAB({
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <input 
+                      aria-label="Your Name"
                       type="text" 
                       value={customerName}
                       onChange={(e) => setCustomerName(e.target.value)}
@@ -350,6 +351,7 @@ export function CartFAB({
                       className="w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-3 text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 placeholder:text-zinc-400 text-[15px]"
                     />
                     <input 
+                      aria-label="Phone Number"
                       type="tel" 
                       value={customerPhone}
                       onChange={(e) => setCustomerPhone(e.target.value)}
@@ -358,6 +360,7 @@ export function CartFAB({
                     />
                   </div>
                   <input 
+                    aria-label="Email for receipt"
                     type="email" 
                     value={customerEmail}
                     onChange={(e) => setCustomerEmail(e.target.value)}
@@ -381,6 +384,7 @@ export function CartFAB({
                       </div>
                     ) : (
                       <textarea 
+                        aria-label="Location or Delivery Address"
                         value={tableNumber}
                         onChange={(e) => setTableNumber(e.target.value)}
                         placeholder={
@@ -402,6 +406,7 @@ export function CartFAB({
                        <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">⚠️ {deliveryNote}</p>
                     )}
                     <textarea 
+                      aria-label="Delivery instructions"
                       value={deliveryInstructions}
                       onChange={(e) => setDeliveryInstructions(e.target.value)}
                       placeholder="Delivery instructions (e.g. leave at door)"
@@ -412,6 +417,7 @@ export function CartFAB({
                 
                 {/* Optional Note */}
                 <textarea 
+                  aria-label="Order notes"
                   value={customerNote}
                   onChange={(e) => setCustomerNote(e.target.value)}
                   placeholder="Order notes (e.g. allergies, specific requests)"

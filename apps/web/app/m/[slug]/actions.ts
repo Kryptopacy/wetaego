@@ -71,7 +71,7 @@ export async function processCheckout(
   const { checkRateLimit, withIdempotency } = await import('@/lib/upstash');
   const cookieStore = await cookies();
   const sessionId = cookieStore.get('session_id')?.value || 'anonymous';
-  const { success } = await checkRateLimit(`checkout:${sessionId}`);
+  const { success } = await checkRateLimit('checkout', sessionId);
   if (!success) {
     throw new Error('Too many requests. Please wait a minute before placing another order.');
   }
