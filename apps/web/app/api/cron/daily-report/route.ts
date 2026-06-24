@@ -52,7 +52,7 @@ export async function GET(req: Request) {
 
       if (ownerEmail) {
         const { data: emailData, error: emailError } = await resend.emails.send({
-          from: 'OurMenu Reports <onboarding@resend.dev>',
+          from: 'OurMenu Reports <noreply@ourmenuos.online>',
           to: ownerEmail,
           subject: `Daily Sales Report: ${org.name}`,
           react: DailyReportEmail({

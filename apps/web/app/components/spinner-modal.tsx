@@ -1,8 +1,6 @@
 'use client'
 
-
-
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useCartStore } from '@/lib/store/cart'
 import confetti from 'canvas-confetti'
@@ -26,6 +24,7 @@ export function SpinnerModal({ locationId, config }: SpinnerModalProps) {
   const [rotation, setRotation] = useState(0)
   const [result, setResult] = useState<SpinnerSegment | null>(null)
   const setSpinnerDiscount = useCartStore((state) => state.setSpinnerDiscount)
+  const modalRef = useRef<HTMLDivElement>(null)
   
   useEffect(() => {
     // Check if user has already spun for this location today
@@ -35,6 +34,33 @@ export function SpinnerModal({ locationId, config }: SpinnerModalProps) {
       queueMicrotask(() => setHasSpun(false))
     }
   }, [locationId])
+
+  // Focus trap + Escape key for WCAG compliance
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (e.key === 'Escape') { setIsOpen(false); return }
+    if (e.key !== 'Tab' || !modalRef.current) return
+    const focusable = modalRef.current.querySelectorAll<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    )
+    const first = focusable[0]
+    const last = focusable[focusable.length - 1]
+    if (e.shiftKey) {
+      if (document.activeElement === first) { e.preventDefault(); last.focus() }
+    } else {
+      if (document.activeElement === last) { e.preventDefault(); first.focus() }
+    }
+  }, [])
+
+  useEffect(() => {
+    if (isOpen) {
+      document.addEventListener('keydown', handleKeyDown)
+      // Move focus into modal
+      setTimeout(() => modalRef.current?.querySelector<HTMLElement>('button')?.focus(), 50)
+    } else {
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen, handleKeyDown])
 
   if (hasSpun) return null
 
@@ -112,8 +138,13 @@ export function SpinnerModal({ locationId, config }: SpinnerModalProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="spinner-modal-title"
+            onClick={(e) => { if (e.target === e.currentTarget) setIsOpen(false) }}
           >
             <motion.div
+              ref={modalRef}
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
@@ -126,7 +157,7 @@ export function SpinnerModal({ locationId, config }: SpinnerModalProps) {
                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
 
-              <h2 className="text-3xl font-black text-white mb-2 text-center">Spin to Win!</h2>
+              <h2 id="spinner-modal-title" className="text-3xl font-black text-white mb-2 text-center">Spin to Win!</h2>
               <p className="text-zinc-400 text-center mb-8">Test your luck to win an instant discount on your meal.</p>
 
               <div className="relative w-64 h-64 md:w-80 md:h-80 mb-8">

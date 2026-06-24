@@ -25,6 +25,10 @@ export function CallStaffFAB({ organizationId, locationId, tableIdentifier }: Ca
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!navigator.onLine) {
+      toast.error("You're offline. Reconnect to call staff.", { id: 'offline-staff' })
+      return
+    }
     setIsCalling(true)
     
     const tableId = tableNumber || "Bar"

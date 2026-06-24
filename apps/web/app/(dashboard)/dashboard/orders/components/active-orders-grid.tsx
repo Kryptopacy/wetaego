@@ -1,8 +1,9 @@
+'use client'
 
+import { useOptimistic, startTransition } from 'react'
 import { toast } from 'sonner'
 import { formatCurrency } from '@/lib/utils/currency'
 import { UIOrder } from '@/lib/types/frontend'
-
 
 interface ActiveOrdersGridProps {
   activeOrders: UIOrder[]
@@ -12,22 +13,32 @@ interface ActiveOrdersGridProps {
 }
 
 export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, onClaimOrder }: ActiveOrdersGridProps) {
+  const [optimisticOrders, addOptimisticOrder] = useOptimistic(
+    activeOrders,
+    (state: UIOrder[], updatedOrder: Partial<UIOrder> & { id: string }) => {
+      if (updatedOrder.status === 'completed') {
+        return state.filter(o => o.id !== updatedOrder.id)
+      }
+      return state.map(o => o.id === updatedOrder.id ? { ...o, ...updatedOrder } : o)
+    }
+  )
+
   return (
       <div className="col-span-1 lg:col-span-2 border border-zinc-800 rounded-xl bg-zinc-900/30 flex flex-col overflow-hidden min-h-[500px]">
         <div className="p-4 border-b border-zinc-800 bg-zinc-900">
           <h2 className="font-bold text-white flex justify-between items-center">
             Active Orders
-            <span className="px-2 py-0.5 rounded-full bg-zinc-800 text-xs">{activeOrders.length}</span>
+            <span className="px-2 py-0.5 rounded-full bg-zinc-800 text-xs">{optimisticOrders.length}</span>
           </h2>
         </div>
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          {activeOrders.length === 0 ? (
+          {optimisticOrders.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-zinc-500">
               <p>Waiting for new orders...</p>
               <p className="text-sm mt-2">Orders paid via Paystack will appear here instantly.</p>
             </div>
           ) : (
-            activeOrders.map(order => (
+            optimisticOrders.map(order => (
               <div key={order.id} className={`p-5 rounded-lg border ${order.status === 'paid' ? 'border-blue-500/50 bg-blue-500/5' : 'border-zinc-800 bg-zinc-900/50'}`}>
                 <div className="flex justify-between items-start mb-4 border-b border-zinc-800/50 pb-4">
                   <div>
@@ -66,7 +77,12 @@ export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, onC
                 <div className="flex justify-end mt-4 pt-4 border-t border-zinc-800/50">
                   {(!order.assigned_staff_id && (order.status === 'paid' || (order.status === 'pending' && billingMode === 'table_service'))) && (
                     <button 
-                      onClick={() => onClaimOrder(order.id)}
+                      onClick={() => {
+                        startTransition(() => {
+                          addOptimisticOrder({ id: order.id, assigned_staff_id: currentUserId, status: 'preparing' })
+                        })
+                        onClaimOrder(order.id)
+                      }}
                       className="px-6 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-medium transition-colors animate-pulse"
                     >
                       {order.status === 'pending' ? 'Accept (Pay After)' : 'Claim Order'}
@@ -81,6 +97,9 @@ export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, onC
                       <button 
                         onClick={async () => {
                           const { markOrderPaidOffline } = await import('../actions')
+                          startTransition(() => {
+                            addOptimisticOrder({ id: order.id, status: 'paid' })
+                          })
                           toast.promise(markOrderPaidOffline(order.id), {
                             loading: 'Confirming payment...',
                             success: 'Payment confirmed!',
@@ -97,6 +116,9 @@ export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, onC
                     <button 
                       onClick={async () => {
                         const { markOrderPaidOffline } = await import('../actions')
+                        startTransition(() => {
+                          addOptimisticOrder({ id: order.id, status: 'paid' })
+                        })
                         toast.promise(markOrderPaidOffline(order.id), {
                           loading: 'Confirming payment...',
                           success: 'Payment confirmed!',
@@ -112,6 +134,9 @@ export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, onC
                     <button 
                       onClick={async () => {
                         const { completeOrderAction } = await import('../actions')
+                        startTransition(() => {
+                          addOptimisticOrder({ id: order.id, status: 'completed' })
+                        })
                         toast.promise(completeOrderAction(order.id), {
                           loading: 'Completing order...',
                           success: 'Order completed! Feedback email sent.',

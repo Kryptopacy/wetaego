@@ -119,6 +119,11 @@ export function CartFAB({
     }
 
     setIsCheckingOut(true)
+    if (!navigator.onLine) {
+      toast.error("You're offline. Please reconnect to place your order.", { id: 'offline-checkout' })
+      setIsCheckingOut(false)
+      return
+    }
     try {
       posthog.capture('checkout_completed', { organizationId, locationId, totalAmountMinor: finalTotalMinor })
       

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { notifyBusiness } from '@/lib/notifications/dispatcher'
+import { checkRateLimit } from '@/lib/upstash'
 import { z } from 'zod'
 
 const bookingSchema = z.object({
@@ -26,6 +27,11 @@ const bookingSchema = z.object({
  */
 export async function POST(req: Request) {
   try {
+    const { success } = await checkRateLimit('api_bookings')
+    if (!success) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
+    }
+
     const body = await req.json()
     const parsed = bookingSchema.safeParse(body)
 

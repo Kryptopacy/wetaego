@@ -47,11 +47,15 @@ export default async function AnalyticsDashboardPage() {
   const hasRateCard = activeModules.has('rate_card')
 
   // 2. Fetch Aggregated Data
-  // In a real app we'd group these by date in the DB. We'll do it in-memory for this Phase.
+  // Fetch orders for the last 30 days
+  const thirtyDaysAgo = new Date()
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+
   const { data: orders } = await supabase
     .from('orders')
     .select('id, total_amount_minor, tip_amount_minor, created_at, assigned_staff_id, status')
     .eq('organization_id', orgId)
+    .gte('created_at', thirtyDaysAgo.toISOString())
     .order('created_at', { ascending: true })
 
   const { data: orderItems } = await supabase
@@ -72,6 +76,42 @@ export default async function AnalyticsDashboardPage() {
   // Global Revenue Aggregation
   const totalRevenueMinor = typedOrders?.reduce((sum, o) => sum + (o.status !== 'cancelled' ? o.total_amount_minor : 0), 0) || 0
   const totalTipsMinor = typedOrders?.reduce((sum, o) => sum + (o.tip_amount_minor || 0), 0) || 0
+
+  // Real per-day revenue chart (last 14 days)
+  const revenueByDay: Record<string, number> = {}
+  const today = new Date()
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date(today)
+    d.setDate(d.getDate() - i)
+    revenueByDay[d.toISOString().slice(0, 10)] = 0
+  }
+  typedOrders?.forEach(o => {
+    if (o.status === 'cancelled') return
+    const day = new Date(o.created_at).toISOString().slice(0, 10)
+    if (day in revenueByDay) revenueByDay[day] += o.total_amount_minor
+  })
+  const dailyRevenues = Object.entries(revenueByDay).map(([date, rev]) => ({ date, rev }))
+  const maxDayRevenue = Math.max(...dailyRevenues.map(d => d.rev), 1)
+  const chartBars = dailyRevenues.map(d => ({
+    date: d.date,
+    rev: d.rev,
+    height: Math.max(4, Math.round((d.rev / maxDayRevenue) * 100))
+  }))
+
+  // Real week-over-week growth
+  const nowMs = Date.now()
+  const thisWeekRevenue = typedOrders
+    ?.filter(o => o.status !== 'cancelled' && nowMs - new Date(o.created_at).getTime() < 7 * 86400000)
+    .reduce((sum, o) => sum + o.total_amount_minor, 0) || 0
+  const lastWeekRevenue = typedOrders
+    ?.filter(o => {
+      const age = nowMs - new Date(o.created_at).getTime()
+      return o.status !== 'cancelled' && age >= 7 * 86400000 && age < 14 * 86400000
+    })
+    .reduce((sum, o) => sum + o.total_amount_minor, 0) || 0
+  const weekGrowthPct = lastWeekRevenue > 0
+    ? ((thisWeekRevenue - lastWeekRevenue) / lastWeekRevenue * 100).toFixed(1)
+    : null
 
   // Top Items
   const itemCounts: Record<string, { count: number, revenue: number }> = {}
@@ -106,11 +146,23 @@ export default async function AnalyticsDashboardPage() {
     avgRating: data.ratingsCount > 0 ? (data.ratingSum / data.ratingsCount).toFixed(1) : 'N/A'
   })).sort((a, b) => b.tips - a.tips)
 
-  // Fake chart data for the timeline
-  const chartBars = Array.from({ length: 14 }).map((_, i) => ({
-    day: i + 1,
-    height: Math.floor(Math.abs(Math.sin(i)) * 80) + 20
-  }))
+  // Real overall average rating
+  const allRatings = typedReviews?.filter(r => r.staff_rating != null) || []
+  const overallAvgRating = allRatings.length > 0
+    ? (allRatings.reduce((sum, r) => sum + (r.staff_rating || 0), 0) / allRatings.length).toFixed(1)
+    : null
+
+  // Real bookings this month
+  let bookingsThisMonth = 0
+  if (hasBooking) {
+    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1).toISOString()
+    const { count } = await supabase
+      .from('page_bookings')
+      .select('id', { count: 'exact', head: true })
+      .eq('location_pages.locations.organization_id', orgId)
+      .gte('created_at', startOfMonth)
+    bookingsThisMonth = count || 0
+  }
 
   return (
     <div className="p-8 pb-20 max-w-6xl mx-auto space-y-12">
@@ -131,26 +183,43 @@ export default async function AnalyticsDashboardPage() {
             <div className="text-5xl font-black text-white">₦{(totalRevenueMinor / 100).toLocaleString()}</div>
           </div>
           <div className="text-right">
-            <div className="text-sm font-medium text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20 inline-flex items-center gap-1">
-              <TrendingUp className="w-4 h-4" /> +12.5% this week
-            </div>
+            {weekGrowthPct !== null ? (
+              <div className={`text-sm font-medium px-3 py-1 rounded-full border inline-flex items-center gap-1 ${
+                Number(weekGrowthPct) >= 0
+                  ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
+                  : 'text-red-400 bg-red-500/10 border-red-500/20'
+              }`}>
+                <TrendingUp className="w-4 h-4" />
+                {Number(weekGrowthPct) >= 0 ? '+' : ''}{weekGrowthPct}% vs last week
+              </div>
+            ) : (
+              <div className="text-sm font-medium text-zinc-500 bg-zinc-800/50 px-3 py-1 rounded-full border border-zinc-700 inline-flex items-center gap-1">
+                Not enough data yet
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Visual Timeline Bar Chart */}
-        <div className="h-48 flex items-end justify-between gap-2 mt-8">
+        {/* Real Revenue Bar Chart — Last 14 Days */}
+        <div className="h-48 flex items-end justify-between gap-1.5 mt-8">
           {chartBars.map((bar, i) => (
             <div key={i} className="w-full flex flex-col items-center gap-2 group cursor-crosshair">
-              <div 
+              <div
                 className="w-full bg-zinc-800 hover:bg-blue-500 transition-colors rounded-t-sm relative"
                 style={{ height: `${bar.height}%` }}
               >
-                <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-zinc-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-xl">
-                  Day {bar.day}
+                <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-zinc-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-xl z-10">
+                  {new Date(bar.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}<br />
+                  <span className="text-blue-400 font-bold">₦{(bar.rev / 100).toLocaleString()}</span>
                 </div>
               </div>
             </div>
           ))}
+        </div>
+        <div className="flex justify-between text-xs text-zinc-600 mt-2">
+          <span>{new Date(chartBars[0]?.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+          <span className="text-zinc-500 font-medium">Last 14 days</span>
+          <span>{new Date(chartBars[chartBars.length - 1]?.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
         </div>
       </section>
 
@@ -202,9 +271,11 @@ export default async function AnalyticsDashboardPage() {
               </div>
               <div className="bg-zinc-950 rounded-2xl p-4 border border-zinc-800/50">
                 <div className="text-sm text-zinc-500 mb-1 flex items-center gap-2">
-                  <Star className="w-4 h-4 text-amber-400" /> Top Rating
+                  <Star className="w-4 h-4 text-amber-400" /> Avg Rating
                 </div>
-                <div className="text-2xl font-black text-white">4.9/5</div>
+                <div className="text-2xl font-black text-white">
+                  {overallAvgRating ? `${overallAvgRating}/5` : 'No reviews yet'}
+                </div>
               </div>
             </div>
 
@@ -249,32 +320,28 @@ export default async function AnalyticsDashboardPage() {
                 <div className="w-12 h-12 rounded-full bg-cyan-500/10 text-cyan-400 flex items-center justify-center mb-4">
                   <CalendarDays className="w-6 h-6" />
                 </div>
-                <div className="text-3xl font-black text-white mb-1">124</div>
+                <div className="text-3xl font-black text-white mb-1">{bookingsThisMonth}</div>
                 <div className="text-sm text-zinc-400">Bookings this month</div>
               </div>
               <div className="md:col-span-2 bg-zinc-950 p-6 rounded-2xl border border-zinc-800/50">
-                <h3 className="text-sm font-bold text-zinc-400 mb-4">Peak Activity Heatmap</h3>
-                <div className="grid grid-cols-7 gap-2 h-24">
-                  {/* Heatmap Mock */}
-                  {Array.from({ length: 7 }).map((_, col) => (
-                    <div key={col} className="flex flex-col gap-1">
-                      {Array.from({ length: 4 }).map((_, row) => {
-                        const intensity = Math.random()
-                        return (
-                          <div 
-                            key={row} 
-                            className="w-full h-full rounded-sm transition-colors"
-                            style={{ backgroundColor: `rgba(6, 182, 212, ${Math.max(0.1, intensity)})` }}
-                          />
-                        )
-                      })}
-                    </div>
-                  ))}
-                </div>
-                <div className="flex justify-between text-xs text-zinc-500 mt-2">
-                  <span>Mon</span>
-                  <span>Sun</span>
-                </div>
+                <h3 className="text-sm font-bold text-zinc-400 mb-4">Bookings — Last 7 Days</h3>
+                {bookingsThisMonth === 0 ? (
+                  <div className="h-24 flex items-center justify-center text-zinc-600 text-sm">No bookings yet this month.</div>
+                ) : (
+                  <div className="h-24 flex items-end gap-2">
+                    {chartBars.slice(-7).map((bar, i) => (
+                      <div key={i} className="flex-1 flex flex-col items-center gap-1 group">
+                        <div
+                          className="w-full bg-cyan-500/30 hover:bg-cyan-500/60 rounded-t-sm transition-colors"
+                          style={{ height: `${bar.height}%` }}
+                        />
+                        <span className="text-[9px] text-zinc-600">
+                          {new Date(bar.date).toLocaleDateString('en-US', { weekday: 'short' })}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </section>

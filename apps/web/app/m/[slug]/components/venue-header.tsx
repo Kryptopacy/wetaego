@@ -46,6 +46,8 @@ export function VenueHeader({ location, slug, tableIdentifier }: VenueHeaderProp
             className="object-cover object-center"
             priority
             sizes="100vw"
+            placeholder="blur"
+            blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiMxNzIwMWIiLz48L3N2Zz4="
           />
         </div>
       ) : (

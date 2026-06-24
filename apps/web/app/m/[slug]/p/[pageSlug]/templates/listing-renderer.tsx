@@ -117,7 +117,7 @@ export function ListingRenderer({ location, page, items, locationSlug }: Listing
       {/* Hero */}
       <div className="relative w-full h-[35vh] min-h-[240px] max-h-[380px] overflow-hidden">
         {location.cover_image_url ? (
-          <Image src={location.cover_image_url} alt={location.name} fill className="object-cover" priority />
+          <Image src={location.cover_image_url} alt={location.name} fill className="object-cover" priority sizes="100vw" placeholder="blur" blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiMwYTBhMGYiLz48L3N2Zz4=" />
         ) : (
           <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${themeColor}30 0%, #0a0a0f 100%)` }} />
         )}

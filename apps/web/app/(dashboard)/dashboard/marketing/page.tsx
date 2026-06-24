@@ -3,15 +3,17 @@
 import { useState } from 'react'
 import { sendBroadcastAction } from './actions'
 import { useFormStatus } from 'react-dom'
+import { Mail, Send, Users, Megaphone } from 'lucide-react'
 
 function SubmitButton() {
   const { pending } = useFormStatus()
   return (
-    <button 
-      type="submit" 
+    <button
+      type="submit"
       disabled={pending}
-      className="bg-black text-white px-6 py-3 rounded-lg font-semibold disabled:opacity-50"
+      className="flex items-center gap-2 bg-violet-600 hover:bg-violet-500 disabled:bg-zinc-800 disabled:text-zinc-500 text-white px-6 py-3 rounded-xl font-bold transition-all"
     >
+      <Send className="w-4 h-4" />
       {pending ? 'Sending Broadcast...' : 'Send to All Customers'}
     </button>
   )
@@ -26,7 +28,13 @@ export default function MarketingPage({
   const orgId = searchParams.org
 
   if (!orgId) {
-    return <div className="p-8">Please select an organization from the sidebar.</div>
+    return (
+      <div className="max-w-4xl space-y-6">
+        <div className="rounded-2xl border border-amber-800/40 bg-amber-900/10 p-6">
+          <p className="text-amber-400 text-sm font-medium">Please select an organization from the sidebar to access Marketing.</p>
+        </div>
+      </div>
+    )
   }
 
   async function clientAction(formData: FormData) {
@@ -35,55 +43,118 @@ export default function MarketingPage({
   }
 
   return (
-    <div className="p-8 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-2">Broadcast Marketing</h1>
-      <p className="text-gray-600 mb-8">
-        Send promotional emails or updates to all customers who have ordered from your menu.
-      </p>
+    <div className="max-w-4xl space-y-8 pb-20">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+            <Megaphone className="w-6 h-6 text-violet-400" />
+            Broadcast Marketing
+          </h1>
+          <p className="text-zinc-400 mt-1">
+            Send promotional emails to all customers who have opted in to marketing.
+          </p>
+        </div>
+      </div>
 
+      {/* Stats hint */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-5 flex items-center gap-4">
+          <div className="w-10 h-10 rounded-full bg-violet-500/10 flex items-center justify-center">
+            <Users className="w-5 h-5 text-violet-400" />
+          </div>
+          <div>
+            <div className="text-xs text-zinc-500 font-medium uppercase tracking-wide">Recipients</div>
+            <div className="text-white font-bold text-lg">All Opt-ins</div>
+          </div>
+        </div>
+        <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-5 flex items-center gap-4">
+          <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center">
+            <Mail className="w-5 h-5 text-blue-400" />
+          </div>
+          <div>
+            <div className="text-xs text-zinc-500 font-medium uppercase tracking-wide">Delivery</div>
+            <div className="text-white font-bold text-lg">via Resend</div>
+          </div>
+        </div>
+        <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-5 flex items-center gap-4">
+          <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center">
+            <Send className="w-5 h-5 text-emerald-400" />
+          </div>
+          <div>
+            <div className="text-xs text-zinc-500 font-medium uppercase tracking-wide">GDPR</div>
+            <div className="text-white font-bold text-lg">Compliant</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Result banners */}
       {result?.success && (
-        <div className="bg-green-50 border border-green-200 text-green-800 rounded-lg p-4 mb-6">
-          Successfully queued broadcast to {result.count} unique customers!
+        <div className="rounded-xl border border-emerald-800/40 bg-emerald-900/10 p-5 flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0">
+            <svg className="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <p className="text-emerald-300 font-medium">
+            Successfully queued broadcast to <strong>{result.count}</strong> unique customers!
+          </p>
         </div>
       )}
 
       {result?.error && (
-        <div className="bg-red-50 border border-red-200 text-red-800 rounded-lg p-4 mb-6">
-          {result.error}
+        <div className="rounded-xl border border-red-800/40 bg-red-900/10 p-5 flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center shrink-0">
+            <svg className="w-4 h-4 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </div>
+          <p className="text-red-300 font-medium">{result.error}</p>
         </div>
       )}
 
-      <form action={clientAction} className="space-y-6">
-        <input type="hidden" name="organization_id" value={orgId} />
-        
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">Email Subject</label>
-          <input 
-            type="text" 
-            name="subject"
-            required
-            className="w-full border rounded-lg px-4 py-2"
-            placeholder="e.g. 50% off all Pasta this Friday!"
-          />
-        </div>
+      {/* Compose Form */}
+      <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6 md:p-8">
+        <h2 className="text-lg font-bold text-white mb-6">Compose Broadcast</h2>
+        <form action={clientAction} className="space-y-6">
+          <input type="hidden" name="organization_id" value={orgId} />
 
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">Message Body</label>
-          <textarea 
-            name="message"
-            required
-            rows={8}
-            className="w-full border rounded-lg px-4 py-2 font-sans"
-            placeholder="Write your email here..."
-          />
-        </div>
+          <div>
+            <label className="block text-sm font-medium text-zinc-300 mb-2">Email Subject</label>
+            <input
+              type="text"
+              name="subject"
+              required
+              className="w-full bg-zinc-800/50 border border-zinc-700 text-white rounded-xl px-4 py-3 text-sm outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 placeholder:text-zinc-500 transition-colors"
+              placeholder="e.g. 50% off all Pasta this Friday!"
+            />
+          </div>
 
-        <div className="bg-blue-50 text-blue-800 p-4 rounded-lg text-sm mb-6">
-          <strong>Note:</strong> We will automatically find all unique customer emails associated with your paid orders and deliver this message via our high-deliverability Resend infrastructure.
-        </div>
+          <div>
+            <label className="block text-sm font-medium text-zinc-300 mb-2">Message Body</label>
+            <textarea
+              name="message"
+              required
+              rows={8}
+              className="w-full bg-zinc-800/50 border border-zinc-700 text-white rounded-xl px-4 py-3 text-sm outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 placeholder:text-zinc-500 font-sans resize-none transition-colors"
+              placeholder="Write your message here..."
+            />
+          </div>
 
-        <SubmitButton />
-      </form>
+          <div className="flex items-start gap-3 p-4 bg-blue-900/10 border border-blue-800/30 rounded-xl">
+            <svg className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p className="text-sm text-blue-300">
+              <strong className="font-bold text-blue-200">GDPR Safe:</strong> Only customers who explicitly opted in at checkout will receive this broadcast. Unsubscribers are automatically excluded.
+            </p>
+          </div>
+
+          <div className="flex justify-end pt-2">
+            <SubmitButton />
+          </div>
+        </form>
+      </div>
     </div>
   )
 }

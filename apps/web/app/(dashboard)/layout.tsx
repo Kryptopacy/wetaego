@@ -89,7 +89,7 @@ function NavLink({ href, label, icon: Icon, badge, exact, onClick }: {
 }
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
-  const [orgName, setOrgName] = useState('Pacy Grills')
+  const [orgName, setOrgName] = useState('')
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [locations, setLocations] = useState<any[]>([])
   const [activeLocationId, setActiveLocationId] = useState('')
@@ -339,7 +339,11 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             <div className="w-px h-4 bg-zinc-800"></div>
             <NotificationCenter />
             <div className="w-px h-4 bg-zinc-800"></div>
-            <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest">{orgName}</span>
+            {orgName ? (
+              <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest">{orgName}</span>
+            ) : (
+              <div className="h-3 w-24 bg-zinc-800 rounded-full animate-pulse" />
+            )}
           </div>
         </div>
         <div className="flex-1 p-4 md:p-10 max-w-[1600px] mx-auto w-full print:p-0">

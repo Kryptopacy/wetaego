@@ -137,7 +137,7 @@ export async function buyCredits(formData: FormData): Promise<void> {
   
   waitUntil((async () => {
     const { error: resendError } = await resend.emails.send({
-      from: 'OurMenu <onboarding@resend.dev>',
+      from: 'OurMenu <noreply@ourmenuos.online>',
       to: userData.user.email!,
       subject: `Invoice for ${credits} Credits`,
       react: InvoiceEmail({
