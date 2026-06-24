@@ -11,6 +11,9 @@ import { z } from 'zod'
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { getPreset, buildPageTitle } from '@/lib/templates/presets'
 
+const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
+const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
+
 // ─── Business Type Setup ───────────────────────────────────────────────────────
 
 export async function setBusinessTypeAction(formData: FormData): Promise<void> {
@@ -231,7 +234,7 @@ const addPageItemSchema = z.object({
   price_minor: z.number().min(0).nullable(),
   price_display: z.string().max(50).optional(),
   availability_status: z.string(),
-  item_data: z.any().nullable(),
+  item_data: z.unknown().nullable(),
   deposit_percentage: z.number().min(0).max(100).nullable(),
   payment_mode: z.string(),
   inventory_count: z.number().min(0).nullable(),
@@ -295,6 +298,13 @@ export async function addPageItem(formData: FormData): Promise<void> {
   if (aiImageUrl) {
     images = [aiImageUrl]
   } else if (image && image.size > 0) {
+    if (image.size > MAX_FILE_SIZE) {
+      throw new Error('Image must be less than 5MB')
+    }
+    if (!ACCEPTED_IMAGE_TYPES.includes(image.type)) {
+      throw new Error('Invalid image format. Only JPEG, PNG, and WebP are accepted.')
+    }
+
     const fileExt = image.name.split('.').pop()
     const fileName = `page-items/${userData.user.id}-${Date.now()}.${fileExt}`
     const { data: uploadData, error: uploadError } = await supabase.storage
@@ -304,6 +314,8 @@ export async function addPageItem(formData: FormData): Promise<void> {
     if (!uploadError && uploadData) {
       const { data: publicUrlData } = supabase.storage.from('public-assets').getPublicUrl(fileName)
       images = [publicUrlData.publicUrl]
+    } else {
+      throw new Error('Failed to upload image')
     }
   }
 
@@ -364,7 +376,7 @@ export async function updatePageItem(formData: FormData): Promise<void> {
     price_minor?: number | null
     price_display?: string | null
     availability_status?: string
-    item_data?: Json
+    item_data?: any
     inventory_count?: number | null
     images?: string[]
   } = { title, subtitle, description, price_minor, price_display, availability_status, item_data, inventory_count }
@@ -373,6 +385,13 @@ export async function updatePageItem(formData: FormData): Promise<void> {
   if (aiImageUrl) {
     updatePayload.images = [aiImageUrl]
   } else if (image && image.size > 0) {
+    if (image.size > MAX_FILE_SIZE) {
+      throw new Error('Image must be less than 5MB')
+    }
+    if (!ACCEPTED_IMAGE_TYPES.includes(image.type)) {
+      throw new Error('Invalid image format. Only JPEG, PNG, and WebP are accepted.')
+    }
+
     const fileExt = image.name.split('.').pop()
     const fileName = `page-items/${userData.user.id}-${Date.now()}.${fileExt}`
     const { data: uploadData, error: uploadError } = await supabase.storage
@@ -382,6 +401,8 @@ export async function updatePageItem(formData: FormData): Promise<void> {
     if (!uploadError && uploadData) {
       const { data: publicUrlData } = supabase.storage.from('public-assets').getPublicUrl(fileName)
       updatePayload.images = [publicUrlData.publicUrl]
+    } else {
+      throw new Error('Failed to upload image')
     }
   }
 

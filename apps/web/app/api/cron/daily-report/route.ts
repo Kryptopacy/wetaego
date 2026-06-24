@@ -28,69 +28,88 @@ export async function GET(req: Request) {
     yesterday.setDate(yesterday.getDate() - 1)
     const yesterdayIso = yesterday.toISOString()
 
-    const results = []
+    // 3. Fetch ALL completed/paid orders from the last 24h across ALL orgs in ONE query (O(1))
+    // We only need organization_id and total_amount_minor.
+    let allOrders: any[] = []
+    let hasMore = true
+    let page = 0
+    const PAGE_SIZE = 1000
 
-    // 3. For each org, fetch their orders from the last 24h
-    for (const org of orgs) {
-      if (!org.created_by) continue
+    while (hasMore) {
+      const { data: ordersBatch, error: ordersError } = await adminClient
+        .from('orders')
+        .select('organization_id, total_amount_minor')
+        .in('status', ['paid', 'completed'])
+        .gte('created_at', yesterdayIso)
+        .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1)
 
-      let totalRevenueMinor = 0
-      let totalOrders = 0
-      let hasMore = true
-      let page = 0
-      const PAGE_SIZE = 1000
-
-      while (hasMore) {
-        const { data: orders, error: ordersError } = await adminClient
-          .from('orders')
-          .select('total_amount_minor')
-          .eq('organization_id', org.id)
-          .in('status', ['paid', 'completed'])
-          .gte('created_at', yesterdayIso)
-          .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1)
-
-        if (ordersError || !orders) {
-          console.error(`Error fetching orders for org ${org.id}:`, ordersError)
-          hasMore = false
-          break
-        }
-
-        totalOrders += orders.length
-        totalRevenueMinor += orders.reduce((sum, order) => sum + (order.total_amount_minor || 0), 0)
-
-        if (orders.length < PAGE_SIZE) {
-          hasMore = false
-        } else {
-          page++
-        }
+      if (ordersError || !ordersBatch) {
+        console.error('Error fetching global orders batch:', ordersError)
+        hasMore = false
+        break
       }
 
-      if (totalOrders === 0) continue
-
-      // Fetch owner email
-      const { data: ownerUser } = await adminClient.auth.admin.getUserById(org.created_by)
-      const ownerEmail = ownerUser?.user?.email
-
-      if (ownerEmail) {
-        const { data: emailData, error: emailError } = await resend.emails.send({
-          from: 'OurMenu Reports <noreply@ourmenuos.online>',
-          to: ownerEmail,
-          subject: `Daily Sales Report: ${org.name}`,
-          react: DailyReportEmail({
-            organizationName: org.name,
-            totalOrders,
-            totalRevenueMinor,
-            dateString: new Date().toLocaleDateString()
-          }) as React.ReactElement
-        })
-
-        if (emailError) {
-          console.error(`Failed to send report for ${org.name}:`, emailError)
-        } else {
-          results.push({ org: org.name, sentId: emailData?.id })
-        }
+      allOrders = allOrders.concat(ordersBatch)
+      
+      if (ordersBatch.length < PAGE_SIZE) {
+        hasMore = false
+      } else {
+        page++
       }
     }
+
+    // 4. Group orders by organization in-memory
+    const orgStats: Record<string, { totalOrders: number; totalRevenueMinor: number }> = {}
+    for (const order of allOrders) {
+      if (!orgStats[order.organization_id]) {
+        orgStats[order.organization_id] = { totalOrders: 0, totalRevenueMinor: 0 }
+      }
+      orgStats[order.organization_id].totalOrders += 1
+      orgStats[order.organization_id].totalRevenueMinor += (order.total_amount_minor || 0)
+    }
+
+    // 5. Fetch all users in one go to map created_by to emails
+    const { data: usersData, error: usersError } = await adminClient.auth.admin.listUsers()
+    if (usersError) {
+      console.error('Error fetching users:', usersError)
+    }
+    const userEmailMap = new Map<string, string>()
+    usersData?.users.forEach(u => {
+      if (u.email) userEmailMap.set(u.id, u.email)
+    })
+
+    // 6. Build email dispatch promises (concurrent dispatch)
+    const emailPromises = orgs.map(async (org) => {
+      const stats = orgStats[org.id]
+      if (!stats || stats.totalOrders === 0 || !org.created_by) return null
+
+      const ownerEmail = userEmailMap.get(org.created_by)
+      if (!ownerEmail) return null
+
+      const { data: emailData, error: emailError } = await resend.emails.send({
+        from: 'OurMenu Reports <noreply@ourmenuos.online>',
+        to: ownerEmail,
+        subject: `Daily Sales Report: ${org.name}`,
+        react: DailyReportEmail({
+          organizationName: org.name,
+          totalOrders: stats.totalOrders,
+          totalRevenueMinor: stats.totalRevenueMinor,
+          dateString: new Date().toLocaleDateString()
+        }) as React.ReactElement
+      })
+
+      if (emailError) {
+        console.error(`Failed to send report for ${org.name}:`, emailError)
+        return null
+      }
+      return { org: org.name, sentId: emailData?.id }
+    })
+
+    // 7. Dispatch all concurrently
+    const settled = await Promise.allSettled(emailPromises)
+    const results = settled
+      .filter((res): res is PromiseFulfilledResult<any> => res.status === 'fulfilled' && res.value !== null)
+      .map(res => res.value)
 
     return NextResponse.json({ status: 'success', sent: results.length, details: results })
   } catch (err: unknown) {
