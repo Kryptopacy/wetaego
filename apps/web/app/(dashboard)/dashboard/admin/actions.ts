@@ -38,9 +38,8 @@ export async function updateSetting(formData: FormData) {
     })
   }
 
-  const { error } = await supabase
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .from('system_settings' as any)
+  const { error } = await (supabase as any)
+    .from('system_settings')
     .upsert({
       key,
       value,
@@ -68,7 +67,7 @@ export async function overrideTenantPlan(formData: FormData) {
   const status = formData.get('subscription_status') as string
   const credits = Number(formData.get('purchased_credits')) || 0
 
-  const { error } = await supabase
+  const { error } = await (supabase as any)
     .from('organizations')
     .update({
       subscription_plan: plan,
