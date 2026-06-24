@@ -39,10 +39,11 @@ export async function updateSetting(formData: FormData) {
   }
 
   const { error } = await supabase
-    .from('system_settings')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .from('system_settings' as any)
     .upsert({
       key,
-      value: value as any,
+      value,
       updated_by: data.user.id
     })
 
