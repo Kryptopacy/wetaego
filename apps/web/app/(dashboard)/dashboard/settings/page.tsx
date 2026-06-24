@@ -590,6 +590,18 @@ export default async function SettingsPage({
                 />
               </div>
 
+              <div>
+                <label className="mb-2 block text-sm font-medium text-zinc-300">Location Identifier Label (Table, Room, Seat)</label>
+                <input
+                  type="text"
+                  name="fulfillmentLocationLabel"
+                  defaultValue={location.fulfillment_location_label || 'Table'}
+                  className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm"
+                  placeholder="e.g. Table, Room, Cabana, Seat"
+                  maxLength={50}
+                />
+              </div>
+
               <div className="mt-6">
                 <button type="submit" className="px-6 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium transition-colors">
                   Save Venue Info
@@ -790,6 +802,62 @@ export default async function SettingsPage({
                     className="w-full rounded-xl bg-zinc-800 border-zinc-700 px-4 py-3 text-white outline-none focus:border-purple-500 font-mono text-sm"
                   />
                   <p className="text-xs text-zinc-500 mt-2">Customize the wheel segments. &quot;value&quot; is the discount percentage won.</p>
+                </div>
+              </div>
+
+              <div className="pt-6 border-t border-zinc-800 space-y-5">
+                <h3 className="text-md font-bold text-white mb-2">Delivery Settings</h3>
+                
+                <div className="flex items-center gap-3 bg-zinc-800/50 p-4 rounded-xl border border-zinc-700/50">
+                  <input 
+                    type="checkbox" 
+                    id="delivery_enabled"
+                    name="delivery_enabled" 
+                    defaultChecked={location.delivery_enabled || false}
+                    className="w-5 h-5 rounded border-zinc-600 text-green-500 bg-zinc-800"
+                  />
+                  <label htmlFor="delivery_enabled" className="text-sm font-medium text-white flex-1 cursor-pointer">
+                    Enable Delivery Support
+                    <span className="block text-xs text-zinc-400 font-normal mt-0.5">Allow customers to choose delivery at checkout.</span>
+                  </label>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-zinc-300">Delivery Fee (Minor Units)</label>
+                    <input
+                      type="number"
+                      name="delivery_fee_minor"
+                      defaultValue={location.delivery_fee_minor || 0}
+                      className="w-full rounded-xl bg-zinc-800 border-zinc-700 px-4 py-3 text-white outline-none focus:border-green-500"
+                      placeholder="e.g. 150000 for ₦1,500"
+                    />
+                    <p className="text-xs text-zinc-500 mt-2">The flat fee added to delivery orders.</p>
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-zinc-300">Minimum Order (Minor Units)</label>
+                    <input
+                      type="number"
+                      name="delivery_minimum_order_minor"
+                      defaultValue={location.delivery_minimum_order_minor || 0}
+                      className="w-full rounded-xl bg-zinc-800 border-zinc-700 px-4 py-3 text-white outline-none focus:border-green-500"
+                      placeholder="e.g. 500000 for ₦5,000"
+                    />
+                    <p className="text-xs text-zinc-500 mt-2">Minimum cart subtotal to qualify for delivery.</p>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-zinc-300">Delivery Note / Radius</label>
+                  <input
+                    type="text"
+                    name="delivery_note"
+                    defaultValue={location.delivery_note || ''}
+                    className="w-full rounded-xl bg-zinc-800 border-zinc-700 px-4 py-3 text-white outline-none focus:border-green-500"
+                    placeholder="e.g. Mainland Lagos Only"
+                    maxLength={255}
+                  />
+                  <p className="text-xs text-zinc-500 mt-2">Displayed to customers when entering their delivery address.</p>
                 </div>
               </div>
 

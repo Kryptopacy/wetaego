@@ -216,6 +216,7 @@ const locationInfoSchema = z.object({
   phoneNumber: z.string().max(30).optional().nullable(),
   googleMapsUrl: z.string().max(300).url().optional().nullable().or(z.literal('')),
   operatingHours: z.string().max(200).optional().nullable(),
+  fulfillmentLocationLabel: z.string().max(50).optional().nullable(),
   randomizerEnabled: z.boolean().optional(),
 })
 
@@ -246,6 +247,7 @@ export async function saveLocationInfoSettings(formData: FormData) {
       phoneNumber: formData.get('phoneNumber') || null,
       googleMapsUrl: formData.get('googleMapsUrl') || null,
       operatingHours: formData.get('operatingHours') || null,
+      fulfillmentLocationLabel: formData.get('fulfillmentLocationLabel') || null,
       randomizerEnabled: formData.get('randomizerEnabled') === 'true',
     })
 
@@ -292,6 +294,7 @@ export async function saveLocationInfoSettings(formData: FormData) {
         phone_number: validatedData.phoneNumber,
         google_maps_url: validatedData.googleMapsUrl === '' ? null : validatedData.googleMapsUrl,
         operating_hours: validatedData.operatingHours,
+        fulfillment_location_label: validatedData.fulfillmentLocationLabel,
         randomizer_enabled: validatedData.randomizerEnabled,
       })
       .eq('id', validatedData.locationId)

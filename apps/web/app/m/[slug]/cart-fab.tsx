@@ -24,6 +24,11 @@ interface CartFABProps {
   globalDiscountPercentage?: number | null
   menuItems?: { id: string, name: string, price_minor: number }[]
   templateType?: string
+  deliveryEnabled?: boolean | null
+  deliveryFeeMinor?: number | null
+  deliveryMinimumOrderMinor?: number | null
+  deliveryNote?: string | null
+  fulfillmentLocationLabel?: string | null
 }
 
 export function CartFAB({ 
@@ -40,7 +45,12 @@ export function CartFAB({
   globalDiscountEnabled,
   globalDiscountPercentage,
   menuItems = [],
-  templateType = 'catalog'
+  templateType = 'catalog',
+  deliveryEnabled,
+  deliveryFeeMinor,
+  deliveryMinimumOrderMinor,
+  deliveryNote,
+  fulfillmentLocationLabel = 'Table'
 }: CartFABProps) {
   const { items, totalAmountMinor, addItem, updateQuantity, clearCart, spinnerDiscount } = useCartStore()
   const [isCheckingOut, setIsCheckingOut] = useState(false)
@@ -49,10 +59,35 @@ export function CartFAB({
   // Checkout Modal State
   const [showCheckoutModal, setShowCheckoutModal] = useState(false)
   const [tableNumber, setTableNumber] = useState(tableIdentifier || '')
+  
+  const showTableOption = !['catalog', 'retail'].includes(templateType)
+  const defaultFulfillment = tableIdentifier ? 'table' : (showTableOption ? 'table' : 'pickup')
+  const [fulfillmentType, setFulfillmentType] = useState<'table' | 'pickup' | 'delivery'>(defaultFulfillment)
+  
+  const [customerName, setCustomerName] = useState('')
   const [customerEmail, setCustomerEmail] = useState('')
+  const [customerPhone, setCustomerPhone] = useState('')
   const [customerNote, setCustomerNote] = useState('')
+  const [deliveryInstructions, setDeliveryInstructions] = useState('')
+  
   const [splitCount, setSplitCount] = useState(1)
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'transfer'>(paymentIsLive ? 'card' : 'transfer')
+
+  // Auto-fill customer data on load
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('om_customer_profile')
+      if (saved) {
+        const profile = JSON.parse(saved)
+        if (profile.name) setCustomerName(profile.name)
+        if (profile.email) setCustomerEmail(profile.email)
+        if (profile.phone) setCustomerPhone(profile.phone)
+        if (profile.address && !tableIdentifier) setTableNumber(profile.address) // reuse for delivery address
+      }
+    } catch (e) {
+      // Ignore local storage errors
+    }
+  }, [tableIdentifier])
 
   useEffect(() => {
     queueMicrotask(() => setIsMounted(true))
@@ -108,13 +143,29 @@ export function CartFAB({
   const discountMultiplier = effectivePercent / 100
   const discountAmountMinor = Math.floor(subtotalMinor * discountMultiplier)
   const discountedSubtotalMinor = subtotalMinor - discountAmountMinor
-  const finalTotalMinor = discountedSubtotalMinor
+  
+  const isDelivery = fulfillmentType === 'delivery'
+  const appliedDeliveryFee = (isDelivery && deliveryFeeMinor) ? deliveryFeeMinor : 0
+  const finalTotalMinor = discountedSubtotalMinor + appliedDeliveryFee
 
   const handleCheckout = async () => {
     if (isCheckingOut) return
     
-    if (!hideAddressField && !tableNumber && templateType !== 'catalog') {
-      toast.error('Please enter your table number')
+    // Validation
+    if (!customerName) {
+      toast.error('Please enter your name')
+      return
+    }
+    if (isDelivery && !tableNumber) {
+      toast.error('Please enter your delivery address')
+      return
+    }
+    if ((isDelivery || fulfillmentType === 'pickup') && !customerPhone) {
+      toast.error('Please enter your phone number')
+      return
+    }
+    if (isDelivery && deliveryMinimumOrderMinor && subtotalMinor < deliveryMinimumOrderMinor) {
+      toast.error(`Minimum order for delivery is ${formatCurrency(deliveryMinimumOrderMinor)}`)
       return
     }
 
@@ -125,6 +176,14 @@ export function CartFAB({
       return
     }
     try {
+      // Save profile to local storage for frictionless future checkouts
+      localStorage.setItem('om_customer_profile', JSON.stringify({
+        name: customerName,
+        email: customerEmail,
+        phone: customerPhone,
+        address: tableNumber
+      }))
+
       posthog.capture('checkout_completed', { organizationId, locationId, totalAmountMinor: finalTotalMinor })
       
       let paymentFractionMinor: number | undefined = undefined
@@ -134,7 +193,8 @@ export function CartFAB({
 
       const { checkoutUrl, orderId, error } = (await processCheckout(
         organizationId, locationId, items, finalTotalMinor, 0, tableNumber,
-        customerNote, customerEmail, paymentFractionMinor, paymentMethod, discountAmountMinor
+        customerNote, customerEmail, paymentFractionMinor, paymentMethod, discountAmountMinor,
+        customerName, customerPhone, fulfillmentType, deliveryInstructions
       )) as { checkoutUrl?: string, orderId?: string, error?: string }
 
       if (error) {
@@ -251,45 +311,112 @@ export function CartFAB({
               </div>
 
               <div className="overflow-y-auto overflow-x-hidden -mx-6 px-6 pb-6 space-y-6 flex-1">
+                {/* Fulfillment Type Toggle */}
+                {!tableIdentifier && (showTableOption || deliveryEnabled) && (
+                  <div className="flex bg-zinc-100 dark:bg-zinc-800 p-1 rounded-xl">
+                    {showTableOption && (
+                      <button
+                        className={`flex-1 py-2 text-sm font-bold rounded-lg transition-colors ${fulfillmentType === 'table' ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm' : 'text-zinc-500'}`}
+                        onClick={() => setFulfillmentType('table')}
+                      >
+                        {fulfillmentLocationLabel}
+                      </button>
+                    )}
+                    <button
+                      className={`flex-1 py-2 text-sm font-bold rounded-lg transition-colors ${fulfillmentType === 'pickup' ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm' : 'text-zinc-500'}`}
+                      onClick={() => setFulfillmentType('pickup')}
+                    >
+                      Pickup
+                    </button>
+                    {deliveryEnabled && (
+                      <button
+                        className={`flex-1 py-2 text-sm font-bold rounded-lg transition-colors ${fulfillmentType === 'delivery' ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm' : 'text-zinc-500'}`}
+                        onClick={() => setFulfillmentType('delivery')}
+                      >
+                        Delivery
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {/* Customer Details */}
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <input 
+                      type="text" 
+                      value={customerName}
+                      onChange={(e) => setCustomerName(e.target.value)}
+                      placeholder="Your Name *"
+                      className="w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-3 text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 placeholder:text-zinc-400 text-[15px]"
+                    />
+                    <input 
+                      type="tel" 
+                      value={customerPhone}
+                      onChange={(e) => setCustomerPhone(e.target.value)}
+                      placeholder="Phone Number *"
+                      className="w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-3 text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 placeholder:text-zinc-400 text-[15px]"
+                    />
+                  </div>
+                  <input 
+                    type="email" 
+                    value={customerEmail}
+                    onChange={(e) => setCustomerEmail(e.target.value)}
+                    placeholder="Email for receipt (Optional)"
+                    className="w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-3 text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 placeholder:text-zinc-400 text-[15px]"
+                  />
+                </div>
+
                 {/* Location / Table Input */}
                 {!hideAddressField && (
                   <div className="space-y-2">
                     <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">
-                      {templateType === 'catalog' ? 'Delivery Address (Optional)' : 'Table Number / Location'}
+                      {fulfillmentType === 'delivery' ? 'Delivery Address' : 
+                       fulfillmentType === 'pickup' ? 'Pickup Details' : 
+                       fulfillmentLocationLabel}
                     </label>
                     {tableIdentifier && templateType !== 'catalog' ? (
                       <div className="w-full bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 rounded-xl px-4 py-3.5 text-emerald-700 dark:text-emerald-400 font-bold flex items-center justify-between">
-                        <span>Table {tableIdentifier}</span>
+                        <span>{fulfillmentLocationLabel} {tableIdentifier}</span>
                         <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                       </div>
                     ) : (
                       <textarea 
                         value={tableNumber}
                         onChange={(e) => setTableNumber(e.target.value)}
-                        placeholder={templateType === 'catalog' ? "123 Main St, Apt 4B..." : "e.g. Table 12 or 'Takeaway'"}
+                        placeholder={
+                          fulfillmentType === 'delivery' ? "123 Main St, Apt 4B..." : 
+                          fulfillmentType === 'pickup' ? "e.g. 'Pickup at 5pm' or 'Car details'" :
+                          `Enter your ${fulfillmentLocationLabel} (e.g. 12 or 'VIP 1')`
+                        }
                         className="w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-3 text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 resize-none placeholder:text-zinc-400 text-[15px]"
-                        rows={templateType === 'catalog' ? 2 : 1}
+                        rows={fulfillmentType === 'delivery' ? 2 : 1}
                       />
                     )}
                   </div>
                 )}
-
-                {/* Optional Email & Note */}
-                <div className="space-y-4">
-                  <input 
-                    type="email" 
-                    value={customerEmail}
-                    onChange={(e) => setCustomerEmail(e.target.value)}
-                    placeholder="Email for receipt (Optional)"
-                    className="w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-3.5 text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 placeholder:text-zinc-400 text-[15px]"
-                  />
-                  <textarea 
-                    value={customerNote}
-                    onChange={(e) => setCustomerNote(e.target.value)}
-                    placeholder="Order notes (e.g. allergies, specific requests)"
-                    className="w-full h-20 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-3 text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 resize-none placeholder:text-zinc-400 text-[15px]"
-                  />
-                </div>
+                
+                {/* Delivery Note / Instructions */}
+                {fulfillmentType === 'delivery' && (
+                  <div className="space-y-2">
+                    {deliveryNote && (
+                       <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">⚠️ {deliveryNote}</p>
+                    )}
+                    <textarea 
+                      value={deliveryInstructions}
+                      onChange={(e) => setDeliveryInstructions(e.target.value)}
+                      placeholder="Delivery instructions (e.g. leave at door)"
+                      className="w-full h-16 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-3 text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 resize-none placeholder:text-zinc-400 text-[15px]"
+                    />
+                  </div>
+                )}
+                
+                {/* Optional Note */}
+                <textarea 
+                  value={customerNote}
+                  onChange={(e) => setCustomerNote(e.target.value)}
+                  placeholder="Order notes (e.g. allergies, specific requests)"
+                  className="w-full h-16 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-3 text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 resize-none placeholder:text-zinc-400 text-[15px]"
+                />
 
                 {/* AI Upsell */}
                 <AnimatePresence>

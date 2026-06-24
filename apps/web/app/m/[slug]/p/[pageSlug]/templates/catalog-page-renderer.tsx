@@ -218,6 +218,11 @@ export function CatalogPageRenderer({ location, page, items, locationSlug, payme
           templateType="catalog"
           menuItems={items.map(i => ({ id: i.id, name: i.title, price_minor: i.price_minor || 0 }))}
           hideAddressField={page.template_data?.hide_delivery === true}
+          deliveryEnabled={(location as any).delivery_enabled}
+          deliveryFeeMinor={(location as any).delivery_fee_minor}
+          deliveryMinimumOrderMinor={(location as any).delivery_minimum_order_minor}
+          deliveryNote={(location as any).delivery_note}
+          fulfillmentLocationLabel={(location as any).fulfillment_location_label}
         />
       )}
     </div>

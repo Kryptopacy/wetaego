@@ -9,6 +9,7 @@ import { revalidatePath } from 'next/cache'
 
 import { paymentProvider } from '@/lib/payments/paystack'
 import { sendWhatsAppMessage } from '@/lib/notifications/termii'
+import { getPlatformFees } from '@/lib/utils/settings'
 import { waitUntil } from '@vercel/functions'
 
 export async function submitServiceRequest(formData: FormData) {
@@ -57,6 +58,10 @@ export async function processCheckout(
   paymentFractionMinor?: number,
   paymentMethod?: 'card' | 'transfer',
   discountAmountMinor?: number,
+  customerName?: string,
+  customerPhone?: string,
+  fulfillmentType?: 'table' | 'pickup' | 'delivery' | string,
+  deliveryInstructions?: string,
   idempotencyKey?: string,
   staffSubaccountOverride?: string
 ) {
@@ -118,8 +123,11 @@ export async function processCheckout(
     .insert({
       organization_id: orgId,
       location_id: locationId,
-      customer_name: 'Guest',
-      table_identifier: tableIdentifier || 'Takeaway',
+      customer_name: customerName || 'Guest',
+      customer_phone: customerPhone || null,
+      table_identifier: tableIdentifier || null,
+      fulfillment_type: fulfillmentType || 'table',
+      delivery_instructions: deliveryInstructions || null,
       status: 'pending',
       total_amount_minor: verifiedTotalMinor,
       tip_amount_minor: tipAmountMinor || 0,
@@ -168,6 +176,27 @@ export async function processCheckout(
   // Fallback to manual payment: trigger push notification immediately
   const { sendPushToOrg, newOrderNotification } = await import('@/lib/notifications/push')
   waitUntil(sendPushToOrg(orgId, newOrderNotification(tableIdentifier || 'Takeaway', verifiedTotalMinor)))
+
+  // Record platform fee for manual offline payment
+  if (verifiedTotalMinor > 0) {
+    try {
+      const platformFeesConfig = await getPlatformFees()
+      const businessFeePercent = platformFeesConfig.business_subaccount || 5
+      const feeAmountMinor = Math.floor(verifiedTotalMinor * (businessFeePercent / 100))
+      
+      if (feeAmountMinor > 0) {
+        await (supabase as any).from('platform_fee_ledger').insert({
+          organization_id: orgId,
+          location_id: locationId,
+          order_id: order.id,
+          fee_amount_minor: feeAmountMinor,
+          status: 'unpaid'
+        })
+      }
+    } catch (e) {
+      console.error('Failed to log platform fee to ledger:', e)
+    }
+  }
 
     return { orderId: order.id };
   };
