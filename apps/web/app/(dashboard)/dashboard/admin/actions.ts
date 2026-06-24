@@ -1,4 +1,3 @@
-
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
@@ -15,7 +14,7 @@ export async function updateSetting(formData: FormData) {
   const key = formData.get('key') as string
   const isJson = formData.get('is_json') === 'true'
 
-  let value: Record<string, unknown> = {}
+  let value: Record<string, any> = {}
 
   if (isJson) {
     const rawJson = formData.get('json_value') as string
@@ -40,11 +39,10 @@ export async function updateSetting(formData: FormData) {
   }
 
   const { error } = await supabase
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .from('system_settings' as any)
+    .from('system_settings')
     .upsert({
       key,
-      value,
+      value: value as any,
       updated_by: data.user.id
     })
 
