@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import { formatCurrency } from '@/lib/utils/currency'
 import { Users, Mail, TrendingUp, Award } from 'lucide-react'
 import Link from 'next/link'
-import { cookies } from 'next/headers'
+
 
 export default async function CustomersPage() {
   const supabase = await createClient()
@@ -11,7 +11,7 @@ export default async function CustomersPage() {
   const { data: userData } = await supabase.auth.getUser()
   const user = userData?.user
 
-  const cookieStore = await cookies()
+  
 
   if (!user) {
     redirect('/login')

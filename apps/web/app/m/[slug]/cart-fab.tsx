@@ -79,12 +79,14 @@ export function CartFAB({
       const saved = localStorage.getItem('om_customer_profile')
       if (saved) {
         const profile = JSON.parse(saved)
+        /* eslint-disable react-hooks/set-state-in-effect */
         if (profile.name) setCustomerName(profile.name)
         if (profile.email) setCustomerEmail(profile.email)
         if (profile.phone) setCustomerPhone(profile.phone)
         if (profile.address && !tableIdentifier) setTableNumber(profile.address) // reuse for delivery address
+        /* eslint-enable react-hooks/set-state-in-effect */
       }
-    } catch (e) {
+    } catch {
       // Ignore local storage errors
     }
   }, [tableIdentifier])
@@ -148,7 +150,8 @@ export function CartFAB({
   const appliedDeliveryFee = (isDelivery && deliveryFeeMinor) ? deliveryFeeMinor : 0
   const finalTotalMinor = discountedSubtotalMinor + appliedDeliveryFee
 
-  const handleCheckout = async () => {
+  const handleCheckout = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault()
     if (isCheckingOut) return
     
     // Validation
@@ -294,7 +297,8 @@ export function CartFAB({
               onClick={() => setShowCheckoutModal(false)}
             />
             
-            <motion.div
+            <motion.form
+              onSubmit={handleCheckout}
               initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
               className="w-full max-w-md bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-t-[2rem] sm:rounded-[2rem] p-6 shadow-2xl relative z-10 max-h-[90vh] flex flex-col"
@@ -302,6 +306,7 @@ export function CartFAB({
               <div className="flex justify-between items-center mb-6 shrink-0">
                 <h2 className="text-2xl font-black text-zinc-900 dark:text-white tracking-tight">Checkout</h2>
                 <button 
+                  type="button"
                   aria-label="Close Checkout"
                   onClick={() => setShowCheckoutModal(false)} 
                   className="w-8 h-8 flex items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors"
@@ -316,6 +321,7 @@ export function CartFAB({
                   <div className="flex bg-zinc-100 dark:bg-zinc-800 p-1 rounded-xl">
                     {showTableOption && (
                       <button
+                        type="button"
                         className={`flex-1 py-2 text-sm font-bold rounded-lg transition-colors ${fulfillmentType === 'table' ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm' : 'text-zinc-500'}`}
                         onClick={() => setFulfillmentType('table')}
                       >
@@ -323,6 +329,7 @@ export function CartFAB({
                       </button>
                     )}
                     <button
+                      type="button"
                       className={`flex-1 py-2 text-sm font-bold rounded-lg transition-colors ${fulfillmentType === 'pickup' ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm' : 'text-zinc-500'}`}
                       onClick={() => setFulfillmentType('pickup')}
                     >
@@ -330,6 +337,7 @@ export function CartFAB({
                     </button>
                     {deliveryEnabled && (
                       <button
+                        type="button"
                         className={`flex-1 py-2 text-sm font-bold rounded-lg transition-colors ${fulfillmentType === 'delivery' ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm' : 'text-zinc-500'}`}
                         onClick={() => setFulfillmentType('delivery')}
                       >
@@ -441,6 +449,7 @@ export function CartFAB({
                           <p className="text-[13px] text-zinc-500 dark:text-zinc-400 mt-1">{upsellItemDetails.name} • {formatCurrency(upsellItemDetails.price_minor )}</p>
                         </div>
                         <button 
+                          type="button"
                           aria-label="Add upsell to cart"
                           onClick={handleAddUpsell}
                           className="shrink-0 w-10 h-10 rounded-full bg-white dark:bg-indigo-500 hover:scale-105 text-indigo-600 dark:text-white flex items-center justify-center transition-transform shadow-sm border border-indigo-100 dark:border-indigo-600"
@@ -456,19 +465,29 @@ export function CartFAB({
                 <div className="bg-zinc-50 dark:bg-zinc-800/30 rounded-2xl p-5 space-y-4 border border-zinc-200 dark:border-zinc-800">
                   <h3 className="text-sm font-bold text-zinc-900 dark:text-white">Order Summary</h3>
                   <div className="space-y-3">
-                    {items.map(item => (
-                      <div key={item.id} className="flex justify-between items-center group">
-                        <div className="flex-1 min-w-0 pr-4">
-                          <h4 className="text-[14px] font-medium text-zinc-900 dark:text-white truncate">{item.name}</h4>
-                          <span className="text-[13px] text-zinc-500">{formatCurrency(item.price_minor )}</span>
-                        </div>
-                        <div className="flex items-center gap-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-full p-1 shadow-sm opacity-100 transition-opacity">
-                          <button aria-label="Decrease quantity" onClick={() => updateQuantity(item.id, -1)} className="w-6 h-6 flex items-center justify-center bg-zinc-100 dark:bg-zinc-800 rounded-full text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700"><Minus className="w-3 h-3" /></button>
-                          <span className="text-zinc-900 dark:text-white font-bold text-[13px] w-3 text-center">{item.quantity}</span>
-                          <button aria-label="Increase quantity" onClick={() => updateQuantity(item.id, 1)} className="w-6 h-6 flex items-center justify-center bg-zinc-100 dark:bg-zinc-800 rounded-full text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700"><Plus className="w-3 h-3" /></button>
-                        </div>
-                      </div>
-                    ))}
+                    <AnimatePresence>
+                      {items.map(item => (
+                        <motion.div 
+                          layout
+                          initial={{ opacity: 0, x: -20, scale: 0.95 }}
+                          animate={{ opacity: 1, x: 0, scale: 1 }}
+                          exit={{ opacity: 0, x: 20, scale: 0.95 }}
+                          transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                          key={item.id} 
+                          className="flex justify-between items-center group"
+                        >
+                          <div className="flex-1 min-w-0 pr-4">
+                            <h4 className="text-[14px] font-medium text-zinc-900 dark:text-white truncate">{item.name}</h4>
+                            <span className="text-[13px] text-zinc-500">{formatCurrency(item.price_minor )}</span>
+                          </div>
+                          <div className="flex items-center gap-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-full p-1 shadow-sm opacity-100 transition-opacity">
+                            <button type="button" aria-label={`Decrease quantity of ${item.name}`} onClick={() => updateQuantity(item.id, -1)} className="w-6 h-6 flex items-center justify-center bg-zinc-100 dark:bg-zinc-800 rounded-full text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-95 transition-transform"><Minus className="w-3 h-3" /></button>
+                            <span className="text-zinc-900 dark:text-white font-bold text-[13px] w-3 text-center">{item.quantity}</span>
+                            <button type="button" aria-label={`Increase quantity of ${item.name}`} onClick={() => updateQuantity(item.id, 1)} className="w-6 h-6 flex items-center justify-center bg-zinc-100 dark:bg-zinc-800 rounded-full text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-95 transition-transform"><Plus className="w-3 h-3" /></button>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
                   </div>
                   
                   <div className="h-px bg-zinc-200 dark:bg-zinc-800 w-full" />
@@ -502,9 +521,9 @@ export function CartFAB({
                     )}
                   </div>
                   <div className="flex items-center gap-3 bg-zinc-50 dark:bg-zinc-800 rounded-full p-1 border border-zinc-200 dark:border-zinc-700">
-                    <button aria-label="Decrease split" onClick={() => setSplitCount(Math.max(1, splitCount - 1))} disabled={splitCount <= 1 || paymentMethod === 'transfer'} className="w-8 h-8 flex items-center justify-center bg-white dark:bg-zinc-700 rounded-full text-zinc-600 dark:text-zinc-300 shadow-sm disabled:opacity-50"><Minus className="w-4 h-4" /></button>
+                    <button type="button" aria-label="Decrease split" onClick={() => setSplitCount(Math.max(1, splitCount - 1))} disabled={splitCount <= 1 || paymentMethod === 'transfer'} className="w-8 h-8 flex items-center justify-center bg-white dark:bg-zinc-700 rounded-full text-zinc-600 dark:text-zinc-300 shadow-sm disabled:opacity-50"><Minus className="w-4 h-4" /></button>
                     <span className="text-zinc-900 dark:text-white font-bold w-4 text-center">{splitCount}</span>
-                    <button aria-label="Increase split" onClick={() => setSplitCount(Math.min(10, splitCount + 1))} disabled={splitCount >= 10 || paymentMethod === 'transfer'} className="w-8 h-8 flex items-center justify-center bg-white dark:bg-zinc-700 rounded-full text-zinc-600 dark:text-zinc-300 shadow-sm disabled:opacity-50"><Plus className="w-4 h-4" /></button>
+                    <button type="button" aria-label="Increase split" onClick={() => setSplitCount(Math.min(10, splitCount + 1))} disabled={splitCount >= 10 || paymentMethod === 'transfer'} className="w-8 h-8 flex items-center justify-center bg-white dark:bg-zinc-700 rounded-full text-zinc-600 dark:text-zinc-300 shadow-sm disabled:opacity-50"><Plus className="w-4 h-4" /></button>
                   </div>
                 </div>
 
@@ -514,6 +533,7 @@ export function CartFAB({
                     <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Payment Method</label>
                     <div className="grid grid-cols-2 gap-3">
                       <button 
+                        type="button"
                         onClick={() => setPaymentMethod('card')}
                         className={`flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border-2 transition-all ${paymentMethod === 'card' ? 'border-zinc-900 dark:border-white bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-md' : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:border-zinc-300 dark:hover:border-zinc-700'}`}
                       >
@@ -521,6 +541,7 @@ export function CartFAB({
                         <span className="text-sm font-bold">Online</span>
                       </button>
                       <button 
+                        type="button"
                         onClick={() => { setPaymentMethod('transfer'); setSplitCount(1); }}
                         className={`flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border-2 transition-all ${paymentMethod === 'transfer' ? 'border-zinc-900 dark:border-white bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-md' : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:border-zinc-300 dark:hover:border-zinc-700'}`}
                       >
@@ -549,7 +570,7 @@ export function CartFAB({
               {/* Sticky Checkout Button */}
               <div className="pt-4 mt-auto shrink-0 bg-white dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800 -mx-6 px-6 -mb-6 pb-6 sm:mb-0 sm:pb-0 sm:border-t-0 sm:pt-0">
                 <button 
-                  onClick={handleCheckout}
+                  type="submit"
                   disabled={isCheckingOut || (!hideAddressField && !tableNumber && templateType !== 'catalog')}
                   className="group w-full bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-bold h-14 rounded-2xl shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 transition-all active:scale-95 text-[15px]"
                 >
@@ -568,7 +589,7 @@ export function CartFAB({
                   )}
                 </button>
               </div>
-            </motion.div>
+            </motion.form>
           </div>
         )}
       </AnimatePresence>

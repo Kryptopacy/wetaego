@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { cookies } from 'next/headers'
+
 import Link from 'next/link'
 import {
   BUSINESS_TYPE_GROUPS,

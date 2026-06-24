@@ -4,7 +4,7 @@ import { Tier } from '@/lib/utils/billing'
 import { togglePageStatus, deletePage } from './actions'
 import Link from 'next/link'
 import Image from 'next/image'
-import { cookies } from 'next/headers'
+
 import { BUSINESS_TYPE_PRESETS } from '@/lib/templates/presets'
 import { ShareButton } from '@/components/ShareButton'
 

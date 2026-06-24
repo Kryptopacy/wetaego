@@ -27,7 +27,7 @@ export async function saveAddonsSettings(formData: FormData) {
     if (rawConfig) {
       spinner_config = JSON.parse(rawConfig)
     }
-  } catch (e) {
+  } catch {
     throw new Error('Invalid JSON for Wheel Segments')
   }
 

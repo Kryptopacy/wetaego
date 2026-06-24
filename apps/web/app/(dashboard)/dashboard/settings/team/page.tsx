@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { cookies } from 'next/headers'
+
 import TeamManager from './team-manager'
 import DangerZone from './danger-zone'
 
@@ -15,7 +15,7 @@ export default async function TeamPage() {
     // Demo Mode bypass
   }
 
-  const cookieStore = await cookies()
+  
 
   if (!user) {
     redirect('/login')

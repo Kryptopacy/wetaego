@@ -3,6 +3,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { purgeStorefrontCache } from '@/lib/cache-purger'
 
 export async function createCategory(formData: FormData) {
   const supabase = await createClient()
@@ -25,6 +26,7 @@ export async function createCategory(formData: FormData) {
 
   if (error) return { error: (error as Error).message }
 
+  await purgeStorefrontCache(orgId)
   revalidatePath('/dashboard/menu')
   return { success: true }
 }
@@ -82,6 +84,7 @@ export async function createItem(formData: FormData) {
 
   if (error) return { error: (error as Error).message }
 
+  await purgeStorefrontCache(orgId)
   revalidatePath('/dashboard/menu')
   return { success: true }
 }
@@ -137,6 +140,7 @@ export async function updateItem(formData: FormData) {
 
   if (error) return { error: (error as Error).message }
 
+  if (item) await purgeStorefrontCache(item.organization_id)
   revalidatePath('/dashboard/menu')
   return { success: true }
 }
@@ -156,6 +160,7 @@ export async function deleteItem(itemId: string) {
   
   if (error) return { error: (error as Error).message }
 
+  if (item) await purgeStorefrontCache(item.organization_id)
   revalidatePath('/dashboard/menu')
   return { success: true }
 }
@@ -169,11 +174,13 @@ export async function toggleItemStatus(itemId: string, currentStatus: string) {
     return
   }
 
+  const { data: item } = await supabase.from('menu_items').select('organization_id').eq('id', itemId).single()
   await supabase
     .from('menu_items')
     .update({ availability_status: nextStatus })
     .eq('id', itemId)
 
+  if (item) await purgeStorefrontCache(item.organization_id)
   revalidatePath('/dashboard/menu')
 }
 
@@ -196,6 +203,7 @@ export async function applyTranslations(orgId: string, translatedCategories: { i
     }
   }
 
+  await purgeStorefrontCache(orgId)
   revalidatePath('/dashboard/menu')
   return { success: true }
 }
