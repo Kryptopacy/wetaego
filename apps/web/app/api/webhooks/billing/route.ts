@@ -12,9 +12,15 @@ export async function POST(req: Request) {
 
   if (!secret) return NextResponse.json({ error: 'Missing Paystack Secret Key' }, { status: 500 })
 
-  // Verify the webhook signature
+  if (!signature) {
+    return NextResponse.json({ error: 'Missing signature' }, { status: 400 })
+  }
+
   const hash = crypto.createHmac('sha512', secret).update(bodyString).digest('hex')
-  if (hash !== signature) {
+  if (
+    hash.length !== signature.length ||
+    !crypto.timingSafeEqual(Buffer.from(hash), Buffer.from(signature))
+  ) {
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 })
   }
 

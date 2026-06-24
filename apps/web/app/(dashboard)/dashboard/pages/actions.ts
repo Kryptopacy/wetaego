@@ -327,7 +327,7 @@ export async function addPageItem(formData: FormData): Promise<void> {
     price_minor,
     price_display,
     availability_status,
-    item_data,
+    item_data: item_data as Json | null,
     deposit_percentage,
     payment_mode,
     inventory_count,
@@ -376,10 +376,10 @@ export async function updatePageItem(formData: FormData): Promise<void> {
     price_minor?: number | null
     price_display?: string | null
     availability_status?: string
-    item_data?: any
+    item_data?: Json | null
     inventory_count?: number | null
     images?: string[]
-  } = { title, subtitle, description, price_minor, price_display, availability_status, item_data, inventory_count }
+  } = { title, subtitle, description, price_minor, price_display, availability_status, item_data: item_data as Json | null, inventory_count }
 
   // Handle image upload
   if (aiImageUrl) {
