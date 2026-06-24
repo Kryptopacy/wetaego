@@ -96,8 +96,12 @@ export function CallStaffFAB({ organizationId, locationId, tableIdentifier }: Ca
             animate={{ opacity: 1, y: 0, scale: 1, x: 0 }}
             exit={{ opacity: 0, y: 20, scale: 0.9, x: 0 }}
             className="fixed bottom-24 right-6 w-80 max-w-[calc(100vw-3rem)] bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl shadow-2xl p-5 overflow-hidden z-50"
+            id="call-staff-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="call-staff-title"
           >
-            <h3 className="text-white font-bold mb-2">Request Service</h3>
+            <h3 id="call-staff-title" className="text-white font-bold mb-2">Request Service</h3>
             <form onSubmit={handleSubmit} className="flex flex-col gap-3">
               <textarea 
                 value={requestText}
@@ -138,9 +142,10 @@ export function CallStaffFAB({ organizationId, locationId, tableIdentifier }: Ca
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ delay: 0.2, type: 'spring', stiffness: 260, damping: 20 }}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
         onClick={() => setIsOpen(!isOpen)}
+        aria-label={isOpen ? "Close Call Staff Menu" : "Call Staff"}
+        aria-expanded={isOpen}
+        aria-controls="call-staff-dialog"
         className="fixed bottom-24 right-6 z-30 h-14 w-14 rounded-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 shadow-xl flex items-center justify-center text-[#17201b] dark:text-white transition-colors group"
       >
         <span className="absolute right-[115%] whitespace-nowrap bg-zinc-800 dark:bg-zinc-100 text-white dark:text-black font-semibold text-[13px] px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-lg">

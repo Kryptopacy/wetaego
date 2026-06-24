@@ -5,6 +5,7 @@ import { useState, useRef } from 'react'
 import Image from 'next/image'
 import { createItem } from './actions'
 import { toast } from 'sonner'
+import { SubmitButton } from '@/components/submit-button'
 
 export function AddItemForm({ orgId, categoryId, categoryName }: { orgId: string, categoryId: string, categoryName: string }) {
   const [name, setName] = useState('')
@@ -145,7 +146,9 @@ export function AddItemForm({ orgId, categoryId, categoryName }: { orgId: string
           )}
           {aiImageUrl && <input type="hidden" name="ai_image_url" value={aiImageUrl} />}
         </div>
-        <button type="submit" className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium transition-colors">Add Item</button>
+        <SubmitButton className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium transition-colors h-10 self-end">
+          Add Item
+        </SubmitButton>
       </div>
 
       {/* AI Tags Preview */}
