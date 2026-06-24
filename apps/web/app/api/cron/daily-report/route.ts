@@ -34,17 +34,38 @@ export async function GET(req: Request) {
     for (const org of orgs) {
       if (!org.created_by) continue
 
-      const { data: orders } = await adminClient
-        .from('orders')
-        .select('total_amount_minor, status')
-        .eq('organization_id', org.id)
-        .eq('status', 'paid')
-        .gte('created_at', yesterdayIso)
+      let totalRevenueMinor = 0
+      let totalOrders = 0
+      let hasMore = true
+      let page = 0
+      const PAGE_SIZE = 1000
 
-      if (!orders || orders.length === 0) continue
+      while (hasMore) {
+        const { data: orders, error: ordersError } = await adminClient
+          .from('orders')
+          .select('total_amount_minor')
+          .eq('organization_id', org.id)
+          .in('status', ['paid', 'completed'])
+          .gte('created_at', yesterdayIso)
+          .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1)
 
-      const totalRevenueMinor = orders.reduce((sum, order) => sum + (order.total_amount_minor || 0), 0)
-      const totalOrders = orders.length
+        if (ordersError || !orders) {
+          console.error(`Error fetching orders for org ${org.id}:`, ordersError)
+          hasMore = false
+          break
+        }
+
+        totalOrders += orders.length
+        totalRevenueMinor += orders.reduce((sum, order) => sum + (order.total_amount_minor || 0), 0)
+
+        if (orders.length < PAGE_SIZE) {
+          hasMore = false
+        } else {
+          page++
+        }
+      }
+
+      if (totalOrders === 0) continue
 
       // Fetch owner email
       const { data: ownerUser } = await adminClient.auth.admin.getUserById(org.created_by)

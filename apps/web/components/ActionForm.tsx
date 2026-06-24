@@ -3,7 +3,7 @@
 import { toast } from 'sonner'
 import { ReactNode } from 'react'
 
-type ActionResponse = { error?: string; success?: boolean; data?: any } | void
+type ActionResponse = { error?: string; success?: boolean; data?: unknown } | void
 
 interface ActionFormProps extends Omit<React.FormHTMLAttributes<HTMLFormElement>, 'action'> {
   action: (formData: FormData) => Promise<ActionResponse>
@@ -23,8 +23,8 @@ export function ActionForm({ action, successMessage, children, ...props }: Actio
           } else if (res?.success || successMessage) {
             toast.success(successMessage || 'Saved successfully')
           }
-        } catch (error: any) {
-          toast.error(error.message || 'An unexpected error occurred')
+        } catch (error: unknown) {
+          toast.error((error as Error).message || 'An unexpected error occurred')
         }
       }}
     >

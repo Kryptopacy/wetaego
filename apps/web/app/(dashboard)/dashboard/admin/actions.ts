@@ -14,6 +14,7 @@ export async function updateSetting(formData: FormData) {
   const key = formData.get('key') as string
   const isJson = formData.get('is_json') === 'true'
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let value: Record<string, any> = {}
 
   if (isJson) {
@@ -38,6 +39,7 @@ export async function updateSetting(formData: FormData) {
     })
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error } = await (supabase as any)
     .from('system_settings')
     .upsert({
@@ -67,6 +69,7 @@ export async function overrideTenantPlan(formData: FormData) {
   const status = formData.get('subscription_status') as string
   const credits = Number(formData.get('purchased_credits')) || 0
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error } = await (supabase as any)
     .from('organizations')
     .update({

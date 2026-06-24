@@ -86,6 +86,7 @@ export default async function PublicPageView({
         whatsapp_number: '+1234567890',
         organizations: { logo_url: 'https://picsum.photos/200' },
         randomizer_enabled: true,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any
     }
 
@@ -136,6 +137,7 @@ export default async function PublicPageView({
         template_type: 'info',
         content: '# Allergen Policy\n\nPlease let our staff know if you have any allergies. We handle nuts, dairy, and wheat in our kitchen.',
         is_published: true,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any
     }
     let query = supabase

@@ -42,7 +42,7 @@ export async function completeOrderAction(orderId: string) {
     waitUntil((async () => {
       try {
         await resend.emails.send({
-          from: 'OurMenu <onboarding@resend.dev>', // Should use verified domain in prod
+          from: 'OurMenu Feedback <noreply@ourmenuos.online>',
           to: order.customer_email!,
           subject: `How was your meal at ${orgName}?`,
           react: FeedbackEmail({ orgName, orderId: order.id, feedbackUrl })

@@ -12,6 +12,10 @@ import {
   paymentConfirmedNotification,
 } from '@/lib/notifications/push'
 import { checkRateLimit } from '@/lib/upstash'
+import { Resend } from 'resend'
+import { ReceiptEmail } from '../../../../emails/receipt-email'
+
+const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy')
 
 export async function POST(req: Request) {
   try {
@@ -48,17 +52,6 @@ export async function POST(req: Request) {
         return NextResponse.json({ status: 'already_processed' }, { status: 200 })
       }
 
-      // Record webhook first (prevents duplicate processing even if later steps fail)
-      const { error: insertError } = await supabase.from('webhook_events').insert({
-        provider_reference: event.data.reference,
-        event_type: 'charge.success',
-      })
-
-      if (insertError) {
-        // If it fails, likely due to a unique constraint from a concurrent request, we consider it already processed
-        return NextResponse.json({ status: 'already_processed' }, { status: 200 })
-      }
-
       // ── Determine what was paid: order or booking ────────────────────────────
 
       // Booking references are prefixed: "book_<bookingId>_<hash>"
@@ -67,7 +60,7 @@ export async function POST(req: Request) {
 
         const { data: booking } = await supabase
           .from('page_bookings')
-          .select('id, page_id, item_id, number_of_guests, total_amount_minor, customer_name, location_pages(location_id, title, locations(organization_id))')
+          .select('id, page_id, item_id, number_of_guests, total_amount_minor, customer_name, customer_email, location_pages(location_id, title, locations(organization_id))')
           .eq('id', bookingId)
           .single()
 
@@ -147,6 +140,28 @@ export async function POST(req: Request) {
           ).catch(console.error) // non-blocking
         }
 
+        // Send customer email receipt
+        if (booking.customer_email) {
+          try {
+            await resend.emails.send({
+              from: 'OurMenu Bookings <noreply@ourmenuos.online>',
+              to: booking.customer_email,
+              subject: `Booking Confirmed: ${booking.location_pages?.title || 'Your Reservation'}`,
+              html: `
+                <div style="font-family: sans-serif; padding: 20px;">
+                  <h2>Booking Confirmed</h2>
+                  <p>Hi ${booking.customer_name},</p>
+                  <p>Your payment of <strong>${(amountPaidMinor / 100).toLocaleString()}</strong> was successful. Your booking is confirmed.</p>
+                  <p>Reference: ${rawReference}</p>
+                </div>
+              `
+            })
+          } catch (e) {
+            console.error('Failed to send booking receipt', e)
+          }
+        }
+
+        await supabase.from('webhook_events').insert({ provider_reference: event.data.reference, event_type: 'charge.success' })
         return NextResponse.json({ status: 'booking_confirmed' }, { status: 200 })
       }
 
@@ -215,6 +230,7 @@ export async function POST(req: Request) {
             }
           }
         }
+        await supabase.from('webhook_events').insert({ provider_reference: event.data.reference, event_type: 'charge.success' })
         return NextResponse.json({ status: 'subscription_confirmed' }, { status: 200 })
       }
 
@@ -223,7 +239,7 @@ export async function POST(req: Request) {
 
       const { data: order } = await supabase
         .from('orders')
-        .select('id, status, total_amount_minor, location_id, table_identifier')
+        .select('id, status, total_amount_minor, location_id, table_identifier, customer_email, customer_name, locations(organization_id, name), order_items(item_name, quantity, price_minor)')
         .eq('id', orderId)
         .single()
 
@@ -260,6 +276,32 @@ export async function POST(req: Request) {
         ).catch(console.error) // non-blocking
       }
 
+      // Send customer email receipt using React Email template
+      if (order.customer_email) {
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const orgName = (order.locations as any)?.name || 'OurMenu Partner'
+          await resend.emails.send({
+            from: 'OurMenu Orders <noreply@ourmenuos.online>',
+            to: order.customer_email,
+            subject: `Receipt for your order at ${orgName}`,
+            react: ReceiptEmail({
+              organizationName: orgName,
+              orderId: order.id,
+              totalAmountMinor: amountPaidMinor,
+              items: order.order_items.map(item => ({
+                name: item.item_name,
+                quantity: item.quantity,
+                priceMinor: item.price_minor
+              }))
+            })
+          })
+        } catch (e) {
+          console.error('Failed to send order receipt', e)
+        }
+      }
+
+      await supabase.from('webhook_events').insert({ provider_reference: event.data.reference, event_type: 'charge.success' })
       return NextResponse.json({ status: 'success' }, { status: 200 })
     }
 

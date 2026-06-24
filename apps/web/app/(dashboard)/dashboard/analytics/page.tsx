@@ -109,6 +109,7 @@ export default async function AnalyticsDashboardPage() {
   }))
 
   // Real week-over-week growth
+  // eslint-disable-next-line react-hooks/purity
   const nowMs = Date.now()
   const thisWeekRevenue = typedOrders
     ?.filter(o => o.status !== 'cancelled' && nowMs - new Date(o.created_at).getTime() < 7 * 86400000)

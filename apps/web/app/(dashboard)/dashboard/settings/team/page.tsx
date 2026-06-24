@@ -1,5 +1,4 @@
-import { ActionForm } from '@/components/ActionForm'
-import { createClient, createAdminClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { cookies } from 'next/headers'
@@ -84,7 +83,7 @@ export default async function TeamPage() {
       .select('id, full_name, bank_name, account_number, account_name')
       .in('id', userIds)
 
-    const profilesMap = new Map(profiles?.map((p: any) => [p.id, p]) || [])
+    const profilesMap = new Map(profiles?.map((p: { id: string, full_name?: string, bank_name?: string, account_number?: string, account_name?: string }) => [p.id, p]) || [])
 
     members = (membersRaw || []).map(m => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

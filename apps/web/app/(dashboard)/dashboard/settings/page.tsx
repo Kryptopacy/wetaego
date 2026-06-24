@@ -755,7 +755,7 @@ export default async function SettingsPage({
                 <div className="flex items-center justify-between p-4 bg-zinc-800/30 border border-zinc-700 rounded-xl">
                   <div>
                     <p className="text-sm font-bold text-white">Payment Roulette</p>
-                    <p className="text-xs text-zinc-400 mt-0.5">Enable the Surprise Me spinning wheel for customers who can't decide what to eat.</p>
+                    <p className="text-xs text-zinc-400 mt-0.5">Enable the Surprise Me spinning wheel for customers who can&apos;t decide what to eat.</p>
                   </div>
                   <label className="relative inline-flex items-center cursor-pointer">
                     <input type="checkbox" name="randomizerEnabled" value="true" defaultChecked={location.randomizer_enabled || false} className="sr-only peer" />
@@ -789,7 +789,7 @@ export default async function SettingsPage({
                     rows={6}
                     className="w-full rounded-xl bg-zinc-800 border-zinc-700 px-4 py-3 text-white outline-none focus:border-purple-500 font-mono text-sm"
                   />
-                  <p className="text-xs text-zinc-500 mt-2">Customize the wheel segments. "value" is the discount percentage won.</p>
+                  <p className="text-xs text-zinc-500 mt-2">Customize the wheel segments. &quot;value&quot; is the discount percentage won.</p>
                 </div>
               </div>
 
