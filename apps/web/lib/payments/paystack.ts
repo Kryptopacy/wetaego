@@ -28,6 +28,8 @@ export const paystackProvider: PaymentProvider = {
         email: params.customerEmail,
         reference: params.reference,
         callback_url: params.callbackUrl,
+        ...(params.subaccountCode ? { subaccount: params.subaccountCode } : {}),
+        ...(params.splitCode ? { split_code: params.splitCode } : {}),
         metadata: {
           ...params.metadata,
           customer_name: params.customerName,
@@ -96,7 +98,7 @@ export const paystackProvider: PaymentProvider = {
  */
 export const paymentProvider: PaymentProvider = paystackProvider
 
-export async function createSubaccount(bankCode: string, accountNumber: string, businessName: string): Promise<string> {
+export async function createSubaccount(bankCode: string, accountNumber: string, businessName: string, percentageCharge: number = 0): Promise<string> {
   const secretKey = process.env.PAYSTACK_SECRET_KEY
   if (!secretKey) throw new Error('PAYSTACK_SECRET_KEY is not configured')
 
@@ -110,7 +112,7 @@ export async function createSubaccount(bankCode: string, accountNumber: string, 
       business_name: businessName,
       settlement_bank: bankCode,
       account_number: accountNumber,
-      percentage_charge: 5 // Default split percentage
+      percentage_charge: percentageCharge
     }),
   })
 

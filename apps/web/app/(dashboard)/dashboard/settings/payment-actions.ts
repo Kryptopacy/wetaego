@@ -29,7 +29,9 @@ export async function savePaymentSettings(formData: FormData) {
 
   let subaccountCode = ''
   try {
-    subaccountCode = await createSubaccount(bankName, accountNumber, businessName)
+    const { getPlatformFees } = await import('@/lib/utils/settings')
+    const platformFees = await getPlatformFees() as { business_subaccount: number }
+    subaccountCode = await createSubaccount(bankName, accountNumber, businessName, platformFees.business_subaccount ?? 5)
   } catch (err) {
     throw new Error((err as Error).message || 'Failed to connect bank account via Paystack')
   }

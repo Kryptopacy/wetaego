@@ -81,6 +81,21 @@ export async function submitFeedbackAndTip(
     if (tipAmountMinor > 0) {
       // If there's a tip, we need to process a new payment intent
       try {
+        let staffSubaccount: string | undefined = undefined
+
+        if (assignedStaffId) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const { data: staffProfile } = await (supabase as any)
+            .from('user_profiles')
+            .select('paystack_subaccount_code')
+            .eq('id', assignedStaffId)
+            .single()
+            
+          if (staffProfile?.paystack_subaccount_code) {
+            staffSubaccount = staffProfile.paystack_subaccount_code
+          }
+        }
+
         const { checkoutUrl } = await processCheckout(
           organizationId, 
           locationId, 
@@ -89,7 +104,12 @@ export async function submitFeedbackAndTip(
           tipAmountMinor, 
           tableIdentifier, 
           'Tip Only',
-          undefined // customer email
+          undefined, // customer email
+          undefined, // paymentFractionMinor
+          undefined, // paymentMethod
+          undefined, // discountAmountMinor
+          undefined, // idempotencyKey
+          staffSubaccount // Pass the staff's subaccount!
         )
         
         return { checkoutUrl }

@@ -11,13 +11,154 @@ type Category = Database['public']['Tables']['menu_categories']['Row'] & { menu_
 
 import { useOptimistic, startTransition } from 'react'
 
-function OptimisticItem({ item }: { item: NonNullable<Category['menu_items']>[0] }) {
+import { updateItem, deleteItem } from './actions'
+
+import { toast } from 'sonner'
+import Image from 'next/image'
+
+function OptimisticItem({ item, orgId, categoryName }: { item: NonNullable<Category['menu_items']>[0], orgId: string, categoryName: string }) {
   const [optimisticStatus, addOptimisticStatus] = useOptimistic(
     item.availability_status,
     (state: string, newStatus: string) => newStatus
   );
+  const [isEditing, setIsEditing] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const isAvailable = optimisticStatus === 'available';
+
+  const [editName, setEditName] = useState(item.name)
+  const [editDescription, setEditDescription] = useState(item.description || '')
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [isGeneratingImg, setIsGeneratingImg] = useState(false)
+  const [aiImageUrl, setAiImageUrl] = useState<string | null>(null)
+
+  async function handleMagicFill() {
+    if (!editName) {
+      toast.error('Please enter an Item Name first!')
+      return
+    }
+
+    setIsGenerating(true)
+    try {
+      const res = await fetch('/api/ai/copywriter', {
+        method: 'POST',
+        body: JSON.stringify({ itemName: editName, categoryName, organizationId: orgId }),
+        headers: { 'Content-Type': 'application/json' }
+      })
+
+      if (!res.ok) throw new Error('Failed to generate copy')
+      
+      const data = await res.json()
+      if (data.description) setEditDescription(data.description)
+      
+      toast.success('AI magic applied successfully!')
+    } catch (err: unknown) {
+      toast.error((err as Error).message || 'AI request failed.')
+    } finally {
+      setIsGenerating(false)
+    }
+  }
+
+  async function handleGenerateImage() {
+    if (!editName) {
+      toast.error('Please enter an Item Name first to guide the AI!')
+      return
+    }
+    
+    if (!confirm('This will cost 5 AI Credits. Are you sure?')) return
+
+    setIsGeneratingImg(true)
+    try {
+      const res = await fetch('/api/ai/generate-item-image', {
+        method: 'POST',
+        body: JSON.stringify({ itemName: editName, itemContext: editDescription, organizationId: orgId }),
+        headers: { 'Content-Type': 'application/json' }
+      })
+
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || 'Failed to generate image')
+      }
+      
+      const data = await res.json()
+      if (data.url) setAiImageUrl(data.url)
+      
+      toast.success('AI Image generated successfully!')
+    } catch (err: unknown) {
+      toast.error((err as Error).message || 'AI request failed.')
+    } finally {
+      setIsGeneratingImg(false)
+    }
+  }
+
+  if (isEditing) {
+    return (
+      <div className="py-4 first:pt-0 last:pb-0">
+        <form action={async (formData) => {
+          await updateItem(formData);
+          setIsEditing(false);
+        }} className="space-y-4">
+          <input type="hidden" name="item_id" value={item.id} />
+          
+          <div className="flex gap-4 items-start flex-wrap">
+            <div className="flex-1 min-w-[200px]">
+              <label className="block text-xs font-medium text-zinc-400 mb-1">Item Name</label>
+              <input type="text" name="name" value={editName} onChange={(e) => setEditName(e.target.value)} required className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-white outline-none focus:border-blue-500" />
+            </div>
+            <div className="flex-2 min-w-[300px] relative">
+              <label className="block text-xs font-medium text-zinc-400 mb-1">Description</label>
+              <input type="text" name="description" value={editDescription} onChange={(e) => setEditDescription(e.target.value)} className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 pr-28 text-sm text-white outline-none focus:border-blue-500" />
+              <button 
+                type="button" 
+                onClick={handleMagicFill} 
+                disabled={isGenerating || !editName}
+                className="absolute right-1 bottom-1 px-3 py-1 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white rounded-md text-xs font-bold transition-all disabled:opacity-50 shadow-lg"
+              >
+                {isGenerating ? 'Wait...' : '✨ Magic Fill'}
+              </button>
+            </div>
+            <div className="w-24">
+              <label className="block text-xs font-medium text-zinc-400 mb-1">Price (₦)</label>
+              <input type="number" step="0.01" name="price" defaultValue={item.price_minor / 100} required className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-white outline-none focus:border-blue-500" />
+            </div>
+            <div className="w-full sm:w-auto flex flex-col gap-2">
+              <label className="block text-xs font-medium text-zinc-400 mb-1">Update Image</label>
+              {aiImageUrl ? (
+                <div className="relative w-24 h-24 rounded-lg overflow-hidden border border-zinc-700">
+                  <Image src={aiImageUrl} alt="AI Generated" width={96} height={96} className="object-cover w-full h-full" />
+                  <input type="hidden" name="ai_image_url" value={aiImageUrl} />
+                  <button type="button" onClick={() => setAiImageUrl(null)} className="absolute top-1 right-1 bg-black/60 rounded-full p-1 hover:bg-red-500/80 transition-colors">
+                    <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <input type="file" name="image" accept="image/*" className="w-full text-xs text-zinc-400 file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-medium file:bg-zinc-800 file:text-zinc-300 hover:file:bg-zinc-700 cursor-pointer" />
+                  <button 
+                    type="button"
+                    onClick={handleGenerateImage}
+                    disabled={isGeneratingImg || !editName}
+                    className="w-full px-3 py-1.5 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white rounded-lg text-xs font-bold transition-all disabled:opacity-50 flex items-center justify-center gap-1 shadow-lg mt-1"
+                  >
+                    {isGeneratingImg ? 'Generating...' : '✨ AI Image Studio'}
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+          
+          <div className="flex items-center justify-end gap-3 mt-2">
+            <button type="button" onClick={() => setIsEditing(false)} className="px-4 py-2 text-xs font-medium text-zinc-400 hover:text-white transition-colors">
+              Cancel
+            </button>
+            <button type="submit" className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-lg transition-colors">
+              Save Changes
+            </button>
+          </div>
+        </form>
+      </div>
+    );
+  }
 
   return (
     <div className="py-4 flex justify-between items-center first:pt-0 last:pb-0 group">
@@ -27,6 +168,17 @@ function OptimisticItem({ item }: { item: NonNullable<Category['menu_items']>[0]
           <span className="text-zinc-400 font-normal ml-2">₦{(item.price_minor / 100).toLocaleString()}</span>
         </h3>
         {item.description && <p className="text-sm text-zinc-400 mt-1">{item.description}</p>}
+        <div className="mt-2 flex gap-2">
+          <button onClick={() => setIsEditing(true)} className="text-xs font-medium text-blue-400 hover:text-blue-300">Edit</button>
+          <button onClick={async () => {
+            if (confirm('Are you sure you want to delete this item?')) {
+              setIsDeleting(true);
+              await deleteItem(item.id);
+            }
+          }} disabled={isDeleting} className="text-xs font-medium text-red-400 hover:text-red-300 disabled:opacity-50">
+            {isDeleting ? 'Deleting...' : 'Delete'}
+          </button>
+        </div>
       </div>
       <div>
         <form action={async () => {
@@ -103,7 +255,7 @@ export function CategoryTabs({ categories, orgId }: { categories: Category[], or
               <p className="text-zinc-500 text-center py-8">No items yet in this category.</p>
             ) : (
               activeCategory.menu_items?.map((item) => (
-                <OptimisticItem key={item.id} item={item} />
+                <OptimisticItem key={item.id} item={item} orgId={orgId} categoryName={activeCategory.name} />
               ))
             )}
           </div>

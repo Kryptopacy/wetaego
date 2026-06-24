@@ -1,5 +1,5 @@
 
-import { getPricingSettings, getCreditCosts, getPlanLimits, getAiModels } from '@/lib/utils/settings'
+import { getPricingSettings, getCreditCosts, getPlanLimits, getAiModels, getPlatformFees } from '@/lib/utils/settings'
 import { updateSetting } from './actions'
 
 import { createClient } from '@/lib/supabase/server'
@@ -10,6 +10,7 @@ export default async function AdminPage() {
   const creditCosts = await getCreditCosts()
   const planLimits = await getPlanLimits()
   const aiModels = await getAiModels()
+  const platformFees = await getPlatformFees()
 
   const supabase = await createClient()
   const { data: orgs } = await supabase
@@ -63,6 +64,30 @@ export default async function AdminPage() {
             <span className="px-3 py-1 bg-white/10 rounded-full text-xs text-white">{orgs?.length || 0} Businesses</span>
           </div>
           <TenantDirectory organizations={orgs || []} />
+        </section>
+
+        {/* Platform Fees */}
+        <section className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+          <h2 className="text-lg font-bold text-white mb-4">Platform Fee Percentages (%)</h2>
+          <form action={updateSetting} className="space-y-4">
+            <input type="hidden" name="key" value="platform_fees" />
+            <input type="hidden" name="is_json" value="true" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-zinc-400 mb-1">Business Payouts</label>
+                <input type="number" name="business_subaccount" defaultValue={(platformFees as Record<string, number>).business_subaccount ?? 5} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-zinc-400 mb-1">Affiliate Payouts</label>
+                <input type="number" name="affiliate_subaccount" defaultValue={(platformFees as Record<string, number>).affiliate_subaccount ?? 5} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-zinc-400 mb-1">Staff Tips</label>
+                <input type="number" name="staff_tip_subaccount" defaultValue={(platformFees as Record<string, number>).staff_tip_subaccount ?? 0} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white" />
+              </div>
+            </div>
+            <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-500 transition">Save Fees</button>
+          </form>
         </section>
 
         {/* AI Models */}

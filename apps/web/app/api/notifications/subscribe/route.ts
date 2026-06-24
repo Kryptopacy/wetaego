@@ -36,13 +36,26 @@ export async function POST(req: Request) {
     const { subscription, deviceName } = parsed.data
 
     // Get org ID for this user
+    let orgId = null;
     const { data: member } = await supabase
       .from('organization_members')
       .select('organizations(id)')
       .eq('user_id', userData.user.id)
-      .single()
+      .maybeSingle()
 
-    const orgId = (member?.organizations as { id: string } | null)?.id
+    if (member && member.organizations) {
+      orgId = (member.organizations as unknown as { id: string }).id
+    } else {
+      const { data: org } = await supabase
+        .from('organizations')
+        .select('id')
+        .eq('created_by', userData.user.id)
+        .maybeSingle()
+      if (org) {
+        orgId = org.id
+      }
+    }
+
     if (!orgId) {
       return NextResponse.json({ error: 'No organization found' }, { status: 404 })
     }

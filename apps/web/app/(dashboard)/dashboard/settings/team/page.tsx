@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { cookies } from 'next/headers'
@@ -28,15 +28,24 @@ export default async function TeamPage() {
   let organization = null
   let role = 'viewer'
 
-  let members: { user_id: string; email: string; role: string; created_at: string }[] = []
+  let members: { 
+    user_id: string; 
+    email: string; 
+    role: string; 
+    created_at: string; 
+    full_name?: string;
+    bank_name?: string;
+    account_number?: string;
+    account_name?: string;
+  }[] = []
   let invites: { id: string; email: string; role: string; token: string; expires_at: string }[] = []
 
   if (isDemo) {
     organization = { id: 'demo-org', name: 'Demo Venue', slug: 'demo-venue' }
     role = 'owner'
     members = [
-      { user_id: 'demo-user-id', email: 'owner@ourmenuos.online', role: 'owner', created_at: new Date(1718236800000 - 86400000 * 10).toISOString() },
-      { user_id: 'manager-1', email: 'manager@ourmenuos.online', role: 'manager', created_at: new Date(1718236800000 - 86400000 * 5).toISOString() }
+      { user_id: 'demo-user-id', email: 'owner@ourmenuos.online', role: 'owner', created_at: new Date(1718236800000 - 86400000 * 10).toISOString(), full_name: 'Pacy Owner', bank_name: 'GTBank', account_number: '0123456789' },
+      { user_id: 'manager-1', email: 'manager@ourmenuos.online', role: 'manager', created_at: new Date(1718236800000 - 86400000 * 5).toISOString(), full_name: 'Jane Manager' }
     ]
     invites = [
       { id: 'invite-1', email: 'staff@ourmenuos.online', role: 'viewer', token: 'mock-token', expires_at: new Date(1718236800000 + 86400000 * 2).toISOString() }
@@ -66,12 +75,30 @@ export default async function TeamPage() {
       .select('*')
       .eq('organization_id', organization?.id || '')
 
-    members = (membersRaw || []).map((m) => ({
-      user_id: m.user_id as string,
-      email: m.email as string,
-      role: m.role as string,
-      created_at: m.created_at as string,
-    }))
+    // Fetch all user profiles for these members
+    const userIds = (membersRaw || []).map(m => m.user_id as string)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: profiles } = await (supabase as any)
+      .from('user_profiles')
+      .select('id, full_name, bank_name, account_number, account_name')
+      .in('id', userIds)
+
+    const profilesMap = new Map(profiles?.map((p: any) => [p.id, p]) || [])
+
+    members = (membersRaw || []).map(m => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const profile = profilesMap.get(m.user_id as string) as any
+      return {
+        user_id: m.user_id as string,
+        email: m.email as string,
+        role: m.role as string,
+        created_at: m.created_at as string,
+        full_name: profile?.full_name,
+        bank_name: profile?.bank_name,
+        account_number: profile?.account_number,
+        account_name: profile?.account_name,
+      }
+    })
 
     const { data: invitesRaw } = await supabase
       .from('organization_invites')

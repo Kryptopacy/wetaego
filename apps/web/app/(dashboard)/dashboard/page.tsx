@@ -116,10 +116,10 @@ export default async function DashboardOverviewPage() {
 
   const aiModules = [
     {
-      href: '/dashboard/menu',
-      icon: ChefHat,
-      label: 'AI Copywriter',
-      desc: 'Auto-generate sensory menu descriptions & allergen tags.',
+      href: '/dashboard/pages',
+      icon: Sparkles,
+      label: 'AI Copywriter & Image Studio',
+      desc: 'Auto-generate engaging descriptions and professional images for your items and services.',
       color: 'from-violet-600/20 to-indigo-600/10',
       border: 'border-violet-500/20',
       iconColor: 'text-violet-400',

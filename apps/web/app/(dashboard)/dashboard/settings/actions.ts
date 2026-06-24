@@ -379,3 +379,83 @@ export async function saveLoyaltySettings(formData: FormData): Promise<void> {
     throw error
   }
 }
+
+export async function updateProfile(formData: FormData) {
+  try {
+    const supabase = await createClient()
+
+    const { data: userData, error: authError } = await supabase.auth.getUser()
+    const { cookies } = await import('next/headers')
+    if ((await cookies()).get('demo_mode')?.value === '1') {
+      revalidatePath('/dashboard/settings')
+      return { success: true }
+    }
+    if (authError || !userData?.user) throw new Error('Not authenticated')
+
+    const fullName = formData.get('full_name') as string
+    if (!fullName) throw new Error('Full Name is required')
+
+    const bankName = (formData.get('bank_name') as string) || null
+    const accountNumber = (formData.get('account_number') as string) || null
+    const accountName = (formData.get('account_name') as string) || null
+
+    // Fetch existing profile to check if we already have a subaccount
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: existingProfile } = await (supabase as any)
+      .from('user_profiles')
+      .select('paystack_subaccount_code, bank_name, account_number, account_name')
+      .eq('id', userData.user.id)
+      .single()
+
+    let subaccountCode = existingProfile?.paystack_subaccount_code || null
+
+    // Only create a new subaccount if bank details are provided AND they changed (or subaccount doesn't exist)
+    if (
+      bankName && 
+      accountNumber && 
+      accountName && 
+      (!subaccountCode || existingProfile?.bank_name !== bankName || existingProfile?.account_number !== accountNumber || existingProfile?.account_name !== accountName)
+    ) {
+      const { createSubaccount } = await import('@/lib/payments/paystack')
+      const { getPlatformFees } = await import('@/lib/utils/settings')
+      try {
+        const platformFees = await getPlatformFees() as { staff_tip_subaccount: number }
+        // We pass the configured fee (defaulting to 0) for staff tips
+        subaccountCode = await createSubaccount(bankName, accountNumber, accountName, platformFees.staff_tip_subaccount ?? 0)
+      } catch (err) {
+        console.error('Failed to create Paystack subaccount for staff tip profile:', err)
+        // We don't fail the entire profile update, just log it
+      }
+    }
+
+    // 1. Update Auth metadata
+    const { error: updateError } = await supabase.auth.updateUser({
+      data: { full_name: fullName }
+    })
+
+    if (updateError) throw new Error(updateError.message)
+
+    // 2. Upsert into user_profiles
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error: profileError } = await (supabase as any)
+      .from('user_profiles')
+      .upsert({
+        id: userData.user.id,
+        full_name: fullName,
+        bank_name: bankName,
+        account_number: accountNumber,
+        account_name: accountName,
+        paystack_subaccount_code: subaccountCode
+      })
+
+    if (profileError) {
+      console.error('Error updating user_profiles:', profileError)
+      throw new Error('Failed to update payout details')
+    }
+
+    revalidatePath('/dashboard/settings')
+  } catch (error) {
+    Sentry.captureException(error)
+    throw error
+  }
+}

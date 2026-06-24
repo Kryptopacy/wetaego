@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
 
@@ -8,14 +8,39 @@ export default async function TeamPerformancePage() {
   const { data: userData } = await supabase.auth.getUser()
   const isDemo = !userData?.user && (await cookies()).get('demo_mode')?.value === '1'
   if (!userData?.user && !isDemo) redirect('/login')
-  // Fetch organization
-  const { data: member } = await supabase
-    .from('organization_members')
-    .select('organizations(id, name)')
-    .eq('user_id', userData.user!.id)
-    .single()
 
-  const orgId = (member?.organizations as { id: string })?.id
+  const userId = userData?.user?.id || 'demo-user-id'
+
+  // Fetch organization and role
+  let orgId = ''
+  let role = 'viewer'
+
+  if (isDemo) {
+    orgId = 'demo-org'
+    role = 'owner'
+  } else {
+    const { data: member } = await supabase
+      .from('organization_members')
+      .select('role, organizations(id, name)')
+      .eq('user_id', userId)
+      .maybeSingle()
+
+    if (member && member.organizations) {
+      orgId = (member.organizations as { id: string }).id
+      role = member.role
+    } else {
+      const { data: org } = await supabase
+        .from('organizations')
+        .select('id')
+        .eq('created_by', userId)
+        .maybeSingle()
+      if (org) {
+        orgId = org.id
+        role = 'owner'
+      }
+    }
+  }
+
   if (!orgId) redirect('/dashboard')
 
   // Get active location
@@ -63,21 +88,33 @@ export default async function TeamPerformancePage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const ordersWithTips: { id: string; assigned_staff_id: string | null; tip_amount_minor: number | null; created_at: string }[] = ordersWithTipsRaw as unknown as any || []
 
-  // Calculate stats per staff
-  const staffStats = staffMembers?.map((staff) => {
-    const userId = staff.user_id
-    const name = `Staff ${userId.slice(0, 6).toUpperCase()}`
+  // Create Admin Client to fetch user names
+  const adminClient = await createAdminClient()
 
-    const staffReviews = reviews?.filter(r => r.staff_id === userId && r.staff_rating) || []
+  // Calculate stats per staff
+  const staffStatsRaw = await Promise.all((staffMembers || []).map(async (staff) => {
+    const staffId = staff.user_id
+    let fullName = undefined
+    
+    if (!isDemo) {
+      try {
+        const { data: userRecord } = await adminClient.auth.admin.getUserById(staffId)
+        fullName = userRecord?.user?.user_metadata?.full_name
+      } catch (e) {}
+    }
+
+    const name = fullName ? fullName : `Staff ${staffId.slice(0, 6).toUpperCase()}`
+
+    const staffReviews = reviews?.filter(r => r.staff_id === staffId && r.staff_rating) || []
     const avgRating = staffReviews.length > 0 
       ? staffReviews.reduce((sum, r) => sum + (r.staff_rating || 0), 0) / staffReviews.length 
       : 0
 
-    const staffTips = ordersWithTips?.filter(o => o.assigned_staff_id === userId) || []
+    const staffTips = ordersWithTips?.filter(o => o.assigned_staff_id === staffId) || []
     const totalTipsMinor = staffTips.reduce((sum, o) => sum + (o.tip_amount_minor || 0), 0)
 
     return {
-      userId,
+      userId: staffId,
       name,
       role: staff.role,
       reviewCount: staffReviews.length,
@@ -85,7 +122,9 @@ export default async function TeamPerformancePage() {
       totalTipsMinor,
       recentFeedback: staffReviews.filter(r => r.staff_feedback).map(r => r.staff_feedback).slice(0, 3)
     }
-  }).sort((a, b) => b.totalTipsMinor - a.totalTipsMinor) || []
+  }))
+  
+  const staffStats = staffStatsRaw.sort((a, b) => b.totalTipsMinor - a.totalTipsMinor)
 
   // Calculate Business Stats
   const bizReviews = reviews?.filter(r => r.business_rating) || []
@@ -93,6 +132,54 @@ export default async function TeamPerformancePage() {
     ? bizReviews.reduce((sum, r) => sum + (r.business_rating || 0), 0) / bizReviews.length
     : 0
 
+  const isOwnerOrManager = role === 'owner' || role === 'manager'
+
+  if (!isOwnerOrManager) {
+    const myStats = staffStats.find(s => s.userId === userId) || {
+      userId, name: 'You', role, reviewCount: 0, avgRating: 0, totalTipsMinor: 0, recentFeedback: []
+    }
+
+    return (
+      <div className="max-w-6xl mx-auto space-y-8">
+        <div>
+          <h1 className="text-2xl font-bold text-white mb-2">My Performance</h1>
+          <p className="text-zinc-400">Track your personal tips and service feedback.</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-6">
+            <h3 className="text-zinc-500 font-bold uppercase tracking-wider text-xs mb-1">Your Tips Earned</h3>
+            <div className="text-4xl font-black text-green-400">
+              ₦{(myStats.totalTipsMinor / 100).toLocaleString()}
+            </div>
+          </div>
+          <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-6">
+            <h3 className="text-zinc-500 font-bold uppercase tracking-wider text-xs mb-1">Your Service Rating</h3>
+            <div className="text-4xl font-black text-white flex items-center gap-2">
+              {myStats.avgRating > 0 ? myStats.avgRating.toFixed(1) : '-'} <span className="text-yellow-500 text-2xl">★</span>
+              <span className="text-sm font-medium text-zinc-500 ml-2">({myStats.reviewCount} reviews)</span>
+            </div>
+          </div>
+        </div>
+
+        <h2 className="text-xl font-bold text-white mt-12 mb-4">Your Recent Feedback</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {myStats.recentFeedback.map((feedback, idx) => (
+            <div key={idx} className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-5">
+              <p className="text-zinc-300 text-sm leading-relaxed">&quot;{feedback}&quot;</p>
+            </div>
+          ))}
+          {myStats.recentFeedback.length === 0 && (
+            <div className="col-span-full py-8 text-center text-zinc-500 border border-dashed border-zinc-800 rounded-xl">
+              No personal feedback received yet.
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  // Full Leaderboard for Owners/Managers
   return (
     <div className="max-w-6xl mx-auto space-y-8">
       <div>
@@ -134,9 +221,7 @@ export default async function TeamPerformancePage() {
                   <div className="text-zinc-500 text-xs uppercase tracking-wider">{staff.role}</div>
                   {staff.recentFeedback.length > 0 && (
                     <div className="mt-2 text-xs text-zinc-400 italic">
-  { }
-  {/* eslint-disable-next-line react/no-unescaped-entities */}
-                      "{staff.recentFeedback[0]}"
+                      &quot;{staff.recentFeedback[0]}&quot;
                     </div>
                   )}
                 </td>
@@ -186,5 +271,3 @@ export default async function TeamPerformancePage() {
     </div>
   )
 }
-
-

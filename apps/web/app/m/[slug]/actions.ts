@@ -56,7 +56,8 @@ export async function processCheckout(
   paymentFractionMinor?: number,
   paymentMethod?: 'card' | 'transfer',
   discountAmountMinor?: number,
-  idempotencyKey?: string
+  idempotencyKey?: string,
+  staffSubaccountOverride?: string
 ) {
   const supabase = await createClient()
 
@@ -79,7 +80,7 @@ export async function processCheckout(
     .single()
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const subaccountCode = paySettings?.is_active ? paySettings.provider_account_id : null
+  const subaccountCode = staffSubaccountOverride || (paySettings?.is_active ? paySettings.provider_account_id : null)
 
   // 2. Create Order
   const { data: order, error: orderError } = await supabase
@@ -122,6 +123,7 @@ export async function processCheckout(
       reference: order.id,
       currency: 'NGN',
       callbackUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/api/bookings/callback`,
+      subaccountCode: subaccountCode || undefined,
     })
 
     return { checkoutUrl, orderId: order.id }

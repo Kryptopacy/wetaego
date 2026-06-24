@@ -19,6 +19,10 @@ export interface PaymentParams {
   callbackUrl: string
   /** Free-form metadata we want back in the webhook */
   metadata?: Record<string, unknown>
+  /** Paystack Subaccount Code to route the payment to */
+  subaccountCode?: string
+  /** Paystack Split Code for complex multi-party splits */
+  splitCode?: string
 }
 
 export interface PaymentVerification {

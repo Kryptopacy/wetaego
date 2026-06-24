@@ -18,6 +18,7 @@ const DEFAULT_PLAN_LIMITS = {
 const DEFAULT_AI_MODELS = { text_generation: "gemini-3.1-flash", image_generation: "imagen-3.0-generate-001" }
 const DEFAULT_EXCHANGE_RATES = { usd_to_ngn: 1500 }
 const DEFAULT_AFFILIATE = { default_percentage: 10 }
+const DEFAULT_PLATFORM_FEES = { business_subaccount: 5, affiliate_subaccount: 5, staff_tip_subaccount: 0 }
 
 async function fetchSystemSettingFromDB<T>(key: string, fallback: T): Promise<T> {
   try {
@@ -72,4 +73,10 @@ export const getAffiliateSettings = unstable_cache(
   async () => fetchSystemSettingFromDB('affiliate', DEFAULT_AFFILIATE),
   ['system_setting_affiliate'],
   { revalidate: 86400, tags: ['affiliate'] }
+)
+
+export const getPlatformFees = unstable_cache(
+  async () => fetchSystemSettingFromDB('platform_fees', DEFAULT_PLATFORM_FEES),
+  ['system_setting_platform_fees'],
+  { revalidate: 86400, tags: ['platform_fees'] }
 )

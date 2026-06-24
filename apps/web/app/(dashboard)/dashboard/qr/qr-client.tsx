@@ -20,6 +20,8 @@ export function QrClient({ organizationId, orgLogo, locations, qrCodes, baseUrl 
   const [assigningQr, setAssigningQr] = useState<Database['public']['Tables']['qr_codes']['Row'] | null>(null)
   const [tableInput, setTableInput] = useState('')
 
+  const [localQrCodes, setLocalQrCodes] = useState(qrCodes)
+
   async function handleGenerate(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setIsGenerating(true)
@@ -31,6 +33,17 @@ export function QrClient({ organizationId, orgLogo, locations, qrCodes, baseUrl 
       toast.error(res.error)
     } else {
       toast.success('QR batch generated successfully!')
+      if (organizationId === 'demo-org') {
+        const newQr = {
+          id: `demo-new-${Date.now()}`,
+          location_id: formData.get('location_id') as string,
+          organization_id: 'demo-org',
+          label: 'Generic QR',
+          destination_path: `/m/demo-venue`,
+          is_active: true
+        } as Database['public']['Tables']['qr_codes']['Row']
+        setLocalQrCodes(prev => [newQr, ...prev])
+      }
     }
   }
 
@@ -59,11 +72,11 @@ export function QrClient({ organizationId, orgLogo, locations, qrCodes, baseUrl 
             type="number" 
             name="quantity" 
             min="1" 
-            max="200" 
-            defaultValue="10" 
+            max={organizationId === 'demo-org' ? "1" : "200"} 
+            defaultValue="1" 
             className="w-24 bg-zinc-950 border border-zinc-800 text-white rounded-lg px-4 py-2 focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-all"
             required
-            title="Number of QR codes to generate"
+            title={organizationId === 'demo-org' ? "Demo mode is limited to 1 QR code" : "Number of QR codes to generate"}
           />
 
           <button 
@@ -77,7 +90,7 @@ export function QrClient({ organizationId, orgLogo, locations, qrCodes, baseUrl 
       </div>
 
       <div className="print:hidden flex justify-between items-center">
-        <h3 className="text-lg font-medium text-white">Generated QR Codes ({qrCodes.length})</h3>
+        <h3 className="text-lg font-medium text-white">Generated QR Codes ({localQrCodes.length})</h3>
         <button 
           onClick={() => window.print()}
           className="bg-zinc-100 hover:bg-white text-zinc-900 font-bold px-4 py-2 rounded-lg shadow-lg transition-colors flex items-center gap-2"
@@ -89,7 +102,7 @@ export function QrClient({ organizationId, orgLogo, locations, qrCodes, baseUrl 
 
       {/* Grid of QR Codes */}
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6 print:grid-cols-4 print:gap-8 print:p-0">
-        {qrCodes.map((qr) => {
+        {localQrCodes.map((qr) => {
           const loc = locations.find((l) => l.id === qr.location_id)
           const themeColor = loc?.theme_color || '#000000'
           const hexColor = themeColor.replace('#', '')

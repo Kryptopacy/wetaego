@@ -72,13 +72,15 @@ export default async function SettingsPage({
   }
 
   const isOwnerOrManager = role === 'owner' || role === 'manager'
-  if (!isOwnerOrManager) {
-    redirect('/dashboard')
+  
+  // If not owner/manager and they are on a restricted tab, redirect them to their profile
+  if (!isOwnerOrManager && tab !== 'profile') {
+    redirect('/dashboard/settings?tab=profile')
   }
 
   let paymentSettings = null
   let location = null
-  if (organization) {
+  if (organization && isOwnerOrManager) {
     const { data: paySettings } = await supabase
       .from('organization_payment_settings')
       .select('*')
@@ -95,65 +97,172 @@ export default async function SettingsPage({
     location = loc
   }
 
+  // Fetch their profile details for the inputs
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: userProfile } = await (supabase as any)
+    .from('user_profiles')
+    .select('full_name, bank_name, account_number, account_name')
+    .eq('id', userId)
+    .single()
+
   return (
     <div className="max-w-3xl pb-20">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <h1 className="text-2xl font-bold text-white">Business Settings</h1>
-        <Link 
-          href="/dashboard/settings/team" 
-          className="self-start px-4 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 hover:text-white font-medium transition-colors border border-zinc-700 flex items-center gap-2"
-        >
-          <svg className="w-5 h-5 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-          </svg>
-          Manage Team
-        </Link>
+        {isOwnerOrManager && (
+          <Link 
+            href="/dashboard/settings/team" 
+            className="self-start px-4 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 hover:text-white font-medium transition-colors border border-zinc-700 flex items-center gap-2"
+          >
+            <svg className="w-5 h-5 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+            Manage Team
+          </Link>
+        )}
       </div>
 
       <div className="flex space-x-1 border-b border-zinc-800 mb-6 overflow-x-auto no-scrollbar">
+        {isOwnerOrManager && (
+          <>
+            <Link 
+              href="?tab=general"
+              className={`px-4 py-2.5 text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${
+                tab === 'general' ? 'border-blue-500 text-white' : 'border-transparent text-zinc-400 hover:text-zinc-200 hover:border-zinc-700'
+              }`}
+            >
+              General & Payments
+            </Link>
+            <Link 
+              href="?tab=venue"
+              className={`px-4 py-2.5 text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${
+                tab === 'venue' ? 'border-blue-500 text-white' : 'border-transparent text-zinc-400 hover:text-zinc-200 hover:border-zinc-700'
+              }`}
+            >
+              Venue Information
+            </Link>
+            <Link 
+              href="?tab=ai"
+              className={`px-4 py-2.5 text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${
+                tab === 'ai' ? 'border-blue-500 text-white' : 'border-transparent text-zinc-400 hover:text-zinc-200 hover:border-zinc-700'
+              }`}
+            >
+              AI Assistant
+            </Link>
+            <Link 
+              href="?tab=promotions"
+              className={`px-4 py-2.5 text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${
+                tab === 'promotions' ? 'border-blue-500 text-white' : 'border-transparent text-zinc-400 hover:text-zinc-200 hover:border-zinc-700'
+              }`}
+            >
+              Promotions
+            </Link>
+          </>
+        )}
         <Link 
-          href="?tab=general"
+          href="?tab=profile"
           className={`px-4 py-2.5 text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${
-            tab === 'general' ? 'border-blue-500 text-white' : 'border-transparent text-zinc-400 hover:text-zinc-200 hover:border-zinc-700'
+            tab === 'profile' ? 'border-blue-500 text-white' : 'border-transparent text-zinc-400 hover:text-zinc-200 hover:border-zinc-700'
           }`}
         >
-          General & Payments
+          My Profile
         </Link>
-        <Link 
-          href="?tab=venue"
-          className={`px-4 py-2.5 text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${
-            tab === 'venue' ? 'border-blue-500 text-white' : 'border-transparent text-zinc-400 hover:text-zinc-200 hover:border-zinc-700'
-          }`}
-        >
-          Venue Information
-        </Link>
-        <Link 
-          href="?tab=ai"
-          className={`px-4 py-2.5 text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${
-            tab === 'ai' ? 'border-blue-500 text-white' : 'border-transparent text-zinc-400 hover:text-zinc-200 hover:border-zinc-700'
-          }`}
-        >
-          AI Assistant
-        </Link>
-        <Link 
-          href="?tab=promotions"
-          className={`px-4 py-2.5 text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${
-            tab === 'promotions' ? 'border-blue-500 text-white' : 'border-transparent text-zinc-400 hover:text-zinc-200 hover:border-zinc-700'
-          }`}
-        >
-          Promotions
-        </Link>
-        <Link 
-          href="?tab=loyalty"
-          className={`px-4 py-2.5 text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${
-            tab === 'loyalty' ? 'border-blue-500 text-white' : 'border-transparent text-zinc-400 hover:text-zinc-200 hover:border-zinc-700'
-          }`}
-        >
-          Loyalty & CRM
-        </Link>
+        {isOwnerOrManager && (
+          <>
+            <Link 
+              href="?tab=loyalty"
+              className={`px-4 py-2.5 text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${
+                tab === 'loyalty' ? 'border-blue-500 text-white' : 'border-transparent text-zinc-400 hover:text-zinc-200 hover:border-zinc-700'
+              }`}
+            >
+              Loyalty & CRM
+            </Link>
+            <Link 
+              href="?tab=addons"
+              className={`px-4 py-2.5 text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${
+                tab === 'addons' ? 'border-blue-500 text-white' : 'border-transparent text-zinc-400 hover:text-zinc-200 hover:border-zinc-700'
+              }`}
+            >
+              Add-ons
+            </Link>
+          </>
+        )}
       </div>
 
       <div className="space-y-6">
+        {tab === 'profile' && user && (
+          <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
+            <h2 className="text-lg font-semibold text-white mb-2">My Profile</h2>
+            <p className="text-sm text-zinc-400 mb-6">
+              Set your personal profile details. This name will be visible to your team.
+            </p>
+            <form action={async (formData) => {
+              'use server'
+              const { updateProfile } = await import('./actions')
+              await updateProfile(formData)
+            }} className="flex flex-col gap-4">
+              <div>
+                <label className="mb-2 block text-sm font-medium text-zinc-300">Full Name</label>
+                <input
+                  type="text"
+                  name="full_name"
+                  defaultValue={userProfile?.full_name || user.user_metadata?.full_name || ''}
+                  required
+                  className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  placeholder="Jane Doe"
+                />
+              </div>
+
+              <div className="mt-4 pt-4 border-t border-zinc-800">
+                <h3 className="text-md font-semibold text-white mb-2">Payout Details (Tips & Earnings)</h3>
+                <p className="text-sm text-zinc-400 mb-4">
+                  Where should the business transfer your accumulated tips?
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-zinc-300">Bank Name</label>
+                    <input
+                      type="text"
+                      name="bank_name"
+                      defaultValue={userProfile?.bank_name || ''}
+                      className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                      placeholder="e.g. Opay, Moniepoint, GTBank"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-zinc-300">Account Number</label>
+                    <input
+                      type="text"
+                      name="account_number"
+                      defaultValue={userProfile?.account_number || ''}
+                      pattern="[0-9]{10}"
+                      maxLength={10}
+                      className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                      placeholder="0123456789"
+                    />
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <label className="mb-2 block text-sm font-medium text-zinc-300">Account Name</label>
+                  <input
+                    type="text"
+                    name="account_name"
+                    defaultValue={userProfile?.account_name || ''}
+                    className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    placeholder="e.g. Jane Doe"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-4 flex items-center justify-between">
+                <button type="submit" className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium transition-colors">
+                  Save Profile & Payout Details
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
         {tab === 'general' && (
           <>
             <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
@@ -480,20 +589,6 @@ export default async function SettingsPage({
                 />
               </div>
 
-              <div className="flex items-center justify-between p-4 bg-zinc-800/30 border border-zinc-700 rounded-xl mt-4">
-                <div>
-                  <p className="text-sm font-bold text-white">Payment Roulette Add-on</p>
-  { }
-  { }
-  {/* eslint-disable-next-line react/no-unescaped-entities */}
-                  <p className="text-xs text-zinc-400 mt-0.5">Enable the "Surprise Me" spinning wheel on your main menu for customers who can't decide.</p>
-                </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" name="randomizerEnabled" value="true" defaultChecked={location.randomizer_enabled || false} className="sr-only peer" />
-                  <div className="w-11 h-6 bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
-                </label>
-              </div>
-
               <div className="mt-6">
                 <button type="submit" className="px-6 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium transition-colors">
                   Save Venue Info
@@ -556,39 +651,6 @@ export default async function SettingsPage({
                   className="w-full rounded-xl bg-zinc-800 border-zinc-700 px-4 py-3 text-white outline-none focus:border-blue-500"
                 />
                 <p className="text-xs text-zinc-500 mt-2">This text will be displayed prominently at the top of your public menu.</p>
-              </div>
-
-              <div className="mt-8 pt-8 border-t border-zinc-800 space-y-5">
-                <h3 className="text-md font-bold text-white mb-2">Gamified Discount Spinner</h3>
-                
-                <div className="flex items-center gap-3 bg-zinc-800/50 p-4 rounded-xl border border-zinc-700/50">
-                  <input 
-                    type="checkbox" 
-                    id="spinner_enabled"
-                    name="spinner_enabled" 
-                    defaultChecked={location.spinner_enabled || false}
-                    className="w-5 h-5 rounded border-zinc-600 text-purple-500 bg-zinc-800"
-                  />
-                  <label htmlFor="spinner_enabled" className="text-sm font-medium text-white flex-1 cursor-pointer">
-  { }
-  {/* eslint-disable-next-line react/no-unescaped-entities */}
-                    Enable "Spin the Wheel"
-                    <span className="block text-xs text-zinc-400 font-normal mt-0.5">Let guests spin a wheel to win discounts before checkout.</span>
-                  </label>
-                </div>
-
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-zinc-300">Wheel Segments (JSON)</label>
-                  <textarea
-                    name="spinner_config"
-                    defaultValue={location.spinner_config ? JSON.stringify(location.spinner_config, null, 2) : '[\n  { "label": "10% Off", "value": 10, "type": "win" },\n  { "label": "Try Again", "value": 0, "type": "loss" },\n  { "label": "5% Off", "value": 5, "type": "win" },\n  { "label": "No Luck", "value": 0, "type": "loss" }\n]'}
-                    rows={6}
-                    className="w-full rounded-xl bg-zinc-800 border-zinc-700 px-4 py-3 text-white outline-none focus:border-purple-500 font-mono text-sm"
-                  />
-  { }
-  {/* eslint-disable-next-line react/no-unescaped-entities */}
-                  <p className="text-xs text-zinc-500 mt-2">Customize the wheel segments. "value" is the discount percentage won.</p>
-                </div>
               </div>
 
               <div className="mt-4 pt-4 border-t border-zinc-800">
@@ -672,6 +734,73 @@ export default async function SettingsPage({
           </div>
         )}
 
+        {tab === 'addons' && location && (
+          <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
+            <h2 className="text-lg font-semibold text-white mb-2 flex items-center gap-2">
+              Menu Add-ons
+            </h2>
+            <p className="text-sm text-zinc-400 mb-6">
+              Enable fun, interactive add-ons to boost guest engagement on your public menu.
+            </p>
+
+            <form action={async (formData) => {
+              'use server'
+              const { saveAddonsSettings } = await import('./addons-actions')
+              await saveAddonsSettings(formData)
+            }} className="flex flex-col gap-8">
+              <input type="hidden" name="locationId" value={location.id} />
+              
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-4 bg-zinc-800/30 border border-zinc-700 rounded-xl">
+                  <div>
+                    <p className="text-sm font-bold text-white">Payment Roulette</p>
+                    <p className="text-xs text-zinc-400 mt-0.5">Enable the Surprise Me spinning wheel for customers who can't decide what to eat.</p>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" name="randomizerEnabled" value="true" defaultChecked={location.randomizer_enabled || false} className="sr-only peer" />
+                    <div className="w-11 h-6 bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
+                  </label>
+                </div>
+              </div>
+
+              <div className="pt-6 border-t border-zinc-800 space-y-5">
+                <h3 className="text-md font-bold text-white mb-2">Gamified Discount Spinner</h3>
+                
+                <div className="flex items-center gap-3 bg-zinc-800/50 p-4 rounded-xl border border-zinc-700/50">
+                  <input 
+                    type="checkbox" 
+                    id="spinner_enabled"
+                    name="spinner_enabled" 
+                    defaultChecked={location.spinner_enabled || false}
+                    className="w-5 h-5 rounded border-zinc-600 text-purple-500 bg-zinc-800"
+                  />
+                  <label htmlFor="spinner_enabled" className="text-sm font-medium text-white flex-1 cursor-pointer">
+                    Enable Spin the Wheel
+                    <span className="block text-xs text-zinc-400 font-normal mt-0.5">Let guests spin a wheel to win discounts before checkout.</span>
+                  </label>
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-zinc-300">Wheel Segments (JSON)</label>
+                  <textarea
+                    name="spinner_config"
+                    defaultValue={location.spinner_config ? JSON.stringify(location.spinner_config, null, 2) : '[\n  { "label": "10% Off", "value": 10, "type": "win" },\n  { "label": "Try Again", "value": 0, "type": "loss" },\n  { "label": "5% Off", "value": 5, "type": "win" },\n  { "label": "No Luck", "value": 0, "type": "loss" }\n]'}
+                    rows={6}
+                    className="w-full rounded-xl bg-zinc-800 border-zinc-700 px-4 py-3 text-white outline-none focus:border-purple-500 font-mono text-sm"
+                  />
+                  <p className="text-xs text-zinc-500 mt-2">Customize the wheel segments. "value" is the discount percentage won.</p>
+                </div>
+              </div>
+
+              <div className="mt-2 flex items-center justify-between">
+                <button type="submit" className="px-6 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium transition-colors">
+                  Save Add-ons
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+        
         {/* Removed AICoverStudio from here as it was moved inside Venue Information */}
       </div>
     </div>

@@ -17,6 +17,7 @@ import { withCache } from '@/lib/redis-cache'
 import { VenueHeader } from './components/venue-header'
 import { InvalidQrMessage, UnassignedTableMessage } from './components/qr-state-messages'
 import { GlobalDiscountBanner } from './components/global-discount-banner'
+import { PreviewBanner } from '@/components/preview-banner'
 
 // Revalidate this page every 60 seconds (Incremental Static Regeneration)
 // This ensures edge caching handles high traffic seamlessly
@@ -74,12 +75,13 @@ export default async function PublicMenuPage({
   searchParams
 }: { 
   params: Promise<{ slug: string }>,
-  searchParams: Promise<{ qr_id?: string, view?: string }>
+  searchParams: Promise<{ qr_id?: string, view?: string, preview?: string }>
 }) {
   const resolvedParams = await params
   const resolvedSearchParams = await searchParams
   const slug = resolvedParams.slug
   const qrId = resolvedSearchParams.qr_id
+  const preview = resolvedSearchParams.preview
 
   const supabase = await createClient()
 
@@ -99,6 +101,31 @@ export default async function PublicMenuPage({
   }
 
   const location = locationData;
+
+  let isPreview = false
+  if (preview === 'true') {
+    const { data: userData } = await supabase.auth.getUser()
+    if (userData?.user) {
+      const { data: member } = await supabase
+        .from('organization_members')
+        .select('role')
+        .eq('organization_id', location.organization_id)
+        .eq('user_id', userData.user.id)
+        .single()
+        
+      if (member?.role === 'owner' || member?.role === 'manager') {
+        isPreview = true
+      } else {
+        const { data: org } = await supabase
+          .from('organizations')
+          .select('id')
+          .eq('id', location.organization_id)
+          .eq('created_by', userData.user.id)
+          .single()
+        if (org) isPreview = true
+      }
+    }
+  }
 
   // 1.2 Fetch Payment Settings
   const { data: paymentSettings } = await supabase
@@ -133,21 +160,33 @@ export default async function PublicMenuPage({
 
   // 1.8 Check location_pages for Portal mode
   const fetchLocationPages = async () => {
-    const { data } = await supabase
+    let query = supabase
       .from('location_pages')
       .select('id, slug, title, template_type, is_published')
       .eq('location_id', location.id)
-      .eq('is_published', true)
+
+    if (!isPreview) {
+      query = query.eq('is_published', true)
+    }
+
+    const { data } = await query
     return data
   }
   
-  const locationPages = await withCache(`location_pages_${location.id}`, fetchLocationPages, 60)
+  const locationPages = isPreview
+    ? await fetchLocationPages()
+    : await withCache(`location_pages_${location.id}`, fetchLocationPages, 60)
 
   const view = resolvedSearchParams.view;
   const hasPortalMode = locationPages && locationPages.length > 0;
 
   if (hasPortalMode && view !== 'menu') {
-    return <PortalRenderer location={location as unknown as Parameters<typeof PortalRenderer>[0]['location']} pages={locationPages} />
+    return (
+      <>
+        {isPreview && <PreviewBanner />}
+        <PortalRenderer location={location as unknown as Parameters<typeof PortalRenderer>[0]['location']} pages={locationPages} />
+      </>
+    )
   }
 
   // 2. Find the active menu for this location
@@ -216,6 +255,7 @@ export default async function PublicMenuPage({
 
   return (
     <>
+      {isPreview && <PreviewBanner />}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

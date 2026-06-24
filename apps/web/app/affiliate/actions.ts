@@ -24,7 +24,9 @@ export async function registerAffiliate(formData: FormData) {
   // 1. Create Paystack Subaccount
   let subaccountCode = ''
   try {
-    subaccountCode = await createSubaccount(bankCode, accountNumber, accountName)
+    const { getPlatformFees } = await import('@/lib/utils/settings')
+    const platformFees = await getPlatformFees() as { affiliate_subaccount: number }
+    subaccountCode = await createSubaccount(bankCode, accountNumber, accountName, platformFees.affiliate_subaccount ?? 5)
   } catch (error) {
     console.error('Failed to create subaccount', error)
     throw new Error('Failed to verify bank details with Paystack. Please check your account number and bank code.')

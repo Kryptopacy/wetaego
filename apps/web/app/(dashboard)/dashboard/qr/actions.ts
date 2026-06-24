@@ -21,7 +21,8 @@ export async function generateQrBatch(formData: FormData) {
   const isDemo = cookieStore.get('demo_mode')?.value === '1'
 
   if (isDemo && orgId === 'demo-org') {
-    // In Demo Mode, allow unlimited generation just to demonstrate the UI
+    if (quantity > 1) return { error: 'Demo mode is limited to generating 1 QR code at a time.' }
+    // In Demo Mode, allow 1 generation just to demonstrate the UI
     return { success: true }
   }
 

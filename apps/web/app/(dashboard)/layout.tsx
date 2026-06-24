@@ -97,6 +97,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const [isOwnerOrManager, setIsOwnerOrManager] = useState(true)
   const [time, setTime] = useState('')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [userEmail, setUserEmail] = useState('')
   const [dynamicNavItems, setDynamicNavItems] = useState<NavItem[]>(baseNavItems)
 
   const [credits, setCredits] = useState<number | null>(null)
@@ -106,6 +107,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       const supabase = createClient()
       const { data: userData } = await supabase.auth.getUser()
       if (userData?.user) {
+        setUserEmail(userData.user.email || '')
         const { data: member } = await supabase
           .from('organization_members')
           .select('role, organizations(id, name, subscription_tier, purchased_credits, monthly_free_credits_used)')
@@ -199,7 +201,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
               <Image src="/ourmenu-qr-icon.svg" alt="OurMenu Logo" width={32} height={32} className="object-contain" />
             </div>
             <div className="flex flex-col">
-              <span className="text-white font-bold tracking-tight leading-tight">{orgName}</span>
+              <span className="text-white font-bold tracking-tight leading-tight">OurMenu OS</span>
               {/* OS Version removed as requested */}
             </div>
           </Link>
@@ -243,6 +245,16 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
               {managerItems.map((item) => (
                 <NavLink key={item.href} {...item} onClick={onClose} />
               ))}
+            </div>
+          )}
+
+          {userEmail === 'kryptopacy@gmail.com' && (
+            <div className="space-y-1">
+              <div className="px-3 flex items-center gap-2 mb-3 mt-4">
+                <h3 className="text-xs font-bold text-violet-500 uppercase tracking-wider">Superadmin</h3>
+                <div className="h-px flex-1 bg-violet-500/20"></div>
+              </div>
+              <NavLink href="/dashboard/admin" label="Developer Console" icon={Zap} onClick={onClose} />
             </div>
           )}
         </div>
@@ -296,7 +308,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           <div className="w-8 h-8 flex items-center justify-center">
             <Image src="/ourmenu-qr-icon.svg" alt="OurMenu Logo" width={24} height={24} className="object-contain" />
           </div>
-          <span className="text-white font-bold tracking-tight">{orgName}</span>
+          <span className="text-white font-bold tracking-tight">OurMenu OS</span>
         </div>
         <div className="flex items-center gap-4">
           <NotificationCenter />

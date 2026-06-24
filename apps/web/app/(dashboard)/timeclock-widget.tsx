@@ -32,7 +32,7 @@ export function TimeclockWidget({ locationId }: { locationId: string }) {
         .eq('user_id', user.id)
         .eq('status', 'active')
         .limit(1)
-        .single()
+        .maybeSingle()
       if (data) setActiveShiftId(data.id)
       else setActiveShiftId(null)
     }
@@ -56,7 +56,7 @@ export function TimeclockWidget({ locationId }: { locationId: string }) {
             .eq('user_id', user.id)
             .eq('status', 'active')
             .limit(1)
-            .single()
+            .maybeSingle()
           if (data) setActiveShiftId(data.id)
         }
       }

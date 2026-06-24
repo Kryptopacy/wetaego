@@ -85,18 +85,19 @@ export async function POST(req: Request) {
     const { object } = await generateObject({
       model: google(modelName),
       schema: z.object({
-        description: z.string().describe('A sensory, appetizing, premium description of the food or beverage item. Max 2 sentences.'),
-        dietary_tags: z.array(z.string()).describe('An array of dietary tags like "Spicy", "Vegan", "Gluten-Free", "Halal", etc. Capitalize first letter. Max 3 tags.'),
-        allergen_tags: z.array(z.string()).describe('An array of potential allergens present in this item like "Dairy", "Nuts", "Shellfish", "Soy", etc. Capitalize first letter.')
+        description: z.string().describe('A premium, engaging description highlighting the value of the product or service. Max 2 sentences.'),
+        dietary_tags: z.array(z.string()).describe('ONLY if it is a food/beverage item, an array of dietary tags like "Spicy", "Vegan", etc. Capitalize first letter. Otherwise, return an empty array.'),
+        allergen_tags: z.array(z.string()).describe('ONLY if it is a food/beverage item, an array of potential allergens like "Dairy", "Nuts", etc. Capitalize first letter. Otherwise, return an empty array.')
       }),
-      prompt: `Act as a world-class culinary copywriter and nutritionist for a high-end hospitality venue. 
-      Generate a premium description, guess the likely dietary profile, and identify potential allergens for the following menu item.
+      prompt: `Act as a world-class copywriter for a premium business. 
+      Analyze the Item Name and Category to determine if this is a food/beverage item, a physical product, or a service.
+      Generate a premium, engaging description for it.
+      If it is a food/beverage item, guess the likely dietary profile and identify potential allergens. If it is NOT a food/beverage item, return empty arrays for dietary_tags and allergen_tags.
       
       Item Name: ${itemName}
       Category: ${categoryName || 'General'}
       
-      Ensure the description sounds incredibly appetizing, sensory, and professional. 
-      Be conservative with allergens (if a dish traditionally contains dairy or nuts, tag it).`
+      Ensure the description highlights its value, appeals to customers, and sounds professional.`
     })
 
     return NextResponse.json(object)

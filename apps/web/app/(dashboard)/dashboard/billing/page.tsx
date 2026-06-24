@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { subscribeToLite, subscribeToPro, buyCredits, cancelSubscription } from './actions'
 import { getUsdToNgnRate } from '@/lib/payments/exchange'
+import { formatCurrency } from '@/lib/utils/currency'
 
 import Link from 'next/link'
 import { CancelButton } from './cancel-button'
@@ -50,7 +51,7 @@ export default async function BillingPage(props: { searchParams: Promise<{ curre
   const c50Base = pricing.credits_50_ngn || 20000
   
   const convertPrice = (base: number) => currency === 'USD' ? Math.round(base / rate) : base
-  const formatPrice = (amount: number) => currency === 'USD' ? `$${amount}` : `₦${amount.toLocaleString()}`
+  const formatPrice = (amount: number) => formatCurrency(amount * 100, currency)
 
   const litePrice = convertPrice(liteBase)
   const proPrice = convertPrice(proBase)

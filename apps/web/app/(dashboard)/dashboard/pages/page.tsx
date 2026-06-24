@@ -165,7 +165,7 @@ export default async function PagesManager() {
                   </div>
 
                   <Link
-                    href={`/m/${locData!.slug}/p/${page.slug}`}
+                    href={`/m/${locData!.slug}/p/${page.slug}?preview=true`}
                     target="_blank"
                     className="text-xs text-blue-400 hover:underline flex items-center gap-1"
                   >

@@ -2,14 +2,19 @@
 'use client'
 
 import { useState } from 'react'
-import { createInviteAction, revokeInviteAction, removeMemberAction } from './actions'
+import { createInviteAction, revokeInviteAction, removeMemberAction, updateMemberRoleAction } from './actions'
 
 interface Member {
   user_id: string
   email: string
   role: string
   created_at: string
+  full_name?: string
+  bank_name?: string
+  account_number?: string
+  account_name?: string
 }
+
 
 interface Invite {
   id: string
@@ -42,11 +47,11 @@ export default function TeamManager({
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
 
-  const isOwner = currentUserRole === 'owner'
+  const isOwnerOrManager = currentUserRole === 'owner' || currentUserRole === 'manager'
 
   const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!isOwner) return
+    if (!isOwnerOrManager) return
 
     setIsInviting(true)
     setError(null)
@@ -67,7 +72,7 @@ export default function TeamManager({
   }
 
   const handleRevokeInvite = async (inviteId: string) => {
-    if (!isOwner) return
+    if (!isOwnerOrManager) return
     if (!confirm('Are you sure you want to revoke this invite?')) return
 
     setError(null)
@@ -82,7 +87,7 @@ export default function TeamManager({
   }
 
   const handleRemoveMember = async (userId: string, email: string) => {
-    if (!isOwner) return
+    if (!isOwnerOrManager) return
     if (userId === currentUserId) {
       setError('You cannot remove yourself.')
       return
@@ -97,6 +102,21 @@ export default function TeamManager({
       setError(result.error)
     } else {
       setSuccess('Member removed from team.')
+    }
+  }
+
+  const handleUpdateRole = async (userId: string, email: string, newRole: string) => {
+    if (!isOwnerOrManager) return
+    if (!confirm(`Are you sure you want to change ${email}'s role to ${newRole}?`)) return
+
+    setError(null)
+    setSuccess(null)
+
+    const result = await updateMemberRoleAction(organizationId, userId, newRole)
+    if (result.error) {
+      setError(result.error)
+    } else {
+      setSuccess('Member role updated.')
     }
   }
 
@@ -168,7 +188,7 @@ export default function TeamManager({
       )}
 
       {/* Invite Member Section */}
-      {isOwner ? (
+      {isOwnerOrManager ? (
         <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
           <h2 className="text-lg font-semibold text-white mb-2">Invite Team Member</h2>
           <p className="text-sm text-zinc-400 mb-6">Create an invitation link to add managers, editors, or service staff to your business.</p>
@@ -231,7 +251,7 @@ export default function TeamManager({
                   <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${getRoleBadgeColor(invite.role)}`}>
                     {invite.role}
                   </span>
-                  {isOwner && (
+                  {isOwnerOrManager && (
                     <button
                       onClick={() => handleRevokeInvite(invite.id)}
                       className="text-xs text-red-400 hover:text-red-300 font-medium px-3 py-1.5 rounded-lg hover:bg-red-500/10 transition-colors"
@@ -256,7 +276,7 @@ export default function TeamManager({
             <div key={member.user_id} className="px-6 py-4 flex items-center justify-between gap-4">
               <div>
                 <div className="font-medium text-white flex items-center gap-2">
-                  {member.email}
+                  {member.full_name ? `${member.full_name} (${member.email})` : member.email}
                   {member.user_id === currentUserId && (
                     <span className="text-[10px] px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-400 border border-zinc-700">
                       You
@@ -266,12 +286,29 @@ export default function TeamManager({
                 <div className="text-xs text-zinc-500 mt-1">
                   Joined: {new Date(member.created_at).toLocaleDateString()}
                 </div>
+                {(member.bank_name || member.account_number) && (
+                  <div className="text-xs text-blue-400 mt-2 p-2 bg-blue-500/10 rounded-md inline-block border border-blue-500/20">
+                    <span className="font-semibold text-blue-300">Payout Account:</span> {member.bank_name} - {member.account_number} {member.account_name && `(${member.account_name})`}
+                  </div>
+                )}
               </div>
               <div className="flex items-center gap-3">
-                <span className={`text-xs px-2.5 py-1 rounded-full font-medium uppercase tracking-wider ${getRoleBadgeColor(member.role)}`}>
-                  {member.role}
-                </span>
-                {isOwner && member.user_id !== currentUserId && (
+                {isOwnerOrManager && member.user_id !== currentUserId && member.role !== 'owner' ? (
+                  <select
+                    value={member.role}
+                    onChange={(e) => handleUpdateRole(member.user_id, member.email, e.target.value)}
+                    className={`text-xs px-2.5 py-1 rounded-full font-medium uppercase tracking-wider bg-zinc-800 border border-zinc-700 text-white cursor-pointer hover:bg-zinc-700 focus:outline-none focus:ring-1 focus:ring-zinc-600 ${getRoleBadgeColor(member.role)}`}
+                  >
+                    <option value="viewer" className="bg-zinc-900 text-zinc-300">Viewer</option>
+                    <option value="editor" className="bg-zinc-900 text-zinc-300">Editor</option>
+                    <option value="manager" className="bg-zinc-900 text-zinc-300">Manager</option>
+                  </select>
+                ) : (
+                  <span className={`text-xs px-2.5 py-1 rounded-full font-medium uppercase tracking-wider ${getRoleBadgeColor(member.role)}`}>
+                    {member.role}
+                  </span>
+                )}
+                {isOwnerOrManager && member.user_id !== currentUserId && (
                   <button
                     onClick={() => handleRemoveMember(member.user_id, member.email)}
                     className="text-xs text-zinc-400 hover:text-red-400 font-medium px-3 py-1.5 rounded-lg hover:bg-red-500/10 transition-colors"
