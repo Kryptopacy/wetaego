@@ -34,19 +34,29 @@ export function CallStaffFAB({ organizationId, locationId, tableIdentifier }: Ca
     const tableId = tableNumber || "Bar"
     
     try {
-      // 1. Triage the request using AI
-      const triageRes = await fetch('/api/ai/triage', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ requestText })
-      })
-
+      // 1. Hybrid Triage: Check local keywords first to save AI costs
       let urgency_tier = 'standard'
       const request_type = 'custom'
+      
+      const emergencyKeywords = /spill|broken|fire|sick|emergency|hurt|cut|blood|glass|urgent/i
+      const lowUrgencyKeywords = /napkin|water|menu|bill|check|plate|fork|knife|spoon|ketchup|salt|pepper|sauce/i
 
-      if (triageRes.ok) {
-        const data = await triageRes.json()
-        if (data.urgency_tier) urgency_tier = data.urgency_tier
+      if (emergencyKeywords.test(requestText)) {
+        urgency_tier = 'critical'
+      } else if (lowUrgencyKeywords.test(requestText)) {
+        urgency_tier = 'low'
+      } else if (requestText.split(/\\s+/).length > 3) {
+        // Fallback to AI only for ambiguous, complex requests
+        const triageRes = await fetch('/api/ai/triage', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ requestText })
+        })
+
+        if (triageRes.ok) {
+          const data = await triageRes.json()
+          if (data.urgency_tier) urgency_tier = data.urgency_tier
+        }
       }
 
       const formData = new FormData()

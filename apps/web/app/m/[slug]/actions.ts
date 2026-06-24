@@ -11,39 +11,77 @@ import { paymentProvider } from '@/lib/payments/paystack'
 import { sendWhatsAppMessage } from '@/lib/notifications/termii'
 import { getPlatformFees } from '@/lib/utils/settings'
 import { waitUntil } from '@vercel/functions'
+import { z } from 'zod'
+import * as Sentry from '@sentry/nextjs'
+
+const serviceRequestSchema = z.object({
+  organization_id: z.string().min(1),
+  location_id: z.string().min(1),
+  table_identifier: z.string().min(1).max(50),
+  request_type: z.string().min(1).max(50),
+  custom_request_text: z.string().max(200).nullable().optional(),
+  urgency_tier: z.enum(['standard', 'critical', 'low']).default('standard')
+})
 
 export async function submitServiceRequest(formData: FormData) {
-  const supabase = await createClient()
+  try {
+    const { checkRateLimit } = await import('@/lib/upstash');
+    const cookieStore = await cookies();
+    const sessionId = cookieStore.get('session_id')?.value || 'anonymous';
+    const { success } = await checkRateLimit('service_request', sessionId);
+    
+    if (!success) {
+      throw new Error('Too many requests. Please wait before calling staff again.');
+    }
 
-  const orgId = formData.get('organization_id') as string
-  const locId = formData.get('location_id') as string
-  const tableId = formData.get('table_identifier') as string
-  const requestType = formData.get('request_type') as string
-  const customRequestText = formData.get('custom_request_text') as string | null
-  const urgencyTier = formData.get('urgency_tier') as string || 'standard'
+    const supabase = await createClient()
 
-  if (!orgId || !locId || !tableId || !requestType) return
+    const parsed = serviceRequestSchema.safeParse({
+      organization_id: formData.get('organization_id'),
+      location_id: formData.get('location_id'),
+      table_identifier: formData.get('table_identifier'),
+      request_type: formData.get('request_type'),
+      custom_request_text: formData.get('custom_request_text') || null,
+      urgency_tier: formData.get('urgency_tier') || 'standard',
+    })
 
-  await supabase.from('service_requests').insert({
-    organization_id: orgId,
-    location_id: locId,
-    table_identifier: tableId,
-    request_type: requestType as RequestType,
-    custom_request_text: customRequestText,
-    urgency_tier: urgencyTier as 'standard' | 'critical',
-  })
+    if (!parsed.success) {
+      throw new Error('Invalid request payload')
+    }
 
-  // Fetch the location's configured WhatsApp number
-  const { data: location } = await supabase
-    .from('locations')
-    .select('whatsapp_number')
-    .eq('id', locId)
-    .single()
+    const {
+      organization_id: orgId,
+      location_id: locId,
+      table_identifier: tableId,
+      request_type: requestType,
+      custom_request_text: customRequestText,
+      urgency_tier: urgencyTier
+    } = parsed.data
 
-  const whatsappNumber = location?.whatsapp_number || '08000000000'
+    await supabase.from('service_requests').insert({
+      organization_id: orgId,
+      location_id: locId,
+      table_identifier: tableId,
+      request_type: requestType as RequestType,
+      custom_request_text: customRequestText,
+      urgency_tier: urgencyTier as 'standard' | 'critical',
+    })
 
-  // Fire WhatsApp Notification in the background without blocking the UI
-  waitUntil(sendWhatsAppMessage(whatsappNumber, `[${urgencyTier.toUpperCase()}] Table ${tableId} needs a ${requestType}! ${customRequestText || ''}`))
+    // Fetch the location's configured WhatsApp number
+    const { data: location } = await supabase
+      .from('locations')
+      .select('whatsapp_number')
+      .eq('id', locId)
+      .single()
+
+    const whatsappNumber = location?.whatsapp_number || '08000000000'
+
+    // Fire WhatsApp Notification in the background without blocking the UI
+    waitUntil(sendWhatsAppMessage(whatsappNumber, `[${urgencyTier.toUpperCase()}] Table ${tableId} needs a ${requestType}! ${customRequestText || ''}`))
+  } catch (e: unknown) {
+    Sentry.captureException(e)
+    throw e;
+  }
 }
 
 export async function processCheckout(
@@ -185,7 +223,8 @@ export async function processCheckout(
       const feeAmountMinor = Math.floor(verifiedTotalMinor * (businessFeePercent / 100))
       
       if (feeAmountMinor > 0) {
-        await supabase.from('platform_fee_ledger').insert({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await (supabase as any).from('platform_fee_ledger').insert({
           organization_id: orgId,
           location_id: locationId,
           order_id: order.id,

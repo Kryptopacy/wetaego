@@ -4,6 +4,21 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { processCheckout } from '../../actions'
+import { z } from 'zod'
+import { cookies } from 'next/headers'
+import * as Sentry from '@sentry/nextjs'
+
+const feedbackSchema = z.object({
+  orgSlug: z.string().min(1),
+  orderId: z.string().nullable(),
+  locationIdOverride: z.string().nullable(),
+  staffRating: z.number().min(0).max(5),
+  staffFeedback: z.string().max(500),
+  businessRating: z.number().min(0).max(5),
+  businessFeedback: z.string().max(500),
+  tipSelection: z.string().max(50),
+  customTip: z.string().max(50)
+})
 
 export async function submitFeedbackAndTip(
   orgSlug: string,
@@ -16,7 +31,25 @@ export async function submitFeedbackAndTip(
   tipSelection: string,
   customTip: string
 ) {
-  const supabase = await createClient()
+  try {
+    const { checkRateLimit } = await import('@/lib/upstash');
+    const cookieStore = await cookies();
+    const sessionId = cookieStore.get('session_id')?.value || 'anonymous';
+    const { success } = await checkRateLimit('feedback_submit', sessionId);
+    
+    if (!success) {
+      return { error: 'Too many requests. Please wait before submitting again.' }
+    }
+
+    const parsed = feedbackSchema.safeParse({
+      orgSlug, orderId, locationIdOverride, staffRating, staffFeedback, businessRating, businessFeedback, tipSelection, customTip
+    })
+
+    if (!parsed.success) {
+      return { error: 'Invalid feedback payload' }
+    }
+
+    const supabase = await createClient()
 
   let organizationId = ''
   let locationId = locationIdOverride || ''
@@ -121,4 +154,8 @@ export async function submitFeedbackAndTip(
   }
 
   return { success: true }
+  } catch (e: unknown) {
+    Sentry.captureException(e)
+    return { error: 'An unexpected error occurred while submitting feedback.' }
+  }
 }
