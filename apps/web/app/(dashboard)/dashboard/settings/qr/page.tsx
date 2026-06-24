@@ -1,3 +1,4 @@
+import { ActionForm } from '@/components/ActionForm'
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { QrSettingsClient } from "./QrSettingsClient";

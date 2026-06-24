@@ -7,7 +7,7 @@ export default async function TeamPerformancePage() {
 
   const { data: userData } = await supabase.auth.getUser()
   const isDemo = !userData?.user && (await cookies()).get('demo_mode')?.value === '1'
-  if (!userData?.user && !isDemo) redirect('/login')
+  if (!userData?.user) redirect('/login')
 
   const userId = userData?.user?.id || 'demo-user-id'
 

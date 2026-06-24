@@ -1,3 +1,4 @@
+import { ActionForm } from '@/components/ActionForm'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -28,7 +29,7 @@ export default async function SettingsPage({
   const cookieStore = await cookies()
   const isDemo = !user && cookieStore.get('demo_mode')?.value === '1'
 
-  if (!user && !isDemo) {
+  if (!user) {
     redirect('/login')
   }
 
@@ -196,7 +197,7 @@ export default async function SettingsPage({
             <p className="text-sm text-zinc-400 mb-6">
               Set your personal profile details. This name will be visible to your team.
             </p>
-            <form action={async (formData) => {
+            <ActionForm action={async (formData) => {
               'use server'
               const { updateProfile } = await import('./actions')
               await updateProfile(formData)
@@ -259,7 +260,7 @@ export default async function SettingsPage({
                   Save Profile & Payout Details
                 </button>
               </div>
-            </form>
+            </ActionForm>
           </div>
         )}
 
@@ -267,7 +268,7 @@ export default async function SettingsPage({
           <>
             <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
           <h2 className="text-lg font-semibold text-white mb-4">General Info</h2>
-          <form action={updateOrganization} className="flex flex-col gap-4">
+          <ActionForm action={updateOrganization} className="flex flex-col gap-4">
             <div>
               <label className="mb-2 block text-sm font-medium text-zinc-300">Business Name</label>
               <input
@@ -300,7 +301,7 @@ export default async function SettingsPage({
                 Save Changes
               </button>
             </div>
-          </form>
+          </ActionForm>
         </div>
 
         {organization && (
@@ -314,7 +315,7 @@ export default async function SettingsPage({
               </h2>
               <p className="text-sm text-zinc-400 mb-6">Connect your bank account via Paystack to receive payouts instantly when customers order from your digital menu.</p>
               
-              <form action={savePaymentSettings} className="flex flex-col gap-4">
+              <ActionForm action={savePaymentSettings} className="flex flex-col gap-4">
                 <div>
                   <label className="mb-2 block text-sm font-medium text-zinc-300">Bank Name</label>
                   <select name="bankName" required className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
@@ -360,7 +361,7 @@ export default async function SettingsPage({
                     {paymentSettings?.is_active ? 'Update Bank Account' : 'Connect Bank Account'}
                   </button>
                 </div>
-              </form>
+              </ActionForm>
             </div>
 
             {location && (
@@ -376,7 +377,7 @@ export default async function SettingsPage({
                   If your Paystack account isn't live yet or the provider experiences downtime, the system will automatically fall back to showing these manual bank transfer details so you never lose a booking.
                 </p>
                 
-                <form action={saveManualPaymentSettings} className="flex flex-col gap-4">
+                <ActionForm action={saveManualPaymentSettings} className="flex flex-col gap-4">
                   <input type="hidden" name="locationId" value={location.id} />
                   
                   <div>
@@ -441,7 +442,7 @@ export default async function SettingsPage({
                     Save Fallback Settings
                   </button>
                 </div>
-              </form>
+              </ActionForm>
             </div>
             )}
           </div>
@@ -466,7 +467,7 @@ export default async function SettingsPage({
               />
             </div>
 
-            <form action={saveLocationInfoSettings} className="flex flex-col gap-4">
+            <ActionForm action={saveLocationInfoSettings} className="flex flex-col gap-4">
               <input type="hidden" name="locationId" value={location.id} />
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -594,14 +595,14 @@ export default async function SettingsPage({
                   Save Venue Info
                 </button>
               </div>
-            </form>
+            </ActionForm>
           </div>
         )}
 
         {tab === 'promotions' && location && (
           <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
             <h2 className="text-lg font-semibold text-white mb-4">Promotions & Discounts</h2>
-            <form action={async (formData) => {
+            <ActionForm action={async (formData) => {
               'use server'
               const { saveLocationPromotions } = await import('./promotions-actions')
               await saveLocationPromotions(formData)
@@ -661,7 +662,7 @@ export default async function SettingsPage({
                   Save Promotions
                 </button>
               </div>
-            </form>
+            </ActionForm>
           </div>
         )}
 
@@ -677,7 +678,7 @@ export default async function SettingsPage({
               Enable an interactive AI dining advisor on your public menu. Guests can chat with it to get recommendations, ask questions, customize items, and manage their cart.
             </p>
 
-            <form action={saveLocationAiSettings} className="flex flex-col gap-4">
+            <ActionForm action={saveLocationAiSettings} className="flex flex-col gap-4">
               <input type="hidden" name="locationId" value={location.id} />
               
               <div>
@@ -730,7 +731,7 @@ export default async function SettingsPage({
                   Save AI Assistant Settings
                 </button>
               </div>
-            </form>
+            </ActionForm>
           </div>
         )}
 
@@ -743,7 +744,7 @@ export default async function SettingsPage({
               Enable fun, interactive add-ons to boost guest engagement on your public menu.
             </p>
 
-            <form action={async (formData) => {
+            <ActionForm action={async (formData) => {
               'use server'
               const { saveAddonsSettings } = await import('./addons-actions')
               await saveAddonsSettings(formData)
@@ -797,7 +798,7 @@ export default async function SettingsPage({
                   Save Add-ons
                 </button>
               </div>
-            </form>
+            </ActionForm>
           </div>
         )}
         

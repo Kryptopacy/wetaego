@@ -187,7 +187,7 @@ export async function startInteractiveDemo() {
     manual_payment_instructions: 'This is a demo. No real payment is required. Just click "I Have Transferred" to test the ordering flow!'
   }).select('id').single()
 
-  if (!loc) throw new Error('Failed to create location')
+  if (!loc) return { error: 'Location not found' }
 
   // 5. Create Menu
   const { data: menu } = await adminClient.from('menus').insert({
@@ -197,7 +197,7 @@ export async function startInteractiveDemo() {
     publication_status: 'published'
   }).select('id').single()
 
-  if (!menu) throw new Error('Failed to create menu')
+  if (!menu) return { error: 'Unknown error' }
 
   // 6. Create Categories
   const { data: cat1 } = await adminClient.from('menu_categories').insert({ organization_id: org.id, menu_id: menu.id, name: 'Starters & Bites', sort_order: 0 }).select('id').single()
@@ -205,7 +205,7 @@ export async function startInteractiveDemo() {
   const { data: cat3 } = await adminClient.from('menu_categories').insert({ organization_id: org.id, menu_id: menu.id, name: 'Signature Cocktails', sort_order: 2 }).select('id').single()
   const { data: cat4 } = await adminClient.from('menu_categories').insert({ organization_id: org.id, menu_id: menu.id, name: 'Desserts', sort_order: 3 }).select('id').single()
 
-  if (!cat1 || !cat2 || !cat3 || !cat4) throw new Error('Failed to create categories')
+  if (!cat1 || !cat2 || !cat3 || !cat4) return { error: 'Unknown error' }
 
   // 7. Add Menu Items (Zero latency image seeding)
   const { error: itemsError } = await adminClient.from('menu_items').insert([
@@ -235,6 +235,9 @@ export async function startInteractiveDemo() {
     reason: 'Demo Signup Bonus',
     created_by: userId
   })
+
+  // Update the organization's actual credit balance
+  await adminClient.from('organizations').update({ purchased_credits: 5 }).eq('id', org.id)
 
   // 9. Add Demo Custom Pages for them to preview the multi-template architecture
   const { data: pages, error: pagesError } = await adminClient.from('location_pages').insert([

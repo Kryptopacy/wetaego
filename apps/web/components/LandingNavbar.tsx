@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Menu, X, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { ActionForm } from "./ActionForm";
 import { startInteractiveDemo } from "../app/login/actions";
 import { DemoSubmitButton } from "./DemoSubmitButton";
 import { AnimatePresence, motion } from "framer-motion";
@@ -68,14 +69,14 @@ export function LandingNavbar() {
           >
             Log in
           </Link>
-          <form action={startInteractiveDemo} className="hidden sm:block">
+          <ActionForm action={startInteractiveDemo} className="hidden sm:block">
             <DemoSubmitButton
               className="text-sm font-medium text-zinc-300 hover:text-white transition-colors px-4 py-1.5 rounded-full border border-white/10 bg-white/5 hover:bg-white/10"
               pendingText="Building..."
             >
               Try Demo
             </DemoSubmitButton>
-          </form>
+          </ActionForm>
           <Link
             className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-white text-black text-sm font-semibold hover:bg-zinc-200 hover:scale-105 transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.2)]"
             href="/dashboard"
@@ -144,7 +145,7 @@ export function LandingNavbar() {
               >
                 Log in
               </Link>
-              <form action={startInteractiveDemo} className="w-full mt-4">
+              <ActionForm action={startInteractiveDemo} className="w-full mt-4">
                 <DemoSubmitButton
                   className="w-full flex items-center justify-between px-6 py-4 rounded-2xl bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-colors"
                   pendingText="Building..."
@@ -152,7 +153,7 @@ export function LandingNavbar() {
                   Try Demo Mode
                   <ArrowRight className="w-5 h-5 text-zinc-400" />
                 </DemoSubmitButton>
-              </form>
+              </ActionForm>
             </div>
           </motion.div>
         )}

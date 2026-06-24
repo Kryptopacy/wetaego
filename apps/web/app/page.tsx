@@ -1,3 +1,4 @@
+import { ActionForm } from '@/components/ActionForm'
 import Image from 'next/image'
 import Link from 'next/link'
 import { startInteractiveDemo } from './login/actions'
@@ -83,11 +84,11 @@ export default async function HomePage() {
               <Link href="/dashboard" className="flex items-center gap-2 px-8 py-3.5 rounded-full bg-white text-black text-sm font-bold hover:scale-105 transition-all duration-300 shadow-[0_0_30px_rgba(255,255,255,0.15)]">
                 Start Building <ArrowRight className="w-4 h-4" />
               </Link>
-              <form action={startInteractiveDemo}>
+              <ActionForm action={startInteractiveDemo}>
                 <DemoSubmitButton className="flex items-center gap-2 px-8 py-3.5 rounded-full bg-white/5 border border-white/15 text-white text-sm font-semibold hover:bg-white/10 backdrop-blur-md transition-all duration-300">
                   Experience Demo Mode
                 </DemoSubmitButton>
-              </form>
+              </ActionForm>
             </div>
 
           </FadeIn>
@@ -197,11 +198,11 @@ export default async function HomePage() {
             <Link href="/dashboard" className="flex items-center gap-2 px-10 py-4 rounded-full bg-white text-black text-base font-bold hover:scale-105 transition-all duration-300 shadow-[0_0_40px_rgba(255,255,255,0.15)]">
               Start Free — No Card Required <ArrowRight className="w-5 h-5" />
             </Link>
-            <form action={startInteractiveDemo}>
+            <ActionForm action={startInteractiveDemo}>
               <DemoSubmitButton className="flex items-center gap-2 px-10 py-4 rounded-full bg-white/5 border border-white/10 text-white text-base font-semibold hover:bg-white/10 backdrop-blur-md transition-all duration-300">
                 Try Demo Mode
               </DemoSubmitButton>
-            </form>
+            </ActionForm>
           </div>
         </FadeIn>
       </section>

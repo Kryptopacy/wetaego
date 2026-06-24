@@ -23,7 +23,7 @@ export default async function BusinessTypeSetupPage({
   const cookieStore = await cookies()
   const isDemo = !user && cookieStore.get('demo_mode')?.value === '1'
 
-  if (!user && !isDemo) redirect('/login')
+  if (!user) redirect('/login')
 
   const userId = user?.id || 'demo-user-id'
 

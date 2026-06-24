@@ -12,7 +12,7 @@ export async function savePaymentSettings(formData: FormData) {
   if ((await cookies()).get('demo_mode')?.value === '1') {
     return
   }
-  if (authError || !userData?.user) throw new Error('Not authenticated')
+  if (authError || !userData?.user) return { error: 'Unauthorized' }
 
   // Find existing org for this user
   const { data: org } = await supabase
@@ -21,7 +21,7 @@ export async function savePaymentSettings(formData: FormData) {
     .eq('created_by', userData.user.id)
     .single()
 
-  if (!org) throw new Error('Organization not found')
+  if (!org) return { error: 'Unknown error' }
 
   const bankName = formData.get('bankName') as string
   const accountNumber = formData.get('accountNumber') as string
@@ -33,7 +33,7 @@ export async function savePaymentSettings(formData: FormData) {
     const platformFees = await getPlatformFees() as { business_subaccount: number }
     subaccountCode = await createSubaccount(bankName, accountNumber, businessName, platformFees.business_subaccount ?? 5)
   } catch (err) {
-    throw new Error((err as Error).message || 'Failed to connect bank account via Paystack')
+    return { error: 'Unknown error' }
   }
 
   // Check if settings exist
@@ -74,10 +74,10 @@ export async function saveManualPaymentSettings(formData: FormData) {
   if ((await cookies()).get('demo_mode')?.value === '1') {
     return
   }
-  if (authError || !userData?.user) throw new Error('Not authenticated')
+  if (authError || !userData?.user) return { error: 'Unknown error' }
 
   const locationId = formData.get('locationId') as string
-  if (!locationId) throw new Error('Location ID required')
+  if (!locationId) return { error: 'Unknown error' }
 
   const { data: loc } = await supabase
     .from('locations')
@@ -85,7 +85,7 @@ export async function saveManualPaymentSettings(formData: FormData) {
     .eq('id', locationId)
     .single()
 
-  if (!loc) throw new Error('Location not found')
+  if (!loc) return { error: 'Unknown error' }
 
   const { data: member } = await supabase
     .from('organization_members')
@@ -105,7 +105,7 @@ export async function saveManualPaymentSettings(formData: FormData) {
     isAuthorized = !!org
   }
 
-  if (!isAuthorized) throw new Error('Unauthorized')
+  if (!isAuthorized) return { error: 'Unknown error' }
 
   const manualPaymentEnabled = formData.get('manualPaymentEnabled') === 'true'
   const manualBankName = formData.get('manualBankName') as string || null
@@ -124,7 +124,7 @@ export async function saveManualPaymentSettings(formData: FormData) {
     })
     .eq('id', locationId)
 
-  if (error) throw new Error((error as Error).message)
+  if (error) return { error: 'Unknown error' }
 
   revalidatePath('/dashboard/settings')
 }

@@ -12,7 +12,7 @@ export default async function QRCodeBatchPage() {
   const cookieStore = await cookies()
   const isDemo = !user && cookieStore.get('demo_mode')?.value === '1'
 
-  if (!user && !isDemo) {
+  if (!user) {
     redirect('/login')
   }
 

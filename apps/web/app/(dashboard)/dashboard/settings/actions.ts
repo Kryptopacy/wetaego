@@ -20,7 +20,7 @@ export async function updateOrganization(formData: FormData) {
       revalidatePath('/dashboard/settings')
       return
     }
-    if (authError || !userData?.user) throw new Error('Not authenticated')
+    if (authError || !userData?.user) return { error: 'Unauthorized' }
 
     const rawData = {
       name: formData.get('name'),
@@ -46,7 +46,7 @@ export async function updateOrganization(formData: FormData) {
         .update({ name: validatedData.name, slug: validatedData.slug })
         .eq('id', org.id)
       
-      if (error) throw new Error('Could not update organization')
+      if (error) return { error: 'Unknown error' }
     } else {
       // Create new org
       let referredByAffiliateId: string | null = null
@@ -79,7 +79,7 @@ export async function updateOrganization(formData: FormData) {
         .select('id')
         .single()
       
-      if (error) throw new Error('Could not create organization')
+      if (error) return { error: 'Unknown error' }
       currentOrgId = newOrg.id
     }
 
@@ -127,7 +127,7 @@ const aiSettingsSchema = z.object({
   brandKnowledge: z.string().max(4000).optional().nullable(),
 })
 
-export async function saveLocationAiSettings(formData: FormData): Promise<void> {
+export async function saveLocationAiSettings(formData: FormData) {
   try {
     const supabase = await createClient()
 
@@ -137,7 +137,7 @@ export async function saveLocationAiSettings(formData: FormData): Promise<void> 
       revalidatePath('/dashboard/settings')
       return
     }
-    if (authError || !userData?.user) throw new Error('Not authenticated')
+    if (authError || !userData?.user) return { error: 'Unknown error' }
 
     const locationId = formData.get('locationId') as string
     const aiEnabled = formData.get('aiEnabled') === 'true'
@@ -161,7 +161,7 @@ export async function saveLocationAiSettings(formData: FormData): Promise<void> 
       .eq('id', validatedData.locationId)
       .single()
 
-    if (locError || !loc) throw new Error('Location not found')
+    if (locError || !loc) return { error: 'Unknown error' }
 
     // Verify user role
     const { data: member } = await supabase
@@ -182,7 +182,7 @@ export async function saveLocationAiSettings(formData: FormData): Promise<void> 
       isAuthorized = !!org
     }
 
-    if (!isAuthorized) throw new Error('Only owners and managers can modify AI settings.')
+    if (!isAuthorized) return { error: 'Unknown error' }
 
     // Update settings
     const { error: updateError } = await supabase
@@ -195,7 +195,7 @@ export async function saveLocationAiSettings(formData: FormData): Promise<void> 
       })
       .eq('id', validatedData.locationId)
 
-    if (updateError) throw new Error(updateError.message)
+    if (updateError) return { error: 'Unknown error' }
 
     revalidatePath('/dashboard/settings')
   } catch (error) {
@@ -219,7 +219,7 @@ const locationInfoSchema = z.object({
   randomizerEnabled: z.boolean().optional(),
 })
 
-export async function saveLocationInfoSettings(formData: FormData): Promise<void> {
+export async function saveLocationInfoSettings(formData: FormData) {
   try {
     const supabase = await createClient()
 
@@ -229,7 +229,7 @@ export async function saveLocationInfoSettings(formData: FormData): Promise<void
       revalidatePath('/dashboard/settings')
       return
     }
-    if (authError || !userData?.user) throw new Error('Not authenticated')
+    if (authError || !userData?.user) return { error: 'Unknown error' }
 
     const locationId = formData.get('locationId') as string
     
@@ -256,7 +256,7 @@ export async function saveLocationInfoSettings(formData: FormData): Promise<void
       .eq('id', validatedData.locationId)
       .single()
 
-    if (locError || !loc) throw new Error('Location not found')
+    if (locError || !loc) return { error: 'Unknown error' }
 
     const { data: member } = await supabase
       .from('organization_members')
@@ -276,7 +276,7 @@ export async function saveLocationInfoSettings(formData: FormData): Promise<void
       isAuthorized = !!org
     }
 
-    if (!isAuthorized) throw new Error('Only owners and managers can modify location info.')
+    if (!isAuthorized) return { error: 'Unknown error' }
 
     // Update settings
     const { error: updateError } = await supabase
@@ -296,7 +296,7 @@ export async function saveLocationInfoSettings(formData: FormData): Promise<void
       })
       .eq('id', validatedData.locationId)
 
-    if (updateError) throw new Error(updateError.message)
+    if (updateError) return { error: 'Unknown error' }
 
     revalidatePath('/dashboard/settings')
   } catch (error) {
@@ -314,7 +314,7 @@ const loyaltySettingsSchema = z.object({
   rewardDiscountMinor: z.number().min(0),
 })
 
-export async function saveLoyaltySettings(formData: FormData): Promise<void> {
+export async function saveLoyaltySettings(formData: FormData) {
   try {
     const supabase = await createClient()
 
@@ -324,7 +324,7 @@ export async function saveLoyaltySettings(formData: FormData): Promise<void> {
       revalidatePath('/dashboard/settings')
       return
     }
-    if (authError || !userData?.user) throw new Error('Not authenticated')
+    if (authError || !userData?.user) return { error: 'Unknown error' }
 
     const organizationId = formData.get('organizationId') as string
     
@@ -356,7 +356,7 @@ export async function saveLoyaltySettings(formData: FormData): Promise<void> {
       isAuthorized = !!org
     }
 
-    if (!isAuthorized) throw new Error('Only owners and managers can modify loyalty settings.')
+    if (!isAuthorized) return { error: 'Unknown error' }
 
     // Upsert settings
     const { error: upsertError } = await supabase
@@ -370,7 +370,7 @@ export async function saveLoyaltySettings(formData: FormData): Promise<void> {
         updated_at: new Date().toISOString()
       }, { onConflict: 'organization_id' })
 
-    if (upsertError) throw new Error(upsertError.message)
+    if (upsertError) return { error: 'Unknown error' }
 
     revalidatePath('/dashboard/settings')
     revalidatePath('/dashboard/customers')
@@ -390,10 +390,10 @@ export async function updateProfile(formData: FormData) {
       revalidatePath('/dashboard/settings')
       return { success: true }
     }
-    if (authError || !userData?.user) throw new Error('Not authenticated')
+    if (authError || !userData?.user) return { error: 'Unknown error' }
 
     const fullName = formData.get('full_name') as string
-    if (!fullName) throw new Error('Full Name is required')
+    if (!fullName) return { error: 'Unknown error' }
 
     const bankName = (formData.get('bank_name') as string) || null
     const accountNumber = (formData.get('account_number') as string) || null
@@ -433,7 +433,7 @@ export async function updateProfile(formData: FormData) {
       data: { full_name: fullName }
     })
 
-    if (updateError) throw new Error(updateError.message)
+    if (updateError) return { error: 'Unknown error' }
 
     // 2. Upsert into user_profiles
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -450,7 +450,7 @@ export async function updateProfile(formData: FormData) {
 
     if (profileError) {
       console.error('Error updating user_profiles:', profileError)
-      throw new Error('Failed to update payout details')
+      return { error: 'Unknown error' }
     }
 
     revalidatePath('/dashboard/settings')
