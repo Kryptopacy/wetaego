@@ -4,6 +4,7 @@ import { streamText, tool, stepCountIs } from 'ai'
 import { z } from 'zod'
 import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
+import { getAiModels } from '@/lib/utils/settings'
 // cleaned up unused type
 
 export const maxDuration = 30
@@ -219,9 +220,12 @@ ${itemsJson}`
       Object.entries(allTools).filter(([name]) => persona.tools.includes(name as never))
     )
 
+    const aiModels = await getAiModels() as Record<string, string>
+    const modelName = aiModels.text_generation || 'gemini-3.5-flash'
+
     // 7. Initialize streaming text session with tools
     const result = streamText({
-      model: google('gemini-3.1-flash'),
+      model: google(modelName),
       system: systemPrompt,
       messages,
       stopWhen: stepCountIs(5),

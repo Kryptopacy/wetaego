@@ -4,6 +4,7 @@ import { google } from '@ai-sdk/google'
 import { generateObject } from 'ai'
 import { z } from 'zod'
 import { NextResponse } from 'next/server'
+import { getAiModels } from '@/lib/utils/settings'
 
 const triageSchema = z.object({
   requestText: z.string().min(1, 'Request text is required')
@@ -25,8 +26,11 @@ export async function POST(req: Request) {
 
     const { requestText } = parsed.data
 
+    const aiModels = await getAiModels() as Record<string, string>
+    const modelName = aiModels.text_generation || 'gemini-3.5-flash'
+
     const { object } = await generateObject({
-      model: google('gemini-3.1-flash'),
+      model: google(modelName),
       schema: z.object({
         urgency_tier: z.enum(['critical', 'standard', 'low']).describe('The classified urgency level of the request.')
       }),

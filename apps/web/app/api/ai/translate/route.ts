@@ -82,7 +82,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: charge.error }, { status: 402 })
     }
 
-    const modelName = aiModels.text_generation || 'gemini-3.1-flash'
+    const modelName = aiModels.text_generation || 'gemini-3.5-flash'
 
     const { object } = await generateObject({
       model: google(modelName),

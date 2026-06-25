@@ -4,6 +4,7 @@ import { google } from '@ai-sdk/google'
 import { generateObject } from 'ai'
 import { z } from 'zod'
 import { NextResponse } from 'next/server'
+import { getAiModels } from '@/lib/utils/settings'
 import { createClient } from '@/lib/supabase/server'
 
 const forecastSchema = z.object({
@@ -72,8 +73,11 @@ export async function POST(req: Request) {
     })).sort((a, b) => b.total_qty_sold_30d - a.total_qty_sold_30d)
 
     // 3. Ask Gemini to produce a forecast for each item
+    const aiModels = await getAiModels() as Record<string, string>
+    const modelName = aiModels.text_generation || 'gemini-3.5-flash'
+
     const { object } = await generateObject({
-      model: google('gemini-3.1-flash'),
+      model: google(modelName),
       schema: z.object({
         forecasts: z.array(z.object({
           item_name: z.string(),
