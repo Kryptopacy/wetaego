@@ -28,17 +28,20 @@ Businesses are no longer limited to a single menu. The system supports multiple 
 - **Listings Builder:** Image-heavy galleries and property specific details.
 - **Portal Mode:** A dynamic landing page template that seamlessly routes customers to multiple sub-pages (e.g., a Hotel routing guests to a Restaurant menu, a Spa booking page, and a Room Service catalog).
 
-### 2. Omnichannel Payments & Manual Fallbacks
-A resilient checkout engine powers the entire ecosystem:
+### 2. Omnichannel Payments, Platform Fees & Logistics
+A resilient checkout engine powers the entire ecosystem, allowing us to seamlessly monetize the platform:
 - **Paystack Integration:** Seamlessly handles split payments, service charges, and automated reconciliation via Webhooks.
+- **Platform Fee Ledger:** A transparent ledger system that automatically extracts a configurable SaaS platform fee (e.g., 2%) on every transaction, driving core MRR beyond just subscriptions.
+- **Staff Payouts & Payroll:** Built-in payout profiles to route split payments and tips directly to staff or vendors.
 - **Global Manual Fallback:** If API keys are pending or the payment provider experiences downtime, the system automatically degrades to a "Manual Bank Transfer" workflow. Customers see localized bank details and instructions without blocking conversions.
-- **Edge Functions:** Serverless edge functions reliably manage the payment webhook reconciliation, ensuring idempotency and instant order syncing.
+- **Omnichannel Logistics:** Full support for Dine-in, Pickup, and Delivery (with built-in delivery zones, phone verification, and custom delivery settings).
 
 ### 3. Progressive Web App (PWA) & Native App Experience
 OurMenu OS feels like a native app.
-- **Service Workers:** Caching assets for offline resilience and near-instant load times.
+- **Service Workers:** Caching assets for offline resilience and near-instant load times (via `next-pwa`).
 - **Install Prompts:** Intelligently prompts customers to "Add to Home Screen" for a true app-like experience without the App Store friction.
 - **Push Notifications:** Deeply integrated Web Push API ensures businesses receive instant, native push alerts (with sounds) on their devices the second a new order, booking, or quote inquiry is placed.
+- **WhatsApp & SMS Alerts:** Integrated Termii API for automated fallback WhatsApp notifications if web push is disabled.
 - **White-Label Branding:** The entire customer-facing interface dynamically adapts to the business's custom theme colors, logos, and cover images.
 
 ### 4. Branch Switcher & Multi-Location Management
@@ -118,6 +121,17 @@ OurMenu OS features a built-in Affiliate system designed for B2B growth:
 - **Affiliate Dashboard:** Affiliates register and receive a unique referral code.
 - **Organization Linking:** New organizations that register via referral links are permanently tied to their affiliate.
 - **Automated Commissions:** Webhooks calculate a percentage commission (default 10%) on every subscription renewal and log it in `affiliate_earnings`.
+
+## Architecture & Tech Stack
+
+- **Framework:** Next.js 16 (App Router, Server Actions, async `params`)
+- **Database & Auth:** Supabase (PostgreSQL, Row Level Security, Edge Functions)
+- **AI Engine:** Google AI SDK (`@ai-sdk/google`) + Gemini 3.1 Flash for blazing-fast inference
+- **Caching & Rate Limiting:** Upstash Redis (`@upstash/redis`, `@upstash/ratelimit`)
+- **Error Tracking & Observability:** Sentry (`@sentry/nextjs`)
+- **End-to-End Testing:** Playwright (`@playwright/test`)
+- **Styling & Animation:** Tailwind CSS v4 + Framer Motion
+- **Payments & Comms:** Paystack (Webhooks), Termii (WhatsApp/SMS), Web Push API
 
 ## Repo Layout
 
