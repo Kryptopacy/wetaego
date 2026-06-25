@@ -8,9 +8,11 @@ export default async function SharedPaymentPage({
   params,
   searchParams
 }: {
-  params: { order_id: string }
-  searchParams: { split?: string }
+  params: Promise<{ order_id: string }>
+  searchParams: Promise<{ split?: string }>
 }) {
+  const { order_id } = await params
+  const { split } = await searchParams
   const supabase = await createClient()
 
   // Fetch the order
@@ -27,7 +29,7 @@ export default async function SharedPaymentPage({
       location_id,
       organizations(name, slug)
     `)
-    .eq('id', params.order_id)
+    .eq('id', order_id)
     .single()
 
   const order = orderRaw ? mapSupabaseOrderToUI(orderRaw) : null
@@ -40,12 +42,20 @@ export default async function SharedPaymentPage({
     )
   }
 
-  const splitCount = parseInt(searchParams.split || '1')
+  const splitCount = parseInt(split || '1')
   
   // handle array or single object for organizations
   const org = Array.isArray(order.organizations) ? order.organizations[0] : order.organizations
   const orgName = org?.name || 'Restaurant'
   const orgSlug = org?.slug || ''
+
+  // Fetch currency code from location
+  const { data: locationData } = await supabase
+    .from('locations')
+    .select('currency_code')
+    .eq('id', order.location_id)
+    .single()
+  const currencyCode = locationData?.currency_code || 'NGN'
 
   if (order.status === 'paid' || order.status === 'completed') {
     return (
@@ -93,7 +103,7 @@ export default async function SharedPaymentPage({
                   <span className="text-zinc-500 font-medium">{item.quantity}x</span>
                   <span className="text-white text-sm">{item.item_name}</span>
                 </div>
-                <span className="text-zinc-400 text-sm">{formatCurrency(item.price_minor )}</span>
+                <span className="text-zinc-400 text-sm">{formatCurrency(item.price_minor, currencyCode)}</span>
               </div>
             ))}
           </div>
@@ -101,15 +111,15 @@ export default async function SharedPaymentPage({
           <div className="border-t border-zinc-800 pt-4 space-y-2">
             <div className="flex justify-between text-sm text-zinc-400">
               <span>Total Bill</span>
-              <span>{formatCurrency(order.total_amount_minor )}</span>
+              <span>{formatCurrency(order.total_amount_minor, currencyCode)}</span>
             </div>
             <div className="flex justify-between text-sm text-green-400 font-medium">
               <span>Amount Paid</span>
-              <span>- {formatCurrency((order.amount_paid_minor || 0) )}</span>
+              <span>- {formatCurrency((order.amount_paid_minor || 0), currencyCode)}</span>
             </div>
             <div className="flex justify-between text-lg text-white font-black pt-2 border-t border-zinc-800">
               <span>Remaining</span>
-              <span>{formatCurrency((order.total_amount_minor - (order.amount_paid_minor || 0)) )}</span>
+              <span>{formatCurrency((order.total_amount_minor - (order.amount_paid_minor || 0)), currencyCode)}</span>
             </div>
           </div>
         </div>
@@ -117,6 +127,7 @@ export default async function SharedPaymentPage({
         <PayClient 
           order={order}
           splitCount={splitCount}
+          currencyCode={currencyCode}
         />
       </div>
     </div>

@@ -64,7 +64,7 @@ export default async function DashboardOverviewPage() {
       supabase.from('menu_items').select('id', { count: 'exact', head: true }).eq('organization_id', orgId),
       supabase.from('qr_codes').select('id', { count: 'exact', head: true }).eq('organization_id', orgId),
       supabase.from('orders').select('id', { count: 'exact', head: true }).eq('organization_id', orgId)
-        .gte('created_at', new Date(1718236800000 - 86400000).toISOString()),
+        .gte('created_at', new Date(new Date().setHours(0, 0, 0, 0)).toISOString()),
       supabase.from('service_requests').select('id', { count: 'exact', head: true })
         .eq('organization_id', orgId).eq('status', 'pending'),
     ])

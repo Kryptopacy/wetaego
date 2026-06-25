@@ -64,6 +64,18 @@ export async function sendBroadcastAction(formData: FormData) {
     return { error: 'No customers found with email addresses.' }
   }
 
+  // Sanitise user-supplied content — escape HTML special chars to prevent injection
+  const escapeHtml = (str: string) =>
+    str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#x27;')
+
+  const safeSubject = escapeHtml(subject)
+  const safeMessage = escapeHtml(message)
+
   // 3. Batch send (Resend limit is 100 per batch call)
   const chunkSize = 100
   let totalSent = 0
@@ -75,9 +87,9 @@ export async function sendBroadcastAction(formData: FormData) {
       const payload = chunk.map(email => ({
         from: 'OurMenu Marketing <onboarding@resend.dev>',
         to: email,
-        subject: subject,
+        subject: safeSubject,
         html: `<div style="font-family: sans-serif; padding: 20px;">
-                <p style="white-space: pre-wrap;">${message}</p>
+                <p style="white-space: pre-wrap;">${safeMessage}</p>
                 <hr style="margin-top: 30px; border: 0; border-top: 1px solid #eaeaea;" />
                 <p style="color: #888; font-size: 12px; text-align: center;">Powered by OurMenu OS</p>
                </div>`

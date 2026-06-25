@@ -402,7 +402,8 @@ export async function updateProfile(formData: FormData) {
     const accountNumber = (formData.get('account_number') as string) || null
     const accountName = (formData.get('account_name') as string) || null
 
-    // Fetch existing profile to check if we already have a subaccount
+    // user_profiles is not in the auto-generated Supabase types yet;
+    // cast is scoped to this query only.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: existingProfile } = await (supabase as any)
       .from('user_profiles')
@@ -438,7 +439,8 @@ export async function updateProfile(formData: FormData) {
 
     if (updateError) return { error: 'Unknown error' }
 
-    // 2. Upsert into user_profiles
+    // user_profiles is not in the auto-generated Supabase types yet;
+    // cast is scoped to this query only.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error: profileError } = await (supabase as any)
       .from('user_profiles')

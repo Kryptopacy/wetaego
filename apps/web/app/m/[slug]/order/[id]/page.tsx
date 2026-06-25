@@ -20,11 +20,12 @@ export default async function OrderStatusPage(props: { params: Promise<{ slug: s
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const location = locationPage.locations as any
 
-  // 2. Fetch Order
+  // 2. Fetch Order — scope to the resolved location to prevent IDOR
   const { data: order } = await supabase
     .from('orders')
     .select('*, order_items(*)')
     .eq('id', id)
+    .eq('location_id', location.id)
     .single()
 
   if (!order) {
@@ -40,6 +41,7 @@ export default async function OrderStatusPage(props: { params: Promise<{ slug: s
           manualPaymentAccountName={location.manual_payment_account_name}
           manualPaymentAccountNumber={location.manual_payment_account_number}
           manualPaymentInstructions={location.manual_payment_instructions}
+          currencyCode={location.currency_code || 'NGN'}
           slug={slug}
         />
       </div>

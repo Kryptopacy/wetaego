@@ -9,10 +9,12 @@ import { UIOrder } from '@/lib/types/frontend'
 
 export default function PayClient({
   order: initialOrder,
-  splitCount
+  splitCount,
+  currencyCode
 }: {
   order: UIOrder
   splitCount: number
+  currencyCode: string
 }) {
   const [order, setOrder] = useState(initialOrder)
   const [isProcessing, setIsProcessing] = useState(false)
@@ -89,7 +91,7 @@ export default function PayClient({
     }
     const valMinor = val * 100
     if (valMinor > remainingMinor) {
-      toast.error(`Cannot pay more than the remaining balance (${formatCurrency(remainingMinor)})`)
+      toast.error(`Cannot pay more than the remaining balance (${formatCurrency(remainingMinor, currencyCode)})`)
       return
     }
     handlePay(valMinor)
@@ -104,7 +106,7 @@ export default function PayClient({
             disabled={isProcessing}
             className="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-[0_0_20px_rgba(37,99,235,0.3)] hover:bg-blue-500 transition-colors disabled:opacity-50"
           >
-            {isProcessing ? 'Processing...' : `Pay My Share (${formatCurrency(defaultPayAmount )})`}
+            {isProcessing ? 'Processing...' : `Pay My Share (${formatCurrency(defaultPayAmount, currencyCode)})`}
           </button>
         )}
 
@@ -113,7 +115,7 @@ export default function PayClient({
           disabled={isProcessing}
           className={`w-full font-bold py-4 rounded-xl shadow-lg transition-colors disabled:opacity-50 ${splitCount > 1 && defaultPayAmount < remainingMinor ? 'bg-zinc-800 text-white hover:bg-zinc-700' : 'bg-white text-black hover:bg-zinc-200'}`}
         >
-          {isProcessing ? 'Processing...' : `Pay Remaining Balance (${formatCurrency(remainingMinor )})`}
+          {isProcessing ? 'Processing...' : `Pay Remaining Balance (${formatCurrency(remainingMinor, currencyCode)})`}
         </button>
 
         <div className="flex gap-2 pt-2">

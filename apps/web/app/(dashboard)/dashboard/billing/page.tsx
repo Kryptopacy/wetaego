@@ -220,7 +220,7 @@ export default async function BillingPage(props: { searchParams: Promise<{ curre
             ))}
           </ul>
 
-          <a href="mailto:sales@ourmenu.os" className="block text-center w-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-3 rounded-xl transition-colors relative z-10 mt-auto">
+          <a href="mailto:support@ourmenuos.online" className="block text-center w-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-3 rounded-xl transition-colors relative z-10 mt-auto">
             Contact Sales
           </a>
         </div>

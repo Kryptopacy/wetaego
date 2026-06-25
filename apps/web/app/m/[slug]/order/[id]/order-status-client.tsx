@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
+import { formatCurrency } from '@/lib/utils/currency'
 import type { Database } from '@/lib/supabase/types'
 
 type OrderRow = Database['public']['Tables']['orders']['Row']
@@ -16,6 +17,7 @@ export function OrderStatusClient({
   manualPaymentAccountName, 
   manualPaymentAccountNumber, 
   manualPaymentInstructions,
+  currencyCode,
   slug 
 }: { 
   initialOrder: OrderRow
@@ -23,6 +25,7 @@ export function OrderStatusClient({
   manualPaymentAccountName?: string
   manualPaymentAccountNumber?: string
   manualPaymentInstructions?: string
+  currencyCode: string
   slug: string
 }) {
   const [order, setOrder] = useState(initialOrder)
@@ -62,7 +65,7 @@ export function OrderStatusClient({
     <div className="w-full bg-zinc-900 border border-zinc-800 rounded-3xl p-6 shadow-2xl">
       <div className="text-center mb-6 border-b border-zinc-800 pb-6">
         <h1 className="text-2xl font-bold text-white mb-2">Order #{order.id.split('-')[0]}</h1>
-        <p className="text-zinc-400">Total: <span className="font-bold text-white">₦{(order.total_amount_minor / 100).toLocaleString()}</span></p>
+        <p className="text-zinc-400">Total: <span className="font-bold text-white">{formatCurrency(order.total_amount_minor, currencyCode)}</span></p>
       </div>
 
       <AnimatePresence mode="wait">
@@ -83,7 +86,7 @@ export function OrderStatusClient({
             
             <h2 className="text-xl font-bold text-white mb-2">Awaiting Transfer</h2>
             <p className="text-zinc-400 text-center text-sm mb-6 max-w-[280px]">
-              Please make a transfer of <strong className="text-white">₦{(order.total_amount_minor / 100).toLocaleString()}</strong> to the account below. The cashier will verify and approve your order.
+              Please make a transfer of <strong className="text-white">{formatCurrency(order.total_amount_minor, currencyCode)}</strong> to the account below. The cashier will verify and approve your order.
             </p>
 
             <div className="w-full bg-zinc-800/50 rounded-xl p-5 mb-6 relative overflow-hidden">
