@@ -15,39 +15,42 @@ export async function GET(req: Request) {
     const url = new URL(req.url)
     const organizationId = url.searchParams.get('orgId')
 
-    if (!organizationId) {
-      return NextResponse.json({ error: 'orgId is required' }, { status: 400 })
-    }
+    let query = supabase.from('orders').select('created_at, total_amount_minor').eq('status', 'paid')
+    let countQuery = supabase.from('orders').select('*', { count: 'exact', head: true })
 
-    // Verify user is part of the org
-    const { data: member } = await supabase
-      .from('organization_members')
-      .select('role')
-      .eq('organization_id', organizationId)
-      .eq('user_id', user.id)
-      .single()
-
-    let isAuthorized = !!member
-    if (!member) {
-      const { data: org } = await supabase
-        .from('organizations')
-        .select('id')
-        .eq('id', organizationId)
-        .eq('created_by', user.id)
+    // If orgId is provided, run for specific org, else run for ENTIRE platform (Hackathon Total)
+    if (organizationId) {
+       // Verify user is part of the org
+      const { data: member } = await supabase
+        .from('organization_members')
+        .select('role')
+        .eq('organization_id', organizationId)
+        .eq('user_id', user.id)
         .single()
-      isAuthorized = !!org
-    }
 
-    if (!isAuthorized) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      let isAuthorized = !!member
+      if (!member) {
+        const { data: org } = await supabase
+          .from('organizations')
+          .select('id')
+          .eq('id', organizationId)
+          .eq('created_by', user.id)
+          .single()
+        isAuthorized = !!org
+      }
+
+      if (!isAuthorized) {
+        return NextResponse.json({ error: 'Forbidden for this org' }, { status: 403 })
+      }
+      query = query.eq('organization_id', organizationId)
+      countQuery = countQuery.eq('organization_id', organizationId)
+    } else {
+      // Platform-wide aggregate. You could optionally restrict this to superadmins.
+      // For hackathon purposes, we will aggregate all data.
     }
 
     // 2. Calculate Total Revenue (Orders with status 'paid')
-    const { data: paidOrders } = await supabase
-      .from('orders')
-      .select('created_at, total_amount_minor')
-      .eq('organization_id', organizationId)
-      .eq('status', 'paid')
+    const { data: paidOrders } = await query
 
     let totalRevenueMinor = 0
     const monthlyRevenueMinor: Record<string, number> = {
@@ -69,14 +72,11 @@ export async function GET(req: Request) {
     }
 
     // 3. Get total scans (if available) - checking tracking tables
-    const { count: totalOrders } = await supabase
-      .from('orders')
-      .select('*', { count: 'exact', head: true })
-      .eq('organization_id', organizationId)
+    const { count: totalOrders } = await countQuery
 
     // 4. Return formatted report
     const report = {
-      organizationId,
+      scope: organizationId ? \`Organization: \${organizationId}\` : "Platform-Wide Total (Hackathon Submission)",
       hackathon_metrics: {
         total_revenue_usd: (totalRevenueMinor / 100).toFixed(2), // Assumes currency is USD or normalized
         revenue_by_month: {
