@@ -76,7 +76,7 @@ export async function GET(req: Request) {
 
     // 4. Return formatted report
     const report = {
-      scope: organizationId ? \`Organization: \${organizationId}\` : "Platform-Wide Total (Hackathon Submission)",
+      scope: organizationId ? `Organization: ${organizationId}` : "Platform-Wide Total (Hackathon Submission)",
       hackathon_metrics: {
         total_revenue_usd: (totalRevenueMinor / 100).toFixed(2), // Assumes currency is USD or normalized
         revenue_by_month: {
