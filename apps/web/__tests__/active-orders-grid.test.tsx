@@ -39,6 +39,8 @@ describe('ActiveOrdersGrid', () => {
         currentUserId={mockCurrentUserId}
         billingMode="table_service"
         onClaimOrder={vi.fn()}
+        onMarkPaidOffline={vi.fn()}
+        onCompleteOrder={vi.fn()}
       />
     )
     
@@ -53,6 +55,8 @@ describe('ActiveOrdersGrid', () => {
         currentUserId={mockCurrentUserId}
         billingMode="table_service"
         onClaimOrder={vi.fn()}
+        onMarkPaidOffline={vi.fn()}
+        onCompleteOrder={vi.fn()}
       />
     )
     
@@ -66,6 +70,8 @@ describe('ActiveOrdersGrid', () => {
         currentUserId={mockCurrentUserId}
         billingMode="table_service"
         onClaimOrder={vi.fn()}
+        onMarkPaidOffline={vi.fn()}
+        onCompleteOrder={vi.fn()}
       />
     )
     
@@ -93,6 +99,8 @@ describe('ActiveOrdersGrid', () => {
         currentUserId={mockCurrentUserId}
         billingMode="table_service" // For table_service, pending status shows "Accept (Pay After)"
         onClaimOrder={onClaimOrderMock}
+        onMarkPaidOffline={vi.fn()}
+        onCompleteOrder={vi.fn()}
       />
     )
     
