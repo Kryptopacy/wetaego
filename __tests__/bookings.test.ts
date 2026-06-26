@@ -63,10 +63,10 @@ describe('Booking Flow (updateBookingStatus)', () => {
       data: { role: 'owner' }
     })
 
-    await updateBookingStatus('booking-123', 'mark_paid')
+    await updateBookingStatus('123e4567-e89b-12d3-a456-426614174000', 'mark_paid')
 
     expect(mockUpdate).toHaveBeenCalledWith({ payment_status: 'paid', status: 'confirmed' })
-    expect(mockEq).toHaveBeenCalledWith('id', 'booking-123')
+    expect(mockEq).toHaveBeenCalledWith('id', '123e4567-e89b-12d3-a456-426614174000')
   })
 
   it('cancels booking successfully', async () => {
@@ -82,9 +82,9 @@ describe('Booking Flow (updateBookingStatus)', () => {
       data: { role: 'owner' }
     })
 
-    await updateBookingStatus('booking-123', 'cancel')
+    await updateBookingStatus('123e4567-e89b-12d3-a456-426614174000', 'cancel')
 
     expect(mockUpdate).toHaveBeenCalledWith({ status: 'cancelled' })
-    expect(mockEq).toHaveBeenCalledWith('id', 'booking-123')
+    expect(mockEq).toHaveBeenCalledWith('id', '123e4567-e89b-12d3-a456-426614174000')
   })
 })

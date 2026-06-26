@@ -1,4 +1,5 @@
 import { ActionForm } from '@/components/ActionForm'
+import { SubmitButton } from '@/components/submit-button'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -255,9 +256,7 @@ export default async function SettingsPage({
               </div>
 
               <div className="mt-4 flex items-center justify-between">
-                <button type="submit" className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium transition-colors">
-                  Save Profile & Payout Details
-                </button>
+                <SubmitButton>Save Profile & Payout Details</SubmitButton>
               </div>
             </ActionForm>
           </div>
@@ -296,9 +295,7 @@ export default async function SettingsPage({
               <p className="mt-1 text-xs text-zinc-500">Only lowercase letters, numbers, and hyphens.</p>
             </div>
             <div className="mt-2 flex items-center justify-between">
-              <button type="submit" className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium transition-colors">
-                Save Changes
-              </button>
+              <SubmitButton>Save Changes</SubmitButton>
             </div>
           </ActionForm>
         </div>
