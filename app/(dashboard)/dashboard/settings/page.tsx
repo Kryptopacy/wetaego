@@ -571,6 +571,7 @@ export default async function SettingsPage({
                 </div>
               </div>
 
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="mb-2 block text-sm font-medium text-zinc-300">WhatsApp Number</label>

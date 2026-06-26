@@ -1,7 +1,6 @@
 'use client'
 
-
-
+import { use } from 'react'
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { verifyFeedbackPin } from './actions'
@@ -11,8 +10,9 @@ import { useRouter } from 'next/navigation'
 export default function FeedbackVerifyPage({
   params
 }: {
-  params: { slug: string }
+  params: Promise<{ slug: string }>
 }) {
+  const { slug } = use(params)
   const [pin, setPin] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
@@ -26,13 +26,13 @@ export default function FeedbackVerifyPage({
 
     setIsLoading(true)
     try {
-      const { orderId, error } = await verifyFeedbackPin(params.slug, pin)
+      const { orderId, error } = await verifyFeedbackPin(slug, pin)
       if (error) {
         toast.error(error)
         setPin('')
       } else if (orderId) {
         toast.success('Verified!')
-        router.push(`/m/${params.slug}/feedback/${orderId}`)
+        router.push(`/m/${slug}/feedback/${orderId}`)
       }
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
@@ -82,7 +82,7 @@ export default function FeedbackVerifyPage({
             <div className="pt-4 border-t border-zinc-800">
               <button
                 type="button"
-                onClick={() => router.push(`/m/${params.slug}/feedback/general`)}
+                onClick={() => router.push(`/m/${slug}/feedback/general`)}
                 className="w-full text-zinc-500 text-sm font-medium hover:text-white transition-colors"
               >
                 I don&apos;t have an order (General Feedback)

@@ -125,32 +125,33 @@ export async function buyCredits(formData: FormData): Promise<void> {
 
   if (!org) throw new Error('Org not found')
 
-  await supabase
-    .from('organizations')
-    .update({ purchased_credits: (org.purchased_credits || 0) + credits })
-    .eq('id', orgId)
+  // 3. Initialize Paystack payment for credits
+  const amountMinor = credits === 10 ? 600000 : credits === 25 ? 1200000 : 2000000; // NGN 6k, 12k, 20k
 
-  // Normally we would redirect to a checkout page, but we'll fulfill directly for the demo
-  // 3. Send the Invoice Email
-  const transactionId = crypto.randomUUID() // Mock transaction ID
-  const orgName = org.name || 'OurMenu Partner'
+  const response = await fetch('https://api.paystack.co/transaction/initialize', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      email: userData.user.email!,
+      amount: amountMinor,
+      currency: 'NGN',
+      callback_url: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard/billing/verify`,
+      metadata: {
+        organization_id: orgId,
+        is_credit_pack: true,
+        credits: credits
+      }
+    }),
+  })
+
+  const data = await response.json()
   
-  waitUntil((async () => {
-    const { error: resendError } = await resend.emails.send({
-      from: 'OurMenu <noreply@ourmenuos.online>',
-      to: userData.user.email!,
-      subject: `Invoice for ${credits} Credits`,
-      react: InvoiceEmail({
-        organizationName: orgName,
-        amountCredits: credits,
-        userName: userData.user.email! // Or use full name if available
-      }) as React.ReactElement
-    }, {
-      idempotencyKey: `invoice-${transactionId}`
-    });
+  if (!data.status) {
+    throw new Error(data.message || 'Failed to initialize payment')
+  }
 
-    if (resendError) {
-      console.error('Failed to send invoice email:', resendError.message);
-    }
-  })())
+  redirect(data.data.authorization_url)
 }

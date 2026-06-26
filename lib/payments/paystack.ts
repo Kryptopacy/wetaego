@@ -30,6 +30,8 @@ export const paystackProvider: PaymentProvider = {
         callback_url: params.callbackUrl,
         ...(params.subaccountCode ? { subaccount: params.subaccountCode } : {}),
         ...(params.splitCode ? { split_code: params.splitCode } : {}),
+        ...(params.transactionChargeMinor ? { transaction_charge: params.transactionChargeMinor } : {}),
+        ...(params.channels ? { channels: params.channels } : {}),
         metadata: {
           ...params.metadata,
           customer_name: params.customerName,

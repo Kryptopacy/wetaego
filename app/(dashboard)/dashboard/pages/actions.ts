@@ -164,6 +164,9 @@ const updatePageSchema = z.object({
   deposit_percentage: z.number().min(0).max(100).nullable(),
   randomizer_enabled: z.boolean(),
   hide_delivery: z.boolean(),
+  payment_channels: z.array(z.string()).optional(),
+  refund_policy: z.string().optional(),
+  milestones_enabled: z.boolean(),
 })
 
 export async function updatePage(formData: FormData): Promise<void> {
@@ -181,6 +184,9 @@ export async function updatePage(formData: FormData): Promise<void> {
       : null,
     randomizer_enabled: formData.get('randomizer_enabled') === 'true',
     hide_delivery: formData.get('hide_delivery') === 'true',
+    payment_channels: formData.getAll('payment_channels') as string[],
+    refund_policy: formData.get('refund_policy') || undefined,
+    milestones_enabled: formData.get('milestones_enabled') === 'true',
   })
 
   if (!parsed.success) throw new Error(parsed.error.issues[0].message)
@@ -194,7 +200,10 @@ export async function updatePage(formData: FormData): Promise<void> {
     payment_mode,
     deposit_percentage,
     randomizer_enabled,
-    hide_delivery
+    hide_delivery,
+    payment_channels,
+    refund_policy,
+    milestones_enabled
   } = parsed.data
 
   if (pageId.startsWith('page-')) {
@@ -212,7 +221,13 @@ export async function updatePage(formData: FormData): Promise<void> {
   if (!userData?.user) throw new Error('Not authenticated')
 
   const { data: existing } = await supabase.from('location_pages').select('template_data').eq('id', pageId).single()
-  const template_data = { ...((existing?.template_data as Record<string, unknown>) || {}), hide_delivery }
+  const template_data = { 
+    ...((existing?.template_data as Record<string, unknown>) || {}), 
+    hide_delivery, 
+    payment_channels, 
+    refund_policy, 
+    milestones_enabled 
+  }
 
   const { error } = await supabase
     .from('location_pages')

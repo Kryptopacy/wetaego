@@ -15,7 +15,7 @@ import {
    
    
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  FileText, Settings, CreditCard, LogOut, Zap, Menu, X, Users, QrCode, TrendingUp
+  FileText, Settings, CreditCard, LogOut, Zap, Menu, X, Users, QrCode, TrendingUp, MessageSquare
 } from 'lucide-react'
 import { GlobalRealtime } from './global-realtime'
 import { NotificationCenter } from './notification-center'
@@ -37,6 +37,7 @@ const baseNavItems: NavItem[] = [
 const managerItems: NavItem[] = [
   { href: '/dashboard/customers', label: 'CRM & Loyalty', icon: Users },
   { href: '/dashboard/team-performance', label: 'Team Performance', icon: BarChart3 },
+  { href: '/dashboard/manage/feedback', label: 'Feedback Inbox', icon: MessageSquare },
   { href: '/dashboard/qr', label: 'QR Generator', icon: QrCode },
   { href: '/dashboard/menu', label: 'Catalog Manager', icon: BookOpen },
   { href: '/dashboard/pages', label: 'Your Pages', icon: FileText },

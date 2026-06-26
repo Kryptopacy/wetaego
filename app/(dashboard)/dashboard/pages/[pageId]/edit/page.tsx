@@ -127,7 +127,45 @@ export default async function PageEditDashboard({
             </div>
           )}
 
-          <div className="pt-2">
+          <div className="space-y-4 pt-4 border-t border-white/5">
+            <div>
+              <label className="block text-xs font-medium text-zinc-400 mb-2">Allowed Payment Methods</label>
+              <div className="flex gap-4">
+                {['card', 'bank_transfer', 'ussd'].map((method) => {
+                  // @ts-expect-error JSONB typing
+                  const channels = page.template_data?.payment_channels as string[] | undefined
+                  // If channels is undefined, we assume all are allowed by default. 
+                  const isChecked = channels ? channels.includes(method) : true
+                  return (
+                    <label key={method} className="flex items-center gap-2 text-sm text-white cursor-pointer">
+                      <input type="checkbox" name="payment_channels" value={method} defaultChecked={isChecked} className="rounded bg-zinc-900 border-zinc-800 text-purple-500 focus:ring-purple-500" />
+                      {method.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                    </label>
+                  )
+                })}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-zinc-400 mb-1">Cancellation & Refund Policy (Optional)</label>
+              {/* @ts-expect-error JSONB typing */}
+              <textarea name="refund_policy" defaultValue={page.template_data?.refund_policy || ''} placeholder="e.g. Deposits are non-refundable if cancelled within 48 hours." className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white h-16" />
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between p-4 bg-zinc-900 border border-zinc-800 rounded-xl mt-4">
+            <div>
+              <p className="text-sm font-bold text-white">Milestone Billing (Add-on)</p>
+              <p className="text-xs text-zinc-400 mt-0.5">Allow splitting invoices into custom payment milestones (e.g., 30% upfront, 70% completion).</p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              {/* @ts-expect-error JSONB typing */}
+              <input type="checkbox" name="milestones_enabled" value="true" defaultChecked={page.template_data?.milestones_enabled || false} className="sr-only peer" />
+              <div className="w-11 h-6 bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-500"></div>
+            </label>
+          </div>
+
+          <div className="pt-4">
             <button type="submit" className="px-4 py-2 bg-white text-black text-sm font-bold rounded-lg hover:bg-zinc-200 transition-colors">
               Save Settings
             </button>

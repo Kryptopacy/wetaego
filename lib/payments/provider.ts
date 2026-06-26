@@ -23,6 +23,10 @@ export interface PaymentParams {
   subaccountCode?: string
   /** Paystack Split Code for complex multi-party splits */
   splitCode?: string
+  /** Flat fee to deduct for the platform (overrides subaccount default) */
+  transactionChargeMinor?: number
+  /** Restrict payment methods (e.g. ['card', 'bank_transfer']) */
+  channels?: string[]
 }
 
 export interface PaymentVerification {

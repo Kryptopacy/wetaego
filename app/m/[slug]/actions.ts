@@ -101,7 +101,8 @@ export async function processCheckout(
   fulfillmentType?: 'table' | 'pickup' | 'delivery' | string,
   deliveryInstructions?: string,
   idempotencyKey?: string,
-  staffSubaccountOverride?: string
+  staffSubaccountOverride?: string,
+  pageId?: string
 ) {
   const supabase = await createClient()
 
@@ -199,6 +200,23 @@ export async function processCheckout(
     // Use verified server total for Paystack — split payment uses fractional amount
     const chargeAmountMinor = paymentFractionMinor ?? verifiedTotalMinor
     const email = customerEmail || `order_${order.id}@ourmenuos.online`
+
+    // Dynamically calculate platform fee to enforce OurMenuOS percentages
+    const platformFeesConfig = await getPlatformFees()
+    const businessFeePercent = platformFeesConfig.business_subaccount || 5
+    const transactionChargeMinor = subaccountCode && businessFeePercent > 0
+      ? Math.floor(chargeAmountMinor * (businessFeePercent / 100))
+      : undefined
+
+    // Fetch page-specific payment channels restriction
+    let channels: string[] | undefined = undefined
+    if (pageId) {
+      const { data: pageData } = await supabase.from('location_pages').select('template_data').eq('id', pageId).single()
+      if (pageData?.template_data && typeof pageData.template_data === 'object' && 'payment_channels' in pageData.template_data) {
+        channels = pageData.template_data.payment_channels as string[]
+      }
+    }
+
     const { authorizationUrl: checkoutUrl } = await paymentProvider.initiatePayment({
       amountMinor: chargeAmountMinor,
       customerEmail: email,
@@ -206,6 +224,8 @@ export async function processCheckout(
       currency: 'NGN',
       callbackUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/api/bookings/callback`,
       subaccountCode: subaccountCode || undefined,
+      transactionChargeMinor,
+      channels
     })
 
     return { checkoutUrl, orderId: order.id }
@@ -313,12 +333,21 @@ export async function processExistingOrderPayment(
     const email = order.customer_email || `order_${orderId}@ourmenuos.online`
     const reference = `${orderId}_split_${crypto.randomUUID().slice(0, 8)}`
 
+    // Dynamically calculate platform fee to enforce OurMenuOS percentages
+    const platformFeesConfig = await getPlatformFees()
+    const businessFeePercent = platformFeesConfig.business_subaccount || 5
+    const transactionChargeMinor = subaccountCode && businessFeePercent > 0
+      ? Math.floor(amountMinor * (businessFeePercent / 100))
+      : undefined
+
     const { authorizationUrl: checkoutUrl } = await paymentProvider.initiatePayment({
       amountMinor: amountMinor,
       customerEmail: email,
       reference: reference,
       currency: 'NGN',
-      callbackUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/api/bookings/callback`
+      callbackUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/api/bookings/callback`,
+      subaccountCode: subaccountCode || undefined,
+      transactionChargeMinor
     })
 
     return { checkoutUrl }
@@ -357,5 +386,36 @@ export async function optInMarketing(orderId: string): Promise<{ success?: boole
     return { success: true }
   } catch (err: unknown) {
     return { error: err instanceof Error ? err.message : 'Failed to opt in' }
+  }
+}
+
+export async function submitQuoteRequest(formData: FormData) {
+  try {
+    const supabase = await createClient()
+
+    const page_id = formData.get('page_id') as string
+    const organization_id = formData.get('organization_id') as string
+    const location_id = formData.get('location_id') as string
+    const quote_data = JSON.parse(formData.get('quote_data') as string)
+    
+    const referenceNumber = `QUO-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`
+
+    const { error } = await supabase
+      .from('page_bookings')
+      .insert({
+        page_id,
+        status: 'pending',
+        booking_notes: JSON.stringify({ ...quote_data, referenceNumber }),
+        customer_name: quote_data.customerName,
+        customer_email: quote_data.customerEmail,
+        customer_phone: quote_data.customerPhone,
+      })
+
+    if (error) throw error
+
+    return { success: true, referenceNumber }
+  } catch (err: unknown) {
+    Sentry.captureException(err)
+    return { success: false, error: err instanceof Error ? err.message : 'Failed to submit quote request' }
   }
 }

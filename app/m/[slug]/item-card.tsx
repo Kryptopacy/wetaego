@@ -5,7 +5,7 @@ import { formatCurrency } from '@/lib/utils/currency'
 import { useState } from 'react'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
-import { Tables } from '../../../../../types'
+import { Tables } from '@/types'
 import { Plus, Minus, ShoppingBag, X } from 'lucide-react'
 import { AnimatedDialog, AnimatedDialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 

@@ -185,6 +185,43 @@ export async function processSubscriptionPayment(
   }
 }
 
+export async function processCreditPackPayment(
+  supabase: SupabaseClient,
+  orgId: string,
+  creditsAdded: number,
+  amountPaidMinor: number,
+  currency: string,
+  reference: string
+) {
+  // 1. Fetch current credits
+  const { data: org } = await supabase
+    .from('organizations')
+    .select('purchased_credits, name')
+    .eq('id', orgId)
+    .single()
+
+  if (!org) return
+
+  // 2. Update credits
+  await supabase
+    .from('organizations')
+    .update({ purchased_credits: (org.purchased_credits || 0) + creditsAdded })
+    .eq('id', orgId)
+
+  // 3. Record billing payment
+  const { data: paymentRecord } = await supabase
+    .from('billing_payments')
+    .insert({
+      organization_id: orgId,
+      amount_minor: amountPaidMinor,
+      currency: currency || 'NGN',
+      payment_purpose: 'credit_pack',
+      provider_reference: reference
+    })
+    .select('id')
+    .single()
+}
+
 export async function processOrderPayment(
   supabase: SupabaseClient,
   orderId: string,
@@ -249,9 +286,86 @@ export async function processOrderPayment(
         }) as React.ReactElement
       })
     } catch (e) {
-      console.error('Failed to send order receipt', e)
+      console.error('Failed to send order receipt email:', e)
     }
   }
 
+  return 'success'
+}
+
+export async function processQuoteMilestonePayment(
+  supabase: SupabaseClient,
+  rawReference: string,
+  amountPaidMinor: number
+) {
+  // Reference format: QUOTE_<quoteId>_<milestoneId>_<timestamp>
+  const parts = rawReference.split('_')
+  if (parts.length < 3) throw new Error('Invalid quote reference format')
+  
+  const quoteId = parts[1]
+  const milestoneId = parts[2]
+
+  const { data: quote } = await supabase
+    .from('page_bookings')
+    .select('id, booking_notes, amount_paid_minor, customer_email, customer_name, location_pages(location_id)')
+    .eq('id', quoteId)
+    .single()
+
+  if (!quote) throw new Error('Quote not found')
+
+  let parsedNotes: any = {}
+  try {
+    if (quote.booking_notes) parsedNotes = JSON.parse(quote.booking_notes)
+  } catch (e) {}
+
+  if (!Array.isArray(parsedNotes.milestones)) {
+    // If no milestones are explicitly defined, we assume this is a fallback "Full Payment"
+    // Update quote status
+    await supabase
+      .from('page_bookings')
+      .update({
+        payment_status: 'paid',
+        status: 'confirmed',
+        amount_paid_minor: (quote.amount_paid_minor || 0) + amountPaidMinor,
+        payment_reference: rawReference
+      })
+      .eq('id', quoteId)
+  } else {
+    // Update specific milestone status
+    const milestoneIndex = parsedNotes.milestones.findIndex((m: any) => m.id === milestoneId)
+    if (milestoneIndex > -1) {
+      parsedNotes.milestones[milestoneIndex].status = 'paid'
+    }
+
+    // Check if all milestones are paid
+    const allPaid = parsedNotes.milestones.every((m: any) => m.status === 'paid')
+
+    await supabase
+      .from('page_bookings')
+      .update({
+        booking_notes: JSON.stringify(parsedNotes),
+        payment_status: allPaid ? 'paid' : 'deposit_paid',
+        status: 'confirmed',
+        amount_paid_minor: (quote.amount_paid_minor || 0) + amountPaidMinor,
+        payment_reference: rawReference
+      })
+      .eq('id', quoteId)
+  }
+
+  // Push notification to business
+  const locationId = (quote.location_pages as { location_id?: string })?.location_id
+  if (locationId) {
+    await notifyBusiness(
+      locationId,
+      {
+        title: '💸 Quote Payment Received',
+        body: `${quote.customer_name || 'Customer'} paid a milestone for their quote.`,
+        url: `/dashboard/quotes/${quoteId}`,
+        tag: 'quote-payment'
+      }
+    ).catch(console.error)
+  }
+
+  // Optional: Send customer receipt
   return 'success'
 }

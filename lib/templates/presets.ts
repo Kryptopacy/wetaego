@@ -7,7 +7,7 @@
  * — they just pick their business type and everything is pre-configured.
  */
 
-export type TemplateType = 'catalog' | 'booking' | 'listing' | 'rate_card' | 'info' | 'custom'
+export type TemplateType = 'catalog' | 'booking' | 'listing' | 'rate_card' | 'info' | 'custom' | 'quote'
 export type BillingMode = 'table_service' | 'standard_checkout'
 export type PaymentMode = 'full' | 'deposit'
 
@@ -35,7 +35,7 @@ export interface BusinessTypePreset {
   /** AI content hint for the first item description */
   ai_item_hint: string
   /** Category group for the picker UI */
-  group: 'food_drink' | 'hospitality' | 'services' | 'retail' | 'property' | 'creative'
+  group: 'food_drink' | 'hospitality' | 'services' | 'retail' | 'property' | 'creative' | 'quote_based'
 }
 
 export const BUSINESS_TYPE_PRESETS: Record<string, BusinessTypePreset> = {
@@ -242,6 +242,92 @@ export const BUSINESS_TYPE_PRESETS: Record<string, BusinessTypePreset> = {
     ai_item_hint: 'a fashion item description, style-forward and aspirational',
     group: 'retail',
   },
+  creative_portfolio: {
+    label: 'Creative Portfolio',
+    description: 'A visual showcase of your work, projects, and case studies',
+    icon: '🎨',
+    template_type: 'info',
+    billing_enabled: false,
+    billing_mode: 'standard_checkout',
+    payment_mode: 'full',
+    deposit_percentage: 0,
+    default_page_title: "{businessName} — Portfolio",
+    ai_cover_hint: 'a minimalist and aesthetic designer workspace, moodboards, creative tools',
+    ai_item_hint: 'a brief description of a creative project or artwork',
+    group: 'creative',
+  },
+
+  // ─── QUOTE-BASED (B2B / Custom Services) ─────────────────────────────────────
+  contractor: {
+    label: 'Contractor / Renovation',
+    description: 'Allow clients to request quotes for custom builds and renovations',
+    icon: '👷',
+    template_type: 'quote',
+    billing_enabled: true,
+    billing_mode: 'standard_checkout',
+    payment_mode: 'deposit',
+    deposit_percentage: 50,
+    default_page_title: "{businessName} — Services",
+    ai_cover_hint: 'a modern home renovation in progress, architectural blueprints, high quality craftsmanship',
+    ai_item_hint: 'a description of a contracting service like bathroom remodelling',
+    group: 'quote_based',
+  },
+  agency: {
+    label: 'Creative / Marketing Agency',
+    description: 'Clients can select services and request a custom project quote',
+    icon: '🚀',
+    template_type: 'quote',
+    billing_enabled: true,
+    billing_mode: 'standard_checkout',
+    payment_mode: 'full',
+    deposit_percentage: 0,
+    default_page_title: "{businessName} — Agency Services",
+    ai_cover_hint: 'a sleek modern creative agency office, team collaborating around a table',
+    ai_item_hint: 'a description of a marketing or design service, like brand identity or SEO',
+    group: 'quote_based',
+  },
+  custom_fabrication: {
+    label: 'Custom Fabrication / Furniture',
+    description: 'Clients can request quotes for custom-built or manufactured items',
+    icon: '🪚',
+    template_type: 'quote',
+    billing_enabled: true,
+    billing_mode: 'standard_checkout',
+    payment_mode: 'deposit',
+    deposit_percentage: 50,
+    default_page_title: "{businessName} — Custom Builds",
+    ai_cover_hint: 'a bright artisan workshop, custom woodworking or metal fabrication tools',
+    ai_item_hint: 'a description of a custom built piece of furniture or machinery',
+    group: 'quote_based',
+  },
+  it_services: {
+    label: 'IT / Software Services',
+    description: 'Receive project requirements and generate formal quotes for software dev or IT support',
+    icon: '💻',
+    template_type: 'quote',
+    billing_enabled: true,
+    billing_mode: 'standard_checkout',
+    payment_mode: 'full',
+    deposit_percentage: 0,
+    default_page_title: "{businessName} — Tech Solutions",
+    ai_cover_hint: 'a clean futuristic IT workspace, multiple screens with code, glowing server racks',
+    ai_item_hint: 'a description of a technical service like cloud migration or custom software development',
+    group: 'quote_based',
+  },
+  events_planner: {
+    label: 'Events Planning & Production',
+    description: 'Clients browse packages and request a custom quote for their event',
+    icon: '🎉',
+    template_type: 'quote',
+    billing_enabled: true,
+    billing_mode: 'standard_checkout',
+    payment_mode: 'deposit',
+    deposit_percentage: 50,
+    default_page_title: "{businessName} — Event Services",
+    ai_cover_hint: 'a beautifully decorated wedding reception hall or corporate event stage',
+    ai_item_hint: 'a description of an event planning package or service like AV setup',
+    group: 'quote_based',
+  },
   furniture: {
     label: 'Furniture / Home Decor',
     description: 'Browse catalog with inquiry CTA',
@@ -312,6 +398,7 @@ export const BUSINESS_TYPE_GROUPS = [
   { id: 'retail', label: '🛍️ Retail', description: 'Phone stores, boutiques, home decor' },
   { id: 'property', label: '🏠 Property', description: 'Estate agents, landlords, short-stay' },
   { id: 'services', label: '🎓 Professional Services', description: 'Coaches, tutors, consultants' },
+  { id: 'quote_based', label: '📋 Custom & Quotes', description: 'Contractors, agencies, custom builds' },
 ] as const
 
 /**

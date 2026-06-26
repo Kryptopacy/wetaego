@@ -7,7 +7,7 @@ import { toast } from 'sonner'
 import { processCheckout } from './actions'
 import { motion, AnimatePresence } from 'framer-motion'
 import posthog from 'posthog-js'
-import { ShoppingBag, ChevronRight, X, Sparkles, Plus, Minus, CreditCard, Building2 } from 'lucide-react'
+import { ShoppingBag, ChevronRight, X, Sparkles, Plus, Minus, CreditCard, Building2, Lock } from 'lucide-react'
 
 interface CartFABProps {
   organizationId: string
@@ -29,6 +29,8 @@ interface CartFABProps {
   deliveryMinimumOrderMinor?: number | null
   deliveryNote?: string | null
   fulfillmentLocationLabel?: string | null
+  pageId?: string
+  refundPolicy?: string | null
 }
 
 export function CartFAB({ 
@@ -50,7 +52,9 @@ export function CartFAB({
   deliveryFeeMinor,
   deliveryMinimumOrderMinor,
   deliveryNote,
-  fulfillmentLocationLabel = 'Table'
+  fulfillmentLocationLabel = 'Table',
+  pageId,
+  refundPolicy
 }: CartFABProps) {
   const { items, totalAmountMinor, addItem, updateQuantity, clearCart, spinnerDiscount } = useCartStore()
   const [isCheckingOut, setIsCheckingOut] = useState(false)
@@ -197,7 +201,7 @@ export function CartFAB({
       const { checkoutUrl, orderId, error } = (await processCheckout(
         organizationId, locationId, items, finalTotalMinor, 0, tableNumber,
         customerNote, customerEmail, paymentFractionMinor, paymentMethod, discountAmountMinor,
-        customerName, customerPhone, fulfillmentType, deliveryInstructions
+        customerName, customerPhone, fulfillmentType, deliveryInstructions, undefined, undefined, pageId
       )) as { checkoutUrl?: string, orderId?: string, error?: string }
 
       if (error) {
@@ -565,6 +569,13 @@ export function CartFAB({
                     {manualPaymentInstructions && <p className="mt-4 text-[13px] text-amber-900/60 dark:text-amber-200/60 leading-relaxed">{manualPaymentInstructions}</p>}
                   </div>
                 )}
+                
+                {refundPolicy && (
+                  <div className="p-4 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/20">
+                    <h4 className="text-[12px] font-bold text-red-800 dark:text-red-400 mb-1 uppercase tracking-wider">Cancellation Policy</h4>
+                    <p className="text-[13px] text-red-900/80 dark:text-red-200/80 leading-relaxed">{refundPolicy}</p>
+                  </div>
+                )}
               </div>
 
               {/* Sticky Checkout Button */}
@@ -588,6 +599,10 @@ export function CartFAB({
                     </>
                   )}
                 </button>
+                <div className="mt-4 flex items-center justify-center gap-1.5 opacity-60">
+                  <Lock className="w-3 h-3 text-zinc-500" />
+                  <span className="text-[11px] text-zinc-500 font-medium">Payments securely processed by CruiseHQ (OurMenu)</span>
+                </div>
               </div>
             </motion.form>
           </div>

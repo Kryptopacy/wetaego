@@ -1,7 +1,6 @@
 'use client'
 
-
-
+import { use } from 'react'
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
@@ -10,9 +9,10 @@ import { submitFeedbackAndTip } from './actions'
 export default function FeedbackPage({
   params
 }: {
-  params: { slug: string, order_id: string }
+  params: Promise<{ slug: string, order_id: string }>
 }) {
-  const isGeneral = params.order_id === 'general'
+  const { slug, order_id } = use(params)
+  const isGeneral = order_id === 'general'
   
   const [staffRating, setStaffRating] = useState(0)
   const [staffFeedback, setStaffFeedback] = useState('')
@@ -50,8 +50,8 @@ export default function FeedbackPage({
     setIsSubmitting(true)
     try {
       const { checkoutUrl, error } = await submitFeedbackAndTip(
-        params.slug,
-        isGeneral ? null : params.order_id,
+        slug,
+        isGeneral ? null : order_id,
         locationId,
         staffRating,
         staffFeedback,
@@ -91,7 +91,7 @@ export default function FeedbackPage({
           Your feedback has been submitted successfully. We appreciate your business and hope to see you again soon.
         </p>
         <button 
-          onClick={() => window.location.href = `/m/${params.slug}`}
+          onClick={() => window.location.href = `/m/${slug}`}
           className="px-6 py-3 rounded-xl bg-zinc-800 text-white font-medium hover:bg-zinc-700 transition-colors"
         >
           Return to Menu
@@ -212,7 +212,7 @@ export default function FeedbackPage({
               {isSubmitting ? 'Submitting...' : (tipSelection !== '0' ? 'Submit & Pay Tip' : 'Submit Feedback')}
             </button>
             <button 
-              onClick={() => window.location.href = `/m/${params.slug}`}
+              onClick={() => window.location.href = `/m/${slug}`}
               className="w-full py-4 text-zinc-500 text-sm font-medium hover:text-zinc-300 transition-colors mt-2"
             >
               Skip & Return to Menu

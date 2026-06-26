@@ -51,6 +51,11 @@ export function PageBuilderForm({ pageId, templateType, initialItems, orgId }: P
       if (category) {
         formData.set('item_data', JSON.stringify({ category }))
       }
+    } else if (templateType === 'quote') {
+      const unit = formData.get('unit') as string
+      const price_range = formData.get('price_range') as string
+      const turnaround = formData.get('turnaround') as string
+      formData.set('item_data', JSON.stringify({ unit, price_range, turnaround }))
     }
 
     try {
@@ -78,6 +83,11 @@ export function PageBuilderForm({ pageId, templateType, initialItems, orgId }: P
       if (category) {
         formData.set('item_data', JSON.stringify({ category }))
       }
+    } else if (templateType === 'quote') {
+      const unit = formData.get('unit') as string
+      const price_range = formData.get('price_range') as string
+      const turnaround = formData.get('turnaround') as string
+      formData.set('item_data', JSON.stringify({ unit, price_range, turnaround }))
     }
 
     try {
@@ -159,6 +169,25 @@ export function PageBuilderForm({ pageId, templateType, initialItems, orgId }: P
             <label className="block text-xs font-medium text-zinc-400 mb-1">Category</label>
             <input name="category" defaultValue={category} className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white" placeholder="e.g. Services" />
           </div>
+        )}
+
+        {templateType === 'quote' && (
+          <>
+            <div>
+              <label className="block text-xs font-medium text-zinc-400 mb-1">Unit of Measurement (Optional)</label>
+              <input name="unit" defaultValue={item?.item_data?.unit || ''} className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white" placeholder="e.g. per square meter, per hour, per unit" />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-medium text-zinc-400 mb-1">Price Range</label>
+                <input name="price_range" defaultValue={item?.item_data?.price_range || ''} className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white" placeholder="e.g. $500 - $1,200" />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-zinc-400 mb-1">Turnaround Time</label>
+                <input name="turnaround" defaultValue={item?.item_data?.turnaround || ''} className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white" placeholder="e.g. 2-3 weeks" />
+              </div>
+            </div>
+          </>
         )}
 
         <div>

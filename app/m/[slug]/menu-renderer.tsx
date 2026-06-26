@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ItemCard } from './item-card'
 import { toast } from 'sonner'
-import { Tables } from '../../../../../types'
+import { Tables } from '@/types'
 import { Sparkles, Search, X, Globe, ChevronRight } from 'lucide-react'
 
 export type CategoryWithItems = Tables<'menu_categories'> & {

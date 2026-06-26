@@ -1,7 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import Link from 'next/link'
 import { format } from 'date-fns'
 
@@ -22,7 +20,7 @@ export default async function QuotesDashboard() {
 
   if (!member) redirect('/dashboard')
 
-  // Fetch quotes linked to rate_card, info, custom templates
+  // Fetch quotes linked to rate_card, info, custom, quote templates
   const { data: quotes } = await supabase
     .from('page_bookings')
     .select(`
@@ -31,7 +29,7 @@ export default async function QuotesDashboard() {
       page_items(title)
     `)
     .eq('location_pages.locations.organization_id', member.organization_id)
-    .in('location_pages.template_type', ['rate_card', 'info', 'custom'])
+    .in('location_pages.template_type', ['rate_card', 'info', 'custom', 'quote'])
     .order('created_at', { ascending: false })
 
   return (
@@ -89,9 +87,9 @@ export default async function QuotesDashboard() {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <button className="text-violet-400 hover:text-violet-300 font-medium text-sm transition-colors">
+                      <Link href={`/dashboard/quotes/${quote.id}`} className="text-violet-400 hover:text-violet-300 font-medium text-sm transition-colors">
                         View & Reply
-                      </button>
+                      </Link>
                     </td>
                   </tr>
                 ))

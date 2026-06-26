@@ -7,6 +7,7 @@ import { BookingRenderer } from './templates/booking-renderer'
 import { CatalogPageRenderer } from './templates/catalog-page-renderer'
 import { ListingRenderer } from './templates/listing-renderer'
 import { RateCardRenderer } from './templates/rate-card-renderer'
+import { QuoteRenderer } from './templates/quote-renderer'
 import { InfoRenderer } from './templates/info-renderer'
 import { AIChat } from '../../ai-chat'
 import { RouletteFAB } from '../../roulette-fab'
@@ -185,6 +186,9 @@ export default async function PublicPageView({
       break
     case 'rate_card':
       RendererContent = <RateCardRenderer {...sharedProps} />
+      break
+    case 'quote':
+      RendererContent = <QuoteRenderer {...sharedProps} />
       break
     case 'info':
     case 'custom':

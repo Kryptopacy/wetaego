@@ -1,10 +1,10 @@
 'use client'
 
-import { Tables } from '../../../../../types'
+import { Tables } from '@/types'
 import Link from "next/link";
 import { motion } from 'framer-motion';
 import Image from "next/image";
-import { ArrowRight, Utensils, Calendar, Info, FileText, LayoutList } from "lucide-react";
+import { ArrowRight, Utensils, Calendar, Info, FileText, LayoutList, FileSignature } from "lucide-react";
 
 function getLuminance(hex: string) {
   let r = 0, g = 0, b = 0;
@@ -44,6 +44,7 @@ export function PortalRenderer({
       case 'catalog': return <Utensils className="w-5 h-5" />;
       case 'info': return <Info className="w-5 h-5" />;
       case 'rate_card': return <FileText className="w-5 h-5" />;
+      case 'quote': return <FileSignature className="w-5 h-5" />;
       default: return <LayoutList className="w-5 h-5" />;
     }
   };

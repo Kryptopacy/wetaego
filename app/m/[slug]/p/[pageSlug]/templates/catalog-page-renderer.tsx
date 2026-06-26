@@ -230,6 +230,8 @@ export function CatalogPageRenderer({ location, page, items, locationSlug, payme
           deliveryMinimumOrderMinor={location.delivery_minimum_order_minor ?? 0}
           deliveryNote={location.delivery_note ?? ''}
           fulfillmentLocationLabel={location.fulfillment_location_label ?? ''}
+          pageId={page.id}
+          refundPolicy={page.template_data?.refund_policy as string | undefined}
         />
       )}
     </div>

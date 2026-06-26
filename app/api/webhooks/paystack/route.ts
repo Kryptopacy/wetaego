@@ -6,6 +6,7 @@ import { paystackProvider } from '@/lib/payments/paystack'
 import {
   processBookingPayment,
   processSubscriptionPayment,
+  processCreditPackPayment,
   processOrderPayment
 } from '@/lib/payments/webhook-service'
 
@@ -56,6 +57,18 @@ export async function POST(req: Request) {
           }
           throw e
         }
+      } else if (rawReference.startsWith('QUOTE_')) {
+        // Quote Milestone References: QUOTE_<quoteId>_<milestoneId>_<hash>
+        try {
+          // Note: we dynamically import the function here or add it to the webhook-service exports
+          const { processQuoteMilestonePayment } = await import('@/lib/payments/webhook-service')
+          await processQuoteMilestonePayment(supabase, rawReference, amountPaidMinor)
+        } catch (e: unknown) {
+          console.error('Failed to process quote payment', e)
+          // We still return 200 so Paystack stops retrying if it's a structural error, 
+          // or we can let it throw. For now, we'll just throw so it's logged.
+          throw e
+        }
 
         await supabase.from('webhook_events').insert({ provider_reference: event.data.reference, event_type: 'charge.success' })
         return NextResponse.json({ status: 'booking_confirmed' }, { status: 200 })
@@ -72,6 +85,19 @@ export async function POST(req: Request) {
         }
         await supabase.from('webhook_events').insert({ provider_reference: event.data.reference, event_type: 'charge.success' })
         return NextResponse.json({ status: 'subscription_confirmed' }, { status: 200 })
+      }
+
+      // ── Credit Pack payment ───────────────────────────────────────────────
+      if (event.data.metadata?.is_credit_pack) {
+        const orgId = event.data.metadata.organization_id
+        const credits = event.data.metadata.credits || 0
+        const currency = event.data.currency || 'NGN'
+        
+        if (orgId && credits > 0) {
+          await processCreditPackPayment(supabase, orgId, credits, amountPaidMinor, currency, event.data.reference)
+        }
+        await supabase.from('webhook_events').insert({ provider_reference: event.data.reference, event_type: 'charge.success' })
+        return NextResponse.json({ status: 'credit_pack_confirmed' }, { status: 200 })
       }
 
       // ── Standard order payment ───────────────────────────────────────────────

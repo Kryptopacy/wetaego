@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
+import { Lock } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/currency'
 
 interface PageItem {
@@ -384,6 +385,11 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
                 ) : 'Confirm Booking'}
               </button>
 
+              <div className="mt-4 flex items-center justify-center gap-1.5 opacity-60">
+                <Lock className="w-3 h-3 text-zinc-500" />
+                <span className="text-[11px] text-zinc-500 font-medium">Payments securely processed by CruiseHQ (OurMenu)</span>
+              </div>
+
               {/* Manual payment fallback */}
               {location.manual_payment_enabled && page.billing_enabled && (
                 <div className={`rounded-xl border p-4 text-xs space-y-1 ${!paymentIsLive ? 'border-amber-500/30 bg-amber-500/10 text-amber-100/70' : 'border-zinc-700 bg-zinc-900 text-zinc-400'}`}>
@@ -482,6 +488,11 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
                         >
                           {selectedItems.some(i => i.id === item.id) ? 'Selected ✓' : 'Select Service'}
                         </button>
+                
+                <div className="mt-4 flex items-center justify-center gap-1.5 opacity-60">
+                  <Lock className="w-3 h-3 text-zinc-500" />
+                  <span className="text-[11px] text-zinc-500 font-medium">Payments securely processed by CruiseHQ (OurMenu)</span>
+                </div>
                         <Link
                           href={`/m/${locationSlug}/p/${page.slug || page.id}/${item.id}`}
                           className="px-4 py-2.5 rounded-xl text-sm font-bold transition-all text-zinc-300 bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 whitespace-nowrap"

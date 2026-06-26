@@ -1,5 +1,6 @@
 'use client'
 
+import { use } from 'react'
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
@@ -9,8 +10,9 @@ import Image from 'next/image'
 export default function SharingHubPage({
   params
 }: {
-  params: { order_id: string }
+  params: Promise<{ order_id: string }>
 }) {
+  const { order_id } = use(params)
   const searchParams = useSearchParams()
   const splitCount = parseInt(searchParams.get('split') || '1')
   
@@ -21,7 +23,7 @@ export default function SharingHubPage({
     setOrigin(window.location.origin)
   }, [])
 
-  const shareLink = origin ? `${origin}/pay/${params.order_id}?split=${splitCount}` : ''
+  const shareLink = origin ? `${origin}/pay/${order_id}?split=${splitCount}` : ''
   const qrUrl = shareLink ? `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(shareLink)}&color=000000` : ''
 
   const copyLink = async () => {
@@ -95,7 +97,7 @@ export default function SharingHubPage({
               Copy Link
             </button>
             <button 
-              onClick={() => window.location.href = `/pay/${params.order_id}?split=${splitCount}`}
+              onClick={() => window.location.href = `/pay/${order_id}?split=${splitCount}`}
               className="w-full py-3 text-zinc-500 text-sm font-medium hover:text-white transition-colors"
             >
               Proceed to my payment

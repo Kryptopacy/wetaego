@@ -1,4 +1,4 @@
-export type Json =
+﻿export type Json =
   | string
   | number
   | boolean
@@ -372,8 +372,6 @@ export type Database = {
           google_maps_url: string | null
           id: string
           instagram_handle: string | null
-          x_handle: string | null
-          tiktok_handle: string | null
           logo_url: string | null
           manual_payment_account_name: string | null
           manual_payment_account_number: string | null
@@ -394,11 +392,13 @@ export type Database = {
           spinner_enabled: boolean | null
           tagline: string | null
           theme_color: string
+          tiktok_handle: string | null
           twitter_handle: string | null
           updated_at: string
           whatsapp_number: string | null
           wifi_network: string | null
           wifi_password: string | null
+          x_handle: string | null
         }
         Insert: {
           address?: string | null
@@ -421,8 +421,6 @@ export type Database = {
           google_maps_url?: string | null
           id?: string
           instagram_handle?: string | null
-          x_handle?: string | null
-          tiktok_handle?: string | null
           logo_url?: string | null
           manual_payment_account_name?: string | null
           manual_payment_account_number?: string | null
@@ -443,11 +441,13 @@ export type Database = {
           spinner_enabled?: boolean | null
           tagline?: string | null
           theme_color?: string
+          tiktok_handle?: string | null
           twitter_handle?: string | null
           updated_at?: string
           whatsapp_number?: string | null
           wifi_network?: string | null
           wifi_password?: string | null
+          x_handle?: string | null
         }
         Update: {
           address?: string | null
@@ -470,8 +470,6 @@ export type Database = {
           google_maps_url?: string | null
           id?: string
           instagram_handle?: string | null
-          x_handle?: string | null
-          tiktok_handle?: string | null
           logo_url?: string | null
           manual_payment_account_name?: string | null
           manual_payment_account_number?: string | null
@@ -492,11 +490,13 @@ export type Database = {
           spinner_enabled?: boolean | null
           tagline?: string | null
           theme_color?: string
+          tiktok_handle?: string | null
           twitter_handle?: string | null
           updated_at?: string
           whatsapp_number?: string | null
           wifi_network?: string | null
           wifi_password?: string | null
+          x_handle?: string | null
         }
         Relationships: [
           {
