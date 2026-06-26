@@ -32,15 +32,18 @@ export async function POST(req: Request) {
       const amountPaidMinor = event.data.amount as number
       const supabase = await createAdminClient()
 
-      // Idempotency check
-      const { data: existingEvent } = await supabase
+      // Bulletproof Idempotency check: Insert first, if it fails with unique constraint, it's a duplicate
+      const { error: insertError } = await supabase
         .from('webhook_events')
-        .select('id')
-        .eq('provider_reference', event.data.reference)
-        .single()
+        .insert({ provider_reference: event.data.reference, event_type: 'charge.success' })
 
-      if (existingEvent) {
-        return NextResponse.json({ status: 'already_processed' }, { status: 200 })
+      if (insertError) {
+        if (insertError.code === '23505') { // Postgres unique constraint violation
+          return NextResponse.json({ status: 'already_processed' }, { status: 200 })
+        }
+        // Strict Idempotency: Throw if we cannot acquire the lock to prevent double-processing on retries
+        console.error('Webhook Idempotency Insert Error:', insertError)
+        return NextResponse.json({ error: 'Failed to acquire idempotency lock' }, { status: 500 })
       }
 
       // ── Determine what was paid: order or booking ────────────────────────────
@@ -70,7 +73,6 @@ export async function POST(req: Request) {
           throw e
         }
 
-        await supabase.from('webhook_events').insert({ provider_reference: event.data.reference, event_type: 'charge.success' })
         return NextResponse.json({ status: 'booking_confirmed' }, { status: 200 })
       }
 
@@ -83,7 +85,6 @@ export async function POST(req: Request) {
         if (orgId) {
           await processSubscriptionPayment(supabase, orgId, planType, amountPaidMinor, currency, event.data.reference)
         }
-        await supabase.from('webhook_events').insert({ provider_reference: event.data.reference, event_type: 'charge.success' })
         return NextResponse.json({ status: 'subscription_confirmed' }, { status: 200 })
       }
 
@@ -96,7 +97,6 @@ export async function POST(req: Request) {
         if (orgId && credits > 0) {
           await processCreditPackPayment(supabase, orgId, credits, amountPaidMinor, currency, event.data.reference)
         }
-        await supabase.from('webhook_events').insert({ provider_reference: event.data.reference, event_type: 'charge.success' })
         return NextResponse.json({ status: 'credit_pack_confirmed' }, { status: 200 })
       }
 
@@ -115,7 +115,6 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'Failed to record payment' }, { status: 500 })
       }
 
-      await supabase.from('webhook_events').insert({ provider_reference: event.data.reference, event_type: 'charge.success' })
       return NextResponse.json({ status: 'success' }, { status: 200 })
     }
 

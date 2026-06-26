@@ -12,7 +12,7 @@ import { InfoRenderer } from './templates/info-renderer'
 import { AIChat } from '../../ai-chat'
 import { RouletteFAB } from '../../roulette-fab'
 import { EcosystemNav } from '@/components/layout/ecosystem-nav'
-import { withCache } from '@/lib/redis-cache'
+import { unstable_cache } from 'next/cache'
 import { PreviewBanner } from '@/components/preview-banner'
 
 export async function generateMetadata({
@@ -83,7 +83,11 @@ export default async function PublicPageView({
       .single()
     return data
   }
-  const loc = await withCache(`location_${slug}`, fetchLocation, 60)
+  const loc = await unstable_cache(
+    fetchLocation,
+    [`location_${slug}`],
+    { revalidate: 60, tags: [`location_${slug}`] }
+  )()
 
   if (!loc) notFound()
 
@@ -130,7 +134,11 @@ export default async function PublicPageView({
   }
   const page = isPreview 
     ? await fetchPage()
-    : await withCache(`location_page_${loc.id}_${pageSlug}`, fetchPage, 60)
+    : await unstable_cache(
+        fetchPage,
+        [`location_page_${loc.id}_${pageSlug}`],
+        { revalidate: 60, tags: [`location_page_${loc.id}_${pageSlug}`] }
+      )()
 
   if (!page) notFound()
 
@@ -151,7 +159,11 @@ export default async function PublicPageView({
   }
   const items = isPreview
     ? await fetchItems()
-    : await withCache(`page_items_${page.id}`, fetchItems, 60)
+    : await unstable_cache(
+        fetchItems,
+        [`page_items_${page.id}`],
+        { revalidate: 60, tags: [`page_items_${page.id}`] }
+      )()
 
   // 4. Payment Settings
   const { data: paymentSettings } = await supabase

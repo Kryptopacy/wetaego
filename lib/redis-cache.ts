@@ -1,7 +1,9 @@
 import { redis } from './upstash';
+import { unstable_cache } from 'next/cache';
 
 /**
  * Generic caching wrapper for data fetching operations.
+ * Uses Upstash Redis as primary distributed cache, and Next.js unstable_cache as fallback memory cache.
  * @param key The unique cache key
  * @param fetcher The async function to execute if cache misses
  * @param ttlSeconds Time to live in seconds (default 60s)
@@ -11,7 +13,9 @@ export async function withCache<T>(
   fetcher: () => Promise<T>,
   ttlSeconds: number = 60
 ): Promise<T> {
-  if (!redis) return await fetcher();
+  const cachedFetcher = unstable_cache(fetcher, [key], { revalidate: ttlSeconds, tags: [key] });
+
+  if (!redis) return await cachedFetcher();
 
   try {
     const cachedResult = await redis.get<T>(key);
@@ -22,8 +26,8 @@ export async function withCache<T>(
     console.error('Redis cache read error:', error);
   }
 
-  // Execute fetcher and cache result
-  const result = await fetcher();
+  // Execute cached fetcher and cache result in Redis
+  const result = await cachedFetcher();
   
   if (result) {
     try {

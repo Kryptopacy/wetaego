@@ -57,7 +57,7 @@ export default async function PagesManager() {
   if (locData) {
     const { data: pagesData } = await supabase
       .from('location_pages')
-      .select('id, title, slug, is_published, template_type, is_primary, created_at')
+      .select('id, title, slug, is_published, template_type, is_primary, created_at, business_type_preset')
       .eq('location_id', locData.id)
       .order('is_primary', { ascending: false })
       .order('created_at', { ascending: false })
@@ -180,10 +180,10 @@ export default async function PagesManager() {
 
                 {/* Edit button */}
                 <Link
-                  href={`/dashboard/pages/${page.id}/edit`}
-                  className="p-2 rounded-lg text-zinc-500 hover:text-white hover:bg-white/5 transition-colors"
-                  title="Edit"
+                  href={page.business_type_preset ? `/dashboard/pages/build/${page.business_type_preset}?pageId=${page.id}` : `/dashboard/pages/${page.id}/edit`}
+                  className="px-4 py-2 rounded-xl text-xs font-bold bg-white/5 hover:bg-white/10 transition-colors border border-white/10 flex items-center gap-2"
                 >
+                  Edit Page
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                   </svg>

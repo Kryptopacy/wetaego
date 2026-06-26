@@ -167,6 +167,11 @@ const updatePageSchema = z.object({
   payment_channels: z.array(z.string()).optional(),
   refund_policy: z.string().optional(),
   milestones_enabled: z.boolean(),
+  whatsapp_number: z.string().optional(),
+  phone_number: z.string().optional(),
+  instagram_handle: z.string().optional(),
+  x_handle: z.string().optional(),
+  tiktok_handle: z.string().optional(),
 })
 
 export async function updatePage(formData: FormData): Promise<void> {
@@ -187,6 +192,11 @@ export async function updatePage(formData: FormData): Promise<void> {
     payment_channels: formData.getAll('payment_channels') as string[],
     refund_policy: formData.get('refund_policy') || undefined,
     milestones_enabled: formData.get('milestones_enabled') === 'true',
+    whatsapp_number: formData.get('whatsapp_number') || undefined,
+    phone_number: formData.get('phone_number') || undefined,
+    instagram_handle: formData.get('instagram_handle') || undefined,
+    x_handle: formData.get('x_handle') || undefined,
+    tiktok_handle: formData.get('tiktok_handle') || undefined,
   })
 
   if (!parsed.success) throw new Error(parsed.error.issues[0].message)
@@ -203,7 +213,12 @@ export async function updatePage(formData: FormData): Promise<void> {
     hide_delivery,
     payment_channels,
     refund_policy,
-    milestones_enabled
+    milestones_enabled,
+    whatsapp_number,
+    phone_number,
+    instagram_handle,
+    x_handle,
+    tiktok_handle
   } = parsed.data
 
   if (pageId.startsWith('page-')) {
@@ -226,7 +241,12 @@ export async function updatePage(formData: FormData): Promise<void> {
     hide_delivery, 
     payment_channels, 
     refund_policy, 
-    milestones_enabled 
+    milestones_enabled,
+    whatsapp_number,
+    phone_number,
+    instagram_handle,
+    x_handle,
+    tiktok_handle
   }
 
   const { error } = await supabase

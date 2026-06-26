@@ -125,21 +125,27 @@ export function RateCardRenderer({ location, page, items, locationSlug, paymentI
     .filter(Boolean)
     .join(' + ')
 
-  // Group items by category
+  // Group items by category dynamically
   const grouped: Record<string, PageItem[]> = {}
   const uncategorized: PageItem[] = []
 
   for (const item of items) {
-    const cat = item.item_data?.category
-    if (cat && CATEGORY_ORDER.includes(cat)) {
+    const cat = item.item_data?.category?.trim()
+    if (cat) {
       grouped[cat] = [...(grouped[cat] || []), item]
     } else {
       uncategorized.push(item)
     }
   }
 
+  // Sort groups: predefined first in CATEGORY_ORDER, then custom categories sorted alphabetically
+  const customCategories = Object.keys(grouped)
+    .filter(c => !CATEGORY_ORDER.includes(c))
+    .sort()
+
   const sections = [
     ...CATEGORY_ORDER.filter(c => grouped[c]?.length > 0).map(c => ({ key: c, items: grouped[c] })),
+    ...customCategories.map(c => ({ key: c, items: grouped[c] })),
     ...(uncategorized.length > 0 ? [{ key: 'other', items: uncategorized }] : []),
   ]
 
@@ -227,11 +233,12 @@ export function RateCardRenderer({ location, page, items, locationSlug, paymentI
         {/* Rate sections */}
         <div className="space-y-8">
           {sections.map(({ key, items: sectionItems }) => {
-            const meta = CATEGORY_LABELS[key] || { label: 'Services', color: 'text-zinc-300', bg: 'bg-zinc-800/40' }
+            const isBuiltIn = CATEGORY_LABELS[key.toLowerCase()]
+            const meta = isBuiltIn || { label: key, color: 'text-zinc-300', bg: 'bg-zinc-800/40' }
             return (
               <div key={key}>
                 <div className="flex items-center gap-3 mb-3">
-                  <span className={`px-3 py-1 rounded-full text-xs font-bold ${meta.color} ${meta.bg} border border-white/5`}>
+                  <span className={`px-3 py-1 rounded-full text-xs font-bold ${meta.color} ${meta.bg} border border-white/5 capitalize`}>
                     {meta.label}
                   </span>
                   <div className="h-px flex-1 bg-zinc-800" />

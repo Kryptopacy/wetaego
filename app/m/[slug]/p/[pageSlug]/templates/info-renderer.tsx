@@ -16,6 +16,7 @@ interface InfoRendererProps {
   page: {
     title: string
     content?: string
+    template_data?: Record<string, any>
   }
   items: unknown[]
   locationSlug: string
@@ -25,6 +26,12 @@ interface InfoRendererProps {
 export function InfoRenderer({ location, page, locationSlug }: InfoRendererProps) {
   const themeColor = location.theme_color || '#7c3aed'
   const lines = (page.content || '').split('\n')
+
+  const whatsapp = page.template_data?.whatsapp_number || location.whatsapp_number
+  const phone = page.template_data?.phone_number || location.phone_number
+  const instagram = page.template_data?.instagram_handle || location.instagram_handle
+  const xHandle = page.template_data?.x_handle || location.x_handle
+  const tiktok = page.template_data?.tiktok_handle || location.tiktok_handle
 
   function renderLine(line: string, i: number) {
     const trimmed = line.trim()
@@ -94,13 +101,13 @@ export function InfoRenderer({ location, page, locationSlug }: InfoRendererProps
         </div>
 
         {/* Contact Strip */}
-        {(location.whatsapp_number || location.phone_number || location.instagram_handle || location.x_handle || location.tiktok_handle) && (
+        {(whatsapp || phone || instagram || xHandle || tiktok) && (
           <div className="mt-12 pt-8 border-t border-zinc-800/50">
             <h3 className="text-sm font-bold text-white mb-4 text-center">Connect with us</h3>
             <div className="flex flex-wrap gap-3 justify-center">
-              {location.whatsapp_number && (
+              {whatsapp && (
                 <a
-                  href={`https://wa.me/${location.whatsapp_number.replace(/[^0-9]/g, '')}`}
+                  href={`https://wa.me/${whatsapp.replace(/[^0-9]/g, '')}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm font-medium hover:bg-emerald-500/20 transition-colors"
@@ -109,23 +116,23 @@ export function InfoRenderer({ location, page, locationSlug }: InfoRendererProps
                   WhatsApp
                 </a>
               )}
-              {location.phone_number && (
-                <a href={`tel:${location.phone_number}`} className="flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-300 text-sm font-medium hover:bg-zinc-700 transition-colors">
+              {phone && (
+                <a href={`tel:${phone}`} className="flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-300 text-sm font-medium hover:bg-zinc-700 transition-colors">
                   📞 Call
                 </a>
               )}
-              {location.instagram_handle && (
-                <a href={`https://instagram.com/${location.instagram_handle.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-300 text-sm font-medium hover:bg-zinc-700 transition-colors">
+              {instagram && (
+                <a href={`https://instagram.com/${instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-300 text-sm font-medium hover:bg-zinc-700 transition-colors">
                   Instagram
                 </a>
               )}
-              {location.x_handle && (
-                <a href={`https://x.com/${location.x_handle.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-300 text-sm font-medium hover:bg-zinc-700 transition-colors">
+              {xHandle && (
+                <a href={`https://x.com/${xHandle.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-300 text-sm font-medium hover:bg-zinc-700 transition-colors">
                   𝕏 Twitter
                 </a>
               )}
-              {location.tiktok_handle && (
-                <a href={`https://tiktok.com/@${location.tiktok_handle.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-300 text-sm font-medium hover:bg-zinc-700 transition-colors">
+              {tiktok && (
+                <a href={`https://tiktok.com/@${tiktok.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-300 text-sm font-medium hover:bg-zinc-700 transition-colors">
                   🎵 TikTok
                 </a>
               )}

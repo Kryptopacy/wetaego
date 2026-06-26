@@ -11,7 +11,7 @@ import { SpinnerModal } from '../../components/spinner-modal'
 import { PortalRenderer } from './portal-renderer'
 import { EcosystemNav } from '@/components/layout/ecosystem-nav'
 
-import { withCache } from '@/lib/redis-cache'
+import { unstable_cache } from 'next/cache'
 
 
 import { VenueHeader } from './components/venue-header'
@@ -94,7 +94,11 @@ export default async function PublicMenuPage({
     return data;
   }
 
-  const locationData = await withCache(`location_${slug}`, locationFetcher, 60);
+  const locationData = await unstable_cache(
+    locationFetcher,
+    [`location_${slug}`],
+    { revalidate: 60, tags: [`location_${slug}`] }
+  )();
 
   if (!locationData) {
     notFound()
@@ -173,7 +177,11 @@ export default async function PublicMenuPage({
   
   const locationPages = isPreview
     ? await fetchLocationPages()
-    : await withCache(`location_pages_${location.id}`, fetchLocationPages, 60)
+    : await unstable_cache(
+        fetchLocationPages,
+        [`location_pages_${location.id}`],
+        { revalidate: 60, tags: [`location_pages_${location.id}`] }
+      )()
 
   const view = resolvedSearchParams.view;
   const hasPortalMode = locationPages && locationPages.length > 0;
@@ -206,7 +214,11 @@ export default async function PublicMenuPage({
     return data || []
   }
 
-  const categories = await withCache(`menu_categories_${location.id}`, fetchMenuCategories, 60)
+  const categories = await unstable_cache(
+    fetchMenuCategories,
+    [`menu_categories_${location.id}`],
+    { revalidate: 60, tags: [`menu_categories_${location.id}`] }
+  )()
 
   const allMenuItems = categories.flatMap(cat => 
     (cat.menu_items || []).map(item => ({

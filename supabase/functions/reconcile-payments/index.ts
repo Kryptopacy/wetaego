@@ -142,23 +142,21 @@ async function verifyWithPaystack(reference: string) {
   }
 }
 
-/*
-─── Schedule this function via pg_cron ────────────────────────────────────────
-Add to a migration file:
-
-SELECT cron.schedule(
-  'reconcile-pending-payments',
-  '*/30 * * * *',  -- every 30 minutes
-  $$
-  SELECT net.http_post(
-    url := current_setting('app.supabase_url') || '/functions/v1/reconcile-payments',
-    headers := jsonb_build_object(
-      'Authorization', 'Bearer ' || current_setting('app.service_role_key'),
-      'Content-Type', 'application/json'
-    ),
-    body := '{}'::jsonb
-  )
-  $$
-);
-─────────────────────────────────────────────────────────────────────────────── 
-*/
+// ─── Schedule this function via pg_cron ────────────────────────────────────────
+// Add to a migration file:
+// 
+// SELECT cron.schedule(
+//   'reconcile-pending-payments',
+//   '*/30 * * * *',  -- every 30 minutes
+//   $$
+//   SELECT net.http_post(
+//     url := current_setting('app.supabase_url') || '/functions/v1/reconcile-payments',
+//     headers := jsonb_build_object(
+//       'Authorization', 'Bearer ' || current_setting('app.service_role_key'),
+//       'Content-Type', 'application/json'
+//     ),
+//     body := '{}'::jsonb
+//   )
+//   $$
+// );
+// ─────────────────────────────────────────────────────────────────────────────── 
