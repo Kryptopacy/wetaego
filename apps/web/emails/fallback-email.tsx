@@ -41,7 +41,7 @@ export const FallbackEmail = ({
                 CRITICAL ALERT
               </Heading>
               <Text className="text-gray-600 text-base mt-0 font-medium">
-                The KDS/WhatsApp notification failed to deliver for a recent paid order.
+                The Dashboard/WhatsApp notification failed to deliver for a recent paid order.
               </Text>
             </Section>
 

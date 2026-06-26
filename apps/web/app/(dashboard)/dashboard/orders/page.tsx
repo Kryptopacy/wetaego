@@ -4,9 +4,11 @@ import { OrdersClient } from './orders-client'
 import { mapSupabaseOrderToUI } from '@/lib/utils/transformers'
 import { UIOrder } from '@/lib/types/frontend'
 import { cookies } from 'next/headers'
+import { getTranslations } from 'next-intl/server'
 
 export default async function OrdersPage() {
   const supabase = await createClient()
+  const t = await getTranslations('Dashboard')
 
   // For MVP, we just show a placeholder that lists any orders we can find.
   const { data: userData } = await supabase.auth.getUser()
@@ -90,11 +92,11 @@ export default async function OrdersPage() {
   return (
     <div className="max-w-6xl h-[calc(100vh-8rem)] flex flex-col">
       <div className="flex items-center justify-between mb-8 flex-shrink-0">
-        <h1 className="text-2xl font-bold text-white">Live Operations</h1>
+        <h1 className="text-2xl font-bold text-white">{t('liveOperations')}</h1>
         <div className="flex gap-2">
           <span className="flex items-center gap-2 px-3 py-1 rounded-full bg-green-500/10 text-green-400 text-sm font-medium border border-green-500/20">
             <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-            Receiving Orders
+            {t('receivingOrders')}
           </span>
         </div>
       </div>

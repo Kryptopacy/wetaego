@@ -2,6 +2,9 @@ import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
 import withPWAInit from "@ducanh2912/next-pwa";
 import bundleAnalyzer from "@next/bundle-analyzer";
+import createNextIntlPlugin from 'next-intl/plugin';
+
+const withNextIntl = createNextIntlPlugin();
 
 const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
@@ -19,6 +22,10 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'images.unsplash.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'picsum.photos',
       },
       {
         protocol: 'https',
@@ -54,7 +61,7 @@ const nextConfig: NextConfig = {
           },
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.paystack.co https://checkout.paystack.com https://vercel.live https://us-assets.i.posthog.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.unsplash.com https://api.dicebear.com *.supabase.co; font-src 'self' data:; connect-src 'self' *.supabase.co wss://*.supabase.co https://api.paystack.co https://us.i.posthog.com https://us-assets.i.posthog.com wss://ws-us2.pusher.com https://sockjs-us2.pusher.com wss://*.vercel.live https://*.vercel.live; frame-src 'self' https://checkout.paystack.com https://vercel.live;"
+            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.paystack.co https://checkout.paystack.com https://vercel.live https://us-assets.i.posthog.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.unsplash.com https://picsum.photos https://api.dicebear.com *.supabase.co; font-src 'self' data:; connect-src 'self' *.supabase.co wss://*.supabase.co https://api.paystack.co https://us.i.posthog.com https://us-assets.i.posthog.com wss://ws-us2.pusher.com https://sockjs-us2.pusher.com wss://*.vercel.live https://*.vercel.live; frame-src 'self' https://checkout.paystack.com https://vercel.live;"
           },
         ],
       },
@@ -62,7 +69,7 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withSentryConfig(withBundleAnalyzer(withPWA(nextConfig)), {
+export default withSentryConfig(withBundleAnalyzer(withPWA(withNextIntl(nextConfig))), {
   silent: !process.env.CI,
   widenClientFileUpload: true,
   tunnelRoute: "/monitoring",

@@ -1,0 +1,9 @@
+{
+  "Dashboard": {
+    "liveOperations": "Operaciones en Vivo",
+    "receivingOrders": "Recibiendo Órdenes",
+    "hardwareSettings": "Configuración de Hardware",
+    "language": "Idioma",
+    "languageDesc": "Idioma de la interfaz del panel de cumplimiento"
+  }
+}

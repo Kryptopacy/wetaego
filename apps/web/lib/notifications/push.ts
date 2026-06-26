@@ -14,6 +14,7 @@
 
 import webpush from 'web-push'
 import { createClient } from '@/lib/supabase/server'
+import { formatCurrency } from '../utils/currency'
 
 // Configure VAPID once on module load
 const vapidConfigured =
@@ -112,12 +113,12 @@ export async function sendPushToOrg(
 
 export function newOrderNotification(tableIdentifier: string, amountMinor: number): PushPayload {
   return {
-    title: '🛎️ New Order Received',
-    body: `Table ${tableIdentifier} — ₦${(amountMinor / 100).toLocaleString()}`,
+    title: `Order Received • ${formatCurrency(amountMinor, 'NGN')}`,
+    body: `Table ${tableIdentifier} — ${formatCurrency(amountMinor, 'NGN')}`,
     url: '/dashboard/orders',
     tag: 'new-order',
     requireInteraction: true,
-    actions: [{ action: 'view', title: 'Open KDS' }],
+    actions: [{ action: 'view', title: 'Open Dashboard' }],
   }
 }
 
@@ -154,8 +155,8 @@ export function newQuoteRequestNotification(serviceName: string, customerName: s
 
 export function paymentConfirmedNotification(reference: string, amountMinor: number): PushPayload {
   return {
-    title: '✅ Payment Confirmed',
-    body: `₦${(amountMinor / 100).toLocaleString()} received · Ref: ${reference.slice(-6)}`,
+    title: 'Payment Confirmed',
+    body: `${formatCurrency(amountMinor, 'NGN')} received · Ref: ${reference.slice(-6)}`,
     url: '/dashboard',
     tag: 'payment-confirmed',
   }

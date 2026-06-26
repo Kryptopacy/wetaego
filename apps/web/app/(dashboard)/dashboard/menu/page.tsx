@@ -80,7 +80,7 @@ export default async function MenuManagerPage() {
   if (!org || !menu) {
     return (
       <div className="max-w-5xl">
-        <h1 className="text-2xl font-bold text-white mb-6">Menu Manager</h1>
+        <h1 className="text-2xl font-bold text-white mb-6">Primary Catalog</h1>
         <div className="rounded-xl border border-yellow-800 bg-yellow-900/20 p-6">
           <p className="text-yellow-400">Please complete your Business Settings to create your first menu.</p>
         </div>
@@ -91,7 +91,7 @@ export default async function MenuManagerPage() {
   return (
     <div className="max-w-5xl">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-4">
-        <h1 className="text-2xl font-bold text-white">Menu Manager</h1>
+        <h1 className="text-2xl font-bold text-white">Primary Catalog</h1>
         <TranslateMenuButton orgId={org.id} categories={categories} />
       </div>
 

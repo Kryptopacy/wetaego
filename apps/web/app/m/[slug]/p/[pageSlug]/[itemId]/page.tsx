@@ -2,6 +2,7 @@ export const revalidate = 60;
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
+import { formatCurrency } from '@/lib/utils/currency'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ShareButton } from '@/app/components/share-button'
@@ -46,7 +47,7 @@ export default async function ItemDetailsPage({
   // 1. Get location
   const locQuery = supabase
     .from('locations')
-    .select('id, name, theme_color, whatsapp_number')
+    .select('id, name, theme_color, whatsapp_number, currency_code')
     .eq('slug', slug)
     .single()
   const { data: loc } = await locQuery
@@ -130,7 +131,7 @@ export default async function ItemDetailsPage({
               {item.price_display ? (
                 <div className="text-3xl font-black text-white">{item.price_display}</div>
               ) : item.price_minor ? (
-                <div className="text-3xl font-black text-white">₦{(item.price_minor / 100).toLocaleString()}</div>
+                <div className="text-3xl font-black text-white">{formatCurrency(item.price_minor, loc?.currency_code || 'NGN')}</div>
               ) : null}
               {pageInfo.template_type === 'listing' && !item.price_display && item.price_minor && (
                 <div className="text-zinc-500 mb-1 font-medium">/month</div>

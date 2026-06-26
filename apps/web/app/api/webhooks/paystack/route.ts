@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import * as Sentry from '@sentry/nextjs'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import { checkRateLimit } from '@/lib/upstash'
 import { paystackProvider } from '@/lib/payments/paystack'
 import {
@@ -29,7 +29,7 @@ export async function POST(req: Request) {
     if (event.event === 'charge.success') {
       const rawReference = event.data.reference as string
       const amountPaidMinor = event.data.amount as number
-      const supabase = await createClient()
+      const supabase = await createAdminClient()
 
       // Idempotency check
       const { data: existingEvent } = await supabase
@@ -50,8 +50,8 @@ export async function POST(req: Request) {
         
         try {
           await processBookingPayment(supabase, bookingId, amountPaidMinor, rawReference)
-        } catch (e: any) {
-          if (e.message === 'Booking not found') {
+        } catch (e: unknown) {
+          if (e instanceof Error && e.message === 'Booking not found') {
             return NextResponse.json({ error: 'Booking not found' }, { status: 404 })
           }
           throw e
@@ -82,8 +82,8 @@ export async function POST(req: Request) {
         if (result === 'already_processed') {
           return NextResponse.json({ status: 'already_processed' }, { status: 200 })
         }
-      } catch (e: any) {
-        if (e.message === 'Order not found') {
+      } catch (e: unknown) {
+        if (e instanceof Error && e.message === 'Order not found') {
           return NextResponse.json({ error: 'Order not found' }, { status: 404 })
         }
         return NextResponse.json({ error: 'Failed to record payment' }, { status: 500 })

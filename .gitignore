@@ -1,4 +1,4 @@
-﻿node_modules/
+node_modules/
 .next/
 out/
 dist/
@@ -9,3 +9,6 @@ build/
 .DS_Store
 Thumbs.db
 *.log
+
+# Project specific
+devpost_submission.md

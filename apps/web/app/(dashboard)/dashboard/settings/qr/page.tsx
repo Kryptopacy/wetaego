@@ -11,20 +11,35 @@ export default async function QrSettingsPage() {
   }
 
   // Get user's org
+  let orgId: string | null = null;
   const { data: member } = await supabase
     .from('organization_members')
     .select('organization_id')
     .eq('user_id', user.id)
     .single();
 
-  if (!member) {
+  if (member) {
+    orgId = member.organization_id;
+  } else {
+    // Check if user is the creator (Owner) of the org
+    const { data: org } = await supabase
+      .from('organizations')
+      .select('id')
+      .eq('created_by', user.id)
+      .single();
+    if (org) {
+      orgId = org.id;
+    }
+  }
+
+  if (!orgId) {
     redirect("/dashboard");
   }
 
   const { data: location } = await supabase
     .from("locations")
     .select("*")
-    .eq("organization_id", member.organization_id)
+    .eq("organization_id", orgId)
     .limit(1)
     .single();
 

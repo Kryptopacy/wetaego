@@ -3,6 +3,7 @@ import * as Sentry from '@sentry/nextjs'
 import { createClient } from '@supabase/supabase-js'
 import crypto from 'crypto'
 import { Database } from '@/lib/supabase/types'
+import { formatCurrency } from '@/lib/utils/currency'
 
 export async function POST(req: Request) {
   const secret = process.env.PAYSTACK_SECRET_KEY
@@ -89,7 +90,7 @@ export async function POST(req: Request) {
 
       if (event.event === 'charge.success') {
       const metadata = event.data.metadata
-      const amountStr = `₦${(event.data.amount / 100).toLocaleString()}`
+      const amountStr = formatCurrency(event.data.amount, 'NGN')
       
       if (metadata && metadata.is_subscription && metadata.organization_id) {
         // This is a successful recurring charge!

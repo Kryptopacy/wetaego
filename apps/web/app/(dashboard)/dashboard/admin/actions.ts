@@ -7,7 +7,7 @@ export async function updateSetting(formData: FormData) {
   const supabase = await createClient()
   const { data } = await supabase.auth.getUser()
 
-  if (data?.user?.email !== 'kryptopacy@gmail.com') {
+  if (data?.user?.email !== (process.env.ADMIN_EMAIL || 'kryptopacy@gmail.com')) {
     throw new Error('Unauthorized')
   }
 
@@ -60,7 +60,7 @@ export async function overrideTenantPlan(formData: FormData) {
   const supabase = await createClient()
   const { data } = await supabase.auth.getUser()
 
-  if (data?.user?.email !== 'kryptopacy@gmail.com') {
+  if (data?.user?.email !== (process.env.ADMIN_EMAIL || 'kryptopacy@gmail.com')) {
     throw new Error('Unauthorized')
   }
 

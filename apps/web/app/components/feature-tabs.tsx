@@ -33,37 +33,37 @@ const categories = [
   },
   {
     id: 'command-center',
-    label: 'Command Center',
+    label: 'Operations Hub',
     features: [
       {
         icon: ClipboardList,
         color: 'from-red-600 to-orange-600',
-        tag: 'Live KDS',
+        tag: 'Live Fulfillment Dashboard',
         badge: '< 1s delivery',
-        title: '"Table 7 ordered. Kitchen notified."',
-        description: 'Realtime order stream powered by Supabase subscriptions. New orders flash onto your Kitchen Display before the guest puts their phone down. No refresh. No delay. Ever.',
+        title: '"Order received. Team notified."',
+        description: 'Realtime request stream powered by Supabase WebSockets. New orders, bookings, and quotes flash onto your fulfillment dashboard instantly. No refresh. No delay. Ever.',
       },
       {
         icon: MessageCircle,
         color: 'from-blue-600 to-cyan-600',
-        tag: 'AI Dining Advisor',
+        tag: 'AI Digital Concierge',
         badge: 'Gemini-powered',
-        title: 'Your best waiter, always on shift.',
-        description: 'Guests chat to get recommendations, ask about allergens, customize items, and add to cart — all without flagging down staff.',
+        title: 'Your best associate, always on shift.',
+        description: 'Clients chat to get recommendations, ask about services, customize items, and add to cart — all without flagging down staff.',
       }
     ]
   },
   {
     id: 'guest-experience',
-    label: 'Guest Experience',
+    label: 'Client Experience',
     features: [
       {
         icon: QrCode,
         color: 'from-violet-600 to-indigo-600',
-        tag: 'QR Table Mapping',
-        badge: 'Per-table precision',
-        title: 'Every table has a unique identity.',
-        description: 'Generate individual QR codes per table. Orders arrive pre-tagged with the exact table number. Zero confusion at the pass.',
+        tag: 'Dynamic Location Mapping',
+        badge: 'Precision routing',
+        title: 'Every table, room, or desk has an identity.',
+        description: 'Generate individual QR codes per zone. Orders arrive pre-tagged with the exact location. Zero confusion during fulfillment.',
       },
       {
         icon: Bell,
@@ -101,7 +101,7 @@ const categories = [
         tag: 'Demand Forecaster',
         badge: '30-day data window',
         title: 'Never stock out on your best-sellers.',
-        description: 'Analyses 30 days of sales velocity. Predicts the next 7 days of demand, and fires stock alerts before shelves run dry. Suya trending up? We knew two days ago.',
+        description: 'Analyses 30 days of sales velocity. Predicts the next 7 days of demand, and fires stock alerts before shelves run dry. Bestsellers trending up? We knew two days ago.',
       }
     ]
   },
@@ -130,8 +130,8 @@ const categories = [
         color: 'from-green-600 to-emerald-600',
         tag: 'Paystack Payouts',
         badge: 'Direct to your bank',
-        title: 'Get paid when they order.',
-        description: 'Connect your Nigerian bank account via Paystack. Revenue lands directly in your account the moment a guest completes an order.',
+        title: 'Get paid when they checkout.',
+        description: 'Connect your bank account via Paystack. Revenue lands directly in your account the moment a client completes an order or booking.',
       }
     ]
   },
@@ -143,17 +143,17 @@ const categories = [
         icon: Star,
         color: 'from-amber-400 to-orange-500',
         tag: 'Staff Performance & Tipping',
-        badge: 'Post-meal feedback',
+        badge: 'Post-service feedback',
         title: 'Reward flawless service.',
-        description: 'Tipping shouldn\'t be demanded upfront. Customers leave a 1-5 star rating and an optional tip after their meal, giving you powerful HR insights into your top-performing staff.',
+        description: 'Customers leave a 1-5 star rating and an optional tip after their service, giving you powerful HR insights into your top-performing staff.',
       },
       {
         icon: Users,
         color: 'from-emerald-500 to-teal-500',
-        tag: 'Atomic Order Claiming',
+        tag: 'Atomic Request Claiming',
         badge: 'Zero race conditions',
         title: 'No double-prep. No hoarding.',
-        description: 'Staff claim orders securely. The system actively limits how many orders a single waiter can hoard, keeping your kitchen flowing smoothly.',
+        description: 'Staff claim requests securely. The system actively limits how many tasks a single associate can hoard, keeping your operations flowing smoothly.',
       }
     ]
   }
@@ -175,13 +175,16 @@ export function FeatureTabs() {
               <button
                 key={category.id}
                 onClick={() => setActiveTab(category.id)}
-                className={`flex-shrink-0 text-left px-5 py-4 rounded-2xl transition-all duration-300 font-bold whitespace-nowrap lg:whitespace-normal ${
+                className={`flex-shrink-0 text-left px-5 py-4 rounded-2xl transition-all duration-300 font-bold whitespace-nowrap lg:whitespace-normal group relative overflow-hidden ${
                   isActive 
-                    ? 'bg-white/10 text-white shadow-xl shadow-black/20 border border-white/10' 
-                    : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5 border border-transparent'
+                    ? 'text-white' 
+                    : 'text-zinc-500 hover:text-zinc-300'
                 }`}
               >
-                {category.label}
+                {isActive && (
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent rounded-2xl border border-white/10 shadow-[0_0_20px_rgba(255,255,255,0.05)]" />
+                )}
+                <span className="relative z-10">{category.label}</span>
               </button>
             )
           })}
@@ -202,10 +205,10 @@ export function FeatureTabs() {
                   key={f.tag} 
                   className={`group relative rounded-3xl border border-white/[0.06] bg-zinc-900/40 backdrop-blur-xl overflow-hidden hover:border-white/15 transition-all duration-500 hover:shadow-2xl hover:shadow-black/50 ${isFullWidth ? 'md:col-span-2' : ''}`}
                 >
-                  <div className={`absolute inset-0 bg-gradient-to-br ${f.color} opacity-0 group-hover:opacity-[0.06] transition-opacity duration-500`} />
+                  <div className={`absolute inset-0 bg-gradient-to-br ${f.color} opacity-0 group-hover:opacity-10 transition-all duration-700 blur-2xl group-hover:scale-110`} />
                   <div className="p-8 h-full flex flex-col z-10 relative">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                      <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${f.color} flex items-center justify-center shadow-lg shrink-0`}>
+                      <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${f.color} flex items-center justify-center shadow-[0_0_30px_rgba(0,0,0,0.5)] shrink-0 border border-white/10 group-hover:scale-110 transition-transform duration-500`}>
                         <Icon className="w-6 h-6 text-white" aria-hidden="true" />
                       </div>
                       <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/5 backdrop-blur-md self-start sm:self-auto">

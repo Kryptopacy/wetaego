@@ -50,7 +50,7 @@ export default function PrivacyPage() {
             </p>
             <ul className="list-disc pl-6 space-y-2 text-zinc-400">
               <li><strong>Paystack:</strong> For secure payment processing.</li>
-              <li><strong>Termii:</strong> For sending real-time communication/notifications (e.g., WhatsApp KDS alerts to Merchants).</li>
+              <li><strong>Termii:</strong> For sending real-time communication/notifications (e.g., WhatsApp Fulfillment alerts to Merchants).</li>
               <li><strong>Resend:</strong> For delivering transactional email receipts to End-Users.</li>
             </ul>
           </section>

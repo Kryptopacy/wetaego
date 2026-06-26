@@ -30,7 +30,7 @@ export async function GET(req: Request) {
 
     // 3. Fetch ALL completed/paid orders from the last 24h across ALL orgs in ONE query (O(1))
     // We only need organization_id and total_amount_minor.
-    let allOrders: any[] = []
+    let allOrders: { organization_id: string; total_amount_minor: number }[] = []
     let hasMore = true
     let page = 0
     const PAGE_SIZE = 1000
@@ -105,11 +105,10 @@ export async function GET(req: Request) {
       return { org: org.name, sentId: emailData?.id }
     })
 
-    // 7. Dispatch all concurrently
     const settled = await Promise.allSettled(emailPromises)
     const results = settled
-      .filter((res): res is PromiseFulfilledResult<any> => res.status === 'fulfilled' && res.value !== null)
-      .map(res => res.value)
+      .map(res => res.status === 'fulfilled' ? res.value : null)
+      .filter(val => val !== null) as { org: string; sentId: string | undefined }[]
 
     return NextResponse.json({ status: 'success', sent: results.length, details: results })
   } catch (err: unknown) {

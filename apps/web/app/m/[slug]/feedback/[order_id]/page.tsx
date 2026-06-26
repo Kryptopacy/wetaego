@@ -195,7 +195,7 @@ export default function FeedbackPage({
                     step="100"
                     value={customTip}
                     onChange={(e) => setCustomTip(e.target.value)}
-                    placeholder="Enter custom amount (₦)"
+                    placeholder="Enter custom amount"
                     className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white outline-none focus:border-zinc-500 mt-2"
                   />
                 )}

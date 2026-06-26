@@ -4,6 +4,8 @@ import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
+import { toast } from 'sonner'
+import { formatCurrency } from '@/lib/utils/currency'
 
 interface PageItem {
   id: string
@@ -40,6 +42,7 @@ interface RateCardRendererProps {
     manual_payment_account_name?: string
     manual_payment_account_number?: string
     manual_payment_instructions?: string
+    currency?: string
   }
   page: {
     id: string
@@ -111,7 +114,7 @@ export function RateCardRenderer({ location, page, items, locationSlug, paymentI
           setShowCheckout(false)
         }
       } else {
-        alert('Something went wrong submitting your project request.')
+        toast.error('Something went wrong submitting your project request.')
       }
     })
   }
@@ -266,7 +269,7 @@ export function RateCardRenderer({ location, page, items, locationSlug, paymentI
                             {item.price_display ? (
                               <div className="font-bold text-white">{item.price_display}</div>
                             ) : item.price_minor ? (
-                              <div className="font-bold text-white">₦{(item.price_minor / 100).toLocaleString()}</div>
+                              <div className="font-bold text-white">{formatCurrency(item.price_minor, location.currency || 'NGN')}</div>
                             ) : (
                               <div className="text-xs text-zinc-500 italic">Price on request</div>
                             )}
@@ -306,7 +309,7 @@ export function RateCardRenderer({ location, page, items, locationSlug, paymentI
                 </a>
               )}
               {location.instagram_handle && (
-                <a href={`https://instagram.com/${location.instagram_handle.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 rounded-full bg-pink-500/10 border border-pink-500/20 text-pink-400 text-sm font-medium hover:bg-pink-500/20 transition-colors">
+                <a href={`https://instagram.com/${location.instagram_handle.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-300 text-sm font-medium hover:bg-zinc-700 transition-colors">
                   Instagram
                 </a>
               )}
@@ -344,7 +347,7 @@ export function RateCardRenderer({ location, page, items, locationSlug, paymentI
                 <span>Start Project</span>
               </div>
               <span className="opacity-90">
-                ₦{(selectedItems.reduce((sum, i) => sum + (i.price_minor || 0), 0) / 100).toLocaleString()} →
+                {formatCurrency(selectedItems.reduce((sum, i) => sum + (i.price_minor || 0), 0), location.currency || 'NGN')} →
               </span>
             </motion.button>
           </motion.div>
@@ -384,13 +387,13 @@ export function RateCardRenderer({ location, page, items, locationSlug, paymentI
                 )}
                 <div className="flex justify-between text-sm text-zinc-300 pt-2 border-t border-zinc-700">
                   <span>Total Base Price:</span>
-                  <span className="text-white font-bold">₦{(selectedItems.reduce((sum, i) => sum + (i.price_minor || 0), 0) / 100).toLocaleString()}</span>
+                  <span className="text-white font-bold">{formatCurrency(selectedItems.reduce((sum, i) => sum + (i.price_minor || 0), 0), location.currency || 'NGN')}</span>
                 </div>
                 {(selectedItems.some(i => i.payment_mode === 'deposit') || page.payment_mode === 'deposit') && (
                   <div className="flex justify-between text-sm pt-2">
                     <span className="text-amber-400 font-medium">Deposit to start:</span>
                     <span className="text-amber-400 font-bold">
-                      ₦{Math.round(selectedItems.reduce((sum, i) => sum + (i.price_minor || 0), 0) * (Math.max(...selectedItems.map(i => i.deposit_percentage || 0), page.deposit_percentage || 30) / 100) / 100).toLocaleString()}
+                      {formatCurrency(Math.round(selectedItems.reduce((sum, i) => sum + (i.price_minor || 0), 0) * (Math.max(...selectedItems.map(i => i.deposit_percentage || 0), page.deposit_percentage || 30) / 100)), location.currency || 'NGN')}
                     </span>
                   </div>
                 )}

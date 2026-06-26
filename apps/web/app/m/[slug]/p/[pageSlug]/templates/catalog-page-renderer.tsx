@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { useCartStore } from '@/lib/store/cart'
 import { motion } from 'framer-motion'
 import { CartFAB } from '../../../cart-fab'
+import { formatCurrency } from '@/lib/utils/currency'
 
 // The catalog page renderer is a light version for pages created via the pages builder
 // (NOT the main /m/[slug] menu — that stays as is).
@@ -29,6 +30,7 @@ interface CatalogPageRendererProps {
     theme_color?: string
     cover_image_url?: string
     organizations?: { logo_url?: string }
+    currency?: string
     whatsapp_number?: string
     phone_number?: string
     delivery_enabled?: boolean | null
@@ -153,7 +155,7 @@ export function CatalogPageRenderer({ location, page, items, locationSlug, payme
                           {item.price_display ? (
                             <div className="font-bold text-white text-sm">{item.price_display}</div>
                           ) : item.price_minor ? (
-                            <div className="font-bold text-white text-sm">₦{(item.price_minor / 100).toLocaleString()}</div>
+                            <div className="font-bold text-white text-sm">{formatCurrency(item.price_minor, location.currency || 'NGN')}</div>
                           ) : null}
                         </div>
                       </div>
@@ -195,7 +197,7 @@ export function CatalogPageRenderer({ location, page, items, locationSlug, payme
                   <div key={item.id} className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4">
                     <div className="flex items-start justify-between gap-3">
                       <h3 className="font-bold text-white text-sm">{item.title}</h3>
-                      {item.price_minor && <span className="font-bold text-white text-sm">₦{(item.price_minor / 100).toLocaleString()}</span>}
+                      {item.price_minor && <span className="font-bold text-white text-sm">{formatCurrency(item.price_minor, location.currency || 'NGN')}</span>}
                     </div>
                   </div>
                 ))}

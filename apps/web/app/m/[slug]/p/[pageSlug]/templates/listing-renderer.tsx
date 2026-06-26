@@ -4,6 +4,8 @@ import { useState, useMemo, useTransition } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
+import { toast } from 'sonner'
+import { formatCurrency } from '@/lib/utils/currency'
 
 interface PageItem {
   id: string
@@ -25,6 +27,7 @@ interface ListingRendererProps {
     organizations?: { logo_url?: string }
     whatsapp_number?: string
     phone_number?: string
+    currency?: string
   }
   page: {
     id: string
@@ -107,7 +110,7 @@ export function ListingRenderer({ location, page, items, locationSlug }: Listing
         const waLink = `https://wa.me/${(location.whatsapp_number || '').replace(/[^0-9]/g, '')}?text=Hi, I'm ${form.customer_name}. I'm interested in: ${selectedItem.title}`
         window.open(waLink, '_blank')
       } else {
-        alert('Something went wrong. Please try again.')
+        toast.error('Something went wrong. Please try again.')
       }
     })
   }
@@ -282,7 +285,7 @@ export function ListingRenderer({ location, page, items, locationSlug }: Listing
                     {(item.price_display || item.price_minor) && (
                       <div className="text-right shrink-0">
                         <div className="font-bold text-white text-sm">
-                          {item.price_display || (item.price_minor ? `₦${(item.price_minor / 100).toLocaleString()}` : '')}
+                          {item.price_display || (item.price_minor ? formatCurrency(item.price_minor, location.currency || 'NGN') : '')}
                         </div>
                         {!item.price_display && item.price_minor && <div className="text-xs text-zinc-500">/month</div>}
                       </div>

@@ -22,7 +22,7 @@ export interface BusinessTypePreset {
   template_type: TemplateType
   /** Default billing enabled */
   billing_enabled: boolean
-  /** Table service (KDS) vs standard checkout */
+  /** Table service (Fulfillment Dashboard) vs standard checkout */
   billing_mode: BillingMode
   /** Full payment or deposit */
   payment_mode: PaymentMode
@@ -42,7 +42,7 @@ export const BUSINESS_TYPE_PRESETS: Record<string, BusinessTypePreset> = {
   // ─── FOOD & DRINK ────────────────────────────────────────────────────────────
   restaurant: {
     label: 'Restaurant / Café',
-    description: 'Table ordering, live KDS, and Paystack payments',
+    description: 'Table ordering, live Kitchen Display System (KDS), and Paystack payments',
     icon: '🍽️',
     template_type: 'catalog',
     billing_enabled: true,
@@ -56,7 +56,7 @@ export const BUSINESS_TYPE_PRESETS: Record<string, BusinessTypePreset> = {
   },
   bar_lounge: {
     label: 'Bar / Club / Lounge',
-    description: 'Drinks menu with table ordering and live KDS',
+    description: 'Drinks menu with table ordering and live Bar Display System (KDS)',
     icon: '🍸',
     template_type: 'catalog',
     billing_enabled: true,

@@ -121,7 +121,7 @@ export default function PayClient({
         <div className="flex gap-2 pt-2">
           <input 
             type="number"
-            placeholder="Custom Amount (₦)"
+            placeholder="Custom Amount"
             value={customAmount}
             onChange={(e) => setCustomAmount(e.target.value)}
             className="flex-1 bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-white outline-none focus:border-zinc-500"

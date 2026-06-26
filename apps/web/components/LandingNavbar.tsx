@@ -8,9 +8,11 @@ import { ActionForm } from "./ActionForm";
 import { startInteractiveDemo } from "../app/login/actions";
 import { DemoSubmitButton } from "./DemoSubmitButton";
 import { AnimatePresence, motion } from "framer-motion";
+import { PaymentRouletteModal } from "./payment-roulette-modal";
 
 export function LandingNavbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isRouletteOpen, setIsRouletteOpen] = useState(false);
 
   // Prevent scrolling when mobile menu is open
   useEffect(() => {
@@ -77,6 +79,12 @@ export function LandingNavbar() {
               Try Demo
             </DemoSubmitButton>
           </ActionForm>
+          <button
+            onClick={() => setIsRouletteOpen(true)}
+            className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full border border-purple-500/30 text-purple-400 text-sm font-semibold hover:bg-purple-500/10 transition-colors"
+          >
+            Play Roulette 🎲
+          </button>
           <Link
             className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-white text-black text-sm font-semibold hover:bg-zinc-200 hover:scale-105 transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.2)]"
             href="/dashboard"
@@ -87,10 +95,12 @@ export function LandingNavbar() {
           {/* Mobile Menu Toggle */}
           <button
             className="md:hidden ml-2 text-white p-1"
-            onClick={() => setIsOpen(true)}
-            aria-label="Open Menu"
+            onClick={() => setIsOpen(!isOpen)}
+            aria-label={isOpen ? "Close Menu" : "Open Menu"}
+            aria-expanded={isOpen}
+            aria-controls="mobile-menu"
           >
-            <Menu className="w-6 h-6" />
+            {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
       </nav>
@@ -99,11 +109,15 @@ export function LandingNavbar() {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-[150] bg-[#050505] flex flex-col px-6 py-4"
+            id="mobile-menu"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Mobile Navigation"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="fixed inset-0 z-[150] bg-black/60 backdrop-blur-3xl flex flex-col px-6 py-4"
           >
             <div className="flex items-center justify-between h-12">
               <div className="flex items-center gap-3">
@@ -112,52 +126,96 @@ export function LandingNavbar() {
                   alt="OurMenu Logo"
                   width={28}
                   height={28}
-                  className="object-contain"
+                  className="object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]"
                 />
                 <span className="font-semibold text-white tracking-tight">
                   OurMenu OS
                 </span>
               </div>
               <button
-                className="text-white p-2"
+                className="text-white p-2 bg-white/5 hover:bg-white/10 rounded-full transition-colors"
                 onClick={() => setIsOpen(false)}
                 aria-label="Close Menu"
               >
-                <X className="w-6 h-6" />
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="flex flex-col gap-6 mt-12 text-2xl font-semibold">
+            <motion.div 
+              className="flex flex-col gap-6 mt-16 px-2"
+              initial="closed"
+              animate="open"
+              variants={{
+                open: {
+                  transition: { staggerChildren: 0.1, delayChildren: 0.1 }
+                },
+                closed: {
+                  transition: { staggerChildren: 0.05, staggerDirection: -1 }
+                }
+              }}
+            >
               {navLinks.map((link) => (
-                <Link
+                <motion.div
                   key={link.name}
-                  href={link.href}
-                  onClick={() => setIsOpen(false)}
-                  className="text-zinc-300 hover:text-white border-b border-white/10 pb-4"
+                  variants={{
+                    open: { opacity: 1, y: 0 },
+                    closed: { opacity: 0, y: 20 }
+                  }}
                 >
-                  {link.name}
-                </Link>
+                  <Link
+                    href={link.href}
+                    onClick={() => setIsOpen(false)}
+                    className="text-3xl font-light text-zinc-400 hover:text-white transition-colors block"
+                  >
+                    {link.name}
+                  </Link>
+                </motion.div>
               ))}
-              <Link
-                href="/dashboard"
-                onClick={() => setIsOpen(false)}
-                className="text-zinc-300 hover:text-white border-b border-white/10 pb-4"
+
+              <motion.div
+                variants={{
+                  open: { opacity: 1, y: 0 },
+                  closed: { opacity: 0, y: 20 }
+                }}
+                className="mt-4 pt-8 border-t border-white/10"
               >
-                Log in
-              </Link>
-              <ActionForm action={startInteractiveDemo} className="w-full mt-4">
-                <DemoSubmitButton
-                  className="w-full flex items-center justify-between px-6 py-4 rounded-2xl bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-colors"
-                  pendingText="Building..."
+                <Link
+                  href="/dashboard"
+                  onClick={() => setIsOpen(false)}
+                  className="text-2xl font-light text-zinc-300 hover:text-white transition-colors block mb-8"
                 >
-                  Try Demo Mode
-                  <ArrowRight className="w-5 h-5 text-zinc-400" />
-                </DemoSubmitButton>
-              </ActionForm>
-            </div>
+                  Log in
+                </Link>
+                
+                <ActionForm action={startInteractiveDemo} className="w-full">
+                  <DemoSubmitButton
+                    className="w-full flex items-center justify-between px-6 py-4 rounded-2xl bg-gradient-to-r from-zinc-800 to-zinc-900 border border-white/10 text-white hover:border-white/30 transition-all shadow-xl"
+                    pendingText="Building your workspace..."
+                  >
+                    <span className="font-medium text-lg">Try Demo Mode</span>
+                    <ArrowRight className="w-5 h-5 text-zinc-400 group-hover:text-white transition-colors" />
+                  </DemoSubmitButton>
+                </ActionForm>
+
+                <button
+                  onClick={() => {
+                    setIsOpen(false);
+                    setIsRouletteOpen(true);
+                  }}
+                  className="w-full mt-4 flex items-center justify-between px-6 py-4 rounded-2xl bg-purple-500/10 border border-purple-500/30 text-purple-400 hover:bg-purple-500/20 transition-all shadow-xl"
+                >
+                  <span className="font-medium text-lg">Play Roulette 🎲</span>
+                </button>
+              </motion.div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
+
+      <PaymentRouletteModal 
+        isOpen={isRouletteOpen} 
+        onClose={() => setIsRouletteOpen(false)} 
+      />
     </>
   );
 }

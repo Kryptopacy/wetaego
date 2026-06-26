@@ -7,8 +7,9 @@ export async function sendWhatsAppMessage(toPhoneNumber: string, message: string
     return true
   }
 
-  // Format number to international format (strip leading 0, add 234 for Nigeria if necessary)
-  let formattedNumber = toPhoneNumber
+  // Strip all non-digit characters (spaces, +, dashes, parentheses)
+  let formattedNumber = toPhoneNumber.replace(/\D/g, '')
+  // If it's a local number starting with 0, default to 234 (Nigeria). Otherwise assume international.
   if (formattedNumber.startsWith('0')) {
     formattedNumber = '234' + formattedNumber.slice(1)
   }

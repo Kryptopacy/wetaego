@@ -2,6 +2,7 @@ import { SupabaseClient } from '@supabase/supabase-js'
 import { notifyBusiness } from '@/lib/notifications/dispatcher'
 import { Resend } from 'resend'
 import { ReceiptEmail } from '../../emails/receipt-email'
+import { formatCurrency } from '@/lib/utils/currency'
 
 const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy')
 
@@ -64,7 +65,7 @@ export async function processBookingPayment(
           })
           .eq('id', b.item_id)
 
-        const locationId = (booking.location_pages as any)?.location_id
+        const locationId = (booking.location_pages as { location_id?: string })?.location_id
         if (isSoldOut && locationId) {
           await notifyBusiness(
             locationId,
@@ -81,13 +82,13 @@ export async function processBookingPayment(
   }
 
   // Push notification to business
-  const locationId = (booking.location_pages as any)?.location_id
+  const locationId = (booking.location_pages as { location_id?: string })?.location_id
   if (locationId) {
     await notifyBusiness(
       locationId,
       {
         title: '📅 New Booking Paid',
-        body: `${booking.customer_name} paid for ${(booking.location_pages as any)?.title || 'a service'}`,
+        body: `${booking.customer_name} paid for ${(booking.location_pages as { title?: string })?.title || 'a service'}`,
         url: '/dashboard/manage/bookings',
         tag: 'new-booking'
       }
@@ -100,7 +101,7 @@ export async function processBookingPayment(
       await resend.emails.send({
         from: 'OurMenu Bookings <noreply@ourmenuos.online>',
         to: booking.customer_email,
-        subject: `Booking Confirmed: ${(booking.location_pages as any)?.title || 'Your Reservation'}`,
+        subject: `Booking Confirmed: ${(booking.location_pages as { title?: string })?.title || 'Your Reservation'}`,
         html: `
           <div style="font-family: sans-serif; padding: 20px;">
             <h2>Booking Confirmed</h2>
@@ -221,7 +222,7 @@ export async function processOrderPayment(
       order.location_id,
       {
         title: '✅ New Order Paid',
-        body: `₦${(amountPaidMinor / 100).toLocaleString()} received for ${order.table_identifier || 'Takeaway'}`,
+        body: `${formatCurrency(amountPaidMinor, 'NGN')} received for ${order.table_identifier || 'Takeaway'}`,
         url: '/dashboard',
         tag: 'payment-confirmed'
       }
@@ -231,8 +232,7 @@ export async function processOrderPayment(
   // Send customer email receipt using React Email template
   if (order.customer_email) {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const orgName = (order.locations as any)?.name || 'OurMenu Partner'
+      const orgName = (order.locations as { name?: string })?.name || 'OurMenu Partner'
       await resend.emails.send({
         from: 'OurMenu Orders <noreply@ourmenuos.online>',
         to: order.customer_email,
@@ -241,7 +241,7 @@ export async function processOrderPayment(
           organizationName: orgName,
           orderId: order.id,
           totalAmountMinor: amountPaidMinor,
-          items: order.order_items.map((item: any) => ({
+          items: order.order_items.map((item: { item_name: string; quantity: number; price_minor: number }) => ({
             name: item.item_name,
             quantity: item.quantity,
             priceMinor: item.price_minor

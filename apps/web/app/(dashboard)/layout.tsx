@@ -248,7 +248,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             </div>
           )}
 
-          {userEmail === 'kryptopacy@gmail.com' && (
+          {(userEmail === (process.env.ADMIN_EMAIL || 'kryptopacy@gmail.com')) && (
             <div className="space-y-1">
               <div className="px-3 flex items-center gap-2 mb-3 mt-4">
                 <h3 className="text-xs font-bold text-violet-500 uppercase tracking-wider">Superadmin</h3>

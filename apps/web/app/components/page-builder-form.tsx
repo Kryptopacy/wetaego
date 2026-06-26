@@ -4,8 +4,10 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import { addPageItem, updatePageItem, deletePageItem } from '../(dashboard)/dashboard/pages/actions'
 import { AiGenerateButton } from './ai-generate-button'
+import { formatCurrency } from '@/lib/utils/currency'
 
 interface PageItem {
   id: string
@@ -54,11 +56,12 @@ export function PageBuilderForm({ pageId, templateType, initialItems, orgId }: P
     try {
       await addPageItem(formData)
       setIsAdding(false)
+      toast.success('Item added successfully')
       // Force refresh to get new items
       router.refresh()
     } catch (err) {
       console.error(err)
-      alert('Failed to add item')
+      toast.error('Failed to add item')
     } finally {
       setIsSaving(false)
     }
@@ -80,10 +83,11 @@ export function PageBuilderForm({ pageId, templateType, initialItems, orgId }: P
     try {
       await updatePageItem(formData)
       setEditingId(null)
+      toast.success('Item updated successfully')
       router.refresh()
     } catch (err) {
       console.error(err)
-      alert('Failed to update item')
+      toast.error('Failed to update item')
     } finally {
       setIsSaving(false)
     }
@@ -96,10 +100,11 @@ export function PageBuilderForm({ pageId, templateType, initialItems, orgId }: P
     formData.append('itemId', itemId)
     try {
       await deletePageItem(formData)
+      toast.success('Item deleted')
       router.refresh()
     } catch (err) {
       console.error(err)
-      alert('Failed to delete item')
+      toast.error('Failed to delete item')
     } finally {
       setIsSaving(false)
     }
@@ -112,7 +117,7 @@ export function PageBuilderForm({ pageId, templateType, initialItems, orgId }: P
     const titleInput = form.elements.namedItem('title') as HTMLInputElement
     const title = titleInput?.value
     if (!title) {
-      alert('Please enter a title first to generate a description.')
+      toast.error('Please enter a title first to generate a description.')
       return
     }
 
@@ -135,7 +140,7 @@ export function PageBuilderForm({ pageId, templateType, initialItems, orgId }: P
       }
     } catch (err) {
       console.error('AI Gen Error:', err)
-      alert('Failed to generate description. Please try again.')
+      toast.error('Failed to generate description. Please try again.')
     }
   }
 
@@ -170,12 +175,12 @@ export function PageBuilderForm({ pageId, templateType, initialItems, orgId }: P
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-medium text-zinc-400 mb-1">Price (Minor Units)</label>
-            <input type="number" name="price_minor" defaultValue={item?.price_minor || ''} className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white" placeholder="e.g. 500000 for ₦5000" />
+            <input type="number" name="price_minor" defaultValue={item?.price_minor || ''} className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white" placeholder="e.g. 500000 for 5000" />
             <p className="text-[10px] text-zinc-500 mt-1">Multiply your price by 100.</p>
           </div>
           <div>
             <label className="block text-xs font-medium text-zinc-400 mb-1">Price Display (Optional)</label>
-            <input name="price_display" defaultValue={item?.price_display || ''} className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white" placeholder="e.g. Starting from ₦5,000" />
+            <input name="price_display" defaultValue={item?.price_display || ''} className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white" placeholder="e.g. Starting from 5,000" />
           </div>
         </div>
 
@@ -189,7 +194,10 @@ export function PageBuilderForm({ pageId, templateType, initialItems, orgId }: P
                 const form = document.getElementById(formId) as HTMLFormElement
                 const title = (form.elements.namedItem('title') as HTMLInputElement)?.value
                 const desc = (form.elements.namedItem('description') as HTMLTextAreaElement)?.value
-                if (!title) return alert('Enter a title first')
+                if (!title) {
+                  toast.error('Enter a title first')
+                  return
+                }
                 if (!confirm('This will cost 5 AI Credits. Continue?')) return
                 try {
                   const res = await fetch('/api/ai/generate-item-image', {
@@ -208,11 +216,11 @@ export function PageBuilderForm({ pageId, templateType, initialItems, orgId }: P
                       form.appendChild(hidden)
                     }
                     hidden.value = data.url
-                    alert('AI Image Generated! It will be saved when you submit.')
+                    toast.success('AI Image Generated! It will be saved when you submit.')
                   }
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 } catch(e) {
-                  alert('AI generation failed.')
+                  toast.error('AI generation failed.')
                 }
               }}
               className="px-3 py-1.5 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white rounded-lg text-xs font-bold transition-all whitespace-nowrap"
@@ -227,6 +235,15 @@ export function PageBuilderForm({ pageId, templateType, initialItems, orgId }: P
           <label className="block text-xs font-medium text-zinc-400 mb-1">Inventory / Stock (Optional)</label>
           <input type="number" name="inventory_count" defaultValue={item?.inventory_count ?? ''} className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white" placeholder="e.g. 50" />
           <p className="text-[10px] text-zinc-500 mt-1">Leave empty for unlimited. Setting this will automatically mark item as Sold Out when it hits 0.</p>
+        </div>
+
+        <div>
+          <label className="block text-xs font-medium text-zinc-400 mb-1">Availability Status</label>
+          <select name="availability_status" defaultValue={item?.availability_status || 'available'} className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none">
+            <option value="available">Available (In Stock)</option>
+            <option value="sold_out">Sold Out (Visible but cannot buy)</option>
+            <option value="hidden">Hidden (Completely removed from menu)</option>
+          </select>
         </div>
       </div>
     )
@@ -298,7 +315,7 @@ export function PageBuilderForm({ pageId, templateType, initialItems, orgId }: P
                   {item.description && <p className="text-sm text-zinc-400 mt-1 line-clamp-2">{item.description}</p>}
                   <div className="mt-3 flex items-center gap-4 text-xs font-medium">
                     {item.price_minor ? (
-                      <span className="text-emerald-400">₦{(item.price_minor / 100).toLocaleString()}</span>
+                      <span className="text-emerald-400">{formatCurrency(item.price_minor)}</span>
                     ) : (
                       <span className="text-zinc-500">No price set</span>
                     )}

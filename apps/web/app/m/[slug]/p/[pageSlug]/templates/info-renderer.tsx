@@ -48,9 +48,16 @@ export function InfoRenderer({ location, page, locationSlug }: InfoRendererProps
       )
     }
     // Bold: **text**
-    const boldParsed = trimmed.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    const parts = trimmed.split(/(\*\*.*?\*\*)/g)
     return (
-      <p key={i} className="text-zinc-300 text-sm leading-relaxed mb-3" dangerouslySetInnerHTML={{ __html: boldParsed }} />
+      <p key={i} className="text-zinc-300 text-sm leading-relaxed mb-3">
+        {parts.map((part, j) => {
+          if (part.startsWith('**') && part.endsWith('**') && part.length >= 4) {
+            return <strong key={j} className="text-white font-semibold">{part.slice(2, -2)}</strong>
+          }
+          return <span key={j}>{part}</span>
+        })}
+      </p>
     )
   }
 
@@ -59,7 +66,7 @@ export function InfoRenderer({ location, page, locationSlug }: InfoRendererProps
       {/* Hero */}
       <div className="relative w-full h-[30vh] min-h-[200px] max-h-[300px] overflow-hidden">
         {location.cover_image_url ? (
-          <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${location.cover_image_url})` }} />
+          <Image src={location.cover_image_url} alt="Cover" fill className="object-cover object-center priority" priority />
         ) : (
           <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${themeColor}30 0%, #0a0a0f 100%)` }} />
         )}
@@ -108,7 +115,7 @@ export function InfoRenderer({ location, page, locationSlug }: InfoRendererProps
                 </a>
               )}
               {location.instagram_handle && (
-                <a href={`https://instagram.com/${location.instagram_handle.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 rounded-full bg-pink-500/10 border border-pink-500/20 text-pink-400 text-sm font-medium hover:bg-pink-500/20 transition-colors">
+                <a href={`https://instagram.com/${location.instagram_handle.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-300 text-sm font-medium hover:bg-zinc-700 transition-colors">
                   Instagram
                 </a>
               )}

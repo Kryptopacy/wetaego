@@ -1,11 +1,11 @@
 'use client'
 
-
-
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
+import { formatCurrency } from '@/lib/utils/currency'
+
 interface PageItem {
   id: string
   title: string
@@ -39,6 +39,7 @@ interface BookingRendererProps {
     instagram_handle?: string
     x_handle?: string
     tiktok_handle?: string
+    currency?: string
   }
   page: {
     id: string
@@ -347,13 +348,14 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
                   {selectedItems.map((i, idx) => (
                     <div key={idx} className="flex justify-between text-sm">
                       <span className="text-zinc-400">{i.title}</span>
-                      <span className="text-white font-semibold">₦{((i.price_minor || 0) / 100).toLocaleString()}</span>
-                    </div>
+                      {(i.price_minor !== undefined && i.price_minor !== null) && (
+                      <span className="text-white font-semibold">{formatCurrency(i.price_minor, location.currency || 'NGN')}</span>
+                    )}</div>
                   ))}
                   
-                  <div className="flex justify-between text-sm border-t border-zinc-700 pt-2 font-bold">
-                    <span className="text-zinc-300">Total</span>
-                    <span className="text-white">₦{(selectedItems.reduce((sum, i) => sum + (i.price_minor || 0), 0) / 100).toLocaleString()}</span>
+                  <div className="flex justify-between text-sm border-t border-zinc-700 pt-2 mb-1">
+                    <span className="text-zinc-400">Add-ons Subtotal</span>
+                    <span className="text-white">{formatCurrency(selectedItems.reduce((sum, i) => sum + (i.price_minor || 0), 0), location.currency || 'NGN')}</span>
                   </div>
 
                   {(selectedItems.some(i => i.payment_mode === 'deposit') || page.payment_mode === 'deposit') && (
@@ -362,7 +364,7 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
                         Due now ({Math.max(...selectedItems.map(i => i.deposit_percentage || 0), page.deposit_percentage || 30)}% deposit)
                       </span>
                       <span className="text-amber-400 font-bold">
-                        ₦{Math.round(selectedItems.reduce((sum, i) => sum + (i.price_minor || 0), 0) * (Math.max(...selectedItems.map(i => i.deposit_percentage || 0), page.deposit_percentage || 30) / 100) / 100).toLocaleString()}
+                        {formatCurrency(Math.round(selectedItems.reduce((sum, i) => sum + (i.price_minor || 0), 0) * (Math.max(...selectedItems.map(i => i.deposit_percentage || 0), page.deposit_percentage || 30) / 100)), location.currency || 'NGN')}
                       </span>
                     </div>
                   )}
@@ -464,7 +466,7 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
                         {item.price_display ? (
                           <div className="text-base font-bold text-white">{item.price_display}</div>
                         ) : item.price_minor ? (
-                          <div className="text-base font-bold text-white">₦{(item.price_minor / 100).toLocaleString()}</div>
+                          <div className="text-base font-bold text-white">{formatCurrency(item.price_minor, location.currency || 'NGN')}</div>
                         ) : null}
                         {item.payment_mode === 'deposit' && item.deposit_percentage && (
                           <div className="text-xs text-amber-400 mt-0.5">{item.deposit_percentage}% deposit</div>
@@ -515,7 +517,7 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
                 <span>Proceed to Book</span>
               </div>
               <span className="opacity-90">
-                ₦{(selectedItems.reduce((sum, i) => sum + (i.price_minor || 0), 0) / 100).toLocaleString()} →
+                {formatCurrency(selectedItems.reduce((sum, i) => sum + (i.price_minor || 0), 0), location.currency || 'NGN')} →
               </span>
             </button>
           </div>
@@ -541,7 +543,12 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
               </a>
             )}
             {location.instagram_handle && (
-              <a href={`https://instagram.com/${location.instagram_handle.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 rounded-full bg-pink-500/10 border border-pink-500/20 text-pink-400 text-sm font-medium hover:bg-pink-500/20 transition-colors">
+              <a
+                href={`https://instagram.com/${location.instagram_handle.replace('@', '')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-300 text-sm font-medium hover:bg-zinc-700 transition-colors"
+              >
                 Instagram
               </a>
             )}

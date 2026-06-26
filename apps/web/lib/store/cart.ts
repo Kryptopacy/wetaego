@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { useState, useEffect } from 'react'
 
 export interface CartItem {
   id: string
@@ -58,6 +59,18 @@ export const useCartStore = create<CartState>()(
     }),
     {
       name: 'ourmenu-cart-storage', // name of the item in the storage (must be unique)
+      skipHydration: true,
     }
   )
 )
+
+export function useCartHydration() {
+  const [hasHydrated, setHasHydrated] = useState(false)
+
+  useEffect(() => {
+    useCartStore.persist.onFinishHydration(() => setHasHydrated(true))
+    useCartStore.persist.rehydrate()
+  }, [])
+
+  return hasHydrated
+}

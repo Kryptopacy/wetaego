@@ -11,8 +11,9 @@ const upsellRequestSchema = z.object({
 })
 
 export async function POST(req: Request) {
+  let body: { availableItems?: { id: string; name: string }[] } | null = null
   try {
-    const body = await req.json()
+    body = await req.json()
     const parsed = upsellRequestSchema.safeParse(body)
 
     if (!parsed.success) {
@@ -58,6 +59,15 @@ Examples:
     return Response.json(object)
   } catch (error) {
     console.error('Upsell API Error:', error)
+    // AI Circuit Breaker: Graceful Fallback instead of failure
+    if (body?.availableItems && Array.isArray(body.availableItems) && body.availableItems.length > 0) {
+      // Fallback: Just suggest the first available item if AI fails
+      const fallbackItem = body.availableItems[0]
+      return Response.json({
+        suggestedItemId: fallbackItem.id,
+        pitch: `Would you like to add ${fallbackItem.name}?`
+      })
+    }
     return new Response('Internal Server Error', { status: 500 })
   }
 }

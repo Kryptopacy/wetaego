@@ -71,6 +71,7 @@ export function PortalRenderer({
             width={96}
             height={96}
             className="w-24 h-24 rounded-full object-cover border-4 border-zinc-800 shadow-xl mb-6"
+            priority={true}
             onError={(e) => { e.currentTarget.style.display = 'none'; }}
           />
         ) : (

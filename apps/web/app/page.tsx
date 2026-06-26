@@ -10,6 +10,7 @@ import { TrustedBy } from './components/trusted-by'
 import { DirectorySearch } from './components/directory-search'
 import { Pricing } from './components/pricing'
 import { LandingNavbar } from '../components/LandingNavbar'
+import { UseCases } from './components/use-cases'
 
 export default async function HomePage() {
   const jsonLd = {
@@ -18,7 +19,15 @@ export default async function HomePage() {
     "name": "OurMenu OS",
     "operatingSystem": "Web",
     "applicationCategory": "BusinessApplication",
-    "description": "The complete platform to build your online presence, manage operations, and engage customers. Designed for restaurants, salons, and service businesses.",
+    "description": "The ultimate operating layer for multi-business operations. Supports dynamic templates for Hospitality, Retail Boutiques, Wellness Services, Real Estate Listings, Consultant Rate Cards, and Multi-venue Portals.",
+    "featureList": [
+      "Omnichannel Checkout",
+      "Live Fulfillment Dashboard",
+      "AI Demand Forecasting",
+      "Smart Upselling Engine",
+      "Payment Roulette Game",
+      "Progressive Web App (PWA)"
+    ],
     "url": "https://ourmenuos.online",
     "offers": {
       "@type": "Offer",
@@ -71,14 +80,14 @@ export default async function HomePage() {
           {/* Left — Copy */}
           <FadeIn className="flex flex-col justify-center">
             <h1 className="text-5xl md:text-7xl font-black text-white tracking-[-0.04em] leading-[1.02] mb-6 mt-8">
-              The ultimate digital menu.<br />
+              The ultimate digital storefront.<br />
               <span className="text-transparent bg-clip-text bg-gradient-to-br from-violet-300 via-white to-zinc-400">
-                A complete management suite.
+                A complete operating layer.
               </span>
             </h1>
             <p className="text-lg md:text-xl text-zinc-300 max-w-xl font-light leading-relaxed mb-10">
-              <strong>OurMenu OS is the complete platform to build your online presence, manage operations, and engage customers.</strong><br /><br />
-              Ditch the expensive custom websites and terrible PDF links. A &apos;menu&apos; isn&apos;t just for food, it&apos;s any assortment of offerings your business provides. Whether you&apos;re processing restaurant orders, bookings/appointments, or listing consulting services, our flexible templates instantly give you a stunning digital storefront without the hassle of building from scratch. Delight your clients with a personalized AI Assistant that handles inquiries and processes payments, while your team stays seamlessly synced with live management dashboards and staff alerts.
+              <strong>OurMenu OS is the complete platform to build your online presence, manage operations, and engage clients.</strong><br /><br />
+              Ditch expensive custom websites and terrible PDF links. Whether you are processing restaurant orders, booking salon appointments, selling retail inventory, or quoting consulting retainers, our dynamic templates instantly generate a stunning digital storefront. Delight your clients with an AI Digital Concierge that handles inquiries and processes payments, while your team stays flawlessly synced with the Live Fulfillment Dashboard.
             </p>
             <div className="flex flex-col sm:flex-row items-start gap-4">
               <Link href="/dashboard" className="flex items-center gap-2 px-8 py-3.5 rounded-full bg-white text-black text-sm font-bold hover:scale-105 transition-all duration-300 shadow-[0_0_30px_rgba(255,255,255,0.15)]">
@@ -148,13 +157,16 @@ export default async function HomePage() {
       <section id="features" className="py-24 px-6 max-w-7xl mx-auto relative z-10">
         <FadeIn className="text-center mb-20">
           <h2 className="text-4xl md:text-6xl font-black text-white mb-6 tracking-tight">
-            Not features.<br /><span className="text-zinc-400">A complete hospitality suite.</span>
+            Not just features.<br /><span className="text-zinc-400">A complete business suite.</span>
           </h2>
-          <p className="text-zinc-400 text-lg md:text-xl max-w-2xl mx-auto font-light">Everything your operation needs — from the guest&apos;s first QR scan to the last Paystack payout.</p>
+          <p className="text-zinc-400 text-lg md:text-xl max-w-2xl mx-auto font-light">Everything your operation needs — from the client&apos;s first scan to the last Paystack payout.</p>
         </FadeIn>
 
         <FeatureTabs />
       </section>
+
+      {/* ── USE CASES: MULTI-BUSINESS ── */}
+      <UseCases />
 
       {/* ── DYNAMIC TRUSTED BY ── */}
       <TrustedBy />

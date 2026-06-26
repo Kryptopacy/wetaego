@@ -8,17 +8,37 @@ OurMenu OS is a comprehensive, real-time hospitality operating system. Designed 
 2. **Frictionless Checkout & Tips:** Customers order and pay (with custom tipping) securely via Paystack directly from their phones. No app download or account required.
 3. **Conversational AI Waiter:** An embedded, brand-aware AI assistant capable of answering menu questions, making contextual recommendations, managing the cart, and calling staff—all within a jailbreak-proof session.
 4. **Service Requests:** Customers can tap to request service (e.g., "Need Shisha Coal", "Clean Table", "Call Manager") which pings the dashboard immediately.
-5. **Live Fulfillment Dashboard (KDS):** A real-time display for the Service Team to manage active orders and pending table requests seamlessly.
+5. **Universal Fulfillment Dashboard:** A real-time, offline-resilient display for the Service Team to manage active orders and pending table requests seamlessly.
+6. **Hardware Integration:** Native Cloud Thermal Printing support for automatic receipt and kitchen ticket generation.
+7. **Progressive Web App (PWA):** Staff and Managers can install the dashboard directly to their iOS/Android home screens as a native-feeling application, complete with a persistent standalone UI and offline caching.
 
 ## 🛠️ Technical Architecture
 
 - **Framework:** Next.js 14 (App Router)
 - **Database & Auth:** Supabase (PostgreSQL, Realtime, RLS)
-- **State Management:** Zustand (Client Persistence)
+- **State Management:** Zustand (Client Persistence) + IndexedDB (Offline Queue)
 - **Styling:** Tailwind CSS + Framer Motion
 - **Payments:** Paystack (Webhooks, Idempotency, Custom Tips)
 - **Notifications:** Termii (WhatsApp/SMS async queues)
+- **Hardware:** Epson ePOS XML (Server Direct Print) & Browser Kiosk Mode
 - **Analytics:** PostHog
+
+## 🏢 Multi-Business Template Architecture
+
+OurMenu OS dynamically adapts its user interface and terminology based on the business type, ensuring a bespoke experience across multiple hospitality sectors:
+- **Restaurants & Bars:** Optimizes for "Tables", "Waitstaff", and "Kitchen Tickets". Focuses heavily on the live catalog and cart checkout.
+- **Salons & Spas:** Transforms into a service-based interface. "Orders" become "Appointments", "Waitstaff" becomes "Stylists", and receipts print as "Appointment Slips".
+- **Retail Stores:** Optimizes for barcode scanning, "Store Receipts", and physical checkout queues.
+- **Consulting/Agencies:** Focuses on service booking and discrete client requests.
+
+The unified Universal Fulfillment Dashboard automatically routes these disparate data structures (Physical Orders vs. Service Requests) into a single, cohesive view for staff.
+
+## 📡 Offline-First Resilience
+
+We built a robust, custom synchronization engine to guarantee zero data loss during internet outages:
+1. **IndexedDB Queuing:** When a device goes offline, staff actions (like marking an order as paid, claiming a service request, or toggling stock) are intercepted and securely serialized into a local IndexedDB queue.
+2. **Optimistic UI:** The interface instantly reflects the action, allowing staff to continue working at lightning speed without waiting for network acknowledgment.
+3. **Background Sync:** The moment the internet connection is restored, the `useOfflineSync` engine seamlessly flushes the queue sequentially to Supabase, resolving any conflicts automatically.
 
 ## 📱 Operational Flow
 
@@ -40,7 +60,8 @@ Instead of printing hardcoded table numbers, venues print batches of **Generic Q
 1. The Paystack Webhook hits the Next.js API, verifies the signature, ensures idempotency, and marks the Order as `paid`.
 2. **Supabase Realtime** broadcasts the event directly to the venue's Dashboard.
 3. The Service Team's screen flashes with the new order or Service Request for "VIP Cabana 4" instantly.
-4. Background tasks trigger WhatsApp notifications via Termii to the Manager's phone for high-priority alerts.
+4. **Auto-Printing:** The Universal Thermal Print Engine intercepts the new paid order and automatically pushes an ESC/POS XML command to the local network printer (or via HTML Kiosk), instantly printing the receipt.
+5. Background tasks trigger WhatsApp notifications via Termii to the Manager's phone for high-priority alerts.
 
 ## 👥 Multi-Tenant Architecture & Roles
 
@@ -93,6 +114,7 @@ npm run dev
 Visit `http://localhost:3000` (or `https://ourmenuos.online` in production) to access the application.
 
 ## 🔒 Security Highlights
+- **DOMPurify Sanitization:** Strict XSS prevention strips malicious payloads from all user-generated content (e.g., customer notes, business descriptions) before rendering in React.
 - **Underpayment Fraud Prevention:** Webhooks strictly compare the amount paid against the database `total_amount_minor` before marking an order as paid.
 - **Idempotency:** Webhook events are logged to prevent double-processing.
 - **Strict RLS:** Supabase Row Level Security ensures cross-tenant data leakage is impossible at the database level.

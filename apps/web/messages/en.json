@@ -1,0 +1,9 @@
+{
+  "Dashboard": {
+    "liveOperations": "Live Operations",
+    "receivingOrders": "Receiving Orders",
+    "hardwareSettings": "Hardware Settings",
+    "language": "Language",
+    "languageDesc": "Fulfillment dashboard interface language"
+  }
+}

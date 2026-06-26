@@ -74,25 +74,10 @@ export default async function PublicPageView({
   const supabase = await createClient()
 
   const fetchLocation = async () => {
-    if (slug === 'demo-venue') {
-      return {
-        id: 'demo-loc',
-        name: 'Demo Venue',
-        organization_id: 'demo-org',
-        theme_color: '#3b82f6',
-        cover_image_url: 'https://picsum.photos/1000/400',
-        ai_enabled: true,
-        ai_name: 'MenuAI',
-        whatsapp_number: '+1234567890',
-        organizations: { logo_url: 'https://picsum.photos/200' },
-        randomizer_enabled: true,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any
-    }
 
     const { data } = await supabase
       .from('locations')
-      .select('id, name, organization_id, theme_color, cover_image_url, ai_enabled, ai_name, instagram_handle, x_handle, tiktok_handle, whatsapp_number, phone_number, organizations(logo_url), manual_payment_enabled, manual_payment_bank_name, manual_payment_account_name, manual_payment_account_number, manual_payment_instructions, delivery_enabled, delivery_fee_minor, delivery_minimum_order_minor, delivery_note, fulfillment_location_label')
+      .select('id, name, organization_id, theme_color, cover_image_url, ai_enabled, ai_name, instagram_handle, x_handle, tiktok_handle, whatsapp_number, phone_number, organizations(logo_url), manual_payment_enabled, manual_payment_bank_name, manual_payment_account_name, manual_payment_account_number, manual_payment_instructions, delivery_enabled, delivery_fee_minor, delivery_minimum_order_minor, delivery_note, fulfillment_location_label, currency_code')
       .eq('slug', slug)
       .single()
     return data
@@ -129,17 +114,6 @@ export default async function PublicPageView({
 
   // 2. Page
   const fetchPage = async () => {
-    if (slug === 'demo-venue' && pageSlug === 'allergens') {
-      return {
-        id: 'page-2',
-        title: 'Allergen Information',
-        slug: 'allergens',
-        template_type: 'info',
-        content: '# Allergen Policy\n\nPlease let our staff know if you have any allergies. We handle nuts, dairy, and wheat in our kitchen.',
-        is_published: true,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any
-    }
     let query = supabase
       .from('location_pages')
       .select('id, title, slug, content, template_type, billing_enabled, billing_mode, payment_mode, deposit_percentage, business_type_preset, randomizer_enabled, template_data, is_published')
@@ -187,7 +161,7 @@ export default async function PublicPageView({
 
   const sharedProps = {
      
-    location: { ...loc, cover_image_url: loc.cover_image_url ?? undefined } as never,
+    location: { ...loc, cover_image_url: loc.cover_image_url ?? undefined, currency: loc.currency_code } as never,
      
     page: page as never,
      

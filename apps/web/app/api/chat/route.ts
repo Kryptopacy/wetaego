@@ -1,9 +1,9 @@
-
 import { google } from '@ai-sdk/google'
 import { streamText, tool, stepCountIs } from 'ai'
 import { z } from 'zod'
 import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
+import { formatCurrency } from '@/lib/utils/currency'
 import { getAiModels } from '@/lib/utils/settings'
 // cleaned up unused type
 
@@ -83,13 +83,15 @@ export async function POST(req: Request) {
     // 3. Fetch location AI configuration
     const { data: location, error: locError } = await supabase
       .from('locations')
-      .select('id, name, ai_enabled, ai_name, ai_instructions, brand_knowledge')
+      .select('id, name, ai_enabled, ai_name, ai_instructions, brand_knowledge, currency_code')
       .eq('id', locationId)
       .single()
 
     if (locError || !location) {
       return new Response('Location not found', { status: 404 })
     }
+    
+    const locationCurrency = location.currency_code || 'NGN'
 
     if (!location.ai_enabled) {
       return new Response('AI Assistant is disabled for this location', { status: 400 })
@@ -132,7 +134,7 @@ export async function POST(req: Request) {
             const itemsList = (cat.menu_items || [])
               .filter(item => item.availability_status !== 'hidden')
               .map(item => 
-                `- [ID: ${item.id}] ${item.name}: ₦${(item.price_minor / 100).toLocaleString()} | Availability: ${item.availability_status} | Description: ${item.description || 'No description'}`
+                `- [ID: ${item.id}] ${item.name}: ${formatCurrency(item.price_minor, locationCurrency)} | Availability: ${item.availability_status} | Description: ${item.description || 'No description'}`
               )
               .join('\n')
             return `### ${cat.name}\n${itemsList}`
@@ -235,6 +237,10 @@ ${itemsJson}`
     return (result as unknown as { toDataStreamResponse: () => Response }).toDataStreamResponse()
   } catch (err: unknown) {
     console.error('Chat error:', err)
-    return new Response((err as Error).message || 'Internal Server Error', { status: 500 })
+    // AI Circuit Breaker: Return a polite fallback message so the UI doesn't break
+    return new Response(
+      'I apologize, but my connection is currently experiencing difficulties. Please try again in a moment or speak to a staff member directly.', 
+      { status: 200, headers: { 'Content-Type': 'text/plain' } }
+    )
   }
 }

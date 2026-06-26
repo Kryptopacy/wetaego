@@ -24,8 +24,7 @@ export default function DashboardError({
       <h2 className="mb-2 text-2xl font-bold text-white tracking-tight">Something went wrong!</h2>
       
       <p className="mb-8 max-w-md text-zinc-400">
-        We encountered an unexpected error while loading this section of the dashboard. 
-        Your data is safe, but we couldn't render this page.
+        Your data is safe, but we couldn&apos;t render this page.
       </p>
 
       <button

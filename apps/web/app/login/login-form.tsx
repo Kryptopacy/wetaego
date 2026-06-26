@@ -125,7 +125,12 @@ function LoginFormInner() {
 
 export default function LoginForm() {
   return (
-    <Suspense fallback={<div className="w-full max-w-sm rounded-2xl bg-zinc-900/50 p-8 shadow-2xl ring-1 ring-white/10 backdrop-blur-xl animate-pulse h-96 flex items-center justify-center text-zinc-500">Loading...</div>}>
+    <Suspense fallback={
+      <div className="w-full max-w-sm rounded-2xl bg-zinc-900/50 p-8 shadow-2xl ring-1 ring-white/10 backdrop-blur-xl h-[420px] flex flex-col items-center justify-center">
+        <div className="w-10 h-10 border-4 border-zinc-800 border-t-white rounded-full animate-spin mb-4" />
+        <div className="text-sm font-medium text-zinc-500 animate-pulse">Loading dashboard...</div>
+      </div>
+    }>
       <LoginFormInner />
     </Suspense>
   )

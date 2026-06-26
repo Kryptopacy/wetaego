@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { ShareButton } from '@/components/ShareButton'
+import { formatCurrency } from '@/lib/utils/currency'
 
 export default async function AffiliateDashboardPage() {
   const supabase = await createClient()
@@ -62,12 +63,12 @@ export default async function AffiliateDashboardPage() {
           </div>
           <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
             <h3 className="text-zinc-400 text-sm font-medium mb-1">Pending Balance</h3>
-            <p className="text-3xl font-bold text-yellow-500">₦{(pendingEarnings / 100).toLocaleString()}</p>
+            <p className="text-3xl font-bold text-yellow-500">{formatCurrency(pendingEarnings)}</p>
             <p className="text-xs text-zinc-500 mt-1">Available for next payout</p>
           </div>
           <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
             <h3 className="text-zinc-400 text-sm font-medium mb-1">Total Paid</h3>
-            <p className="text-3xl font-bold text-emerald-500">₦{(paidEarnings / 100).toLocaleString()}</p>
+            <p className="text-3xl font-bold text-emerald-500">{formatCurrency(paidEarnings)}</p>
           </div>
         </div>
 

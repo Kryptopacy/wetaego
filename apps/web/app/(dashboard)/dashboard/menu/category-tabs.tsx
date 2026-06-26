@@ -15,6 +15,7 @@ import { updateItem, deleteItem } from './actions'
 
 import { toast } from 'sonner'
 import Image from 'next/image'
+import { formatCurrency } from '@/lib/utils/currency'
 
 function OptimisticItem({ item, orgId, categoryName }: { item: NonNullable<Category['menu_items']>[0], orgId: string, categoryName: string }) {
   const [optimisticStatus, addOptimisticStatus] = useOptimistic(
@@ -28,6 +29,7 @@ function OptimisticItem({ item, orgId, categoryName }: { item: NonNullable<Categ
 
   const [editName, setEditName] = useState(item.name)
   const [editDescription, setEditDescription] = useState(item.description || '')
+  const [editPrice, setEditPrice] = useState(item.price_minor)
   const [isGenerating, setIsGenerating] = useState(false)
   const [isGeneratingImg, setIsGeneratingImg] = useState(false)
   const [aiImageUrl, setAiImageUrl] = useState<string | null>(null)
@@ -118,8 +120,8 @@ function OptimisticItem({ item, orgId, categoryName }: { item: NonNullable<Categ
               </button>
             </div>
             <div className="w-24">
-              <label className="block text-xs font-medium text-zinc-400 mb-1">Price (₦)</label>
-              <input type="number" step="0.01" name="price" defaultValue={item.price_minor / 100} required className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-white outline-none focus:border-blue-500" />
+              <label className="block text-xs font-medium text-zinc-400 mb-1">Price (Minor)</label>
+              <input type="number" name="price" value={editPrice} onChange={(e) => setEditPrice(Number(e.target.value))} required className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-white outline-none focus:border-blue-500" />
             </div>
             <div className="w-full sm:w-auto flex flex-col gap-2">
               <label className="block text-xs font-medium text-zinc-400 mb-1">Update Image</label>
@@ -165,7 +167,7 @@ function OptimisticItem({ item, orgId, categoryName }: { item: NonNullable<Categ
       <div>
         <h3 className="font-semibold text-white">
           {item.name} 
-          <span className="text-zinc-400 font-normal ml-2">₦{(item.price_minor / 100).toLocaleString()}</span>
+          <span className="text-zinc-400 font-normal ml-2">{formatCurrency(item.price_minor)}</span>
         </h3>
         {item.description && <p className="text-sm text-zinc-400 mt-1">{item.description}</p>}
         <div className="mt-2 flex gap-2">

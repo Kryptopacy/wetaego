@@ -4,6 +4,12 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { z } from 'zod'
+
+const updateBookingSchema = z.object({
+  bookingId: z.string().uuid(),
+  action: z.enum(['mark_paid', 'cancel', 'confirm'])
+})
 
 export async function updateBookingStatus(bookingId: string, action: 'mark_paid' | 'cancel' | 'confirm') {
   const supabase = await createClient()
@@ -14,6 +20,12 @@ export async function updateBookingStatus(bookingId: string, action: 'mark_paid'
     return { success: true }
   }
   if (authError || !userData?.user) throw new Error('Not authenticated')
+
+  // Validate inputs
+  const parsed = updateBookingSchema.safeParse({ bookingId, action })
+  if (!parsed.success) {
+    throw new Error('Invalid input parameters')
+  }
 
   const { data: bookingData } = await supabase
     .from('page_bookings')

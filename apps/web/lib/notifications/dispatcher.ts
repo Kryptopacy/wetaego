@@ -48,21 +48,23 @@ export async function notifyBusiness(
       .eq('organization_id', orgId)
 
     if (members && members.length > 0) {
-      for (const member of members) {
-        try {
-          const { data: userData } = await supabaseAdmin.auth.admin.getUserById(member.user_id)
-          const email = userData?.user?.email
-          if (email) {
-            await sendEmailNotification(
-              email,
-              `[${location.name}] ${payload.title}`,
-              payload.body + (payload.url ? `\n\nView details: ${process.env.NEXT_PUBLIC_SITE_URL}${payload.url}` : '')
-            )
+      await Promise.all(
+        members.map(async (member) => {
+          try {
+            const { data: userData } = await supabaseAdmin.auth.admin.getUserById(member.user_id)
+            const email = userData?.user?.email
+            if (email) {
+              await sendEmailNotification(
+                email,
+                `[${location.name}] ${payload.title}`,
+                payload.body + (payload.url ? `\n\nView details: ${process.env.NEXT_PUBLIC_SITE_URL}${payload.url}` : '')
+              )
+            }
+          } catch (e) {
+            console.error(`Failed to get email for user ${member.user_id}`, e)
           }
-        } catch (e) {
-          console.error(`Failed to get email for user ${member.user_id}`, e)
-        }
-      }
+        })
+      )
     }
 
     // 4. Send WhatsApp via Termii

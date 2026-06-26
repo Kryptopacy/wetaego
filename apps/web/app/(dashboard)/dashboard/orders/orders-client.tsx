@@ -2,7 +2,8 @@
 
 
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useOptimistic } from 'react'
+import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { Database } from '@/lib/supabase/types'
@@ -11,6 +12,13 @@ import { ActiveOrdersGrid } from './components/active-orders-grid'
 import { StockManagementView } from './components/stock-management-view'
 import { mapSupabaseOrderToUI } from '@/lib/utils/transformers'
 import { UIOrder } from '@/lib/types/frontend'
+import { useOfflineSync } from '@/hooks/use-offline-sync'
+import { QueuedAction } from '@/lib/stores/offline-queue-store'
+import { markOrderPaidOffline, completeOrderAction } from './actions'
+import { OfflineIndicator } from './components/offline-indicator'
+import { HardwareSettingsView } from './components/hardware-settings-view'
+import { usePrinterStore } from '@/lib/stores/printer-store'
+import { printOrder } from '@/lib/utils/printer'
 
 type ServiceRequestRow = Database['public']['Tables']['service_requests']['Row']
 type MenuItemRow = Database['public']['Tables']['menu_items']['Row']
@@ -33,7 +41,33 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
   const [orders, setOrders] = useState(initialOrders)
   const [serviceRequests, setServiceRequests] = useState(initialServiceRequests)
   const [menuItems, setMenuItems] = useState(initialMenuItems)
-  const [activeTab, setActiveTab] = useState<'orders' | 'stock'>('orders')
+  const [activeTab, setActiveTab] = useState<'orders' | 'stock' | 'hardware'>('orders')
+  const { mode, ipAddress, autoPrintReceipts } = usePrinterStore()
+  const t = useTranslations('Dashboard')
+
+  const onSyncAction = async (action: QueuedAction) => {
+    switch (action.type) {
+      case 'toggleStock':
+        const { error } = await supabase.from('menu_items').update({ availability_status: action.payload.newStatus }).eq('id', action.payload.itemId)
+        return !error
+      case 'claimOrder':
+        const { error: claimError } = await supabase.rpc('claim_order', { p_order_id: action.payload.orderId, p_prep_time_minutes: action.payload.minutes })
+        return !claimError
+      case 'resolveServiceRequest':
+        const { error: srError } = await supabase.from('service_requests').update({ status: 'resolved' }).eq('id', action.payload.id)
+        return !srError
+      case 'markOrderPaid':
+        const resPaid = await markOrderPaidOffline(action.payload.orderId)
+        return !!resPaid.success
+      case 'completeOrder':
+        const resComp = await completeOrderAction(action.payload.orderId)
+        return !!resComp.success
+      default:
+        return true
+    }
+  }
+
+  const { executeOrQueue } = useOfflineSync(onSyncAction)
 
   useEffect(() => {
     // Subscribe to Orders
@@ -116,33 +150,39 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
   }, [organizationId, locationId, supabase])  
 
   const urgencyWeight: Record<string, number> = { 'critical': 3, 'standard': 2, 'low': 1 }
-  const pendingRequests = serviceRequests
+  const basePendingRequests = serviceRequests
     .filter(r => r.status === 'pending')
     .sort((a, b) => {
       const weightA = urgencyWeight[a.urgency_tier || 'standard'] || 0
       const weightB = urgencyWeight[b.urgency_tier || 'standard'] || 0
       return weightB - weightA // Critical first
     })
+
+  const [optimisticRequests, addOptimisticResolve] = useOptimistic(
+    basePendingRequests,
+    (state, resolvedId: string) => state.filter(r => r.id !== resolvedId)
+  )
+
   const activeOrders = orders.filter(o => o.status !== 'completed')
 
   const toggleStock = async (itemId: string, currentStatus: string) => {
     const newStatus = currentStatus === 'available' ? 'sold_out' : 'available'
-    
-    // Store previous state for rollback
     const previousItems = [...menuItems]
-    
-    // Optimistic update
-    setMenuItems(prev => prev.map(i => i.id === itemId ? { ...i, availability_status: newStatus } : i))
-    
-    const { error } = await supabase.from('menu_items').update({ availability_status: newStatus }).eq('id', itemId)
-    
-    if (error) {
-      // Rollback on failure
-      setMenuItems(previousItems)
-      toast.error('Failed to update stock status: ' + (error as Error).message)
-    } else {
-      toast.success(`Item marked as ${newStatus === 'available' ? 'Available' : 'Sold Out'}`)
-    }
+
+    await executeOrQueue(
+      { type: 'toggleStock', payload: { itemId, newStatus } },
+      () => setMenuItems(prev => prev.map(i => i.id === itemId ? { ...i, availability_status: newStatus } : i)),
+      async () => {
+        const { error } = await supabase.from('menu_items').update({ availability_status: newStatus }).eq('id', itemId)
+        if (error) {
+          setMenuItems(previousItems)
+          toast.error('Failed to update stock status: ' + (error as Error).message)
+          return false
+        }
+        toast.success(`Item marked as ${newStatus === 'available' ? 'Available' : 'Sold Out'}`)
+        return true
+      }
+    )
   }
 
   const handleClaimOrder = async (orderId: string) => {
@@ -155,25 +195,71 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
       return
     }
 
-    const { data, error } = await supabase.rpc('claim_order', {
-      p_order_id: orderId,
-      p_prep_time_minutes: minutes
-    })
+    await executeOrQueue(
+      { type: 'claimOrder', payload: { orderId, minutes } },
+      () => {}, // Handled optimistically inside ActiveOrdersGrid
+      async () => {
+        const { data, error } = await supabase.rpc('claim_order', {
+          p_order_id: orderId,
+          p_prep_time_minutes: minutes
+        })
+        if (error) {
+          toast.error('Failed to claim order: ' + (error as Error).message)
+          return false
+        }
+        if (data === false) {
+          toast.error('Order was already claimed by another staff member, or limit reached.')
+        } else {
+          toast.success('Order claimed successfully!')
+        }
+        return true
+      }
+    )
+  }
 
-    if (error) {
-      toast.error('Failed to claim order: ' + (error as Error).message)
-      return
-    }
+  const handleMarkPaidOffline = async (orderId: string) => {
+    await executeOrQueue(
+      { type: 'markOrderPaid', payload: { orderId } },
+      () => {}, // Handled optimistically inside ActiveOrdersGrid
+      async () => {
+        const res = await markOrderPaidOffline(orderId)
+        if (res.error) {
+          toast.error('Failed to confirm payment')
+          return false
+        }
+        toast.success('Payment confirmed!')
+        return true
+      }
+    )
+  }
 
-    if (data === false) {
-      toast.error('Order was already claimed by another staff member, or limit reached.')
-    } else {
-      toast.success('Order claimed successfully!')
-    }
+  const handleCompleteOrder = async (orderId: string) => {
+    await executeOrQueue(
+      { type: 'completeOrder', payload: { orderId } },
+      () => {}, // Handled optimistically inside ActiveOrdersGrid
+      async () => {
+        const res = await completeOrderAction(orderId)
+        if (res.error) {
+          toast.error('Failed to complete order')
+          return false
+        }
+        toast.success('Order completed! Feedback email sent.')
+        
+        // Auto-print receipt if hardware is configured
+        if (autoPrintReceipts) {
+          const order = activeOrders.find(o => o.id === orderId)
+          if (order) {
+            printOrder(order, { mode, ipAddress, businessName: 'OurMenu OS' })
+          }
+        }
+        return true
+      }
+    )
   }
 
   return (
     <div className="flex-1 flex flex-col mt-8">
+      <OfflineIndicator />
       <div className="flex space-x-2 mb-6">
         <button 
           onClick={() => setActiveTab('orders')}
@@ -188,21 +274,40 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
           <span className={`w-2 h-2 rounded-full ${menuItems.some(i => i.availability_status === 'sold_out') ? 'bg-red-500' : 'bg-green-500'}`}></span>
           Live Stock
         </button>
+        <button 
+          onClick={() => setActiveTab('hardware')}
+          className={`px-4 py-2 rounded-lg font-medium transition-colors ${activeTab === 'hardware' ? 'bg-zinc-800 text-white' : 'text-zinc-400 hover:text-white'}`}
+        >
+          {t('hardwareSettings')}
+        </button>
       </div>
 
       {activeTab === 'orders' ? (
         <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6 overflow-hidden">
           <ServiceRequestsPanel 
-            pendingRequests={pendingRequests} 
-            onResolve={async (id) => { await supabase.from('service_requests').update({ status: 'resolved' }).eq('id', id) }} 
+            pendingRequests={optimisticRequests} 
+            onResolve={async (id) => { 
+              await executeOrQueue(
+                { type: 'resolveServiceRequest', payload: { id } },
+                () => addOptimisticResolve(id),
+                async () => {
+                  const { error } = await supabase.from('service_requests').update({ status: 'resolved' }).eq('id', id)
+                  return !error
+                }
+              )
+            }} 
           />
           <ActiveOrdersGrid 
             activeOrders={activeOrders} 
             currentUserId={currentUserId} 
             billingMode={billingMode} 
             onClaimOrder={handleClaimOrder} 
+            onMarkPaidOffline={handleMarkPaidOffline}
+            onCompleteOrder={handleCompleteOrder}
           />
         </div>
+      ) : activeTab === 'hardware' ? (
+        <HardwareSettingsView />
       ) : (
         <StockManagementView 
           menuItems={menuItems} 

@@ -542,6 +542,37 @@ export default async function SettingsPage({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
+                  <label className="mb-2 block text-sm font-medium text-zinc-300">TikTok Handle</label>
+                  <div className="flex items-center rounded-lg border border-zinc-700 bg-zinc-800/50 overflow-hidden focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500">
+                    <span className="px-4 text-zinc-500">@</span>
+                    <input
+                      type="text"
+                      name="tiktokHandle"
+                      defaultValue={location.tiktok_handle || ''}
+                      className="w-full bg-transparent py-2.5 text-white outline-none"
+                      placeholder="yourvenue"
+                      maxLength={50}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-zinc-300">New X Handle</label>
+                  <div className="flex items-center rounded-lg border border-zinc-700 bg-zinc-800/50 overflow-hidden focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500">
+                    <span className="px-4 text-zinc-500">@</span>
+                    <input
+                      type="text"
+                      name="xHandle"
+                      defaultValue={location.x_handle || ''}
+                      className="w-full bg-transparent py-2.5 text-white outline-none"
+                      placeholder="yourvenue"
+                      maxLength={50}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
                   <label className="mb-2 block text-sm font-medium text-zinc-300">WhatsApp Number</label>
                   <input
                     type="text"
@@ -829,7 +860,7 @@ export default async function SettingsPage({
                       name="delivery_fee_minor"
                       defaultValue={location.delivery_fee_minor || 0}
                       className="w-full rounded-xl bg-zinc-800 border-zinc-700 px-4 py-3 text-white outline-none focus:border-green-500"
-                      placeholder="e.g. 150000 for ₦1,500"
+                      placeholder="e.g. 150000 for 1500"
                     />
                     <p className="text-xs text-zinc-500 mt-2">The flat fee added to delivery orders.</p>
                   </div>
@@ -840,7 +871,7 @@ export default async function SettingsPage({
                       name="delivery_minimum_order_minor"
                       defaultValue={location.delivery_minimum_order_minor || 0}
                       className="w-full rounded-xl bg-zinc-800 border-zinc-700 px-4 py-3 text-white outline-none focus:border-green-500"
-                      placeholder="e.g. 500000 for ₦5,000"
+                      placeholder="e.g. 500000 for 5000"
                     />
                     <p className="text-xs text-zinc-500 mt-2">Minimum cart subtotal to qualify for delivery.</p>
                   </div>

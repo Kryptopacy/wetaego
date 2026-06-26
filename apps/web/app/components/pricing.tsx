@@ -1,6 +1,7 @@
 import { Zap, Check, ArrowRight } from 'lucide-react'
 import { getPricingSettings, getPlanLimits } from '@/lib/utils/settings'
 import { FadeIn } from './animations'
+import { formatCurrency } from '@/lib/utils/currency'
 
 export async function Pricing() {
   const pricing = await getPricingSettings()
@@ -12,7 +13,7 @@ export async function Pricing() {
   const plans = [
     {
       name: 'Lite',
-      price: `₦${litePrice.toLocaleString()}`,
+      price: formatCurrency(litePrice * 100),
       period: 'per month',
       description: 'Perfect for testing the platform at your venue. 30-day free trial included.',
       features: ['Includes 10 Credits/mo', 'Customizable AI Assistant (guest-facing)', 'Edge Translator (40+ languages)', 'Up to 2 QR codes', '1 active location', '0 Extra Custom Pages (10 credits/page)'],
@@ -22,7 +23,7 @@ export async function Pricing() {
     },
     {
       name: 'Pro',
-      price: `₦${proPrice.toLocaleString()}`,
+      price: formatCurrency(proPrice * 100),
       period: 'per month',
       description: 'For serious operators who want every edge.',
       features: [
@@ -125,7 +126,7 @@ export async function Pricing() {
                 )}
                 <Zap className={`w-8 h-8 mb-6 ${pack.popular ? 'text-violet-400' : 'text-zinc-500'}`} aria-hidden="true" />
                 <h4 className="text-2xl font-bold text-white mb-2">{pack.amount} Credits</h4>
-                <div className="text-3xl font-black text-white mb-8">₦{pack.price.toLocaleString()}</div>
+                <div className="text-3xl font-black text-white mb-8">{pack.price}</div>
                 <a href="/dashboard/billing" className={`w-full py-3 rounded-xl text-sm font-bold transition-all duration-300 ${pack.popular
                     ? 'bg-white text-black hover:scale-105'
                     : 'bg-white/5 text-white hover:bg-white/10 border border-white/10'

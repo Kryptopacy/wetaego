@@ -87,7 +87,8 @@ export const paystackProvider: PaymentProvider = {
     const secretKey = process.env.PAYSTACK_SECRET_KEY
     if (!secretKey) return false
     const hash = crypto.createHmac('sha512', secretKey).update(payload).digest('hex')
-    return hash === signature
+    if (hash.length !== signature.length) return false
+    return crypto.timingSafeEqual(Buffer.from(hash), Buffer.from(signature))
   },
 }
 

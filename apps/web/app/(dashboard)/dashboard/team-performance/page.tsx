@@ -1,4 +1,4 @@
-import { createClient, createAdminClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
 import { formatCurrency } from '@/lib/utils/currency'
@@ -90,18 +90,19 @@ export default async function TeamPerformancePage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const ordersWithTips: { id: string; assigned_staff_id: string | null; tip_amount_minor: number | null; created_at: string }[] = ordersWithTipsRaw as unknown as any || []
 
-  // Create Admin Client to fetch user names
-  const adminClient = await createAdminClient()
+  // 4. Fetch User Profiles for Staff
+  const staffIds = (staffMembers || []).map(s => s.user_id)
+  const { data: profiles } = await supabase
+    .from('user_profiles')
+    .select('id, full_name')
+    .in('id', staffIds)
+
+  const profileMap = new Map((profiles || []).map(p => [p.id, p.full_name]))
 
   // Calculate stats per staff
-  const staffStatsRaw = await Promise.all((staffMembers || []).map(async (staff) => {
+  const staffStatsRaw = (staffMembers || []).map((staff) => {
     const staffId = staff.user_id
-    let fullName = undefined
-    try {
-      const { data: userRecord } = await adminClient.auth.admin.getUserById(staffId)
-      fullName = userRecord?.user?.user_metadata?.full_name
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (_e) {}
+    const fullName = profileMap.get(staffId)
 
     const name = fullName ? fullName : `Staff ${staffId.slice(0, 6).toUpperCase()}`
 
@@ -122,7 +123,7 @@ export default async function TeamPerformancePage() {
       totalTipsMinor,
       recentFeedback: staffReviews.filter(r => r.staff_feedback).map(r => r.staff_feedback).slice(0, 3)
     }
-  }))
+  })
   
   const staffStats = staffStatsRaw.sort((a, b) => b.totalTipsMinor - a.totalTipsMinor)
 

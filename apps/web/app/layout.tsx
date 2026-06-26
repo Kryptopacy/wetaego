@@ -19,8 +19,8 @@ export const metadata: Metadata = {
     default: "OurMenu OS",
     template: "%s | OurMenu OS"
   },
-  description: "The complete platform to build your online presence, manage operations, and engage customers. Digital menus, ordering, and operations for hospitality and services.",
-  keywords: ["digital menu", "restaurant os", "qr menu", "hospitality software", "online ordering", "service booking"],
+  description: "The complete operating layer for modern businesses. Build your digital storefront, manage operations, and process payments instantly. Tailored for restaurants, boutiques, hotels, wellness spas, and creators.",
+  keywords: ["digital storefront", "restaurant os", "qr menu", "hospitality software", "online ordering", "service booking", "hotel pms", "boutique ecommerce", "spa booking system", "media rate card", "real estate listings", "consulting portal", "food truck pos", "salon scheduling", "omnichannel os", "payment roulette", "digital rate card", "b2b rate cards", "ai demand forecasting"],
   authors: [{ name: "CruiseHQ" }],
   creator: "CruiseHQ",
   manifest: "/manifest.json",
@@ -40,8 +40,8 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_US',
     url: 'https://ourmenuos.online',
-    title: 'OurMenu OS - The ultimate digital menu & operations suite',
-    description: 'A complete management suite for restaurants, salons, and service businesses. Ditch the expensive custom websites and terrible PDF links.',
+    title: 'OurMenu OS - The ultimate digital storefront & operations suite',
+    description: 'A complete management suite for restaurants, boutiques, hotels, wellness spas, consultants, and real estate. Ditch expensive custom websites and terrible PDF links.',
     siteName: 'OurMenu OS',
     images: [
       {
@@ -55,7 +55,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'OurMenu OS',
-    description: 'The ultimate digital menu & operations suite for hospitality and services.',
+    description: 'The ultimate digital storefront & operations suite for hospitality, retail, and services.',
     images: ['/hero_restaurant_bg.png'],
   },
 };
@@ -68,22 +68,30 @@ import { PostHogProvider } from './providers'
 import { PwaInstallPrompt } from './components/pwa-install-prompt'
 import { OfflineBanner } from '@/components/offline-banner'
 
-export default function RootLayout({
+import { NextIntlClientProvider } from 'next-intl'
+import { getLocale, getMessages } from 'next-intl/server'
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale()
+  const messages = await getMessages()
+
   return (
     <html
-      lang="en"
+      lang={locale}
       className={`${inter.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-zinc-950 text-zinc-50">
         <PostHogProvider>
-          <OfflineBanner />
-          {children}
-          <PwaInstallPrompt />
-          <Toaster theme="dark" position="bottom-center" richColors />
+          <NextIntlClientProvider messages={messages}>
+            <OfflineBanner />
+            {children}
+            <PwaInstallPrompt />
+            <Toaster theme="dark" position="bottom-center" richColors />
+          </NextIntlClientProvider>
         </PostHogProvider>
       </body>
     </html>

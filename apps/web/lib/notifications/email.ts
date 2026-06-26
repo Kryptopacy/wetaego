@@ -2,6 +2,15 @@ import { Resend } from 'resend';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+function escapeHTML(str: string) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 export async function sendEmailNotification(toEmail: string, subject: string, message: string) {
   if (!process.env.RESEND_API_KEY) {
     if (process.env.NODE_ENV === 'production') {
@@ -18,8 +27,8 @@ export async function sendEmailNotification(toEmail: string, subject: string, me
       subject: subject,
       html: `
         <div style="font-family: sans-serif; max-w: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
-          <h2 style="color: #333; margin-top: 0;">${subject}</h2>
-          <p style="color: #555; font-size: 16px; line-height: 1.5; white-space: pre-line;">${message}</p>
+          <h2 style="color: #333; margin-top: 0;">${escapeHTML(subject)}</h2>
+          <p style="color: #555; font-size: 16px; line-height: 1.5; white-space: pre-line;">${escapeHTML(message)}</p>
           <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
           <p style="color: #999; font-size: 12px;">This is an automated notification from OurMenu OS.</p>
         </div>
@@ -54,7 +63,7 @@ export async function sendWelcomeEmail(toEmail: string, name?: string) {
       subject: 'Welcome to OurMenu OS! 🚀',
       html: `
         <div style="font-family: sans-serif; max-w: 600px; margin: 0 auto; padding: 30px; border: 1px solid #eee; border-radius: 12px; background: #fafafa;">
-          <h1 style="color: #111; margin-top: 0;">Welcome aboard${name ? `, ${name}` : ''}! 🎉</h1>
+          <h1 style="color: #111; margin-top: 0;">Welcome aboard${name ? `, ${escapeHTML(name)}` : ''}! 🎉</h1>
           <p style="color: #444; font-size: 16px; line-height: 1.6;">
             We're thrilled to have you join OurMenu OS. Our mission is to give you absolute control over your digital storefront, bookings, and customer interactions without the technical headache.
           </p>

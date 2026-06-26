@@ -84,8 +84,8 @@ export async function completeOrderAction(orderId: string) {
     }
 
     return { success: true }
-  } catch (err: any) {
-    return { error: err.message }
+  } catch (err: unknown) {
+    return { error: err instanceof Error ? err.message : 'Unknown error' }
   }
 }
 
@@ -116,8 +116,8 @@ export async function markOrderPaidOffline(orderId: string) {
     })
 
     return { success: true }
-  } catch (err: any) {
-    return { error: err.message }
+  } catch (err: unknown) {
+    return { error: err instanceof Error ? err.message : 'Unknown error' }
   }
 }
 

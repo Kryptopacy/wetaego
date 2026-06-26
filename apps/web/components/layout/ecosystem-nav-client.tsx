@@ -43,7 +43,7 @@ export function EcosystemNavClient({ slug, pages, currentPath }: EcosystemNavCli
         )}
       </AnimatePresence>
 
-      <div className="fixed bottom-24 right-6 z-50 flex flex-col items-end">
+      <div className="fixed bottom-24 left-6 z-50 flex flex-col items-start">
         <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -51,7 +51,7 @@ export function EcosystemNavClient({ slug, pages, currentPath }: EcosystemNavCli
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.9 }}
             transition={{ duration: 0.2 }}
-            className="mb-4 bg-zinc-900/95 backdrop-blur-xl border border-zinc-800 shadow-2xl rounded-2xl p-2 w-64 origin-bottom-right"
+            className="mb-4 bg-zinc-900/95 backdrop-blur-xl border border-zinc-800 shadow-2xl rounded-2xl p-2 w-64 origin-bottom-left"
             role="menu"
             aria-orientation="vertical"
           >

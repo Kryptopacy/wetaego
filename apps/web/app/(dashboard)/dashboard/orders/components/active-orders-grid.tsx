@@ -1,18 +1,22 @@
 'use client'
 
 import { useOptimistic, startTransition } from 'react'
-import { toast } from 'sonner'
 import { formatCurrency } from '@/lib/utils/currency'
 import { UIOrder } from '@/lib/types/frontend'
+import { Printer } from 'lucide-react'
+import { usePrinterStore } from '@/lib/stores/printer-store'
+import { printOrder } from '@/lib/utils/printer'
 
 interface ActiveOrdersGridProps {
   activeOrders: UIOrder[]
   currentUserId: string
   billingMode: string
   onClaimOrder: (id: string) => Promise<void>
+  onMarkPaidOffline: (id: string) => Promise<void>
+  onCompleteOrder: (id: string) => Promise<void>
 }
 
-export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, onClaimOrder }: ActiveOrdersGridProps) {
+export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, onClaimOrder, onMarkPaidOffline, onCompleteOrder }: ActiveOrdersGridProps) {
   const [optimisticOrders, addOptimisticOrder] = useOptimistic(
     activeOrders,
     (state: UIOrder[], updatedOrder: Partial<UIOrder> & { id: string }) => {
@@ -22,6 +26,8 @@ export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, onC
       return state.map(o => o.id === updatedOrder.id ? { ...o, ...updatedOrder } : o)
     }
   )
+
+  const { mode, ipAddress } = usePrinterStore()
 
   return (
       <div className="col-span-1 lg:col-span-2 border border-zinc-800 rounded-xl bg-zinc-900/30 flex flex-col overflow-hidden min-h-[500px]">
@@ -49,14 +55,26 @@ export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, onC
                     </div>
                     <span className="text-sm text-zinc-500">Order #{order.id.split('-')[0]}</span>
                   </div>
-                  <div className="text-right">
-                    <div className="font-bold text-lg text-white">{formatCurrency(order.total_amount_minor )}</div>
-                    {(order.tip_amount_minor || 0) > 0 && (
-                      <div className="text-sm text-blue-400 mb-1 font-medium">+ {formatCurrency(order.tip_amount_minor || 0)} Tip</div>
-                    )}
-                    <span className={`text-xs font-medium px-2 py-1 rounded-full ${order.status === 'paid' ? 'bg-green-500/20 text-green-400' : 'bg-zinc-800 text-zinc-400'}`}>
-                      {order.status.toUpperCase()}
-                    </span>
+                  <div className="text-right flex items-start gap-4">
+                    <div>
+                      <div className="font-bold text-lg text-white">{formatCurrency(order.total_amount_minor )}</div>
+                      {(order.tip_amount_minor || 0) > 0 && (
+                        <div className="text-sm text-blue-400 mb-1 font-medium">+ {formatCurrency(order.tip_amount_minor || 0)} Tip</div>
+                      )}
+                      <span className={`text-xs font-medium px-2 py-1 rounded-full ${order.status === 'paid' ? 'bg-green-500/20 text-green-400' : 'bg-zinc-800 text-zinc-400'}`}>
+                        {order.status.toUpperCase()}
+                      </span>
+                    </div>
+                    <button 
+                      onClick={() => printOrder(order, { mode, ipAddress })}
+                      className="group relative p-2 rounded-xl bg-zinc-900/50 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700 hover:bg-zinc-800 transition-all hover:scale-105 active:scale-95 shadow-sm"
+                      title="Print Fulfillment Ticket"
+                    >
+                      <Printer className="w-4 h-4 transition-transform group-hover:-translate-y-0.5" />
+                      <span className="absolute -top-8 left-1/2 -translate-x-1/2 scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100 transition-all bg-black text-xs text-white px-2 py-1 rounded shadow-xl whitespace-nowrap pointer-events-none">
+                        Print Ticket
+                      </span>
+                    </button>
                   </div>
                 </div>
                 
@@ -96,15 +114,10 @@ export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, onC
                       </span>
                       <button 
                         onClick={async () => {
-                          const { markOrderPaidOffline } = await import('../actions')
                           startTransition(() => {
                             addOptimisticOrder({ id: order.id, status: 'paid' })
                           })
-                          toast.promise(markOrderPaidOffline(order.id), {
-                            loading: 'Confirming payment...',
-                            success: 'Payment confirmed!',
-                            error: 'Failed to confirm payment'
-                          })
+                          await onMarkPaidOffline(order.id)
                         }}
                         className="px-4 py-2 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 font-medium transition-colors text-sm"
                       >
@@ -115,15 +128,10 @@ export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, onC
                   {order.status === 'pending' && billingMode === 'table_service' && (
                     <button 
                       onClick={async () => {
-                        const { markOrderPaidOffline } = await import('../actions')
                         startTransition(() => {
                           addOptimisticOrder({ id: order.id, status: 'paid' })
                         })
-                        toast.promise(markOrderPaidOffline(order.id), {
-                          loading: 'Confirming payment...',
-                          success: 'Payment confirmed!',
-                          error: 'Failed to confirm payment'
-                        })
+                        await onMarkPaidOffline(order.id)
                       }}
                       className="px-6 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-medium transition-colors"
                     >
@@ -133,15 +141,10 @@ export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, onC
                   {order.status === 'preparing' && order.assigned_staff_id === currentUserId && (
                     <button 
                       onClick={async () => {
-                        const { completeOrderAction } = await import('../actions')
                         startTransition(() => {
                           addOptimisticOrder({ id: order.id, status: 'completed' })
                         })
-                        toast.promise(completeOrderAction(order.id), {
-                          loading: 'Completing order...',
-                          success: 'Order completed! Feedback email sent.',
-                          error: 'Failed to complete order'
-                        })
+                        await onCompleteOrder(order.id)
                       }}
                       className="px-6 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium transition-colors"
                     >

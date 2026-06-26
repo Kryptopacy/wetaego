@@ -1,6 +1,22 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { Ratelimit } from '@upstash/ratelimit'
+import { Redis } from '@upstash/redis'
 
+// Initialize Redis for Edge WAF only if env variables exist
+const redis = (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) 
+  ? Redis.fromEnv() 
+  : null
+
+// Global WAF limiter: 100 requests per 10 seconds per IP for API routes to stop DDoS/Bot attacks
+const wafLimiter = redis 
+  ? new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(100, '10 s'),
+      analytics: true,
+      prefix: '@upstash/ratelimit/waf'
+    })
+  : null
 /**
  * Next.js Middleware — Supabase Session Refresh & Route Protection
  *
@@ -10,6 +26,36 @@ import { NextResponse, type NextRequest } from 'next/server'
  * 3. Allows all public routes (/m/*, /api/*, /login, /, etc.) without auth
  */
 export async function proxy(request: NextRequest) {
+  // --- 1. EDGE WAF PROTECTION ---
+  const path = request.nextUrl.pathname
+  const isProtectedPath = path.startsWith('/api') || path.startsWith('/pay')
+  
+  if (isProtectedPath && wafLimiter) {
+    const ip = request.headers.get('x-real-ip') || request.headers.get('x-forwarded-for') || '127.0.0.1'
+    
+    try {
+      const { success, limit, reset, remaining } = await wafLimiter.limit(ip)
+      
+      if (!success) {
+        return NextResponse.json(
+          { error: 'Too many requests. WAF protection active.' },
+          { 
+            status: 429,
+            headers: {
+              'X-RateLimit-Limit': limit.toString(),
+              'X-RateLimit-Remaining': remaining.toString(),
+              'X-RateLimit-Reset': reset.toString()
+            }
+          }
+        )
+      }
+    } catch (error) {
+      // If Redis fails, fail open so we don't break the app
+      console.error('WAF Error:', error)
+    }
+  }
+
+  // --- 2. SUPABASE SESSION REFRESH & AUTH ---
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(
