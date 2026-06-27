@@ -1,10 +1,9 @@
 'use server'
 
-
-
 import { createClient } from '@/lib/supabase/server'
 import { Resend } from 'resend'
 import { revalidatePath } from 'next/cache'
+import { after } from 'next/server'
 
 const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy')
 
@@ -36,7 +35,6 @@ export async function sendBroadcastAction(formData: FormData) {
   const isOwner = member?.role === 'owner' || member?.role === 'manager'
   
   if (!isOwner) {
-    // Check if creator
     const { data: org } = await supabase
       .from('organizations')
       .select('created_by')
@@ -47,21 +45,22 @@ export async function sendBroadcastAction(formData: FormData) {
     }
   }
 
-  // 2. Fetch unique customer emails for this org
-  const { data: orders } = await supabase
-    .from('orders')
-    .select('customer_email')
+  // 2. Fetch unique customer emails from profiles that explicitly opted in
+  const { data: profiles, error: profileError } = await supabase
+    .from('customer_profiles')
+    .select('email')
     .eq('organization_id', orgId)
-    .not('customer_email', 'is', null)
+    .eq('marketing_opt_in', true)
+    .not('email', 'is', null)
 
-  if (!orders || orders.length === 0) {
-    return { error: 'No customers found with email addresses.' }
+  if (profileError || !profiles || profiles.length === 0) {
+    return { error: 'No customers found who opted into marketing.' }
   }
 
-  const uniqueEmails = Array.from(new Set(orders.map(o => o.customer_email).filter(Boolean))) as string[]
+  const uniqueEmails = profiles.map(p => p.email).filter(Boolean) as string[]
 
   if (uniqueEmails.length === 0) {
-    return { error: 'No customers found with email addresses.' }
+    return { error: 'No customers found who opted into marketing.' }
   }
 
   // Sanitise user-supplied content — escape HTML special chars to prevent injection
@@ -76,11 +75,9 @@ export async function sendBroadcastAction(formData: FormData) {
   const safeSubject = escapeHtml(subject)
   const safeMessage = escapeHtml(message)
 
-  // 3. Batch send (Resend limit is 100 per batch call)
-  const chunkSize = 100
-  let totalSent = 0
-
-  try {
+  // 3. Batch send (Resend limit is 100 per batch call) decoupled via after()
+  after(async () => {
+    const chunkSize = 100
     for (let i = 0; i < uniqueEmails.length; i += chunkSize) {
       const chunk = uniqueEmails.slice(i, i + chunkSize)
       
@@ -95,20 +92,20 @@ export async function sendBroadcastAction(formData: FormData) {
                </div>`
       }))
 
-      const { error: batchError } = await resend.batch.send(payload)
-      if (batchError) {
-        console.error('Batch error:', batchError)
-        return { error: 'Failed to send some emails. Please contact support.' }
+      try {
+        const { error: batchError } = await resend.batch.send(payload)
+        if (batchError) {
+          console.error('Batch error:', batchError)
+        }
+      } catch (e) {
+        console.error('Fatal batch send error:', e)
       }
       
-      totalSent += chunk.length
+      // Delay slightly between batches to respect rate limits if needed
+      await new Promise(resolve => setTimeout(resolve, 500))
     }
+  })
 
-    revalidatePath('/dashboard/marketing')
-    return { success: true, count: totalSent }
-  } catch (err: unknown) {
-    return { error: (err as Error).message || 'An unknown error occurred.' }
-  }
+  revalidatePath('/dashboard/marketing')
+  return { success: true, count: uniqueEmails.length }
 }
-
-
