@@ -81,6 +81,7 @@ interface CheckoutModalProps {
   refundPolicy?: string | null
   pageFulfillmentOptions?: { pickup: boolean, delivery: boolean, table: boolean }
   pageBillingMode?: string
+  locationTaxes?: any[]
 }
 
 export function CheckoutModal({
@@ -115,7 +116,8 @@ export function CheckoutModal({
   pageId,
   refundPolicy,
   pageFulfillmentOptions,
-  pageBillingMode
+  pageBillingMode,
+  locationTaxes = []
 }: CheckoutModalProps) {
   const [isCheckingOut, setIsCheckingOut] = useState(false)
   const [tableNumber, setTableNumber] = useState(tableIdentifier || '')
@@ -200,9 +202,17 @@ export function CheckoutModal({
   const discountAmountMinor = Math.floor(subtotalMinor * discountMultiplier)
   const discountedSubtotalMinor = subtotalMinor - discountAmountMinor
   
+  // Calculate Taxes based on discounted subtotal
+  const taxBreakdown = locationTaxes.map(tax => {
+    const taxAmount = Math.floor(discountedSubtotalMinor * (tax.percentage / 100))
+    return { name: tax.name, percentage: tax.percentage, amount_minor: taxAmount }
+  })
+  const taxTotalMinor = taxBreakdown.reduce((sum, tax) => sum + tax.amount_minor, 0)
+  
   const isDelivery = fulfillmentType === 'delivery'
   const appliedDeliveryFee = (isDelivery && deliveryFeeMinor) ? deliveryFeeMinor : 0
-  const finalTotalMinor = discountedSubtotalMinor + appliedDeliveryFee
+  
+  const finalTotalMinor = discountedSubtotalMinor + taxTotalMinor + appliedDeliveryFee
 
   const handleGetLocation = () => {
     if (!navigator.geolocation) {
@@ -273,7 +283,8 @@ export function CheckoutModal({
       const { checkoutUrl, orderId, error } = (await processCheckout(
         organizationId, locationId, items, finalTotalMinor, 0, tableNumber,
         customerNote, customerEmail, paymentFractionMinor, paymentMethod, discountAmountMinor,
-        customerName, customerPhone, fulfillmentType, deliveryInstructions, undefined, undefined, pageId
+        customerName, customerPhone, fulfillmentType, deliveryInstructions, undefined, undefined, pageId,
+        undefined, discountedSubtotalMinor, taxTotalMinor, taxBreakdown
       )) as { checkoutUrl?: string, orderId?: string, error?: string }
 
       if (error) {

@@ -85,24 +85,28 @@ export async function submitServiceRequest(formData: FormData) {
 }
 
 export async function processCheckout(
-  orgId: string, 
-  locationId: string, 
-  items: { id: string, name: string, quantity: number, price_minor: number }[], 
-  totalAmountMinor: number, 
-  tipAmountMinor: number,
-  tableIdentifier: string,
+  organizationId: string,
+  locationId: string,
+  items: { id: string, name: string, quantity: number, price_minor: number }[],
+  totalAmountMinor: number,
+  tipAmountMinor: number = 0,
+  tableIdentifier?: string,
   customerNote?: string,
   customerEmail?: string,
   paymentFractionMinor?: number,
-  paymentMethod?: 'card' | 'transfer',
-  discountAmountMinor?: number,
+  paymentMethod: 'card' | 'transfer' = 'card',
+  discountAmountMinor: number = 0,
   customerName?: string,
   customerPhone?: string,
-  fulfillmentType?: 'table' | 'pickup' | 'delivery' | string,
+  fulfillmentType?: 'table' | 'pickup' | 'delivery',
   deliveryInstructions?: string,
+  staffId?: string,
+  staffSubaccountOverride?: string | null,
+  pageId?: string,
   idempotencyKey?: string,
-  staffSubaccountOverride?: string,
-  pageId?: string
+  subtotalMinor?: number,
+  taxTotalMinor?: number,
+  taxBreakdown?: any[]
 ) {
   const supabase = await createClient()
 
@@ -150,7 +154,7 @@ export async function processCheckout(
   const { data: paySettings } = await supabase
     .from('organization_payment_settings')
     .select('provider_account_id, is_active')
-    .eq('organization_id', orgId)
+    .eq('organization_id', organizationId)
     .single()
 
 
@@ -160,7 +164,7 @@ export async function processCheckout(
   const { data: order, error: orderError } = await supabase
     .from('orders')
     .insert({
-      organization_id: orgId,
+      organization_id: organizationId,
       location_id: locationId,
       customer_name: customerName || 'Guest',
       customer_phone: customerPhone || null,
@@ -173,6 +177,9 @@ export async function processCheckout(
       discount_amount_minor: clampedDiscountMinor,
       customer_note: customerNote ? customerNote.slice(0, 500) : null,
       customer_email: customerEmail || null,
+      subtotal_minor: subtotalMinor || 0,
+      tax_total_minor: taxTotalMinor || 0,
+      tax_breakdown: taxBreakdown || [],
     } as never).select('id').single()
 
   if (orderError || !order) throw new Error('Failed to create order')
@@ -233,7 +240,7 @@ export async function processCheckout(
 
   // Fallback to manual payment: trigger push notification immediately
   const { sendPushToOrg, newOrderNotification } = await import('@/lib/notifications/push')
-  waitUntil(sendPushToOrg(orgId, newOrderNotification(tableIdentifier || 'Takeaway', verifiedTotalMinor)))
+  waitUntil(sendPushToOrg(organizationId, newOrderNotification(tableIdentifier || 'Takeaway', verifiedTotalMinor)))
 
   // Record platform fee for manual offline payment
   if (verifiedTotalMinor > 0) {
@@ -244,7 +251,7 @@ export async function processCheckout(
       
       if (feeAmountMinor > 0) {
         await supabase.from('platform_fee_ledger').insert({
-          organization_id: orgId,
+          organization_id: organizationId,
           location_id: locationId,
           order_id: order.id,
           fee_amount_minor: feeAmountMinor,

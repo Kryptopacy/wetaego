@@ -12,6 +12,7 @@ import { AICoverStudio } from './ai-cover-studio'
 import { PlanType } from '@/lib/payments/credits'
 import { getPlanLimits } from '@/lib/utils/settings'
 import { savePaymentSettings, saveManualPaymentSettings } from './payment-actions'
+import { TaxesView } from './taxes-view'
 
 
 
@@ -91,7 +92,7 @@ export default async function SettingsPage({
 
     const { data: loc } = await supabase
       .from('locations')
-      .select('*')
+      .select('*, location_taxes(*)')
       .eq('organization_id', organization.id)
       .limit(1)
       .single()
@@ -185,6 +186,14 @@ export default async function SettingsPage({
               }`}
             >
               Add-ons
+            </Link>
+            <Link 
+              href="?tab=taxes"
+              className={`px-4 py-2.5 text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${
+                tab === 'taxes' ? 'border-blue-500 text-white' : 'border-transparent text-zinc-400 hover:text-zinc-200 hover:border-zinc-700'
+              }`}
+            >
+              Taxes & Fees
             </Link>
           </>
         )}

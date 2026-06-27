@@ -31,6 +31,7 @@ interface CartFABProps {
   refundPolicy?: string | null
   pageFulfillmentOptions?: { pickup: boolean, delivery: boolean, table: boolean }
   pageBillingMode?: string
+  locationTaxes?: any[]
 }
 
 export function CartFAB(props: CartFABProps) {
@@ -118,6 +119,9 @@ export function CartFAB(props: CartFABProps) {
         updateQuantity={updateQuantity}
         clearCart={clearCart}
         spinnerDiscount={spinnerDiscount}
+        pageFulfillmentOptions={props.pageFulfillmentOptions}
+        pageBillingMode={props.pageBillingMode}
+        locationTaxes={props.locationTaxes}
         {...props}
       />
     </>
