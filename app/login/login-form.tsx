@@ -1,9 +1,29 @@
 'use client'
 
-import { useState, Suspense } from 'react'
+import { useState, Suspense, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import { login, signup, signInWithGoogle } from './actions'
+import { useFormStatus } from 'react-dom'
+import { toast } from 'sonner'
+
+function SubmitButton({ isLogin }: { isLogin: boolean }) {
+  const { pending } = useFormStatus()
+  
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      className="w-full rounded-lg bg-blue-600 px-4 py-2.5 font-medium text-white transition-all hover:bg-blue-500 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 h-[44px]"
+    >
+      {pending && (
+        <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+      )}
+      {pending ? (isLogin ? 'Signing In...' : 'Signing Up...') : (isLogin ? 'Sign In' : 'Sign Up')}
+    </button>
+  )
+}
+
 
 function LoginFormInner() {
   const [showPassword, setShowPassword] = useState(false)
@@ -21,7 +41,34 @@ function LoginFormInner() {
         </p>
       </div>
 
-      <form className="flex flex-col gap-4">
+      {searchParams.get('message') && (
+        <div className="mb-6 rounded-lg bg-red-500/10 border border-red-500/20 p-4">
+          <p className="text-sm font-medium text-red-500 text-center">
+            {searchParams.get('message')}
+          </p>
+        </div>
+      )}
+
+      {searchParams.get('success') && (
+        <div className="mb-6 rounded-lg bg-emerald-500/10 border border-emerald-500/20 p-4">
+          <p className="text-sm font-medium text-emerald-500 text-center">
+            {searchParams.get('success')}
+          </p>
+        </div>
+      )}
+
+      <form action={async (formData) => {
+        const payload = {
+          email: formData.get('email') as string,
+          password: formData.get('password') as string,
+          redirectTo: formData.get('redirectTo') as string
+        }
+        if (isLogin) {
+          await login(payload)
+        } else {
+          await signup(payload)
+        }
+      }} className="flex flex-col gap-4">
         <input type="hidden" name="redirectTo" value={redirectTo} />
         <div>
           <label className="mb-2 block text-sm font-medium text-zinc-300" htmlFor="email">
@@ -77,12 +124,7 @@ function LoginFormInner() {
         </div>
 
         <div className="mt-4 flex flex-col gap-3">
-          <button
-            formAction={isLogin ? login : signup}
-            className="w-full rounded-lg bg-blue-600 px-4 py-2.5 font-medium text-white transition-all hover:bg-blue-500 active:scale-[0.98]"
-          >
-            {isLogin ? 'Sign In' : 'Sign Up'}
-          </button>
+          <SubmitButton isLogin={isLogin} />
 
           <div className="relative my-2">
             <div className="absolute inset-0 flex items-center">

@@ -95,20 +95,7 @@ export default async function MenuManagerPage() {
         <TranslateMenuButton orgId={org.id} categories={categories} />
       </div>
 
-      <div className="mb-8 rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
-        <h2 className="text-lg font-semibold text-white mb-4">Add Category</h2>
-        <form action={createCategory as unknown as (payload: FormData) => void} className="flex gap-4 items-end">
-          <input type="hidden" name="organization_id" value={org.id} />
-          <input type="hidden" name="menu_id" value={menu.id} />
-          <div className="flex-1">
-            <label className="mb-2 block text-sm font-medium text-zinc-300">Category Name</label>
-            <input type="text" name="name" required className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="e.g. Signature Cocktails" />
-          </div>
-          <button type="submit" className="px-4 py-2.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white font-medium transition-colors border border-zinc-700">Add Category</button>
-        </form>
-      </div>
-
-      <CategoryTabs categories={categories} orgId={org.id} />
+      <CategoryTabs categories={categories} orgId={org.id} menuId={menu.id} />
     </div>
   )
 }

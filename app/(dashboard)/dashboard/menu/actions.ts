@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { purgeStorefrontCache } from '@/lib/cache-purger'
 import { z } from 'zod'
+import { authActionClient } from '@/lib/safe-action'
 
 // Helper to validate user
 async function requireAuth() {
@@ -20,6 +21,28 @@ const createCategorySchema = z.object({
   menu_id: z.string().min(1, "Menu ID is required"),
   name: z.string().min(1, "Name is required").max(100, "Name must be less than 100 characters"),
 })
+
+export const createCategorySafe = authActionClient
+  .schema(createCategorySchema)
+  .action(async ({ parsedInput: { organization_id, menu_id, name }, ctx: { supabase } }) => {
+    if (organization_id === 'demo-org') {
+      revalidatePath('/dashboard/menu')
+      return { success: true }
+    }
+
+    const { error } = await supabase.from('menu_categories').insert({
+      organization_id,
+      menu_id,
+      name,
+    })
+
+    if (error) throw new Error(error.message)
+
+    await purgeStorefrontCache(organization_id)
+    revalidatePath('/dashboard/menu')
+    return { success: true }
+  })
+
 
 export async function createCategory(formData: FormData) {
   try {

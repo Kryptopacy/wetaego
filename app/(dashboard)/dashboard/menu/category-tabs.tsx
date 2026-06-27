@@ -208,20 +208,59 @@ function OptimisticItem({ item, orgId, categoryName }: { item: NonNullable<Categ
   )
 }
 
-export function CategoryTabs({ categories, orgId }: { categories: Category[], orgId: string }) {
+export function CategoryTabs({ categories, orgId, menuId }: { categories: Category[], orgId: string, menuId: string }) {
   const [activeTab, setActiveTab] = useState(categories[0]?.id || '')
+  const [optimisticCategories, addOptimisticCategory] = useOptimistic(
+    categories,
+    (state, newCat: Category) => [...state, newCat]
+  )
 
-  if (categories.length === 0) {
-    return <p className="text-zinc-500 mt-6">No categories found. Add one above to get started.</p>
-  }
-
-  const activeCategory = categories.find(c => c.id === activeTab) || categories[0]
+  const activeCategory = optimisticCategories.find(c => c.id === activeTab) || optimisticCategories[0] || categories[0]
 
   return (
     <div className="mt-8">
-      {/* Horizontal Pills */}
-      <div className="flex overflow-x-auto pb-4 mb-2 gap-2 hide-scrollbar">
-        {categories.map(category => (
+      <div className="mb-8 rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
+        <h2 className="text-lg font-semibold text-white mb-4">Add Category</h2>
+        <form action={async (formData) => {
+          const name = formData.get('name') as string;
+          const tempId = `temp-${Date.now()}`;
+          const newCat: Category = {
+            id: tempId,
+            organization_id: orgId,
+            menu_id: menuId,
+            name,
+            sort_order: optimisticCategories.length,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            description: null,
+            menu_items: []
+          };
+          
+          startTransition(() => {
+            addOptimisticCategory(newCat);
+            setActiveTab(tempId);
+          });
+          
+          const { createCategory } = await import('./actions');
+          await createCategory(formData);
+        }} className="flex gap-4 items-end">
+          <div className="flex-1">
+            <label className="mb-2 block text-sm font-medium text-zinc-300">Category Name</label>
+            <input type="text" name="name" required className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="e.g. Signature Cocktails" />
+            <input type="hidden" name="menu_id" value={menuId} />
+            <input type="hidden" name="organization_id" value={orgId} />
+          </div>
+          <button type="submit" className="px-4 py-2.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white font-medium transition-colors border border-zinc-700">Add Category</button>
+        </form>
+      </div>
+
+      {optimisticCategories.length === 0 ? (
+        <p className="text-zinc-500 mt-6">No categories found. Add one above to get started.</p>
+      ) : (
+        <>
+          {/* Horizontal Pills */}
+          <div className="flex overflow-x-auto pb-4 mb-2 gap-2 hide-scrollbar">
+            {optimisticCategories.map(category => (
           <button
             key={category.id}
             onClick={() => setActiveTab(category.id)}
@@ -268,6 +307,8 @@ export function CategoryTabs({ categories, orgId }: { categories: Category[], or
           </div>
         </motion.div>
       </AnimatePresence>
+        </>
+      )}
     </div>
   )
 }

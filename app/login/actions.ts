@@ -5,15 +5,18 @@ import { redirect } from 'next/navigation'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { sendWelcomeEmail } from '@/lib/notifications/email'
 import { z } from 'zod'
+import { actionClient } from '@/lib/safe-action'
 
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
   password: z.string().min(1, 'Password is required'),
+  redirectTo: z.string().optional()
 })
 
 const signupSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
+  redirectTo: z.string().optional()
 })
 
 /** Sanitize redirect target to prevent open redirect attacks */
@@ -24,72 +27,52 @@ function sanitizeRedirect(target: string | null): string {
   return target
 }
 
-export async function login(formData: FormData) {
-  const supabase = await createClient()
+export const login = actionClient
+  .schema(loginSchema)
+  .action(async ({ parsedInput: { email, password, redirectTo: rawRedirect } }) => {
+    const supabase = await createClient()
+    const redirectTo = sanitizeRedirect(rawRedirect || null)
 
-  const parsed = loginSchema.safeParse({
-    email: formData.get('email'),
-    password: formData.get('password'),
+    // If a demo user is currently logged in, clear their session before proceeding
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user && user.email?.includes('demo-') && user.email?.includes('@ourmenuos.online')) {
+      await supabase.auth.signOut()
+    }
+
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
+
+    if (error) {
+      redirect(`/login?message=${encodeURIComponent('Could not authenticate user')}&redirectTo=${encodeURIComponent(redirectTo)}`)
+    }
+
+    revalidatePath('/', 'layout')
+    redirect(redirectTo)
   })
 
-  if (!parsed.success) {
-    const message = parsed.error.issues[0]?.message || 'Invalid input'
-    redirect(`/login?message=${encodeURIComponent(message)}`)
-  }
+export const signup = actionClient
+  .schema(signupSchema)
+  .action(async ({ parsedInput: { email, password, redirectTo: rawRedirect } }) => {
+    const supabase = await createClient()
+    const redirectTo = sanitizeRedirect(rawRedirect || null)
 
-  const { email, password } = parsed.data
-  const redirectTo = sanitizeRedirect(formData.get('redirectTo') as string | null)
+    // If a demo user is currently logged in, clear their session before proceeding
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user && user.email?.includes('demo-') && user.email?.includes('@ourmenuos.online')) {
+      await supabase.auth.signOut()
+    }
 
-  // If a demo user is currently logged in, clear their session before proceeding
-  const { data: { user } } = await supabase.auth.getUser()
-  if (user && user.email?.includes('demo-') && user.email?.includes('@ourmenuos.online')) {
-    await supabase.auth.signOut()
-  }
+    const { error, data } = await supabase.auth.signUp({ email, password })
 
-  const { error } = await supabase.auth.signInWithPassword({ email, password })
+    if (error) {
+      redirect(`/login?message=${encodeURIComponent('Could not sign up user')}&redirectTo=${encodeURIComponent(redirectTo)}`)
+    }
 
-  if (error) {
-    redirect(`/login?message=Could not authenticate user&redirectTo=${encodeURIComponent(redirectTo)}`)
-  }
+    // Trigger welcome email in the background
+    sendWelcomeEmail(email).catch(console.error)
 
-  revalidatePath('/', 'layout')
-  redirect(redirectTo)
-}
-
-export async function signup(formData: FormData) {
-  const supabase = await createClient()
-
-  const parsed = signupSchema.safeParse({
-    email: formData.get('email'),
-    password: formData.get('password'),
+    revalidatePath('/', 'layout')
+    redirect(redirectTo)
   })
-
-  if (!parsed.success) {
-    const message = parsed.error.issues[0]?.message || 'Invalid input'
-    redirect(`/login?message=${encodeURIComponent(message)}`)
-  }
-
-  const { email, password } = parsed.data
-  const redirectTo = sanitizeRedirect(formData.get('redirectTo') as string | null)
-
-  // If a demo user is currently logged in, clear their session before proceeding
-  const { data: { user } } = await supabase.auth.getUser()
-  if (user && user.email?.includes('demo-') && user.email?.includes('@ourmenuos.online')) {
-    await supabase.auth.signOut()
-  }
-
-  const { error, data } = await supabase.auth.signUp({ email, password })
-
-  if (error) {
-    redirect(`/login?message=Could not sign up user&redirectTo=${encodeURIComponent(redirectTo)}`)
-  }
-
-  // Trigger welcome email in the background
-  sendWelcomeEmail(email).catch(console.error)
-
-  revalidatePath('/', 'layout')
-  redirect(redirectTo)
-}
 
 export async function signInWithGoogle() {
   const supabase = await createClient()
