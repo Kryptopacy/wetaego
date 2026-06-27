@@ -1,5 +1,4 @@
 import { Series, AbsoluteFill } from "remotion";
-import React from "react";
 import { Scene1_Frustration } from "./scenes/Scene1_Frustration";
 import { Scene2_Reveal } from "./scenes/Scene2_Reveal";
 import { Scene3_Power } from "./scenes/Scene3_Power";

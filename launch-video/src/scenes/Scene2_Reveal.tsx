@@ -1,111 +1,52 @@
-import { AbsoluteFill, useCurrentFrame, useVideoConfig, spring, interpolate, Img } from "remotion";
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, spring, interpolate } from "remotion";
 import React from "react";
 
 export const Scene2_Reveal: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  // QR Shockwave Ring
-  const ringScale = spring({ frame, fps, config: { damping: 10, mass: 1 } });
-  const ringOpacity = interpolate(frame, [0, 20], [1, 0], { extrapolateRight: "clamp" });
+  // QR Code morphs into a massive light ray
+  const qrScale = interpolate(frame, [0, 15, 30], [0, 1, 30], { extrapolateRight: "clamp" });
+  const qrOpacity = interpolate(frame, [0, 5, 20], [0, 1, 0], { extrapolateRight: "clamp" });
 
-  // Center QR/NFC Core fades out quickly
-  const coreOpacity = interpolate(frame, [0, 15], [1, 0], { extrapolateRight: "clamp" });
+  const rayOpacity = interpolate(frame, [15, 25], [0, 0.3], { extrapolateRight: "clamp" });
 
-  // 3D Mockups Entering (Hospitality & Retail)
-  // They slide in from the sides and tilt slightly.
-  const mockupSpring = spring({ frame: frame - 15, fps, config: { damping: 14, mass: 1 } });
-  
-  // Left Mockup (Hospitality)
-  const leftX = interpolate(mockupSpring, [0, 1], [-800, -300]);
-  const leftRotateY = interpolate(mockupSpring, [0, 1], [40, 15]);
+  // Text animations
+  const text1Opacity = interpolate(frame, [20, 30], [0, 1], { extrapolateRight: "clamp" });
+  const text1Y = spring({ frame: frame - 20, fps, config: { damping: 12 } });
 
-  // Right Mockup (Retail)
-  const rightX = interpolate(mockupSpring, [0, 1], [800, 300]);
-  const rightRotateY = interpolate(mockupSpring, [0, 1], [-40, -15]);
-
-  // Ambient Background Glow
-  const glowOpacity = interpolate(frame, [15, 45], [0, 0.4], { extrapolateRight: "clamp" });
+  const text2Opacity = interpolate(frame, [40, 50], [0, 1], { extrapolateRight: "clamp" });
+  const text2Y = spring({ frame: frame - 40, fps, config: { damping: 12 } });
 
   return (
     <AbsoluteFill style={{ backgroundColor: "#020202", fontFamily: "'Inter', sans-serif" }}>
       
-      {/* Ambient Emerald Glow */}
-      <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", opacity: glowOpacity }}>
-        <div style={{ width: 800, height: 800, borderRadius: 400, backgroundColor: "#4ade80", filter: "blur(200px)" }} />
+      {/* Morphing QR / Light Ray */}
+      <AbsoluteFill style={{ justifyContent: "center", alignItems: "center" }}>
+        <div style={{
+          width: 100, height: 100, border: "4px solid white", borderRadius: 20,
+          transform: `scale(${qrScale})`, opacity: qrOpacity,
+          boxShadow: "0 0 40px rgba(255,255,255,0.8)"
+        }} />
       </AbsoluteFill>
 
-      {/* 3D Mockup Carousel */}
-      <AbsoluteFill style={{ perspective: 1200, justifyContent: "center", alignItems: "center" }}>
+      {/* Massive Glowing Ray */}
+      <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", opacity: rayOpacity }}>
+        <div style={{ width: "100%", height: 300, background: "linear-gradient(90deg, transparent, rgba(255,255,255,1), transparent)", filter: "blur(50px)", transform: "rotate(-10deg)" }} />
+      </AbsoluteFill>
+
+      {/* Typography */}
+      <AbsoluteFill style={{ justifyContent: "center", alignItems: "center" }}>
         
-        {/* Hospitality Mockup */}
-        <div
-          style={{
-            position: "absolute",
-            width: 450,
-            height: 600,
-            borderRadius: 30,
-            overflow: "hidden",
-            boxShadow: "0 40px 100px rgba(74, 222, 128, 0.2)",
-            border: "1px solid rgba(255,255,255,0.1)",
-            transform: `translateX(${leftX}px) rotateY(${leftRotateY}deg)`,
-            transformStyle: "preserve-3d",
-          }}
-        >
-          <Img src="/images/scene2_mockup_hospitality_1782545513406.png" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-        </div>
+        <h1 style={{ color: "white", fontSize: 70, fontWeight: 900, opacity: text1Opacity, transform: `translateY(${interpolate(text1Y, [0, 1], [30, 0])}px)`, margin: 0, letterSpacing: "-2px" }}>
+          Meet OurMenu OS.
+        </h1>
+        
+        <h2 style={{ color: "#a1a1aa", fontSize: 40, fontWeight: 500, opacity: text2Opacity, transform: `translateY(${interpolate(text2Y, [0, 1], [30, 0])}px)`, marginTop: 20, textAlign: "center" }}>
+          The true operating layer for physical spaces.<br/>
+          <span style={{ color: "#fff", fontWeight: 700 }}>Hospitality. Retail. Services. Unified.</span>
+        </h2>
 
-        {/* Retail Mockup */}
-        <div
-          style={{
-            position: "absolute",
-            width: 450,
-            height: 600,
-            borderRadius: 30,
-            overflow: "hidden",
-            boxShadow: "0 40px 100px rgba(59, 130, 246, 0.2)",
-            border: "1px solid rgba(255,255,255,0.1)",
-            transform: `translateX(${rightX}px) rotateY(${rightRotateY}deg)`,
-            transformStyle: "preserve-3d",
-          }}
-        >
-          <Img src="/images/scene2_mockup_retail_1782545524433.png" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-        </div>
-
-      </AbsoluteFill>
-
-      {/* QR Shockwave */}
-      <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", opacity: ringOpacity }}>
-        <div
-          style={{
-            width: 200,
-            height: 200,
-            borderRadius: "50%",
-            border: "4px solid #fff",
-            transform: `scale(${ringScale * 4})`,
-            position: "absolute",
-          }}
-        />
-      </AbsoluteFill>
-      <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", opacity: coreOpacity }}>
-        <div style={{ width: 100, height: 100, backgroundColor: "#fff", borderRadius: 20 }} />
-      </AbsoluteFill>
-
-      {/* Cinematic Text Overlay */}
-      <AbsoluteFill style={{ justifyContent: "flex-end", alignItems: "center", paddingBottom: 100 }}>
-         <h2
-           style={{
-             color: "white",
-             fontSize: 50,
-             fontWeight: 800,
-             letterSpacing: "-1px",
-             opacity: interpolate(frame, [25, 45], [0, 1], { extrapolateRight: "clamp" }),
-             transform: `translateY(${interpolate(frame, [25, 45], [20, 0], { extrapolateRight: "clamp" })}px)`,
-             textShadow: "0 4px 20px rgba(0,0,0,0.8)"
-           }}
-         >
-           The Universal Operating Layer.
-         </h2>
       </AbsoluteFill>
 
     </AbsoluteFill>

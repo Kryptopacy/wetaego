@@ -1,12 +1,12 @@
-import { AbsoluteFill, useCurrentFrame, useVideoConfig, spring, interpolate, Img } from "remotion";
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, spring, interpolate } from "remotion";
 import React from "react";
 
 export const Scene6_CTA: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  // Majestic slow zoom out of the hero image
-  const bgScale = interpolate(frame, [0, 240], [1.3, 1], { extrapolateRight: "clamp" });
+  // Infinite Grid Animation (Moving towards the viewer)
+  const gridY = (frame * 5) % 100;
 
   // Main CTA text fades in and floats up
   const ctaSpring = spring({ frame: frame - 60, fps, config: { damping: 14 } });
@@ -19,26 +19,35 @@ export const Scene6_CTA: React.FC = () => {
   const urlOpacity = interpolate(urlSpring, [0, 1], [0, 1]);
 
   return (
-    <AbsoluteFill style={{ backgroundColor: "#000", fontFamily: "'Inter', sans-serif" }}>
+    <AbsoluteFill style={{ backgroundColor: "#020202", fontFamily: "'Inter', sans-serif", overflow: "hidden" }}>
       
-      {/* Deep Space Background with Parallax Zoom Hero Devices */}
-      <AbsoluteFill style={{ transform: `scale(${bgScale})`, justifyContent: "center", alignItems: "center" }}>
-        <Img src="/images/scene6_hero_devices_1782545574431.png" style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.8 }} />
+      {/* Abstract Infinite Grid */}
+      <AbsoluteFill style={{ perspective: 1000, justifyContent: "center", alignItems: "center" }}>
+        <div style={{
+          position: "absolute",
+          top: "50%",
+          width: "200%",
+          height: "200%",
+          backgroundSize: "100px 100px",
+          backgroundImage: "linear-gradient(rgba(16, 185, 129, 0.2) 2px, transparent 2px), linear-gradient(90deg, rgba(16, 185, 129, 0.2) 2px, transparent 2px)",
+          transform: `rotateX(75deg) translateY(${gridY}px)`,
+          transformOrigin: "top center"
+        }} />
       </AbsoluteFill>
 
-      {/* Cinematic Dark Gradient Overlay (Focusing attention on the center/bottom) */}
-      <AbsoluteFill style={{ background: "linear-gradient(to top, rgba(0,0,0,1) 10%, rgba(0,0,0,0) 60%)" }} />
+      {/* Cinematic Dark Gradient Overlay (Fades out the grid in the distance) */}
+      <AbsoluteFill style={{ background: "radial-gradient(circle at center, transparent 0%, #020202 70%)" }} />
 
       {/* Main CTA Text */}
-      <AbsoluteFill style={{ justifyContent: "flex-end", alignItems: "center", paddingBottom: 180, opacity: ctaOpacity, transform: `translateY(${ctaY}px)` }}>
-         <h1 style={{ color: "white", fontSize: 60, fontWeight: 800, textAlign: "center", margin: 0, letterSpacing: "-1px", textShadow: "0 10px 40px rgba(0,0,0,0.8)" }}>
-           Don't just digitize your business.<br/>
-           <span style={{ color: "#4ade80" }}>Upgrade its operating system.</span>
+      <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", paddingBottom: 150, opacity: ctaOpacity, transform: `translateY(${ctaY}px)` }}>
+         <h1 style={{ color: "white", fontSize: 80, fontWeight: 900, textAlign: "center", margin: 0, letterSpacing: "-2px", textShadow: "0 10px 40px rgba(0,0,0,0.8)" }}>
+           Zero friction.<br/>
+           <span style={{ color: "#4ade80" }}>Absolute scale.</span>
          </h1>
       </AbsoluteFill>
 
       {/* Final URL in a Glowing Glass Pill */}
-      <AbsoluteFill style={{ justifyContent: "flex-end", alignItems: "center", paddingBottom: 80, opacity: urlOpacity, transform: `scale(${urlScale})` }}>
+      <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", paddingTop: 150, opacity: urlOpacity, transform: `scale(${urlScale})` }}>
          <div
            style={{
              display: "flex",
@@ -55,10 +64,7 @@ export const Scene6_CTA: React.FC = () => {
              overflow: "hidden"
            }}
          >
-           {/* Sweeping Light Reflection effect could be added here using a translated div, but for static code we use a subtle gradient */}
-           <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "1px", background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent)" }} />
-           
-           <h2 style={{ color: "#fff", fontSize: 45, fontWeight: 700, margin: 0, letterSpacing: "1px" }}>
+           <h2 style={{ color: "#fff", fontSize: 50, fontWeight: 700, margin: 0, letterSpacing: "1px" }}>
              ourmenuos.online
            </h2>
          </div>

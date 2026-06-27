@@ -1,66 +1,69 @@
-import { AbsoluteFill, useCurrentFrame, useVideoConfig, spring, interpolate, Img } from "remotion";
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, spring, interpolate } from "remotion";
 import React from "react";
 
 export const Scene3_Power: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  // Floating 3D CRM/Roulette Panel
-  const panelScale = spring({ frame: frame - 10, fps, config: { damping: 14, mass: 1 } });
-  const panelRotateX = interpolate(panelScale, [0, 1], [40, 10]);
-  const panelRotateY = interpolate(frame, [0, 300], [-10, 10]); // Continuous slow rotation
+  // Roulette Wheel Rotation
+  const rouletteRotation = interpolate(frame, [0, 300], [0, 360]);
 
-  // Text Entrance
-  const textOpacity = interpolate(frame, [30, 60], [0, 1], { extrapolateRight: "clamp" });
-  const textY = spring({ frame: frame - 30, fps, config: { damping: 12 } });
+  // Data blocks flowing
+  const blockY = interpolate(frame % 30, [0, 30], [-100, 400]);
+  const blockOpacity = interpolate(frame % 30, [0, 15, 30], [0, 1, 0]);
+
+  // Text Animations
+  const t1 = spring({ frame: frame - 10, fps, config: { damping: 12 } });
+  const t2 = spring({ frame: frame - 40, fps, config: { damping: 12 } });
+  const t3 = spring({ frame: frame - 70, fps, config: { damping: 12 } });
 
   return (
     <AbsoluteFill style={{ backgroundColor: "#020202", fontFamily: "'Inter', sans-serif" }}>
       
-      {/* Deep Space Emerald Background Glow */}
+      {/* Background Emerald/Purple Glow */}
       <AbsoluteFill style={{ justifyContent: "center", alignItems: "center" }}>
-        <div style={{ width: 1000, height: 1000, borderRadius: 500, backgroundColor: "rgba(16, 185, 129, 0.15)", filter: "blur(250px)" }} />
+        <div style={{ position: "absolute", left: -100, width: 600, height: 600, borderRadius: 300, backgroundColor: "rgba(16, 185, 129, 0.15)", filter: "blur(200px)" }} />
+        <div style={{ position: "absolute", right: -100, width: 600, height: 600, borderRadius: 300, backgroundColor: "rgba(139, 92, 246, 0.15)", filter: "blur(200px)" }} />
       </AbsoluteFill>
 
-      <AbsoluteFill style={{ perspective: 1200, justifyContent: "center", alignItems: "center" }}>
-        
-        {/* Main Floating Mockup */}
-        <div
-          style={{
-            position: "absolute",
-            width: 800,
-            height: 500,
-            borderRadius: 30,
-            overflow: "hidden",
-            boxShadow: "0 50px 150px rgba(0,0,0,0.8), 0 0 80px rgba(16, 185, 129, 0.3)",
-            border: "1px solid rgba(255,255,255,0.15)",
-            transform: `scale(${panelScale}) rotateX(${panelRotateX}deg) rotateY(${panelRotateY}deg)`,
-            transformStyle: "preserve-3d",
-            backdropFilter: "blur(40px)",
-            backgroundColor: "rgba(25,25,25,0.8)",
-          }}
-        >
-          <Img src="/images/scene3_gamified_roulette_1782545544003.png" style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.9 }} />
+      {/* Abstract CSS Roulette Wheel (Right side) */}
+      <AbsoluteFill style={{ justifyContent: "center", alignItems: "flex-end", paddingRight: 200 }}>
+        <div style={{
+          width: 400, height: 400, borderRadius: "50%",
+          background: "conic-gradient(from 0deg, #10b981, #3b82f6, #8b5cf6, #10b981)",
+          transform: `rotate(${rouletteRotation}deg) perspective(500px) rotateX(20deg)`,
+          boxShadow: "0 0 100px rgba(139, 92, 246, 0.4)",
+          opacity: interpolate(frame, [50, 70], [0, 1], { extrapolateRight: "clamp" })
+        }}>
+          {/* Inner dark circle */}
+          <div style={{ position: "absolute", top: 20, left: 20, right: 20, bottom: 20, backgroundColor: "#020202", borderRadius: "50%" }} />
         </div>
-
       </AbsoluteFill>
 
-      {/* Cinematic Text Overlay */}
-      <AbsoluteFill style={{ justifyContent: "flex-end", alignItems: "center", paddingBottom: 80, opacity: textOpacity }}>
-         <h2
-           style={{
-             color: "white",
-             fontSize: 40,
-             fontWeight: 600,
-             letterSpacing: "-0.5px",
-             transform: `translateY(${interpolate(textY, [0, 1], [30, 0])}px)`,
-             textShadow: "0 10px 30px rgba(0,0,0,0.9)",
-             textAlign: "center"
-           }}
-         >
-           Automated Ledgers.<br/>
-           <span style={{ color: "#4ade80", fontWeight: 800 }}>Wired into Gamified Promos.</span>
-         </h2>
+      {/* Abstract CSS Data Blocks (Left side) */}
+      <AbsoluteFill style={{ justifyContent: "center", alignItems: "flex-start", paddingLeft: 200 }}>
+        <div style={{ width: 100, height: 400, borderLeft: "2px dashed rgba(255,255,255,0.2)", position: "relative" }}>
+          <div style={{
+            position: "absolute", left: -26, width: 50, height: 10, backgroundColor: "#4ade80",
+            transform: `translateY(${blockY}px)`, opacity: blockOpacity,
+            boxShadow: "0 0 20px #4ade80"
+          }} />
+        </div>
+      </AbsoluteFill>
+
+      {/* Typography Overlay */}
+      <AbsoluteFill style={{ justifyContent: "center", alignItems: "center" }}>
+         <div style={{ display: "flex", flexDirection: "column", gap: 20, width: "100%", paddingLeft: 300 }}>
+           <h2 style={{ color: "white", fontSize: 50, fontWeight: 800, margin: 0, transform: `translateY(${interpolate(t1, [0, 1], [30, 0])}px)`, opacity: interpolate(t1, [0,1], [0,1]) }}>
+             Live Fulfillment.
+           </h2>
+           <h2 style={{ color: "white", fontSize: 50, fontWeight: 800, margin: 0, transform: `translateY(${interpolate(t2, [0, 1], [30, 0])}px)`, opacity: interpolate(t2, [0,1], [0,1]) }}>
+             Automated Reconciliation.
+           </h2>
+           <h2 style={{ color: "#a78bfa", fontSize: 50, fontWeight: 800, margin: 0, transform: `translateY(${interpolate(t3, [0, 1], [30, 0])}px)`, opacity: interpolate(t3, [0,1], [0,1]), textShadow: "0 0 30px #a78bfa" }}>
+             And Viral Payment Roulette.
+           </h2>
+         </div>
       </AbsoluteFill>
 
     </AbsoluteFill>
