@@ -11,6 +11,8 @@ import { QuoteRenderer } from './templates/quote-renderer'
 import { InfoRenderer } from './templates/info-renderer'
 import { AIChat } from '../../ai-chat'
 import { RouletteFAB } from '../../roulette-fab'
+import { CallStaffFAB } from '../../call-staff-fab'
+import { FabGroup } from '../../components/fab-group'
 import { EcosystemNav } from '@/components/layout/ecosystem-nav'
 import { unstable_cache } from 'next/cache'
 import { PreviewBanner } from '@/components/preview-banner'
@@ -214,22 +216,25 @@ export default async function PublicPageView({
       {isPreview && <PreviewBanner />}
       {RendererContent}
       <EcosystemNav locationId={loc.id} slug={slug} currentPath={page.slug} />
-      {loc.ai_enabled && (
-        <AIChat
-          locationId={loc.id}
-          organizationId={loc.organization_id}
-          aiName={loc.ai_name || ''}
-          themeColor={loc.theme_color || '#7c3aed'}
-          tableIdentifier="QR Scan" // Standard fallback for generic pages
-          menuItems={((items as Record<string, unknown>[]) || []).map(i => ({ id: i.id as string, name: i.title as string, price_minor: (i.price_minor as number) || 0 }))}
-          templateType={page.template_type}
-          billingMode={page.billing_mode}
-          businessTypePreset={page.business_type_preset}
-        />
-      )}
-      {page.randomizer_enabled && (
-        <RouletteFAB />
-      )}
+      <FabGroup>
+        {loc.ai_enabled && (
+          <AIChat
+            locationId={loc.id}
+            organizationId={loc.organization_id}
+            aiName={loc.ai_name || ''}
+            themeColor={loc.theme_color || '#7c3aed'}
+            tableIdentifier="QR Scan" // Standard fallback for generic pages
+            menuItems={((items as Record<string, unknown>[]) || []).map(i => ({ id: i.id as string, name: i.title as string, price_minor: (i.price_minor as number) || 0 }))}
+            templateType={page.template_type}
+            billingMode={page.billing_mode}
+            businessTypePreset={page.business_type_preset}
+          />
+        )}
+        <CallStaffFAB organizationId={loc.organization_id} locationId={loc.id} tableIdentifier="QR Scan" />
+        {page.randomizer_enabled && (
+          <RouletteFAB />
+        )}
+      </FabGroup>
     </>
   )
 }

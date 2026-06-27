@@ -10,6 +10,7 @@ import { RouletteFAB } from './roulette-fab'
 import { SpinnerModal } from '../../components/spinner-modal'
 import { PortalRenderer } from './portal-renderer'
 import { EcosystemNav } from '@/components/layout/ecosystem-nav'
+import { FabGroup } from './components/fab-group'
 
 import { unstable_cache } from 'next/cache'
 
@@ -297,8 +298,21 @@ export default async function PublicMenuPage({
         </article>
 
         {/* Floating Actions */}
-        <CallStaffFAB organizationId={location.organization_id} locationId={location.id} tableIdentifier={tableIdentifier} />
-        {location.randomizer_enabled && <RouletteFAB />}
+        <FabGroup>
+          {location.ai_enabled && (
+            <AIChat 
+              locationId={location.id}
+              organizationId={location.organization_id}
+              aiName={location.ai_name}
+              themeColor={location.theme_color}
+              tableIdentifier={tableIdentifier || ''}
+              menuItems={allMenuItems}
+            />
+          )}
+          <CallStaffFAB organizationId={location.organization_id} locationId={location.id} tableIdentifier={tableIdentifier} />
+          {location.randomizer_enabled && <RouletteFAB />}
+        </FabGroup>
+        
         {location.spinner_enabled && location.spinner_config && (
           <SpinnerModal locationId={location.id} config={location.spinner_config as unknown as Parameters<typeof SpinnerModal>[0]["config"]} />
         )}
@@ -323,16 +337,6 @@ export default async function PublicMenuPage({
           deliveryNote={location.delivery_note}
           fulfillmentLocationLabel={location.fulfillment_location_label}
         />
-        {location.ai_enabled && (
-          <AIChat 
-            locationId={location.id}
-            organizationId={location.organization_id}
-            aiName={location.ai_name}
-            themeColor={location.theme_color}
-            tableIdentifier={tableIdentifier || ''}
-            menuItems={allMenuItems}
-          />
-        )}
       </main>
     </>
   )

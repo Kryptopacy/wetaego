@@ -24,7 +24,7 @@ export function RouletteFAB() {
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-[136px] right-6 z-[45] h-14 w-14 rounded-full bg-zinc-900 border border-zinc-700 shadow-xl flex items-center justify-center text-purple-400 transition-colors group"
+        className="relative z-[45] h-14 w-14 rounded-full bg-zinc-900 border border-zinc-700 shadow-xl flex items-center justify-center text-purple-400 transition-colors group"
         aria-label={isOpen ? "Close roulette" : "Open roulette"}
       >
         <span className="absolute right-[115%] whitespace-nowrap bg-zinc-800 text-white font-semibold text-[13px] px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-lg">

@@ -40,6 +40,12 @@ export async function login(formData: FormData) {
   const { email, password } = parsed.data
   const redirectTo = sanitizeRedirect(formData.get('redirectTo') as string | null)
 
+  // If a demo user is currently logged in, clear their session before proceeding
+  const { data: { user } } = await supabase.auth.getUser()
+  if (user && user.email?.includes('demo-') && user.email?.includes('@ourmenuos.online')) {
+    await supabase.auth.signOut()
+  }
+
   const { error } = await supabase.auth.signInWithPassword({ email, password })
 
   if (error) {
@@ -66,7 +72,13 @@ export async function signup(formData: FormData) {
   const { email, password } = parsed.data
   const redirectTo = sanitizeRedirect(formData.get('redirectTo') as string | null)
 
-  const { error } = await supabase.auth.signUp({ email, password })
+  // If a demo user is currently logged in, clear their session before proceeding
+  const { data: { user } } = await supabase.auth.getUser()
+  if (user && user.email?.includes('demo-') && user.email?.includes('@ourmenuos.online')) {
+    await supabase.auth.signOut()
+  }
+
+  const { error, data } = await supabase.auth.signUp({ email, password })
 
   if (error) {
     redirect(`/login?message=Could not sign up user&redirectTo=${encodeURIComponent(redirectTo)}`)

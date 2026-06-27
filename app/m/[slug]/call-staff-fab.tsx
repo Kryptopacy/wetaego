@@ -146,7 +146,7 @@ export function CallStaffFAB({ organizationId, locationId, tableIdentifier }: Ca
         aria-label={isOpen ? "Close Call Staff Menu" : "Call Staff"}
         aria-expanded={isOpen}
         aria-controls="call-staff-dialog"
-        className="fixed bottom-24 right-6 z-30 h-14 w-14 rounded-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 shadow-xl flex items-center justify-center text-[#17201b] dark:text-white transition-colors group"
+        className="relative z-30 h-14 w-14 rounded-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 shadow-xl flex items-center justify-center text-[#17201b] dark:text-white transition-colors group"
       >
         <span className="absolute right-[115%] whitespace-nowrap bg-zinc-800 dark:bg-zinc-100 text-white dark:text-black font-semibold text-[13px] px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-lg">
           Call Staff

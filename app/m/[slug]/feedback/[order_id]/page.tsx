@@ -179,7 +179,7 @@ export default function FeedbackPage({
                     <button
                       key={btn.val}
                       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  onClick={() => setTipSelection(btn.val as any)}
+                  onClick={() => setTipSelection(btn.val as '0' | '10' | '15' | '20' | 'custom')}
                       className={`py-2 text-sm rounded-lg font-medium transition-colors border ${tipSelection === btn.val ? 'bg-zinc-100 border-zinc-100 text-black' : 'bg-transparent border-zinc-800 text-zinc-400 hover:bg-zinc-800 hover:text-white'}`}
                     >
                       {btn.label}

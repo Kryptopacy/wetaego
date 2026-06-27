@@ -243,8 +243,7 @@ export async function processCheckout(
       const feeAmountMinor = Math.floor(verifiedTotalMinor * (businessFeePercent / 100))
       
       if (feeAmountMinor > 0) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        await (supabase as any).from('platform_fee_ledger').insert({
+        await supabase.from('platform_fee_ledger').insert({
           organization_id: orgId,
           location_id: locationId,
           order_id: order.id,

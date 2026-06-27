@@ -1,135 +1,113 @@
-import { AbsoluteFill, useCurrentFrame, useVideoConfig, spring, interpolate, Sequence } from "remotion";
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, spring, interpolate, Img } from "remotion";
 import React from "react";
 
 export const Scene2_Reveal: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  // The QR Code scanner frame shrinks out
-  const scanScale = spring({
-    frame: frame - 10,
-    fps,
-    config: { damping: 14, mass: 0.5 },
-  });
+  // QR Shockwave Ring
+  const ringScale = spring({ frame, fps, config: { damping: 10, mass: 1 } });
+  const ringOpacity = interpolate(frame, [0, 20], [1, 0], { extrapolateRight: "clamp" });
 
-  const scanOpacity = interpolate(frame, [40, 60], [1, 0], {
-    extrapolateRight: "clamp",
-  });
+  // Center QR/NFC Core fades out quickly
+  const coreOpacity = interpolate(frame, [0, 15], [1, 0], { extrapolateRight: "clamp" });
 
-  // OS morphing container expands from the center
-  const osContainerScale = spring({
-    frame: frame - 50,
-    fps,
-    config: { damping: 12, mass: 0.8 },
-  });
+  // 3D Mockups Entering (Hospitality & Retail)
+  // They slide in from the sides and tilt slightly.
+  const mockupSpring = spring({ frame: frame - 15, fps, config: { damping: 14, mass: 1 } });
+  
+  // Left Mockup (Hospitality)
+  const leftX = interpolate(mockupSpring, [0, 1], [-800, -300]);
+  const leftRotateY = interpolate(mockupSpring, [0, 1], [40, 15]);
 
-  // Text entrance
-  const titleSpring = spring({
-    frame: frame - 70,
-    fps,
-    config: { damping: 10 },
-  });
+  // Right Mockup (Retail)
+  const rightX = interpolate(mockupSpring, [0, 1], [800, 300]);
+  const rightRotateY = interpolate(mockupSpring, [0, 1], [-40, -15]);
 
-  // We rotate between 3 templates using interpolate
-  const templateY = interpolate(frame, [120, 140, 190, 210, 260, 280], [0, -400, -400, -800, -800, -1200], {
-    extrapolateRight: "clamp",
-    extrapolateLeft: "clamp",
-  });
+  // Ambient Background Glow
+  const glowOpacity = interpolate(frame, [15, 45], [0, 0.4], { extrapolateRight: "clamp" });
 
   return (
-    <AbsoluteFill style={{ backgroundColor: "#0a0a0a", fontFamily: "'Inter', sans-serif" }}>
-      <Sequence durationInFrames={60}>
-        <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", opacity: scanOpacity }}>
-          <div
-            style={{
-              width: 300,
-              height: 300,
-              border: "4px solid #4ade80",
-              borderRadius: 40,
-              transform: `scale(${scanScale})`,
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              boxShadow: "0 0 40px rgba(74, 222, 128, 0.4)",
-            }}
-          >
-            <h1 style={{ color: "#4ade80", fontSize: 40, fontWeight: 800 }}>SCAN</h1>
-          </div>
-        </AbsoluteFill>
-      </Sequence>
+    <AbsoluteFill style={{ backgroundColor: "#020202", fontFamily: "'Inter', sans-serif" }}>
+      
+      {/* Ambient Emerald Glow */}
+      <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", opacity: glowOpacity }}>
+        <div style={{ width: 800, height: 800, borderRadius: 400, backgroundColor: "#4ade80", filter: "blur(200px)" }} />
+      </AbsoluteFill>
 
-      <Sequence from={50}>
-        <AbsoluteFill style={{ justifyContent: "center", alignItems: "center" }}>
-          <div
-            style={{
-              width: 1000,
-              height: 600,
-              backgroundColor: "rgba(255,255,255,0.05)",
-              backdropFilter: "blur(40px)",
-              WebkitBackdropFilter: "blur(40px)",
-              borderRadius: 32,
-              border: "1px solid rgba(255,255,255,0.1)",
-              transform: `scale(${osContainerScale})`,
-              overflow: "hidden",
-              display: "flex",
-              flexDirection: "row",
-            }}
-          >
-            {/* Left side text */}
-            <div style={{ flex: 1, padding: 60, display: "flex", flexDirection: "column", justifyContent: "center" }}>
-              <h1
-                style={{
-                  color: "white",
-                  fontSize: 64,
-                  fontWeight: 800,
-                  transform: `translateY(${interpolate(titleSpring, [0, 1], [50, 0])}px)`,
-                  opacity: titleSpring,
-                  lineHeight: 1.1,
-                }}
-              >
-                Meet<br />
-                <span style={{ color: "#4ade80" }}>OurMenu OS</span>
-              </h1>
-              <p
-                style={{
-                  color: "#aaa",
-                  fontSize: 32,
-                  marginTop: 20,
-                  transform: `translateY(${interpolate(titleSpring, [0, 1], [50, 0])}px)`,
-                  opacity: titleSpring,
-                }}
-              >
-                The universal digital<br />operating layer.
-              </p>
-            </div>
+      {/* 3D Mockup Carousel */}
+      <AbsoluteFill style={{ perspective: 1200, justifyContent: "center", alignItems: "center" }}>
+        
+        {/* Hospitality Mockup */}
+        <div
+          style={{
+            position: "absolute",
+            width: 450,
+            height: 600,
+            borderRadius: 30,
+            overflow: "hidden",
+            boxShadow: "0 40px 100px rgba(74, 222, 128, 0.2)",
+            border: "1px solid rgba(255,255,255,0.1)",
+            transform: `translateX(${leftX}px) rotateY(${leftRotateY}deg)`,
+            transformStyle: "preserve-3d",
+          }}
+        >
+          <Img src="/images/scene2_mockup_hospitality_1782545513406.png" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        </div>
 
-            {/* Right side morphing templates */}
-            <div style={{ flex: 1, backgroundColor: "#111", position: "relative", overflow: "hidden" }}>
-              <div
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  width: "100%",
-                  transform: `translateY(${templateY}px)`,
-                  display: "flex",
-                  flexDirection: "column",
-                }}
-              >
-                <div style={{ height: 400, display: "flex", justifyContent: "center", alignItems: "center" }}>
-                  <h2 style={{ color: "white", fontSize: 40 }}>Hospitality Menu</h2>
-                </div>
-                <div style={{ height: 400, display: "flex", justifyContent: "center", alignItems: "center", backgroundColor: "#1a1a1a" }}>
-                  <h2 style={{ color: "white", fontSize: 40 }}>Retail Catalog</h2>
-                </div>
-                <div style={{ height: 400, display: "flex", justifyContent: "center", alignItems: "center", backgroundColor: "#222" }}>
-                  <h2 style={{ color: "white", fontSize: 40 }}>Service Booking</h2>
-                </div>
-              </div>
-            </div>
-          </div>
-        </AbsoluteFill>
-      </Sequence>
+        {/* Retail Mockup */}
+        <div
+          style={{
+            position: "absolute",
+            width: 450,
+            height: 600,
+            borderRadius: 30,
+            overflow: "hidden",
+            boxShadow: "0 40px 100px rgba(59, 130, 246, 0.2)",
+            border: "1px solid rgba(255,255,255,0.1)",
+            transform: `translateX(${rightX}px) rotateY(${rightRotateY}deg)`,
+            transformStyle: "preserve-3d",
+          }}
+        >
+          <Img src="/images/scene2_mockup_retail_1782545524433.png" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        </div>
+
+      </AbsoluteFill>
+
+      {/* QR Shockwave */}
+      <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", opacity: ringOpacity }}>
+        <div
+          style={{
+            width: 200,
+            height: 200,
+            borderRadius: "50%",
+            border: "4px solid #fff",
+            transform: `scale(${ringScale * 4})`,
+            position: "absolute",
+          }}
+        />
+      </AbsoluteFill>
+      <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", opacity: coreOpacity }}>
+        <div style={{ width: 100, height: 100, backgroundColor: "#fff", borderRadius: 20 }} />
+      </AbsoluteFill>
+
+      {/* Cinematic Text Overlay */}
+      <AbsoluteFill style={{ justifyContent: "flex-end", alignItems: "center", paddingBottom: 100 }}>
+         <h2
+           style={{
+             color: "white",
+             fontSize: 50,
+             fontWeight: 800,
+             letterSpacing: "-1px",
+             opacity: interpolate(frame, [25, 45], [0, 1], { extrapolateRight: "clamp" }),
+             transform: `translateY(${interpolate(frame, [25, 45], [20, 0], { extrapolateRight: "clamp" })}px)`,
+             textShadow: "0 4px 20px rgba(0,0,0,0.8)"
+           }}
+         >
+           The Universal Operating Layer.
+         </h2>
+      </AbsoluteFill>
+
     </AbsoluteFill>
   );
 };

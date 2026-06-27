@@ -7,7 +7,46 @@ import { toast } from 'sonner'
 import { processCheckout } from './actions'
 import { motion, AnimatePresence } from 'framer-motion'
 import posthog from 'posthog-js'
-import { ShoppingBag, ChevronRight, X, Sparkles, Plus, Minus, CreditCard, Building2, Lock } from 'lucide-react'
+import { ShoppingBag, ChevronRight, X, Sparkles, Plus, Minus, CreditCard, Building2, Lock, MapPin, ChevronDown } from 'lucide-react'
+
+function FloatingInput({ 
+  label, 
+  value, 
+  onChange, 
+  type = "text", 
+  placeholder = "",
+  required = false
+}: { 
+  label: string; 
+  value: string; 
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; 
+  type?: string;
+  placeholder?: string;
+  required?: boolean;
+}) {
+  const [isFocused, setIsFocused] = useState(false)
+  const isActive = isFocused || value.length > 0
+
+  return (
+    <div className="relative w-full">
+      <input
+        type={type}
+        value={value}
+        onChange={onChange}
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
+        required={required}
+        className={`w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 pb-2 pt-6 text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all text-[15px] ${isActive ? '' : 'placeholder:text-transparent'}`}
+        placeholder={placeholder}
+      />
+      <label 
+        className={`absolute left-4 transition-all duration-200 pointer-events-none ${isActive ? 'text-[11px] top-2 text-emerald-600 dark:text-emerald-400 font-bold' : 'text-[15px] top-3.5 text-zinc-500 dark:text-zinc-400'}`}
+      >
+        {label}
+      </label>
+    </div>
+  )
+}
 
 interface CartFABProps {
   organizationId: string
@@ -31,6 +70,8 @@ interface CartFABProps {
   fulfillmentLocationLabel?: string | null
   pageId?: string
   refundPolicy?: string | null
+  pageFulfillmentOptions?: { pickup: boolean, delivery: boolean, table: boolean }
+  pageBillingMode?: string
 }
 
 export function CartFAB({ 
@@ -54,7 +95,9 @@ export function CartFAB({
   deliveryNote,
   fulfillmentLocationLabel = 'Table',
   pageId,
-  refundPolicy
+  refundPolicy,
+  pageFulfillmentOptions,
+  pageBillingMode
 }: CartFABProps) {
   const { items, totalAmountMinor, addItem, updateQuantity, clearCart, spinnerDiscount } = useCartStore()
   const [isCheckingOut, setIsCheckingOut] = useState(false)
@@ -63,9 +106,14 @@ export function CartFAB({
   // Checkout Modal State
   const [showCheckoutModal, setShowCheckoutModal] = useState(false)
   const [tableNumber, setTableNumber] = useState(tableIdentifier || '')
+  const [isFetchingLocation, setIsFetchingLocation] = useState(false)
+  const [isSummaryExpanded, setIsSummaryExpanded] = useState(false)
   
-  const showTableOption = !['catalog', 'retail'].includes(templateType)
-  const defaultFulfillment = tableIdentifier ? 'table' : (showTableOption ? 'table' : 'pickup')
+  const showTableOption = pageFulfillmentOptions ? pageFulfillmentOptions.table : !['catalog', 'retail'].includes(templateType)
+  const showPickupOption = pageFulfillmentOptions ? pageFulfillmentOptions.pickup : true
+  const showDeliveryOption = pageFulfillmentOptions ? pageFulfillmentOptions.delivery : !!deliveryEnabled
+
+  const defaultFulfillment = tableIdentifier ? 'table' : (showTableOption ? 'table' : (showPickupOption ? 'pickup' : 'delivery'))
   const [fulfillmentType, setFulfillmentType] = useState<'table' | 'pickup' | 'delivery'>(defaultFulfillment)
   
   const [customerName, setCustomerName] = useState('')
@@ -153,6 +201,27 @@ export function CartFAB({
   const isDelivery = fulfillmentType === 'delivery'
   const appliedDeliveryFee = (isDelivery && deliveryFeeMinor) ? deliveryFeeMinor : 0
   const finalTotalMinor = discountedSubtotalMinor + appliedDeliveryFee
+
+  const handleGetLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error('Geolocation is not supported by your browser')
+      return
+    }
+    setIsFetchingLocation(true)
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords
+        setTableNumber(prev => prev ? `${prev}\n📍 Live Location (Lat: ${latitude.toFixed(5)}, Lng: ${longitude.toFixed(5)})` : `📍 Live Location (Lat: ${latitude.toFixed(5)}, Lng: ${longitude.toFixed(5)})`)
+        toast.success('Live location attached!')
+        setIsFetchingLocation(false)
+      },
+      (error) => {
+        console.error(error)
+        toast.error('Unable to retrieve your location')
+        setIsFetchingLocation(false)
+      }
+    )
+  }
 
   const handleCheckout = async (e?: React.FormEvent) => {
     if (e) e.preventDefault()
@@ -320,29 +389,42 @@ export function CartFAB({
               </div>
 
               <div className="overflow-y-auto overflow-x-hidden -mx-6 px-6 pb-6 space-y-6 flex-1">
-                {/* Fulfillment Type Toggle */}
-                {!tableIdentifier && (showTableOption || deliveryEnabled) && (
-                  <div className="flex bg-zinc-100 dark:bg-zinc-800 p-1 rounded-xl">
+                {/* Fulfillment Type Segmented Control */}
+                {!tableIdentifier && (showTableOption || showDeliveryOption || showPickupOption) && (
+                  <div className="relative flex bg-zinc-100/80 dark:bg-zinc-800/80 backdrop-blur-md p-1.5 rounded-[1.25rem] shadow-inner">
+                    {/* Animated Sliding Pill */}
+                    <motion.div 
+                      layout
+                      transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                      className="absolute top-1.5 bottom-1.5 rounded-xl bg-white dark:bg-zinc-700 shadow-sm border border-zinc-200/50 dark:border-zinc-600/50"
+                      style={{
+                        left: fulfillmentType === 'table' ? '6px' : fulfillmentType === 'pickup' ? (showTableOption ? 'calc(33.33% + 4px)' : '6px') : (showTableOption ? 'calc(66.66% + 2px)' : 'calc(50% + 3px)'),
+                        width: (showTableOption && showDeliveryOption && showPickupOption) ? 'calc(33.33% - 4px)' : ((showTableOption && showPickupOption) || (showTableOption && showDeliveryOption) || (showPickupOption && showDeliveryOption)) ? 'calc(50% - 6px)' : 'calc(100% - 12px)'
+                      }}
+                    />
+                    
                     {showTableOption && (
                       <button
                         type="button"
-                        className={`flex-1 py-2 text-sm font-bold rounded-lg transition-colors ${fulfillmentType === 'table' ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm' : 'text-zinc-500'}`}
+                        className={`relative z-10 flex-1 py-2.5 text-[14px] font-bold rounded-xl transition-colors ${fulfillmentType === 'table' ? 'text-zinc-900 dark:text-white' : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'}`}
                         onClick={() => setFulfillmentType('table')}
                       >
                         {fulfillmentLocationLabel}
                       </button>
                     )}
-                    <button
-                      type="button"
-                      className={`flex-1 py-2 text-sm font-bold rounded-lg transition-colors ${fulfillmentType === 'pickup' ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm' : 'text-zinc-500'}`}
-                      onClick={() => setFulfillmentType('pickup')}
-                    >
-                      Pickup
-                    </button>
-                    {deliveryEnabled && (
+                    {showPickupOption && (
                       <button
                         type="button"
-                        className={`flex-1 py-2 text-sm font-bold rounded-lg transition-colors ${fulfillmentType === 'delivery' ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm' : 'text-zinc-500'}`}
+                        className={`relative z-10 flex-1 py-2.5 text-[14px] font-bold rounded-xl transition-colors ${fulfillmentType === 'pickup' ? 'text-zinc-900 dark:text-white' : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'}`}
+                        onClick={() => setFulfillmentType('pickup')}
+                      >
+                        Pickup
+                      </button>
+                    )}
+                    {showDeliveryOption && (
+                      <button
+                        type="button"
+                        className={`relative z-10 flex-1 py-2.5 text-[14px] font-bold rounded-xl transition-colors ${fulfillmentType === 'delivery' ? 'text-zinc-900 dark:text-white' : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'}`}
                         onClick={() => setFulfillmentType('delivery')}
                       >
                         Delivery
@@ -354,45 +436,54 @@ export function CartFAB({
                 {/* Customer Details */}
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
-                    <input 
-                      aria-label="Your Name"
-                      type="text" 
+                    <FloatingInput 
+                      label="Your Name *"
                       value={customerName}
                       onChange={(e) => setCustomerName(e.target.value)}
-                      placeholder="Your Name *"
-                      className="w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-3 text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 placeholder:text-zinc-400 text-[15px]"
+                      placeholder="John Doe"
                     />
-                    <input 
-                      aria-label="Phone Number"
-                      type="tel" 
+                    <FloatingInput 
+                      label="Phone Number *"
+                      type="tel"
                       value={customerPhone}
                       onChange={(e) => setCustomerPhone(e.target.value)}
-                      placeholder="Phone Number *"
-                      className="w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-3 text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 placeholder:text-zinc-400 text-[15px]"
+                      placeholder="08012345678"
                     />
                   </div>
-                  <input 
-                    aria-label="Email for receipt"
-                    type="email" 
+                  <FloatingInput 
+                    label="Email for receipt (Optional)"
+                    type="email"
                     value={customerEmail}
                     onChange={(e) => setCustomerEmail(e.target.value)}
-                    placeholder="Email for receipt (Optional)"
-                    className="w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-3 text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 placeholder:text-zinc-400 text-[15px]"
+                    placeholder="john@example.com"
                   />
                 </div>
 
                 {/* Location / Table Input */}
                 {!hideAddressField && (
                   <div className="space-y-2">
-                    <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">
-                      {fulfillmentType === 'delivery' ? 'Delivery Address' : 
-                       fulfillmentType === 'pickup' ? 'Pickup Details' : 
-                       fulfillmentLocationLabel}
-                    </label>
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">
+                        {fulfillmentType === 'delivery' ? 'Delivery Address' : 
+                         fulfillmentType === 'pickup' ? 'Pickup Details' : 
+                         fulfillmentLocationLabel}
+                      </label>
+                      {fulfillmentType === 'delivery' && (
+                        <button
+                          type="button"
+                          onClick={handleGetLocation}
+                          disabled={isFetchingLocation}
+                          className="text-xs font-bold text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5 disabled:opacity-50 transition-colors bg-emerald-50 dark:bg-emerald-500/10 px-2 py-1 rounded-lg"
+                        >
+                          <MapPin className="w-3.5 h-3.5" />
+                          {isFetchingLocation ? 'Locating...' : 'Use current location'}
+                        </button>
+                      )}
+                    </div>
                     {tableIdentifier && templateType !== 'catalog' ? (
-                      <div className="w-full bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 rounded-xl px-4 py-3.5 text-emerald-700 dark:text-emerald-400 font-bold flex items-center justify-between">
+                      <div className="w-full bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 rounded-xl px-4 py-3.5 text-emerald-700 dark:text-emerald-400 font-bold flex items-center justify-between shadow-inner">
                         <span>{fulfillmentLocationLabel} {tableIdentifier}</span>
-                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                        <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
                       </div>
                     ) : (
                       <textarea 
@@ -404,7 +495,7 @@ export function CartFAB({
                           fulfillmentType === 'pickup' ? "e.g. 'Pickup at 5pm' or 'Car details'" :
                           `Enter your ${fulfillmentLocationLabel} (e.g. 12 or 'VIP 1')`
                         }
-                        className="w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-3 text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 resize-none placeholder:text-zinc-400 text-[15px]"
+                        className="w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-3 text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 resize-none placeholder:text-zinc-400 text-[15px] transition-all"
                         rows={fulfillmentType === 'delivery' ? 2 : 1}
                       />
                     )}
@@ -465,40 +556,67 @@ export function CartFAB({
                   )}
                 </AnimatePresence>
 
-                {/* Order Summary */}
-                <div className="bg-zinc-50 dark:bg-zinc-800/30 rounded-2xl p-5 space-y-4 border border-zinc-200 dark:border-zinc-800">
-                  <h3 className="text-sm font-bold text-zinc-900 dark:text-white">Order Summary</h3>
-                  <div className="space-y-3">
-                    <AnimatePresence>
-                      {items.map(item => (
-                        <motion.div 
-                          layout
-                          initial={{ opacity: 0, x: -20, scale: 0.95 }}
-                          animate={{ opacity: 1, x: 0, scale: 1 }}
-                          exit={{ opacity: 0, x: 20, scale: 0.95 }}
-                          transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                          key={item.id} 
-                          className="flex justify-between items-center group"
-                        >
-                          <div className="flex-1 min-w-0 pr-4">
-                            <h4 className="text-[14px] font-medium text-zinc-900 dark:text-white truncate">{item.name}</h4>
-                            <span className="text-[13px] text-zinc-500">{formatCurrency(item.price_minor )}</span>
-                          </div>
-                          <div className="flex items-center gap-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-full p-1 shadow-sm opacity-100 transition-opacity">
-                            <button type="button" aria-label={`Decrease quantity of ${item.name}`} onClick={() => updateQuantity(item.id, -1)} className="w-6 h-6 flex items-center justify-center bg-zinc-100 dark:bg-zinc-800 rounded-full text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-95 transition-transform"><Minus className="w-3 h-3" /></button>
-                            <span className="text-zinc-900 dark:text-white font-bold text-[13px] w-3 text-center">{item.quantity}</span>
-                            <button type="button" aria-label={`Increase quantity of ${item.name}`} onClick={() => updateQuantity(item.id, 1)} className="w-6 h-6 flex items-center justify-center bg-zinc-100 dark:bg-zinc-800 rounded-full text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-95 transition-transform"><Plus className="w-3 h-3" /></button>
-                          </div>
-                        </motion.div>
-                      ))}
-                    </AnimatePresence>
-                  </div>
+                {/* Order Summary Accordion */}
+                <div className="bg-zinc-50 dark:bg-zinc-800/30 rounded-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden">
+                  <button 
+                    type="button" 
+                    onClick={() => setIsSummaryExpanded(!isSummaryExpanded)}
+                    className="w-full flex items-center justify-between p-5 focus:outline-none"
+                  >
+                    <div className="flex items-center gap-3">
+                      <ShoppingBag className="w-5 h-5 text-zinc-500" />
+                      <div className="text-left">
+                        <h3 className="text-sm font-bold text-zinc-900 dark:text-white">Order Summary</h3>
+                        <p className="text-[12px] text-zinc-500">{items.reduce((acc, item) => acc + item.quantity, 0)} items • {formatCurrency(subtotalMinor)}</p>
+                      </div>
+                    </div>
+                    <motion.div animate={{ rotate: isSummaryExpanded ? 180 : 0 }}>
+                      <ChevronDown className="w-5 h-5 text-zinc-400" />
+                    </motion.div>
+                  </button>
                   
-                  <div className="h-px bg-zinc-200 dark:bg-zinc-800 w-full" />
+                  <AnimatePresence>
+                    {isSummaryExpanded && (
+                      <motion.div 
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3, ease: "easeInOut" }}
+                        className="px-5 pb-5 pt-1 space-y-4 border-t border-zinc-200 dark:border-zinc-800"
+                      >
+                        <div className="space-y-3">
+                          <AnimatePresence>
+                            {items.map(item => (
+                              <motion.div 
+                                layout
+                                initial={{ opacity: 0, x: -20, scale: 0.95 }}
+                                animate={{ opacity: 1, x: 0, scale: 1 }}
+                                exit={{ opacity: 0, x: 20, scale: 0.95 }}
+                                transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                                key={item.id} 
+                                className="flex justify-between items-center group"
+                              >
+                                <div className="flex-1 min-w-0 pr-4">
+                                  <h4 className="text-[14px] font-medium text-zinc-900 dark:text-white truncate">{item.name}</h4>
+                                  <span className="text-[13px] text-zinc-500">{formatCurrency(item.price_minor )}</span>
+                                </div>
+                                <div className="flex items-center gap-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-full p-1 shadow-sm opacity-100 transition-opacity">
+                                  <button type="button" aria-label={`Decrease quantity of ${item.name}`} onClick={() => updateQuantity(item.id, -1)} className="w-6 h-6 flex items-center justify-center bg-zinc-100 dark:bg-zinc-800 rounded-full text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-95 transition-transform"><Minus className="w-3 h-3" /></button>
+                                  <span className="text-zinc-900 dark:text-white font-bold text-[13px] w-3 text-center">{item.quantity}</span>
+                                  <button type="button" aria-label={`Increase quantity of ${item.name}`} onClick={() => updateQuantity(item.id, 1)} className="w-6 h-6 flex items-center justify-center bg-zinc-100 dark:bg-zinc-800 rounded-full text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-95 transition-transform"><Plus className="w-3 h-3" /></button>
+                                </div>
+                              </motion.div>
+                            ))}
+                          </AnimatePresence>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                   
-                  <div className="space-y-2">
-                    {discountAmountMinor > 0 && (
-                      <>
+                  {discountAmountMinor > 0 && (
+                    <div className="px-5 pb-5">
+                      <div className="h-px bg-zinc-200 dark:bg-zinc-800 w-full mb-4" />
+                      <div className="space-y-2">
                         <div className="flex justify-between items-center text-zinc-500 text-[14px]">
                           <span>Subtotal</span>
                           <span className="line-through">{formatCurrency(subtotalMinor )}</span>
@@ -507,12 +625,12 @@ export function CartFAB({
                           <span>Discount ({effectivePercent}%) {spinnerDiscount === effectivePercent && '🎲'}</span>
                           <span>-{formatCurrency(discountAmountMinor )}</span>
                         </div>
-                      </>
-                    )}
-                    <div className="flex justify-between items-end pt-2">
-                      <span className="text-[15px] font-bold text-zinc-900 dark:text-white">Total</span>
-                      <span className="text-2xl font-black text-zinc-900 dark:text-white tracking-tight">{formatCurrency(finalTotalMinor )}</span>
+                      </div>
                     </div>
+                  )}
+                  <div className="flex justify-between items-end p-5 bg-zinc-100/50 dark:bg-zinc-800/50">
+                    <span className="text-[15px] font-bold text-zinc-900 dark:text-white">Total</span>
+                    <span className="text-2xl font-black text-zinc-900 dark:text-white tracking-tight">{formatCurrency(finalTotalMinor)}</span>
                   </div>
                 </div>
 
@@ -579,24 +697,31 @@ export function CartFAB({
               </div>
 
               {/* Sticky Checkout Button */}
-              <div className="pt-4 mt-auto shrink-0 bg-white dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800 -mx-6 px-6 -mb-6 pb-6 sm:mb-0 sm:pb-0 sm:border-t-0 sm:pt-0">
+              <div className="pt-5 mt-auto shrink-0 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl border-t border-zinc-200/50 dark:border-zinc-800/50 -mx-6 px-6 -mb-6 pb-8 sm:mb-0 sm:pb-0 sm:border-t-0 sm:pt-0 sm:bg-transparent">
                 <button 
                   type="submit"
                   disabled={isCheckingOut || (!hideAddressField && !tableNumber && templateType !== 'catalog')}
-                  className="group w-full bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-bold h-14 rounded-2xl shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 transition-all active:scale-95 text-[15px]"
+                  className="relative group w-full overflow-hidden text-white dark:text-zinc-900 font-bold h-14 rounded-2xl shadow-xl flex items-center justify-center gap-2 disabled:opacity-50 transition-all active:scale-95 text-[15px]"
                 >
+                  <div className="absolute inset-0 bg-zinc-900 dark:bg-white" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/20 via-purple-500/20 to-emerald-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  
                   {isCheckingOut ? (
-                    <div className="flex items-center gap-2">
+                    <div className="relative z-10 flex items-center gap-2">
                       <div className="w-4 h-4 border-2 border-zinc-500 border-t-transparent rounded-full animate-spin" />
                       Processing...
                     </div>
                   ) : (
-                    <>
-                      {paymentMethod === 'transfer' 
-                        ? 'Place Order' 
-                        : (splitCount > 1 ? `Pay My Share (${formatCurrency(Math.ceil(finalTotalMinor / splitCount))})` : `Pay ${formatCurrency(finalTotalMinor )}`)}
-                      <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                    </>
+                    <div className="relative z-10 flex items-center justify-center gap-2 w-full px-6">
+                      <div className="flex-1 text-left">
+                        <span className="text-[13px] font-medium opacity-80 block -mb-1">Pay</span>
+                        <span className="text-[16px] tracking-tight">{splitCount > 1 ? formatCurrency(Math.ceil(finalTotalMinor / splitCount)) : formatCurrency(finalTotalMinor)}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 bg-white/10 dark:bg-black/10 py-1.5 px-3 rounded-xl backdrop-blur-sm">
+                        {paymentMethod === 'transfer' ? 'Transfer' : 'Complete Order'}
+                        <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                      </div>
+                    </div>
                   )}
                 </button>
                 <div className="mt-4 flex items-center justify-center gap-1.5 opacity-60">

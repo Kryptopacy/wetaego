@@ -17,8 +17,15 @@ export default async function OrderStatusPage(props: { params: Promise<{ slug: s
     notFound()
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const location = locationPage.locations as any
+  const location = locationPage.locations as { 
+    id: string; 
+    name?: string;
+    manual_payment_bank_name?: string;
+    manual_payment_account_name?: string;
+    manual_payment_account_number?: string;
+    manual_payment_instructions?: string;
+    currency_code?: string;
+  }
 
   // 2. Fetch Order — scope to the resolved location to prevent IDOR
   const { data: order } = await supabase

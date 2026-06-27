@@ -5,76 +5,70 @@ export const Scene5_Barrage: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  // Flash bang effect on every beat (every 30 frames = 1 second)
-  const flash = interpolate(frame % 30, [0, 5, 30], [1, 0, 0], { extrapolateRight: "clamp" });
-
-  // Scaling effect for each feature text
-  const featureScale = spring({
-    frame: frame % 30,
-    fps,
-    config: { damping: 10, mass: 0.5 },
-  });
+  // Rapid Beat Flash (every 30 frames there is a flash impact)
+  const flashOpacity = spring({ frame: frame % 30, fps, config: { damping: 10, stiffness: 200 } });
+  const featureScale = interpolate(flashOpacity, [0, 1], [0.8, 1.1]);
 
   return (
     <AbsoluteFill style={{ backgroundColor: "#000", fontFamily: "'Inter', sans-serif" }}>
       
+      {/* Background Strobe/Beat Flash Effect */}
+      <AbsoluteFill style={{ backgroundColor: "rgba(255,255,255,0.05)", opacity: interpolate(frame % 30, [0, 5, 30], [1, 0, 0]) }} />
+
       {/* 0-30: Web Push Notifications */}
       <Sequence durationInFrames={30}>
-        <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", backgroundColor: "#3b82f6" }}>
-          <h1 style={{ color: "white", fontSize: 100, fontWeight: 900, transform: `scale(${featureScale})`, textAlign: "center" }}>
+        <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", backgroundColor: "radial-gradient(circle, #1e3a8a 0%, #000 80%)" }}>
+          <h1 style={{ color: "white", fontSize: 100, fontWeight: 900, transform: `scale(${featureScale})`, textAlign: "center", textShadow: "0 0 40px #3b82f6" }}>
             NATIVE<br/>WEB PUSH
           </h1>
         </AbsoluteFill>
       </Sequence>
 
-      {/* 30-60: Edge Translations */}
+      {/* 30-60: Real-Time Translation */}
       <Sequence from={30} durationInFrames={30}>
-        <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", backgroundColor: "#10b981" }}>
-          <h1 style={{ color: "white", fontSize: 100, fontWeight: 900, transform: `scale(${featureScale})`, textAlign: "center" }}>
+        <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", backgroundColor: "radial-gradient(circle, #064e3b 0%, #000 80%)" }}>
+          <h1 style={{ color: "white", fontSize: 100, fontWeight: 900, transform: `scale(${featureScale})`, textAlign: "center", textShadow: "0 0 40px #10b981" }}>
             REAL-TIME<br/>TRANSLATION
           </h1>
         </AbsoluteFill>
       </Sequence>
 
-      {/* 60-90: Hardware Provisioning */}
+      {/* 60-90: Hardware Fleet */}
       <Sequence from={60} durationInFrames={30}>
-        <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", backgroundColor: "#f59e0b" }}>
-          <h1 style={{ color: "white", fontSize: 100, fontWeight: 900, transform: `scale(${featureScale})`, textAlign: "center" }}>
-            FLEET<br/>HARDWARE
+        <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", backgroundColor: "radial-gradient(circle, #4c1d95 0%, #000 80%)" }}>
+          <h1 style={{ color: "white", fontSize: 100, fontWeight: 900, transform: `scale(${featureScale})`, textAlign: "center", textShadow: "0 0 40px #8b5cf6" }}>
+            HARDWARE<br/>FLEET
           </h1>
         </AbsoluteFill>
       </Sequence>
 
-      {/* 90-120: Affiliate Network */}
+      {/* 90-120: B2B Affiliates */}
       <Sequence from={90} durationInFrames={30}>
-        <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", backgroundColor: "#8b5cf6" }}>
-          <h1 style={{ color: "white", fontSize: 100, fontWeight: 900, transform: `scale(${featureScale})`, textAlign: "center" }}>
-            B2B<br/>AFFILIATES
+        <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", backgroundColor: "radial-gradient(circle, #7f1d1d 0%, #000 80%)" }}>
+          <h1 style={{ color: "white", fontSize: 100, fontWeight: 900, transform: `scale(${featureScale})`, textAlign: "center", textShadow: "0 0 40px #ef4444" }}>
+            B2B AFFILIATE<br/>NETWORK
           </h1>
         </AbsoluteFill>
       </Sequence>
 
-      {/* 120-210: And so much more... */}
-      <Sequence from={120}>
-        <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", backgroundColor: "#111" }}>
+      {/* 120-210: Scale / Acceleration transition into the end */}
+      <Sequence from={120} durationInFrames={90}>
+        <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", backgroundColor: "#020202" }}>
           <h1
             style={{
-              color: "white",
-              fontSize: 120,
-              fontWeight: 900,
-              transform: `scale(${spring({ frame: frame - 120, fps, config: { damping: 12 } })})`,
-              textAlign: "center",
-              letterSpacing: "-2px",
+               color: "white",
+               fontSize: 120,
+               fontWeight: 900,
+               letterSpacing: "-4px",
+               transform: `scale(${interpolate(frame, [120, 210], [1, 5])})`,
+               opacity: interpolate(frame, [180, 210], [1, 0]),
             }}
           >
-            AND <span style={{ color: "#ef4444" }}>EVERYTHING</span><br/>ELSE.
+            INFINITY.
           </h1>
         </AbsoluteFill>
       </Sequence>
 
-      {/* Global Flash effect over everything */}
-      <AbsoluteFill style={{ backgroundColor: "white", opacity: flash, pointerEvents: "none" }} />
-      
     </AbsoluteFill>
   );
 };

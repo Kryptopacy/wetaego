@@ -1,125 +1,68 @@
-import { AbsoluteFill, useCurrentFrame, useVideoConfig, spring, interpolate } from "remotion";
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, spring, interpolate, Img } from "remotion";
 import React from "react";
 
 export const Scene3_Power: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  // Three vertical panels sliding in
-  const panel1Y = spring({ frame: frame - 10, fps, config: { damping: 12 } });
-  const panel2Y = spring({ frame: frame - 25, fps, config: { damping: 12 } });
-  const panel3Y = spring({ frame: frame - 40, fps, config: { damping: 12 } });
+  // Floating 3D CRM/Roulette Panel
+  const panelScale = spring({ frame: frame - 10, fps, config: { damping: 14, mass: 1 } });
+  const panelRotateX = interpolate(panelScale, [0, 1], [40, 10]);
+  const panelRotateY = interpolate(frame, [0, 300], [-10, 10]); // Continuous slow rotation
 
-  const textOpacity = interpolate(frame, [80, 100], [0, 1], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
+  // Text Entrance
+  const textOpacity = interpolate(frame, [30, 60], [0, 1], { extrapolateRight: "clamp" });
+  const textY = spring({ frame: frame - 30, fps, config: { damping: 12 } });
 
   return (
-    <AbsoluteFill style={{ backgroundColor: "#000", fontFamily: "'Inter', sans-serif" }}>
-      <div style={{ display: "flex", width: "100%", height: "100%", padding: 40, gap: 40 }}>
-        {/* Panel 1: Billing & Ledgers */}
-        <div
-          style={{
-            flex: 1,
-            backgroundColor: "#111",
-            borderRadius: 32,
-            border: "1px solid rgba(255,255,255,0.1)",
-            transform: `translateY(${interpolate(panel1Y, [0, 1], [1000, 0])}px)`,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            padding: 40,
-            overflow: "hidden",
-          }}
-        >
-          <div style={{ width: "100%", height: 200, backgroundColor: "#1e1e1e", borderRadius: 20, marginBottom: 40 }} />
-          <h2 style={{ color: "white", fontSize: 36, fontWeight: 800 }}>Automated Billing</h2>
-          <p style={{ color: "#aaa", fontSize: 24, textAlign: "center", marginTop: 20 }}>
-            Zero reconciliation nightmares. Instant split payments.
-          </p>
-        </div>
-
-        {/* Panel 2: CRM & Gamification */}
-        <div
-          style={{
-            flex: 1,
-            backgroundColor: "#111",
-            borderRadius: 32,
-            border: "1px solid rgba(255,255,255,0.1)",
-            transform: `translateY(${interpolate(panel2Y, [0, 1], [1000, 0])}px)`,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            padding: 40,
-            position: "relative",
-          }}
-        >
-          {/* Mock Roulette Wheel */}
-          <div
-            style={{
-              width: 200,
-              height: 200,
-              borderRadius: "50%",
-              border: "8px solid #4ade80",
-              borderTopColor: "#3b82f6",
-              borderRightColor: "#ef4444",
-              marginBottom: 40,
-              transform: `rotate(${frame * 5}deg)`,
-            }}
-          />
-          <h2 style={{ color: "white", fontSize: 36, fontWeight: 800 }}>Payment Roulette</h2>
-          <p style={{ color: "#aaa", fontSize: 24, textAlign: "center", marginTop: 20 }}>
-            Deeply wired CRM with gamified promotions.
-          </p>
-        </div>
-
-        {/* Panel 3: Staff & Ops */}
-        <div
-          style={{
-            flex: 1,
-            backgroundColor: "#111",
-            borderRadius: 32,
-            border: "1px solid rgba(255,255,255,0.1)",
-            transform: `translateY(${interpolate(panel3Y, [0, 1], [1000, 0])}px)`,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            padding: 40,
-          }}
-        >
-          {/* Mock Staff Dashboard List */}
-          <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 15, marginBottom: 40 }}>
-            <div style={{ height: 40, backgroundColor: "#3b82f6", borderRadius: 10, width: "80%" }} />
-            <div style={{ height: 40, backgroundColor: "#4ade80", borderRadius: 10, width: "100%" }} />
-            <div style={{ height: 40, backgroundColor: "#ef4444", borderRadius: 10, width: "60%" }} />
-          </div>
-          <h2 style={{ color: "white", fontSize: 36, fontWeight: 800 }}>Staff Management</h2>
-          <p style={{ color: "#aaa", fontSize: 24, textAlign: "center", marginTop: 20 }}>
-            Live fulfillment triaging across your entire team.
-          </p>
-        </div>
-      </div>
+    <AbsoluteFill style={{ backgroundColor: "#020202", fontFamily: "'Inter', sans-serif" }}>
       
-      {/* Overlay Text */}
-      <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", pointerEvents: "none" }}>
-        <h1
+      {/* Deep Space Emerald Background Glow */}
+      <AbsoluteFill style={{ justifyContent: "center", alignItems: "center" }}>
+        <div style={{ width: 1000, height: 1000, borderRadius: 500, backgroundColor: "rgba(16, 185, 129, 0.15)", filter: "blur(250px)" }} />
+      </AbsoluteFill>
+
+      <AbsoluteFill style={{ perspective: 1200, justifyContent: "center", alignItems: "center" }}>
+        
+        {/* Main Floating Mockup */}
+        <div
           style={{
-            color: "white",
-            fontSize: 90,
-            fontWeight: 900,
-            opacity: textOpacity,
-            textShadow: "0px 20px 50px rgba(0,0,0,0.8)",
-            textAlign: "center",
-            background: "rgba(0,0,0,0.4)",
-            padding: "20px 60px",
-            borderRadius: 40,
-            backdropFilter: "blur(10px)",
+            position: "absolute",
+            width: 800,
+            height: 500,
+            borderRadius: 30,
+            overflow: "hidden",
+            boxShadow: "0 50px 150px rgba(0,0,0,0.8), 0 0 80px rgba(16, 185, 129, 0.3)",
+            border: "1px solid rgba(255,255,255,0.15)",
+            transform: `scale(${panelScale}) rotateX(${panelRotateX}deg) rotateY(${panelRotateY}deg)`,
+            transformStyle: "preserve-3d",
+            backdropFilter: "blur(40px)",
+            backgroundColor: "rgba(25,25,25,0.8)",
           }}
         >
-          ONE UNIFIED ENGINE
-        </h1>
+          <Img src="/images/scene3_gamified_roulette_1782545544003.png" style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.9 }} />
+        </div>
+
       </AbsoluteFill>
+
+      {/* Cinematic Text Overlay */}
+      <AbsoluteFill style={{ justifyContent: "flex-end", alignItems: "center", paddingBottom: 80, opacity: textOpacity }}>
+         <h2
+           style={{
+             color: "white",
+             fontSize: 40,
+             fontWeight: 600,
+             letterSpacing: "-0.5px",
+             transform: `translateY(${interpolate(textY, [0, 1], [30, 0])}px)`,
+             textShadow: "0 10px 30px rgba(0,0,0,0.9)",
+             textAlign: "center"
+           }}
+         >
+           Automated Ledgers.<br/>
+           <span style={{ color: "#4ade80", fontWeight: 800 }}>Wired into Gamified Promos.</span>
+         </h2>
+      </AbsoluteFill>
+
     </AbsoluteFill>
   );
 };

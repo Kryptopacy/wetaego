@@ -8,10 +8,11 @@ export default async function LoginPage() {
 
   // If already logged in, go straight to dashboard
   if (user) {
-    // If it's a demo user, maybe they want to sign up for real. 
-    // But standard behavior is to redirect them so they don't get confused.
-    // They can log out from the dashboard to create a real account.
-    redirect('/dashboard')
+    // If it's a demo user, do not redirect them. We want them to see the login form
+    // so they can seamlessly upgrade their session to a real account or log back into their real account.
+    if (!user.email?.includes('demo-') && !user.email?.includes('@ourmenuos.online')) {
+      redirect('/dashboard')
+    }
   }
 
   return (

@@ -74,8 +74,8 @@ export function QuotePayment({
 
       if (error) throw new Error(error)
       if (checkoutUrl) window.location.href = checkoutUrl
-    } catch (e: any) {
-      toast.error(e.message || 'Payment initiation failed')
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : 'Payment initiation failed')
       setIsProcessing(false)
     }
   }

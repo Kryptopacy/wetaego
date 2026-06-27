@@ -94,7 +94,7 @@ export default async function PublicQuotePage({
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-zinc-800">
-                        {parsedQuoteData.lineItems.map((item: any, idx: number) => (
+                        {parsedQuoteData.lineItems.map((item: { title: string; qty: number }, idx: number) => (
                           <tr key={idx}>
                             <td className="px-4 py-4 text-white">{item.title}</td>
                             <td className="px-4 py-4 text-white text-right">{item.qty}</td>

@@ -172,6 +172,7 @@ const updatePageSchema = z.object({
   instagram_handle: z.string().optional(),
   x_handle: z.string().optional(),
   tiktok_handle: z.string().optional(),
+  fulfillment_options: z.string().optional(),
 })
 
 export async function updatePage(formData: FormData): Promise<void> {
@@ -197,6 +198,7 @@ export async function updatePage(formData: FormData): Promise<void> {
     instagram_handle: formData.get('instagram_handle') || undefined,
     x_handle: formData.get('x_handle') || undefined,
     tiktok_handle: formData.get('tiktok_handle') || undefined,
+    fulfillment_options: formData.get('fulfillment_options') || undefined,
   })
 
   if (!parsed.success) throw new Error(parsed.error.issues[0].message)
@@ -218,7 +220,8 @@ export async function updatePage(formData: FormData): Promise<void> {
     phone_number,
     instagram_handle,
     x_handle,
-    tiktok_handle
+    tiktok_handle,
+    fulfillment_options
   } = parsed.data
 
   if (pageId.startsWith('page-')) {
@@ -246,7 +249,8 @@ export async function updatePage(formData: FormData): Promise<void> {
     phone_number,
     instagram_handle,
     x_handle,
-    tiktok_handle
+    tiktok_handle,
+    ...(fulfillment_options ? { fulfillment_options: JSON.parse(fulfillment_options as string) } : {})
   }
 
   const { error } = await supabase
