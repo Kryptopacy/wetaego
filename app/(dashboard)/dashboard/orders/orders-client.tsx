@@ -10,6 +10,7 @@ import { Database } from '@/lib/supabase/types'
 import { ServiceRequestsPanel } from './components/service-requests-panel'
 import { ActiveOrdersGrid } from './components/active-orders-grid'
 import { StockManagementView } from './components/stock-management-view'
+import { OrderHistoryView } from './components/order-history-view'
 import { mapSupabaseOrderToUI } from '@/lib/utils/transformers'
 import { UIOrder } from '@/lib/types/frontend'
 import { useOfflineSync } from '@/hooks/use-offline-sync'
@@ -41,7 +42,7 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
   const [orders, setOrders] = useState(initialOrders)
   const [serviceRequests, setServiceRequests] = useState(initialServiceRequests)
   const [menuItems, setMenuItems] = useState(initialMenuItems)
-  const [activeTab, setActiveTab] = useState<'orders' | 'stock' | 'hardware'>('orders')
+  const [activeTab, setActiveTab] = useState<'orders' | 'history' | 'stock' | 'hardware'>('orders')
   const { mode, ipAddress, autoPrintReceipts } = usePrinterStore()
   const t = useTranslations('Dashboard')
 
@@ -164,6 +165,7 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
   )
 
   const activeOrders = orders.filter(o => o.status !== 'completed')
+  const completedOrders = orders.filter(o => o.status === 'completed')
 
   const toggleStock = async (itemId: string, currentStatus: string) => {
     const newStatus = currentStatus === 'available' ? 'sold_out' : 'available'
@@ -265,7 +267,13 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
           onClick={() => setActiveTab('orders')}
           className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${activeTab === 'orders' ? 'bg-blue-600 text-white shadow-md' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white border border-zinc-700/50'}`}
         >
-          Orders & Requests
+          Active Orders
+        </button>
+        <button 
+          onClick={() => setActiveTab('history')}
+          className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${activeTab === 'history' ? 'bg-blue-600 text-white shadow-md' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white border border-zinc-700/50'}`}
+        >
+          History
         </button>
         <button 
           onClick={() => setActiveTab('stock')}
@@ -306,6 +314,12 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
             onCompleteOrder={handleCompleteOrder}
           />
         </div>
+      ) : activeTab === 'history' ? (
+        <OrderHistoryView 
+          organizationId={organizationId} 
+          locationId={locationId} 
+          initialOrders={completedOrders} 
+        />
       ) : activeTab === 'hardware' ? (
         <HardwareSettingsView />
       ) : (

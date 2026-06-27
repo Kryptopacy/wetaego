@@ -1,8 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { formatCurrency } from '@/lib/utils/currency'
 import { Users, Mail, TrendingUp, Award } from 'lucide-react'
 import Link from 'next/link'
+import { CustomersClient } from './customers-client'
 
 
 export default async function CustomersPage() {
@@ -10,8 +10,6 @@ export default async function CustomersPage() {
 
   const { data: userData } = await supabase.auth.getUser()
   const user = userData?.user
-
-  
 
   if (!user) {
     redirect('/login')
@@ -37,19 +35,33 @@ export default async function CustomersPage() {
   const { data: loc } = await supabase.from('locations').select('currency_code').eq('organization_id', orgId).limit(1).single()
   const currencyCode = loc?.currency_code || 'NGN'
 
-  // Fetch customer profiles
+  // Fetch paginated customer profiles (Limit 50)
   const { data: customers } = await supabase
     .from('customer_profiles')
     .select('*')
     .eq('organization_id', orgId)
     .order('last_visit_at', { ascending: false })
+    .limit(50)
 
-  const profiles = customers || []
+  // Fetch scalable exact counts without loading massive row payloads
+  const { count: totalCustomers } = await supabase
+    .from('customer_profiles')
+    .select('*', { count: 'exact', head: true })
+    .eq('organization_id', orgId)
 
-  // Basic stats
-  const totalCustomers = profiles.length
-  const marketingOptIns = profiles.filter(p => p.marketing_opt_in).length
-  const totalPoints = profiles.reduce((sum, p) => sum + (p.loyalty_points || 0), 0)
+  const { count: marketingOptIns } = await supabase
+    .from('customer_profiles')
+    .select('*', { count: 'exact', head: true })
+    .eq('organization_id', orgId)
+    .eq('marketing_opt_in', true)
+
+  // Fetch only the loyalty_points column for aggregation to avoid OOM crashes
+  const { data: pointsData } = await supabase
+    .from('customer_profiles')
+    .select('loyalty_points')
+    .eq('organization_id', orgId)
+    
+  const totalPoints = (pointsData || []).reduce((sum, p) => sum + (p.loyalty_points || 0), 0)
 
   return (
     <div className="max-w-6xl space-y-6 pb-20">
@@ -76,14 +88,14 @@ export default async function CustomersPage() {
             <Users className="w-5 h-5" />
             <span className="font-medium">Total Customers</span>
           </div>
-          <span className="text-3xl font-bold text-white">{totalCustomers}</span>
+          <span className="text-3xl font-bold text-white">{totalCustomers || 0}</span>
         </div>
         <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 flex flex-col">
           <div className="flex items-center gap-2 text-zinc-400 mb-2">
             <Mail className="w-5 h-5" />
             <span className="font-medium">Marketing Subscribers</span>
           </div>
-          <span className="text-3xl font-bold text-white">{marketingOptIns}</span>
+          <span className="text-3xl font-bold text-white">{marketingOptIns || 0}</span>
           <p className="text-xs text-zinc-500 mt-2">Explicit GDPR opt-ins at checkout</p>
         </div>
         <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 flex flex-col">
@@ -95,59 +107,11 @@ export default async function CustomersPage() {
         </div>
       </div>
 
-      <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden">
-        <div className="p-6 border-b border-zinc-800">
-          <h2 className="text-lg font-semibold text-white">Customer Directory</h2>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-zinc-400">
-            <thead className="bg-zinc-800/50 text-xs uppercase text-zinc-500">
-              <tr>
-                <th className="px-6 py-4 font-medium">Customer Email</th>
-                <th className="px-6 py-4 font-medium">Orders</th>
-                <th className="px-6 py-4 font-medium">Lifetime Value</th>
-                <th className="px-6 py-4 font-medium">Loyalty Points</th>
-                <th className="px-6 py-4 font-medium">Last Visit</th>
-                <th className="px-6 py-4 font-medium text-right">Marketing</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-800">
-              {profiles.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-zinc-500">
-                    No customers found. Shadow profiles are built automatically when customers checkout.
-                  </td>
-                </tr>
-              ) : (
-                profiles.map((profile) => (
-                  <tr key={profile.id} className="hover:bg-zinc-800/30 transition-colors">
-                    <td className="px-6 py-4 font-medium text-zinc-200">{profile.email}</td>
-                    <td className="px-6 py-4">{profile.total_orders}</td>
-                    <td className="px-6 py-4 font-medium text-emerald-400">
-                      {formatCurrency(profile.total_spend_minor || 0, currencyCode)}
-                    </td>
-                    <td className="px-6 py-4 font-bold text-blue-400">{profile.loyalty_points || 0}</td>
-                    <td className="px-6 py-4">
-                      {profile.last_visit_at ? new Date(profile.last_visit_at).toLocaleDateString() : 'N/A'}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      {profile.marketing_opt_in ? (
-                        <span className="inline-flex items-center rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-medium text-emerald-400 ring-1 ring-inset ring-emerald-500/20">
-                          Opted In
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center rounded-full bg-zinc-500/10 px-2 py-1 text-xs font-medium text-zinc-400 ring-1 ring-inset ring-zinc-500/20">
-                          Unsubscribed
-                        </span>
-                      )}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <CustomersClient 
+        organizationId={orgId} 
+        initialProfiles={customers || []} 
+        currencyCode={currencyCode} 
+      />
     </div>
   )
 }
