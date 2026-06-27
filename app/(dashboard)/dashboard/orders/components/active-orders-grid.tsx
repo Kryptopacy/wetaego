@@ -39,7 +39,8 @@ export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, onC
       const matchesSearch = !searchQuery || 
         (order.table_identifier?.toLowerCase().includes(searchLower)) ||
         (order.customer_name?.toLowerCase().includes(searchLower)) ||
-        (order.id.toLowerCase().includes(searchLower))
+        (order.id.toLowerCase().includes(searchLower)) ||
+        (order.order_items?.some(item => item.item_name.toLowerCase().includes(searchLower)))
       return matchesStatus && matchesSearch
     })
   }, [optimisticOrders, filterStatus, searchQuery])
@@ -55,10 +56,10 @@ export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, onC
             <div className="flex items-center gap-2 w-full sm:w-auto">
               <input 
                 type="text" 
-                placeholder="Search table or ID..."
+                placeholder="Search items, tables, or IDs..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full sm:w-48 bg-zinc-800/50 border border-zinc-700 rounded-lg px-3 py-1.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-blue-500 transition-colors"
+                className="w-full sm:w-64 bg-zinc-800/50 border border-zinc-700 rounded-lg px-3 py-1.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-blue-500 transition-colors"
               />
             </div>
           </div>
