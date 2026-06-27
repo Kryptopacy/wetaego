@@ -27,26 +27,32 @@ export const revalidate = 60;
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const resolvedParams = await params
-  const supabase = await createClient()
-  const { data: locationData } = await supabase.from('locations').select('id, name, cover_image_url').eq('slug', resolvedParams.slug).single()
-  
-  if (!locationData) return { title: 'Not Found' }
-  
-  const { data: locationPages } = await supabase
-    .from('location_pages')
-    .select('template_type')
-    .eq('location_id', locationData.id)
-    .eq('is_published', true)
-    
-  let templateName = "Menu";
-  if (locationPages && locationPages.length > 0) {
-     const types = locationPages.map(p => p.template_type);
-     if (types.some(t => ['services', 'consulting', 'salon', 'spa'].includes(t))) {
-         templateName = "Services";
-     } else if (types.some(t => ['catalog', 'retail'].includes(t))) {
-         templateName = "Catalog";
-     }
-  }
+  const getCachedMetadata = unstable_cache(async () => {
+    const supabase = await createClient()
+    const { data: locationData } = await supabase.from('locations').select('id, name, cover_image_url').eq('slug', resolvedParams.slug).single()
+    if (!locationData) return null
+
+    const { data: locationPages } = await supabase
+      .from('location_pages')
+      .select('template_type')
+      .eq('location_id', locationData.id)
+      .eq('is_published', true)
+
+    let templateName = "Menu"
+    if (locationPages && locationPages.length > 0) {
+       const types = locationPages.map(p => p.template_type)
+       if (types.some(t => ['services', 'consulting', 'salon', 'spa'].includes(t))) {
+           templateName = "Services"
+       } else if (types.some(t => ['catalog', 'retail'].includes(t))) {
+           templateName = "Catalog"
+       }
+    }
+    return { locationData, templateName }
+  }, [`metadata_${resolvedParams.slug}`], { tags: [`location_data_${resolvedParams.slug}`], revalidate: 60 })
+
+  const metadata = await getCachedMetadata()
+  if (!metadata) return { title: 'Not Found' }
+  const { locationData, templateName } = metadata
 
   const title = `${locationData.name} - ${templateName} | OurMenu OS`;
   const description = `View the live ${templateName.toLowerCase()} and order directly at ${locationData.name}.`;
