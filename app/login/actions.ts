@@ -93,11 +93,17 @@ export async function signup(formData: FormData) {
 
 export async function signInWithGoogle() {
   const supabase = await createClient()
+  const { headers } = await import('next/headers')
+  
+  const headersList = await headers()
+  const host = headersList.get('host') || 'localhost:3000'
+  const protocol = host.includes('localhost') ? 'http' : 'https'
+  const origin = `${protocol}://${host}`
   
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+      redirectTo: `${origin}/auth/callback`,
     },
   })
 
