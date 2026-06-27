@@ -2,6 +2,8 @@
 
 import { useEffect } from 'react'
 
+import * as Sentry from '@sentry/nextjs'
+
 export default function GuestMenuError({
   error,
   reset,
@@ -10,7 +12,7 @@ export default function GuestMenuError({
   reset: () => void
 }) {
   useEffect(() => {
-    // Log the error to an error reporting service if needed
+    Sentry.captureException(error)
     console.error('Guest Menu Error:', error)
   }, [error])
 

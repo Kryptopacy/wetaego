@@ -36,7 +36,7 @@ export function VenueHeader({ location, slug, tableIdentifier }: VenueHeaderProp
   const hasInfo = hours || wifiName || ig || tw || fb || wa || phone || mapUrl
 
   return (
-    <header className="relative w-full h-[35vh] min-h-[280px] max-h-[400px] overflow-hidden">
+    <header className="relative w-full min-h-[35vh] md:max-h-[400px] flex flex-col justify-end overflow-hidden">
       {location.cover_image_url ? (
         <div className="absolute inset-0">
           <Image 
@@ -62,7 +62,7 @@ export function VenueHeader({ location, slug, tableIdentifier }: VenueHeaderProp
       )}
       <div className="absolute inset-0 bg-black/30 dark:bg-black/50" />
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-      <div className="absolute bottom-0 left-0 right-0 p-6 max-w-2xl mx-auto flex flex-col justify-end h-full">
+      <div className="relative z-10 w-full p-6 pt-[calc(env(safe-area-inset-top,24px)+60px)] max-w-2xl mx-auto flex flex-col justify-end mt-auto">
         {location.organizations?.logo_url && (
           <div className="mb-4">
             <div className="relative h-16 w-32 shrink-0 drop-shadow-md overflow-hidden rounded-lg">

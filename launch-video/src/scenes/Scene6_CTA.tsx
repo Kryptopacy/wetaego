@@ -5,68 +5,52 @@ export const Scene6_CTA: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  // Infinite Grid Animation (Moving towards the viewer)
-  const gridY = (frame * 5) % 100;
-
   // Main CTA text fades in and floats up
-  const ctaSpring = spring({ frame: frame - 60, fps, config: { damping: 14 } });
+  const ctaSpring = spring({ frame: frame - 20, fps, config: { damping: 14 } });
   const ctaY = interpolate(ctaSpring, [0, 1], [50, 0]);
   const ctaOpacity = interpolate(ctaSpring, [0, 1], [0, 1]);
 
   // URL Glass Pill entrance
-  const urlSpring = spring({ frame: frame - 90, fps, config: { damping: 12 } });
+  const urlSpring = spring({ frame: frame - 50, fps, config: { damping: 12 } });
   const urlScale = interpolate(urlSpring, [0, 1], [0.8, 1]);
   const urlOpacity = interpolate(urlSpring, [0, 1], [0, 1]);
 
   return (
-    <AbsoluteFill style={{ backgroundColor: "#020202", fontFamily: "'Inter', sans-serif", overflow: "hidden" }}>
+    <AbsoluteFill style={{ backgroundColor: "#09090f", fontFamily: "'Inter', sans-serif" }}>
       
-      {/* Abstract Infinite Grid */}
-      <AbsoluteFill style={{ perspective: 1000, justifyContent: "center", alignItems: "center" }}>
-        <div style={{
-          position: "absolute",
-          top: "50%",
-          width: "200%",
-          height: "200%",
-          backgroundSize: "100px 100px",
-          backgroundImage: "linear-gradient(rgba(16, 185, 129, 0.2) 2px, transparent 2px), linear-gradient(90deg, rgba(16, 185, 129, 0.2) 2px, transparent 2px)",
-          transform: `rotateX(75deg) translateY(${gridY}px)`,
-          transformOrigin: "top center"
-        }} />
+      {/* Massive Violet Blur (600x600) per the real page.tsx */}
+      <AbsoluteFill style={{ justifyContent: "center", alignItems: "center" }}>
+        <div style={{ position: "absolute", width: 600, height: 600, borderRadius: "50%", backgroundColor: "rgba(124, 58, 237, 0.1)", filter: "blur(120px)" }} />
       </AbsoluteFill>
-
-      {/* Cinematic Dark Gradient Overlay (Fades out the grid in the distance) */}
-      <AbsoluteFill style={{ background: "radial-gradient(circle at center, transparent 0%, #020202 70%)" }} />
 
       {/* Main CTA Text */}
       <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", paddingBottom: 150, opacity: ctaOpacity, transform: `translateY(${ctaY}px)` }}>
-         <h1 style={{ color: "white", fontSize: 80, fontWeight: 900, textAlign: "center", margin: 0, letterSpacing: "-2px", textShadow: "0 10px 40px rgba(0,0,0,0.8)" }}>
-           Zero friction.<br/>
-           <span style={{ color: "#4ade80" }}>Absolute scale.</span>
+         <span style={{ display: "inline-block", padding: "6px 16px", borderRadius: 100, backgroundColor: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#d4d4d8", fontSize: 14, fontWeight: 700, textTransform: "uppercase", letterSpacing: "2px", marginBottom: 30 }}>
+           Get Started Today
+         </span>
+         <h1 style={{ fontSize: 70, fontWeight: 900, textAlign: "center", margin: 0, letterSpacing: "-2px", color: "white" }}>
+           Your venue deserves<br/>
+           <span style={{ background: "linear-gradient(135deg, #c4b5fd, #ffffff, #a1a1aa)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+             better infrastructure.
+           </span>
          </h1>
       </AbsoluteFill>
 
-      {/* Final URL in a Glowing Glass Pill */}
-      <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", paddingTop: 150, opacity: urlOpacity, transform: `scale(${urlScale})` }}>
+      {/* Final CTA Button (Matches "Get Started Free" from page.tsx) */}
+      <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", paddingTop: 180, opacity: urlOpacity, transform: `scale(${urlScale})` }}>
          <div
            style={{
              display: "flex",
-             justifyContent: "center",
+             flexDirection: "column",
              alignItems: "center",
-             padding: "20px 60px",
-             backgroundColor: "rgba(255,255,255,0.05)",
-             borderRadius: 100,
-             backdropFilter: "blur(40px)",
-             WebkitBackdropFilter: "blur(40px)",
-             border: "1px solid rgba(255,255,255,0.2)",
-             boxShadow: "0 20px 80px rgba(74, 222, 128, 0.2)",
-             position: "relative",
-             overflow: "hidden"
+             gap: 20
            }}
          >
-           <h2 style={{ color: "#fff", fontSize: 50, fontWeight: 700, margin: 0, letterSpacing: "1px" }}>
+           {/* White Button */}
+           <div style={{ padding: "16px 40px", borderRadius: 100, backgroundColor: "white", color: "black", fontSize: 20, fontWeight: 700, boxShadow: "0 0 40px rgba(255,255,255,0.15)", display: "flex", alignItems: "center", gap: 10 }}>
              ourmenuos.online
-           </h2>
+             <span style={{ fontSize: 24 }}>→</span>
+           </div>
          </div>
       </AbsoluteFill>
 

@@ -11,6 +11,8 @@ const eslintConfig = defineConfig([
     ".next/**",
     "out/**",
     "build/**",
+    "launch-video/.next/**",
+    "launch-video/out/**",
     "next-env.d.ts",
     // Test output directories:
     "test-results/**",

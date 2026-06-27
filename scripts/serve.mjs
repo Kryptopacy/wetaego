@@ -41,5 +41,5 @@ createServer((req, res) => {
 
   createReadStream(filePath).pipe(res);
 }).listen(port, () => {
-  console.log(`OurMenu OS running at http://localhost:${port}`);
+  console.info(`Proxy server listening at http://localhost:${port}`);
 });

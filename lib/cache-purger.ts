@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { invalidateCache } from '@/lib/redis-cache'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
 
 /**
  * World-Class Edge Caching:
@@ -23,7 +23,11 @@ export async function purgeStorefrontCache(orgId: string) {
       await invalidateCache(`location_pages_${loc.id}`)
       await invalidateCache(`menu_categories_${loc.id}`)
 
-      // 2. Purge Next.js static page cache
+      // 2. Purge Next.js static page cache & fetch tags
+      revalidateTag(`location_data_${loc.slug}`, 'default')
+      revalidateTag(`location_pages_${loc.id}`, 'default')
+      revalidateTag(`menu_categories_${loc.id}`, 'default')
+      
       revalidatePath(`/m/${loc.slug}`, 'page')
       revalidatePath(`/m/${loc.slug}`)
     }

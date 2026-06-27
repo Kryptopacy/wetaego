@@ -84,17 +84,17 @@ export function CatalogPageRenderer({ location, page, items, locationSlug, payme
   return (
     <div className="min-h-screen bg-zinc-950 text-white font-sans">
       {/* Hero */}
-      <div className="relative w-full h-[32vh] min-h-[220px] max-h-[340px] overflow-hidden">
+      <div className="relative w-full min-h-[32vh] md:max-h-[340px] flex flex-col justify-end overflow-hidden">
         {location.cover_image_url ? (
           <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${location.cover_image_url})` }} />
         ) : (
           <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${themeColor}30, #0a0a0f)` }} />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-black/30 to-transparent" />
-        <div className="absolute bottom-0 left-0 right-0 p-5 max-w-4xl mx-auto">
+        <div className="relative z-10 w-full p-5 pt-[calc(env(safe-area-inset-top,24px)+40px)] max-w-4xl mx-auto flex flex-col justify-end mt-auto">
           {location.organizations?.logo_url && (
             <div className="relative h-10 w-24 mb-3 drop-shadow-lg">
-              <Image src={location.organizations.logo_url} alt="" fill className="object-contain" />
+              <Image src={location.organizations.logo_url} alt="Logo" fill sizes="96px" className="object-contain" />
             </div>
           )}
           <h1 className="text-3xl font-black text-white">{page.title}</h1>

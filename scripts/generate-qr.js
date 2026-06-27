@@ -6,6 +6,7 @@
  * in the final PNG image.
  */
 
+/* eslint-disable @typescript-eslint/no-require-imports, no-console, @typescript-eslint/no-unused-vars */
 const QRCode    = require('qrcode');
 const fs        = require('fs');
 const path      = require('path');

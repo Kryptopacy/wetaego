@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { PaymentRouletteModal } from '@/components/payment-roulette-modal'
+import dynamic from 'next/dynamic'
+const PaymentRouletteModal = dynamic(() => import('@/components/payment-roulette-modal').then(mod => mod.PaymentRouletteModal), { ssr: false })
 
 export function RouletteFAB() {
   const [isOpen, setIsOpen] = useState(false)
@@ -15,7 +16,7 @@ export function RouletteFAB() {
 
   return (
     <>
-      <PaymentRouletteModal isOpen={isOpen} onClose={() => setIsOpen(false)} />
+      {isOpen && <PaymentRouletteModal isOpen={isOpen} onClose={() => setIsOpen(false)} />}
       
       <motion.button 
         initial={{ scale: 0, opacity: 0 }}

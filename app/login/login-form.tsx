@@ -95,6 +95,7 @@ function LoginFormInner() {
 
           <button
             formAction={signInWithGoogle}
+            formNoValidate
             className="flex w-full items-center justify-center gap-3 rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 font-medium text-white transition-all hover:bg-zinc-700 active:scale-[0.98]"
           >
             <svg className="h-5 w-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

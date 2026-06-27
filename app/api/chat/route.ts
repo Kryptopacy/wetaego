@@ -7,10 +7,16 @@ import { formatCurrency } from '@/lib/utils/currency'
 import { getAiModels } from '@/lib/utils/settings'
 // cleaned up unused type
 
+import { Ratelimit } from '@upstash/ratelimit'
+import { redis } from '@/lib/upstash'
+
 export const maxDuration = 30
 
-// In-memory store for IP rate limiting (fallback for Vercel KV)
-const ipRateLimitMap = new Map<string, { count: number, resetAt: number }>()
+const ratelimit = redis ? new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(50, '1 h'),
+  analytics: true,
+}) : null
 
 function getIp(req: Request) {
   const forwarded = req.headers.get('x-forwarded-for')
@@ -40,26 +46,14 @@ export async function POST(req: Request) {
     const { getBusinessMode, resolvePersona } = await import('@/lib/templates/ai-personas')
     const mode = getBusinessMode(templateType, billingMode, businessTypePreset)
 
-
-    // 1. Strict IP-Based Rate Limiting (Prevent abuse)
+    // 1. Strict IP-Based Rate Limiting (Prevent abuse) using Upstash
     const ip = getIp(req)
-    const now = Date.now()
-    const rateLimitWindowMs = 60 * 60 * 1000 // 1 hour window
-    const maxRequestsPerHour = 50
-
     if (ip !== 'unknown_ip') {
-      const ipData = ipRateLimitMap.get(ip)
-      if (ipData) {
-        if (now > ipData.resetAt) {
-          ipRateLimitMap.set(ip, { count: 1, resetAt: now + rateLimitWindowMs })
-        } else {
-          if (ipData.count >= maxRequestsPerHour) {
-            return new Response('Too many requests from this IP. Please try again later.', { status: 429 })
-          }
-          ipData.count++
+      if (ratelimit) {
+        const { success } = await ratelimit.limit(ip)
+        if (!success) {
+          return new Response('Too many requests from this IP. Please try again later.', { status: 429 })
         }
-      } else {
-        ipRateLimitMap.set(ip, { count: 1, resetAt: now + rateLimitWindowMs })
       }
     }
 

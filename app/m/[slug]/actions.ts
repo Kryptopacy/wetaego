@@ -325,7 +325,7 @@ export async function processExistingOrderPayment(
       .eq('organization_id', order.organization_id)
       .single()
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+   
     const subaccountCode = paySettings?.is_active ? paySettings.provider_account_id : null
 
     // Initialize Paystack transaction for partial/split payment
@@ -388,14 +388,47 @@ export async function optInMarketing(orderId: string): Promise<{ success?: boole
   }
 }
 
+const quoteSchema = z.object({
+  page_id: z.string().uuid(),
+  organization_id: z.string().uuid(),
+  location_id: z.string().uuid(),
+  quote_data: z.object({
+    customerName: z.string().min(1).max(100),
+    customerEmail: z.string().email().optional().or(z.literal('')),
+    customerPhone: z.string().min(5).max(20),
+    projectName: z.string().min(1).max(200),
+    deadline: z.string().optional(),
+    budgetRange: z.string().optional(),
+    brief: z.string().max(5000).optional(),
+  })
+})
+
 export async function submitQuoteRequest(formData: FormData) {
   try {
+    const { checkRateLimit } = await import('@/lib/upstash');
+    const cookieStore = await cookies();
+    const sessionId = cookieStore.get('session_id')?.value || 'anonymous';
+    const { success } = await checkRateLimit('quote_request', sessionId);
+    
+    if (!success) {
+      throw new Error('Too many requests. Please wait a minute before submitting another quote.');
+    }
+
     const supabase = await createClient()
 
-    const page_id = formData.get('page_id') as string
-    const organization_id = formData.get('organization_id') as string
-    const location_id = formData.get('location_id') as string
-    const quote_data = JSON.parse(formData.get('quote_data') as string)
+    const rawData = {
+      page_id: formData.get('page_id'),
+      organization_id: formData.get('organization_id'),
+      location_id: formData.get('location_id'),
+      quote_data: JSON.parse(formData.get('quote_data') as string || '{}')
+    }
+
+    const parsed = quoteSchema.safeParse(rawData)
+    if (!parsed.success) {
+      throw new Error('Invalid quote data submitted')
+    }
+
+    const { page_id, quote_data } = parsed.data
     
     const referenceNumber = `QUO-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`
 

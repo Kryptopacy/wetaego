@@ -1,12 +1,13 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
+import dynamic from 'next/dynamic'
+const AIChat = dynamic(() => import('./ai-chat').then(mod => mod.AIChat))
+const RouletteFAB = dynamic(() => import('./roulette-fab').then(mod => mod.RouletteFAB))
 import { CartFAB } from './cart-fab'
 import { CallStaffFAB } from './call-staff-fab'
-import { AIChat } from './ai-chat'
 import { MenuRenderer } from './menu-renderer'
 import { LiveOrderTracker } from './live-order-tracker'
-import { RouletteFAB } from './roulette-fab'
 import { SpinnerModal } from '../../components/spinner-modal'
 import { PortalRenderer } from './portal-renderer'
 import { EcosystemNav } from '@/components/layout/ecosystem-nav'

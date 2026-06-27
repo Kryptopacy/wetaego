@@ -23,6 +23,7 @@ const PAYSTACK_SECRET = Deno.env.get('PAYSTACK_SECRET_KEY')!
 const RECONCILE_AFTER_MINUTES = 15
 const ABANDON_AFTER_HOURS = 24
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 Deno.serve(async (_req) => {
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 
@@ -109,7 +110,7 @@ Deno.serve(async (_req) => {
     }
   }
 
-  console.log('Reconciliation complete:', results)
+  console.info('Reconciliation complete:', results)
   return new Response(JSON.stringify({ ok: true, results }), {
     headers: { 'Content-Type': 'application/json' },
   })
