@@ -28,6 +28,8 @@ OurMenu OS is engineered for massive scale, zero downtime, and bank-grade securi
 - **Flawless React SSR Hydration:** Utilizing advanced Zustand `skipHydration: true` middleware synchronized perfectly with React lifecycle hooks, the platform guarantees zero UI flashing, layout shifts, or Server-Side Rendering (SSR) mismatches between the Edge server and the client browser.
 - **XSS & HTML-Injection Hardened:** All user-generated content passing through email notifications, push payloads, and template rendering is aggressively escaped, sanitized, and type-checked.
 - **N+1 Query Elimination for Infinite Scale:** Core notification and dispatcher systems utilize highly parallelized `Promise.all` fetching strategies. This bypasses Vercel/Serverless timeout constraints, guaranteeing instant execution whether an organization has 5 staff members or 5,000.
+- **GDPR-Compliant Marketing Queues:** Enforced opt-in filtering for customer marketing communications, paired with background queues for bulk email dispatches to eliminate 504 timeouts at scale.
+- **Storage Protection (Denial of Wallet Defense):** Cloud storage buckets are natively locked to strict file sizes (e.g. 5MB) and MIME-type whitelists (WebP, PNG, JPEG) to prevent malicious bulk uploads and SDK exploitation.
 - **WCAG 2.1 Accessibility Compliance:** The platform delivers premium mobile UI flows with fluid focus trapping, strict ARIA attribute integrations (`aria-expanded`, `aria-controls`, `role="dialog"`), and seamless screen-reader support.
 
 ---
@@ -51,13 +53,14 @@ OurMenu OS is fundamentally decoupled from the concept of a "restaurant." It is 
 A resilient, globally aware checkout engine powers the entire ecosystem:
 - **Paystack Native Integration:** Seamlessly handles split payments, automated service charges, and real-time reconciliation via cryptographic Webhooks.
 - **Automated SaaS Ledger (Platform Fees):** A transparent, built-in ledger system that extracts a configurable SaaS platform fee (e.g., 2%) on every transaction, driving pure MRR beyond monthly subscriptions.
+- **Enterprise Tax & Compliance Engine:** Dynamically calculates localized taxes (e.g., VAT, State Taxes) and applies them accurately before reaching the payment gateway, providing transparent itemized receipts for strict global compliance.
 - **Global Manual Fallback:** If API keys are pending or the payment provider experiences regional downtime, the system automatically degrades to a localized "Manual Bank Transfer" workflow, ensuring conversions are never blocked.
 - **Omnichannel Logistics:** Full, robust support for Dine-in (Table-specific QR mapping), Pickup, and Delivery (with interactive delivery zones, SMS phone verification, and dynamic fees).
 
 ### 2. Live Fulfillment Dashboard (formerly KDS)
 Re-architected to serve any industry, the **Live Fulfillment Dashboard** is a real-time, WebSocket-powered operations center:
 - **Universal Tracking:** Tracks incoming restaurant orders, spa booking requests, and retail pickup orders simultaneously.
-- **Smart Triaging:** Instantly calculates prep times and urgency classification.
+- **Advanced Triaging & Deep Search:** Instantly filters active states (Pending, Preparing, Paid), calculates prep times, and supports deep-searching globally by Table ID, Order ID, and specific item names.
 - **Fulfillment States:** Seamless drag-and-drop state transitions from "Received" to "In Progress" to "Fulfilled."
 
 ### 3. PWA & True Native App Experience
