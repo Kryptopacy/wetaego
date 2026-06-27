@@ -436,18 +436,28 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
 
         {/* Services grid */}
         {!showBookingForm && (
-          <div className="space-y-4">
-            <h2 className="text-base font-bold text-zinc-400 uppercase tracking-wider text-xs">
-              {availableItems.length > 0 ? 'Our Services' : 'Services'}
-            </h2>
+          <div className="space-y-8">
+            {Object.entries(
+              items.reduce((acc, item) => {
+                // @ts-ignore
+                const cat = item.item_data?.category?.trim() || 'Services'
+                if (!acc[cat]) acc[cat] = []
+                acc[cat].push(item)
+                return acc
+              }, {} as Record<string, PageItem[]>)
+            ).map(([categoryName, categoryItems]) => (
+              <div key={categoryName} className="space-y-4">
+                <h2 className="text-base font-bold text-zinc-400 uppercase tracking-wider text-xs">
+                  {categoryName}
+                </h2>
 
-            <motion.div 
-              initial="hidden" animate="show" 
-              variants={{ hidden: {}, show: { transition: { staggerChildren: 0.1 } } }}
-              className="space-y-4"
-            >
+                <motion.div 
+                  initial="hidden" animate="show" 
+                  variants={{ hidden: {}, show: { transition: { staggerChildren: 0.1 } } }}
+                  className="space-y-4"
+                >
 
-            {items.map(item => {
+                {categoryItems.map(item => {
               const avail = AVAILABILITY_LABELS[item.availability_status] || AVAILABILITY_LABELS.available
               const isAvailable = item.availability_status === 'available'
 
@@ -506,6 +516,8 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
               )
             })}
             </motion.div>
+            </div>
+            ))}
 
             {items.length === 0 && (
               <div className="text-center py-12 text-zinc-600">

@@ -24,7 +24,8 @@ export default async function PagesManager() {
   let locData: { id: string; slug: string } | null = null
   let pages: {
     id: string; title: string; slug: string; is_published: boolean;
-    template_type: string; is_primary: boolean; created_at: string
+    template_type: string; is_primary: boolean; created_at: string;
+    business_type_preset?: string
   }[] = []
 
   const { data: member } = await supabase

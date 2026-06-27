@@ -199,10 +199,20 @@ export function QuoteRenderer({ location, page, items, locationSlug }: QuoteRend
               <p className="text-zinc-400 text-sm">Choose the services you need a quote for.</p>
             </div>
             
-            <div className="space-y-4">
-              {availableItems.map(item => {
-                const isSelected = selectedItems.find(i => i.item.id === item.id)
-                return (
+            <div className="space-y-8">
+              {Object.entries(
+                availableItems.reduce((acc, item) => {
+                  const cat = item.item_data?.category?.trim() || 'Services'
+                  if (!acc[cat]) acc[cat] = []
+                  acc[cat].push(item)
+                  return acc
+                }, {} as Record<string, PageItem[]>)
+              ).map(([categoryName, categoryItems]) => (
+                <div key={categoryName} className="space-y-4">
+                  <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-wider">{categoryName}</h3>
+                  {categoryItems.map(item => {
+                    const isSelected = selectedItems.find(i => i.item.id === item.id)
+                    return (
                   <div 
                     key={item.id} 
                     onClick={() => !isSelected && handleToggleItem(item)}
@@ -262,9 +272,11 @@ export function QuoteRenderer({ location, page, items, locationSlug }: QuoteRend
                         )}
                       </div>
                     </div>
-                  </div>
-                )
-              })}
+                    </div>
+                  )
+                })}
+              </div>
+              ))}
             </div>
           </motion.div>
         )}
