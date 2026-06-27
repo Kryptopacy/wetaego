@@ -223,43 +223,17 @@ export default async function PublicPageView({
             organizationId={loc.organization_id}
             aiName={loc.ai_name || ''}
             themeColor={loc.theme_color || '#7c3aed'}
-            tableIdentifier={qr?.table_identifier || "QR Scan"}
+            tableIdentifier="QR Scan" // Standard fallback for generic pages
             menuItems={((items as Record<string, unknown>[]) || []).map(i => ({ id: i.id as string, name: i.title as string, price_minor: (i.price_minor as number) || 0 }))}
             templateType={page.template_type}
             billingMode={page.billing_mode}
             businessTypePreset={page.business_type_preset}
           />
         )}
-        <CallStaffFAB organizationId={loc.organization_id} locationId={loc.id} tableIdentifier={qr?.table_identifier || "QR Scan"} />
+        <CallStaffFAB organizationId={loc.organization_id} locationId={loc.id} tableIdentifier="QR Scan" />
         {page.randomizer_enabled && (
           <RouletteFAB />
         )}
-        <CartFAB 
-            organizationId={loc.organization_id} 
-            locationId={loc.id} 
-            tableIdentifier={qr?.table_identifier || undefined} 
-            paymentIsLive={paymentSettings?.is_active ?? false}
-            manualPaymentEnabled={loc.manual_payment_enabled}
-            manualPaymentBankName={loc.manual_payment_bank_name}
-            manualPaymentAccountName={loc.manual_payment_account_name}
-            manualPaymentAccountNumber={loc.manual_payment_account_number}
-            manualPaymentInstructions={loc.manual_payment_instructions}
-            hideAddressField={page.billing_mode === 'in_store' || page.template_type === 'booking'}
-            globalDiscountEnabled={qr?.discount_enabled}
-            globalDiscountPercentage={qr?.discount_percentage}
-            menuItems={allItems.map(i => ({ id: i.item_id, name: i.menu_items?.name || 'Unknown', price_minor: i.price_minor || i.menu_items?.price_minor || 0 }))}
-            templateType={page.template_type}
-            deliveryEnabled={loc.delivery_enabled}
-            deliveryFeeMinor={loc.delivery_fee_minor}
-            deliveryMinimumOrderMinor={loc.delivery_minimum_order_minor}
-            deliveryNote={loc.delivery_note}
-            fulfillmentLocationLabel={loc.fulfillment_location_label}
-            pageId={page.id}
-            refundPolicy={refundPolicy}
-            pageFulfillmentOptions={templateData.fulfillment_options}
-            pageBillingMode={page.billing_mode}
-            locationTaxes={loc.location_taxes?.filter((t: any) => t.is_active) || []}
-        />
       </FabGroup>
     </>
   )
