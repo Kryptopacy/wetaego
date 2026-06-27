@@ -165,7 +165,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
           const newNav = [...baseNavItems]
           
-          if (templates.has('catalog')) {
+          if (templates.has('restaurant') || templates.has('catalog')) {
             newNav.push({ href: '/dashboard/orders', label: 'Order Inbox', icon: ClipboardList, badge: 'LIVE' })
           }
           if (templates.has('booking')) {

@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { Metadata } from 'next'
 import dynamic from 'next/dynamic'
 const AIChat = dynamic(() => import('./ai-chat').then(mod => mod.AIChat))
@@ -14,7 +14,6 @@ import { EcosystemNav } from '@/components/layout/ecosystem-nav'
 import { FabGroup } from './components/fab-group'
 
 import { unstable_cache } from 'next/cache'
-
 
 import { VenueHeader } from './components/venue-header'
 import { InvalidQrMessage } from './components/qr-state-messages'
@@ -146,15 +145,15 @@ export default async function PublicMenuPage({
     .eq('organization_id', location.organization_id)
     .single()
     
-  const isPaystackLive = paymentSettings?.is_active && paymentSettings?.provider_account_id
+  // const isPaystackLive = paymentSettings?.is_active && paymentSettings?.provider_account_id
 
-  // 1.5 Handle Dynamic QR Routing
+  // 1.5 Handle Dynamic QR Routing — redirect to destination_path if configured
   let tableIdentifier = undefined
 
   if (qrId) {
     const { data: qrCode } = await supabase
       .from('qr_codes')
-      .select('table_identifier, is_active')
+      .select('table_identifier, destination_path, is_active')
       .eq('id', qrId)
       .eq('location_id', location.id)
       .single()
@@ -166,14 +165,22 @@ export default async function PublicMenuPage({
     if (qrCode.table_identifier) {
       tableIdentifier = qrCode.table_identifier
     }
+
+    // If the QR code has a specific destination page, redirect directly to it
+    const rootPath = `/m/${slug}`
+    if (qrCode.destination_path && qrCode.destination_path !== rootPath) {
+      const destWithQr = `${qrCode.destination_path}?qr_id=${qrId}`
+      redirect(destWithQr)
+    }
   }
 
-  // 1.8 Check location_pages for Portal mode
+  // 1.8 Fetch published location_pages for routing logic
   const fetchLocationPages = async () => {
     let query = supabase
       .from('location_pages')
       .select('id, slug, title, template_type, is_published')
       .eq('location_id', location.id)
+      .order('created_at', { ascending: true })
 
     if (!isPreview) {
       query = query.eq('is_published', true)
@@ -191,10 +198,20 @@ export default async function PublicMenuPage({
         { revalidate: 60, tags: [`location_pages_${location.id}`] }
       )()
 
-  const view = resolvedSearchParams.view;
-  const hasPortalMode = locationPages && locationPages.length > 0;
+  const pageCount = locationPages?.length ?? 0
+  // ── Routing Decision Tree ───────────────────────────────────────────────────
+  // 1 page  → redirect directly to it (e.g. a phone store with only one catalog)
+  // >1 pages → render the Portal (becomes the business's branded landing page)
+  // 0 pages → render empty state
+  // ────────────────────────────────────────────────────────────────────────────
 
-  if (hasPortalMode && view !== 'menu') {
+  if (pageCount === 1 && locationPages) {
+    const singlePage = locationPages[0]
+    const destination = `/m/${slug}/p/${singlePage.slug}${qrId ? `?qr_id=${qrId}` : ''}`
+    redirect(destination)
+  }
+
+  if (pageCount > 1 && locationPages) {
     return (
       <>
         {isPreview && <PreviewBanner />}
@@ -203,151 +220,28 @@ export default async function PublicMenuPage({
     )
   }
 
-  // 2. Find the active menu for this location
-  const fetchMenuCategories = async () => {
-    const { data: menuData } = await supabase
-      .from('menus')
-      .select('id')
-      .eq('location_id', location.id)
-      .single()
-
-    if (!menuData) return []
-
-    const { data } = await supabase
-      .from('menu_categories')
-      .select('*, menu_items(*)')
-      .eq('menu_id', menuData.id)
-      .order('sort_order')
-    
-    return data || []
-  }
-
-  const categories = await unstable_cache(
-    fetchMenuCategories,
-    [`menu_categories_${location.id}`],
-    { revalidate: 60, tags: [`menu_categories_${location.id}`] }
-  )()
-
-  const allMenuItems = categories.flatMap(cat => 
-    (cat.menu_items || []).map(item => ({
-      id: item.id,
-      name: item.name,
-      price_minor: item.price_minor
-    }))
-  )
-
-  // Generate JSON-LD Schema dynamically based on business type
-  const templateType = locationPages && locationPages.length > 0 ? locationPages[0].template_type : 'restaurant';
-  let schemaType = "Restaurant";
-  if (['services', 'consulting'].includes(templateType)) schemaType = "ProfessionalService";
-  if (['salon', 'spa'].includes(templateType)) schemaType = "HealthAndBeautyBusiness";
-  if (['catalog', 'retail'].includes(templateType)) schemaType = "LocalBusiness";
-
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": schemaType,
-    "name": location.name,
-    "image": location.cover_image_url || undefined,
-    "logo": location.organizations && !Array.isArray(location.organizations) ? location.organizations.logo_url : undefined,
-    "telephone": location.phone_number || location.whatsapp_number || undefined,
-    "url": `https://ourmenuos.online/m/${slug}`,
-    "hasMenu": {
-      "@type": "Menu",
-      "hasMenuSection": categories.map(cat => ({
-        "@type": "MenuSection",
-        "name": cat.name,
-        "hasMenuItem": (cat.menu_items || []).map(item => ({
-          "@type": "MenuItem",
-          "name": item.name,
-          "description": item.description,
-          "image": item.image_url || undefined,
-          "offers": {
-            "@type": "Offer",
-            "price": item.price_minor / 100,
-            "priceCurrency": "NGN"
-          }
-        }))
-      }))
-    }
-  };
-
+  // 0 pages → Empty State
   return (
-    <>
+    <main className="min-h-screen bg-[#f5f7f5] dark:bg-zinc-950 font-sans flex flex-col items-center justify-center p-6 text-center">
       {isPreview && <PreviewBanner />}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-      <main className="min-h-screen bg-[#f5f7f5] dark:bg-zinc-950 font-sans text-[#17201b] dark:text-zinc-100 pb-32 transition-colors">
-        {/* Elevated Cover Image Hero Section */}
-        <VenueHeader 
-          location={location as unknown as Parameters<typeof VenueHeader>[0]["location"]} 
-          slug={slug} 
-          tableIdentifier={tableIdentifier} 
-        />
-
-        <article className="px-6 max-w-2xl mx-auto pt-6 relative">
-          {location.global_discount_enabled && location.global_discount_banner_text && (
-            <GlobalDiscountBanner 
-              bannerText={location.global_discount_banner_text} 
-              percentage={location.global_discount_percentage || 0} 
-            />
-          )}
-          <LiveOrderTracker organizationId={location.organization_id} locationId={location.id} />
-          {/* Categories */}
-          <MenuRenderer initialCategories={categories} />
-          
-          <div className="mt-12 text-center pb-8">
-            <a href="https://ourmenuos.online" className="text-xs text-zinc-400 dark:text-zinc-600 hover:text-zinc-600 dark:hover:text-zinc-400 transition-colors font-medium">
-              Powered by OurMenu OS
-            </a>
-          </div>
-        </article>
-
-        {/* Floating Actions */}
-        <FabGroup>
-          {location.ai_enabled && (
-            <AIChat 
-              locationId={location.id}
-              organizationId={location.organization_id}
-              aiName={location.ai_name}
-              themeColor={location.theme_color}
-              tableIdentifier={tableIdentifier || ''}
-              menuItems={allMenuItems}
-            />
-          )}
-          <CallStaffFAB organizationId={location.organization_id} locationId={location.id} tableIdentifier={tableIdentifier} />
-          {location.randomizer_enabled && <RouletteFAB />}
-        </FabGroup>
-        
-        {location.spinner_enabled && location.spinner_config && (
-          <SpinnerModal locationId={location.id} config={location.spinner_config as unknown as Parameters<typeof SpinnerModal>[0]["config"]} />
-        )}
-        <EcosystemNav locationId={location.id} slug={slug} currentPath="menu" />
-        <CartFAB 
-          organizationId={location.organization_id} 
-          locationId={location.id} 
-          tableIdentifier={tableIdentifier}
-          paymentIsLive={!!isPaystackLive}
-          manualPaymentEnabled={location.manual_payment_enabled || false}
-          manualPaymentBankName={location.manual_payment_bank_name || undefined}
-          manualPaymentAccountName={location.manual_payment_account_name || undefined}
-          manualPaymentAccountNumber={location.manual_payment_account_number || undefined}
-          manualPaymentInstructions={location.manual_payment_instructions || undefined}
-          globalDiscountEnabled={location.global_discount_enabled || false}
-          globalDiscountPercentage={(location.global_discount_percentage as number) || 0}
-          menuItems={allMenuItems}
-          templateType={templateType}
-          deliveryEnabled={location.delivery_enabled}
-          deliveryFeeMinor={location.delivery_fee_minor}
-          deliveryMinimumOrderMinor={location.delivery_minimum_order_minor}
-          deliveryNote={location.delivery_note}
-          fulfillmentLocationLabel={location.fulfillment_location_label}
-        />
-      </main>
-    </>
+      <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl p-10 max-w-md w-full shadow-2xl border border-black/5 dark:border-white/10">
+        <div className="w-16 h-16 bg-zinc-100 dark:bg-zinc-900 rounded-2xl mx-auto flex items-center justify-center mb-6">
+          <svg className="w-8 h-8 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+          </svg>
+        </div>
+        <h1 className="text-2xl font-bold text-[#17201b] dark:text-white mb-3">
+          {location.name}
+        </h1>
+        <p className="text-zinc-500 dark:text-zinc-400">
+          We're getting our space ready. Check back soon!
+        </p>
+      </div>
+      <div className="mt-12 text-center">
+        <a href="https://ourmenuos.online" className="text-xs text-zinc-400 dark:text-zinc-600 hover:text-zinc-600 dark:hover:text-zinc-400 transition-colors font-medium">
+          Powered by OurMenu OS
+        </a>
+      </div>
+    </main>
   )
 }
-
-
-

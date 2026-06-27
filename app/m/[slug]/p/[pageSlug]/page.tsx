@@ -9,6 +9,7 @@ import { ListingRenderer } from './templates/listing-renderer'
 import { RateCardRenderer } from './templates/rate-card-renderer'
 import { QuoteRenderer } from './templates/quote-renderer'
 import { InfoRenderer } from './templates/info-renderer'
+import { RestaurantRenderer } from './templates/restaurant-renderer'
 import { AIChat } from '../../ai-chat'
 import { RouletteFAB } from '../../roulette-fab'
 import { CallStaffFAB } from '../../call-staff-fab'
@@ -189,6 +190,9 @@ export default async function PublicPageView({
   // Route to the right renderer
   let RendererContent = null
   switch (page.template_type) {
+    case 'restaurant':
+      RendererContent = <RestaurantRenderer {...sharedProps} slug={slug} />
+      break
     case 'booking':
       RendererContent = <BookingRenderer {...sharedProps} />
       break

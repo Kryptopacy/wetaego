@@ -261,6 +261,13 @@ export async function startInteractiveDemo() {
   const { data: pages, error: pagesError } = await adminClient.from('location_pages').insert([
     {
       location_id: loc.id,
+      slug: 'restaurant',
+      title: 'Pacy Grills & Lounge',
+      template_type: 'restaurant',
+      is_published: true
+    },
+    {
+      location_id: loc.id,
       slug: 'pacy-media',
       title: 'Pacy Media & Creators',
       template_type: 'rate_card',
