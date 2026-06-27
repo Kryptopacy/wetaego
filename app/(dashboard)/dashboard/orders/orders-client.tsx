@@ -15,7 +15,7 @@ import { mapSupabaseOrderToUI } from '@/lib/utils/transformers'
 import { UIOrder } from '@/lib/types/frontend'
 import { useOfflineSync } from '@/hooks/use-offline-sync'
 import { QueuedAction } from '@/lib/stores/offline-queue-store'
-import { markOrderPaidOffline, completeOrderAction } from './actions'
+import { markOrderPaidOffline, completeOrderAction, cancelOrderAction } from './actions'
 import { OfflineIndicator } from './components/offline-indicator'
 import { HardwareSettingsView } from './components/hardware-settings-view'
 import { usePrinterStore } from '@/lib/stores/printer-store'
@@ -259,6 +259,22 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
     )
   }
 
+  const handleCancelOrder = async (orderId: string, reason: string, restock: boolean) => {
+    await executeOrQueue(
+      { type: 'cancelOrder', payload: { orderId, reason, restock } },
+      () => {}, 
+      async () => {
+        const res = await cancelOrderAction(orderId, reason, restock)
+        if (res.error) {
+          toast.error('Failed to cancel order')
+          return false
+        }
+        toast.success(`Order cancelled. ${restock ? 'Inventory restocked.' : ''}`)
+        return true
+      }
+    )
+  }
+
   return (
     <div className="flex-1 flex flex-col mt-8">
       <OfflineIndicator />
@@ -312,6 +328,7 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
             onClaimOrder={handleClaimOrder} 
             onMarkPaidOffline={handleMarkPaidOffline}
             onCompleteOrder={handleCompleteOrder}
+            onCancelOrder={handleCancelOrder}
           />
         </div>
       ) : activeTab === 'history' ? (

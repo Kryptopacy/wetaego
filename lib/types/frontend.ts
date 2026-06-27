@@ -38,6 +38,7 @@ export interface UIOrder {
   payment_method: string | null;
   customer_note: string | null;
   assigned_staff_id: string | null;
+  cancellation_reason?: string | null;
   created_at: string;
   currency_code?: string;
   order_items: UIOrderItem[];

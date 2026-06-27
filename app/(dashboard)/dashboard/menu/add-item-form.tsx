@@ -118,6 +118,9 @@ export function AddItemForm({ orgId, categoryId, categoryName }: { orgId: string
         <div className="w-24">
           <input type="number" step="0.01" name="price" required placeholder="Price" className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2 text-white outline-none focus:border-blue-500" />
         </div>
+        <div className="w-32">
+          <input type="number" step="1" name="stock_count" placeholder="Stock (opt)" min="0" className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2 text-white outline-none focus:border-blue-500" title="Leave blank for infinite supply" />
+        </div>
         <div className="w-48 relative flex flex-col gap-2">
           {aiImageUrl ? (
             <div className="relative w-full aspect-square rounded-lg overflow-hidden border border-zinc-700">

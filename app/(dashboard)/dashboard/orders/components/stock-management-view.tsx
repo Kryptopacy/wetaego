@@ -22,7 +22,14 @@ export function StockManagementView({ menuItems, onToggleStock }: StockManagemen
             menuItems.map(item => (
               <div key={item.id} className="flex justify-between items-center p-4 bg-zinc-900/50 border border-zinc-800 rounded-lg">
                 <div>
-                  <div className="font-medium text-white">{item.name}</div>
+                  <div className="font-medium text-white flex items-center gap-2">
+                    {item.name}
+                    {item.stock_count !== null && (
+                      <span className="text-xs bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-full border border-indigo-500/30">
+                        {item.stock_count} left
+                      </span>
+                    )}
+                  </div>
                   <div className="text-sm text-zinc-400">{formatCurrency(item.price_minor )}</div>
                 </div>
                 <button

@@ -14,13 +14,14 @@ interface ActiveOrdersGridProps {
   onClaimOrder: (id: string) => Promise<void>
   onMarkPaidOffline: (id: string) => Promise<void>
   onCompleteOrder: (id: string) => Promise<void>
+  onCancelOrder: (id: string, reason: string, restock: boolean) => Promise<void>
 }
 
-export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, onClaimOrder, onMarkPaidOffline, onCompleteOrder }: ActiveOrdersGridProps) {
+export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, onClaimOrder, onMarkPaidOffline, onCompleteOrder, onCancelOrder }: ActiveOrdersGridProps) {
   const [optimisticOrders, addOptimisticOrder] = useOptimistic(
     activeOrders,
     (state: UIOrder[], updatedOrder: Partial<UIOrder> & { id: string }) => {
-      if (updatedOrder.status === 'completed') {
+      if (updatedOrder.status === 'completed' || updatedOrder.status === 'cancelled') {
         return state.filter(o => o.id !== updatedOrder.id)
       }
       return state.map(o => o.id === updatedOrder.id ? { ...o, ...updatedOrder } : o)
@@ -142,26 +143,55 @@ export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, onC
                   </div>
                 )}
 
-                <div className="flex justify-end mt-4 pt-4 border-t border-zinc-800/50">
-                  {(!order.assigned_staff_id && (order.status === 'paid' || (order.status === 'pending' && billingMode === 'table_service'))) && (
-                    <button 
-                      onClick={() => {
-                        startTransition(() => {
-                          addOptimisticOrder({ id: order.id, assigned_staff_id: currentUserId, status: 'preparing' })
-                        })
-                        onClaimOrder(order.id)
-                      }}
-                      className="px-6 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-medium transition-colors animate-pulse"
-                    >
-                      {order.status === 'pending' ? 'Accept (Pay After)' : 'Claim Order'}
-                    </button>
-                  )}
-                  {order.status === 'pending' && billingMode === 'standard_checkout' && (
-                    <div className="flex items-center gap-4">
-                      <span className="text-amber-500 text-sm font-medium flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-                        Waiting for payment
-                      </span>
+                <div className="flex justify-between items-center mt-4 pt-4 border-t border-zinc-800/50">
+                  <button
+                    onClick={() => {
+                      const reason = window.prompt('Reason for cancellation (e.g. Sold out, Guest left)?')
+                      if (!reason) return
+                      const restock = window.confirm('Restock these items back into inventory? (Click OK to restock, Cancel to keep inventory depleted)')
+                      startTransition(() => {
+                        addOptimisticOrder({ id: order.id, status: 'cancelled' })
+                      })
+                      onCancelOrder(order.id, reason, restock)
+                    }}
+                    className="px-4 py-2 rounded-lg text-red-400 hover:bg-red-500/10 font-medium transition-colors text-sm"
+                  >
+                    Reject Order
+                  </button>
+                  <div className="flex items-center gap-3">
+                    {(!order.assigned_staff_id && (order.status === 'paid' || (order.status === 'pending' && billingMode === 'table_service'))) && (
+                      <button 
+                        onClick={() => {
+                          startTransition(() => {
+                            addOptimisticOrder({ id: order.id, assigned_staff_id: currentUserId, status: 'preparing' })
+                          })
+                          onClaimOrder(order.id)
+                        }}
+                        className="px-6 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-medium transition-colors animate-pulse"
+                      >
+                        {order.status === 'pending' ? 'Accept (Pay After)' : 'Claim Order'}
+                      </button>
+                    )}
+                    {order.status === 'pending' && billingMode === 'standard_checkout' && (
+                      <div className="flex items-center gap-4">
+                        <span className="text-amber-500 text-sm font-medium flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                          Waiting for payment
+                        </span>
+                        <button 
+                          onClick={async () => {
+                            startTransition(() => {
+                              addOptimisticOrder({ id: order.id, status: 'paid' })
+                            })
+                            await onMarkPaidOffline(order.id)
+                          }}
+                          className="px-4 py-2 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 font-medium transition-colors text-sm"
+                        >
+                          Force Paid Offline
+                        </button>
+                      </div>
+                    )}
+                    {order.status === 'pending' && billingMode === 'table_service' && (
                       <button 
                         onClick={async () => {
                           startTransition(() => {
@@ -169,43 +199,30 @@ export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, onC
                           })
                           await onMarkPaidOffline(order.id)
                         }}
-                        className="px-4 py-2 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 font-medium transition-colors text-sm"
+                        className="px-6 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-medium transition-colors"
                       >
-                        Force Paid Offline
+                        Mark Paid Offline
                       </button>
-                    </div>
-                  )}
-                  {order.status === 'pending' && billingMode === 'table_service' && (
-                    <button 
-                      onClick={async () => {
-                        startTransition(() => {
-                          addOptimisticOrder({ id: order.id, status: 'paid' })
-                        })
-                        await onMarkPaidOffline(order.id)
-                      }}
-                      className="px-6 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-medium transition-colors"
-                    >
-                      Mark Paid Offline
-                    </button>
-                  )}
-                  {order.status === 'preparing' && order.assigned_staff_id === currentUserId && (
-                    <button 
-                      onClick={async () => {
-                        startTransition(() => {
-                          addOptimisticOrder({ id: order.id, status: 'completed' })
-                        })
-                        await onCompleteOrder(order.id)
-                      }}
-                      className="px-6 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium transition-colors"
-                    >
-                      Mark as Completed
-                    </button>
-                  )}
-                  {order.status === 'preparing' && order.assigned_staff_id !== currentUserId && (
-                    <div className="px-6 py-2 rounded-lg bg-zinc-800 text-zinc-400 font-medium">
-                      Claimed (Preparing)
-                    </div>
-                  )}
+                    )}
+                    {order.status === 'preparing' && order.assigned_staff_id === currentUserId && (
+                      <button 
+                        onClick={async () => {
+                          startTransition(() => {
+                            addOptimisticOrder({ id: order.id, status: 'completed' })
+                          })
+                          await onCompleteOrder(order.id)
+                        }}
+                        className="px-6 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium transition-colors"
+                      >
+                        Mark as Completed
+                      </button>
+                    )}
+                    {order.status === 'preparing' && order.assigned_staff_id !== currentUserId && (
+                      <div className="px-6 py-2 rounded-lg bg-zinc-800 text-zinc-400 font-medium">
+                        Claimed (Preparing)
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             ))

@@ -200,6 +200,17 @@ export async function processCheckout(
     throw new Error('Failed to save order items. Please try again.')
   }
 
+  // 4b. Decrement Inventory Stock (Atomically)
+  const { error: stockError } = await supabase.rpc('decrement_stock', {
+    p_items: orderItemsData.map(item => ({ item_id: item.item_id, quantity: item.quantity }))
+  })
+  
+  if (stockError) {
+    // If stock decrement fails (e.g. someone bought the last item 1ms ago), rollback order!
+    await supabase.from('orders').delete().eq('id', order.id)
+    throw new Error(stockError.message || 'One or more items in your cart just sold out. Please review your cart.')
+  }
+
   // 5. Initialize Paystack Transaction if Active and method is card
   const isPaystackLive = paySettings?.is_active && paySettings?.provider_account_id
   

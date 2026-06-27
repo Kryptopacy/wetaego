@@ -121,3 +121,38 @@ export async function markOrderPaidOffline(orderId: string) {
   }
 }
 
+export async function cancelOrderAction(orderId: string, reason: string, restock: boolean) {
+  try {
+    const { supabase } = await requireOrderAuth(orderId)
+
+    // 1. Update status to cancelled and store reason
+    const { error: updateError } = await supabase
+      .from('orders')
+      .update({ status: 'cancelled', cancellation_reason: reason })
+      .eq('id', orderId)
+
+    if (updateError) {
+      return { error: 'Failed to cancel order' }
+    }
+
+    // 2. Restock items if requested
+    if (restock) {
+      const { data: items } = await supabase
+        .from('order_items')
+        .select('item_id, quantity')
+        .eq('order_id', orderId)
+        .not('item_id', 'is', null)
+
+      if (items && items.length > 0) {
+        await supabase.rpc('increment_stock', {
+          p_items: items
+        })
+      }
+    }
+
+    return { success: true }
+  } catch (err: unknown) {
+    return { error: err instanceof Error ? err.message : 'Unknown error' }
+  }
+}
+

@@ -1,4 +1,4 @@
-﻿export type Json =
+export type Json =
   | string
   | number
   | boolean
@@ -648,6 +648,7 @@ export type Database = {
           organization_id: string
           price_minor: number
           sort_order: number
+          stock_count: number | null
           updated_at: string
         }
         Insert: {
@@ -665,6 +666,7 @@ export type Database = {
           organization_id: string
           price_minor?: number
           sort_order?: number
+          stock_count?: number | null
           updated_at?: string
         }
         Update: {
@@ -682,6 +684,7 @@ export type Database = {
           organization_id?: string
           price_minor?: number
           sort_order?: number
+          stock_count?: number | null
           updated_at?: string
         }
         Relationships: [
@@ -900,6 +903,7 @@ export type Database = {
         Row: {
           amount_paid_minor: number | null
           assigned_staff_id: string | null
+          cancellation_reason: string | null
           created_at: string
           customer_email: string | null
           customer_name: string | null
@@ -924,6 +928,7 @@ export type Database = {
         Insert: {
           amount_paid_minor?: number | null
           assigned_staff_id?: string | null
+          cancellation_reason?: string | null
           created_at?: string
           customer_email?: string | null
           customer_name?: string | null
@@ -948,6 +953,7 @@ export type Database = {
         Update: {
           amount_paid_minor?: number | null
           assigned_staff_id?: string | null
+          cancellation_reason?: string | null
           created_at?: string
           customer_email?: string | null
           customer_name?: string | null
@@ -1858,6 +1864,14 @@ export type Database = {
       claim_order: {
         Args: { p_order_id: string; p_prep_time_minutes: number }
         Returns: boolean
+      }
+      decrement_stock: {
+        Args: { p_items: Json }
+        Returns: undefined
+      }
+      increment_stock: {
+        Args: { p_items: Json }
+        Returns: undefined
       }
       cleanup_stale_orders: { Args: never; Returns: undefined }
       enforce_subscription_grace_periods: { Args: never; Returns: undefined }

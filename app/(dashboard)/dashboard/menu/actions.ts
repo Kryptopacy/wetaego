@@ -63,6 +63,7 @@ const createItemSchema = z.object({
   dietary_tags: z.string().optional(),
   allergens: z.string().optional(),
   ai_image_url: z.string().url().optional().or(z.literal('')),
+  stock_count: z.string().optional().transform(val => val ? parseInt(val, 10) : null).refine(val => val === null || (!isNaN(val) && val >= 0), "Stock must be a non-negative number")
 })
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
@@ -93,7 +94,8 @@ export async function createItem(formData: FormData) {
       description,
       dietary_tags: dietaryTagsRaw,
       allergens: allergensRaw,
-      ai_image_url: aiImageUrl
+      ai_image_url: aiImageUrl,
+      stock_count: stockCount
     } = parsed.data
 
     const image = formData.get('image') as File | null
@@ -138,7 +140,8 @@ export async function createItem(formData: FormData) {
       price_minor: Math.round(price * 100), // price is already parsed to float
       image_url,
       dietary_tags,
-      allergen_tags
+      allergen_tags,
+      stock_count: stockCount
     })
 
     if (error) return { error: (error as Error).message }
@@ -157,6 +160,7 @@ const updateItemSchema = z.object({
   price: z.string().regex(/^\d+(\.\d{1,2})?$/, "Invalid price format").transform(val => parseFloat(val)),
   description: z.string().max(1000, "Description must be less than 1000 characters").optional(),
   ai_image_url: z.string().url().optional().or(z.literal('')),
+  stock_count: z.string().optional().transform(val => val ? parseInt(val, 10) : null).refine(val => val === null || (!isNaN(val) && val >= 0), "Stock must be a non-negative number")
 })
 
 export async function updateItem(formData: FormData) {
@@ -169,6 +173,7 @@ export async function updateItem(formData: FormData) {
       price: formData.get('price'),
       description: formData.get('description') || undefined,
       ai_image_url: formData.get('ai_image_url') || undefined,
+      stock_count: formData.get('stock_count') || undefined,
     })
 
     if (!parsed.success) return { error: parsed.error.issues[0].message }
@@ -178,7 +183,8 @@ export async function updateItem(formData: FormData) {
       name,
       price,
       description,
-      ai_image_url: aiImageUrl
+      ai_image_url: aiImageUrl,
+      stock_count: stockCount
     } = parsed.data
 
     const image = formData.get('image') as File | null
@@ -219,12 +225,14 @@ export async function updateItem(formData: FormData) {
       description: string | null
       price_minor: number
       image_url?: string
+      stock_count?: number | null
     }
 
     const updatePayload: UpdatePayload = {
       name,
       description: description || null,
-      price_minor: Math.round(price * 100)
+      price_minor: Math.round(price * 100),
+      stock_count: stockCount
     }
     
     if (image_url) {

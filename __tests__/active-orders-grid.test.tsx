@@ -41,6 +41,7 @@ describe('ActiveOrdersGrid', () => {
         onClaimOrder={vi.fn()}
         onMarkPaidOffline={vi.fn()}
         onCompleteOrder={vi.fn()}
+        onCancelOrder={vi.fn()}
       />
     )
     
@@ -57,6 +58,7 @@ describe('ActiveOrdersGrid', () => {
         onClaimOrder={vi.fn()}
         onMarkPaidOffline={vi.fn()}
         onCompleteOrder={vi.fn()}
+        onCancelOrder={vi.fn()}
       />
     )
     
@@ -72,6 +74,7 @@ describe('ActiveOrdersGrid', () => {
         onClaimOrder={vi.fn()}
         onMarkPaidOffline={vi.fn()}
         onCompleteOrder={vi.fn()}
+        onCancelOrder={vi.fn()}
       />
     )
     
@@ -101,6 +104,7 @@ describe('ActiveOrdersGrid', () => {
         onClaimOrder={onClaimOrderMock}
         onMarkPaidOffline={vi.fn()}
         onCompleteOrder={vi.fn()}
+        onCancelOrder={vi.fn()}
       />
     )
     

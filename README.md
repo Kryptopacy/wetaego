@@ -73,7 +73,7 @@ OurMenu OS feels indistinguishable from a native iOS/Android application:
 ### 4. Enterprise Fleet & Location Management
 Seamlessly scale operations across multiple venues, cities, or countries from a single organization:
 - **Dynamic Branch Switcher:** A unified dashboard allowing owners to instantly swap active branch contexts.
-- **Decoupled Hardware Provisioning:** Print thousands of generic "dummy" QR codes in bulk, deploy them to tables or hotel rooms globally, and securely provision/re-map them remotely from the dashboard without ever reprinting physical assets.
+- **Decoupled Hardware Provisioning & Smart Routing:** Print thousands of generic "dummy" QR codes in bulk, deploy them globally, and securely re-map them remotely. QR codes can be dynamically routed to specific location pages (e.g. routing directly to a "Room Service" sub-page or "Spa Bookings") from the dashboard without ever reprinting physical assets.
 - **Scoped Data Views:** Operations, Menu Managers, and Analytics dashboards automatically and securely filter down to the active location context via encrypted cookies.
 
 ### 5. AI-Powered Operations
@@ -88,7 +88,12 @@ Seamlessly scale operations across multiple venues, cities, or countries from a 
 - **Payment Roulette:** A gamified "spin to win" bill-splitting module that transforms the friction of group payments into a highly engaging, viral experience.
 - **PIN-Protected Post-Service Feedback:** Automated email receipts include a cryptographic 4-digit PIN ensuring only verified customers can rate staff performance, populating the gamified Team Performance Leaderboard and the centralized **Feedback Inbox** within the dashboard.
 
-### 7. Back-of-House Operations Engine
+### 7. Live Inventory & Intelligent Cancellation Engine
+- **Atomic Stock Management:** Items can optionally track finite units via robust, race-condition-free database RPCs, automatically switching to "Sold Out" when availability runs out.
+- **Order Cancellation Lifecycle:** Businesses can safely reject/cancel orders, logging a strict cancellation reason for analytics while offering front-desk operations the choice to restock rejected inventory instantly or withhold it.
+- **Optimistic UI Validation:** Fully responsive UI updates allow waitstaff and cashiers to modify stock limits dynamically from the dashboard, synchronizing globally without page refreshes.
+
+### 8. Back-of-House Operations Engine
 OurMenu OS is a true operating system, extending far beyond the customer-facing frontend into deep backend workflows:
 - **Demo Mode Bypass:** A dedicated `?demo=1` architectural flow allowing prospective users to experience the full dashboard, analytics, and CRM mock data without creating an account.
 - **Automated Daily Reports:** Nightly cron jobs that aggregate key business metrics (sales, velocity, feedback) and email summarized briefings directly to owners.

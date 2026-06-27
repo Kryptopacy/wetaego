@@ -103,8 +103,18 @@ export function OrderHistoryView({ organizationId, locationId, initialOrders }: 
                   <td className="px-6 py-4 text-xs">
                     {order.order_items?.map(i => `${i.quantity}x ${i.item_name}`).join(', ') || 'N/A'}
                   </td>
-                  <td className="px-6 py-4 font-bold text-emerald-400">
-                    {formatCurrency(order.total_amount_minor)}
+                  <td className="px-6 py-4 font-bold">
+                    {order.status === 'cancelled' ? (
+                      <div className="flex flex-col">
+                        <span className="text-red-400 line-through">{formatCurrency(order.total_amount_minor)}</span>
+                        <span className="text-xs text-red-400/80 uppercase tracking-wider font-bold mt-1">Cancelled</span>
+                        {order.cancellation_reason && (
+                          <span className="text-xs text-red-400/60 mt-0.5">"{order.cancellation_reason}"</span>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-emerald-400">{formatCurrency(order.total_amount_minor)}</span>
+                    )}
                   </td>
                   <td className="px-6 py-4 text-right text-xs">
                     {new Date(order.created_at).toLocaleString()}

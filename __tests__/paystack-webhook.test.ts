@@ -69,9 +69,7 @@ describe('Paystack B2C Webhook (POST)', () => {
     } as unknown as Request
 
     // Setup Supabase mocks for a successful flow
-    // 1. Idempotency Check (returns null)
-    mockSingle.mockResolvedValueOnce({ data: null })
-    // 2. Fetch Order Check (returns order)
+    // 1. Fetch Order Check (returns order)
     mockSingle.mockResolvedValueOnce({ 
       data: { 
         id: 'order_123', 
@@ -110,9 +108,7 @@ describe('Paystack B2C Webhook (POST)', () => {
       })
     } as unknown as Request
 
-    // 1. Idempotency Check (returns null)
-    mockSingle.mockResolvedValueOnce({ data: null })
-    // 2. Fetch Order Check (returns order)
+    // 1. Fetch Order Check (returns order)
     mockSingle.mockResolvedValueOnce({ 
       data: { 
         id: 'order_123', 

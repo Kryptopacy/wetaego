@@ -30,6 +30,7 @@ function OptimisticItem({ item, orgId, categoryName }: { item: NonNullable<Categ
   const [editName, setEditName] = useState(item.name)
   const [editDescription, setEditDescription] = useState(item.description || '')
   const [editPrice, setEditPrice] = useState(item.price_minor)
+  const [editStock, setEditStock] = useState(item.stock_count?.toString() || '')
   const [isGenerating, setIsGenerating] = useState(false)
   const [isGeneratingImg, setIsGeneratingImg] = useState(false)
   const [aiImageUrl, setAiImageUrl] = useState<string | null>(null)
@@ -122,6 +123,10 @@ function OptimisticItem({ item, orgId, categoryName }: { item: NonNullable<Categ
             <div className="w-24">
               <label className="block text-xs font-medium text-zinc-400 mb-1">Price (Minor)</label>
               <input type="number" name="price" value={editPrice} onChange={(e) => setEditPrice(Number(e.target.value))} required className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-white outline-none focus:border-blue-500" />
+            </div>
+            <div className="w-24">
+              <label className="block text-xs font-medium text-zinc-400 mb-1" title="Leave blank for infinite supply">Stock</label>
+              <input type="number" name="stock_count" value={editStock} onChange={(e) => setEditStock(e.target.value)} min="0" className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-white outline-none focus:border-blue-500" />
             </div>
             <div className="w-full sm:w-auto flex flex-col gap-2">
               <label className="block text-xs font-medium text-zinc-400 mb-1">Update Image</label>

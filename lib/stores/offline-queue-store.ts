@@ -18,6 +18,7 @@ const idbStorage: StateStorage = {
 export type OfflineActionType = 
   | 'completeOrder' 
   | 'claimOrder' 
+  | 'cancelOrder'
   | 'toggleStock' 
   | 'resolveServiceRequest' 
   | 'markOrderPaid'
