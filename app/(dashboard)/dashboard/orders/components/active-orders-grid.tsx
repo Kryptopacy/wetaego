@@ -1,6 +1,6 @@
 'use client'
 
-import { useOptimistic, startTransition } from 'react'
+import { useOptimistic, startTransition, useState, useMemo } from 'react'
 import { formatCurrency } from '@/lib/utils/currency'
 import { UIOrder } from '@/lib/types/frontend'
 import { Printer } from 'lucide-react'
@@ -29,22 +29,71 @@ export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, onC
 
   const { mode, ipAddress } = usePrinterStore()
 
+  const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'paid' | 'preparing'>('all')
+  const [searchQuery, setSearchQuery] = useState('')
+
+  const filteredOrders = useMemo(() => {
+    return optimisticOrders.filter(order => {
+      const matchesStatus = filterStatus === 'all' || order.status === filterStatus
+      const searchLower = searchQuery.toLowerCase()
+      const matchesSearch = !searchQuery || 
+        (order.table_identifier?.toLowerCase().includes(searchLower)) ||
+        (order.customer_name?.toLowerCase().includes(searchLower)) ||
+        (order.id.toLowerCase().includes(searchLower))
+      return matchesStatus && matchesSearch
+    })
+  }, [optimisticOrders, filterStatus, searchQuery])
+
   return (
       <div className="col-span-1 lg:col-span-2 border border-zinc-800 rounded-xl bg-zinc-900/30 flex flex-col overflow-hidden min-h-[500px]">
         <div className="p-4 border-b border-zinc-800 bg-zinc-900">
-          <h2 className="font-bold text-white flex justify-between items-center">
-            Active Orders
-            <span className="px-2 py-0.5 rounded-full bg-zinc-800 text-xs">{optimisticOrders.length}</span>
-          </h2>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+            <h2 className="font-bold text-white flex items-center gap-3">
+              Active Orders
+              <span className="px-2 py-0.5 rounded-full bg-zinc-800 text-xs font-medium text-zinc-400">{filteredOrders.length}</span>
+            </h2>
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <input 
+                type="text" 
+                placeholder="Search table or ID..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full sm:w-48 bg-zinc-800/50 border border-zinc-700 rounded-lg px-3 py-1.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-blue-500 transition-colors"
+              />
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-2 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 hide-scrollbar">
+            {['all', 'pending', 'paid', 'preparing'].map((status) => (
+              <button
+                key={status}
+                onClick={() => setFilterStatus(status as any)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${
+                  filterStatus === status 
+                    ? 'bg-blue-600 text-white' 
+                    : 'bg-zinc-800/50 text-zinc-400 hover:bg-zinc-700 hover:text-white border border-zinc-800'
+                }`}
+              >
+                {status.charAt(0).toUpperCase() + status.slice(1)}
+              </button>
+            ))}
+          </div>
         </div>
+        
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          {optimisticOrders.length === 0 ? (
+          {filteredOrders.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-zinc-500">
-              <p>Waiting for new orders...</p>
-              <p className="text-sm mt-2">Orders paid via Paystack will appear here instantly.</p>
+              {optimisticOrders.length === 0 ? (
+                <>
+                  <p>Waiting for new orders...</p>
+                  <p className="text-sm mt-2">Orders paid via Paystack will appear here instantly.</p>
+                </>
+              ) : (
+                <p>No orders match the current filter.</p>
+              )}
             </div>
           ) : (
-            optimisticOrders.map(order => (
+            filteredOrders.map(order => (
               <div key={order.id} className={`p-5 rounded-lg border ${order.status === 'paid' ? 'border-blue-500/50 bg-blue-500/5' : 'border-zinc-800 bg-zinc-900/50'}`}>
                 <div className="flex justify-between items-start mb-4 border-b border-zinc-800/50 pb-4">
                   <div>
