@@ -7,7 +7,8 @@ import { z } from 'zod'
 
 const assignQrSchema = z.object({
   qrId: z.string().uuid(),
-  tableIdentifier: z.string().min(1)
+  tableIdentifier: z.string().min(1),
+  destinationPath: z.string().min(1)
 })
 
 export async function assignQrCode(formData: FormData) {
@@ -15,8 +16,9 @@ export async function assignQrCode(formData: FormData) {
   
   const qrId = formData.get('qr_id') as string
   const tableIdentifier = formData.get('table_identifier') as string
+  const destinationPath = formData.get('destination_path') as string
   
-  const parsed = assignQrSchema.safeParse({ qrId, tableIdentifier })
+  const parsed = assignQrSchema.safeParse({ qrId, tableIdentifier, destinationPath })
   if (!parsed.success) return { error: 'Invalid parameters' }
 
   const { data: userData, error: authError } = await supabase.auth.getUser()
@@ -38,7 +40,10 @@ export async function assignQrCode(formData: FormData) {
 
   const { error } = await supabase
     .from('qr_codes')
-    .update({ table_identifier: tableIdentifier })
+    .update({ 
+      table_identifier: tableIdentifier,
+      destination_path: destinationPath
+    })
     .eq('id', qrId)
 
   if (error) {

@@ -29,7 +29,7 @@ export default async function QRProvisionPage({
   // Fetch the QR code
   const { data: qrCode, error } = await supabase
     .from('qr_codes')
-    .select('*, locations(name)')
+    .select('*, locations(name, slug)')
     .eq('id', qrId)
     .single()
 
@@ -60,6 +60,13 @@ export default async function QRProvisionPage({
     return <div className="p-8 text-red-400">Error: You do not have permission to manage this QR code.</div>
   }
 
+  // Fetch available location pages for routing
+  const { data: pages } = await supabase
+    .from('location_pages')
+    .select('id, title, slug')
+    .eq('location_id', qrCode.location_id)
+    .order('sort_order', { ascending: true })
+
   // Use a Server Action for submission
   async function onSubmit(formData: FormData) {
     'use server'
@@ -87,6 +94,26 @@ export default async function QRProvisionPage({
             required
             autoFocus
           />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-zinc-300 mb-2">Destination Routing</label>
+          <select
+            name="destination_path"
+            defaultValue={qrCode.destination_path || `/m/${qrCode.locations?.slug}`}
+            className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
+            required
+          >
+            <option value={`/m/${qrCode.locations?.slug}`}>Main Menu Catalog</option>
+            {pages?.map(p => (
+              <option key={p.id} value={`/m/${qrCode.locations?.slug}/p/${p.slug}`}>
+                {p.title}
+              </option>
+            ))}
+          </select>
+          <p className="text-zinc-500 text-xs mt-2">
+            Choose which specific page this QR code should open when scanned.
+          </p>
         </div>
 
         <button 
