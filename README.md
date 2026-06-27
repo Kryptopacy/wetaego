@@ -27,7 +27,7 @@ OurMenu OS is engineered for massive scale, zero downtime, and bank-grade securi
 - **Absolute IDOR Protection:** Deep relational authorization matrices ensure that hardware provisioning (QR mapping), location configurations, and page builder tools are cryptographically isolated. A malicious actor cannot modify or access data belonging to another tenant or location.
 - **Flawless React SSR Hydration:** Utilizing advanced Zustand `skipHydration: true` middleware synchronized perfectly with React lifecycle hooks, the platform guarantees zero UI flashing, layout shifts, or Server-Side Rendering (SSR) mismatches between the Edge server and the client browser.
 - **XSS & HTML-Injection Hardened:** All user-generated content passing through email notifications, push payloads, and template rendering is aggressively escaped, sanitized, and type-checked.
-- **N+1 Query Elimination for Infinite Scale:** Core notification and dispatcher systems utilize highly parallelized `Promise.all` fetching strategies. This bypasses Vercel/Serverless timeout constraints, guaranteeing instant execution whether an organization has 5 staff members or 5,000.
+- **N+1 Query Elimination & Infinite Scale:** Core notification and dispatcher systems utilize highly parallelized `Promise.all` fetching strategies. Meanwhile, data-heavy dashboards (like CRM and Order History) employ strict **cursor-based pagination**, bypassing Vercel/Serverless timeout constraints and guaranteeing instant execution whether an organization has 5 records or 5,000,000.
 - **GDPR-Compliant Marketing Queues:** Enforced opt-in filtering for customer marketing communications, paired with background queues for bulk email dispatches to eliminate 504 timeouts at scale.
 - **Storage Protection (Denial of Wallet Defense):** Cloud storage buckets are natively locked to strict file sizes (e.g. 5MB) and MIME-type whitelists (WebP, PNG, JPEG) to prevent malicious bulk uploads and SDK exploitation.
 - **WCAG 2.1 Accessibility Compliance:** The platform delivers premium mobile UI flows with fluid focus trapping, strict ARIA attribute integrations (`aria-expanded`, `aria-controls`, `role="dialog"`), and seamless screen-reader support.
@@ -41,7 +41,7 @@ OurMenu OS is fundamentally decoupled from the concept of a "restaurant." It is 
 1. **Hospitality (The Core):** Live restaurant menus, bar bottle service, dynamic cafe sell-out tracking, and food trucks.
 2. **Retail & Boutiques (Catalog Template):** Tech gadget shops, fashion boutiques, pharmacies, and local stores requiring a highly visual storefront, inventory management, and instant checkout.
 3. **Services (Booking Template):** Salons, spas, therapists, and tutors who need to showcase services, handle complex appointment slots, and collect upfront deposits.
-4. **Consultants & Agencies (Rate Card Template):** Freelancers, marketing agencies, and consultants deploying polished, interactive digital rate cards for standardized B2B pricing.
+4. **Consultants & Agencies (Rate Card & Quote Templates):** Freelancers, marketing agencies, and consultants deploying polished, interactive digital rate cards for standardized B2B pricing, alongside dynamic Quote Generator templates.
 5. **Real Estate & Automotive (Listings Template):** Property rentals, car dealerships, and equipment rentals requiring image-heavy, location-based galleries.
 6. **Portal Mode:** A dynamic macro-landing page that seamlessly routes customers to multiple specialized sub-pages (e.g., A massive Hotel routing guests to a Restaurant menu, a Spa booking page, and a Room Service catalog from a single QR scan).
 
@@ -55,7 +55,7 @@ A resilient, globally aware checkout engine powers the entire ecosystem:
 - **Automated SaaS Ledger (Platform Fees):** A transparent, built-in ledger system that extracts a configurable SaaS platform fee (e.g., 2%) on every transaction, driving pure MRR beyond monthly subscriptions.
 - **Enterprise Tax & Compliance Engine:** Dynamically calculates localized taxes (e.g., VAT, State Taxes) and applies them accurately before reaching the payment gateway, providing transparent itemized receipts for strict global compliance.
 - **Global Manual Fallback:** If API keys are pending or the payment provider experiences regional downtime, the system automatically degrades to a localized "Manual Bank Transfer" workflow, ensuring conversions are never blocked.
-- **Omnichannel Logistics:** Full, robust support for Dine-in (Table-specific QR mapping), Pickup, and Delivery (with interactive delivery zones, SMS phone verification, and dynamic fees).
+- **Omnichannel Logistics & Per-Page Routing:** Full, robust support for Dine-in (Table-specific QR mapping), Pickup, and Delivery (with interactive delivery zones, SMS phone verification, and dynamic fees). Fulfillment logic is highly granular, allowing **per-page configuration** (e.g., a "Room Service" page forces table delivery, while a "Lobby Cafe" page allows pickup).
 
 ### 2. Live Fulfillment Dashboard (formerly KDS)
 Re-architected to serve any industry, the **Live Fulfillment Dashboard** is a real-time, WebSocket-powered operations center:
@@ -86,7 +86,7 @@ Seamlessly scale operations across multiple venues, cities, or countries from a 
 - **Customer Profiles & LTV:** Automatically builds rich CRM profiles at checkout, tracking Lifetime Value (LTV), order frequency, and marketing opt-ins.
 - **Bespoke Loyalty Programs:** Organizations can launch custom point-based reward systems, configurable down to the fractional currency unit.
 - **Payment Roulette:** A gamified "spin to win" bill-splitting module that transforms the friction of group payments into a highly engaging, viral experience.
-- **PIN-Protected Post-Service Feedback:** Automated email receipts include a cryptographic 4-digit PIN ensuring only verified customers can rate staff performance, populating the gamified Team Performance Leaderboard.
+- **PIN-Protected Post-Service Feedback:** Automated email receipts include a cryptographic 4-digit PIN ensuring only verified customers can rate staff performance, populating the gamified Team Performance Leaderboard and the centralized **Feedback Inbox** within the dashboard.
 
 ### 7. Back-of-House Operations Engine
 OurMenu OS is a true operating system, extending far beyond the customer-facing frontend into deep backend workflows:
@@ -94,6 +94,7 @@ OurMenu OS is a true operating system, extending far beyond the customer-facing 
 - **Automated Daily Reports:** Nightly cron jobs that aggregate key business metrics (sales, velocity, feedback) and email summarized briefings directly to owners.
 - **Quotes Engine:** A dedicated pipeline for consultants, freelancers, and agencies to track, manage, and respond to custom B2B rate inquiries instantly.
 - **Properties & Shifts Management:** Dedicated infrastructure for scheduling staff shifts and managing complex real estate and lodging templates.
+- **Developer Console & Metrics Export:** Deep administrative tooling allowing platform owners to export cross-organizational analytics (e.g., Hackathon metrics, platform-wide sales volume) instantly.
 
 ---
 
