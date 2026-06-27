@@ -67,7 +67,7 @@ export function LandingNavbar() {
         <div className="flex items-center gap-2 md:gap-4">
           <Link
             className="text-sm font-medium text-zinc-400 hover:text-white transition-colors hidden lg:block"
-            href="/dashboard"
+            href="/login"
           >
             Log in
           </Link>
@@ -87,7 +87,7 @@ export function LandingNavbar() {
           </button>
           <Link
             className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-white text-black text-sm font-semibold hover:bg-zinc-200 hover:scale-105 transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.2)]"
-            href="/dashboard"
+            href="/login"
           >
             Get Started
           </Link>
@@ -180,7 +180,7 @@ export function LandingNavbar() {
                 className="mt-4 pt-8 border-t border-white/10"
               >
                 <Link
-                  href="/dashboard"
+                  href="/login"
                   onClick={() => setIsOpen(false)}
                   className="text-2xl font-light text-zinc-300 hover:text-white transition-colors block mb-8"
                 >

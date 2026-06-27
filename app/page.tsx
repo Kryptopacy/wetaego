@@ -90,7 +90,7 @@ export default async function HomePage() {
               Ditch expensive custom websites and terrible PDF links. Whether you are processing restaurant orders, booking salon appointments, selling retail inventory, or quoting consulting retainers, our dynamic templates instantly generate a stunning digital storefront. Delight your clients with an AI Digital Concierge that handles inquiries and processes payments, while your team stays flawlessly synced with the Live Fulfillment Dashboard.
             </p>
             <div className="flex flex-col sm:flex-row items-start gap-4">
-              <Link href="/dashboard" className="flex items-center gap-2 px-8 py-3.5 rounded-full bg-white text-black text-sm font-bold hover:scale-105 transition-all duration-300 shadow-[0_0_30px_rgba(255,255,255,0.15)]">
+              <Link href="/login" className="flex items-center gap-2 px-8 py-3.5 rounded-full bg-white text-black text-sm font-bold hover:scale-105 transition-all duration-300 shadow-[0_0_30px_rgba(255,255,255,0.15)]">
                 Start Building <ArrowRight className="w-4 h-4" />
               </Link>
               <ActionForm action={startInteractiveDemo}>
@@ -207,8 +207,8 @@ export default async function HomePage() {
             Join forward-thinking venues running on OurMenu. Setup takes under 10 minutes.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href="/dashboard" className="flex items-center gap-2 px-10 py-4 rounded-full bg-white text-black text-base font-bold hover:scale-105 transition-all duration-300 shadow-[0_0_40px_rgba(255,255,255,0.15)]">
-              Start Free — No Card Required <ArrowRight className="w-5 h-5" />
+            <Link href="/login" className="flex items-center gap-2 px-10 py-4 rounded-full bg-white text-black text-base font-bold hover:scale-105 transition-all duration-300 shadow-[0_0_40px_rgba(255,255,255,0.15)]">
+              Get Started Free <ArrowRight className="w-5 h-5" />
             </Link>
             <ActionForm action={startInteractiveDemo}>
               <DemoSubmitButton className="flex items-center gap-2 px-10 py-4 rounded-full bg-white/5 border border-white/10 text-white text-base font-semibold hover:bg-white/10 backdrop-blur-md transition-all duration-300">
