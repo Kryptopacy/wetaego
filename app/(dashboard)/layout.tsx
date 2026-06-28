@@ -1,6 +1,6 @@
 import { ReactNode } from 'react'
 import { createClient } from '@/lib/supabase/server'
-import ClientLayout, { InitialDashboardData } from './client-layout'
+import ClientLayout, { InitialDashboardData, NavItem } from './client-layout'
 import { cookies } from 'next/headers'
 import {
   LayoutDashboard, ClipboardList, BarChart3, BookOpen,
@@ -19,10 +19,10 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   let locations: any[] = []
   let activeLocationId = ''
   let locationSlug = ''
-  const baseNavItems = [
-    { href: '/dashboard', label: 'Overview', icon: LayoutDashboard, exact: true },
+  const baseNavItems: NavItem[] = [
+    { href: '/dashboard', label: 'Overview', icon: LayoutDashboard as any, exact: true },
   ]
-  let dynamicNavItems = [...baseNavItems]
+  let dynamicNavItems: NavItem[] = [...baseNavItems]
 
   if (userData?.user) {
     const { data: member } = await supabase

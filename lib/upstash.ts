@@ -16,12 +16,22 @@ export const globalRateLimiter = redis
     })
   : null;
 
+// High-throughput limiter for provider webhooks
+export const webhookRateLimiter = redis 
+  ? new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(100, '1 m'), // 100 requests per minute
+      analytics: true,
+    })
+  : null;
+
 /**
  * Validates request rate limit based on IP.
  * @returns { success: boolean, limit: number, remaining: number, reset: number }
  */
 export async function checkRateLimit(actionName: string, customIdentifier?: string) {
-  if (!globalRateLimiter) return { success: true };
+  const limiter = actionName.includes('webhook') ? webhookRateLimiter : globalRateLimiter;
+  if (!limiter) return { success: true };
   
   const reqHeaders = await headers();
   const ip = reqHeaders.get('x-forwarded-for') || 'anonymous';
@@ -30,7 +40,7 @@ export async function checkRateLimit(actionName: string, customIdentifier?: stri
   const identity = customIdentifier || ip;
   const key = `rate_limit_${actionName}_${identity}`;
   
-  return await globalRateLimiter.limit(key);
+  return await limiter.limit(key);
 }
 
 /**

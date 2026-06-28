@@ -53,26 +53,26 @@ export function QuotePayment({
     try {
       const paymentFractionMinor = Math.floor(totalAmountMinor * (nextMilestone.percentage / 100))
       
-      const { checkoutUrl, error } = await processCheckout(
+      const result = await processCheckout({
         organizationId,
         locationId,
-        [], // Quotes don't have standard items at this phase
+        items: [], // Quotes don't have standard items at this phase
         totalAmountMinor,
-        0,
-        'Quote Payment', // tableIdentifier
-        `Milestone Payment: ${nextMilestone.name}`, // customerNote
+        tipAmountMinor: 0,
+        tableIdentifier: 'Quote Payment',
+        customerNote: `Milestone Payment: ${nextMilestone.name}`,
         customerEmail,
-        paymentFractionMinor, // paymentFractionMinor
-        'card', // paymentMethod
-        0, // discountAmountMinor
+        paymentFractionMinor,
+        paymentMethod: 'card',
+        discountAmountMinor: 0,
         customerName,
         customerPhone,
-        'table',
-        undefined,
-        `${quoteId}-${nextMilestone.id}` // idempotencyKey
-      ) as { checkoutUrl?: string, error?: string }
+        fulfillmentType: 'table',
+        idempotencyKey: `${quoteId}-${nextMilestone.id}`
+      })
 
-      if (error) throw new Error(error)
+      if (result?.serverError || result?.validationErrors) throw new Error(result?.serverError || 'Failed to process checkout')
+      const checkoutUrl = result.data?.checkoutUrl
       if (checkoutUrl) window.location.href = checkoutUrl
     } catch (e: unknown) {
       toast.error(e instanceof Error ? e.message : 'Payment initiation failed')

@@ -6,8 +6,16 @@ import { createClient } from '@/lib/supabase/server';
  * It automatically handles unexpected errors.
  */
 export const actionClient = createSafeActionClient({
-  handleServerError(e) {
+  handleServerError(e: any) {
     console.error("Action error:", e.message);
+    if (e.message === 'Unauthorized' || 
+        e.message === 'Not authenticated' || 
+        e.message === 'Not logged in' ||
+        e.message.includes('Image must be less than') || 
+        e.message.includes('Invalid image format') ||
+        e.message.includes('Booking not found')) {
+      return e.message;
+    }
     return DEFAULT_SERVER_ERROR_MESSAGE;
   }
 });

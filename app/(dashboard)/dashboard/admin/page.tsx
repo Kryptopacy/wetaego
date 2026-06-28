@@ -1,6 +1,7 @@
 
 import { getPricingSettings, getCreditCosts, getPlanLimits, getAiModels, getPlatformFees } from '@/lib/utils/settings'
 import { updateSetting } from './actions'
+import { ActionForm } from '@/components/ActionForm'
 
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
@@ -50,7 +51,7 @@ export default async function AdminPage() {
         {/* Pricing Settings */}
         <section className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
           <h2 className="text-lg font-bold text-white mb-4">Pricing Configuration (NGN)</h2>
-          <form action={updateSetting} className="space-y-4">
+          <ActionForm action={updateSetting} className="space-y-4">
             <input type="hidden" name="key" value="pricing" />
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
@@ -79,7 +80,7 @@ export default async function AdminPage() {
               </div>
             </div>
             <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-500 transition">Save Pricing</button>
-          </form>
+          </ActionForm>
         </section>
 
         {/* Tenant Directory */}
@@ -94,7 +95,7 @@ export default async function AdminPage() {
         {/* Platform Fees */}
         <section className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
           <h2 className="text-lg font-bold text-white mb-4">Platform Fee Percentages (%)</h2>
-          <form action={updateSetting} className="space-y-4">
+          <ActionForm action={updateSetting} className="space-y-4">
             <input type="hidden" name="key" value="platform_fees" />
             <input type="hidden" name="is_json" value="true" />
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -112,13 +113,13 @@ export default async function AdminPage() {
               </div>
             </div>
             <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-500 transition">Save Fees</button>
-          </form>
+          </ActionForm>
         </section>
 
         {/* AI Models */}
         <section className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
           <h2 className="text-lg font-bold text-white mb-4">AI Models Configuration</h2>
-          <form action={updateSetting} className="space-y-4">
+          <ActionForm action={updateSetting} className="space-y-4">
             <input type="hidden" name="key" value="ai_models" />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -131,28 +132,28 @@ export default async function AdminPage() {
               </div>
             </div>
             <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-500 transition">Save Models</button>
-          </form>
+          </ActionForm>
         </section>
 
         {/* Advanced JSON Sections for Limits & Costs */}
         <section className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
           <h2 className="text-lg font-bold text-white mb-4">Credit Usage Costs (JSON)</h2>
-          <form action={updateSetting} className="space-y-4">
+          <ActionForm action={updateSetting} className="space-y-4">
             <input type="hidden" name="key" value="credit_costs" />
             <input type="hidden" name="is_json" value="true" />
             <textarea name="json_value" defaultValue={JSON.stringify(creditCosts, null, 2)} rows={6} className="w-full font-mono text-sm rounded-lg bg-zinc-800 border border-zinc-700 px-4 py-3 text-white" />
             <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-500 transition">Save Credit Costs</button>
-          </form>
+          </ActionForm>
         </section>
 
         <section className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
           <h2 className="text-lg font-bold text-white mb-4">Plan Limits (JSON)</h2>
-          <form action={updateSetting} className="space-y-4">
+          <ActionForm action={updateSetting} className="space-y-4">
             <input type="hidden" name="key" value="plan_limits" />
             <input type="hidden" name="is_json" value="true" />
             <textarea name="json_value" defaultValue={JSON.stringify(planLimits, null, 2)} rows={8} className="w-full font-mono text-sm rounded-lg bg-zinc-800 border border-zinc-700 px-4 py-3 text-white" />
             <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-500 transition">Save Plan Limits</button>
-          </form>
+          </ActionForm>
         </section>
       </div>
     </div>

@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { Tier } from '@/lib/utils/billing'
 import { togglePageStatus, deletePage } from './actions'
+import { ActionForm } from '@/components/ActionForm'
 import Link from 'next/link'
 import Image from 'next/image'
 
@@ -191,7 +192,7 @@ export default async function PagesManager() {
                 </Link>
 
                 {/* Publish/Unpublish */}
-                <form action={togglePageStatus}>
+                <ActionForm action={togglePageStatus}>
                   <input type="hidden" name="pageId" value={page.id} />
                   <input type="hidden" name="currentStatus" value={page.is_published.toString()} />
                   <button
@@ -204,10 +205,10 @@ export default async function PagesManager() {
                   >
                     {page.is_published ? 'Live' : 'Hidden'}
                   </button>
-                </form>
+                </ActionForm>
 
                 {/* Delete */}
-                <form action={deletePage}>
+                <ActionForm action={deletePage}>
                   <input type="hidden" name="pageId" value={page.id} />
                   <button
                     type="submit"
@@ -218,7 +219,7 @@ export default async function PagesManager() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                     </svg>
                   </button>
-                </form>
+                </ActionForm>
               </div>
             </div>
           )

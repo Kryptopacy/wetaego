@@ -1,578 +1,465 @@
 'use server'
 
-
-
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import type { Json } from '@/lib/supabase/types'
 import { z } from 'zod'
-   
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { getPreset, buildPageTitle } from '@/lib/templates/presets'
+import { zfd } from 'zod-form-data'
+import { authActionClient } from '@/lib/safe-action'
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
 
 // ─── Business Type Setup ───────────────────────────────────────────────────────
 
-export async function setBusinessTypeAction(formData: FormData): Promise<void> {
-  const businessType = formData.get('businessType') as string
-  const orgId = formData.get('orgId') as string
-  const mode = formData.get('mode') as string
+export const setBusinessTypeAction = authActionClient
+  .schema(zfd.formData({
+    businessType: zfd.text(),
+    orgId: zfd.text(),
+    mode: zfd.text()
+  }))
+  .action(async ({ parsedInput: { businessType, orgId, mode }, ctx: { supabase } }) => {
+    if (orgId === 'demo-org') {
+      redirect(`/dashboard/pages/build/${businessType}?mode=${mode}`)
+    }
 
-  if (orgId === 'demo-org') {
+    const { cookies } = await import('next/headers')
+    if ((await cookies()).get('demo_mode')?.value === '1') {
+      revalidatePath('/dashboard/pages')
+      return { success: true }
+    }
+
+    if (mode === 'primary') {
+      await supabase
+        .from('organizations')
+        .update({ business_type: businessType })
+        .eq('id', orgId)
+    }
+
     redirect(`/dashboard/pages/build/${businessType}?mode=${mode}`)
-  }
-
-  const supabase = await createClient()
-  const { data: userData } = await supabase.auth.getUser()
-  const { cookies } = await import('next/headers')
-  if ((await cookies()).get('demo_mode')?.value === '1') {
-    revalidatePath('/dashboard/pages')
-    return
-  }
-
-  if (!userData?.user) throw new Error('Not authenticated')
-
-  // If primary mode, set the org's business_type
-  if (mode === 'primary') {
-    await supabase
-      .from('organizations')
-      .update({ business_type: businessType })
-      .eq('id', orgId)
-  }
-
-  redirect(`/dashboard/pages/build/${businessType}?mode=${mode}`)
-}
+  })
 
 // ─── Page Creation ─────────────────────────────────────────────────────────────
 
-export async function createCustomPage(formData: FormData): Promise<void> {
-  const supabase = await createClient()
-  const title = formData.get('title') as string
-  const slug = formData.get('slug') as string
-  const content = (formData.get('content') as string) || null
-  const location_id = formData.get('location_id') as string
-  const template_type = (formData.get('template_type') as string) || 'info'
-  const is_primary = formData.get('is_primary') === 'true'
-  const billing_enabled = formData.get('billing_enabled') === 'true'
-  const billing_mode = (formData.get('billing_mode') as string) || 'standard_checkout'
-  const payment_mode = (formData.get('payment_mode') as string) || 'full'
-  const deposit_percentage = formData.get('deposit_percentage')
-    ? parseInt(formData.get('deposit_percentage') as string)
-    : null
-  const business_type_preset = (formData.get('business_type_preset') as string) || null
+export const createCustomPage = authActionClient
+  .schema(zfd.formData({
+    title: zfd.text(),
+    slug: zfd.text(),
+    content: zfd.text(z.string().optional()),
+    location_id: zfd.text(),
+    template_type: zfd.text(z.string().default('info')),
+    is_primary: zfd.checkbox(),
+    billing_enabled: zfd.checkbox(),
+    billing_mode: zfd.text(z.string().default('standard_checkout')),
+    payment_mode: zfd.text(z.string().default('full')),
+    deposit_percentage: zfd.numeric(z.number().optional()),
+    business_type_preset: zfd.text(z.string().optional())
+  }))
+  .action(async ({ parsedInput, ctx: { supabase, user } }) => {
+    const {
+      title, slug, content, location_id, template_type, is_primary,
+      billing_enabled, billing_mode, payment_mode, deposit_percentage, business_type_preset
+    } = parsedInput
 
-  if (location_id === 'demo-loc') {
-    revalidatePath('/dashboard/pages')
-    return
-  }
-
-  const { data: userData } = await supabase.auth.getUser()
-  const { cookies } = await import('next/headers')
-  if ((await cookies()).get('demo_mode')?.value === '1') {
-    revalidatePath('/dashboard/pages')
-    return
-  }
-
-  if (!userData?.user) throw new Error('Not authenticated')
-
-  // 1. Get organization ID for this location
-  const { data: loc } = await supabase
-    .from('locations')
-    .select('organization_id')
-    .eq('id', location_id)
-    .single()
-  if (!loc) throw new Error('Location not found')
-  const orgId = loc.organization_id
-
-  // 2. Get org tier and current page count
-  const { data: org } = await supabase
-    .from('organizations')
-    .select('subscription_tier')
-    .eq('id', orgId)
-    .single()
-
-  const { count } = await supabase
-    .from('location_pages')
-    .select('id', { count: 'exact' })
-    .eq('location_id', location_id)
-
-  const { getFreePagesLimit } = await import('@/lib/utils/billing')
-  const freeLimit = await getFreePagesLimit(org?.subscription_tier || 'lite')
-
-  // 3. Primary pages are always free; only charge for extras beyond free limit
-  if (!is_primary && (count || 0) >= freeLimit) {
-    const { getCreditCosts } = await import('@/lib/utils/settings')
-    const creditCosts = await getCreditCosts() as Record<string, number>
-    const pageCost = creditCosts.custom_page || 10
-
-    const { chargeCredits } = await import('@/lib/payments/credits')
-    const charge = await chargeCredits(
-      orgId,
-      pageCost,
-      `Created Page: ${slug} (${template_type})`,
-      userData.user.id
-    )
-    if (!charge.success) {
-      throw new Error(
-        `Insufficient credits to create an extra page. (Cost: ${pageCost})`
-      )
+    if (location_id === 'demo-loc') {
+      revalidatePath('/dashboard/pages')
+      return { success: true }
     }
-  }
 
-  // 4. If this is primary, unset any previous primary
-  if (is_primary) {
-    await supabase
+    const { cookies } = await import('next/headers')
+    if ((await cookies()).get('demo_mode')?.value === '1') {
+      revalidatePath('/dashboard/pages')
+      return { success: true }
+    }
+
+    const { data: loc } = await supabase
+      .from('locations')
+      .select('organization_id')
+      .eq('id', location_id)
+      .single()
+    if (!loc) throw new Error('Location not found')
+    const orgId = loc.organization_id
+
+    const { data: org } = await supabase
+      .from('organizations')
+      .select('subscription_tier')
+      .eq('id', orgId)
+      .single()
+
+    const { count } = await supabase
       .from('location_pages')
-      .update({ is_primary: false })
+      .select('id', { count: 'exact' })
       .eq('location_id', location_id)
-      .eq('is_primary', true)
-  }
 
-  const { error } = await supabase.from('location_pages').insert({
-    location_id,
-    title,
-    slug,
-    content,
-    template_type,
-    is_primary,
-    billing_enabled,
-    billing_mode,
-    payment_mode,
-    deposit_percentage,
-    business_type_preset,
-    is_published: true,
+    const { getFreePagesLimit } = await import('@/lib/utils/billing')
+    const freeLimit = await getFreePagesLimit(org?.subscription_tier || 'lite')
+
+    if (!is_primary && (count || 0) >= freeLimit) {
+      const { getCreditCosts } = await import('@/lib/utils/settings')
+      const creditCosts = await getCreditCosts() as Record<string, number>
+      const pageCost = creditCosts.custom_page || 10
+
+      const { chargeCredits } = await import('@/lib/payments/credits')
+      const charge = await chargeCredits(
+        orgId,
+        pageCost,
+        `Created Page: ${slug} (${template_type})`,
+        user.id
+      )
+      if (!charge.success) {
+        throw new Error(`Insufficient credits to create an extra page. (Cost: ${pageCost})`)
+      }
+    }
+
+    if (is_primary) {
+      await supabase
+        .from('location_pages')
+        .update({ is_primary: false })
+        .eq('location_id', location_id)
+        .eq('is_primary', true)
+    }
+
+    const { error } = await supabase.from('location_pages').insert({
+      location_id,
+      title,
+      slug,
+      content: content || null,
+      template_type,
+      is_primary,
+      billing_enabled,
+      billing_mode,
+      payment_mode,
+      deposit_percentage: deposit_percentage || null,
+      business_type_preset: business_type_preset || null,
+      is_published: true,
+    })
+
+    if (error) throw new Error((error as Error).message)
+
+    revalidatePath('/dashboard/pages')
+    redirect('/dashboard/pages')
   })
-
-  if (error) throw new Error((error as Error).message)
-
-  revalidatePath('/dashboard/pages')
-  redirect('/dashboard/pages')
-}
 
 // ─── Page Update ───────────────────────────────────────────────────────────────
 
-const updatePageSchema = z.object({
-  pageId: z.string().min(1),
-  title: z.string().min(1, "Title is required").max(100),
-  content: z.string().max(2000).optional(),
-  billing_enabled: z.boolean(),
-  billing_mode: z.string(),
-  payment_mode: z.string(),
-  deposit_percentage: z.number().min(0).max(100).nullable(),
-  randomizer_enabled: z.boolean(),
-  hide_delivery: z.boolean(),
-  payment_channels: z.array(z.string()).optional(),
-  refund_policy: z.string().optional(),
-  milestones_enabled: z.boolean(),
-  whatsapp_number: z.string().optional(),
-  phone_number: z.string().optional(),
-  instagram_handle: z.string().optional(),
-  x_handle: z.string().optional(),
-  tiktok_handle: z.string().optional(),
-  fulfillment_options: z.string().optional(),
-})
+export const updatePage = authActionClient
+  .schema(zfd.formData({
+    pageId: zfd.text(),
+    title: zfd.text(z.string().max(100)),
+    content: zfd.text(z.string().max(2000).optional()),
+    billing_enabled: zfd.checkbox(),
+    billing_mode: zfd.text(z.string().default('standard_checkout')),
+    payment_mode: zfd.text(z.string().default('full')),
+    deposit_percentage: zfd.numeric(z.number().min(0).max(100).optional()),
+    randomizer_enabled: zfd.checkbox(),
+    hide_delivery: zfd.checkbox(),
+    payment_channels: zfd.repeatableOfType(zfd.text()),
+    refund_policy: zfd.text(z.string().optional()),
+    milestones_enabled: zfd.checkbox(),
+    whatsapp_number: zfd.text(z.string().optional()),
+    phone_number: zfd.text(z.string().optional()),
+    instagram_handle: zfd.text(z.string().optional()),
+    x_handle: zfd.text(z.string().optional()),
+    tiktok_handle: zfd.text(z.string().optional()),
+    fulfillment_options: zfd.text(z.string().optional()),
+  }))
+  .action(async ({ parsedInput, ctx: { supabase } }) => {
+    const {
+      pageId, title, content, billing_enabled, billing_mode, payment_mode, deposit_percentage,
+      randomizer_enabled, hide_delivery, payment_channels, refund_policy, milestones_enabled,
+      whatsapp_number, phone_number, instagram_handle, x_handle, tiktok_handle, fulfillment_options
+    } = parsedInput
 
-export async function updatePage(formData: FormData): Promise<void> {
-  const supabase = await createClient()
+    if (pageId.startsWith('page-')) {
+      revalidatePath('/dashboard/pages')
+      return { success: true }
+    }
 
-  const parsed = updatePageSchema.safeParse({
-    pageId: formData.get('pageId'),
-    title: formData.get('title'),
-    content: formData.get('content') || undefined,
-    billing_enabled: formData.get('billing_enabled') === 'true',
-    billing_mode: formData.get('billing_mode') || 'standard_checkout',
-    payment_mode: formData.get('payment_mode') || 'full',
-    deposit_percentage: formData.get('deposit_percentage')
-      ? parseInt(formData.get('deposit_percentage') as string, 10)
-      : null,
-    randomizer_enabled: formData.get('randomizer_enabled') === 'true',
-    hide_delivery: formData.get('hide_delivery') === 'true',
-    payment_channels: formData.getAll('payment_channels') as string[],
-    refund_policy: formData.get('refund_policy') || undefined,
-    milestones_enabled: formData.get('milestones_enabled') === 'true',
-    whatsapp_number: formData.get('whatsapp_number') || undefined,
-    phone_number: formData.get('phone_number') || undefined,
-    instagram_handle: formData.get('instagram_handle') || undefined,
-    x_handle: formData.get('x_handle') || undefined,
-    tiktok_handle: formData.get('tiktok_handle') || undefined,
-    fulfillment_options: formData.get('fulfillment_options') || undefined,
+    const { cookies } = await import('next/headers')
+    if ((await cookies()).get('demo_mode')?.value === '1') {
+      revalidatePath('/dashboard/pages')
+      return { success: true }
+    }
+
+    const { data: existing } = await supabase.from('location_pages').select('template_data').eq('id', pageId).single()
+    const template_data = { 
+      ...((existing?.template_data as Record<string, unknown>) || {}), 
+      hide_delivery, 
+      payment_channels: payment_channels.length > 0 ? payment_channels : undefined, 
+      refund_policy, 
+      milestones_enabled,
+      whatsapp_number,
+      phone_number,
+      instagram_handle,
+      x_handle,
+      tiktok_handle,
+      ...(fulfillment_options ? { fulfillment_options: JSON.parse(fulfillment_options) } : {})
+    }
+
+    const { error } = await supabase
+      .from('location_pages')
+      .update({ title, content, billing_enabled, billing_mode, payment_mode, deposit_percentage: deposit_percentage || null, randomizer_enabled, template_data })
+      .eq('id', pageId)
+
+    if (error) throw new Error((error as Error).message)
+
+    revalidatePath('/dashboard/pages')
+    return { success: true }
   })
-
-  if (!parsed.success) throw new Error(parsed.error.issues[0].message)
-
-  const {
-    pageId,
-    title,
-    content,
-    billing_enabled,
-    billing_mode,
-    payment_mode,
-    deposit_percentage,
-    randomizer_enabled,
-    hide_delivery,
-    payment_channels,
-    refund_policy,
-    milestones_enabled,
-    whatsapp_number,
-    phone_number,
-    instagram_handle,
-    x_handle,
-    tiktok_handle,
-    fulfillment_options
-  } = parsed.data
-
-  if (pageId.startsWith('page-')) {
-    revalidatePath('/dashboard/pages')
-    return
-  }
-
-  const { data: userData } = await supabase.auth.getUser()
-  const { cookies } = await import('next/headers')
-  if ((await cookies()).get('demo_mode')?.value === '1') {
-    revalidatePath('/dashboard/pages')
-    return
-  }
-
-  if (!userData?.user) throw new Error('Not authenticated')
-
-  const { data: existing } = await supabase.from('location_pages').select('template_data').eq('id', pageId).single()
-  const template_data = { 
-    ...((existing?.template_data as Record<string, unknown>) || {}), 
-    hide_delivery, 
-    payment_channels, 
-    refund_policy, 
-    milestones_enabled,
-    whatsapp_number,
-    phone_number,
-    instagram_handle,
-    x_handle,
-    tiktok_handle,
-    ...(fulfillment_options ? { fulfillment_options: JSON.parse(fulfillment_options as string) } : {})
-  }
-
-  const { error } = await supabase
-    .from('location_pages')
-    .update({ title, content, billing_enabled, billing_mode, payment_mode, deposit_percentage, randomizer_enabled, template_data })
-    .eq('id', pageId)
-
-  if (error) throw new Error((error as Error).message)
-
-  revalidatePath('/dashboard/pages')
-}
 
 // ─── Page Items (Catalog, Booking, Listing, Rate Card) ────────────────────────
 
-const addPageItemSchema = z.object({
-  page_id: z.string().min(1),
-  title: z.string().min(1, "Title is required").max(100),
-  subtitle: z.string().max(200).optional(),
-  description: z.string().max(1000).optional(),
-  price_minor: z.number().min(0).nullable(),
-  price_display: z.string().max(50).optional(),
-  availability_status: z.string(),
-  item_data: z.unknown().nullable(),
-  deposit_percentage: z.number().min(0).max(100).nullable(),
-  payment_mode: z.string(),
-  inventory_count: z.number().min(0).nullable(),
-})
+export const addPageItem = authActionClient
+  .schema(zfd.formData({
+    page_id: zfd.text(),
+    title: zfd.text(z.string().max(100)),
+    subtitle: zfd.text(z.string().max(200).optional()),
+    description: zfd.text(z.string().max(1000).optional()),
+    price_minor: zfd.numeric(z.number().min(0).optional()),
+    price_display: zfd.text(z.string().max(50).optional()),
+    availability_status: zfd.text(z.string().default('available')),
+    item_data: zfd.text(z.string().optional()),
+    deposit_percentage: zfd.numeric(z.number().min(0).max(100).optional()),
+    payment_mode: zfd.text(z.string().default('full')),
+    inventory_count: zfd.numeric(z.number().min(0).optional()),
+    image: zfd.file().optional(),
+    ai_image_url: zfd.text(z.string().optional())
+  }))
+  .action(async ({ parsedInput, ctx: { supabase, user } }) => {
+    const {
+      page_id, title, subtitle, description, price_minor, price_display, availability_status,
+      item_data, deposit_percentage, payment_mode, inventory_count, image, ai_image_url
+    } = parsedInput
 
-export async function addPageItem(formData: FormData): Promise<void> {
-  const supabase = await createClient()
-  
-  const parsed = addPageItemSchema.safeParse({
-    page_id: formData.get('page_id'),
-    title: formData.get('title'),
-    subtitle: formData.get('subtitle') || undefined,
-    description: formData.get('description') || undefined,
-    price_minor: formData.get('price_minor')
-      ? parseInt(formData.get('price_minor') as string, 10)
-      : null,
-    price_display: formData.get('price_display') || undefined,
-    availability_status: formData.get('availability_status') || 'available',
-    item_data: formData.get('item_data')
-      ? JSON.parse(formData.get('item_data') as string)
-      : null,
-    deposit_percentage: formData.get('deposit_percentage')
-      ? parseInt(formData.get('deposit_percentage') as string, 10)
-      : null,
-    payment_mode: formData.get('payment_mode') || 'full',
-    inventory_count: formData.get('inventory_count')
-      ? parseInt(formData.get('inventory_count') as string, 10)
-      : null,
+    const { cookies } = await import('next/headers')
+    if ((await cookies()).get('demo_mode')?.value === '1') {
+      revalidatePath('/dashboard/pages')
+      return { success: true }
+    }
+
+    let images: string[] = []
+    if (ai_image_url) {
+      images = [ai_image_url]
+    } else if (image && image.size > 0) {
+      if (image.size > MAX_FILE_SIZE) throw new Error('Image must be less than 5MB')
+      if (!ACCEPTED_IMAGE_TYPES.includes(image.type)) throw new Error('Invalid image format.')
+
+      const fileExt = image.name.split('.').pop()
+      const fileName = `page-items/${user.id}-${Date.now()}.${fileExt}`
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('public-assets')
+        .upload(fileName, image)
+        
+      if (!uploadError && uploadData) {
+        const { data: publicUrlData } = supabase.storage.from('public-assets').getPublicUrl(fileName)
+        images = [publicUrlData.publicUrl]
+      } else {
+        throw new Error('Failed to upload image')
+      }
+    }
+
+    const { error } = await supabase.from('page_items').insert({
+      page_id,
+      title,
+      subtitle: subtitle || null,
+      description: description || null,
+      price_minor: price_minor ?? null,
+      price_display: price_display || null,
+      availability_status,
+      item_data: item_data ? JSON.parse(item_data) : null,
+      deposit_percentage: deposit_percentage ?? null,
+      payment_mode,
+      inventory_count: inventory_count ?? null,
+      images
+    })
+
+    if (error) throw new Error((error as Error).message)
+
+    revalidatePath('/dashboard/pages')
+    return { success: true }
   })
 
-  if (!parsed.success) throw new Error(parsed.error.issues[0].message)
+export const updatePageItem = authActionClient
+  .schema(zfd.formData({
+    itemId: zfd.text(),
+    title: zfd.text(z.string().max(100)),
+    subtitle: zfd.text(z.string().max(200).optional()),
+    description: zfd.text(z.string().max(1000).optional()),
+    price_minor: zfd.numeric(z.number().min(0).optional()),
+    price_display: zfd.text(z.string().max(50).optional()),
+    availability_status: zfd.text(z.string().default('available')),
+    item_data: zfd.text(z.string().optional()),
+    inventory_count: zfd.numeric(z.number().min(0).optional()),
+    image: zfd.file().optional(),
+    ai_image_url: zfd.text(z.string().optional())
+  }))
+  .action(async ({ parsedInput, ctx: { supabase, user } }) => {
+    const {
+      itemId, title, subtitle, description, price_minor, price_display,
+      availability_status, item_data, inventory_count, image, ai_image_url
+    } = parsedInput
 
-  const {
-    page_id,
-    title,
-    subtitle,
-    description,
-    price_minor,
-    price_display,
-    availability_status,
-    item_data,
-    deposit_percentage,
-    payment_mode,
-    inventory_count
-  } = parsed.data
+    const { cookies } = await import('next/headers')
+    if ((await cookies()).get('demo_mode')?.value === '1') {
+      revalidatePath('/dashboard/pages')
+      return { success: true }
+    }
 
-  const image = formData.get('image') as File | null
-  const aiImageUrl = formData.get('ai_image_url') as string | null
+    const updatePayload: {
+      title?: string
+      subtitle?: string | null
+      description?: string | null
+      price_minor?: number | null
+      price_display?: string | null
+      availability_status?: string
+      item_data?: Json | null
+      inventory_count?: number | null
+      images?: string[]
+    } = { 
+      title, 
+      subtitle: subtitle || null, 
+      description: description || null, 
+      price_minor: price_minor ?? null, 
+      price_display: price_display || null, 
+      availability_status, 
+      item_data: item_data ? JSON.parse(item_data) : null, 
+      inventory_count: inventory_count ?? null 
+    }
 
-  const { data: userData } = await supabase.auth.getUser()
-  const { cookies } = await import('next/headers')
-  if ((await cookies()).get('demo_mode')?.value === '1') {
+    if (ai_image_url) {
+      updatePayload.images = [ai_image_url]
+    } else if (image && image.size > 0) {
+      if (image.size > MAX_FILE_SIZE) throw new Error('Image must be less than 5MB')
+      if (!ACCEPTED_IMAGE_TYPES.includes(image.type)) throw new Error('Invalid image format.')
+
+      const fileExt = image.name.split('.').pop()
+      const fileName = `page-items/${user.id}-${Date.now()}.${fileExt}`
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('public-assets')
+        .upload(fileName, image)
+        
+      if (!uploadError && uploadData) {
+        const { data: publicUrlData } = supabase.storage.from('public-assets').getPublicUrl(fileName)
+        updatePayload.images = [publicUrlData.publicUrl]
+      } else {
+        throw new Error('Failed to upload image')
+      }
+    }
+
+    const { error } = await supabase
+      .from('page_items')
+      .update(updatePayload)
+      .eq('id', itemId)
+
+    if (error) throw new Error((error as Error).message)
+
     revalidatePath('/dashboard/pages')
-    return
-  }
-
-  if (!userData?.user) throw new Error('Not authenticated')
-
-  // Handle image upload
-  let images: string[] = []
-  if (aiImageUrl) {
-    images = [aiImageUrl]
-  } else if (image && image.size > 0) {
-    if (image.size > MAX_FILE_SIZE) {
-      throw new Error('Image must be less than 5MB')
-    }
-    if (!ACCEPTED_IMAGE_TYPES.includes(image.type)) {
-      throw new Error('Invalid image format. Only JPEG, PNG, and WebP are accepted.')
-    }
-
-    const fileExt = image.name.split('.').pop()
-    const fileName = `page-items/${userData.user.id}-${Date.now()}.${fileExt}`
-    const { data: uploadData, error: uploadError } = await supabase.storage
-      .from('public-assets')
-      .upload(fileName, image)
-      
-    if (!uploadError && uploadData) {
-      const { data: publicUrlData } = supabase.storage.from('public-assets').getPublicUrl(fileName)
-      images = [publicUrlData.publicUrl]
-    } else {
-      throw new Error('Failed to upload image')
-    }
-  }
-
-  const { error } = await supabase.from('page_items').insert({
-    page_id,
-    title,
-    subtitle,
-    description,
-    price_minor,
-    price_display,
-    availability_status,
-    item_data: item_data as Json | null,
-    deposit_percentage,
-    payment_mode,
-    inventory_count,
-    images
+    return { success: true }
   })
 
-  if (error) throw new Error((error as Error).message)
-
-  revalidatePath('/dashboard/pages')
-}
-
-export async function updatePageItem(formData: FormData): Promise<void> {
-  const supabase = await createClient()
-  const itemId = formData.get('itemId') as string
-  const title = formData.get('title') as string
-  const subtitle = (formData.get('subtitle') as string) || null
-  const description = (formData.get('description') as string) || null
-  const price_minor = formData.get('price_minor')
-    ? parseInt(formData.get('price_minor') as string)
-    : null
-  const price_display = (formData.get('price_display') as string) || null
-  const availability_status = (formData.get('availability_status') as string) || 'available'
-  const item_data = formData.get('item_data')
-    ? JSON.parse(formData.get('item_data') as string)
-    : null
-  const inventory_count = formData.get('inventory_count')
-    ? parseInt(formData.get('inventory_count') as string)
-    : null
-
-  const image = formData.get('image') as File | null
-  const aiImageUrl = formData.get('ai_image_url') as string | null
-
-  const { data: userData } = await supabase.auth.getUser()
-  const { cookies } = await import('next/headers')
-  if ((await cookies()).get('demo_mode')?.value === '1') {
-    revalidatePath('/dashboard/pages')
-    return
-  }
-
-  if (!userData?.user) throw new Error('Not authenticated')
-
-  const updatePayload: {
-    title?: string
-    subtitle?: string | null
-    description?: string | null
-    price_minor?: number | null
-    price_display?: string | null
-    availability_status?: string
-    item_data?: Json | null
-    inventory_count?: number | null
-    images?: string[]
-  } = { title, subtitle, description, price_minor, price_display, availability_status, item_data: item_data as Json | null, inventory_count }
-
-  // Handle image upload
-  if (aiImageUrl) {
-    updatePayload.images = [aiImageUrl]
-  } else if (image && image.size > 0) {
-    if (image.size > MAX_FILE_SIZE) {
-      throw new Error('Image must be less than 5MB')
-    }
-    if (!ACCEPTED_IMAGE_TYPES.includes(image.type)) {
-      throw new Error('Invalid image format. Only JPEG, PNG, and WebP are accepted.')
+export const deletePageItem = authActionClient
+  .schema(zfd.formData({ itemId: zfd.text() }))
+  .action(async ({ parsedInput: { itemId }, ctx: { supabase } }) => {
+    const { cookies } = await import('next/headers')
+    if ((await cookies()).get('demo_mode')?.value === '1') {
+      revalidatePath('/dashboard/pages')
+      return { success: true }
     }
 
-    const fileExt = image.name.split('.').pop()
-    const fileName = `page-items/${userData.user.id}-${Date.now()}.${fileExt}`
-    const { data: uploadData, error: uploadError } = await supabase.storage
-      .from('public-assets')
-      .upload(fileName, image)
-      
-    if (!uploadError && uploadData) {
-      const { data: publicUrlData } = supabase.storage.from('public-assets').getPublicUrl(fileName)
-      updatePayload.images = [publicUrlData.publicUrl]
-    } else {
-      throw new Error('Failed to upload image')
+    await supabase.from('page_items').delete().eq('id', itemId)
+    revalidatePath('/dashboard/pages')
+    return { success: true }
+  })
+
+export const updateItemAvailability = authActionClient
+  .schema(zfd.formData({ itemId: zfd.text(), status: zfd.text() }))
+  .action(async ({ parsedInput: { itemId, status }, ctx: { supabase } }) => {
+    const { cookies } = await import('next/headers')
+    if ((await cookies()).get('demo_mode')?.value === '1') {
+      revalidatePath('/dashboard/pages')
+      return { success: true }
     }
-  }
 
-  const { error } = await supabase
-    .from('page_items')
-    .update(updatePayload)
-    .eq('id', itemId)
+    await supabase
+      .from('page_items')
+      .update({ availability_status: status })
+      .eq('id', itemId)
 
-  if (error) throw new Error((error as Error).message)
-
-  revalidatePath('/dashboard/pages')
-}
-
-export async function deletePageItem(formData: FormData): Promise<void> {
-  const supabase = await createClient()
-  const itemId = formData.get('itemId') as string
-
-  const { data: userData } = await supabase.auth.getUser()
-  const { cookies } = await import('next/headers')
-  if ((await cookies()).get('demo_mode')?.value === '1') {
     revalidatePath('/dashboard/pages')
-    return
-  }
-
-  if (!userData?.user) throw new Error('Not authenticated')
-
-  await supabase.from('page_items').delete().eq('id', itemId)
-  revalidatePath('/dashboard/pages')
-}
-
-export async function updateItemAvailability(formData: FormData): Promise<void> {
-  const supabase = await createClient()
-  const itemId = formData.get('itemId') as string
-  const status = formData.get('status') as string
-
-  const { data: userData } = await supabase.auth.getUser()
-  const { cookies } = await import('next/headers')
-  if ((await cookies()).get('demo_mode')?.value === '1') {
-    revalidatePath('/dashboard/pages')
-    return
-  }
-
-  if (!userData?.user) throw new Error('Not authenticated')
-
-  await supabase
-    .from('page_items')
-    .update({ availability_status: status })
-    .eq('id', itemId)
-
-  revalidatePath('/dashboard/pages')
-  revalidatePath('/dashboard/manage/bookings')
-  revalidatePath('/dashboard/manage/properties')
-}
+    revalidatePath('/dashboard/manage/bookings')
+    revalidatePath('/dashboard/manage/properties')
+    return { success: true }
+  })
 
 // ─── Existing actions (unchanged) ────────────────────────────────────────────
 
-export async function togglePageStatus(formData: FormData) {
-  const supabase = await createClient()
-  const pageId = formData.get('pageId') as string
-  const currentStatus = formData.get('currentStatus') === 'true'
+export const togglePageStatus = authActionClient
+  .schema(zfd.formData({ pageId: zfd.text(), currentStatus: zfd.checkbox() }))
+  .action(async ({ parsedInput: { pageId, currentStatus }, ctx: { supabase } }) => {
+    if (pageId.startsWith('page-')) {
+      revalidatePath('/dashboard/pages')
+      return { success: true }
+    }
 
-  if (pageId.startsWith('page-')) {
+    await supabase
+      .from('location_pages')
+      .update({ is_published: !currentStatus })
+      .eq('id', pageId)
     revalidatePath('/dashboard/pages')
-    return
-  }
+    return { success: true }
+  })
 
-  await supabase
-    .from('location_pages')
-    .update({ is_published: !currentStatus })
-    .eq('id', pageId)
-  revalidatePath('/dashboard/pages')
-}
+export const deletePage = authActionClient
+  .schema(zfd.formData({ pageId: zfd.text() }))
+  .action(async ({ parsedInput: { pageId }, ctx: { supabase } }) => {
+    if (pageId.startsWith('page-')) {
+      revalidatePath('/dashboard/pages')
+      return { success: true }
+    }
 
-export async function deletePage(formData: FormData) {
-  const supabase = await createClient()
-  const pageId = formData.get('pageId') as string
-
-  if (pageId.startsWith('page-')) {
+    await supabase.from('location_pages').delete().eq('id', pageId)
     revalidatePath('/dashboard/pages')
-    return
-  }
-
-  await supabase.from('location_pages').delete().eq('id', pageId)
-  revalidatePath('/dashboard/pages')
-}
+    return { success: true }
+  })
 
 // ─── Booking actions ───────────────────────────────────────────────────────────
 
-export async function updateBookingStatus(formData: FormData): Promise<void> {
-  const supabase = await createClient()
-  const bookingId = formData.get('bookingId') as string
-  const status = formData.get('status') as string
+export const updateBookingStatus = authActionClient
+  .schema(zfd.formData({ bookingId: zfd.text(), status: zfd.text() }))
+  .action(async ({ parsedInput: { bookingId, status }, ctx: { supabase } }) => {
+    const { cookies } = await import('next/headers')
+    if ((await cookies()).get('demo_mode')?.value === '1') {
+      revalidatePath('/dashboard/pages')
+      return { success: true }
+    }
 
-  const { data: userData } = await supabase.auth.getUser()
-  const { cookies } = await import('next/headers')
-  if ((await cookies()).get('demo_mode')?.value === '1') {
-    revalidatePath('/dashboard/pages')
-    return
-  }
+    await supabase
+      .from('page_bookings')
+      .update({ status })
+      .eq('id', bookingId)
 
-  if (!userData?.user) throw new Error('Not authenticated')
-
-  await supabase
-    .from('page_bookings')
-    .update({ status })
-    .eq('id', bookingId)
-
-  revalidatePath('/dashboard/manage/bookings')
-}
+    revalidatePath('/dashboard/manage/bookings')
+    return { success: true }
+  })
 
 // ─── Inquiry actions ───────────────────────────────────────────────────────────
 
-export async function updateInquiryStatus(formData: FormData): Promise<void> {
-  const supabase = await createClient()
-  const inquiryId = formData.get('inquiryId') as string
-  const status = formData.get('status') as string
+export const updateInquiryStatus = authActionClient
+  .schema(zfd.formData({ inquiryId: zfd.text(), status: zfd.text() }))
+  .action(async ({ parsedInput: { inquiryId, status }, ctx: { supabase } }) => {
+    const { cookies } = await import('next/headers')
+    if ((await cookies()).get('demo_mode')?.value === '1') {
+      revalidatePath('/dashboard/pages')
+      return { success: true }
+    }
 
-  const { data: userData } = await supabase.auth.getUser()
-  const { cookies } = await import('next/headers')
-  if ((await cookies()).get('demo_mode')?.value === '1') {
-    revalidatePath('/dashboard/pages')
-    return
-  }
+    await supabase
+      .from('page_inquiries')
+      .update({ status })
+      .eq('id', inquiryId)
 
-  if (!userData?.user) throw new Error('Not authenticated')
-
-  await supabase
-    .from('page_inquiries')
-    .update({ status })
-    .eq('id', inquiryId)
-
-  revalidatePath('/dashboard/manage/properties')
-  revalidatePath('/dashboard/manage/quotes')
-}
+    revalidatePath('/dashboard/manage/properties')
+    revalidatePath('/dashboard/manage/quotes')
+    return { success: true }
+  })

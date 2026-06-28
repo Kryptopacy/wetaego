@@ -53,3 +53,6 @@ trash2/
 lint_output.txt
 lint_results.json
 lint.json
+# AI Agent Configuration
+.agents/
+

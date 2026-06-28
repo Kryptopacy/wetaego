@@ -14,6 +14,11 @@ import { waitUntil } from '@vercel/functions'
 import { z } from 'zod'
 import * as Sentry from '@sentry/nextjs'
 
+export type SafeResult<T> = 
+  | { data: T; serverError?: undefined; validationErrors?: undefined }
+  | { serverError: string; data?: undefined; validationErrors?: undefined }
+  | { validationErrors: Record<string, string[]>; data?: undefined; serverError?: undefined };
+
 const serviceRequestSchema = z.object({
   organization_id: z.string().min(1),
   location_id: z.string().min(1),
@@ -23,7 +28,7 @@ const serviceRequestSchema = z.object({
   urgency_tier: z.enum(['standard', 'critical', 'low']).default('standard')
 })
 
-export async function submitServiceRequest(formData: FormData) {
+export async function submitServiceRequest(formData: FormData): Promise<SafeResult<{ success: boolean }>> {
   try {
     const { checkRateLimit } = await import('@/lib/upstash');
     const cookieStore = await cookies();
@@ -78,24 +83,26 @@ export async function submitServiceRequest(formData: FormData) {
 
     // Fire WhatsApp Notification in the background without blocking the UI
     waitUntil(sendWhatsAppMessage(whatsappNumber, `[${urgencyTier.toUpperCase()}] Table ${tableId} needs a ${requestType}! ${customRequestText || ''}`))
+    
+    return { data: { success: true } };
   } catch (e: unknown) {
     Sentry.captureException(e)
-    throw e;
+    return { serverError: (e as Error).message || 'Failed to submit service request' };
   }
 }
 
-export async function processCheckout(
+export async function processCheckout(params: {
   organizationId: string,
   locationId: string,
   items: { id: string, name: string, quantity: number, price_minor: number }[],
   totalAmountMinor: number,
-  tipAmountMinor: number = 0,
+  tipAmountMinor?: number,
   tableIdentifier?: string,
   customerNote?: string,
   customerEmail?: string,
   paymentFractionMinor?: number,
-  paymentMethod: 'card' | 'transfer' = 'card',
-  discountAmountMinor: number = 0,
+  paymentMethod?: 'card' | 'transfer',
+  discountAmountMinor?: number,
   customerName?: string,
   customerPhone?: string,
   fulfillmentType?: 'table' | 'pickup' | 'delivery',
@@ -106,8 +113,16 @@ export async function processCheckout(
   idempotencyKey?: string,
   subtotalMinor?: number,
   taxTotalMinor?: number,
-  taxBreakdown?: any[]
-) {
+  taxBreakdown?: any[],
+  isUnevenSplit?: boolean
+}): Promise<SafeResult<{ checkoutUrl?: string, orderId: string, paymentMethod: string }>> {
+  const {
+    organizationId, locationId, items, totalAmountMinor, tipAmountMinor = 0,
+    tableIdentifier, customerNote, customerEmail, paymentFractionMinor,
+    paymentMethod = 'card', discountAmountMinor = 0, customerName, customerPhone,
+    fulfillmentType, deliveryInstructions, staffId, staffSubaccountOverride,
+    pageId, idempotencyKey, subtotalMinor, taxTotalMinor, taxBreakdown, isUnevenSplit
+  } = params;
   const supabase = await createClient()
 
   // --- Rate Limiting & Idempotency ---
@@ -214,7 +229,7 @@ export async function processCheckout(
   // 5. Initialize Paystack Transaction if Active and method is card
   const isPaystackLive = paySettings?.is_active && paySettings?.provider_account_id
   
-  if (isPaystackLive && paymentMethod !== 'transfer') {
+  if (isPaystackLive && paymentMethod !== 'transfer' && !isUnevenSplit) {
     // Use verified server total for Paystack — split payment uses fractional amount
     const chargeAmountMinor = paymentFractionMinor ?? verifiedTotalMinor
     const email = customerEmail || `order_${order.id}@ourmenuos.online`
@@ -246,7 +261,7 @@ export async function processCheckout(
       channels
     })
 
-    return { checkoutUrl, orderId: order.id }
+    return { data: { checkoutUrl, orderId: order.id, paymentMethod: 'card' } }
   }
 
   // Fallback to manual payment: trigger push notification immediately
@@ -254,7 +269,7 @@ export async function processCheckout(
   waitUntil(sendPushToOrg(organizationId, newOrderNotification(tableIdentifier || 'Takeaway', verifiedTotalMinor)))
 
   // Record platform fee for manual offline payment
-  if (verifiedTotalMinor > 0) {
+  if (verifiedTotalMinor > 0 && !isUnevenSplit && paymentMethod === 'transfer') {
     try {
       const platformFeesConfig = await getPlatformFees()
       const businessFeePercent = platformFeesConfig.business_subaccount || 5
@@ -274,7 +289,7 @@ export async function processCheckout(
     }
   }
 
-    return { orderId: order.id };
+    return { data: { orderId: order.id, paymentMethod: 'transfer' } };
   };
 
   if (idempotencyKey) {
@@ -284,16 +299,17 @@ export async function processCheckout(
   }
 }
 
-export async function callStaffFromAi(
+export async function callStaffFromAi(params: {
   orgId: string,
   locationId: string,
   tableIdentifier: string,
   requestType: 'waiter' | 'bill' | 'cleanup'
-) {
+}): Promise<SafeResult<{ success: boolean }>> {
+  const { orgId, locationId, tableIdentifier, requestType } = params;
   const supabase = await createClient()
 
   if (!orgId || !locationId || !tableIdentifier || !requestType) {
-    return { error: 'Missing required parameters' }
+    return { serverError: 'Missing required parameters' }
   }
 
   const { error } = await supabase.from('service_requests').insert({
@@ -303,7 +319,7 @@ export async function callStaffFromAi(
     request_type: requestType as RequestType,
   })
 
-  if (error) return { error: error.message }
+  if (error) return { serverError: error.message }
 
   // Fetch the location's configured WhatsApp number
   const { data: location } = await supabase
@@ -317,13 +333,14 @@ export async function callStaffFromAi(
   // Fire WhatsApp Notification in the background without blocking the UI
   waitUntil(sendWhatsAppMessage(whatsappNumber, `Table ${tableIdentifier} needs a ${requestType}!`))
 
-  return { success: true }
+  return { data: { success: true } }
 }
 
-export async function processExistingOrderPayment(
+export async function processExistingOrderPayment(params: {
   orderId: string,
   amountMinor: number
-): Promise<{ checkoutUrl?: string; error?: string }> {
+}): Promise<SafeResult<{ checkoutUrl?: string }>> {
+  const { orderId, amountMinor } = params;
   try {
     const supabase = await createClient()
 
@@ -334,7 +351,7 @@ export async function processExistingOrderPayment(
       .eq('id', orderId)
       .single()
 
-    if (orderError || !order) return { error: 'Order not found' }
+    if (orderError || !order) return { serverError: 'Order not found' }
 
     // Fetch payment settings for split
     const { data: paySettings } = await supabase
@@ -367,14 +384,15 @@ export async function processExistingOrderPayment(
       transactionChargeMinor
     })
 
-    return { checkoutUrl }
+    return { data: { checkoutUrl } }
   } catch (err: unknown) {
-    return { error: (err as Error).message || 'Failed to initialize payment' }
+    return { serverError: (err as Error).message || 'Failed to initialize payment' }
   }
 }
 
 
-export async function optInMarketing(orderId: string): Promise<{ success?: boolean; error?: string }> {
+export async function optInMarketing(params: { orderId: string }): Promise<SafeResult<{ success: boolean }>> {
+  const { orderId } = params;
   try {
     const supabase = await createClient()
 
@@ -385,7 +403,7 @@ export async function optInMarketing(orderId: string): Promise<{ success?: boole
       .single()
 
     if (!order || !order.customer_email) {
-      return { error: 'Order or customer email not found' }
+      return { serverError: 'Order or customer email not found' }
     }
 
     // Upsert into customer_profiles to enable marketing
@@ -400,9 +418,9 @@ export async function optInMarketing(orderId: string): Promise<{ success?: boole
 
     if (error) throw error
 
-    return { success: true }
+    return { data: { success: true } }
   } catch (err: unknown) {
-    return { error: err instanceof Error ? err.message : 'Failed to opt in' }
+    return { serverError: err instanceof Error ? err.message : 'Failed to opt in' }
   }
 }
 
@@ -421,7 +439,7 @@ const quoteSchema = z.object({
   })
 })
 
-export async function submitQuoteRequest(formData: FormData) {
+export async function submitQuoteRequest(formData: FormData): Promise<SafeResult<{ success: boolean, referenceNumber?: string }>> {
   try {
     const { checkRateLimit } = await import('@/lib/upstash');
     const cookieStore = await cookies();
@@ -463,9 +481,9 @@ export async function submitQuoteRequest(formData: FormData) {
 
     if (error) throw error
 
-    return { success: true, referenceNumber }
+    return { data: { success: true, referenceNumber } }
   } catch (err: unknown) {
     Sentry.captureException(err)
-    return { success: false, error: err instanceof Error ? err.message : 'Failed to submit quote request' }
+    return { serverError: err instanceof Error ? err.message : 'Failed to submit quote request' }
   }
 }

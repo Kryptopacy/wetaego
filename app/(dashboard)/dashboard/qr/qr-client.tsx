@@ -29,8 +29,8 @@ export function QrClient({ organizationId, orgLogo, locations, qrCodes, baseUrl 
     const res = await generateQrBatch(formData)
     setIsGenerating(false)
     
-    if (res?.error) {
-      toast.error(res.error)
+    if (res?.serverError || res?.validationErrors) {
+      toast.error(res?.serverError || 'Failed to generate QR batch')
     } else {
       toast.success('QR batch generated successfully!')
       if (organizationId === 'demo-org') {
@@ -127,7 +127,10 @@ export function QrClient({ organizationId, orgLogo, locations, qrCodes, baseUrl 
 
               {/* Delete Button (Hidden during print) */}
               <button 
-                onClick={async () => await deleteQrCode(qr.id)}
+                onClick={async () => {
+                  const res = await deleteQrCode({ qrId: qr.id })
+                  if (res?.serverError) toast.error(res.serverError)
+                }}
                 className="absolute top-4 right-4 p-2 rounded-full bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white opacity-0 group-hover:opacity-100 transition-all print:hidden"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
@@ -217,9 +220,9 @@ export function QrClient({ organizationId, orgLogo, locations, qrCodes, baseUrl 
               const qrId = assigningQr.id
               setAssignModalOpen(false)
               
-              const res = await assignQrTable(qrId, tableInput.trim() || null)
-              if (res?.error) {
-                toast.error(res.error)
+              const res = await assignQrTable({ qrId, tableIdentifier: tableInput.trim() || null })
+              if (res?.serverError || res?.validationErrors) {
+                toast.error(res?.serverError || 'Failed to assign table')
               } else {
                 toast.success('Table assigned successfully!')
               }

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { ActionForm } from '@/components/ActionForm'
 import { SubmitButton } from '@/components/submit-button'
 import { saveTax, deleteTax } from './taxes/actions'
+import { toast } from 'sonner'
 
 export function TaxesView({ locationId, taxes }: { locationId: string, taxes: any[] }) {
   const [isAdding, setIsAdding] = useState(false)
@@ -27,7 +28,8 @@ export function TaxesView({ locationId, taxes }: { locationId: string, taxes: an
         <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
           <ActionForm action={async (formData) => {
             const res = await saveTax(formData)
-            if (res.success) setIsAdding(false)
+            if (res?.data?.success) setIsAdding(false)
+            return res
           }} className="flex flex-col gap-4">
             <input type="hidden" name="location_id" value={locationId} />
             <input type="hidden" name="is_active" value="true" />
@@ -77,7 +79,10 @@ export function TaxesView({ locationId, taxes }: { locationId: string, taxes: an
                   {tax.is_active ? 'Active' : 'Inactive'}
                 </span>
                 <button 
-                  onClick={() => deleteTax(tax.id, locationId)}
+                  onClick={async () => {
+                    const res = await deleteTax({ taxId: tax.id, locationId })
+                    if (res?.serverError || res?.validationErrors) toast.error(res?.serverError || 'Failed to delete')
+                  }}
                   className="text-red-500 hover:text-red-400 text-sm font-medium"
                 >
                   Delete

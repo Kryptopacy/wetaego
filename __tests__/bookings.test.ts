@@ -47,7 +47,12 @@ describe('Booking Flow (updateBookingStatus)', () => {
   it('fails if not authenticated', async () => {
     mockAuthGetUser.mockResolvedValueOnce({ data: null, error: new Error('Not logged in') })
 
-    await expect(updateBookingStatus('booking-123', 'mark_paid')).rejects.toThrow('Not authenticated')
+    const fd = new FormData()
+    fd.append('bookingId', 'booking-123')
+    fd.append('action', 'mark_paid')
+    
+    const result = await updateBookingStatus(fd)
+    expect(result?.serverError).toContain('Unauthorized')
   })
 
   it('updates booking to paid successfully', async () => {
@@ -63,7 +68,11 @@ describe('Booking Flow (updateBookingStatus)', () => {
       data: { role: 'owner' }
     })
 
-    await updateBookingStatus('123e4567-e89b-12d3-a456-426614174000', 'mark_paid')
+    const fd = new FormData()
+    fd.append('bookingId', '123e4567-e89b-12d3-a456-426614174000')
+    fd.append('action', 'mark_paid')
+    
+    await updateBookingStatus(fd)
 
     expect(mockUpdate).toHaveBeenCalledWith({ payment_status: 'paid', status: 'confirmed' })
     expect(mockEq).toHaveBeenCalledWith('id', '123e4567-e89b-12d3-a456-426614174000')
@@ -82,7 +91,11 @@ describe('Booking Flow (updateBookingStatus)', () => {
       data: { role: 'owner' }
     })
 
-    await updateBookingStatus('123e4567-e89b-12d3-a456-426614174000', 'cancel')
+    const fd = new FormData()
+    fd.append('bookingId', '123e4567-e89b-12d3-a456-426614174000')
+    fd.append('action', 'cancel')
+    
+    await updateBookingStatus(fd)
 
     expect(mockUpdate).toHaveBeenCalledWith({ status: 'cancelled' })
     expect(mockEq).toHaveBeenCalledWith('id', '123e4567-e89b-12d3-a456-426614174000')

@@ -119,6 +119,14 @@ export function CheckoutModal({
   pageBillingMode,
   locationTaxes = []
 }: CheckoutModalProps) {
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) onClose()
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen, onClose])
+
   const [isCheckingOut, setIsCheckingOut] = useState(false)
   const [tableNumber, setTableNumber] = useState(tableIdentifier || '')
   const [isFetchingLocation, setIsFetchingLocation] = useState(false)
@@ -138,6 +146,7 @@ export function CheckoutModal({
   const [deliveryInstructions, setDeliveryInstructions] = useState('')
   
   const [splitCount, setSplitCount] = useState(1)
+  const [splitType, setSplitType] = useState<'even' | 'uneven'>('even')
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'transfer'>(paymentIsLive ? 'card' : 'transfer')
 
   // Auto-fill customer data on load
@@ -276,21 +285,27 @@ export function CheckoutModal({
       posthog.capture('checkout_completed', { organizationId, locationId, totalAmountMinor: finalTotalMinor })
       
       let paymentFractionMinor: number | undefined = undefined
-      if (splitCount > 1) {
+      if (splitCount > 1 && splitType === 'even') {
         paymentFractionMinor = Math.ceil(finalTotalMinor / splitCount)
       }
 
-      const { checkoutUrl, orderId, error } = (await processCheckout(
-        organizationId, locationId, items, finalTotalMinor, 0, tableNumber,
-        customerNote, customerEmail, paymentFractionMinor, paymentMethod, discountAmountMinor,
-        customerName, customerPhone, fulfillmentType, deliveryInstructions, undefined, undefined, pageId,
-        undefined, discountedSubtotalMinor, taxTotalMinor, taxBreakdown
-      )) as { checkoutUrl?: string, orderId?: string, error?: string }
+      const isUnevenSplit = splitCount > 1 && splitType === 'uneven'
 
-      if (error) {
-        toast.error(error || 'Checkout failed')
+      const result = await processCheckout({
+        organizationId, locationId, items, totalAmountMinor: finalTotalMinor, tipAmountMinor: 0,
+        tableIdentifier: tableNumber, customerNote, customerEmail, paymentFractionMinor,
+        paymentMethod, discountAmountMinor, customerName, customerPhone,
+        fulfillmentType, deliveryInstructions, staffId: undefined, staffSubaccountOverride: undefined,
+        pageId, idempotencyKey: undefined, subtotalMinor: discountedSubtotalMinor, taxTotalMinor, taxBreakdown,
+        isUnevenSplit
+      })
+
+      if (result?.serverError || result?.validationErrors) {
+        toast.error(result?.serverError || 'Checkout failed')
         return
       }
+
+      const { checkoutUrl, orderId } = result.data || {}
 
       clearCart()
       localStorage.setItem('activeOrderId', orderId as string)
@@ -309,7 +324,8 @@ export function CheckoutModal({
         const currentSlug = window.location.pathname.split('/')[2]
         window.location.href = `/m/${currentSlug}/order/${orderId}`
       } else if (splitCount > 1) {
-        window.location.href = `/pay/${orderId}/share?split=${splitCount}`
+        const currentSlug = window.location.pathname.split('/')[2]
+        window.location.href = `/pay/${orderId}/share?split=${splitCount}&slug=${currentSlug}`
       } else if (checkoutUrl) {
         window.location.href = checkoutUrl
       } else {
@@ -349,11 +365,17 @@ export function CheckoutModal({
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center p-0 sm:p-4 pointer-events-auto">
+        <div 
+          className="fixed inset-0 z-50 flex items-end justify-center sm:items-center p-0 sm:p-4 pointer-events-auto"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="checkout-modal-title"
+        >
           <motion.div 
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="absolute inset-0 bg-zinc-950/60 backdrop-blur-md"
             onClick={onClose}
+            aria-hidden="true"
           />
           
           <motion.form
@@ -363,7 +385,7 @@ export function CheckoutModal({
             className="w-full max-w-md bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-t-[2rem] sm:rounded-[2rem] p-6 shadow-2xl relative z-10 max-h-[90vh] flex flex-col"
           >
             <div className="flex justify-between items-center mb-6 shrink-0">
-              <h2 className="text-2xl font-black text-zinc-900 dark:text-white tracking-tight">Checkout</h2>
+              <h2 id="checkout-modal-title" className="text-2xl font-black text-zinc-900 dark:text-white tracking-tight">Checkout</h2>
               <button 
                 type="button"
                 aria-label="Close Checkout"
@@ -618,18 +640,42 @@ export function CheckoutModal({
               </div>
 
               {/* Split Bill */}
-              <div className="flex items-center justify-between p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
-                <div>
-                  <span className="text-[14px] font-bold text-zinc-900 dark:text-white block">Split Bill?</span>
-                  {splitCount > 1 && (
-                    <span className="text-xs text-zinc-500">{formatCurrency(Math.ceil(finalTotalMinor / splitCount))} per person</span>
-                  )}
+              <div className="flex flex-col gap-3 p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="text-[14px] font-bold text-zinc-900 dark:text-white block">Split Bill?</span>
+                    {splitCount > 1 && splitType === 'even' && (
+                      <span className="text-xs text-zinc-500">{formatCurrency(Math.ceil(finalTotalMinor / splitCount))} per person</span>
+                    )}
+                    {splitCount > 1 && splitType === 'uneven' && (
+                      <span className="text-xs text-zinc-500">Group members choose amount</span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-3 bg-zinc-50 dark:bg-zinc-800 rounded-full p-1 border border-zinc-200 dark:border-zinc-700">
+                    <button type="button" aria-label="Decrease split" onClick={() => setSplitCount(Math.max(1, splitCount - 1))} disabled={splitCount <= 1 || paymentMethod === 'transfer'} className="w-8 h-8 flex items-center justify-center bg-white dark:bg-zinc-700 rounded-full text-zinc-600 dark:text-zinc-300 shadow-sm disabled:opacity-50"><Minus className="w-4 h-4" /></button>
+                    <span className="text-zinc-900 dark:text-white font-bold w-4 text-center">{splitCount}</span>
+                    <button type="button" aria-label="Increase split" onClick={() => setSplitCount(Math.min(10, splitCount + 1))} disabled={splitCount >= 10 || paymentMethod === 'transfer'} className="w-8 h-8 flex items-center justify-center bg-white dark:bg-zinc-700 rounded-full text-zinc-600 dark:text-zinc-300 shadow-sm disabled:opacity-50"><Plus className="w-4 h-4" /></button>
+                  </div>
                 </div>
-                <div className="flex items-center gap-3 bg-zinc-50 dark:bg-zinc-800 rounded-full p-1 border border-zinc-200 dark:border-zinc-700">
-                  <button type="button" aria-label="Decrease split" onClick={() => setSplitCount(Math.max(1, splitCount - 1))} disabled={splitCount <= 1 || paymentMethod === 'transfer'} className="w-8 h-8 flex items-center justify-center bg-white dark:bg-zinc-700 rounded-full text-zinc-600 dark:text-zinc-300 shadow-sm disabled:opacity-50"><Minus className="w-4 h-4" /></button>
-                  <span className="text-zinc-900 dark:text-white font-bold w-4 text-center">{splitCount}</span>
-                  <button type="button" aria-label="Increase split" onClick={() => setSplitCount(Math.min(10, splitCount + 1))} disabled={splitCount >= 10 || paymentMethod === 'transfer'} className="w-8 h-8 flex items-center justify-center bg-white dark:bg-zinc-700 rounded-full text-zinc-600 dark:text-zinc-300 shadow-sm disabled:opacity-50"><Plus className="w-4 h-4" /></button>
-                </div>
+
+                {splitCount > 1 && (
+                  <div className="flex bg-zinc-100 dark:bg-zinc-800 p-1 rounded-xl">
+                    <button
+                      type="button"
+                      onClick={() => setSplitType('even')}
+                      className={`flex-1 text-[13px] font-bold py-2 rounded-lg transition-colors ${splitType === 'even' ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'}`}
+                    >
+                      Even Split
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSplitType('uneven')}
+                      className={`flex-1 text-[13px] font-bold py-2 rounded-lg transition-colors ${splitType === 'uneven' ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'}`}
+                    >
+                      Uneven / Custom
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* Payment Method / Action Buttons (Extracted Component) */}

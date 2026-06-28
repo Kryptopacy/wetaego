@@ -104,19 +104,19 @@ export function AIChat({
         }
 
         if (toolCall.toolName === 'callStaff') {
-          const { requestType } = (toolCall as unknown as { args: { requestType: Extract<Parameters<typeof callStaffFromAi>[3], string> } }).args
-          const res = await callStaffFromAi(
-            organizationId,
+          const { requestType } = (toolCall as unknown as { args: { requestType: 'waiter' | 'bill' | 'cleanup' } }).args
+          const res = await callStaffFromAi({
+            orgId: organizationId,
             locationId,
-            tableIdentifier || 'QR Scan',
+            tableIdentifier: tableIdentifier || 'QR Scan',
             requestType
-          )
-          if (res.success) {
+          })
+          if (res?.data?.success) {
             toast.success(`Called staff for ${requestType}`)
             addToolResult({ tool: toolCall.toolName as never, toolCallId: toolCall.toolCallId, output: `Successfully requested ${requestType} service.` })
             return
           }
-          addToolResult({ tool: toolCall.toolName as never, toolCallId: toolCall.toolCallId, output: `Failed to request service: ${res.error}` })
+          addToolResult({ tool: toolCall.toolName as never, toolCallId: toolCall.toolCallId, output: `Failed to request service: ${res.serverError || 'Unknown error'}` })
           return
         }
 

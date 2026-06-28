@@ -1,77 +1,58 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
+import { zfd } from 'zod-form-data'
+import { authActionClient } from '@/lib/safe-action'
 
-const taxSchema = z.object({
-  id: z.string().uuid().optional(),
-  location_id: z.string().uuid(),
-  name: z.string().min(1, 'Tax name is required'),
-  percentage: z.number().min(0, 'Percentage cannot be negative'),
-  is_active: z.boolean().default(true)
-})
-
-export async function saveTax(formData: FormData) {
-  try {
-    const supabase = await createClient()
-    const { data: userData } = await supabase.auth.getUser()
-    if (!userData?.user) throw new Error('Not authenticated')
-
-    const parsed = taxSchema.safeParse({
-      id: formData.get('id') || undefined,
-      location_id: formData.get('location_id'),
-      name: formData.get('name'),
-      percentage: parseFloat(formData.get('percentage') as string),
-      is_active: formData.get('is_active') === 'true'
-    })
-
-    if (!parsed.success) return { error: parsed.error.issues[0].message }
-
-    const { id, location_id, name, percentage, is_active } = parsed.data
-
+export const saveTax = authActionClient
+  .schema(zfd.formData({
+    id: zfd.text(z.string().uuid().optional()),
+    location_id: zfd.text(z.string().uuid()),
+    name: zfd.text(z.string().min(1, 'Tax name is required')),
+    percentage: zfd.numeric(z.number().min(0, 'Percentage cannot be negative')),
+    is_active: zfd.checkbox().default(true)
+  }))
+  .action(async ({ parsedInput: { id, location_id, name, percentage, is_active }, ctx: { supabase } }) => {
     if (id) {
       // Update
-      const { error } = await supabase
-        .from('location_taxes' as any)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error } = await (supabase as any)
+        .from('location_taxes')
         .update({ name, percentage, is_active })
         .eq('id', id)
         .eq('location_id', location_id)
       
-      if (error) throw error
+      if (error) throw new Error(error.message || 'Failed to update tax')
     } else {
       // Insert
-      const { error } = await supabase
-        .from('location_taxes' as any)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error } = await (supabase as any)
+        .from('location_taxes')
         .insert({ location_id, name, percentage, is_active })
       
-      if (error) throw error
+      if (error) throw new Error(error.message || 'Failed to insert tax')
     }
 
     revalidatePath('/dashboard/settings')
     return { success: true }
-  } catch (e: any) {
-    return { error: e.message || 'Failed to save tax' }
-  }
-}
+  })
 
-export async function deleteTax(taxId: string, locationId: string) {
-  try {
-    const supabase = await createClient()
-    const { data: userData } = await supabase.auth.getUser()
-    if (!userData?.user) throw new Error('Not authenticated')
-
-    const { error } = await supabase
-      .from('location_taxes' as any)
+export const deleteTax = authActionClient
+  .schema(z.object({
+    taxId: z.string().uuid(),
+    locationId: z.string().uuid()
+  }))
+  .action(async ({ parsedInput: { taxId, locationId }, ctx: { supabase } }) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase as any)
+      .from('location_taxes')
       .delete()
       .eq('id', taxId)
       .eq('location_id', locationId)
 
-    if (error) throw error
+    if (error) throw new Error(error.message || 'Failed to delete tax')
 
     revalidatePath('/dashboard/settings')
     return { success: true }
-  } catch (e: any) {
-    return { error: e.message || 'Failed to delete tax' }
-  }
-}
+  })

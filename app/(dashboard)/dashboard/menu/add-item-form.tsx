@@ -80,8 +80,8 @@ export function AddItemForm({ orgId, categoryId, categoryName }: { orgId: string
 
   async function handleSubmit(formData: FormData) {
     const res = await createItem(formData)
-    if (res?.error) {
-      toast.error(res.error)
+    if (res?.serverError || res?.validationErrors) {
+      toast.error(res?.serverError || 'Validation error');
     } else {
       toast.success('Item added successfully!')
       setName('')

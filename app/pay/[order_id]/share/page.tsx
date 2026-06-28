@@ -15,6 +15,7 @@ export default function SharingHubPage({
   const { order_id } = use(params)
   const searchParams = useSearchParams()
   const splitCount = parseInt(searchParams.get('split') || '1')
+  const slug = searchParams.get('slug')
   
   const [origin, setOrigin] = useState('')
 
@@ -98,10 +99,18 @@ export default function SharingHubPage({
             </button>
             <button 
               onClick={() => window.location.href = `/pay/${order_id}?split=${splitCount}`}
-              className="w-full py-3 text-zinc-500 text-sm font-medium hover:text-white transition-colors"
+              className="w-full bg-zinc-900 text-zinc-400 font-bold py-4 rounded-xl hover:text-white transition-colors border border-zinc-800"
             >
-              Proceed to my payment
+              Go to Payment Page
             </button>
+            {slug && (
+              <button 
+                onClick={() => window.location.href = `/m/${slug}`}
+                className="w-full bg-transparent text-zinc-500 font-medium py-3 rounded-xl hover:text-zinc-300 transition-colors mt-2"
+              >
+                Return to Menu
+              </button>
+            )}
           </div>
         </div>
       </motion.div>

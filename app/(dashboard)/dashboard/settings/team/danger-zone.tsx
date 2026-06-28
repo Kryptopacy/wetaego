@@ -18,8 +18,8 @@ export default function DangerZone({ orgId, isOwner }: { orgId: string, isOwner:
 
     setIsDeleting(true)
     try {
-      const res = await deleteOrganizationAction(orgId)
-      if (res.error) throw new Error(res.error)
+      const res = await deleteOrganizationAction({ orgId })
+      if (res?.serverError || res?.validationErrors) throw new Error(res?.serverError || 'Failed to delete organization')
       toast.success('Organization deleted successfully.')
       router.push('/dashboard') // Or landing page if they have no other orgs
     } catch (err: unknown) {

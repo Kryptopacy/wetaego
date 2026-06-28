@@ -80,8 +80,16 @@ export default async function SharedPaymentPage({
 
   return (
     <div className="min-h-screen bg-black font-sans pb-24">
-      <div className="bg-zinc-900 border-b border-zinc-800 p-6 pt-12">
-        <div className="max-w-md mx-auto">
+      <div className="bg-zinc-900 border-b border-zinc-800 p-6 pt-12 relative">
+        <Link 
+          href={`/m/${orgSlug}`} 
+          className="absolute top-6 left-6 text-zinc-500 hover:text-white transition-colors"
+        >
+          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+        </Link>
+        <div className="max-w-md mx-auto pt-4">
           <p className="text-zinc-400 text-sm font-medium uppercase tracking-widest mb-1">Paying at</p>
           <h1 className="text-2xl font-black text-white truncate">{orgName}</h1>
           <div className="mt-4 flex items-center gap-2">

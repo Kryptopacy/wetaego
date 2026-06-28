@@ -20,6 +20,7 @@ export default async function OrdersPage() {
   let menuItems: Database['public']['Tables']['menu_items']['Row'][] = []
   let activeLocationId = ''
   let billingMode = 'standard_checkout'
+  let templateType = 'catalog'
 
   if (userId) {
     // Check if user is a member of an organization
@@ -67,15 +68,17 @@ export default async function OrdersPage() {
         
         serviceRequests = requestsData || []
 
-        // Fetch billing mode
+        // Fetch billing mode and template type
         const { data: pageData } = await supabase
           .from('location_pages')
-          .select('billing_mode')
+          .select('billing_mode, template_type')
           .eq('location_id', activeLocationId)
+          .eq('is_published', true)
           .limit(1)
           .single()
         
         billingMode = pageData?.billing_mode || 'standard_checkout'
+        templateType = pageData?.template_type || 'catalog'
       }
 
       // Fetch Menu Items (usually org-wide)
@@ -110,6 +113,7 @@ export default async function OrdersPage() {
           initialMenuItems={menuItems}
           currentUserId={userId!}
           billingMode={billingMode}
+          templateType={templateType}
         />
       ) : (
         <p className="text-zinc-500">Please create an organization and location first.</p>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useOptimistic, startTransition, useState, useMemo } from 'react'
+import { useOptimistic, startTransition, useState, useMemo, useEffect } from 'react'
 import { formatCurrency } from '@/lib/utils/currency'
 import { UIOrder } from '@/lib/types/frontend'
 import { Printer } from 'lucide-react'
@@ -11,13 +11,14 @@ interface ActiveOrdersGridProps {
   activeOrders: UIOrder[]
   currentUserId: string
   billingMode: string
+  templateType?: string
   onClaimOrder: (id: string) => Promise<void>
   onMarkPaidOffline: (id: string) => Promise<void>
   onCompleteOrder: (id: string) => Promise<void>
   onCancelOrder: (id: string, reason: string, restock: boolean) => Promise<void>
 }
 
-export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, onClaimOrder, onMarkPaidOffline, onCompleteOrder, onCancelOrder }: ActiveOrdersGridProps) {
+export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, templateType, onClaimOrder, onMarkPaidOffline, onCompleteOrder, onCancelOrder }: ActiveOrdersGridProps) {
   const [optimisticOrders, addOptimisticOrder] = useOptimistic(
     activeOrders,
     (state: UIOrder[], updatedOrder: Partial<UIOrder> & { id: string }) => {
@@ -32,6 +33,14 @@ export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, onC
 
   const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'paid' | 'preparing'>('all')
   const [searchQuery, setSearchQuery] = useState('')
+  const [, setTick] = useState(0)
+
+  // Force re-render every 30 seconds to update SLA timers
+  useEffect(() => {
+    if (templateType !== 'restaurant') return
+    const interval = setInterval(() => setTick(t => t + 1), 30000)
+    return () => clearInterval(interval)
+  }, [templateType])
 
   const filteredOrders = useMemo(() => {
     return optimisticOrders.filter(order => {
@@ -115,6 +124,22 @@ export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, onC
                       <span className={`text-xs font-medium px-2 py-1 rounded-full ${order.status === 'paid' ? 'bg-green-500/20 text-green-400' : 'bg-zinc-800 text-zinc-400'}`}>
                         {order.status.toUpperCase()}
                       </span>
+                      
+                      {/* KDS SLA Timer */}
+                      {templateType === 'restaurant' && order.status !== 'pending' && (
+                        <div className="mt-2 text-right">
+                          {(() => {
+                            const waitMins = Math.floor((Date.now() - new Date(order.created_at).getTime()) / 60000)
+                            const isWarning = waitMins >= 10 && waitMins < 15
+                            const isCritical = waitMins >= 15
+                            return (
+                              <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-bold border ${isCritical ? 'bg-red-500/20 text-red-400 border-red-500/30 animate-pulse' : isWarning ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' : 'bg-zinc-800 text-zinc-400 border-zinc-700'}`}>
+                                ⏱ {waitMins}m waiting
+                              </span>
+                            )
+                          })()}
+                        </div>
+                      )}
                     </div>
                     <button 
                       onClick={() => printOrder(order, { mode, ipAddress })}
@@ -143,7 +168,7 @@ export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, onC
                   </div>
                 )}
 
-                <div className="flex justify-between items-center mt-4 pt-4 border-t border-zinc-800/50">
+                <div className={`flex justify-between items-center mt-4 pt-4 border-t border-zinc-800/50 ${templateType === 'restaurant' ? 'flex-col gap-4 sm:flex-row' : ''}`}>
                   <button
                     onClick={() => {
                       const reason = window.prompt('Reason for cancellation (e.g. Sold out, Guest left)?')
@@ -158,7 +183,7 @@ export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, onC
                   >
                     Reject Order
                   </button>
-                  <div className="flex items-center gap-3">
+                  <div className={`flex items-center gap-3 ${templateType === 'restaurant' ? 'w-full sm:w-auto flex-col sm:flex-row' : ''}`}>
                     {(!order.assigned_staff_id && (order.status === 'paid' || (order.status === 'pending' && billingMode === 'table_service'))) && (
                       <button 
                         onClick={() => {
@@ -212,9 +237,9 @@ export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, onC
                           })
                           await onCompleteOrder(order.id)
                         }}
-                        className="px-6 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium transition-colors"
+                        className={`px-6 py-2 rounded-lg font-medium transition-colors ${templateType === 'restaurant' ? 'w-full bg-emerald-600 hover:bg-emerald-500 text-white text-lg py-4 shadow-[0_0_15px_rgba(16,185,129,0.3)]' : 'bg-blue-600 hover:bg-blue-500 text-white'}`}
                       >
-                        Mark as Completed
+                        {templateType === 'restaurant' ? 'Bump (Complete)' : 'Mark as Completed'}
                       </button>
                     )}
                     {order.status === 'preparing' && order.assigned_staff_id !== currentUserId && (

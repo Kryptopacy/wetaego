@@ -1,55 +1,44 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
+import { zfd } from 'zod-form-data'
+import { authActionClient } from '@/lib/safe-action'
 
-const assignQrSchema = z.object({
-  qrId: z.string().uuid(),
-  tableIdentifier: z.string().min(1),
-  destinationPath: z.string().min(1)
-})
+export const assignQrCode = authActionClient
+  .schema(zfd.formData({
+    qr_id: zfd.text(z.string().uuid()),
+    table_identifier: zfd.text(z.string().min(1)),
+    destination_path: zfd.text(z.string().min(1))
+  }))
+  .action(async ({ parsedInput: { qr_id: qrId, table_identifier: tableIdentifier, destination_path: destinationPath }, ctx: { supabase, user } }) => {
+    const { data: qrData } = await supabase.from('qr_codes').select('location_id').eq('id', qrId).single()
+    if (!qrData) throw new Error('QR Code not found')
 
-export async function assignQrCode(formData: FormData) {
-  const supabase = await createClient()
-  
-  const qrId = formData.get('qr_id') as string
-  const tableIdentifier = formData.get('table_identifier') as string
-  const destinationPath = formData.get('destination_path') as string
-  
-  const parsed = assignQrSchema.safeParse({ qrId, tableIdentifier, destinationPath })
-  if (!parsed.success) return { error: 'Invalid parameters' }
+    const { data: loc } = await supabase.from('locations').select('organization_id').eq('id', qrData.location_id).single()
+    if (!loc) throw new Error('Location not found')
 
-  const { data: userData, error: authError } = await supabase.auth.getUser()
-  if (authError || !userData?.user) return { error: 'Not authenticated' }
+    const { data: member } = await supabase.from('organization_members').select('role').eq('organization_id', loc.organization_id).eq('user_id', user.id).single()
+    let isAuthorized = !!member
+    if (!member) {
+      const { data: org } = await supabase.from('organizations').select('id').eq('id', loc.organization_id).eq('created_by', user.id).single()
+      isAuthorized = !!org
+    }
+    if (!isAuthorized) throw new Error('Unauthorized')
 
-  const { data: qrData } = await supabase.from('qr_codes').select('location_id').eq('id', qrId).single()
-  if (!qrData) return { error: 'QR Code not found' }
+    const { error } = await supabase
+      .from('qr_codes')
+      .update({ 
+        table_identifier: tableIdentifier,
+        destination_path: destinationPath
+      })
+      .eq('id', qrId)
 
-  const { data: loc } = await supabase.from('locations').select('organization_id').eq('id', qrData.location_id).single()
-  if (!loc) return { error: 'Location not found' }
+    if (error) {
+      throw new Error((error as Error).message)
+    }
 
-  const { data: member } = await supabase.from('organization_members').select('role').eq('organization_id', loc.organization_id).eq('user_id', userData.user.id).single()
-  let isAuthorized = !!member
-  if (!member) {
-    const { data: org } = await supabase.from('organizations').select('id').eq('id', loc.organization_id).eq('created_by', userData.user.id).single()
-    isAuthorized = !!org
-  }
-  if (!isAuthorized) return { error: 'Unauthorized' }
-
-  const { error } = await supabase
-    .from('qr_codes')
-    .update({ 
-      table_identifier: tableIdentifier,
-      destination_path: destinationPath
-    })
-    .eq('id', qrId)
-
-  if (error) {
-    return { error: (error as Error).message }
-  }
-
-  revalidatePath('/dashboard/qr')
-  redirect('/dashboard/qr') // Success, go back to batch generator
-}
+    revalidatePath('/dashboard/qr')
+    redirect('/dashboard/qr') // Success, go back to batch generator
+  })

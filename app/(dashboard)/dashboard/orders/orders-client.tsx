@@ -35,9 +35,10 @@ interface OrdersClientProps {
   initialMenuItems?: MenuItemRow[]
   currentUserId: string
   billingMode?: string
+  templateType?: string
 }
 
-export function OrdersClient({ organizationId, locationId, initialOrders, initialServiceRequests, initialMenuItems = [], currentUserId, billingMode = 'standard_checkout' }: OrdersClientProps) {
+export function OrdersClient({ organizationId, locationId, initialOrders, initialServiceRequests, initialMenuItems = [], currentUserId, billingMode = 'standard_checkout', templateType = 'catalog' }: OrdersClientProps) {
   const supabase = createClient()
   const [orders, setOrders] = useState(initialOrders)
   const [serviceRequests, setServiceRequests] = useState(initialServiceRequests)
@@ -58,11 +59,11 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
         const { error: srError } = await supabase.from('service_requests').update({ status: 'resolved' }).eq('id', action.payload.id)
         return !srError
       case 'markOrderPaid':
-        const resPaid = await markOrderPaidOffline(action.payload.orderId)
-        return !!resPaid.success
+        const resPaid = await markOrderPaidOffline({ orderId: action.payload.orderId })
+        return !resPaid?.serverError && !resPaid?.validationErrors
       case 'completeOrder':
-        const resComp = await completeOrderAction(action.payload.orderId)
-        return !!resComp.success
+        const resComp = await completeOrderAction({ orderId: action.payload.orderId })
+        return !resComp?.serverError && !resComp?.validationErrors
       default:
         return true
     }
@@ -139,7 +140,7 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
         filter: `organization_id=eq.${organizationId}`
       }, (payload: unknown) => {
         const itemPayload = payload as MenuItemPayload
-        setMenuItems((prev) => prev.map(item => item.id === itemPayload.new.id ? { ...item, ...itemPayload.new } : item))
+        setMenuItems((prev: MenuItemRow[]) => prev.map((item: MenuItemRow) => item.id === itemPayload.new.id ? { ...item, ...itemPayload.new } : item))
       })
       .subscribe()
 
@@ -149,6 +150,71 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
       supabase.removeChannel(menuSubscription)
     }
   }, [organizationId, locationId, supabase])  
+
+  // Global KDS Hotkeys (Only for restaurant template)
+  useEffect(() => {
+    if (templateType !== 'restaurant') return
+    
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger if user is typing in an input
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement).tagName)) return
+      
+      switch (e.key) {
+        case 'm':
+        case 'M':
+          e.preventDefault()
+          setActiveTab('stock')
+          break
+        case 'o':
+        case 'O':
+          e.preventDefault()
+          setActiveTab('orders')
+          break
+        case 'p':
+        case 'P':
+          e.preventDefault()
+          // Automatically print the oldest active order
+          const printOrderObj = orders.find(o => o.status !== 'completed' && o.status !== 'cancelled')
+          if (printOrderObj) {
+            printOrder(printOrderObj, { mode, ipAddress, businessName: 'OurMenu OS' })
+          }
+          break
+        case ' ': // Spacebar
+          e.preventDefault()
+          // Fast Claim / Complete oldest pending/preparing order
+          const claimable = orders.find(o => o.status === 'pending' || (o.status === 'paid' && !o.assigned_staff_id) || (o.status === 'preparing' && o.assigned_staff_id === currentUserId))
+          if (claimable) {
+            if (claimable.status === 'preparing') {
+               handleCompleteOrder(claimable.id)
+            } else {
+               // Simulate button click to prompt for time (or default to 15m for hotkey)
+               handleClaimOrderFast(claimable.id)
+            }
+          }
+          break
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [templateType, orders, currentUserId, mode, ipAddress])
+
+  const handleClaimOrderFast = async (orderId: string) => {
+    // Fast path for hotkey
+    await executeOrQueue(
+      { type: 'claimOrder', payload: { orderId, minutes: 15 } },
+      () => {},
+      async () => {
+        const { data, error } = await supabase.rpc('claim_order', {
+          p_order_id: orderId,
+          p_prep_time_minutes: 15
+        })
+        if (error) return false
+        if (data !== false) toast.success('Order claimed successfully!')
+        return true
+      }
+    )
+  }
 
   const urgencyWeight: Record<string, number> = { 'critical': 3, 'standard': 2, 'low': 1 }
   const basePendingRequests = serviceRequests
@@ -173,7 +239,7 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
 
     await executeOrQueue(
       { type: 'toggleStock', payload: { itemId, newStatus } },
-      () => setMenuItems(prev => prev.map(i => i.id === itemId ? { ...i, availability_status: newStatus } : i)),
+      () => setMenuItems((prev: MenuItemRow[]) => prev.map((i: MenuItemRow) => i.id === itemId ? { ...i, availability_status: newStatus } : i)),
       async () => {
         const { error } = await supabase.from('menu_items').update({ availability_status: newStatus }).eq('id', itemId)
         if (error) {
@@ -224,8 +290,8 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
       { type: 'markOrderPaid', payload: { orderId } },
       () => {}, // Handled optimistically inside ActiveOrdersGrid
       async () => {
-        const res = await markOrderPaidOffline(orderId)
-        if (res.error) {
+        const res = await markOrderPaidOffline({ orderId })
+        if (res?.serverError || res?.validationErrors) {
           toast.error('Failed to confirm payment')
           return false
         }
@@ -240,8 +306,8 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
       { type: 'completeOrder', payload: { orderId } },
       () => {}, // Handled optimistically inside ActiveOrdersGrid
       async () => {
-        const res = await completeOrderAction(orderId)
-        if (res.error) {
+        const res = await completeOrderAction({ orderId })
+        if (res?.serverError || res?.validationErrors) {
           toast.error('Failed to complete order')
           return false
         }
@@ -264,8 +330,8 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
       { type: 'cancelOrder', payload: { orderId, reason, restock } },
       () => {}, 
       async () => {
-        const res = await cancelOrderAction(orderId, reason, restock)
-        if (res.error) {
+        const res = await cancelOrderAction({ orderId, reason, restock })
+        if (res?.serverError || res?.validationErrors) {
           toast.error('Failed to cancel order')
           return false
         }
@@ -295,7 +361,7 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
           onClick={() => setActiveTab('stock')}
           className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors flex items-center gap-2 ${activeTab === 'stock' ? 'bg-blue-600 text-white shadow-md' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white border border-zinc-700/50'}`}
         >
-          <span className={`w-2 h-2 rounded-full ${menuItems.some(i => i.availability_status === 'sold_out') ? 'bg-red-500' : 'bg-green-500'}`}></span>
+          <span className={`w-2 h-2 rounded-full ${menuItems.some((i: MenuItemRow) => i.availability_status === 'sold_out') ? 'bg-red-500' : 'bg-green-500'}`}></span>
           Live Stock
         </button>
         <button 
@@ -325,6 +391,7 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
             activeOrders={activeOrders} 
             currentUserId={currentUserId} 
             billingMode={billingMode} 
+            templateType={templateType}
             onClaimOrder={handleClaimOrder} 
             onMarkPaidOffline={handleMarkPaidOffline}
             onCompleteOrder={handleCompleteOrder}

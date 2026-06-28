@@ -56,8 +56,8 @@ export function TranslateMenuButton({ orgId, categories }: TranslateMenuButtonPr
       const data = await res.json()
       
       // Update the database via Server Action
-      const result = await applyTranslations(orgId, data.categories)
-      if (!result.success) {
+      const result = await applyTranslations({ orgId, translatedCategories: data.translatedCategories })
+      if (!result?.data?.success) {
         throw new Error('Failed to apply translations to the menu.')
       }
 

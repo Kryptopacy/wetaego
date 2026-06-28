@@ -19,6 +19,7 @@ interface CheckoutPaymentFormProps {
   hideAddressField: boolean
   tableNumber: string
   templateType: string
+  isUnevenSplit?: boolean
 }
 
 export function CheckoutPaymentForm({
@@ -36,7 +37,8 @@ export function CheckoutPaymentForm({
   isCheckingOut,
   hideAddressField,
   tableNumber,
-  templateType
+  templateType,
+  isUnevenSplit
 }: CheckoutPaymentFormProps) {
   return (
     <>
@@ -97,11 +99,11 @@ export function CheckoutPaymentForm({
           ) : (
             <div className="relative z-10 flex items-center justify-center gap-2 w-full px-6">
               <div className="flex-1 text-left">
-                <span className="text-[13px] font-medium opacity-80 block -mb-1">Pay</span>
-                <span className="text-[16px] tracking-tight">{splitCount > 1 ? formatCurrency(Math.ceil(finalTotalMinor / splitCount)) : formatCurrency(finalTotalMinor)}</span>
+                <span className="text-[13px] font-medium opacity-80 block -mb-1">{isUnevenSplit ? 'Total Order' : 'Pay'}</span>
+                <span className="text-[16px] tracking-tight">{isUnevenSplit ? formatCurrency(finalTotalMinor) : (splitCount > 1 ? formatCurrency(Math.ceil(finalTotalMinor / splitCount)) : formatCurrency(finalTotalMinor))}</span>
               </div>
               <div className="flex items-center gap-1.5 bg-white/10 dark:bg-black/10 py-1.5 px-3 rounded-xl backdrop-blur-sm">
-                {paymentMethod === 'transfer' ? 'Transfer' : 'Complete Order'}
+                {isUnevenSplit ? 'Share Link' : (paymentMethod === 'transfer' ? 'Transfer' : 'Complete Order')}
                 <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </div>
             </div>

@@ -1,5 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { ActionForm } from '@/components/ActionForm'
+import { updateBookingStatus } from './actions'
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import Link from 'next/link'
@@ -101,37 +103,31 @@ export default async function BookingsDashboard() {
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
                         {booking.status === 'pending' && (
-                          <form action={async () => {
-                            'use server';
-                            const { updateBookingStatus } = await import('./actions');
-                            await updateBookingStatus(booking.id, 'confirm');
-                          }}>
-                            <button className="px-3 py-1.5 rounded bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 font-medium text-xs transition-colors">
+                          <ActionForm action={updateBookingStatus}>
+                            <input type="hidden" name="bookingId" value={booking.id} />
+                            <input type="hidden" name="action" value="confirm" />
+                            <button type="submit" className="px-3 py-1.5 rounded bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 font-medium text-xs transition-colors">
                               Confirm
                             </button>
-                          </form>
+                          </ActionForm>
                         )}
                         {booking.payment_status !== 'paid' && booking.status !== 'cancelled' && (
-                          <form action={async () => {
-                            'use server';
-                            const { updateBookingStatus } = await import('./actions');
-                            await updateBookingStatus(booking.id, 'mark_paid');
-                          }}>
-                            <button className="px-3 py-1.5 rounded bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 font-medium text-xs transition-colors">
+                          <ActionForm action={updateBookingStatus}>
+                            <input type="hidden" name="bookingId" value={booking.id} />
+                            <input type="hidden" name="action" value="mark_paid" />
+                            <button type="submit" className="px-3 py-1.5 rounded bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 font-medium text-xs transition-colors">
                               Mark Paid
                             </button>
-                          </form>
+                          </ActionForm>
                         )}
                         {booking.status !== 'cancelled' && (
-                          <form action={async () => {
-                            'use server';
-                            const { updateBookingStatus } = await import('./actions');
-                            await updateBookingStatus(booking.id, 'cancel');
-                          }}>
-                            <button className="px-3 py-1.5 rounded bg-zinc-800 text-zinc-300 hover:bg-red-500/20 hover:text-red-400 font-medium text-xs transition-colors">
+                          <ActionForm action={updateBookingStatus}>
+                            <input type="hidden" name="bookingId" value={booking.id} />
+                            <input type="hidden" name="action" value="cancel" />
+                            <button type="submit" className="px-3 py-1.5 rounded bg-zinc-800 text-zinc-300 hover:bg-red-500/20 hover:text-red-400 font-medium text-xs transition-colors">
                               Cancel
                             </button>
-                          </form>
+                          </ActionForm>
                         )}
                       </div>
                     </td>

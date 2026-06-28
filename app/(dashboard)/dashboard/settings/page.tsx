@@ -209,7 +209,7 @@ export default async function SettingsPage({
             <ActionForm action={async (formData) => {
               'use server'
               const { updateProfile } = await import('./actions')
-              await updateProfile(formData)
+              return await updateProfile(formData)
             }} className="flex flex-col gap-4">
               <div>
                 <label className="mb-2 block text-sm font-medium text-zinc-300">Full Name</label>
@@ -654,7 +654,7 @@ export default async function SettingsPage({
             <ActionForm action={async (formData) => {
               'use server'
               const { saveLocationPromotions } = await import('./promotions-actions')
-              await saveLocationPromotions(formData)
+              return await saveLocationPromotions(formData)
             }} className="flex flex-col gap-5">
               <input type="hidden" name="locationId" value={location.id} />
               
@@ -796,7 +796,7 @@ export default async function SettingsPage({
             <ActionForm action={async (formData) => {
               'use server'
               const { saveAddonsSettings } = await import('./addons-actions')
-              await saveAddonsSettings(formData)
+              return await saveAddonsSettings(formData)
             }} className="flex flex-col gap-8">
               <input type="hidden" name="locationId" value={location.id} />
               

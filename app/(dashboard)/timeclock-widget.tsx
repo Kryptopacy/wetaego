@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import { Clock, Play, Square, Loader2 } from 'lucide-react'
 import { clockIn, clockOut } from './dashboard/shifts/actions'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 
 import { createClient } from '@/lib/supabase/client'
 
@@ -43,10 +44,18 @@ export function TimeclockWidget({ locationId }: { locationId: string }) {
     setLoading(true)
     try {
       if (activeShiftId) {
-        await clockOut(activeShiftId)
+        const res = await clockOut({ shiftId: activeShiftId })
+        if (res?.serverError || res?.validationErrors) {
+          toast.error(res?.serverError || 'Failed to clock out')
+          return
+        }
         setActiveShiftId(null)
       } else {
-        await clockIn(locationId)
+        const res = await clockIn({ locationId })
+        if (res?.serverError || res?.validationErrors) {
+          toast.error(res?.serverError || 'Failed to clock in')
+          return
+        }
         // Refresh shift
         const { data: { user } } = await supabase.auth.getUser()
         if (user) {

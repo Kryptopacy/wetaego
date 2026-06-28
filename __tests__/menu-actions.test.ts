@@ -48,7 +48,7 @@ describe('Menu Actions', () => {
       const formData = new FormData()
       const res = await createCategory(formData)
       
-      expect(res).toEqual({ error: 'Not authenticated' })
+      expect(res).toEqual({ serverError: 'Unauthorized' })
     })
 
     it('creates category successfully', async () => {
@@ -62,7 +62,7 @@ describe('Menu Actions', () => {
       
       const res = await createCategory(formData)
       
-      expect(res).toEqual({ success: true })
+      expect(res).toEqual({ data: { success: true } })
       expect(mockInsert).toHaveBeenCalledWith({
         organization_id: 'org_123',
         menu_id: 'menu_123',
@@ -88,7 +88,7 @@ describe('Menu Actions', () => {
       
       const res = await createItem(formData)
       
-      expect(res).toEqual({ error: 'Image must be less than 5MB' })
+      expect(res).toEqual({ serverError: 'Image must be less than 5MB' })
     })
 
     it('rejects invalid mime types', async () => {
@@ -105,7 +105,7 @@ describe('Menu Actions', () => {
       
       const res = await createItem(formData)
       
-      expect(res).toEqual({ error: 'Invalid image format. Only JPEG, PNG, and WebP are accepted.' })
+      expect(res).toEqual({ serverError: 'Invalid image format. Only JPEG, PNG, and WebP are accepted.' })
     })
   })
 })

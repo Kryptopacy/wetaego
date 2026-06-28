@@ -59,20 +59,22 @@ export default function PayClient({
     setIsProcessing(true)
     
     if (optIn) {
-      await optInMarketing(order.id).catch(console.error)
+      await optInMarketing({ orderId: order.id }).catch(console.error)
     }
 
     try {
-      const { checkoutUrl, error } = await processExistingOrderPayment(
-        order.id,
+      const result = await processExistingOrderPayment({
+        orderId: order.id,
         amountMinor
-      )
+      })
 
-      if (error) {
-        toast.error(error)
+      if (result?.serverError || result?.validationErrors) {
+        toast.error(result?.serverError || 'Payment init failed')
         setIsProcessing(false)
         return
       }
+      
+      const checkoutUrl = result.data?.checkoutUrl
 
       if (checkoutUrl) {
         window.location.href = checkoutUrl

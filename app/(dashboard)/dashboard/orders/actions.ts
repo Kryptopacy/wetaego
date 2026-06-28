@@ -4,15 +4,13 @@ import { createClient } from '@/lib/supabase/server'
 import { Resend } from 'resend'
 import { FeedbackEmail } from '@/emails/feedback-email'
 import { waitUntil } from '@vercel/functions'
+import { authActionClient } from '@/lib/safe-action'
+import { z } from 'zod'
 
 const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy')
 
-async function requireOrderAuth(orderId: string) {
+async function requireOrderAuth(orderId: string, user: any) {
   const supabase = await createClient()
-  const { data: userData, error } = await supabase.auth.getUser()
-  if (error || !userData?.user) {
-    throw new Error('Not authenticated')
-  }
 
   // Fetch order details
   const { data: order, error: fetchError } = await supabase
@@ -30,7 +28,7 @@ async function requireOrderAuth(orderId: string) {
     .from('organization_members')
     .select('id')
     .eq('organization_id', order.organization_id)
-    .eq('user_id', userData.user.id)
+    .eq('user_id', user.id)
     .single()
 
   if (!member) {
@@ -39,19 +37,20 @@ async function requireOrderAuth(orderId: string) {
       .from('organizations')
       .select('id')
       .eq('id', order.organization_id)
-      .eq('created_by', userData.user.id)
+      .eq('created_by', user.id)
       .single()
     if (!org) {
       throw new Error('Unauthorized')
     }
   }
 
-  return { supabase, user: userData.user, order }
+  return { supabase, order }
 }
 
-export async function completeOrderAction(orderId: string) {
-  try {
-    const { supabase, order } = await requireOrderAuth(orderId)
+export const completeOrderAction = authActionClient
+  .schema(z.object({ orderId: z.string() }))
+  .action(async ({ parsedInput: { orderId }, ctx: { user } }) => {
+    const { supabase, order } = await requireOrderAuth(orderId, user)
 
     // 2. Update status
     const { error: updateError } = await supabase
@@ -60,7 +59,7 @@ export async function completeOrderAction(orderId: string) {
       .eq('id', orderId)
 
     if (updateError) {
-      return { error: 'Failed to update order status' }
+      throw new Error('Failed to update order status')
     }
 
     // 3. Dispatch Feedback Email asynchronously if customer email exists
@@ -84,19 +83,17 @@ export async function completeOrderAction(orderId: string) {
     }
 
     return { success: true }
-  } catch (err: unknown) {
-    return { error: err instanceof Error ? err.message : 'Unknown error' }
-  }
-}
+  })
 
-export async function markOrderPaidOffline(orderId: string) {
-  try {
+export const markOrderPaidOffline = authActionClient
+  .schema(z.object({ orderId: z.string() }))
+  .action(async ({ parsedInput: { orderId }, ctx: { user } }) => {
     const { cookies } = await import('next/headers')
     if ((await cookies()).get('demo_mode')?.value === '1') {
       return { success: true }
     }
 
-    const { supabase } = await requireOrderAuth(orderId)
+    const { supabase } = await requireOrderAuth(orderId, user)
 
     // 2. Update status to paid
     const { error: updateError } = await supabase
@@ -105,7 +102,7 @@ export async function markOrderPaidOffline(orderId: string) {
       .eq('id', orderId)
 
     if (updateError) {
-      return { error: 'Failed to update order status' }
+      throw new Error('Failed to update order status')
     }
 
     // 3. Log the offline payment
@@ -116,14 +113,16 @@ export async function markOrderPaidOffline(orderId: string) {
     })
 
     return { success: true }
-  } catch (err: unknown) {
-    return { error: err instanceof Error ? err.message : 'Unknown error' }
-  }
-}
+  })
 
-export async function cancelOrderAction(orderId: string, reason: string, restock: boolean) {
-  try {
-    const { supabase } = await requireOrderAuth(orderId)
+export const cancelOrderAction = authActionClient
+  .schema(z.object({
+    orderId: z.string(),
+    reason: z.string(),
+    restock: z.boolean()
+  }))
+  .action(async ({ parsedInput: { orderId, reason, restock }, ctx: { user } }) => {
+    const { supabase } = await requireOrderAuth(orderId, user)
 
     // 1. Update status to cancelled and store reason
     const { error: updateError } = await supabase
@@ -132,7 +131,7 @@ export async function cancelOrderAction(orderId: string, reason: string, restock
       .eq('id', orderId)
 
     if (updateError) {
-      return { error: 'Failed to cancel order' }
+      throw new Error('Failed to cancel order')
     }
 
     // 2. Restock items if requested
@@ -151,8 +150,4 @@ export async function cancelOrderAction(orderId: string, reason: string, restock
     }
 
     return { success: true }
-  } catch (err: unknown) {
-    return { error: err instanceof Error ? err.message : 'Unknown error' }
-  }
-}
-
+  })

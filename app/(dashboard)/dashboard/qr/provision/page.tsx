@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { assignQrCode } from './actions'
+import { ActionForm } from '@/components/ActionForm'
 
 
 export default async function QRProvisionPage({
@@ -67,11 +68,7 @@ export default async function QRProvisionPage({
     .eq('location_id', qrCode.location_id)
     .order('sort_order', { ascending: true })
 
-  // Use a Server Action for submission
-  async function onSubmit(formData: FormData) {
-    'use server'
-    await assignQrCode(formData)
-  }
+  // We use ActionForm for submission
 
   return (
     <div className="max-w-md mx-auto mt-12 p-8 border border-zinc-800 rounded-2xl bg-zinc-900/50">
@@ -80,7 +77,7 @@ export default async function QRProvisionPage({
         You are provisioning a physical QR code for <strong className="text-white">{qrCode.locations?.name}</strong>. What table or cabana is this sticker placed on?
       </p>
 
-      <form action={onSubmit} className="space-y-6">
+      <ActionForm action={assignQrCode} className="space-y-6">
         <input type="hidden" name="qr_id" value={qrCode.id} />
         
         <div>
@@ -122,7 +119,7 @@ export default async function QRProvisionPage({
         >
           {qrCode.table_identifier ? 'Update Assignment' : 'Assign to Table'}
         </button>
-      </form>
+      </ActionForm>
     </div>
   )
 }

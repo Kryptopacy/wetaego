@@ -7,7 +7,8 @@ import {
   processBookingPayment,
   processSubscriptionPayment,
   processCreditPackPayment,
-  processOrderPayment
+  processOrderPayment,
+  processQuoteMilestonePayment
 } from '@/lib/payments/webhook-service'
 
 export async function POST(req: Request) {
@@ -63,8 +64,6 @@ export async function POST(req: Request) {
       } else if (rawReference.startsWith('QUOTE_')) {
         // Quote Milestone References: QUOTE_<quoteId>_<milestoneId>_<hash>
         try {
-          // Note: we dynamically import the function here or add it to the webhook-service exports
-          const { processQuoteMilestonePayment } = await import('@/lib/payments/webhook-service')
           await processQuoteMilestonePayment(supabase, rawReference, amountPaidMinor)
         } catch (e: unknown) {
           console.error('Failed to process quote payment', e)

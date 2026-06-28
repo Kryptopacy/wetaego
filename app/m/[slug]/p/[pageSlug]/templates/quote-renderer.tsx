@@ -115,8 +115,8 @@ export function QuoteRenderer({ location, page, items, locationSlug }: QuoteRend
       const { submitQuoteRequest } = await import('@/app/m/[slug]/actions')
       const res = await submitQuoteRequest(formData)
       
-      if (res.success && res.referenceNumber) {
-        setReferenceNumber(res.referenceNumber)
+      if (res?.data?.success && res?.data?.referenceNumber) {
+        setReferenceNumber(res.data.referenceNumber)
         setFormSuccess(true)
         window.scrollTo({ top: 0, behavior: 'smooth' })
       }

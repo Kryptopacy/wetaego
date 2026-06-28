@@ -19,10 +19,11 @@ export function PaymentRouletteModal({ isOpen, onClose }: PaymentRouletteModalPr
   const [spinning, setSpinning] = useState(false)
   const [isFinished, setIsFinished] = useState(false)
   
-  // Results
   const [winners, setWinners] = useState<string[]>([])
   const [safeNames, setSafeNames] = useState<string[]>([])
   const [chaosResults, setChaosResults] = useState<{name: string, percentage: number}[]>([])
+  const [useNames, setUseNames] = useState(false)
+  const [playerCount, setPlayerCount] = useState(3)
   
   // For the visual roulette display
   const [currentDisplay, setCurrentDisplay] = useState('?')
@@ -31,7 +32,9 @@ export function PaymentRouletteModal({ isOpen, onClose }: PaymentRouletteModalPr
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setIsMounted(true), [])
 
-  const namesList = namesText.split(',').map(n => n.trim()).filter(n => n.length > 0)
+  const namesList = useNames 
+    ? namesText.split(',').map(n => n.trim()).filter(n => n.length > 0)
+    : Array.from({ length: playerCount }, (_, i) => `Player ${i + 1}`)
 
   // Handlers
   const handleSpin = async () => {
@@ -210,12 +213,45 @@ export function PaymentRouletteModal({ isOpen, onClose }: PaymentRouletteModalPr
                     {mode === 'chaos' && "Everyone pays a completely random percentage."}
                   </div>
 
-                  <textarea 
-                    value={namesText}
-                    onChange={(e) => setNamesText(e.target.value)}
-                    placeholder="John, Sarah, Mike, Lisa..."
-                    className="w-full h-24 bg-zinc-950 border border-zinc-800 rounded-xl p-4 text-white resize-none focus:outline-none focus:border-purple-500 text-center text-lg leading-tight"
-                  />
+                  <div className="flex bg-zinc-950 rounded-lg p-1 w-max mx-auto mb-2">
+                    <button
+                      onClick={() => setUseNames(false)}
+                      className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors ${!useNames ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
+                    >
+                      Use Numbers (Quick)
+                    </button>
+                    <button
+                      onClick={() => setUseNames(true)}
+                      className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors ${useNames ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
+                    >
+                      Use Names
+                    </button>
+                  </div>
+
+                  {!useNames ? (
+                    <div className="flex flex-col items-center justify-center space-y-4 py-2">
+                      <div className="flex items-center gap-4 bg-zinc-950 border border-zinc-800 rounded-2xl px-6 py-4">
+                        <button onClick={() => setPlayerCount(Math.max(2, playerCount - 1))} className="w-10 h-10 rounded-xl bg-zinc-800 text-white flex items-center justify-center hover:bg-zinc-700 transition-colors">
+                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" /></svg>
+                        </button>
+                        <div className="text-center">
+                          <span className="block text-3xl font-black text-white">{playerCount}</span>
+                          <span className="block text-[10px] text-zinc-500 uppercase tracking-widest font-bold mt-1">Players</span>
+                        </div>
+                        <button onClick={() => setPlayerCount(Math.min(20, playerCount + 1))} className="w-10 h-10 rounded-xl bg-zinc-800 text-white flex items-center justify-center hover:bg-zinc-700 transition-colors">
+                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+                        </button>
+                      </div>
+                      <p className="text-xs text-purple-400 font-medium">Pick a number amongst yourselves!</p>
+                    </div>
+                  ) : (
+                    <textarea 
+                      value={namesText}
+                      onChange={(e) => setNamesText(e.target.value)}
+                      placeholder="John, Sarah, Mike, Lisa..."
+                      className="w-full h-24 bg-zinc-950 border border-zinc-800 rounded-xl p-4 text-white resize-none focus:outline-none focus:border-purple-500 text-center text-lg leading-tight"
+                    />
+                  )}
 
                   {mode === 'squad' && (
                     <div className="flex items-center justify-between bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2">

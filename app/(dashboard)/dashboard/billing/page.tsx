@@ -5,6 +5,7 @@ import { formatCurrency } from '@/lib/utils/currency'
 
 import Link from 'next/link'
 import { CancelButton } from './cancel-button'
+import { ActionForm } from '@/components/ActionForm'
 
 export default async function BillingPage(props: { searchParams: Promise<{ currency?: string }> }) {
   const searchParams = await props.searchParams
@@ -118,10 +119,10 @@ export default async function BillingPage(props: { searchParams: Promise<{ curre
 
         {org.subscription_status === 'active' && (
           <div className="mt-6 flex justify-end pt-4 border-t border-zinc-800">
-            <form action={cancelSubscription}>
+            <ActionForm action={cancelSubscription}>
               <input type="hidden" name="organization_id" value={org.id} />
               <CancelButton />
-            </form>
+            </ActionForm>
           </div>
         )}
       </div>
@@ -149,7 +150,7 @@ export default async function BillingPage(props: { searchParams: Promise<{ curre
             ))}
           </ul>
 
-          <form action={subscribeToLite} className="relative z-10">
+          <ActionForm action={subscribeToLite} className="relative z-10">
             <input type="hidden" name="organization_id" value={org.id} />
             <input type="hidden" name="currency" value={currency} />
             <button 
@@ -159,7 +160,7 @@ export default async function BillingPage(props: { searchParams: Promise<{ curre
             >
               {(org.subscription_status === 'active' && org.subscription_plan === 'lite') ? 'Current Plan' : 'Subscribe via Paystack'}
             </button>
-          </form>
+          </ActionForm>
         </div>
 
         {/* Pro Upgrade Card */}
@@ -187,7 +188,7 @@ export default async function BillingPage(props: { searchParams: Promise<{ curre
             ))}
           </ul>
 
-          <form action={subscribeToPro} className="relative z-10">
+          <ActionForm action={subscribeToPro} className="relative z-10">
             <input type="hidden" name="organization_id" value={org.id} />
             <input type="hidden" name="currency" value={currency} />
             <button 
@@ -197,7 +198,7 @@ export default async function BillingPage(props: { searchParams: Promise<{ curre
             >
               {(org.subscription_status === 'active' && org.subscription_plan === 'pro') ? 'Current Plan' : 'Subscribe via Paystack'}
             </button>
-          </form>
+          </ActionForm>
         </div>
 
         {/* Enterprise Upgrade Card */}
@@ -238,13 +239,13 @@ export default async function BillingPage(props: { searchParams: Promise<{ curre
               <div className="font-semibold text-white">10 Credits</div>
               <div className="text-xs text-zinc-500">{formatPrice(credits10Price)}</div>
             </div>
-            <form action={buyCredits} className="relative z-10">
+            <ActionForm action={buyCredits} className="relative z-10">
               <input type="hidden" name="organization_id" value={org.id} />
               <input type="hidden" name="credits" value="10" />
               <button type="submit" className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg text-sm font-medium transition-colors">
                 Buy 10
               </button>
-            </form>
+            </ActionForm>
           </div>
 
           <div className="flex items-center justify-between py-4 border-b border-zinc-800">
@@ -252,13 +253,13 @@ export default async function BillingPage(props: { searchParams: Promise<{ curre
               <div className="font-semibold text-white">25 Credits</div>
               <div className="text-xs text-violet-400 font-medium">Most Popular — {formatPrice(credits25Price)}</div>
             </div>
-            <form action={buyCredits} className="relative z-10">
+            <ActionForm action={buyCredits} className="relative z-10">
               <input type="hidden" name="organization_id" value={org.id} />
               <input type="hidden" name="credits" value="25" />
               <button type="submit" className="px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white rounded-lg text-sm font-bold transition-colors">
                 Buy 25
               </button>
-            </form>
+            </ActionForm>
           </div>
 
           <div className="flex items-center justify-between py-4 border-b border-zinc-800">
@@ -266,13 +267,13 @@ export default async function BillingPage(props: { searchParams: Promise<{ curre
               <div className="font-semibold text-white">50 Credits</div>
               <div className="text-xs text-zinc-500">{formatPrice(credits50Price)}</div>
             </div>
-            <form action={buyCredits} className="relative z-10">
+            <ActionForm action={buyCredits} className="relative z-10">
               <input type="hidden" name="organization_id" value={org.id} />
               <input type="hidden" name="credits" value="50" />
               <button type="submit" className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-lg text-sm font-bold transition-colors shadow-lg">
                 Buy 50
               </button>
-            </form>
+            </ActionForm>
           </div>
 
           <div className="mt-4 p-4 bg-blue-900/20 border border-blue-800/50 rounded-xl">

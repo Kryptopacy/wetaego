@@ -1,52 +1,61 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { z } from 'zod'
+import { zfd } from 'zod-form-data'
+import { authActionClient } from '@/lib/safe-action'
 
-export async function saveAddonsSettings(formData: FormData) {
-  const supabase = await createClient()
-  const { data: userData } = await supabase.auth.getUser()
-  const { cookies } = await import('next/headers')
-  if ((await cookies()).get('demo_mode')?.value === '1') {
-    return { success: true }
-  }
-  if (!userData?.user) throw new Error('Not authenticated')
-
-  const locationId = formData.get('locationId') as string
-  const randomizer_enabled = formData.get('randomizerEnabled') === 'true'
-  const spinner_enabled = formData.get('spinner_enabled') === 'on'
-  
-  const delivery_enabled = formData.get('delivery_enabled') === 'on'
-  const delivery_fee_minor = parseInt(formData.get('delivery_fee_minor') as string || '0', 10)
-  const delivery_minimum_order_minor = parseInt(formData.get('delivery_minimum_order_minor') as string || '0', 10)
-  const delivery_note = formData.get('delivery_note') as string || null
-
-  let spinner_config = null
-  try {
-    const rawConfig = formData.get('spinner_config') as string
-    if (rawConfig) {
-      spinner_config = JSON.parse(rawConfig)
+export const saveAddonsSettings = authActionClient
+  .schema(zfd.formData({
+    locationId: zfd.text(z.string().uuid()),
+    randomizerEnabled: zfd.checkbox(),
+    spinner_enabled: zfd.checkbox(),
+    spinner_config: zfd.text(z.string().optional()),
+    delivery_enabled: zfd.checkbox(),
+    delivery_fee_minor: zfd.numeric(z.number().default(0)),
+    delivery_minimum_order_minor: zfd.numeric(z.number().default(0)),
+    delivery_note: zfd.text(z.string().optional()),
+  }))
+  .action(async ({ parsedInput, ctx: { supabase } }) => {
+    const { cookies } = await import('next/headers')
+    if ((await cookies()).get('demo_mode')?.value === '1') {
+      return { success: true }
     }
-  } catch {
-    throw new Error('Invalid JSON for Wheel Segments')
-  }
 
-  if (!locationId) throw new Error('Location ID required')
-
-  const { error } = await supabase
-    .from('locations')
-    .update({
-      randomizer_enabled,
+    const {
+      locationId,
+      randomizerEnabled,
       spinner_enabled,
-      spinner_config,
       delivery_enabled,
       delivery_fee_minor,
       delivery_minimum_order_minor,
-      delivery_note
-    })
-    .eq('id', locationId)
+      delivery_note,
+    } = parsedInput
 
-  if (error) throw new Error((error as Error).message)
+    let spinner_config = null
+    try {
+      if (parsedInput.spinner_config) {
+        spinner_config = JSON.parse(parsedInput.spinner_config)
+      }
+    } catch {
+      throw new Error('Invalid JSON for Wheel Segments')
+    }
 
-  revalidatePath('/dashboard/settings')
-}
+    const { error } = await supabase
+      .from('locations')
+      .update({
+        randomizer_enabled: randomizerEnabled,
+        spinner_enabled,
+        spinner_config,
+        delivery_enabled,
+        delivery_fee_minor,
+        delivery_minimum_order_minor,
+        delivery_note: delivery_note || null
+      })
+      .eq('id', locationId)
+
+    if (error) throw new Error((error as Error).message)
+
+    revalidatePath('/dashboard/settings')
+    return { success: true }
+  })

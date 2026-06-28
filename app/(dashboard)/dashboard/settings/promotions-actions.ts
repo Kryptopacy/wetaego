@@ -1,51 +1,55 @@
 'use server'
 
-
-
-import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { z } from 'zod'
+import { zfd } from 'zod-form-data'
+import { authActionClient } from '@/lib/safe-action'
 
-export async function saveLocationPromotions(formData: FormData) {
-  const supabase = await createClient()
-  const { data: userData } = await supabase.auth.getUser()
-  const { cookies } = await import('next/headers')
-  if ((await cookies()).get('demo_mode')?.value === '1') {
-    return { success: true }
-  }
-  if (!userData?.user) throw new Error('Not authenticated')
-
-  const locationId = formData.get('locationId') as string
-  const global_discount_enabled = formData.get('global_discount_enabled') === 'on'
-  const global_discount_percentage = parseInt(formData.get('global_discount_percentage') as string || '0', 10)
-  const global_discount_banner_text = formData.get('global_discount_banner_text') as string
-  
-  const spinner_enabled = formData.get('spinner_enabled') === 'on'
-  let spinner_config = null
-  try {
-    const rawConfig = formData.get('spinner_config') as string
-    if (rawConfig) {
-      spinner_config = JSON.parse(rawConfig)
+export const saveLocationPromotions = authActionClient
+  .schema(zfd.formData({
+    locationId: zfd.text(z.string().uuid()),
+    global_discount_enabled: zfd.checkbox(),
+    global_discount_percentage: zfd.numeric(z.number().default(0)),
+    global_discount_banner_text: zfd.text(z.string().optional()),
+    spinner_enabled: zfd.checkbox(),
+    spinner_config: zfd.text(z.string().optional()),
+  }))
+  .action(async ({ parsedInput, ctx: { supabase } }) => {
+    const { cookies } = await import('next/headers')
+    if ((await cookies()).get('demo_mode')?.value === '1') {
+      return { success: true }
     }
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (e) {
-    throw new Error('Invalid JSON for Wheel Segments')
-  }
 
-  if (!locationId) throw new Error('Location ID required')
-
-  const { error } = await supabase
-    .from('locations')
-    .update({
+    const {
+      locationId,
       global_discount_enabled,
       global_discount_percentage,
       global_discount_banner_text,
       spinner_enabled,
-      spinner_config
-    })
-    .eq('id', locationId)
+    } = parsedInput
 
-  if (error) throw new Error((error as Error).message)
+    let spinner_config = null
+    try {
+      if (parsedInput.spinner_config) {
+        spinner_config = JSON.parse(parsedInput.spinner_config)
+      }
+    } catch {
+      throw new Error('Invalid JSON for Wheel Segments')
+    }
 
-  revalidatePath('/dashboard/settings')
-  // We don't have the slug here easily, but the location settings update so next time it loads it will cache bust
-}
+    const { error } = await supabase
+      .from('locations')
+      .update({
+        global_discount_enabled,
+        global_discount_percentage,
+        global_discount_banner_text: global_discount_banner_text || null,
+        spinner_enabled,
+        spinner_config
+      })
+      .eq('id', locationId)
+
+    if (error) throw new Error((error as Error).message)
+
+    revalidatePath('/dashboard/settings')
+    return { success: true }
+  })

@@ -129,22 +129,22 @@ export async function submitFeedbackAndTip(
           }
         }
 
-        const { checkoutUrl } = await processCheckout(
+        const result = await processCheckout({
           organizationId, 
           locationId, 
-          [{ id: 'tip', name: 'Service Tip', quantity: 1, price_minor: tipAmountMinor }], 
-          tipAmountMinor, 
+          items: [{ id: 'tip', name: 'Service Tip', quantity: 1, price_minor: tipAmountMinor }], 
+          totalAmountMinor: tipAmountMinor, 
           tipAmountMinor, 
           tableIdentifier, 
-          'Tip Only',
-          undefined, // customer email
-          undefined, // paymentFractionMinor
-          undefined, // paymentMethod
-          undefined, // discountAmountMinor
-          undefined, // idempotencyKey
-          staffSubaccount // Pass the staff's subaccount!
-        )
+          customerNote: 'Tip Only',
+          staffSubaccountOverride: staffSubaccount // Pass the staff's subaccount!
+        })
         
+        if (result?.serverError || result?.validationErrors) {
+          throw new Error(result?.serverError || 'Failed to initialize tip checkout.')
+        }
+
+        const checkoutUrl = result.data?.checkoutUrl
         return { checkoutUrl }
       } catch (err: unknown) {
         console.error('Failed to initialize tip payment:', err)

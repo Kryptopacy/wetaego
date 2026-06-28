@@ -58,13 +58,13 @@ export default function TeamManager({
     setSuccess(null)
     setGeneratedLink(null)
 
-    const result = await createInviteAction(organizationId, inviteEmail, inviteRole)
+    const result = await createInviteAction({ orgId: organizationId, email: inviteEmail, role: inviteRole as any })
     setIsInviting(false)
 
-    if (result.error) {
-      setError(result.error)
-    } else if (result.token) {
-      const link = `${window.location.origin}/invite?token=${result.token}`
+    if (result?.serverError || result?.validationErrors) {
+      setError(result?.serverError || 'Failed to create invite')
+    } else if (result.data?.token) {
+      const link = `${window.location.origin}/invite?token=${result.data.token}`
       setGeneratedLink(link)
       setSuccess(`Invite generated successfully!`)
       setInviteEmail('')
@@ -78,9 +78,9 @@ export default function TeamManager({
     setError(null)
     setSuccess(null)
 
-    const result = await revokeInviteAction(organizationId, inviteId)
-    if (result.error) {
-      setError(result.error)
+    const result = await revokeInviteAction({ orgId: organizationId, inviteId })
+    if (result?.serverError || result?.validationErrors) {
+      setError(result?.serverError || 'Failed to revoke invite')
     } else {
       setSuccess('Invite revoked.')
     }
@@ -97,9 +97,9 @@ export default function TeamManager({
     setError(null)
     setSuccess(null)
 
-    const result = await removeMemberAction(organizationId, userId)
-    if (result.error) {
-      setError(result.error)
+    const result = await removeMemberAction({ orgId: organizationId, userIdToDelete: userId })
+    if (result?.serverError || result?.validationErrors) {
+      setError(result?.serverError || 'Failed to remove member')
     } else {
       setSuccess('Member removed from team.')
     }
@@ -112,9 +112,9 @@ export default function TeamManager({
     setError(null)
     setSuccess(null)
 
-    const result = await updateMemberRoleAction(organizationId, userId, newRole)
-    if (result.error) {
-      setError(result.error)
+    const result = await updateMemberRoleAction({ orgId: organizationId, targetUserId: userId, newRole: newRole as any })
+    if (result?.serverError || result?.validationErrors) {
+      setError(result?.serverError || 'Failed to update member role')
     } else {
       setSuccess('Member role updated.')
     }

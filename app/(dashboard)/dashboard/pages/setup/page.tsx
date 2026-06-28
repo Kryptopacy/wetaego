@@ -9,6 +9,7 @@ import {
   getPresetsByGroup,
 } from '@/lib/templates/presets'
 import { setBusinessTypeAction } from '../actions'
+import { ActionForm } from '@/components/ActionForm'
 
 export default async function BusinessTypeSetupPage({
   searchParams,
@@ -107,7 +108,7 @@ export default async function BusinessTypeSetupPage({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {presets.map(({ key, preset }) => (
-                    <form key={key} action={setBusinessTypeAction}>
+                    <ActionForm key={key} action={setBusinessTypeAction}>
                       <input type="hidden" name="businessType" value={key} />
                       <input type="hidden" name="orgId" value={org!.id} />
                       <input type="hidden" name="mode" value={mode} />
@@ -148,7 +149,7 @@ export default async function BusinessTypeSetupPage({
                           )}
                         </div>
                       </button>
-                    </form>
+                    </ActionForm>
                   ))}
                 </div>
               </div>
@@ -163,7 +164,7 @@ export default async function BusinessTypeSetupPage({
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3">
             {(['info', 'custom'] as const).map((type) => (
-              <form key={type} action={setBusinessTypeAction}>
+              <ActionForm key={type} action={setBusinessTypeAction}>
                 <input type="hidden" name="businessType" value={type} />
                 <input type="hidden" name="orgId" value={org!.id} />
                 <input type="hidden" name="mode" value={mode} />
@@ -173,7 +174,7 @@ export default async function BusinessTypeSetupPage({
                 >
                   {type === 'info' ? '📄 Info / Policy Page' : '✏️ Custom (Blank)'}
                 </button>
-              </form>
+              </ActionForm>
             ))}
           </div>
         </div>

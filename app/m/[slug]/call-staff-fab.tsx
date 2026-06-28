@@ -21,7 +21,14 @@ export function CallStaffFAB({ organizationId, locationId, tableIdentifier }: Ca
   const [isCalling, setIsCalling] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
 
-  useEffect(() => queueMicrotask(() => setIsMounted(true)), [])
+  useEffect(() => {
+    queueMicrotask(() => setIsMounted(true))
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) setIsOpen(false)
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -67,7 +74,10 @@ export function CallStaffFAB({ organizationId, locationId, tableIdentifier }: Ca
       formData.append('custom_request_text', requestText)
       formData.append('urgency_tier', urgency_tier)
 
-      await submitServiceRequest(formData)
+      const res = await submitServiceRequest(formData)
+      if (res?.serverError || res?.validationErrors) {
+        throw new Error(res?.serverError || 'Failed to submit request')
+      }
       
       if (urgency_tier === 'critical') {
         toast.error('Emergency request sent. Staff is rushing over!')

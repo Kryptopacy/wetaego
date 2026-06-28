@@ -78,11 +78,15 @@ export function QrSettingsClient({ location }: { location: Location }) {
     }
 
     try {
-      await updateQrConfig(location.id, {
-        qr_text: text,
-        qr_color: color,
-        logo_url: logoUrl,
+      const res = await updateQrConfig({
+        locationId: location.id, 
+        config: {
+          qr_text: text,
+          qr_color: color,
+          logo_url: logoUrl,
+        }
       });
+      if (res?.serverError || res?.validationErrors) throw new Error(res?.serverError || 'Failed to save');
       toast.success("QR settings saved.");
     } catch (e: unknown) {
       toast.error("Failed to save: " + (e as Error).message);

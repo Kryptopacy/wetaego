@@ -180,7 +180,7 @@ function OptimisticItem({ item, orgId, categoryName }: { item: NonNullable<Categ
           <button onClick={async () => {
             if (confirm('Are you sure you want to delete this item?')) {
               setIsDeleting(true);
-              await deleteItem(item.id);
+              await deleteItem({ itemId: item.id });
             }
           }} disabled={isDeleting} className="text-xs font-medium text-red-400 hover:text-red-300 disabled:opacity-50">
             {isDeleting ? 'Deleting...' : 'Delete'}
@@ -193,7 +193,7 @@ function OptimisticItem({ item, orgId, categoryName }: { item: NonNullable<Categ
           startTransition(() => {
             addOptimisticStatus(nextStatus);
           });
-          await toggleItemStatus(item.id, optimisticStatus);
+          await toggleItemStatus({ itemId: item.id, currentStatus: optimisticStatus });
         }}>
           <button type="submit" className={`px-4 py-1.5 rounded-full text-xs font-bold border transition-colors ${
             isAvailable 

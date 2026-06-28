@@ -22,7 +22,7 @@ import { NotificationCenter } from './notification-center'
 import { ServiceWorkerRegistration } from '@/app/components/service-worker-registration'
 import { TimeclockWidget } from './timeclock-widget'
 
-interface NavItem {
+export interface NavItem {
   href: string
   label: string
   icon: React.ElementType

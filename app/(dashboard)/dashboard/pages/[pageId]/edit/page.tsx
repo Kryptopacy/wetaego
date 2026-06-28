@@ -4,6 +4,7 @@ import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { PageBuilderForm } from '@/app/components/page-builder-form'
 import { updatePage } from '../../actions'
+import { ActionForm } from '@/components/ActionForm'
 
 export default async function PageEditDashboard({
   params
@@ -84,7 +85,7 @@ export default async function PageEditDashboard({
 
       <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-6 shadow-2xl">
         <h2 className="text-xl font-bold text-white mb-6">Page Settings</h2>
-        <form action={updatePage} className="space-y-4 max-w-xl">
+        <ActionForm action={updatePage} className="space-y-4 max-w-xl">
           <input type="hidden" name="pageId" value={page.id} />
           <input type="hidden" name="billing_enabled" value={page.billing_enabled ? 'true' : 'false'} />
           <input type="hidden" name="billing_mode" value={page.billing_mode || ''} />
@@ -170,7 +171,7 @@ export default async function PageEditDashboard({
               Save Settings
             </button>
           </div>
-        </form>
+        </ActionForm>
       </div>
 
       <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-6 shadow-2xl">

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { sendBroadcastAction } from './actions'
 import { useFormStatus } from 'react-dom'
 import { Mail, Send, Users, Megaphone } from 'lucide-react'
+import { toast } from 'sonner'
 
 function SubmitButton() {
   const { pending } = useFormStatus()
@@ -30,7 +31,14 @@ export function MarketingClient({
 
   async function clientAction(formData: FormData) {
     const res = await sendBroadcastAction(formData)
-    setResult(res)
+    
+    if (res?.serverError || res?.validationErrors) {
+      toast.error(res?.serverError || 'Failed to send broadcast.')
+      return
+    }
+
+    toast.success(`Broadcast queued for ${res?.data?.count || 0} customers!`)
+    setResult({ success: true, count: res?.data?.count })
   }
 
   return (

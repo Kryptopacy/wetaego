@@ -1,19 +1,19 @@
-
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { createClient } from '@/lib/supabase/server'
+import { z } from 'zod'
+import { authActionClient } from '@/lib/safe-action'
+import { Resend } from 'resend'
+import InviteEmail from '../../../../../emails/invite-email'
+import { waitUntil } from '@vercel/functions'
 
-async function verifyOwnerOrManager(orgId: string) {
-  const supabase = await createClient()
-  const { data: userData } = await supabase.auth.getUser()
-  if (!userData?.user) {
-    if (orgId === 'demo-org') return { userId: 'demo-user-id', role: 'owner' }
-    const { cookies } = await import('next/headers')
-    if ((await cookies()).get('demo_mode')?.value === '1') {
-      return { userId: 'demo-user-id', role: 'owner' }
-    }
-    throw new Error('Not authenticated')
+const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy')
+
+async function verifyOwnerOrManager(orgId: string, supabase: any, user: any) {
+  if (orgId === 'demo-org') return { userId: 'demo-user-id', role: 'owner' }
+  const { cookies } = await import('next/headers')
+  if ((await cookies()).get('demo_mode')?.value === '1') {
+    return { userId: 'demo-user-id', role: 'owner' }
   }
 
   // Check if owner or manager
@@ -21,17 +21,16 @@ async function verifyOwnerOrManager(orgId: string) {
     .from('organization_members')
     .select('role')
     .eq('organization_id', orgId)
-    .eq('user_id', userData.user.id)
+    .eq('user_id', user.id)
     .single()
 
-  const isOwnerOrManager = member?.role === 'owner' || member?.role === 'manager' || (!member && await checkIsCreator(orgId, userData.user.id))
+  const isOwnerOrManager = member?.role === 'owner' || member?.role === 'manager' || (!member && await checkIsCreator(orgId, user.id, supabase))
   if (!isOwnerOrManager) throw new Error('Only the business Owner or Manager can perform team management actions.')
 
-  return { userId: userData.user.id, role: member?.role || 'owner' }
+  return { userId: user.id, role: member?.role || 'owner' }
 }
 
-async function checkIsCreator(orgId: string, userId: string): Promise<boolean> {
-  const supabase = await createClient()
+async function checkIsCreator(orgId: string, userId: string, supabase: any): Promise<boolean> {
   const { data } = await supabase
     .from('organizations')
     .select('id')
@@ -41,20 +40,14 @@ async function checkIsCreator(orgId: string, userId: string): Promise<boolean> {
   return !!data
 }
 
-import { Resend } from 'resend'
-import InviteEmail from '../../../../../emails/invite-email'
-import { waitUntil } from '@vercel/functions'
-
-const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy')
-
-export async function createInviteAction(
-  orgId: string,
-  email: string,
-  role: 'owner' | 'manager' | 'editor' | 'viewer'
-) {
-  try {
-    const { userId } = await verifyOwnerOrManager(orgId)
-    const supabase = await createClient()
+export const createInviteAction = authActionClient
+  .schema(z.object({
+    orgId: z.string().min(1),
+    email: z.string().email(),
+    role: z.enum(['owner', 'manager', 'editor', 'viewer'])
+  }))
+  .action(async ({ parsedInput: { orgId, email, role }, ctx: { supabase, user } }) => {
+    const { userId } = await verifyOwnerOrManager(orgId, supabase, user)
 
     // Create the invite
     const { data, error } = await supabase
@@ -70,12 +63,10 @@ export async function createInviteAction(
 
     if (orgId === 'demo-org') {
       revalidatePath('/dashboard/settings/team')
-      return { success: true, token: 'demo-invite-token-xyz' }
+      return { token: 'demo-invite-token-xyz' }
     }
 
-    if (error) {
-      return { error: (error as Error).message }
-    }
+    if (error) throw new Error(error.message)
 
     // Fetch org name
     const { data: org } = await supabase
@@ -108,16 +99,16 @@ export async function createInviteAction(
     })())
 
     revalidatePath('/dashboard/settings/team')
-    return { success: true, token: data.token }
-  } catch (err: unknown) {
-    return { error: (err as Error).message || 'An error occurred' }
-  }
-}
+    return { token: data.token }
+  })
 
-export async function revokeInviteAction(orgId: string, inviteId: string) {
-  try {
-    await verifyOwnerOrManager(orgId)
-    const supabase = await createClient()
+export const revokeInviteAction = authActionClient
+  .schema(z.object({
+    orgId: z.string().min(1),
+    inviteId: z.string().min(1)
+  }))
+  .action(async ({ parsedInput: { orgId, inviteId }, ctx: { supabase, user } }) => {
+    await verifyOwnerOrManager(orgId, supabase, user)
 
     const { error } = await supabase
       .from('organization_invites')
@@ -130,27 +121,26 @@ export async function revokeInviteAction(orgId: string, inviteId: string) {
       return { success: true }
     }
 
-    if (error) {
-      return { error: (error as Error).message }
-    }
+    if (error) throw new Error(error.message)
 
     revalidatePath('/dashboard/settings/team')
     return { success: true }
-  } catch (err: unknown) {
-    return { error: (err as Error).message || 'An error occurred' }
-  }
-}
+  })
 
-export async function removeMemberAction(orgId: string, userIdToDelete: string) {
-  try {
-    const { userId: currentUserId, role } = await verifyOwnerOrManager(orgId)
+export const removeMemberAction = authActionClient
+  .schema(z.object({
+    orgId: z.string().min(1),
+    userIdToDelete: z.string().min(1)
+  }))
+  .action(async ({ parsedInput: { orgId, userIdToDelete }, ctx: { supabase, user } }) => {
+    const { userId: currentUserId, role } = await verifyOwnerOrManager(orgId, supabase, user)
+    
     if (currentUserId === userIdToDelete) {
-      return { error: 'You cannot remove yourself from your own organization.' }
+      throw new Error('You cannot remove yourself from your own organization.')
     }
     
     // Additional check: Managers cannot remove owners
     if (role === 'manager') {
-      const supabase = await createClient()
       const { data: targetMember } = await supabase
         .from('organization_members')
         .select('role')
@@ -159,11 +149,9 @@ export async function removeMemberAction(orgId: string, userIdToDelete: string) 
         .single()
       
       if (targetMember?.role === 'owner') {
-        return { error: 'Managers cannot remove the organization owner.' }
+        throw new Error('Managers cannot remove the organization owner.')
       }
     }
-
-    const supabase = await createClient()
 
     const { error } = await supabase
       .from('organization_members')
@@ -176,30 +164,24 @@ export async function removeMemberAction(orgId: string, userIdToDelete: string) 
       return { success: true }
     }
 
-    if (error) {
-      return { error: (error as Error).message }
-    }
+    if (error) throw new Error(error.message)
 
     revalidatePath('/dashboard/settings/team')
     return { success: true }
-  } catch (err: unknown) {
-    return { error: (err as Error).message || 'An error occurred' }
-  }
-}
+  })
 
-export async function updateMemberRoleAction(orgId: string, targetUserId: string, newRole: string) {
-  try {
-    const { userId: currentUserId, role } = await verifyOwnerOrManager(orgId)
+export const updateMemberRoleAction = authActionClient
+  .schema(z.object({
+    orgId: z.string().min(1),
+    targetUserId: z.string().min(1),
+    newRole: z.enum(['owner', 'manager', 'editor', 'viewer'])
+  }))
+  .action(async ({ parsedInput: { orgId, targetUserId, newRole }, ctx: { supabase, user } }) => {
+    const { userId: currentUserId, role } = await verifyOwnerOrManager(orgId, supabase, user)
+    
     if (currentUserId === targetUserId) {
-      return { error: 'You cannot change your own role.' }
+      throw new Error('You cannot change your own role.')
     }
-
-    const validRoles = ['owner', 'manager', 'editor', 'viewer']
-    if (!validRoles.includes(newRole)) {
-      return { error: 'Invalid role provided.' }
-    }
-
-    const supabase = await createClient()
 
     // Additional check: Managers cannot modify owners
     if (role === 'manager') {
@@ -211,10 +193,10 @@ export async function updateMemberRoleAction(orgId: string, targetUserId: string
         .single()
       
       if (targetMember?.role === 'owner') {
-        return { error: 'Managers cannot change the role of the organization owner.' }
+        throw new Error('Managers cannot change the role of the organization owner.')
       }
       if (newRole === 'owner') {
-        return { error: 'Only owners can assign the owner role.' }
+        throw new Error('Only owners can assign the owner role.')
       }
     }
 
@@ -229,56 +211,40 @@ export async function updateMemberRoleAction(orgId: string, targetUserId: string
       return { success: true }
     }
 
-    if (error) {
-      return { error: (error as Error).message }
-    }
+    if (error) throw new Error(error.message)
 
     revalidatePath('/dashboard/settings/team')
     return { success: true }
-  } catch (err: unknown) {
-    return { error: (err as Error).message || 'An error occurred' }
-  }
-}
+  })
 
-export async function deleteOrganizationAction(orgId: string) {
-  try {
-    // Only strictly allow owners to delete
-    const supabase = await createClient()
-    const { data: userData } = await supabase.auth.getUser()
-    if (!userData?.user) throw new Error('Not authenticated')
-
+export const deleteOrganizationAction = authActionClient
+  .schema(z.object({
+    orgId: z.string().min(1)
+  }))
+  .action(async ({ parsedInput: { orgId }, ctx: { supabase, user } }) => {
     const { data: member } = await supabase
       .from('organization_members')
       .select('role')
       .eq('organization_id', orgId)
-      .eq('user_id', userData.user.id)
+      .eq('user_id', user.id)
       .single()
 
-    const isOwner = member?.role === 'owner' || (!member && await checkIsCreator(orgId, userData.user.id))
+    const isOwner = member?.role === 'owner' || (!member && await checkIsCreator(orgId, user.id, supabase))
     if (!isOwner) throw new Error('Only the business Owner can delete the organization.')
     
-    const currentUserId = userData.user.id
+    const currentUserId = user.id
 
     if (orgId === 'demo-org') {
-      return { error: 'You cannot delete the demo organization.' }
+      throw new Error('You cannot delete the demo organization.')
     }
 
-    // Because of foreign keys, deleting the organization should cascade to:
-    // menus, menu_categories, menu_items, locations, custom_pages, etc.
-    // Ensure the DB has ON DELETE CASCADE for all org relations.
-    // If not, we might need an RPC function. Assuming cascade is set up:
     const { error } = await supabase
       .from('organizations')
       .delete()
       .eq('id', orgId)
-      .eq('created_by', currentUserId) // extra safety: only the creator can delete
+      .eq('created_by', currentUserId)
 
-    if (error) {
-      return { error: (error as Error).message }
-    }
+    if (error) throw new Error(error.message)
 
     return { success: true }
-  } catch (err: unknown) {
-    return { error: (err as Error).message || 'An error occurred' }
-  }
-}
+  })
