@@ -2,6 +2,9 @@
   "name": "ourmenu-os",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=20.x"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build --webpack",
@@ -77,5 +80,5 @@
     "vitest": "^4.1.8"
   },
   "description": "Our menu and availability SaaS for hospitality businesses.",
-  "packageManager": "pnpm@11.5.1"
+  "packageManager": "pnpm@9.15.0"
 }
