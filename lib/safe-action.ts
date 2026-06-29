@@ -1,5 +1,6 @@
 import { createSafeActionClient, DEFAULT_SERVER_ERROR_MESSAGE } from 'next-safe-action';
 import { createClient } from '@/lib/supabase/server';
+import { isRedirectError } from 'next/dist/client/components/redirect';
 
 /**
  * Base action client for public, unauthenticated actions.
@@ -7,6 +8,9 @@ import { createClient } from '@/lib/supabase/server';
  */
 export const actionClient = createSafeActionClient({
   handleServerError(e: any) {
+    if (isRedirectError(e)) {
+      throw e;
+    }
     console.error("Action error:", e.message);
     if (e.message === 'Unauthorized' || 
         e.message === 'Not authenticated' || 
