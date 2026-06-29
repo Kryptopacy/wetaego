@@ -6,8 +6,8 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   X, Copy, CheckCircle2, 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-  Mail, MessageCircle
+
+  MessageCircle
 } from 'lucide-react'
 
 const TwitterIcon = ({ className }: { className?: string }) => (
@@ -139,7 +139,7 @@ export function ShareModal({ isOpen, onClose, url, title, description }: ShareMo
             <div className="mb-6">
               <h3 className="text-xl font-bold text-white mb-1">Share this page</h3>
   { }
-  {/* eslint-disable-next-line react/no-unescaped-entities */}
+  
               <p className="text-sm text-zinc-400">Share "{title}" with your friends or community.</p>
             </div>
 

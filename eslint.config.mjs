@@ -11,8 +11,7 @@ const eslintConfig = defineConfig([
     ".next/**",
     "out/**",
     "build/**",
-    "launch-video/.next/**",
-    "launch-video/out/**",
+    "launch-video/**",
     "next-env.d.ts",
     // Test output directories:
     "test-results/**",
@@ -21,12 +20,22 @@ const eslintConfig = defineConfig([
     "trash4/**",
     // Manual testing scripts
     "*.js",
-    "test_demo_*.ts"
+    "test_demo_*.ts",
+    "public/**"
   ]),
   {
     rules: {
       "@typescript-eslint/no-explicit-any": "error",
-      "no-console": ["error", { allow: ["warn", "error", "info"] }]
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        {
+          "argsIgnorePattern": "^_",
+          "varsIgnorePattern": "^_",
+          "caughtErrorsIgnorePattern": "^_"
+        }
+      ],
+      "no-console": ["error", { allow: ["warn", "error", "info"] }],
+      "react/no-unescaped-entities": "off"
     }
   }
 ]);

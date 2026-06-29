@@ -4,8 +4,8 @@ type RequestType = NonNullable<Database['public']['Tables']['service_requests'][
 
 import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { revalidatePath } from 'next/cache'
+  
+// import { revalidatePath } from 'next/cache'
 
 import { paymentProvider } from '@/lib/payments/paystack'
 import { sendWhatsAppMessage } from '@/lib/notifications/termii'
@@ -113,7 +113,7 @@ export async function processCheckout(params: {
   idempotencyKey?: string,
   subtotalMinor?: number,
   taxTotalMinor?: number,
-  taxBreakdown?: any[],
+  taxBreakdown?: unknown[],
   isUnevenSplit?: boolean
 }): Promise<SafeResult<{ checkoutUrl?: string, orderId: string, paymentMethod: string }>> {
   const {
@@ -136,7 +136,7 @@ export async function processCheckout(params: {
 
   const checkoutLogic = async () => {
     // 1. Server-side price verification — never trust client-supplied totals
-    const itemIds = items.map(i => i.id).filter(Boolean)
+    const itemIds = items.map(i => i.id as string).filter(Boolean)
     const { data: dbItems, error: dbItemsError } = await supabase
       .from('menu_items')
       .select('id, price_minor')

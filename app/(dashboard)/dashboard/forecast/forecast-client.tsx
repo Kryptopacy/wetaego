@@ -70,7 +70,7 @@ export function ForecastClient({ locationId }: ForecastClientProps) {
       if (data.forecasts) setForecasts(data.forecasts)
       if (data.message) setMessage(data.message)
       setHasGenerated(true)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  
     } catch (_e) {
       setMessage('Failed to generate forecast. Please try again.')
     } finally {

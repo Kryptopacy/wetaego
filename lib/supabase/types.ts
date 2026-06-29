@@ -1,4 +1,4 @@
-export type Json =
+﻿export type Json =
   | string
   | number
   | boolean
@@ -121,33 +121,36 @@ export type Database = {
       audit_logs: {
         Row: {
           action: string
-          actor_id: string | null
           created_at: string
           entity_id: string | null
-          entity_table: string
+          entity_type: string
           id: string
+          ip_address: string | null
           metadata: Json
           organization_id: string
+          user_id: string | null
         }
         Insert: {
           action: string
-          actor_id?: string | null
           created_at?: string
           entity_id?: string | null
-          entity_table: string
+          entity_type: string
           id?: string
+          ip_address?: string | null
           metadata?: Json
           organization_id: string
+          user_id?: string | null
         }
         Update: {
           action?: string
-          actor_id?: string | null
           created_at?: string
           entity_id?: string | null
-          entity_table?: string
+          entity_type?: string
           id?: string
+          ip_address?: string | null
           metadata?: Json
           organization_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -343,6 +346,41 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "location_pages_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      location_taxes: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          location_id: string
+          name: string
+          percentage: number
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          location_id: string
+          name: string
+          percentage?: number
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          location_id?: string
+          name?: string
+          percentage?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "location_taxes_location_id_fkey"
             columns: ["location_id"]
             isOneToOne: false
             referencedRelation: "locations"
@@ -920,7 +958,10 @@ export type Database = {
           organization_id: string
           payment_reference: string | null
           status: Database["public"]["Enums"]["order_status"]
+          subtotal_minor: number
           table_identifier: string | null
+          tax_breakdown: Json | null
+          tax_total_minor: number
           tip_amount_minor: number | null
           total_amount_minor: number
           updated_at: string
@@ -945,7 +986,10 @@ export type Database = {
           organization_id: string
           payment_reference?: string | null
           status?: Database["public"]["Enums"]["order_status"]
+          subtotal_minor?: number
           table_identifier?: string | null
+          tax_breakdown?: Json | null
+          tax_total_minor?: number
           tip_amount_minor?: number | null
           total_amount_minor?: number
           updated_at?: string
@@ -970,7 +1014,10 @@ export type Database = {
           organization_id?: string
           payment_reference?: string | null
           status?: Database["public"]["Enums"]["order_status"]
+          subtotal_minor?: number
           table_identifier?: string | null
+          tax_breakdown?: Json | null
+          tax_total_minor?: number
           tip_amount_minor?: number | null
           total_amount_minor?: number
           updated_at?: string
@@ -1865,15 +1912,8 @@ export type Database = {
         Args: { p_order_id: string; p_prep_time_minutes: number }
         Returns: boolean
       }
-      decrement_stock: {
-        Args: { p_items: Json }
-        Returns: undefined
-      }
-      increment_stock: {
-        Args: { p_items: Json }
-        Returns: undefined
-      }
       cleanup_stale_orders: { Args: never; Returns: undefined }
+      decrement_stock: { Args: { p_items: Json }; Returns: boolean }
       enforce_subscription_grace_periods: { Args: never; Returns: undefined }
       get_invite_by_token: {
         Args: { lookup_token: string }
@@ -1888,6 +1928,17 @@ export type Database = {
           role: Database["public"]["Enums"]["member_role"]
           token: string
         }[]
+      }
+      increment_stock: { Args: { p_items: Json }; Returns: boolean }
+      log_audit_event: {
+        Args: {
+          p_action: string
+          p_entity_id?: string
+          p_entity_type: string
+          p_metadata?: Json
+          p_organization_id: string
+        }
+        Returns: string
       }
     }
     Enums: {

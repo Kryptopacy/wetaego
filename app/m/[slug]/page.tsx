@@ -1,24 +1,11 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound, redirect } from 'next/navigation'
 import { Metadata } from 'next'
-import dynamic from 'next/dynamic'
-const AIChat = dynamic(() => import('./ai-chat').then(mod => mod.AIChat))
-const RouletteFAB = dynamic(() => import('./roulette-fab').then(mod => mod.RouletteFAB))
-import { CartFAB } from './cart-fab'
-import { CallStaffFAB } from './call-staff-fab'
-import { MenuRenderer } from './menu-renderer'
-import { LiveOrderTracker } from './live-order-tracker'
-import { SpinnerModal } from '../../components/spinner-modal'
+
 import { PortalRenderer } from './portal-renderer'
-import { EcosystemNav } from '@/components/layout/ecosystem-nav'
-import { FabGroup } from './components/fab-group'
-
-import { unstable_cache } from 'next/cache'
-
-import { VenueHeader } from './components/venue-header'
 import { InvalidQrMessage } from './components/qr-state-messages'
-import { GlobalDiscountBanner } from './components/global-discount-banner'
 import { PreviewBanner } from '@/components/preview-banner'
+import { unstable_cache } from 'next/cache'
 
 // Revalidate this page every 60 seconds (Incremental Static Regeneration)
 // This ensures edge caching handles high traffic seamlessly
@@ -138,43 +125,20 @@ export default async function PublicMenuPage({
     }
   }
 
-  // 1.2 Fetch Payment Settings
-  const { data: paymentSettings } = await supabase
+  // Fetch secondary data in parallel
+  const paymentSettingsPromise = supabase
     .from('organization_payment_settings')
     .select('is_active, provider_account_id')
     .eq('organization_id', location.organization_id)
     .single()
-    
-  // const isPaystackLive = paymentSettings?.is_active && paymentSettings?.provider_account_id
 
-  // 1.5 Handle Dynamic QR Routing — redirect to destination_path if configured
-  let tableIdentifier = undefined
+  const qrCodePromise = qrId ? supabase
+    .from('qr_codes')
+    .select('table_identifier, destination_path, is_active')
+    .eq('id', qrId)
+    .eq('location_id', location.id)
+    .single() : Promise.resolve(null)
 
-  if (qrId) {
-    const { data: qrCode } = await supabase
-      .from('qr_codes')
-      .select('table_identifier, destination_path, is_active')
-      .eq('id', qrId)
-      .eq('location_id', location.id)
-      .single()
-
-    if (!qrCode || !qrCode.is_active) {
-      return <InvalidQrMessage />
-    }
-
-    if (qrCode.table_identifier) {
-      tableIdentifier = qrCode.table_identifier
-    }
-
-    // If the QR code has a specific destination page, redirect directly to it
-    const rootPath = `/m/${slug}`
-    if (qrCode.destination_path && qrCode.destination_path !== rootPath) {
-      const destWithQr = `${qrCode.destination_path}?qr_id=${qrId}`
-      redirect(destWithQr)
-    }
-  }
-
-  // 1.8 Fetch published location_pages for routing logic
   const fetchLocationPages = async () => {
     let query = supabase
       .from('location_pages')
@@ -189,14 +153,40 @@ export default async function PublicMenuPage({
     const { data } = await query
     return data
   }
-  
-  const locationPages = isPreview
-    ? await fetchLocationPages()
-    : await unstable_cache(
+
+  const locationPagesPromise = isPreview
+    ? fetchLocationPages()
+    : unstable_cache(
         fetchLocationPages,
         [`location_pages_${location.id}`],
         { revalidate: 60, tags: [`location_pages_${location.id}`] }
       )()
+
+  const [
+    { data: paymentSettings },
+    qrCodeResult,
+    locationPages
+  ] = await Promise.all([
+    paymentSettingsPromise,
+    qrCodePromise,
+    locationPagesPromise
+  ])
+
+  const qrCode = qrCodeResult?.data
+
+  // Handle Dynamic QR Routing
+  if (qrId) {
+    if (!qrCode || !qrCode.is_active) {
+      return <InvalidQrMessage />
+    }
+
+    // If the QR code has a specific destination page, redirect directly to it
+    const rootPath = `/m/${slug}`
+    if (qrCode.destination_path && qrCode.destination_path !== rootPath) {
+      const destWithQr = `${qrCode.destination_path}?qr_id=${qrId}`
+      redirect(destWithQr)
+    }
+  }
 
   const pageCount = locationPages?.length ?? 0
   // ── Routing Decision Tree ───────────────────────────────────────────────────

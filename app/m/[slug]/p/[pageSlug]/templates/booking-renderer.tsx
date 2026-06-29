@@ -111,7 +111,7 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           page_id: page.id,
-          item_ids: selectedItems.map(i => i.id),
+          item_ids: selectedItems.map(i => i.id as string),
           ...form,
           number_of_guests: parseInt(form.number_of_guests),
         }),
@@ -439,7 +439,7 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
           <div className="space-y-8">
             {Object.entries(
               items.reduce((acc, item) => {
-                // @ts-ignore
+                // @ts-expect-error
                 const cat = item.item_data?.category?.trim() || 'Services'
                 if (!acc[cat]) acc[cat] = []
                 acc[cat].push(item)

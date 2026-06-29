@@ -111,8 +111,8 @@ export async function processBookingPayment(
           </div>
         `
       })
-    } catch (e) {
-      console.error('Failed to send booking receipt', e)
+    } catch (_e) {
+      console.error('Failed to send booking receipt', _e)
     }
   }
 }
@@ -285,8 +285,8 @@ export async function processOrderPayment(
           }))
         }) as React.ReactElement
       })
-    } catch (e) {
-      console.error('Failed to send order receipt email:', e)
+    } catch (_e) {
+      console.error('Failed to send order receipt email:', _e)
     }
   }
 
@@ -313,7 +313,7 @@ export async function processQuoteMilestonePayment(
 
   if (!quote) throw new Error('Quote not found')
 
-  let parsedNotes: any = {}
+  let parsedNotes: { milestones?: { id: string; status: string }[] } = {}
   try {
     if (quote.booking_notes) parsedNotes = JSON.parse(quote.booking_notes)
   } catch (e) {}
@@ -332,13 +332,13 @@ export async function processQuoteMilestonePayment(
       .eq('id', quoteId)
   } else {
     // Update specific milestone status
-    const milestoneIndex = parsedNotes.milestones.findIndex((m: any) => m.id === milestoneId)
+    const milestoneIndex = parsedNotes.milestones.findIndex((m) => m.id === milestoneId)
     if (milestoneIndex > -1) {
       parsedNotes.milestones[milestoneIndex].status = 'paid'
     }
 
     // Check if all milestones are paid
-    const allPaid = parsedNotes.milestones.every((m: any) => m.status === 'paid')
+    const allPaid = parsedNotes.milestones.every((m) => m.status === 'paid')
 
     await supabase
       .from('page_bookings')

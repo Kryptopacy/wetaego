@@ -328,7 +328,7 @@ export const updateProfile = authActionClient
 
     const { full_name, bank_name, account_number, account_name } = parsedInput
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    
     const { data: existingProfile } = await (supabase as any)
       .from('user_profiles')
       .select('paystack_subaccount_code, bank_name, account_number, account_name')
@@ -360,7 +360,7 @@ export const updateProfile = authActionClient
 
     if (updateError) throw new Error('Failed to update auth metadata')
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    
     const { error: profileError } = await (supabase as any)
       .from('user_profiles')
       .upsert({

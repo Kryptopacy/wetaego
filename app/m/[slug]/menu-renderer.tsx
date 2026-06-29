@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ItemCard } from './item-card'
 import { toast } from 'sonner'
-import { Tables } from '@/types'
+import { Tables } from '@/lib/supabase/types'
 import { Sparkles, Search, X, Globe, ChevronRight } from 'lucide-react'
 
 export type CategoryWithItems = Tables<'menu_categories'> & {
@@ -76,19 +76,23 @@ export function MenuRenderer({ initialCategories }: { initialCategories: Categor
   }, [categories])
 
   useEffect(() => {
-    try {
-      const lang = navigator.language.split('-')[0]
-      if (lang && lang !== 'en') {
-        const languageNames = new Intl.DisplayNames(['en'], { type: 'language' })
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setTargetLang(languageNames.of(lang) || lang)
-         
-        setShowPrompt(true)
+    const detect = async () => {
+      await Promise.resolve()
+      try {
+        const lang = navigator.language.split('-')[0]
+        if (lang && lang !== 'en' && !targetLang) {
+          const languageNames = new Intl.DisplayNames(['en'], { type: 'language' })
+          
+          setTargetLang(languageNames.of(lang) || lang)
+           
+          setShowPrompt(true)
+        }
+      } catch (e) {
+        console.warn("Language detection failed", e)
       }
-    } catch (e) {
-      console.warn("Language detection failed", e)
     }
-  }, [])
+    detect()
+  }, [targetLang])
 
   async function handleTranslate() {
     if (!targetLang) return
@@ -153,7 +157,7 @@ export function MenuRenderer({ initialCategories }: { initialCategories: Categor
     return categories
       .map(category => ({
         ...category,
-        menu_items: category.menu_items?.filter(item => 
+        menu_items: category.menu_items?.filter((item: Tables<'menu_items'>) => 
           item.name.toLowerCase().includes(query) || 
           item.description?.toLowerCase().includes(query)
         )
@@ -315,7 +319,7 @@ export function MenuRenderer({ initialCategories }: { initialCategories: Categor
                   </div>
                   
                   <div className="grid gap-4">
-                    {category.menu_items?.map(item => (
+                    {category.menu_items?.map((item: Tables<'menu_items'>) => (
                       <ItemCard key={item.id} item={item} />
                     ))}
                   </div>

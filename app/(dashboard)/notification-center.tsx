@@ -46,7 +46,7 @@ export function NotificationCenter() {
             .then(({ data: org }) => { if (org?.id) setOrgId(org.id) })
         })
     })
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, []) 
 
   // ── Convert raw rows into NotificationItems ──────────────────────────────────
   const toOrderItem = (o: Record<string, unknown>): NotificationItem => ({
@@ -135,8 +135,8 @@ export function NotificationCenter() {
 
   useEffect(() => {
     if (!orgId) return
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchAll(orgId)
+      
+    Promise.resolve().then(() => fetchAll(orgId))
   }, [orgId, fetchAll])
 
   // ── Realtime subscriptions ───────────────────────────────────────────────────
@@ -213,7 +213,7 @@ export function NotificationCenter() {
       .subscribe()
 
     return () => { supabase.removeChannel(channel) }
-  }, [orgId]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [orgId]) 
 
   // ── App Badge API ────────────────────────────────────────────────────────────
   useEffect(() => {

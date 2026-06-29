@@ -58,7 +58,7 @@ export function HardwareSettingsView() {
           price_minor: 30000,
         }
       ]
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    
     } as any
 
     const success = await printOrder(testOrder, {

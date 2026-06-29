@@ -25,7 +25,7 @@ export const updateQrConfig = authActionClient
     }
     if (!isAuthorized) throw new Error("Unauthorized");
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    
     const updatePayload: any = {
       qr_text: config.qr_text ? config.qr_text.substring(0, 2) : null,
       qr_color: config.qr_color,

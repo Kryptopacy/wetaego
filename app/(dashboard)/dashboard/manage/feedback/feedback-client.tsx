@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { format } from 'date-fns'
-import { Star, MessageSquare, User, Filter, Search } from 'lucide-react'
+import { Star, MessageSquare, User, Search } from 'lucide-react'
 
 export interface Review {
   id: string
@@ -65,7 +65,7 @@ export function FeedbackInboxClient({
         <div className="flex flex-wrap gap-2">
           <select 
             value={filterType}
-            onChange={(e) => setFilterType(e.target.value as any)}
+            onChange={(e) => setFilterType(e.target.value as 'all' | 'business' | 'staff')}
             className="bg-zinc-900 border border-zinc-800 text-sm text-white rounded-lg px-3 py-2 outline-none focus:border-purple-500"
           >
             <option value="all">All Feedback</option>
@@ -129,7 +129,7 @@ export function FeedbackInboxClient({
                         ))}
                       </div>
                     </div>
-                    <p className="text-sm text-zinc-400 italic">"{review.businessFeedback}"</p>
+                    <p className="text-sm text-zinc-400 italic">&quot;{review.businessFeedback}&quot;</p>
                   </div>
                 )}
 
@@ -150,7 +150,7 @@ export function FeedbackInboxClient({
                         ))}
                       </div>
                     </div>
-                    <p className="text-sm text-zinc-400 italic">"{review.staffFeedback}"</p>
+                    <p className="text-sm text-zinc-400 italic">&quot;{review.staffFeedback}&quot;</p>
                   </div>
                 )}
               </div>

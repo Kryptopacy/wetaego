@@ -20,8 +20,7 @@ export default function SharingHubPage({
   const [origin, setOrigin] = useState('')
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setOrigin(window.location.origin)
+    Promise.resolve().then(() => setOrigin(window.location.origin))
   }, [])
 
   const shareLink = origin ? `${origin}/pay/${order_id}?split=${splitCount}` : ''

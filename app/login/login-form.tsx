@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import { login, signup, signInWithGoogle } from './actions'
 import { useFormStatus } from 'react-dom'
-import { toast } from 'sonner'
+
 
 function SubmitButton({ isLogin }: { isLogin: boolean }) {
   const { pending } = useFormStatus()

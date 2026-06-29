@@ -21,7 +21,7 @@ const signupSchema = z.object({
 
 /** Sanitize redirect target to prevent open redirect attacks */
 function sanitizeRedirect(target: string | null): string {
-  if (!target || !target.startsWith('/') || target.startsWith('//')) {
+  if (!target || target === '/' || !target.startsWith('/') || target.startsWith('//')) {
     return '/dashboard'
   }
   return target

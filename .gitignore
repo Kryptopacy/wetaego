@@ -53,6 +53,11 @@ trash2/
 lint_output.txt
 lint_results.json
 lint.json
+lint_log.txt
+lint_log2.txt
+.eslint-output.json
+eslint-report.json
+swagger.json
 # AI Agent Configuration
 .agents/
 

@@ -117,7 +117,7 @@ export async function submitFeedbackAndTip(
         let staffSubaccount: string | undefined = undefined
 
         if (assignedStaffId) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          
           const { data: staffProfile } = await (supabase as any)
             .from('user_profiles')
             .select('paystack_subaccount_code')

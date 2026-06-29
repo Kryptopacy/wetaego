@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import { format } from 'date-fns'
 import { formatCurrency } from '@/lib/utils/currency'
-import { Lock, FileSignature } from 'lucide-react'
+
 import { QuotePayment } from './quote-payment'
 
 export default async function PublicQuotePage({
@@ -35,7 +35,7 @@ export default async function PublicQuotePage({
   if (quote.booking_notes) {
     try {
       parsedQuoteData = JSON.parse(quote.booking_notes)
-    } catch (e) {
+    } catch (_e) {
       // ignore
     }
   }

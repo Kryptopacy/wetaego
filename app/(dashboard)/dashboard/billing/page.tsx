@@ -22,7 +22,7 @@ export default async function BillingPage(props: { searchParams: Promise<{ curre
 
   // Fetch the user's organization — check membership first, then creator fallback
   // This allows invited managers to access billing (not just the account creator)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  
   let org: any = null
 
   const { data: memberOrg } = await supabase

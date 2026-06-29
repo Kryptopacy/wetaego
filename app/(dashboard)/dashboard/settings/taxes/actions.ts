@@ -16,7 +16,7 @@ export const saveTax = authActionClient
   .action(async ({ parsedInput: { id, location_id, name, percentage, is_active }, ctx: { supabase } }) => {
     if (id) {
       // Update
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      
       const { error } = await (supabase as any)
         .from('location_taxes')
         .update({ name, percentage, is_active })
@@ -26,7 +26,7 @@ export const saveTax = authActionClient
       if (error) throw new Error(error.message || 'Failed to update tax')
     } else {
       // Insert
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      
       const { error } = await (supabase as any)
         .from('location_taxes')
         .insert({ location_id, name, percentage, is_active })
@@ -44,7 +44,7 @@ export const deleteTax = authActionClient
     locationId: z.string().uuid()
   }))
   .action(async ({ parsedInput: { taxId, locationId }, ctx: { supabase } }) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    
     const { error } = await (supabase as any)
       .from('location_taxes')
       .delete()

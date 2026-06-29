@@ -97,7 +97,7 @@ export function RateCardRenderer({ location, page, items, locationSlug, paymentI
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           page_id: page.id,
-          item_ids: selectedItems.map(i => i.id),
+          item_ids: selectedItems.map(i => i.id as string),
           customer_name: form.customer_name,
           customer_email: form.customer_email,
           customer_phone: form.customer_phone,

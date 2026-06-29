@@ -13,7 +13,7 @@ export async function searchDirectory(formData: FormData) {
   const supabase = await createClient()
 
   // Find location by name match
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  
   const { data: locMatch, error } = await supabase
     .from('location_pages')
     .select('slug, locations!inner(name)')

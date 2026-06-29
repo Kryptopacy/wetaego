@@ -27,7 +27,7 @@ export const updateBookingStatus = authActionClient
 
     if (!bookingData) throw new Error('Booking not found')
     
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    
     const orgId = (bookingData.location_pages as any)?.locations?.organization_id
 
     const { data: member } = await supabase

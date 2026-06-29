@@ -49,7 +49,7 @@ export default async function DashboardOverviewPage() {
       .select('slug')
       .eq('organization_id', orgId)
       .single()
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  
     locationSlug = loc?.slug || ''
   }
 

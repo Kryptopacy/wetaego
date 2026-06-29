@@ -64,7 +64,7 @@ export default async function TeamPage() {
     .eq('organization_id', organization?.id || '')
 
   const userIds = (membersRaw || []).map(m => m.user_id as string)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    
     const { data: profiles } = await (supabase as any)
       .from('user_profiles')
       .select('id, full_name, bank_name, account_number, account_name')
@@ -73,7 +73,7 @@ export default async function TeamPage() {
     const profilesMap = new Map(profiles?.map((p: { id: string, full_name?: string, bank_name?: string, account_number?: string, account_name?: string }) => [p.id, p]) || [])
 
     members = (membersRaw || []).map(m => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      
       const profile = profilesMap.get(m.user_id as string) as any
       return {
         user_id: m.user_id as string,

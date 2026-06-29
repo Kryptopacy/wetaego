@@ -34,8 +34,8 @@ export default function FeedbackVerifyPage({
         toast.success('Verified!')
         router.push(`/m/${slug}/feedback/${orderId}`)
       }
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (err) {
+  
+    } catch (_err) {
       toast.error('Failed to verify PIN')
     } finally {
       setIsLoading(false)

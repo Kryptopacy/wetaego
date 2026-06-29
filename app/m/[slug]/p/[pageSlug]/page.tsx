@@ -160,20 +160,24 @@ export default async function PublicPageView({
     const { data } = await query
     return data || []
   }
-  const items = isPreview
-    ? await fetchItems()
-    : await unstable_cache(
+  const paymentSettingsPromise = supabase
+    .from('organization_payment_settings')
+    .select('is_active')
+    .eq('organization_id', loc.organization_id)
+    .single()
+
+  const itemsPromise = isPreview
+    ? fetchItems()
+    : unstable_cache(
         fetchItems,
         [`page_items_${page.id}`],
         { revalidate: 60, tags: [`page_items_${page.id}`] }
       )()
 
-  // 4. Payment Settings
-  const { data: paymentSettings } = await supabase
-    .from('organization_payment_settings')
-    .select('is_active')
-    .eq('organization_id', loc.organization_id)
-    .single()
+  const [items, { data: paymentSettings }] = await Promise.all([
+    itemsPromise,
+    paymentSettingsPromise
+  ])
 
   const sharedProps = {
      

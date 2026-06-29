@@ -31,7 +31,7 @@ export async function GET(req: Request) {
       return new NextResponse('Booking not found', { status: 404 })
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    
     const slug = (booking.location_pages as any)?.slug
 
     if (!slug) {

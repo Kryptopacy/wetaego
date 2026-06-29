@@ -24,15 +24,15 @@ export function PwaInstallPrompt() {
   useEffect(() => {
     // Detect if already installed/standalone
     if (window.matchMedia('(display-mode: standalone)').matches || ('standalone' in navigator && (navigator as { standalone?: boolean }).standalone)) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setIsStandalone(true)
+      
+      Promise.resolve().then(() => setIsStandalone(true))
       return
     }
 
     // Detect iOS for manual instruction fallback
     const ua = window.navigator.userAgent
     const ios = /iPad|iPhone|iPod/.test(ua) && !('MSStream' in window)
-    setIsIos(ios)
+    Promise.resolve().then(() => setIsIos(ios))
 
     // Listen for the install prompt event
     const handleBeforeInstallPrompt = (e: Event) => {

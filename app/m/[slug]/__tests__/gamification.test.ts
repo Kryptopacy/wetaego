@@ -1,5 +1,5 @@
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { describe, it, expect, vi } from 'vitest'
+  
+import { describe, it, expect } from 'vitest'
 
 // We extract the math logic for testing
 function evaluateSpinResult(

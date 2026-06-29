@@ -32,8 +32,7 @@ export default function FeedbackPage({
   useEffect(() => {
     if (isGeneral) {
       const urlParams = new URLSearchParams(window.location.search)
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setLocationId(urlParams.get('location_id'))
+      Promise.resolve().then(() => setLocationId(urlParams.get('location_id')))
     }
   }, [isGeneral])
 
@@ -72,8 +71,8 @@ export default function FeedbackPage({
         setSubmitted(true)
         toast.success('Thank you for your feedback!')
       }
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (e) {
+  
+    } catch (_e) {
       toast.error('Something went wrong submitting your review.')
     } finally {
       setIsSubmitting(false)

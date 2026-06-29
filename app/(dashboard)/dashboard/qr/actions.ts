@@ -73,7 +73,7 @@ export const generateQrBatch = authActionClient
 
     // Generate generic QR codes
      
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    
     const qrCodes = Array.from({ length: quantity }).map((__, _i) => {
       return {
         organization_id: orgId,

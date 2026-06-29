@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import Image from 'next/image'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { formatCurrency } from '@/lib/utils/currency'
 import { Plus, Minus, Check, ArrowRight, ArrowLeft } from 'lucide-react'
 

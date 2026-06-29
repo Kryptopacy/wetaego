@@ -1,6 +1,6 @@
 import { createSafeActionClient, DEFAULT_SERVER_ERROR_MESSAGE } from 'next-safe-action';
 import { createClient } from '@/lib/supabase/server';
-import { isRedirectError } from 'next/dist/client/components/redirect';
+const isRedirectError = (e: any) => e instanceof Error && e.message === 'NEXT_REDIRECT' || e?.digest?.startsWith('NEXT_REDIRECT');
 
 /**
  * Base action client for public, unauthenticated actions.

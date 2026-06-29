@@ -12,7 +12,6 @@ export async function RestaurantRenderer({
   tableIdentifier,
   paymentIsLive,
 }: {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   location: any
   slug: string
   tableIdentifier?: string
@@ -44,9 +43,9 @@ export async function RestaurantRenderer({
     { revalidate: 60, tags: [`menu_categories_${location.id}`] }
   )()
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  
   const allMenuItems = categories.flatMap((cat: any) => 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    
     (cat.menu_items || []).map((item: any) => ({
       id: item.id,
       name: item.name,

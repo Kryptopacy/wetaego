@@ -1,4 +1,4 @@
-﻿-- =============================================================================
+-- =============================================================================
 -- Security Remediation: Function Permissions & Search Path Hardening
 -- Addresses Supabase linter warnings:
 --   0011 (function_search_path_mutable)

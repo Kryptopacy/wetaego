@@ -14,7 +14,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
 
   let orgName = ''
   let isOwnerOrManager = true
-  let userEmail = userData?.user?.email || ''
+  const userEmail = userData?.user?.email || ''
   let credits: number | null = null
   let locations: any[] = []
   let activeLocationId = ''
@@ -22,7 +22,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   const baseNavItems: NavItem[] = [
     { href: '/dashboard', label: 'Overview', icon: LayoutDashboard as any, exact: true },
   ]
-  let dynamicNavItems: NavItem[] = [...baseNavItems]
+  const dynamicNavItems: NavItem[] = [...baseNavItems]
 
   if (userData?.user) {
     const { data: member } = await supabase

@@ -18,14 +18,14 @@ export const updateSetting = authActionClient
     const key = formData.get('key') as string
     const isJson = formData.get('is_json') === 'true'
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    
     let value: Record<string, any> = {}
 
     if (isJson) {
       const rawJson = formData.get('json_value') as string
       try {
         value = JSON.parse(rawJson)
-      } catch (_e) {
+      } catch {
         throw new Error('Invalid JSON format')
       }
     } else {
@@ -42,7 +42,7 @@ export const updateSetting = authActionClient
       })
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    
     const { error } = await (supabase as any)
       .from('system_settings')
       .upsert({
@@ -74,7 +74,7 @@ export const overrideTenantPlan = authActionClient
     const status = formData.get('subscription_status') as string
     const credits = Number(formData.get('purchased_credits')) || 0
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    
     const { error } = await (supabase as any)
       .from('organizations')
       .update({

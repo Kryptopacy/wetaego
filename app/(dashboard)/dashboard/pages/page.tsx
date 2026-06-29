@@ -45,7 +45,7 @@ export default async function PagesManager() {
       .eq('created_by', userId)
       .single()
     org = data
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
     role = 'owner'
   }
 
@@ -84,7 +84,7 @@ export default async function PagesManager() {
 
   const currentCount = pages.length
   const isOverLimit = currentCount >= freeLimit
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  
   const creditsRemaining = (org.purchased_credits || 0) + Math.max(0, (
     org.subscription_tier === 'pro' ? 50 :
     org.subscription_tier === 'enterprise' ? 200 : 0
@@ -119,7 +119,7 @@ export default async function PagesManager() {
         {pages.map((page) => {
           const fullUrl = `${baseUrl}/m/${locData!.slug}/p/${page.slug}`
           const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(fullUrl)}&color=ffffff&bgcolor=09090b`
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  
           const preset = page.template_type !== 'info' && page.template_type !== 'custom'
             ? Object.values(BUSINESS_TYPE_PRESETS).find(p => p.template_type === page.template_type)
             : null

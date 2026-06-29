@@ -100,7 +100,7 @@ export default async function SettingsPage({
   }
 
   // Fetch their profile details for the inputs
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  
   const { data: userProfile } = await (supabase as any)
     .from('user_profiles')
     .select('full_name, bank_name, account_number, account_name')
@@ -378,7 +378,7 @@ export default async function SettingsPage({
                   )}
                 </h2>
                 <p className="text-sm text-zinc-400 mb-6">
-  {/* eslint-disable-next-line react/no-unescaped-entities */}
+  
                   If your Paystack account isn't live yet or the provider experiences downtime, the system will automatically fall back to showing these manual bank transfer details so you never lose a booking.
                 </p>
                 

@@ -48,12 +48,34 @@ export function FloatingInput({
   )
 }
 
+export interface CheckoutCartItem {
+  id: string;
+  name: string;
+  price_minor: number;
+  quantity: number;
+  options?: Record<string, string>;
+  image_url?: string;
+}
+
+export interface CheckoutMenuItem {
+  id: string;
+  name: string;
+  price_minor: number;
+  image_url?: string;
+  description?: string;
+}
+
+export interface CheckoutTax {
+  name: string;
+  percentage: number;
+}
+
 interface CheckoutModalProps {
   isOpen: boolean
   onClose: () => void
-  items: any[]
+  items: CheckoutCartItem[]
   totalAmountMinor: () => number
-  addItem: (item: any) => void
+  addItem: (item: Omit<CheckoutCartItem, 'quantity'>) => void
   updateQuantity: (id: string, delta: number) => void
   clearCart: () => void
   spinnerDiscount?: number | null
@@ -70,7 +92,7 @@ interface CheckoutModalProps {
   hideAddressField?: boolean
   globalDiscountEnabled?: boolean | null
   globalDiscountPercentage?: number | null
-  menuItems?: any[]
+  menuItems?: CheckoutMenuItem[]
   templateType?: string
   deliveryEnabled?: boolean | null
   deliveryFeeMinor?: number | null
@@ -80,8 +102,8 @@ interface CheckoutModalProps {
   pageId?: string
   refundPolicy?: string | null
   pageFulfillmentOptions?: { pickup: boolean, delivery: boolean, table: boolean }
-  pageBillingMode?: string
-  locationTaxes?: any[]
+  __pageBillingMode?: string; pageBillingMode?: string
+  locationTaxes?: CheckoutTax[]
 }
 
 export function CheckoutModal({
@@ -151,14 +173,15 @@ export function CheckoutModal({
 
   // Auto-fill customer data on load
   useEffect(() => {
+    if (typeof window === 'undefined') return
     try {
-      const saved = localStorage.getItem('om_customer_profile')
+      const saved = window.localStorage.getItem('om_customer_profile')
       if (saved) {
         const profile = JSON.parse(saved)
-        if (profile.name) setCustomerName(profile.name)
-        if (profile.email) setCustomerEmail(profile.email)
-        if (profile.phone) setCustomerPhone(profile.phone)
-        if (profile.address && !tableIdentifier) setTableNumber(profile.address) // reuse for delivery address
+        if (profile.name && !customerName) Promise.resolve().then(() => setCustomerName(profile.name))
+        if (profile.email && !customerEmail) Promise.resolve().then(() => setCustomerEmail(profile.email))
+        if (profile.phone && !customerPhone) Promise.resolve().then(() => setCustomerPhone(profile.phone))
+        if (profile.address && !tableIdentifier && !tableNumber) Promise.resolve().then(() => setTableNumber(profile.address)) // reuse for delivery address
       }
     } catch {
       // Ignore
@@ -172,24 +195,33 @@ export function CheckoutModal({
   useEffect(() => {
     if (isOpen && items.length > 0 && menuItems.length > 0 && !upsellData && !isFetchingUpsell.current) {
       isFetchingUpsell.current = true
+      const controller = new AbortController()
       const fetchUpsell = async () => {
         try {
           const res = await fetch('/api/upsell', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ cartItems: items, availableItems: menuItems, templateType })
+            body: JSON.stringify({ cartItems: items, availableItems: menuItems, templateType }),
+            signal: controller.signal
           })
           if (res.ok) {
             const data = await res.json()
             setUpsellData(data)
           }
         } catch (e) {
-          console.error('Upsell fetch failed', e)
+          if (e instanceof Error && e.name !== 'AbortError') {
+             console.error('Upsell fetch failed', e)
+          }
         } finally {
           isFetchingUpsell.current = false
         }
       }
       fetchUpsell()
+      
+      return () => {
+        controller.abort()
+        isFetchingUpsell.current = false
+      }
     }
   }, [isOpen, items, items.length, menuItems, templateType, upsellData])
 

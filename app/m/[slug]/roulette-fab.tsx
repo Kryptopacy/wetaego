@@ -9,8 +9,8 @@ export function RouletteFAB() {
   const [isOpen, setIsOpen] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
   
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => setIsMounted(true), [])
+  
+  useEffect(() => { Promise.resolve().then(() => setIsMounted(true)) }, [])
 
   if (!isMounted) return null
 

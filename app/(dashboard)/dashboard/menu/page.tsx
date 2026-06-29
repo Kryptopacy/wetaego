@@ -40,7 +40,7 @@ export default async function MenuManagerPage() {
       .eq('created_by', userId)
       .single()
     org = data
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  
     role = 'owner'
   }
 

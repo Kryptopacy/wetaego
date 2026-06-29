@@ -6,15 +6,15 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { ReactNode, useEffect, useState } from 'react'
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  
 import { motion, AnimatePresence } from 'framer-motion'
 import { createClient } from '@/lib/supabase/client'
 import { setActiveLocationCookie } from './layout-actions'
 import {
-  LayoutDashboard, ClipboardList, BarChart3, BookOpen,
+  BarChart3, BookOpen,
    
    
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  
   FileText, Settings, CreditCard, LogOut, Zap, Menu, X, Users, QrCode, TrendingUp, MessageSquare
 } from 'lucide-react'
 import { GlobalRealtime } from './global-realtime'
@@ -30,9 +30,6 @@ export interface NavItem {
   exact?: boolean
 }
 
-const baseNavItems: NavItem[] = [
-  { href: '/dashboard', label: 'Overview', icon: LayoutDashboard, exact: true },
-]
 
 const managerItems: NavItem[] = [
   { href: '/dashboard/customers', label: 'CRM & Loyalty', icon: Users },
@@ -91,7 +88,7 @@ function NavLink({ href, label, icon: Icon, badge, exact, onClick }: {
 
 export interface InitialDashboardData {
   orgName: string;
-  locations: any[];
+  locations: { id: string, name: string }[];
   activeLocationId: string;
   locationSlug: string;
   isOwnerOrManager: boolean;
@@ -101,18 +98,17 @@ export interface InitialDashboardData {
 }
 
 export default function ClientLayout({ children, initialData }: { children: ReactNode, initialData: InitialDashboardData }) {
-  const [orgName, setOrgName] = useState(initialData.orgName)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [locations, setLocations] = useState<any[]>(initialData.locations)
+  const [orgName] = useState(initialData.orgName)
+  const [locations] = useState<{ id: string, name: string }[]>(initialData.locations)
   const [activeLocationId, setActiveLocationId] = useState(initialData.activeLocationId)
-  const [locationSlug, setLocationSlug] = useState(initialData.locationSlug)
-  const [isOwnerOrManager, setIsOwnerOrManager] = useState(initialData.isOwnerOrManager)
+  const [locationSlug] = useState(initialData.locationSlug)
+  const [isOwnerOrManager] = useState(initialData.isOwnerOrManager)
   const [time, setTime] = useState('')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [userEmail, setUserEmail] = useState(initialData.userEmail)
-  const [dynamicNavItems, setDynamicNavItems] = useState<NavItem[]>(initialData.dynamicNavItems)
+  const [userEmail] = useState(initialData.userEmail)
+  const [dynamicNavItems] = useState<NavItem[]>(initialData.dynamicNavItems)
 
-  const [credits, setCredits] = useState<number | null>(initialData.credits)
+  const [credits] = useState<number | null>(initialData.credits)
 
   useEffect(() => {
     // Data is now fetched server-side in layout.tsx, so we don't need the client fetcher 
