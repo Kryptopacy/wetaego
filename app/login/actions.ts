@@ -103,7 +103,7 @@ export async function startInteractiveDemo() {
   const supabase = await createClient()
   
   const uid = crypto.randomUUID().split('-')[0]
-  const email = `demo-${uid}@pacygrills.com`
+  const email = `demo-${uid}@ourmenuos.online`
   const password = 'demo-password-123'
 
   // 1. Create a real ephemeral user (bypassing email confirmation using admin client)

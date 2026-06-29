@@ -20,7 +20,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   let activeLocationId = ''
   let locationSlug = ''
   const baseNavItems: NavItem[] = [
-    { href: '/dashboard', label: 'Overview', icon: LayoutDashboard as any, exact: true },
+    { href: '/dashboard', label: 'Overview', icon: 'LayoutDashboard', exact: true },
   ]
   const dynamicNavItems: NavItem[] = [...baseNavItems]
 
@@ -69,20 +69,20 @@ export default async function DashboardLayout({ children }: { children: ReactNod
           }
 
           if (templates.has('restaurant') || templates.has('catalog')) {
-            dynamicNavItems.push({ href: '/dashboard/orders', label: 'Order Inbox', icon: ClipboardList as any, badge: 'LIVE' })
+            dynamicNavItems.push({ href: '/dashboard/orders', label: 'Order Inbox', icon: 'ClipboardList', badge: 'LIVE' })
           }
           if (templates.has('booking')) {
-            dynamicNavItems.push({ href: '/dashboard/bookings', label: 'Bookings (BMS)', icon: BookOpen as any })
+            dynamicNavItems.push({ href: '/dashboard/bookings', label: 'Bookings (BMS)', icon: 'BookOpen' })
           }
           if (templates.has('listing')) {
-            dynamicNavItems.push({ href: '/dashboard/properties', label: 'Properties (PMS)', icon: FileText as any })
+            dynamicNavItems.push({ href: '/dashboard/properties', label: 'Properties (PMS)', icon: 'FileText' })
           }
           if (templates.has('rate_card') || templates.has('info') || templates.has('custom')) {
-            dynamicNavItems.push({ href: '/dashboard/quotes', label: 'Quotes & Inquiries', icon: FileText as any })
+            dynamicNavItems.push({ href: '/dashboard/quotes', label: 'Quotes & Inquiries', icon: 'FileText' })
           }
           
-          dynamicNavItems.push({ href: '/dashboard/analytics', label: 'Deep Analytics', icon: TrendingUp as any })
-          dynamicNavItems.push({ href: '/dashboard/forecast', label: 'Demand Forecast', icon: BarChart3 as any })
+          dynamicNavItems.push({ href: '/dashboard/analytics', label: 'Deep Analytics', icon: 'TrendingUp' })
+          dynamicNavItems.push({ href: '/dashboard/forecast', label: 'Demand Forecast', icon: 'BarChart3' })
         }
       }
     }

@@ -11,10 +11,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { createClient } from '@/lib/supabase/client'
 import { setActiveLocationCookie } from './layout-actions'
 import {
-  BarChart3, BookOpen,
-   
-   
-  
+  LayoutDashboard, ClipboardList, BarChart3, BookOpen,
   FileText, Settings, CreditCard, LogOut, Zap, Menu, X, Users, QrCode, TrendingUp, MessageSquare
 } from 'lucide-react'
 import { GlobalRealtime } from './global-realtime'
@@ -25,9 +22,27 @@ import { TimeclockWidget } from './timeclock-widget'
 export interface NavItem {
   href: string
   label: string
-  icon: React.ElementType
+  icon: React.ElementType | string
   badge?: string
   exact?: boolean
+}
+
+const ICON_MAP: Record<string, React.ElementType> = {
+  LayoutDashboard,
+  ClipboardList,
+  BarChart3,
+  BookOpen,
+  FileText,
+  Settings,
+  CreditCard,
+  LogOut,
+  Zap,
+  Menu,
+  X,
+  Users,
+  QrCode,
+  TrendingUp,
+  MessageSquare
 }
 
 
@@ -41,11 +56,14 @@ const managerItems: NavItem[] = [
   { href: '/dashboard/settings', label: 'Settings & Team', icon: Settings },
 ]
 
-function NavLink({ href, label, icon: Icon, badge, exact, onClick }: {
-  href: string; label: string; icon: React.ElementType; badge?: string; exact?: boolean; onClick?: () => void
+function NavLink({ href, label, icon: iconProp, badge, exact, onClick }: {
+  href: string; label: string; icon: React.ElementType | string; badge?: string; exact?: boolean; onClick?: () => void
 }) {
   const pathname = usePathname()
   const isActive = exact ? pathname === href : pathname.startsWith(href)
+  const Icon = typeof iconProp === 'string' ? ICON_MAP[iconProp] : iconProp
+  
+  if (!Icon) return null;
 
   return (
     <Link
