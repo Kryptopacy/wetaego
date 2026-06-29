@@ -31,13 +31,10 @@ interface PageBuilderFormProps {
 }
 
 export function PageBuilderForm({ pageId, templateType, initialItems, orgId }: PageBuilderFormProps) {
-   
-  
-  const [items, setItems] = useState<PageItem[]>(initialItems)
+  const router = useRouter()
   const [isAdding, setIsAdding] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [isSaving, setIsSaving] = useState(false)
-  const router = useRouter()
 
   const handleAddSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()

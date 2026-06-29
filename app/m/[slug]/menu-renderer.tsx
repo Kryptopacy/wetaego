@@ -92,7 +92,7 @@ export function MenuRenderer({ initialCategories }: { initialCategories: Categor
       }
     }
     detect()
-  }, [targetLang])
+  }, [])
 
   async function handleTranslate() {
     if (!targetLang) return

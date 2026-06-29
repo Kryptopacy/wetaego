@@ -130,5 +130,5 @@ export default withSentryConfig(withBundleAnalyzer(withPWA(withNextIntl(nextConf
   silent: !process.env.CI,
   widenClientFileUpload: true,
   tunnelRoute: "/monitoring",
-  hideSourceMaps: true,
+  sourcemaps: { disable: true },
 });
