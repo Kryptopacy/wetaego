@@ -25,7 +25,7 @@ describe('Booking Flow (updateBookingStatus)', () => {
     mockEq.mockReturnThis()
     mockUpdate.mockReturnThis()
 
-    mockFrom.mockImplementation((table) => {
+    mockFrom.mockImplementation((table: string) => {
       if (table === 'page_bookings') {
         return { select: mockSelect.mockReturnThis(), eq: mockEq, single: mockSingle, update: mockUpdate }
       }
@@ -45,7 +45,7 @@ describe('Booking Flow (updateBookingStatus)', () => {
   })
 
   it('fails if not authenticated', async () => {
-    mockAuthGetUser.mockResolvedValueOnce({ data: null, error: new Error('Not logged in') })
+    mockAuthGetUser.mockResolvedValueOnce({ data: { user: null }, error: new Error('Not logged in') })
 
     const fd = new FormData()
     fd.append('bookingId', 'booking-123')

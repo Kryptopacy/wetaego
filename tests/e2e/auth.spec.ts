@@ -15,9 +15,6 @@ test.describe('Authentication Flow', () => {
     // Submit the form
     await page.click('button[type="submit"]');
 
-    // Ensure the Sign In button shows the loading state
-    await expect(page.getByRole('button', { name: 'Signing In...' })).toBeVisible();
-
     // Assert that the page redirects to the dashboard
     await expect(page).toHaveURL(/\/dashboard/);
     

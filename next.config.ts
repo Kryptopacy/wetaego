@@ -50,6 +50,18 @@ const withPWA = withPWAInit({
         },
       },
       {
+        urlPattern: /\/api\/(?:bookings|orders|feedback-entry).*/i,
+        handler: 'NetworkOnly',
+        options: {
+          backgroundSync: {
+            name: 'offline-mutations-queue',
+            options: {
+              maxRetentionTime: 24 * 60 // Retry for up to 24 hours
+            }
+          }
+        }
+      },
+      {
         urlPattern: /^https:\/\/(?:.*\.)?vercel\.live\/.*/i,
         handler: 'NetworkOnly',
       },
@@ -118,5 +130,5 @@ export default withSentryConfig(withBundleAnalyzer(withPWA(withNextIntl(nextConf
   silent: !process.env.CI,
   widenClientFileUpload: true,
   tunnelRoute: "/monitoring",
-  sourcemaps: { disable: true },
+  hideSourceMaps: true,
 });

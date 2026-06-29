@@ -44,6 +44,7 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
   const [serviceRequests, setServiceRequests] = useState(initialServiceRequests)
   const [menuItems, setMenuItems] = useState(initialMenuItems)
   const [activeTab, setActiveTab] = useState<'orders' | 'history' | 'stock' | 'hardware'>('orders')
+  const [socketStatus, setSocketStatus] = useState<string>('CONNECTING')
   const { mode, ipAddress, autoPrintReceipts } = usePrinterStore()
   const t = useTranslations('Dashboard')
 
@@ -108,7 +109,9 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
           })
         }
       })
-      .subscribe()
+      .subscribe((status) => {
+        setSocketStatus(status)
+      })
 
     // Subscribe to Service Requests
     const serviceRequestsSubscription = supabase
@@ -343,7 +346,7 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
 
   return (
     <div className="flex-1 flex flex-col mt-8">
-      <OfflineIndicator />
+      <OfflineIndicator socketStatus={socketStatus} />
       <div className="flex space-x-2 mb-6">
         <button 
           onClick={() => setActiveTab('orders')}

@@ -2,8 +2,11 @@ import { useOfflineQueueStore } from '@/lib/stores/offline-queue-store'
 import { WifiOff, Activity } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useState, useEffect } from 'react'
+interface OfflineIndicatorProps {
+  socketStatus?: string
+}
 
-export function OfflineIndicator() {
+export function OfflineIndicator({ socketStatus }: OfflineIndicatorProps) {
   const queue = useOfflineQueueStore(state => state.queue)
   const pendingActions = queue.length
   const [isOffline, setIsOffline] = useState(() => 
@@ -23,7 +26,7 @@ export function OfflineIndicator() {
 
   return (
     <AnimatePresence>
-      {(isOffline || pendingActions > 0) && (
+      {(isOffline || pendingActions > 0 || (socketStatus && socketStatus !== 'SUBSCRIBED')) && (
         <motion.div 
           initial={{ opacity: 0, y: -20, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -35,14 +38,16 @@ export function OfflineIndicator() {
           <div className="absolute inset-0 bg-gradient-to-r from-orange-500/10 via-red-500/10 to-orange-500/10 animate-[pulse_3s_ease-in-out_infinite]" />
           
           <div className="relative flex items-center gap-3">
-            {isOffline ? (
+            {isOffline || socketStatus === 'CLOSED' || socketStatus === 'CHANNEL_ERROR' ? (
               <WifiOff className="w-4 h-4 text-orange-400 animate-pulse" />
             ) : (
               <Activity className="w-4 h-4 text-blue-400 animate-pulse" />
             )}
             
             <span className="text-sm font-medium text-zinc-200">
-              {isOffline ? 'Offline Mode' : 'Restoring Connection'}
+              {isOffline ? 'Offline Mode' : 
+               socketStatus === 'CLOSED' || socketStatus === 'CHANNEL_ERROR' ? 'Socket Disconnected' :
+               socketStatus === 'SUBSCRIBED' ? 'Restoring Sync...' : 'Connecting...'}
             </span>
             
             {pendingActions > 0 && (
