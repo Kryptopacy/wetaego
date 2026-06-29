@@ -48,6 +48,14 @@ const withPWA = withPWAInit({
             maxAgeSeconds: 24 * 60 * 60, // 24 hours
           },
         },
+      },
+      {
+        urlPattern: /^https:\/\/(?:.*\.)?vercel\.live\/.*/i,
+        handler: 'NetworkOnly',
+      },
+      {
+        urlPattern: /^https:\/\/(?:.*\.)?posthog\.com\/.*/i,
+        handler: 'NetworkOnly',
       }
     ]
   }
