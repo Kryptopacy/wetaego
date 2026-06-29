@@ -28,7 +28,7 @@ export async function generateMetadata({
 
   const locQuery = supabase
     .from('locations')
-    .select('id, name, cover_image_url')
+    .select('id, name, cover_image_url, is_search_visible')
     .eq('slug', slug)
     .single()
   const { data: loc } = await locQuery
@@ -51,6 +51,10 @@ export async function generateMetadata({
   return {
     title: `${page.title} | ${loc.name}`,
     description,
+    robots: {
+      index: loc.is_search_visible ?? false,
+      follow: loc.is_search_visible ?? false,
+    },
     openGraph: {
       title: `${page.title} | ${loc.name}`,
       description,
@@ -81,7 +85,7 @@ export default async function PublicPageView({
 
     const { data } = await supabase
       .from('locations')
-      .select('id, name, organization_id, theme_color, cover_image_url, ai_enabled, ai_name, instagram_handle, x_handle, tiktok_handle, whatsapp_number, phone_number, organizations(logo_url), manual_payment_enabled, manual_payment_bank_name, manual_payment_account_name, manual_payment_account_number, manual_payment_instructions, delivery_enabled, delivery_fee_minor, delivery_minimum_order_minor, delivery_note, fulfillment_location_label, currency_code, location_taxes(*)')
+      .select('id, name, organization_id, is_search_visible, theme_color, cover_image_url, ai_enabled, ai_name, instagram_handle, x_handle, tiktok_handle, whatsapp_number, phone_number, organizations(logo_url), manual_payment_enabled, manual_payment_bank_name, manual_payment_account_name, manual_payment_account_number, manual_payment_instructions, delivery_enabled, delivery_fee_minor, delivery_minimum_order_minor, delivery_note, fulfillment_location_label, currency_code, location_taxes(*)')
       .eq('slug', slug)
       .single()
     return data
@@ -219,8 +223,36 @@ export default async function PublicPageView({
       break
   }
 
+  const ldJson = loc.is_search_visible ? {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "name": `${page.title} - ${loc.name}`,
+    "url": `https://ourmenuos.online/m/${slug}/p/${pageSlug}`,
+    "itemListElement": (items as any[]).map((item, index) => ({
+      "@type": "ListItem",
+      "position": index + 1,
+      "item": {
+        "@type": "Product",
+        "name": item.title,
+        "description": item.description || undefined,
+        "image": item.image_url || undefined,
+        "offers": {
+          "@type": "Offer",
+          "price": item.price_minor ? (item.price_minor / 100).toFixed(2) : "0.00",
+          "priceCurrency": loc.currency_code || "USD"
+        }
+      }
+    }))
+  } : null;
+
   return (
     <>
+      {ldJson && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(ldJson) }}
+        />
+      )}
       {isPreview && <PreviewBanner />}
       {RendererContent}
       <EcosystemNav locationId={loc.id} slug={slug} currentPath={page.slug} />

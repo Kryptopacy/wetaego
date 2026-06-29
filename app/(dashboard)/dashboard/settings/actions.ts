@@ -189,6 +189,7 @@ export const saveLocationInfoSettings = authActionClient
     operatingHours: zfd.text(z.string().max(200).optional()),
     fulfillmentLocationLabel: zfd.text(z.string().max(50).optional()),
     randomizerEnabled: zfd.checkbox(),
+    isSearchVisible: zfd.checkbox(),
   }))
   .action(async ({ parsedInput, ctx: { supabase, user } }) => {
     const { cookies } = await import('next/headers')
@@ -246,6 +247,7 @@ export const saveLocationInfoSettings = authActionClient
         operating_hours: parsedInput.operatingHours || null,
         fulfillment_location_label: parsedInput.fulfillmentLocationLabel || null,
         randomizer_enabled: parsedInput.randomizerEnabled,
+        is_search_visible: parsedInput.isSearchVisible,
       })
       .eq('id', locationId)
 

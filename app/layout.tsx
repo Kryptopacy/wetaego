@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     template: "%s | OurMenu OS"
   },
   description: "The complete operating layer for modern businesses. Build your digital storefront, manage operations, and process payments instantly. Tailored for restaurants, boutiques, hotels, wellness spas, and creators.",
-  keywords: ["digital storefront", "restaurant os", "qr menu", "hospitality software", "online ordering", "service booking", "hotel pms", "boutique ecommerce", "spa booking system", "media rate card", "real estate listings", "consulting portal", "food truck pos", "salon scheduling", "omnichannel os", "payment roulette", "digital rate card", "b2b rate cards", "ai demand forecasting", "bill splitting randomizer", "who pays the bill randomizer", "restaurant bill roulette", "split the check game"],
+  keywords: ["ourmenuos", "our menu os", "digital storefront", "restaurant os", "qr menu", "hospitality software", "online ordering", "service booking", "hotel pms", "boutique ecommerce", "spa booking system", "media rate card", "real estate listings", "consulting portal", "food truck pos", "salon scheduling", "omnichannel os", "payment roulette", "digital rate card", "b2b rate cards", "ai demand forecasting", "bill splitting randomizer", "who pays the bill randomizer", "restaurant bill roulette", "split the check game"],
   authors: [{ name: "CruiseHQ" }],
   creator: "CruiseHQ",
   manifest: "/manifest.json",

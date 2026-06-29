@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const resolvedParams = await params
   const getCachedMetadata = unstable_cache(async () => {
     const supabase = await createClient()
-    const { data: locationData } = await supabase.from('locations').select('id, name, cover_image_url').eq('slug', resolvedParams.slug).single()
+    const { data: locationData } = await supabase.from('locations').select('id, name, cover_image_url, is_search_visible').eq('slug', resolvedParams.slug).single()
     if (!locationData) return null
 
     const { data: locationPages } = await supabase
@@ -46,6 +46,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return {
     title,
     description,
+    robots: {
+      index: locationData.is_search_visible ?? false,
+      follow: locationData.is_search_visible ?? false,
+    },
     alternates: {
       canonical: `https://ourmenuos.online/m/${resolvedParams.slug}`
     },
@@ -82,7 +86,7 @@ export default async function PublicMenuPage({
   const locationFetcher = async () => {
     const { data } = await supabase
       .from('locations')
-      .select('id, name, organization_id, ai_enabled, ai_name, theme_color, cover_image_url, operating_hours, wifi_network, wifi_password, instagram_handle, twitter_handle, facebook_handle, whatsapp_number, phone_number, google_maps_url, randomizer_enabled, spinner_enabled, spinner_config, global_discount_enabled, global_discount_banner_text, global_discount_percentage, manual_payment_enabled, manual_payment_bank_name, manual_payment_account_name, manual_payment_account_number, manual_payment_instructions, delivery_enabled, delivery_fee_minor, delivery_minimum_order_minor, delivery_note, fulfillment_location_label, organizations(logo_url)')
+      .select('id, name, organization_id, is_search_visible, ai_enabled, ai_name, theme_color, cover_image_url, operating_hours, wifi_network, wifi_password, instagram_handle, twitter_handle, facebook_handle, whatsapp_number, phone_number, google_maps_url, randomizer_enabled, spinner_enabled, spinner_config, global_discount_enabled, global_discount_banner_text, global_discount_percentage, manual_payment_enabled, manual_payment_bank_name, manual_payment_account_name, manual_payment_account_number, manual_payment_instructions, delivery_enabled, delivery_fee_minor, delivery_minimum_order_minor, delivery_note, fulfillment_location_label, organizations(logo_url)')
       .eq('slug', slug)
       .single()
     return data;
@@ -202,8 +206,24 @@ export default async function PublicMenuPage({
   }
 
   if (pageCount > 1 && locationPages) {
+    const ldJson = location.is_search_visible ? {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "name": location.name,
+      "image": location.cover_image_url || undefined,
+      "telephone": location.phone_number || undefined,
+      "url": `https://ourmenuos.online/m/${slug}`,
+      "openingHours": location.operating_hours || undefined
+    } : null;
+
     return (
       <>
+        {ldJson && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(ldJson) }}
+          />
+        )}
         {isPreview && <PreviewBanner />}
         <PortalRenderer location={location as unknown as Parameters<typeof PortalRenderer>[0]['location']} pages={locationPages} />
       </>

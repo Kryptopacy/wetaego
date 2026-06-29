@@ -472,8 +472,38 @@ export default async function SettingsPage({
               />
             </div>
 
+            <div className="mb-8 p-6 rounded-xl border border-zinc-800 bg-black">
+              <h3 className="text-md font-semibold text-white mb-2">SEO & Discoverability</h3>
+              <p className="text-sm text-zinc-400 mb-6">
+                Unlock organic growth by allowing search engines (Google) and AI tools (ChatGPT, Perplexity) to recommend your business to local customers. By turning this on, you consent to your business name, contact info, and hours being publicly indexed and searchable.
+              </p>
+              <ActionForm action={saveLocationInfoSettings} className="flex flex-col gap-4">
+                <input type="hidden" name="locationId" value={location.id} />
+                <input type="hidden" name="randomizerEnabled" value={location.randomizer_enabled ? 'on' : 'off'} />
+                <div className="flex items-center gap-3">
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      name="isSearchVisible" 
+                      className="sr-only peer" 
+                      defaultChecked={location.is_search_visible}
+                    />
+                    <div className="w-11 h-6 bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    <span className="ml-3 text-sm font-medium text-zinc-300">
+                      Enable Search Engine Visibility
+                    </span>
+                  </label>
+                </div>
+                <div className="mt-2">
+                  <SubmitButton>Save SEO Preferences</SubmitButton>
+                </div>
+              </ActionForm>
+            </div>
+
             <ActionForm action={saveLocationInfoSettings} className="flex flex-col gap-4">
               <input type="hidden" name="locationId" value={location.id} />
+              {/* Ensure existing checkboxes state is passed if they aren't in this form */}
+              <input type="hidden" name="isSearchVisible" value={location.is_search_visible ? 'on' : 'off'} />
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>

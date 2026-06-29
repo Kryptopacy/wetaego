@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="./apps/web/public/apple-touch-icon.png" width="120" height="120" alt="OurMenu OS Logo" />
+  <img src="./public/apple-touch-icon.png" width="120" height="120" alt="OurMenu OS Logo" />
   <h1>OurMenu OS</h1>
   <p><strong>The Universal Digital Operating Layer for Modern Businesses</strong></p>
 </div>
@@ -85,15 +85,20 @@ Seamlessly scale operations across multiple venues, cities, or countries from a 
 ### 6. CRM, Loyalty & Gamification
 - **Customer Profiles & LTV:** Automatically builds rich CRM profiles at checkout, tracking Lifetime Value (LTV), order frequency, and marketing opt-ins.
 - **Bespoke Loyalty Programs:** Organizations can launch custom point-based reward systems, configurable down to the fractional currency unit.
-- **Payment Roulette:** A gamified "spin to win" bill-splitting module that transforms the friction of group payments into a highly engaging, viral experience.
+- **Payment Roulette & Bill Splitting:** A gamified "spin to win" bill-splitting randomizer that transforms the friction of group payments into a highly engaging, viral experience. 
 - **PIN-Protected Post-Service Feedback:** Automated email receipts include a cryptographic 4-digit PIN ensuring only verified customers can rate staff performance, populating the gamified Team Performance Leaderboard and the centralized **Feedback Inbox** within the dashboard.
 
-### 7. Live Inventory & Intelligent Cancellation Engine
+### 7. Global SEO, AEO & Privacy Compliance
+- **Dynamic Semantic JSON-LD:** Intelligent generation of `LocalBusiness`, `ItemList`, and `Product` schemas tailored for each specific business and catalog, boosting local SEO visibility.
+- **Answer Engine Optimization (AEO):** Screen-reader-only descriptive blocks feed AI tools (ChatGPT, Perplexity) context around business identities. 
+- **Privacy-First Indexing:** A strict opt-in framework controls web crawlers. All tenant directories default to `noindex, nofollow` to protect private menus, only enabling public indexing when the tenant explicitly grants consent via the compliance dashboard.
+
+### 8. Live Inventory & Intelligent Cancellation Engine
 - **Atomic Stock Management:** Items can optionally track finite units via robust, race-condition-free database RPCs, automatically switching to "Sold Out" when availability runs out.
 - **Order Cancellation Lifecycle:** Businesses can safely reject/cancel orders, logging a strict cancellation reason for analytics while offering front-desk operations the choice to restock rejected inventory instantly or withhold it.
 - **Optimistic UI Validation:** Fully responsive UI updates allow waitstaff and cashiers to modify stock limits dynamically from the dashboard, synchronizing globally without page refreshes.
 
-### 8. Back-of-House Operations Engine
+### 9. Back-of-House Operations Engine
 OurMenu OS is a true operating system, extending far beyond the customer-facing frontend into deep backend workflows:
 - **Demo Mode Bypass:** A dedicated `?demo=1` architectural flow allowing prospective users to experience the full dashboard, analytics, and CRM mock data without creating an account.
 - **Automated Daily Reports:** Nightly cron jobs that aggregate key business metrics (sales, velocity, feedback) and email summarized briefings directly to owners.
@@ -134,11 +139,11 @@ OurMenu OS monetizes via three tiered subscription plans, driven by a unified cr
 
 ---
 
-## 🤝 Affiliate & Referral System (B2B Growth)
+### 🤝 Affiliate & Referral System (B2B Growth)
 OurMenu OS features a built-in Affiliate system designed for aggressive B2B scaling:
 - **Affiliate Dashboard:** Partners register to generate unique referral codes.
 - **Hard-Linked Organizations:** New tenants that register via referral links are permanently cryptographically tied to their affiliate.
-- **Automated Rev-Share:** Automated Webhooks calculate a percentage commission (default 10%) on every single subscription renewal and log it directly in `affiliate_earnings` for instant payout.
+- **Automated Rev-Share:** Automated Webhooks calculate a 10% commission on every single subscription renewal and log it directly in `affiliate_earnings` for instant payout.
 
 ---
 
@@ -157,8 +162,9 @@ OurMenu OS features a built-in Affiliate system designed for aggressive B2B scal
 
 ### Repo Structure
 - `docs/PRODUCT_PLAN.md`: working product plan, viability audit, roadmap, and assumptions.
-- `apps/web/`: customer-facing SaaS dashboard and public progressive web app (PWA).
-- `packages/core/`: shared domain models and business logic.
+- `app/`: Next.js 16 application containing the customer-facing SaaS dashboard and public progressive web app (PWA).
+- `components/`: shared UI components, Layouts, and standard views.
+- `lib/`: shared domain models, business logic, payments, and AI integrations.
 - `supabase/migrations/`: production database schema migrations.
 - `supabase/functions/`: edge functions (webhooks, push notifications, reconciliations).
 
@@ -168,7 +174,6 @@ OurMenu OS features a built-in Affiliate system designed for aggressive B2B scal
 
 ### 1. Web Application (Next.js)
 ```bash
-cd apps/web
 pnpm install
 pnpm dev
 ```
