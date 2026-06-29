@@ -1,7 +1,7 @@
 import { checkRateLimit } from '@/lib/upstash'
 
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { chargeCredits } from '@/lib/payments/credits'
 import * as Sentry from '@sentry/nextjs'
 import { z } from 'zod'
@@ -140,7 +140,8 @@ CRITICAL RULES:
     const buffer = Buffer.from(base64Image, 'base64')
     const fileName = `covers/${loc.organization_id}/${loc.id}-${Date.now()}.png`
 
-    const { error: uploadError } = await supabase
+    const adminClient = await createAdminClient()
+    const { error: uploadError } = await adminClient
       .storage
       .from('public-assets')
       .upload(fileName, buffer, {
@@ -152,7 +153,7 @@ CRITICAL RULES:
       throw uploadError
     }
 
-    const { data: publicUrlData } = supabase.storage.from('public-assets').getPublicUrl(fileName)
+    const { data: publicUrlData } = adminClient.storage.from('public-assets').getPublicUrl(fileName)
     const publicUrl = publicUrlData.publicUrl
 
     // 5. Update Location

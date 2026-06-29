@@ -5,6 +5,7 @@ import { purgeStorefrontCache } from '@/lib/cache-purger'
 import { z } from 'zod'
 import { zfd } from 'zod-form-data'
 import { authActionClient } from '@/lib/safe-action'
+import { createAdminClient, createClient } from '@/lib/supabase/server'
 
 export const createCategory = authActionClient
   .schema(zfd.formData({
@@ -82,12 +83,13 @@ export const createItem = authActionClient
       const fileExt = image.name.split('.').pop()
       const fileName = `${orgId}-${Date.now()}.${fileExt}`
       
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      const adminClient = await createAdminClient()
+      const { data: uploadData, error: uploadError } = await adminClient.storage
         .from('menu-images')
         .upload(fileName, image)
         
       if (!uploadError && uploadData) {
-        const { data: publicUrlData } = supabase.storage.from('menu-images').getPublicUrl(fileName)
+        const { data: publicUrlData } = adminClient.storage.from('menu-images').getPublicUrl(fileName)
         image_url = publicUrlData.publicUrl
       } else {
         throw new Error('Failed to upload image')
@@ -155,12 +157,13 @@ export const updateItem = authActionClient
       const fileExt = image.name.split('.').pop()
       const fileName = `${item.organization_id}-${Date.now()}.${fileExt}`
       
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      const adminClient = await createAdminClient()
+      const { data: uploadData, error: uploadError } = await adminClient.storage
         .from('menu-images')
         .upload(fileName, image)
         
       if (!uploadError && uploadData) {
-        const { data: publicUrlData } = supabase.storage.from('menu-images').getPublicUrl(fileName)
+        const { data: publicUrlData } = adminClient.storage.from('menu-images').getPublicUrl(fileName)
         image_url = publicUrlData.publicUrl
       }
     }

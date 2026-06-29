@@ -29,7 +29,7 @@ OurMenu OS is engineered for massive scale, zero downtime, and bank-grade securi
 - **XSS & HTML-Injection Hardened:** All user-generated content passing through email notifications, push payloads, and template rendering is aggressively escaped, sanitized, and type-checked.
 - **N+1 Query Elimination & Infinite Scale:** Core notification and dispatcher systems utilize highly parallelized `Promise.all` fetching strategies. Meanwhile, data-heavy dashboards (like CRM and Order History) employ strict **cursor-based pagination**, bypassing Vercel/Serverless timeout constraints and guaranteeing instant execution whether an organization has 5 records or 5,000,000.
 - **GDPR-Compliant Marketing Queues:** Enforced opt-in filtering for customer marketing communications, paired with background queues for bulk email dispatches to eliminate 504 timeouts at scale.
-- **Storage Protection (Denial of Wallet Defense):** Cloud storage buckets are natively locked to strict file sizes (e.g. 5MB) and MIME-type whitelists (WebP, PNG, JPEG) to prevent malicious bulk uploads and SDK exploitation.
+- **Storage Protection & Secure Uploads (Denial of Wallet Defense):** Cloud storage buckets are exclusively mutated via secure server-side routes leveraging `createAdminClient`, entirely eliminating insecure public Row Level Security (RLS) policies. Furthermore, buckets are natively locked to strict file sizes (e.g. 5MB) and MIME-type whitelists (WebP, PNG, JPEG) to prevent malicious bulk uploads and SDK exploitation.
 - **WCAG 2.1 Accessibility Compliance:** The platform delivers premium mobile UI flows with fluid focus trapping, strict ARIA attribute integrations (`aria-expanded`, `aria-controls`, `role="dialog"`), and seamless screen-reader support.
 
 ---

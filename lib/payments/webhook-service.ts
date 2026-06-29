@@ -209,7 +209,7 @@ export async function processCreditPackPayment(
     .eq('id', orgId)
 
   // 3. Record billing payment
-  const { data: paymentRecord } = await supabase
+  const { data: _paymentRecord } = await supabase
     .from('billing_payments')
     .insert({
       organization_id: orgId,
@@ -316,7 +316,7 @@ export async function processQuoteMilestonePayment(
   let parsedNotes: { milestones?: { id: string; status: string }[] } = {}
   try {
     if (quote.booking_notes) parsedNotes = JSON.parse(quote.booking_notes)
-  } catch (e) {}
+  } catch (_e) {}
 
   if (!Array.isArray(parsedNotes.milestones)) {
     // If no milestones are explicitly defined, we assume this is a fallback "Full Payment"

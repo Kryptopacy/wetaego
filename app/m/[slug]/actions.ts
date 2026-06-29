@@ -120,7 +120,7 @@ export async function processCheckout(params: {
     organizationId, locationId, items, totalAmountMinor, tipAmountMinor = 0,
     tableIdentifier, customerNote, customerEmail, paymentFractionMinor,
     paymentMethod = 'card', discountAmountMinor = 0, customerName, customerPhone,
-    fulfillmentType, deliveryInstructions, staffId, staffSubaccountOverride,
+    fulfillmentType, deliveryInstructions, staffId: _staffId, staffSubaccountOverride,
     pageId, idempotencyKey, subtotalMinor, taxTotalMinor, taxBreakdown, isUnevenSplit
   } = params;
   const supabase = await createClient()

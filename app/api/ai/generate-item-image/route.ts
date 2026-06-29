@@ -1,6 +1,6 @@
 import { checkRateLimit } from '@/lib/upstash'
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { chargeCredits, refundCredits } from '@/lib/payments/credits'
 import * as Sentry from '@sentry/nextjs'
 import { z } from 'zod'
@@ -126,7 +126,8 @@ CRITICAL RULES:
       const buffer = Buffer.from(base64Image, 'base64')
       const fileName = `items/${organizationId}/${Date.now()}.png`
 
-      const { error: uploadError } = await supabase
+      const adminClient = await createAdminClient()
+      const { error: uploadError } = await adminClient
         .storage
         .from('menu-images')
         .upload(fileName, buffer, {
@@ -138,7 +139,7 @@ CRITICAL RULES:
         throw uploadError
       }
 
-      const { data: publicUrlData } = supabase.storage.from('menu-images').getPublicUrl(fileName)
+      const { data: publicUrlData } = adminClient.storage.from('menu-images').getPublicUrl(fileName)
       const publicUrl = publicUrlData.publicUrl
 
       return NextResponse.json({ success: true, url: publicUrl, remaining: charge.remaining })

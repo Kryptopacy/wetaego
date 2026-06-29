@@ -68,7 +68,7 @@ const AVAILABILITY_LABELS: Record<string, { label: string; color: string }> = {
 
 export function BookingRenderer({ location, page, items, locationSlug, paymentIsLive }: BookingRendererProps) {
   const themeColor = location.theme_color || '#7c3aed'
-  const availableItems = items.filter(i => i.availability_status === 'available')
+  const _availableItems = items.filter(i => i.availability_status === 'available')
   const [selectedItems, setSelectedItems] = useState<PageItem[]>([])
   const [showBookingForm, setShowBookingForm] = useState(false)
   const [formSuccess, setFormSuccess] = useState(false)
@@ -439,7 +439,7 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
           <div className="space-y-8">
             {Object.entries(
               items.reduce((acc, item) => {
-                // @ts-expect-error
+                // @ts-expect-error item_data is loosely typed from JSON column
                 const cat = item.item_data?.category?.trim() || 'Services'
                 if (!acc[cat]) acc[cat] = []
                 acc[cat].push(item)

@@ -228,7 +228,7 @@ export default async function PublicPageView({
     "@type": "ItemList",
     "name": `${page.title} - ${loc.name}`,
     "url": `https://ourmenuos.online/m/${slug}/p/${pageSlug}`,
-    "itemListElement": (items as any[]).map((item, index) => ({
+    "itemListElement": (items as { title: string, description?: string | null, image_url?: string | null, price_minor?: number | null }[]).map((item, index) => ({
       "@type": "ListItem",
       "position": index + 1,
       "item": {

@@ -164,7 +164,7 @@ export function RateCardRenderer({ location, page, items, locationSlug, paymentI
         <div className="absolute bottom-0 left-0 right-0 p-6 max-w-2xl mx-auto flex items-end gap-4">
           {location.organizations?.logo_url && (
             <div className="relative w-16 h-16 rounded-xl overflow-hidden shrink-0 bg-black/40 p-1 border border-white/10">
-              <Image src={location.organizations.logo_url} alt="" fill className="object-contain" />
+              <Image src={location.organizations.logo_url} alt="" fill className="object-contain" sizes="64px" priority />
             </div>
           )}
           <div>

@@ -61,7 +61,7 @@ export const signup = actionClient
       await supabase.auth.signOut()
     }
 
-    const { error, data } = await supabase.auth.signUp({ email, password })
+    const { error, data: _data } = await supabase.auth.signUp({ email, password })
 
     if (error) {
       return { redirect: `/login?message=${encodeURIComponent('Could not sign up user')}&redirectTo=${encodeURIComponent(redirectTo)}` }

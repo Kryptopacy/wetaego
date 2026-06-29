@@ -14,7 +14,7 @@ export async function searchDirectory(formData: FormData) {
 
   // Find location by name match
   
-  const { data: locMatch, error } = await supabase
+  const { data: locMatch, error: _error } = await supabase
     .from('location_pages')
     .select('slug, locations!inner(name)')
     .or(`slug.ilike.%${query}%,locations.name.ilike.%${query}%`)

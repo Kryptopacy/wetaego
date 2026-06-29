@@ -138,7 +138,7 @@ export function CheckoutModal({
   pageId,
   refundPolicy,
   pageFulfillmentOptions,
-  pageBillingMode,
+  pageBillingMode: _pageBillingMode,
   locationTaxes = []
 }: CheckoutModalProps) {
   useEffect(() => {
@@ -186,7 +186,7 @@ export function CheckoutModal({
     } catch {
       // Ignore
     }
-  }, [tableIdentifier])
+  }, [tableIdentifier, customerName, customerEmail, customerPhone, tableNumber])
 
   // AI Upselling State
   const [upsellData, setUpsellData] = useState<{ suggestedItemId: string, pitch: string } | null>(null)

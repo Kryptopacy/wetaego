@@ -118,14 +118,16 @@ export async function submitFeedbackAndTip(
 
         if (assignedStaffId) {
           
-          const { data: staffProfile } = await (supabase as any)
+
+          const { data: staffProfile } = await supabase
             .from('user_profiles')
             .select('paystack_subaccount_code')
             .eq('id', assignedStaffId)
             .single()
             
-          if (staffProfile?.paystack_subaccount_code) {
-            staffSubaccount = staffProfile.paystack_subaccount_code
+          const profile = staffProfile as unknown as { paystack_subaccount_code?: string } | null
+          if (profile?.paystack_subaccount_code) {
+            staffSubaccount = profile.paystack_subaccount_code
           }
         }
 

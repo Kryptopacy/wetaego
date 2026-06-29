@@ -32,7 +32,7 @@ export async function GET(req: Request) {
     }
 
     
-    const slug = (booking.location_pages as any)?.slug
+    const slug = (booking.location_pages as unknown as { slug?: string })?.slug
 
     if (!slug) {
       return new NextResponse('Booking page not found', { status: 404 })

@@ -97,7 +97,7 @@ export function QuotePayment({
           <h3 className="font-bold text-white text-sm">Payment Schedule</h3>
         </div>
         <div className="divide-y divide-zinc-800">
-          {effectiveMilestones.map((milestone, idx) => {
+          {effectiveMilestones.map((milestone, _idx) => {
             const amountMinor = Math.floor(totalAmountMinor * (milestone.percentage / 100))
             const isNext = nextMilestone?.id === milestone.id
             const isPaid = milestone.status === 'paid'

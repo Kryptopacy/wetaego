@@ -167,7 +167,7 @@ export default async function PublicMenuPage({
       )()
 
   const [
-    { data: paymentSettings },
+    { data: _paymentSettings },
     qrCodeResult,
     locationPages
   ] = await Promise.all([

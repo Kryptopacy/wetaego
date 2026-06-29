@@ -16,7 +16,7 @@ interface InfoRendererProps {
   page: {
     title: string
     content?: string
-    template_data?: Record<string, any>
+    template_data?: Record<string, unknown>
   }
   items: unknown[]
   locationSlug: string
@@ -27,11 +27,11 @@ export function InfoRenderer({ location, page, locationSlug }: InfoRendererProps
   const themeColor = location.theme_color || '#7c3aed'
   const lines = (page.content || '').split('\n')
 
-  const whatsapp = page.template_data?.whatsapp_number || location.whatsapp_number
-  const phone = page.template_data?.phone_number || location.phone_number
-  const instagram = page.template_data?.instagram_handle || location.instagram_handle
-  const xHandle = page.template_data?.x_handle || location.x_handle
-  const tiktok = page.template_data?.tiktok_handle || location.tiktok_handle
+  const whatsapp = (page.template_data?.whatsapp_number as string) || location.whatsapp_number
+  const phone = (page.template_data?.phone_number as string) || location.phone_number
+  const instagram = (page.template_data?.instagram_handle as string) || location.instagram_handle
+  const xHandle = (page.template_data?.x_handle as string) || location.x_handle
+  const tiktok = (page.template_data?.tiktok_handle as string) || location.tiktok_handle
 
   function renderLine(line: string, i: number) {
     const trimmed = line.trim()
@@ -73,7 +73,7 @@ export function InfoRenderer({ location, page, locationSlug }: InfoRendererProps
       {/* Hero */}
       <div className="relative w-full h-[30vh] min-h-[200px] max-h-[300px] overflow-hidden">
         {location.cover_image_url ? (
-          <Image src={location.cover_image_url} alt="Cover" fill className="object-cover object-center priority" priority />
+          <Image src={location.cover_image_url} alt="Cover" fill className="object-cover object-center priority" priority sizes="100vw" />
         ) : (
           <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${themeColor}30 0%, #0a0a0f 100%)` }} />
         )}

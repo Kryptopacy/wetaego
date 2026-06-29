@@ -6,13 +6,17 @@ import { GlobalDiscountBanner } from '../../../components/global-discount-banner
 import { CartFAB } from '../../../cart-fab'
 import { VenueHeader } from '../../../components/venue-header'
 
+import type { Database } from '@/lib/supabase/types'
+
+type Location = Database['public']['Tables']['locations']['Row']
+
 export async function RestaurantRenderer({
   location,
   slug,
   tableIdentifier,
   paymentIsLive,
 }: {
-  location: any
+  location: Location
   slug: string
   tableIdentifier?: string
   paymentIsLive: boolean
@@ -44,9 +48,13 @@ export async function RestaurantRenderer({
   )()
 
   
-  const allMenuItems = categories.flatMap((cat: any) => 
+  type Category = Database['public']['Tables']['menu_categories']['Row'] & {
+    menu_items: Database['public']['Tables']['menu_items']['Row'][]
+  }
+
+  const allMenuItems = categories.flatMap((cat: Category) => 
     
-    (cat.menu_items || []).map((item: any) => ({
+    (cat.menu_items || []).map((item: Database['public']['Tables']['menu_items']['Row']) => ({
       id: item.id,
       name: item.name,
       price_minor: item.price_minor
@@ -68,7 +76,7 @@ export async function RestaurantRenderer({
             percentage={location.global_discount_percentage || 0} 
           />
         )}
-        <LiveOrderTracker organizationId={location.organization_id} locationId={location.id} />
+        <LiveOrderTracker />
         
         <MenuRenderer initialCategories={categories} />
         

@@ -138,16 +138,19 @@ export function PageBuilderForm({ pageId, templateType, initialItems, orgId }: P
         })
       })
 
-      if (!res.ok) throw new Error('Failed to generate')
+      if (!res.ok) {
+        if (res.status === 429) throw new Error('Too many requests. Please try again later.')
+        throw new Error('Failed to generate')
+      }
       const { text } = await res.json()
       
       const textarea = form.elements.namedItem('description') as HTMLTextAreaElement
       if (textarea) {
         textarea.value = text
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('AI Gen Error:', err)
-      toast.error('Failed to generate description. Please try again.')
+      toast.error((err as Error).message || 'Failed to generate description. Please try again.')
     }
   }
 
@@ -231,7 +234,10 @@ export function PageBuilderForm({ pageId, templateType, initialItems, orgId }: P
                     body: JSON.stringify({ itemName: title, itemContext: desc, organizationId: orgId }), 
                     headers: { 'Content-Type': 'application/json' }
                   })
-                  if (!res.ok) throw new Error(await res.text())
+                  if (!res.ok) {
+                    if (res.status === 429) throw new Error('Too many requests. Please try again later.')
+                    throw new Error(await res.text())
+                  }
                   const data = await res.json()
                   if (data.url) {
                     let hidden = form.elements.namedItem('ai_image_url') as HTMLInputElement
@@ -245,8 +251,8 @@ export function PageBuilderForm({ pageId, templateType, initialItems, orgId }: P
                     toast.success('AI Image Generated! It will be saved when you submit.')
                   }
   
-                } catch(e) {
-                  toast.error('AI generation failed.')
+                } catch(e: unknown) {
+                  toast.error((e as Error).message || 'AI generation failed.')
                 }
               }}
               className="px-3 py-1.5 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white rounded-lg text-xs font-bold transition-all whitespace-nowrap"

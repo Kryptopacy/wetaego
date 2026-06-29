@@ -127,6 +127,8 @@ const nextConfig: NextConfig = {
 };
 
 export default withSentryConfig(withBundleAnalyzer(withPWA(withNextIntl(nextConfig))), {
+  org: process.env.SENTRY_ORG || "ourmenu",
+  project: process.env.SENTRY_PROJECT || "ourmenu",
   silent: !process.env.CI,
   widenClientFileUpload: true,
   tunnelRoute: "/monitoring",

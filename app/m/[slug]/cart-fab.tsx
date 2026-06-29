@@ -31,7 +31,7 @@ interface CartFABProps {
   refundPolicy?: string | null
   pageFulfillmentOptions?: { pickup: boolean, delivery: boolean, table: boolean }
   pageBillingMode?: string
-  locationTaxes?: any[]
+  locationTaxes?: { name: string; percentage: number }[]
 }
 
 export function CartFAB(props: CartFABProps) {

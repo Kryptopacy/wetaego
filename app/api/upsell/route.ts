@@ -5,8 +5,17 @@ import { z } from 'zod'
 export const maxDuration = 15 // Short duration since it's a quick upsell
 
 const upsellRequestSchema = z.object({
-  cartItems: z.array(z.any()).min(1, 'Cart is empty'),
-  availableItems: z.array(z.any()).min(1, 'No available items to upsell'),
+  cartItems: z.array(z.object({
+    id: z.string(),
+    name: z.string(),
+    quantity: z.number().optional()
+  })).min(1, 'Cart is empty'),
+  availableItems: z.array(z.object({
+    id: z.string(),
+    name: z.string(),
+    price_minor: z.number().optional(),
+    description: z.string().nullable().optional()
+  })).min(1, 'No available items to upsell'),
   templateType: z.string().optional().default('catalog')
 })
 

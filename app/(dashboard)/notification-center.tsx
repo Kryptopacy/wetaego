@@ -46,7 +46,7 @@ export function NotificationCenter() {
             .then(({ data: org }) => { if (org?.id) setOrgId(org.id) })
         })
     })
-  }, []) 
+  }, [supabase]) 
 
   // ── Convert raw rows into NotificationItems ──────────────────────────────────
   const toOrderItem = (o: Record<string, unknown>): NotificationItem => ({
@@ -213,7 +213,7 @@ export function NotificationCenter() {
       .subscribe()
 
     return () => { supabase.removeChannel(channel) }
-  }, [orgId]) 
+  }, [orgId, supabase, playChime]) 
 
   // ── App Badge API ────────────────────────────────────────────────────────────
   useEffect(() => {

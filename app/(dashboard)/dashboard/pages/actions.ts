@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import type { Json } from '@/lib/supabase/types'
@@ -247,12 +247,13 @@ export const addPageItem = authActionClient
 
       const fileExt = image.name.split('.').pop()
       const fileName = `page-items/${user.id}-${Date.now()}.${fileExt}`
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      const adminClient = await createAdminClient()
+      const { data: uploadData, error: uploadError } = await adminClient.storage
         .from('public-assets')
         .upload(fileName, image)
         
       if (!uploadError && uploadData) {
-        const { data: publicUrlData } = supabase.storage.from('public-assets').getPublicUrl(fileName)
+        const { data: publicUrlData } = adminClient.storage.from('public-assets').getPublicUrl(fileName)
         images = [publicUrlData.publicUrl]
       } else {
         throw new Error('Failed to upload image')
@@ -335,12 +336,13 @@ export const updatePageItem = authActionClient
 
       const fileExt = image.name.split('.').pop()
       const fileName = `page-items/${user.id}-${Date.now()}.${fileExt}`
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      const adminClient = await createAdminClient()
+      const { data: uploadData, error: uploadError } = await adminClient.storage
         .from('public-assets')
         .upload(fileName, image)
         
       if (!uploadError && uploadData) {
-        const { data: publicUrlData } = supabase.storage.from('public-assets').getPublicUrl(fileName)
+        const { data: publicUrlData } = adminClient.storage.from('public-assets').getPublicUrl(fileName)
         updatePayload.images = [publicUrlData.publicUrl]
       } else {
         throw new Error('Failed to upload image')

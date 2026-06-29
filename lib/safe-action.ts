@@ -1,24 +1,25 @@
 import { createSafeActionClient, DEFAULT_SERVER_ERROR_MESSAGE } from 'next-safe-action';
 import { createClient } from '@/lib/supabase/server';
-const isRedirectError = (e: any) => e instanceof Error && e.message === 'NEXT_REDIRECT' || e?.digest?.startsWith('NEXT_REDIRECT');
+const isRedirectError = (e: unknown) => e instanceof Error && e.message === 'NEXT_REDIRECT' || (typeof e === 'object' && e !== null && 'digest' in e && typeof (e as { digest: string }).digest === 'string' && (e as { digest: string }).digest.startsWith('NEXT_REDIRECT'));
 
 /**
  * Base action client for public, unauthenticated actions.
  * It automatically handles unexpected errors.
  */
 export const actionClient = createSafeActionClient({
-  handleServerError(e: any) {
+  handleServerError(e: unknown) {
     if (isRedirectError(e)) {
       throw e;
     }
-    console.error("Action error:", e.message);
-    if (e.message === 'Unauthorized' || 
-        e.message === 'Not authenticated' || 
-        e.message === 'Not logged in' ||
-        e.message.includes('Image must be less than') || 
-        e.message.includes('Invalid image format') ||
-        e.message.includes('Booking not found')) {
-      return e.message;
+    const err = e instanceof Error ? e : new Error(String(e));
+    console.error("Action error:", err.message);
+    if (err.message === 'Unauthorized' || 
+        err.message === 'Not authenticated' || 
+        err.message === 'Not logged in' ||
+        err.message.includes('Image must be less than') || 
+        err.message.includes('Invalid image format') ||
+        err.message.includes('Booking not found')) {
+      return err.message;
     }
     return DEFAULT_SERVER_ERROR_MESSAGE;
   }

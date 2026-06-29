@@ -1,11 +1,10 @@
 'use client'
 
-import { useState, Suspense, useEffect } from 'react'
+import { useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import { login, signup, signInWithGoogle } from './actions'
 import { useFormStatus } from 'react-dom'
-import { useAction } from 'next-safe-action/hooks'
 
 
 function SubmitButton({ isLogin }: { isLogin: boolean }) {

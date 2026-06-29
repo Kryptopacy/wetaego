@@ -5,22 +5,12 @@ import { createClient } from '@/lib/supabase/client'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Tables } from '@/types'
 
-interface LiveOrderTrackerProps {
-  organizationId: string
-  locationId: string
-}
+ 
 
-   
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function LiveOrderTracker({ organizationId: _organizationId, locationId: _locationId }: LiveOrderTrackerProps) {
+export function LiveOrderTracker() {
   const supabase = createClient()
   const [order, setOrder] = useState<Tables<'orders'> | null>(null)
   const [timeLeft, setTimeLeft] = useState<number>(0)
-  
-   
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [_isSubmitting, _setIsSubmitting] = useState(false)
-
   useEffect(() => {
     const activeOrderId = localStorage.getItem('activeOrderId')
     if (!activeOrderId) return

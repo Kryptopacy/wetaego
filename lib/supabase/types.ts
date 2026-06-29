@@ -1,4 +1,4 @@
-﻿export type Json =
+export type Json =
   | string
   | number
   | boolean
@@ -410,6 +410,7 @@ export type Database = {
           google_maps_url: string | null
           id: string
           instagram_handle: string | null
+          is_search_visible: boolean | null
           logo_url: string | null
           manual_payment_account_name: string | null
           manual_payment_account_number: string | null
@@ -459,6 +460,7 @@ export type Database = {
           google_maps_url?: string | null
           id?: string
           instagram_handle?: string | null
+          is_search_visible?: boolean | null
           logo_url?: string | null
           manual_payment_account_name?: string | null
           manual_payment_account_number?: string | null
@@ -508,6 +510,7 @@ export type Database = {
           google_maps_url?: string | null
           id?: string
           instagram_handle?: string | null
+          is_search_visible?: boolean | null
           logo_url?: string | null
           manual_payment_account_name?: string | null
           manual_payment_account_number?: string | null

@@ -1,8 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
-import { format } from 'date-fns'
-import { formatCurrency } from '@/lib/utils/currency'
 
 import { QuotePayment } from './quote-payment'
 

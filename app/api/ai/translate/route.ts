@@ -9,7 +9,15 @@ import { chargeCredits } from '@/lib/payments/credits'
 
 const translateSchema = z.object({
   targetLanguage: z.string().min(1, 'Target language is required'),
-  menuData: z.any(),
+  menuData: z.array(z.object({
+    id: z.string(),
+    name: z.string(),
+    items: z.array(z.object({
+      id: z.string(),
+      name: z.string(),
+      description: z.string().optional()
+    }))
+  })),
   organizationId: z.string().uuid('Invalid organization ID')
 })
 

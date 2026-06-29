@@ -164,6 +164,7 @@ export function AIChat({
         transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
+        aria-label={isOpen ? "Close AI Assistant" : "Open AI Assistant"}
         className="relative z-40 h-14 w-14 rounded-full shadow-xl flex items-center justify-center cursor-pointer border border-black/5 dark:border-white/10 group"
         style={{
           backgroundColor: themeColor || '#0f7b55',
