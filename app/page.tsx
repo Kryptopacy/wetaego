@@ -26,6 +26,8 @@ export default async function HomePage() {
       "AI Demand Forecasting",
       "Smart Upselling Engine",
       "Payment Roulette Game",
+      "Bill Splitting Randomizer",
+      "Who Pays The Bill Roulette",
       "Progressive Web App (PWA)"
     ],
     "url": "https://ourmenuos.online",

@@ -61,3 +61,5 @@ swagger.json
 # AI Agent Configuration
 .agents/
 
+playwright-report/
+test-results/

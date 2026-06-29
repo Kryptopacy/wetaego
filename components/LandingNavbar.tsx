@@ -81,9 +81,10 @@ export function LandingNavbar() {
           </ActionForm>
           <button
             onClick={() => setIsRouletteOpen(true)}
+            aria-label="Who's paying? Free randomizer for who pays the restaurant bill"
             className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full border border-purple-500/30 text-purple-400 text-sm font-semibold hover:bg-purple-500/10 transition-colors"
           >
-            Play Roulette 🎲
+            Who's paying? 🎲
           </button>
           <Link
             className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-white text-black text-sm font-semibold hover:bg-zinc-200 hover:scale-105 transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.2)]"
@@ -204,7 +205,7 @@ export function LandingNavbar() {
                   }}
                   className="w-full mt-4 flex items-center justify-between px-6 py-4 rounded-2xl bg-purple-500/10 border border-purple-500/30 text-purple-400 hover:bg-purple-500/20 transition-all shadow-xl"
                 >
-                  <span className="font-medium text-lg">Play Roulette 🎲</span>
+                  <span className="font-medium text-lg">Who's paying? 🎲</span>
                 </button>
               </motion.div>
             </motion.div>

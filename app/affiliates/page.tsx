@@ -27,7 +27,7 @@ export default function AffiliatesLandingPage() {
             </h1>
             
             <p className="text-xl text-zinc-400 mb-10 max-w-2xl mx-auto leading-relaxed">
-              Refer restaurants, hotels, and cafes to OurMenu OS. Earn a 20% recurring commission on every subscription payment for the lifetime of the customer.
+              Refer restaurants, hotels, and cafes to OurMenu OS. Earn a 10% recurring commission on every subscription payment for the lifetime of the customer.
             </p>
             
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -59,7 +59,7 @@ export default function AffiliatesLandingPage() {
               {[
                 { step: '01', title: 'Get Your Link', desc: 'Sign up in seconds and get your unique affiliate referral link.' },
                 { step: '02', title: 'Refer Venues', desc: 'Share OurMenu OS with restaurants, bars, and hotels in your network.' },
-                { step: '03', title: 'Earn Monthly', desc: 'Get paid 20% every time your referred venues renew their subscription.' }
+                { step: '03', title: 'Earn Monthly', desc: 'Get paid 10% every time your referred venues renew their subscription.' }
               ].map(s => (
                 <div key={s.step} className="bg-zinc-900/50 border border-zinc-800/50 p-8 rounded-3xl relative overflow-hidden group hover:border-violet-500/30 transition-colors">
                   <div className="text-6xl font-black text-zinc-800/30 absolute -top-4 -right-4 group-hover:text-violet-500/10 transition-colors">

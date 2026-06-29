@@ -36,6 +36,18 @@ export function PaymentRouletteModal({ isOpen, onClose }: PaymentRouletteModalPr
     ? namesText.split(',').map(n => n.trim()).filter(n => n.length > 0)
     : Array.from({ length: playerCount }, (_, i) => `Player ${i + 1}`)
 
+  const handleCloseOrBack = () => {
+    if (spinning || isFinished) {
+      setIsFinished(false)
+      setSpinning(false)
+      setWinners([])
+      setSafeNames([])
+      setChaosResults([])
+    } else {
+      onClose()
+    }
+  }
+
   // Handlers
   const handleSpin = async () => {
     if (namesList.length < 2) return
@@ -180,7 +192,8 @@ export function PaymentRouletteModal({ isOpen, onClose }: PaymentRouletteModalPr
             <div className="relative z-10 flex flex-col h-full">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-white font-black text-xl">Payment Roulette</h3>
-                <button onClick={onClose} className="text-zinc-500 hover:text-white" aria-label="Close roulette">
+                <span className="sr-only">Free randomizer for who pays the bills, split the check, and restaurant bill roulette.</span>
+                <button onClick={handleCloseOrBack} className="text-zinc-500 hover:text-white" aria-label="Close roulette">
                   <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
               </div>
@@ -346,7 +359,7 @@ export function PaymentRouletteModal({ isOpen, onClose }: PaymentRouletteModalPr
                       )}
 
                       <button 
-                        onClick={() => { setIsFinished(false); setSpinning(false) }}
+                        onClick={handleSpin}
                         className="w-full py-3 text-zinc-400 text-sm font-bold hover:text-white transition-colors mt-2"
                       >
                         Play Again
