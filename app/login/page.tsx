@@ -10,7 +10,8 @@ export default async function LoginPage() {
   if (user) {
     // If it's a demo user, do not redirect them. We want them to see the login form
     // so they can seamlessly upgrade their session to a real account or log back into their real account.
-    if (!user.email?.includes('demo-') && !user.email?.includes('@ourmenuos.online')) {
+    const isDemoUser = user.email?.includes('demo-') && user.email?.includes('@ourmenuos.online')
+    if (!isDemoUser) {
       redirect('/dashboard')
     }
   }
