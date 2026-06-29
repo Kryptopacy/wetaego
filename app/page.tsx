@@ -57,10 +57,10 @@ export default async function HomePage() {
         <div className="absolute inset-0 z-0">
           <Image
             src="/hero_restaurant_bg.png"
-            alt=""
+            alt="Hero Background"
             fill
             sizes="100vw"
-            className="object-cover object-center"
+            className="object-cover object-center opacity-40 brightness-75 mix-blend-overlay"
             priority
             quality={75}
           />

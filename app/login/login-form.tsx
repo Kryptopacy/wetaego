@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import { login, signup, signInWithGoogle } from './actions'
 import { useFormStatus } from 'react-dom'
+import { useAction } from 'next-safe-action/hooks'
 
 
 function SubmitButton({ isLogin }: { isLogin: boolean }) {
@@ -30,6 +31,24 @@ function LoginFormInner() {
   const [isLogin, setIsLogin] = useState(true)
   const searchParams = useSearchParams()
   const redirectTo = searchParams.get('redirectTo') || '/dashboard'
+
+  const handleAction = async (formData: FormData) => {
+    const payload = {
+      email: formData.get('email') as string,
+      password: formData.get('password') as string,
+      redirectTo: formData.get('redirectTo') as string
+    }
+    let res;
+    if (isLogin) {
+      res = await login(payload)
+    } else {
+      res = await signup(payload)
+    }
+    
+    if (res?.data?.redirect) {
+      window.location.href = res.data.redirect
+    }
+  }
 
   return (
     <div className="w-full max-w-sm rounded-2xl bg-zinc-900/50 p-8 shadow-2xl ring-1 ring-white/10 backdrop-blur-xl">
@@ -57,22 +76,7 @@ function LoginFormInner() {
         </div>
       )}
 
-      <form action={async (formData) => {
-        const payload = {
-          email: formData.get('email') as string,
-          password: formData.get('password') as string,
-          redirectTo: formData.get('redirectTo') as string
-        }
-        let res;
-        if (isLogin) {
-          res = await login(payload)
-        } else {
-          res = await signup(payload)
-        }
-        if (res?.data?.redirect) {
-          window.location.href = res.data.redirect
-        }
-      }} className="flex flex-col gap-4">
+      <form action={handleAction} className="flex flex-col gap-4">
         <input type="hidden" name="redirectTo" value={redirectTo} />
         <div>
           <label className="mb-2 block text-sm font-medium text-zinc-300" htmlFor="email">

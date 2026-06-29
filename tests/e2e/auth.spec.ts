@@ -1,22 +1,40 @@
 import { test, expect } from '@playwright/test';
 
-test('login page renders the authentication form', async ({ page }) => {
-  // Navigate to the login page
-  await page.goto('/login');
+test.describe('Authentication Flow', () => {
+  test('should successfully log in with valid credentials and redirect to dashboard', async ({ page }) => {
+    await page.goto('/login');
 
-  // Ensure the page loaded successfully
-  await expect(page).toHaveTitle(/Login|Ourmenu/i);
+    // Wait for the form to be ready
+    await expect(page.getByRole('heading', { name: 'OurMenu OS' })).toBeVisible();
 
-  // Check for the presence of email input
-  // Note: The specific locator might need to be adjusted based on the actual UI of the login page
-  const emailInput = page.locator('input[type="email"]');
-  if (await emailInput.count() > 0) {
-    await expect(emailInput.first()).toBeVisible();
-  }
+    // Fill in the login credentials
+    // Note: Use a dedicated test account or mock the backend in the CI pipeline
+    await page.fill('input[name="email"]', 'test-admin@ourmenuos.online');
+    await page.fill('input[name="password"]', 'testpassword123');
 
-  // Check for the submit/login button
-  const loginButton = page.locator('button[type="submit"]');
-  if (await loginButton.count() > 0) {
-    await expect(loginButton.first()).toBeVisible();
-  }
+    // Submit the form
+    await page.click('button[type="submit"]');
+
+    // Ensure the Sign In button shows the loading state
+    await expect(page.getByRole('button', { name: 'Signing In...' })).toBeVisible();
+
+    // Assert that the page redirects to the dashboard
+    await expect(page).toHaveURL(/\/dashboard/);
+    
+    // Verify the dashboard loads successfully
+    await expect(page.getByText('Loading workspace...').or(page.locator('main'))).toBeVisible();
+  });
+
+  test('should show an error message with invalid credentials', async ({ page }) => {
+    await page.goto('/login');
+
+    await page.fill('input[name="email"]', 'invalid@example.com');
+    await page.fill('input[name="password"]', 'wrongpassword');
+
+    await page.click('button[type="submit"]');
+
+    // Assert that the error banner appears (driven by the ?message= URL param)
+    await expect(page).toHaveURL(/\/login\?message=/);
+    await expect(page.getByText('Could not authenticate user').or(page.getByText('Invalid login credentials'))).toBeVisible();
+  });
 });
