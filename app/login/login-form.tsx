@@ -63,10 +63,14 @@ function LoginFormInner() {
           password: formData.get('password') as string,
           redirectTo: formData.get('redirectTo') as string
         }
+        let res;
         if (isLogin) {
-          await login(payload)
+          res = await login(payload)
         } else {
-          await signup(payload)
+          res = await signup(payload)
+        }
+        if (res?.data?.redirect) {
+          window.location.href = res.data.redirect
         }
       }} className="flex flex-col gap-4">
         <input type="hidden" name="redirectTo" value={redirectTo} />

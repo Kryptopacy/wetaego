@@ -42,11 +42,11 @@ export const login = actionClient
     const { error } = await supabase.auth.signInWithPassword({ email, password })
 
     if (error) {
-      redirect(`/login?message=${encodeURIComponent('Could not authenticate user')}&redirectTo=${encodeURIComponent(redirectTo)}`)
+      return { redirect: `/login?message=${encodeURIComponent('Could not authenticate user')}&redirectTo=${encodeURIComponent(redirectTo)}` }
     }
 
     revalidatePath('/', 'layout')
-    redirect(redirectTo)
+    return { redirect: redirectTo }
   })
 
 export const signup = actionClient
@@ -64,14 +64,14 @@ export const signup = actionClient
     const { error, data } = await supabase.auth.signUp({ email, password })
 
     if (error) {
-      redirect(`/login?message=${encodeURIComponent('Could not sign up user')}&redirectTo=${encodeURIComponent(redirectTo)}`)
+      return { redirect: `/login?message=${encodeURIComponent('Could not sign up user')}&redirectTo=${encodeURIComponent(redirectTo)}` }
     }
 
     // Trigger welcome email in the background
     sendWelcomeEmail(email).catch(console.error)
 
     revalidatePath('/', 'layout')
-    redirect(redirectTo)
+    return { redirect: redirectTo }
   })
 
 export async function signInWithGoogle() {
