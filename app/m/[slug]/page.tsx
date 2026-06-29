@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAnonClient } from '@/lib/supabase/server'
 import { notFound, redirect } from 'next/navigation'
 import { Metadata } from 'next'
 
@@ -14,7 +14,7 @@ export const revalidate = 60;
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const resolvedParams = await params
   const getCachedMetadata = unstable_cache(async () => {
-    const supabase = await createClient()
+    const supabase = createAnonClient()
     const { data: locationData } = await supabase.from('locations').select('id, name, cover_image_url, is_search_visible').eq('slug', resolvedParams.slug).single()
     if (!locationData) return null
 
@@ -84,7 +84,8 @@ export default async function PublicMenuPage({
   const supabase = await createClient()
 
   const locationFetcher = async () => {
-    const { data } = await supabase
+    const anonSupabase = createAnonClient()
+    const { data } = await anonSupabase
       .from('locations')
       .select('id, name, organization_id, is_search_visible, ai_enabled, ai_name, theme_color, cover_image_url, operating_hours, wifi_network, wifi_password, instagram_handle, twitter_handle, facebook_handle, whatsapp_number, phone_number, google_maps_url, randomizer_enabled, spinner_enabled, spinner_config, global_discount_enabled, global_discount_banner_text, global_discount_percentage, manual_payment_enabled, manual_payment_bank_name, manual_payment_account_name, manual_payment_account_number, manual_payment_instructions, delivery_enabled, delivery_fee_minor, delivery_minimum_order_minor, delivery_note, fulfillment_location_label, organizations(logo_url)')
       .eq('slug', slug)
@@ -144,7 +145,8 @@ export default async function PublicMenuPage({
     .single() : Promise.resolve(null)
 
   const fetchLocationPages = async () => {
-    let query = supabase
+    const anonSupabase = createAnonClient()
+    let query = anonSupabase
       .from('location_pages')
       .select('id, slug, title, template_type, is_published')
       .eq('location_id', location.id)

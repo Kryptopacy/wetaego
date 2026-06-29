@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAnonClient } from '@/lib/supabase/server'
 import { unstable_cache } from 'next/cache'
 import { MenuRenderer } from '../../../menu-renderer'
 import { LiveOrderTracker } from '../../../live-order-tracker'
@@ -21,10 +21,9 @@ export async function RestaurantRenderer({
   tableIdentifier?: string
   paymentIsLive: boolean
 }) {
-  const supabase = await createClient()
-
   const fetchMenuCategories = async () => {
-    const { data: menuData } = await supabase
+    const anonSupabase = createAnonClient()
+    const { data: menuData } = await anonSupabase
       .from('menus')
       .select('id')
       .eq('location_id', location.id)
@@ -32,7 +31,7 @@ export async function RestaurantRenderer({
 
     if (!menuData) return []
 
-    const { data } = await supabase
+    const { data } = await anonSupabase
       .from('menu_categories')
       .select('*, menu_items(*)')
       .eq('menu_id', menuData.id)

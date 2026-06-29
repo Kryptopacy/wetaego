@@ -1,6 +1,6 @@
 
 export const revalidate = 60;
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAnonClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 import { BookingRenderer } from './templates/booking-renderer'
@@ -24,25 +24,31 @@ export async function generateMetadata({
   params: Promise<{ slug: string; pageSlug: string }>
 }): Promise<Metadata> {
   const { slug, pageSlug } = await params
-  const supabase = await createClient()
+  
+  const getCachedData = unstable_cache(async () => {
+    const supabase = createAnonClient()
+    const { data: loc } = await supabase
+      .from('locations')
+      .select('id, name, cover_image_url, is_search_visible')
+      .eq('slug', slug)
+      .single()
+    if (!loc) return null
 
-  const locQuery = supabase
-    .from('locations')
-    .select('id, name, cover_image_url, is_search_visible')
-    .eq('slug', slug)
-    .single()
-  const { data: loc } = await locQuery
-  if (!loc) return { title: 'Not Found' }
+    const { data: page } = await supabase
+      .from('location_pages')
+      .select('title, content')
+      .eq('location_id', loc.id)
+      .eq('slug', pageSlug)
+      .eq('is_published', true)
+      .single()
+    if (!page) return null
 
-  const pageQuery = supabase
-    .from('location_pages')
-    .select('title, content, template_type')
-    .eq('location_id', loc.id)
-    .eq('slug', pageSlug)
-    .eq('is_published', true)
-    .single()
-  const { data: page } = await pageQuery
-  if (!page) return { title: 'Not Found' }
+    return { loc, page }
+  }, [`metadata_${slug}_${pageSlug}`], { revalidate: 60 })
+
+  const data = await getCachedData()
+  if (!data) return { title: 'Not Found' }
+  const { loc, page } = data
 
   const description = page.content
     ? page.content.slice(0, 160).replace(/[#\n]/g, ' ').trim()
@@ -126,7 +132,8 @@ export default async function PublicPageView({
 
   // 2. Page
   const fetchPage = async () => {
-    let query = supabase
+    const anonSupabase = createAnonClient()
+    let query = anonSupabase
       .from('location_pages')
       .select('id, title, slug, content, template_type, billing_enabled, billing_mode, payment_mode, deposit_percentage, business_type_preset, randomizer_enabled, template_data, is_published')
       .eq('location_id', loc.id)
@@ -151,7 +158,8 @@ export default async function PublicPageView({
 
   // 3. Items (for catalog, booking, listing, rate_card)
   const fetchItems = async () => {
-    let query = supabase
+    const anonSupabase = createAnonClient()
+    let query = anonSupabase
       .from('page_items')
       .select('*')
       .eq('page_id', page.id)

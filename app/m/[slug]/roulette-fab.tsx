@@ -27,6 +27,8 @@ export function RouletteFAB() {
         onClick={() => setIsOpen(!isOpen)}
         className="relative z-[45] h-14 w-14 rounded-full bg-zinc-900 border border-zinc-700 shadow-xl flex items-center justify-center text-purple-400 transition-colors group"
         aria-label={isOpen ? "Close roulette" : "Open roulette"}
+        aria-expanded={isOpen}
+        aria-controls="payment-roulette-modal"
       >
         <span className="absolute right-[115%] whitespace-nowrap bg-zinc-800 text-white font-semibold text-[13px] px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-lg">
           Roulette

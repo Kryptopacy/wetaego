@@ -1,4 +1,5 @@
 import { ActionForm } from '@/components/ActionForm'
+import heroBg from '../public/hero_restaurant_bg.png'
 import Image from 'next/image'
 import Link from 'next/link'
 import { startInteractiveDemo } from './login/actions'
@@ -57,9 +58,10 @@ export default async function HomePage() {
       {/* ── HERO: Cinematic full-bleed background composition ── */}
       <section className="relative min-h-screen flex items-center overflow-hidden">
         {/* Background image */}
-        <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 z-0 bg-[#050505]">
           <Image
-            src="/hero_restaurant_bg.png"
+            src={heroBg}
+            placeholder="blur"
             alt="Hero Background"
             fill
             sizes="100vw"
