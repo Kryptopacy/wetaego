@@ -2,8 +2,7 @@
 
 import { useState } from 'react'
 import { BUSINESS_TYPE_GROUPS, getPresetsByGroup } from '@/lib/templates/presets'
-import { cn } from '@/lib/utils'
-
+const classNames = (...classes: (string | undefined | null | false)[]) => classes.filter(Boolean).join(' ')
 export function BusinessTypePicker({ defaultValue }: { defaultValue?: string }) {
   // Find which group the default value belongs to
   let defaultGroupId = BUSINESS_TYPE_GROUPS[0].id
@@ -31,7 +30,7 @@ export function BusinessTypePicker({ defaultValue }: { defaultValue?: string }) 
             key={group.id}
             type="button"
             onClick={() => setActiveGroup(group.id)}
-            className={cn(
+            className={classNames(
               "px-3 py-2 text-sm font-medium rounded-lg whitespace-nowrap transition-colors border",
               activeGroup === group.id 
                 ? "bg-blue-600/10 border-blue-500/50 text-blue-400" 
@@ -49,7 +48,7 @@ export function BusinessTypePicker({ defaultValue }: { defaultValue?: string }) 
           <div
             key={key}
             onClick={() => setSelectedValue(key)}
-            className={cn(
+            className={classNames(
               "relative flex flex-col p-4 rounded-xl cursor-pointer border transition-all duration-200",
               selectedValue === key
                 ? "bg-blue-500/10 border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.15)] ring-1 ring-blue-500"
@@ -58,7 +57,7 @@ export function BusinessTypePicker({ defaultValue }: { defaultValue?: string }) 
           >
             <div className="flex items-center justify-between mb-2">
               <span className="text-2xl">{preset.icon}</span>
-              <div className={cn(
+              <div className={classNames(
                 "w-5 h-5 rounded-full border flex items-center justify-center transition-colors",
                 selectedValue === key ? "border-blue-500 bg-blue-500" : "border-zinc-600"
               )}>

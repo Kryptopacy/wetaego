@@ -143,4 +143,5 @@ export default withSentryConfig(withBundleAnalyzer(withPWA(withNextIntl(nextConf
   widenClientFileUpload: true,
   tunnelRoute: "/monitoring",
   sourcemaps: { disable: true },
+  release: { create: false },
 });
