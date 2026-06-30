@@ -2,10 +2,10 @@ import { createClient } from '@/lib/supabase/server'
 import { subscribeToLite, subscribeToPro, buyCredits, cancelSubscription } from './actions'
 import { getUsdToNgnRate } from '@/lib/payments/exchange'
 import { formatCurrency } from '@/lib/utils/currency'
-
 import Link from 'next/link'
 import { CancelButton } from './cancel-button'
 import { ActionForm } from '@/components/ActionForm'
+import { redeemCoupon } from './actions'
 
 export default async function BillingPage(props: { searchParams: Promise<{ currency?: string }> }) {
   const searchParams = await props.searchParams
@@ -125,6 +125,19 @@ export default async function BillingPage(props: { searchParams: Promise<{ curre
             </ActionForm>
           </div>
         )}
+      </div>
+
+      {/* Redeem Promo Code */}
+      <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mt-8">
+        <h2 className="text-lg font-bold text-white mb-2">Redeem Promo Code</h2>
+        <p className="text-sm text-zinc-400 mb-4">Have a promo code for free credits or extra days? Enter it below.</p>
+        <ActionForm action={redeemCoupon} className="flex gap-4">
+          <input type="hidden" name="organization_id" value={org.id} />
+          <input type="text" name="code" placeholder="Enter code (e.g. SUMMER50)" required className="flex-1 rounded-lg bg-zinc-800 border border-zinc-700 px-4 py-2 text-white uppercase" />
+          <button type="submit" className="px-6 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-500 transition whitespace-nowrap">
+            Redeem Code
+          </button>
+        </ActionForm>
       </div>
 
       <div className="grid md:grid-cols-3 gap-6 mt-8">

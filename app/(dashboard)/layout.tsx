@@ -19,6 +19,9 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   let locations: any[] = []
   let activeLocationId = ''
   let locationSlug = ''
+  let plan = 'lite'
+  let planStatus = 'trial'
+  let trialEndsAt: string | null = null
   const baseNavItems: NavItem[] = [
     { href: '/dashboard', label: 'Overview', icon: 'LayoutDashboard', exact: true },
   ]
@@ -27,7 +30,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   if (userData?.user) {
     const { data: member } = await supabase
       .from('organization_members')
-      .select('role, organizations(id, name, subscription_tier, purchased_credits, monthly_free_credits_used)')
+      .select('role, organizations(id, name, subscription_tier, subscription_status, subscription_plan, trial_ends_at, purchased_credits, monthly_free_credits_used)')
       .eq('user_id', userData.user.id)
       .single()
 
@@ -39,6 +42,10 @@ export default async function DashboardLayout({ children }: { children: ReactNod
       const availableFree = (planLimits[orgData.subscription_tier] || 0) - (orgData.monthly_free_credits_used || 0)
       const cb = Math.max(0, availableFree) + (orgData.purchased_credits || 0)
       if (!isNaN(cb)) credits = cb
+
+      plan = orgData.subscription_plan || orgData.subscription_tier || 'lite'
+      planStatus = orgData.subscription_status || 'trial'
+      trialEndsAt = orgData.trial_ends_at || null
 
       const orgId = orgData.id
       if (orgId) {
@@ -96,7 +103,10 @@ export default async function DashboardLayout({ children }: { children: ReactNod
     isOwnerOrManager,
     userEmail,
     credits,
-    dynamicNavItems
+    dynamicNavItems,
+    plan,
+    planStatus,
+    trialEndsAt
   }
 
   return (

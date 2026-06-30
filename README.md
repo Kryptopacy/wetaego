@@ -54,6 +54,7 @@ A resilient, globally aware checkout engine powers the entire ecosystem:
 - **Paystack Native Integration:** Seamlessly handles split payments, automated service charges, and real-time reconciliation via cryptographic Webhooks.
 - **Automated SaaS Ledger (Platform Fees):** A transparent, built-in ledger system that extracts a configurable SaaS platform fee (e.g., 2%) on every transaction, driving pure MRR beyond monthly subscriptions.
 - **Enterprise Tax & Compliance Engine:** Dynamically calculates localized taxes (e.g., VAT, State Taxes) and applies them accurately before reaching the payment gateway, providing transparent itemized receipts for strict global compliance.
+- **Coupon & Discounts Manager:** A robust system allowing admins to distribute customizable coupons for free trials, free plans, credit extensions, or plan extensions to aggressively drive B2B acquisition and retention.
 - **Global Manual Fallback:** If API keys are pending or the payment provider experiences regional downtime, the system automatically degrades to a localized "Manual Bank Transfer" workflow, ensuring conversions are never blocked.
 - **Omnichannel Logistics & Per-Page Routing:** Full, robust support for Dine-in (Table-specific QR mapping), Pickup, and Delivery (with interactive delivery zones, SMS phone verification, and dynamic fees). Fulfillment logic is highly granular, allowing **per-page configuration** (e.g., a "Room Service" page forces table delivery, while a "Lobby Cafe" page allows pickup).
 
@@ -78,6 +79,8 @@ Seamlessly scale operations across multiple venues, cities, or countries from a 
 
 ### 5. AI-Powered Operations
 - **Conversational AI Assistant:** A customizable, domain-aware conversational agent that guides customers through the catalog, menu, or services.
+- **Voice Dictation & Smart Cart Integration:** Customers can use natural voice dictation via the Web Speech API to interact with the AI, which autonomously manages their shopping cart (add/remove) and calls staff directly via AI tool execution.
+- **Structured AI Rules Engine:** Configure strict guardrails including Base Personalities (Professional, Casual, Witty), Escalation Contacts, and a dynamic JSON-based FAQ builder that seamlessly injects venue-specific context directly into the system prompt.
 - **AI Copywriter & Image Studio:** Generative AI deeply integrated into the Page Builder, assisting businesses in writing high-converting item descriptions and generating stunning, professional cover images on the fly.
 - **AI Demand Forecasting (`/api/ai/forecast`):** Analyzes 30-day sales velocity and utilizes Google Gemini to predict 7-day demand trajectories, issuing smart inventory alerts (Critical, Order Soon, Sufficient).
 - **Smart Upselling Engine (`/api/upsell`):** Intelligent checkout add-on engine dynamically analyzes cart contents to suggest highly relevant cross-sells, maximizing Average Order Value (AOV).

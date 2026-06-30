@@ -235,6 +235,78 @@ export type Database = {
           },
         ]
       }
+      coupons: {
+        Row: {
+          id: string
+          code: string
+          discount_type: 'free_plan' | 'free_credits' | 'plan_extension' | 'trial_extension'
+          discount_value: number
+          plan_tier: string | null
+          expires_at: string | null
+          max_redemptions: number | null
+          times_redeemed: number
+          is_active: boolean
+          organization_id: string | null
+          created_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          code: string
+          discount_type: 'free_plan' | 'free_credits' | 'plan_extension' | 'trial_extension'
+          discount_value: number
+          plan_tier?: string | null
+          expires_at?: string | null
+          max_redemptions?: number | null
+          times_redeemed?: number
+          is_active?: boolean
+          organization_id?: string | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          code?: string
+          discount_type?: 'free_plan' | 'free_credits' | 'plan_extension' | 'trial_extension'
+          discount_value?: number
+          plan_tier?: string | null
+          expires_at?: string | null
+          max_redemptions?: number | null
+          times_redeemed?: number
+          is_active?: boolean
+          organization_id?: string | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      coupon_redemptions: {
+        Row: {
+          id: string
+          coupon_id: string
+          organization_id: string
+          redeemed_by: string
+          redeemed_at: string
+        }
+        Insert: {
+          id?: string
+          coupon_id: string
+          organization_id: string
+          redeemed_by: string
+          redeemed_at?: string
+        }
+        Update: {
+          id?: string
+          coupon_id?: string
+          organization_id?: string
+          redeemed_by?: string
+          redeemed_at?: string
+        }
+        Relationships: []
+      }
       customer_profiles: {
         Row: {
           created_at: string | null
@@ -392,6 +464,9 @@ export type Database = {
         Row: {
           address: string | null
           ai_enabled: boolean
+          ai_base_personality: string | null
+          ai_escalation_contact: string | null
+          ai_faqs: Json | null
           ai_instructions: string | null
           ai_name: string
           brand_knowledge: string | null
@@ -442,6 +517,9 @@ export type Database = {
         Insert: {
           address?: string | null
           ai_enabled?: boolean
+          ai_base_personality?: string | null
+          ai_escalation_contact?: string | null
+          ai_faqs?: Json | null
           ai_instructions?: string | null
           ai_name?: string
           brand_knowledge?: string | null
@@ -492,6 +570,9 @@ export type Database = {
         Update: {
           address?: string | null
           ai_enabled?: boolean
+          ai_base_personality?: string | null
+          ai_escalation_contact?: string | null
+          ai_faqs?: Json | null
           ai_instructions?: string | null
           ai_name?: string
           brand_knowledge?: string | null

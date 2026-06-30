@@ -1,11 +1,12 @@
 
-import { getPricingSettings, getCreditCosts, getPlanLimits, getAiModels, getPlatformFees } from '@/lib/utils/settings'
+import { getPricingSettings, getCreditCosts, getPlanLimits, getAiModels, getPlatformFees, getTrialSettings } from '@/lib/utils/settings'
 import { updateSetting } from './actions'
 import { ActionForm } from '@/components/ActionForm'
 
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { TenantDirectory } from './tenant-directory'
+import { CouponsManager } from './coupons-manager'
 
 export default async function AdminPage() {
   const pricing = await getPricingSettings()
@@ -13,6 +14,7 @@ export default async function AdminPage() {
   const planLimits = await getPlanLimits()
   const aiModels = await getAiModels()
   const platformFees = await getPlatformFees()
+  const trialSettings = await getTrialSettings()
 
   const supabase = await createClient()
   const { data: userData } = await supabase.auth.getUser()
@@ -24,6 +26,11 @@ export default async function AdminPage() {
   const { data: orgs } = await supabase
     .from('organizations')
     .select('id, name, subscription_plan, subscription_status, purchased_credits, created_at')
+    .order('created_at', { ascending: false })
+
+  const { data: coupons } = await supabase
+    .from('coupons')
+    .select('*')
     .order('created_at', { ascending: false })
 
   return (
@@ -48,6 +55,21 @@ export default async function AdminPage() {
       </div>
 
       <div className="grid gap-6">
+        {/* Trial Settings */}
+        <section className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+          <h2 className="text-lg font-bold text-white mb-4">Trial Configuration</h2>
+          <ActionForm action={updateSetting} className="space-y-4">
+            <input type="hidden" name="key" value="trial_settings" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-zinc-400 mb-1">Default Trial Days (0 = No Free Trial)</label>
+                <input type="number" name="default_trial_days" defaultValue={(trialSettings as Record<string, number>).default_trial_days ?? 30} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white" />
+              </div>
+            </div>
+            <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-500 transition">Save Trial Settings</button>
+          </ActionForm>
+        </section>
+
         {/* Pricing Settings */}
         <section className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
           <h2 className="text-lg font-bold text-white mb-4">Pricing Configuration (NGN)</h2>
@@ -154,6 +176,11 @@ export default async function AdminPage() {
             <textarea name="json_value" defaultValue={JSON.stringify(planLimits, null, 2)} rows={8} className="w-full font-mono text-sm rounded-lg bg-zinc-800 border border-zinc-700 px-4 py-3 text-white" />
             <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-500 transition">Save Plan Limits</button>
           </ActionForm>
+        </section>
+
+        {/* Promo Campaigns */}
+        <section>
+          <CouponsManager initialCoupons={coupons || []} />
         </section>
       </div>
     </div>

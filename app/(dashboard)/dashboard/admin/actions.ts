@@ -32,8 +32,7 @@ export const updateSetting = authActionClient
       // Collect all other keys into an object
       formData.forEach((val: FormDataEntryValue, k: string) => {
         if (k !== 'key' && k !== 'is_json' && !k.startsWith('$ACTION')) {
-          // Automatically cast numbers for pricing
-          if (key === 'pricing') {
+          if (key === 'pricing' || key === 'trial_settings') {
             value[k] = Number(val)
           } else {
             value[k] = val
@@ -88,6 +87,45 @@ export const overrideTenantPlan = authActionClient
     if (error) {
       console.error('Override error:', error)
       throw new Error('Failed to override tenant plan')
+    }
+
+    revalidatePath('/dashboard/admin')
+    return { success: true }
+  })
+
+export const createCoupon = authActionClient
+  .schema(zfd.formData(z.any()))
+  .action(async ({ parsedInput: formData, ctx: { user } }) => {
+    const supabase = await createClient()
+
+    if (user.email !== (process.env.ADMIN_EMAIL || 'kryptopacy@gmail.com')) {
+      throw new Error('Unauthorized')
+    }
+
+    const code = (formData.get('code') as string).toUpperCase().trim()
+    const discount_type = formData.get('discount_type') as 'free_plan' | 'free_credits' | 'plan_extension' | 'trial_extension'
+    const discount_value = Number(formData.get('discount_value'))
+    const plan_tier = discount_type === 'free_plan' ? (formData.get('plan_tier') as string) : null
+    
+    const expires_at_raw = formData.get('expires_at') as string
+    const expires_at = expires_at_raw ? new Date(expires_at_raw).toISOString() : null
+    
+    const max_redemptions_raw = formData.get('max_redemptions') as string
+    const max_redemptions = max_redemptions_raw ? Number(max_redemptions_raw) : null
+
+    const { error } = await supabase.from('coupons').insert({
+      code,
+      discount_type,
+      discount_value,
+      plan_tier,
+      expires_at,
+      max_redemptions,
+      created_by: user.id
+    })
+
+    if (error) {
+      console.error('Failed to create coupon:', error)
+      throw new Error('Failed to create coupon')
     }
 
     revalidatePath('/dashboard/admin')

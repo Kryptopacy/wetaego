@@ -55,6 +55,7 @@ const managerItems: NavItem[] = [
   { href: '/dashboard/menu', label: 'Catalog Manager', icon: BookOpen },
   { href: '/dashboard/pages', label: 'Your Pages', icon: FileText },
   { href: '/dashboard/settings', label: 'Settings & Team', icon: Settings },
+  { href: '/dashboard/billing', label: 'Billing & Plan', icon: CreditCard },
 ]
 
 function NavLink({ href, label, icon: iconProp, badge, exact, onClick }: {
@@ -114,6 +115,9 @@ export interface InitialDashboardData {
   userEmail: string;
   credits: number | null;
   dynamicNavItems: NavItem[];
+  plan?: string;
+  planStatus?: string;
+  trialEndsAt?: string | null;
 }
 
 export default function ClientLayout({ children, initialData }: { children: ReactNode, initialData: InitialDashboardData }) {
@@ -128,6 +132,12 @@ export default function ClientLayout({ children, initialData }: { children: Reac
   const [dynamicNavItems] = useState<NavItem[]>(initialData.dynamicNavItems)
 
   const [credits] = useState<number | null>(initialData.credits)
+
+  let trialDaysLeft = null
+  if (initialData.planStatus === 'trial' && initialData.trialEndsAt) {
+    const diff = new Date(initialData.trialEndsAt).getTime() - new Date().getTime()
+    trialDaysLeft = Math.max(0, Math.ceil(diff / (1000 * 3600 * 24)))
+  }
 
   useEffect(() => {
     // Data is now fetched server-side in layout.tsx, so we don't need the client fetcher 
@@ -148,8 +158,14 @@ export default function ClientLayout({ children, initialData }: { children: Reac
               <Image src="/ourmenu-qr-icon.svg" alt="OurMenu Logo" width={32} height={32} className="object-contain" />
             </div>
             <div className="flex flex-col">
-              <span className="text-white font-bold tracking-tight leading-tight">OurMenu OS</span>
-              {/* OS Version removed as requested */}
+              <div className="flex items-center gap-2">
+                <span className="text-white font-bold tracking-tight leading-tight">OurMenu OS</span>
+                {initialData.plan && (
+                  <span className="px-1.5 py-0.5 rounded bg-white/10 border border-white/20 text-[10px] font-bold text-zinc-300 uppercase tracking-wider">
+                    {initialData.plan}
+                  </span>
+                )}
+              </div>
             </div>
           </Link>
           {locations.length > 0 && (
@@ -207,6 +223,18 @@ export default function ClientLayout({ children, initialData }: { children: Reac
         </div>
 
         <div className="p-4 mt-auto">
+          {trialDaysLeft !== null && trialDaysLeft > 0 && (
+            <div className="flex items-center justify-between px-3 py-2.5 bg-blue-500/10 rounded-xl border border-blue-500/20 mb-3">
+              <span className="text-xs font-medium text-blue-400">Free Trial</span>
+              <span className="text-xs font-bold text-blue-300">{trialDaysLeft} days left</span>
+            </div>
+          )}
+          {trialDaysLeft === 0 && initialData.planStatus === 'trial' && (
+             <div className="flex items-center justify-between px-3 py-2.5 bg-red-500/10 rounded-xl border border-red-500/20 mb-3">
+             <span className="text-xs font-medium text-red-400">Free Trial</span>
+             <span className="text-xs font-bold text-red-300">Expired</span>
+           </div>
+          )}
           {credits !== null && (
             <Link href="/dashboard/billing" className="flex items-center justify-between px-3 py-2.5 bg-violet-500/10 hover:bg-violet-500/20 rounded-xl border border-violet-500/20 mb-4 transition-colors group" onClick={onClose}>
               <div className="flex items-center gap-2">
@@ -227,6 +255,18 @@ export default function ClientLayout({ children, initialData }: { children: Reac
               <svg className="w-4 h-4 text-zinc-500 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
             </a>
           )}
+
+          <button 
+            onClick={async () => {
+              const supabase = createClient()
+              await supabase.auth.signOut()
+              window.location.href = '/login'
+            }}
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-zinc-400 hover:text-red-400 hover:bg-red-500/10 transition-all w-full mb-4"
+          >
+            <LogOut className="w-4 h-4" />
+            <span>Sign Out</span>
+          </button>
           
           <div className="flex items-center justify-between px-3 py-2 bg-black/40 rounded-xl border border-white/5">
             <div className="flex items-center gap-2">

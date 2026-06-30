@@ -13,6 +13,7 @@ import { PlanType } from '@/lib/payments/credits'
 import { getPlanLimits } from '@/lib/utils/settings'
 import { savePaymentSettings, saveManualPaymentSettings } from './payment-actions'
 import { TaxesView } from './taxes-view'
+import AiFaqBuilder from './ai-faq-builder'
 
 
 
@@ -782,25 +783,57 @@ export default async function SettingsPage({
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-medium text-zinc-300">Custom Tone & Instructions</label>
+                <label className="mb-2 block text-sm font-medium text-zinc-300">Base Personality</label>
+                <select 
+                  name="aiBasePersonality" 
+                  defaultValue={location.ai_base_personality || 'professional'} 
+                  className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                >
+                  <option value="professional">Professional & Polite</option>
+                  <option value="casual">Casual & Friendly</option>
+                  <option value="upscale">Upscale & Elegant</option>
+                  <option value="witty">Witty & Playful</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-medium text-zinc-300">Escalation Contact</label>
+                <input
+                  type="text"
+                  name="aiEscalationContact"
+                  defaultValue={location.ai_escalation_contact || ''}
+                  className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  placeholder="e.g. Call the front desk at 555-1234 or ask a staff member"
+                  maxLength={200}
+                />
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-medium text-zinc-300">Custom Instructions (Optional)</label>
                 <textarea
                   name="aiInstructions"
                   rows={3}
                   defaultValue={location.ai_instructions || ''}
                   className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm"
-                  placeholder="Define style/personality. e.g.: Be very polite and helpful. Suggest drink pairings. Recommend happy hour specials."
+                  placeholder="e.g. Always recommend dessert. Emphasize that our steak is 24-hour marinated."
                   maxLength={2000}
                 />
               </div>
+              
+              <div>
+                <label className="mb-2 block text-sm font-medium text-zinc-300">Frequently Asked Questions (FAQs)</label>
+                <p className="text-xs text-zinc-500 mb-3">Add specific questions and answers the AI should strictly adhere to.</p>
+                <AiFaqBuilder initialFaqs={(location.ai_faqs as any) || []} />
+              </div>
 
               <div>
-                <label className="mb-2 block text-sm font-medium text-zinc-300">Brand Context & Knowledge</label>
+                <label className="mb-2 block text-sm font-medium text-zinc-300">Brand Context & Knowledge (Unstructured)</label>
                 <textarea
                   name="brandKnowledge"
                   rows={4}
                   defaultValue={location.brand_knowledge || ''}
                   className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm"
-                  placeholder="Extra info about the venue. e.g.: Wi-Fi is Lounge2026. Parking is free. Specializing in dry-aged steaks. Vibe is quiet and upscale."
+                  placeholder="Extra info about the venue. e.g.: Wi-Fi is Lounge2026. Parking is free. Vibe is quiet and upscale."
                   maxLength={4000}
                 />
               </div>

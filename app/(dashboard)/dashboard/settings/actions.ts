@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { zfd } from 'zod-form-data'
 import { authActionClient } from '@/lib/safe-action'
+import { getTrialSettings } from '@/lib/utils/settings'
 
 export const updateOrganization = authActionClient
   .schema(zfd.formData({
@@ -54,13 +55,18 @@ export const updateOrganization = authActionClient
         }
       }
 
+      const trialSettings = await getTrialSettings()
+      const trialDays = (trialSettings as any).default_trial_days ?? 30
+      const trialEndsAt = trialDays > 0 ? new Date(Date.now() + trialDays * 24 * 60 * 60 * 1000).toISOString() : undefined
+
       const { data: newOrg, error } = await supabase
         .from('organizations')
         .insert({
           name,
           slug,
           created_by: user.id,
-          referred_by_affiliate_id: referredByAffiliateId
+          referred_by_affiliate_id: referredByAffiliateId,
+          trial_ends_at: trialEndsAt
         })
         .select('id')
         .single()
@@ -107,7 +113,10 @@ export const saveLocationAiSettings = authActionClient
     locationId: zfd.text(z.string().uuid()),
     aiEnabled: zfd.checkbox(),
     aiName: zfd.text(z.string().min(1, "AI Name is required").max(30, "Name must be 30 characters or less")),
+    aiBasePersonality: zfd.text(z.string().optional()),
+    aiEscalationContact: zfd.text(z.string().max(200).optional()),
     aiInstructions: zfd.text(z.string().max(2000).optional()),
+    aiFaqs: zfd.text(z.string().optional()), // JSON string
     brandKnowledge: zfd.text(z.string().max(4000).optional()),
   }))
   .action(async ({ parsedInput, ctx: { supabase, user } }) => {
@@ -121,9 +130,19 @@ export const saveLocationAiSettings = authActionClient
       locationId,
       aiEnabled,
       aiName,
+      aiBasePersonality,
+      aiEscalationContact,
       aiInstructions,
+      aiFaqs,
       brandKnowledge
     } = parsedInput
+
+    let parsedFaqs = []
+    try {
+      if (aiFaqs) parsedFaqs = JSON.parse(aiFaqs)
+    } catch (e) {
+      // Ignore parse error
+    }
 
     // Fetch the location to find its organization
     const { data: loc, error: locError } = await supabase
@@ -161,7 +180,10 @@ export const saveLocationAiSettings = authActionClient
       .update({
         ai_enabled: aiEnabled,
         ai_name: aiName,
+        ai_base_personality: aiBasePersonality || 'professional',
+        ai_escalation_contact: aiEscalationContact || null,
         ai_instructions: aiInstructions || null,
+        ai_faqs: parsedFaqs,
         brand_knowledge: brandKnowledge || null,
       })
       .eq('id', locationId)

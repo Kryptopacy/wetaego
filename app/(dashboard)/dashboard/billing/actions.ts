@@ -8,6 +8,7 @@ import { getPricingSettings } from '@/lib/utils/settings'
 import { getUsdToNgnRate } from '@/lib/payments/exchange'
 import { authActionClient } from '@/lib/safe-action'
 import { z } from 'zod'
+import { revalidatePath } from 'next/cache'
 import { zfd } from 'zod-form-data'
 
 export const subscribeToLite = authActionClient
@@ -149,4 +150,100 @@ export const buyCredits = authActionClient
     }
 
     redirect(data.data.authorization_url)
+  })
+
+export const redeemCoupon = authActionClient
+  .schema(zfd.formData(z.object({
+    organization_id: z.string(),
+    code: z.string().transform(v => v.toUpperCase().trim())
+  })))
+  .action(async ({ parsedInput: { organization_id, code }, ctx: { user } }) => {
+    const supabase = await createClient()
+
+    // 1. Get coupon
+    const { data: coupon, error: couponError } = await supabase
+      .from('coupons')
+      .select('*')
+      .eq('code', code)
+      .eq('is_active', true)
+      .single()
+
+    if (couponError || !coupon) {
+      throw new Error('Invalid or inactive promo code')
+    }
+
+    // 2. Check expiry
+    if (coupon.expires_at && new Date(coupon.expires_at) < new Date()) {
+      throw new Error('Promo code has expired')
+    }
+
+    // 3. Check max redemptions
+    if (coupon.max_redemptions && coupon.times_redeemed >= coupon.max_redemptions) {
+      throw new Error('Promo code redemption limit reached')
+    }
+
+    // 4. Check if already redeemed
+    const { data: existingRedemption } = await supabase
+      .from('coupon_redemptions')
+      .select('id')
+      .eq('coupon_id', coupon.id)
+      .eq('organization_id', organization_id)
+      .single()
+
+    if (existingRedemption) {
+      throw new Error('You have already redeemed this promo code')
+    }
+
+    // 5. Get current org state
+    const { data: org } = await supabase
+      .from('organizations')
+      .select('trial_ends_at, purchased_credits, subscription_plan, subscription_status')
+      .eq('id', organization_id)
+      .single()
+
+    if (!org) throw new Error('Organization not found')
+
+    // 6. Apply discount
+    let updates: any = {}
+    
+    if (coupon.discount_type === 'free_credits') {
+      updates.purchased_credits = (org.purchased_credits || 0) + coupon.discount_value
+    } else if (coupon.discount_type === 'free_plan' || coupon.discount_type === 'plan_extension' || coupon.discount_type === 'trial_extension') {
+      const currentTrialEnd = org.trial_ends_at ? new Date(org.trial_ends_at) : new Date()
+      const baseDate = currentTrialEnd > new Date() ? currentTrialEnd : new Date()
+      
+      const newTrialEnd = new Date(baseDate.getTime() + (coupon.discount_value * 24 * 60 * 60 * 1000))
+      updates.trial_ends_at = newTrialEnd.toISOString()
+
+      if (coupon.discount_type === 'free_plan' && coupon.plan_tier) {
+        updates.subscription_plan = coupon.plan_tier
+        updates.subscription_status = 'active'
+      }
+    }
+
+    const { error: updateError } = await supabase
+      .from('organizations')
+      .update(updates)
+      .eq('id', organization_id)
+
+    if (updateError) throw new Error('Failed to apply promo code benefits')
+
+    const { createClient: createSupabaseAdmin } = await import('@supabase/supabase-js')
+    const adminClient = createSupabaseAdmin(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+
+    await adminClient.from('coupon_redemptions').insert({
+      coupon_id: coupon.id,
+      organization_id: organization_id,
+      redeemed_by: user.id
+    })
+
+    await adminClient.from('coupons').update({
+      times_redeemed: coupon.times_redeemed + 1
+    }).eq('id', coupon.id)
+
+    revalidatePath('/dashboard/billing')
+    return { success: true, message: 'Promo code redeemed successfully!' }
   })

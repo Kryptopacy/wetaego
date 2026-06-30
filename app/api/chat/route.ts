@@ -77,7 +77,7 @@ export async function POST(req: Request) {
     // 3. Fetch location AI configuration
     const { data: location, error: locError } = await supabase
       .from('locations')
-      .select('id, name, ai_enabled, ai_name, ai_instructions, brand_knowledge, currency_code')
+      .select('id, name, ai_enabled, ai_name, ai_instructions, brand_knowledge, currency_code, ai_base_personality, ai_escalation_contact, ai_faqs')
       .eq('id', locationId)
       .single()
 
@@ -151,6 +151,22 @@ export async function POST(req: Request) {
 
     const persona = resolvePersona(mode, location.ai_name)
 
+    let basePersonalityInstruction = 'Use a professional, polite, and helpful tone.'
+    switch (location.ai_base_personality) {
+      case 'casual': basePersonalityInstruction = 'Use a casual, friendly, and approachable tone.'; break;
+      case 'upscale': basePersonalityInstruction = 'Use refined, elegant language. Be highly attentive and formal.'; break;
+      case 'witty': basePersonalityInstruction = 'Use a witty, playful, and fun tone without being unprofessional.'; break;
+    }
+
+    const escalationInstruction = location.ai_escalation_contact 
+      ? `\n[ESCALATION]\nIf you cannot help the user or they ask for a human, direct them to: ${location.ai_escalation_contact}.` 
+      : ''
+
+    const faqs = location.ai_faqs as { question: string, answer: string }[]
+    const faqInstruction = (faqs && Array.isArray(faqs) && faqs.length > 0) 
+      ? `\n[FAQs]\nHere are specific questions and answers you must strictly adhere to:\n${faqs.map(f => `Q: ${f.question}\nA: ${f.answer}`).join('\n\n')}`
+      : ''
+
     // 6. Construct the strict, jailbreak-proof system prompt
     const systemPrompt = `You are ${persona.defaultName}, a dedicated ${persona.subtitle} helping customers at ${location.name}.
     
@@ -166,18 +182,19 @@ export async function POST(req: Request) {
 - Once they reply, recommend specific items/services that are marked as "available" in the live data.
 
 [VENUE SPECIFIC INSTRUCTIONS]
+${basePersonalityInstruction}
 ${location.ai_instructions || 'Be polite, helpful, and concise.'}
+${escalationInstruction}
+${faqInstruction}
 
-[BRAND KNOWLEDGE BASE]
-${location.brand_knowledge || 'No specific brand knowledge provided.'}${pagesText}
+[TOOL REMINDER]
+If the user asks for a waiter, the bill, or table cleanup, you MUST use the callStaff tool to notify the staff immediately.
 
-[LIVE DATA (INSTANTLY CURRENT)]
-Below is the live catalog/menu for ${location.name}. Only recommend items listed here.
-Reference item IDs when executing tool calls.
+[BRAND KNOWLEDGE GRAPH]
+${location.brand_knowledge || 'No additional brand knowledge provided.'}
+${pagesText}
 ${catalogText}
-
-Flat Item ID Mapping for reference:
-${itemsJson}`
+${itemsJson ? `\n[LIVE MENU/CATALOG]\nThe following items are currently available:\n${itemsJson}` : ''}`
 
     // Define all possible tools
     const allTools = {

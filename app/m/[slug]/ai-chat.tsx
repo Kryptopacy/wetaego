@@ -43,6 +43,8 @@ export function AIChat({
 }: AIChatProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [limitReached, setLimitReached] = useState(false)
+  const [isListening, setIsListening] = useState(false)
+  const recognitionRef = useRef<any>(null)
   const chatEndRef = useRef<HTMLDivElement>(null)
 
   const mode = getBusinessMode(templateType, billingMode || 'table_service', businessTypePreset || 'restaurant')
@@ -139,6 +141,50 @@ export function AIChat({
     if (!input.trim()) return
     sendMessage({ role: 'user', content: input } as never)
     setInput('')
+    if (isListening && recognitionRef.current) {
+      recognitionRef.current.stop()
+    }
+  }
+
+  const toggleListening = () => {
+    if (isListening) {
+      if (recognitionRef.current) recognitionRef.current.stop()
+      return
+    }
+
+    // @ts-ignore
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+    if (!SpeechRecognition) {
+      toast.error('Voice dictation is not supported in this browser.')
+      return
+    }
+
+    const recognition = new SpeechRecognition()
+    recognitionRef.current = recognition
+    const initialInput = input
+    recognition.continuous = true
+    recognition.interimResults = true
+
+    recognition.onstart = () => setIsListening(true)
+    
+    recognition.onresult = (event: any) => {
+      const transcript = Array.from(event.results)
+        .map((result: any) => result[0])
+        .map((result: any) => result.transcript)
+        .join('')
+      setInput(initialInput ? initialInput + ' ' + transcript : transcript)
+    }
+
+    recognition.onerror = (event: any) => {
+      console.error('Speech recognition error', event.error)
+      setIsListening(false)
+    }
+
+    recognition.onend = () => {
+      setIsListening(false)
+    }
+
+    recognition.start()
   }
 
   useEffect(() => {
@@ -290,6 +336,21 @@ export function AIChat({
                       disabled={isLoading || limitReached}
                       className="flex-1 bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2.5 text-sm text-white placeholder-zinc-600 outline-none focus:border-zinc-700 disabled:opacity-50 transition-colors"
                     />
+                    <button
+                      type="button"
+                      onClick={toggleListening}
+                      disabled={isLoading || limitReached}
+                      className={`px-3 py-2.5 rounded-xl transition-all shrink-0 disabled:opacity-50 flex items-center justify-center border ${
+                        isListening 
+                          ? 'bg-red-500/20 text-red-400 border-red-500/50 animate-pulse' 
+                          : 'bg-zinc-800 text-zinc-400 border-zinc-700 hover:text-white hover:bg-zinc-700'
+                      }`}
+                      title="Dictate message"
+                    >
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                      </svg>
+                    </button>
                     <button
                       type="submit"
                       disabled={isLoading || !input.trim() || limitReached}

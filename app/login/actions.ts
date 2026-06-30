@@ -76,6 +76,13 @@ export const signup = actionClient
 
 export async function signInWithGoogle() {
   const supabase = await createClient()
+  
+  // If a demo user is currently logged in, clear their session before proceeding
+  const { data: { user } } = await supabase.auth.getUser()
+  if (user && user.email?.includes('demo-') && user.email?.includes('@ourmenuos.online')) {
+    await supabase.auth.signOut()
+  }
+
   const { headers } = await import('next/headers')
   
   const headersList = await headers()
@@ -178,7 +185,13 @@ export async function startInteractiveDemo() {
     google_maps_url: 'https://maps.google.com',
     ai_enabled: true,
     ai_name: 'Pacy Assistant',
-    ai_instructions: 'You are the elegant AI assistant for Pacy Grills. Suggest wine pairings for steaks, and signature cocktails for starters. Be very polite.',
+    ai_base_personality: 'professional',
+    ai_escalation_contact: 'ask a staff member nearby or call 0800 000 0000',
+    ai_instructions: 'Adapt your recommendations perfectly to the current context. If the user is viewing food, suggest pairings. If they are viewing spa or hotel services, be a helpful concierge. If the user needs staff, use your tool to call them.',
+    ai_faqs: [
+      { question: 'What are your operating hours?', answer: 'We are generally open from 11:00 AM to 11:00 PM, but please check the specific service availability.' },
+      { question: 'What payment methods do you accept?', answer: 'We accept all major credit cards and bank transfers.' }
+    ],
     brand_knowledge: 'Pacy Grills is known for its legendary 24-hour marinated Suya steak and craft cocktails.',
     publication_status: 'published',
     manual_payment_enabled: true,

@@ -67,9 +67,6 @@ export default async function BusinessTypeSetupPage({
         <div className="text-center mb-16">
           {isPrimary ? (
             <>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-300 text-xs font-bold uppercase tracking-widest mb-6">
-                First-time setup
-              </div>
               <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-4">
                 What kind of business<br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-br from-violet-300 via-white to-zinc-400">
