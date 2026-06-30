@@ -1,6 +1,6 @@
 'use server'
 
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { sendWelcomeEmail } from '@/lib/notifications/email'
@@ -399,5 +399,7 @@ export async function startInteractiveDemo() {
 
   // We are fully logged in and provisioned!
   revalidatePath('/', 'layout')
+  revalidateTag(`location_${loc.slug}`)
+  revalidateTag(`location_pages_${loc.id}`)
   redirect('/dashboard')
 }
