@@ -5,7 +5,7 @@ import { BUSINESS_TYPE_GROUPS, getPresetsByGroup } from '@/lib/templates/presets
 const classNames = (...classes: (string | undefined | null | false)[]) => classes.filter(Boolean).join(' ')
 export function BusinessTypePicker({ defaultValue }: { defaultValue?: string }) {
   // Find which group the default value belongs to
-  let defaultGroupId = BUSINESS_TYPE_GROUPS[0].id
+  let defaultGroupId: string = BUSINESS_TYPE_GROUPS[0].id
   if (defaultValue) {
     for (const group of BUSINESS_TYPE_GROUPS) {
       if (getPresetsByGroup(group.id).some(p => p.key === defaultValue)) {

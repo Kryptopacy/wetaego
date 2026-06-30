@@ -10,6 +10,10 @@ const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
 });
 
+if (!process.env.SENTRY_AUTH_TOKEN) {
+  process.env.SENTRY_DISABLE_AUTO_UPLOAD = "true";
+}
+
 const withPWA = withPWAInit({
   dest: "public",
   disable: process.env.NODE_ENV === "development",
