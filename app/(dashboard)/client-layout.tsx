@@ -47,16 +47,7 @@ const ICON_MAP: Record<string, React.ElementType> = {
 }
 
 
-const managerItems: NavItem[] = [
-  { href: '/dashboard/customers', label: 'CRM & Loyalty', icon: Users },
-  { href: '/dashboard/team-performance', label: 'Team Performance', icon: BarChart3 },
-  { href: '/dashboard/manage/feedback', label: 'Feedback Inbox', icon: MessageSquare },
-  { href: '/dashboard/qr', label: 'QR Generator', icon: QrCode },
-  { href: '/dashboard/menu', label: 'Catalog Manager', icon: BookOpen },
-  { href: '/dashboard/pages', label: 'Your Pages', icon: FileText },
-  { href: '/dashboard/settings', label: 'Settings & Team', icon: Settings },
-  { href: '/dashboard/billing', label: 'Billing & Plan', icon: CreditCard },
-]
+// managerItems are now built dynamically inside ClientLayout
 
 function NavLink({ href, label, icon: iconProp, badge, exact, onClick }: {
   href: string; label: string; icon: React.ElementType | string; badge?: string; exact?: boolean; onClick?: () => void
@@ -113,11 +104,14 @@ export interface InitialDashboardData {
   locationSlug: string;
   isOwnerOrManager: boolean;
   userEmail: string;
+  isAdmin: boolean;
   credits: number | null;
   dynamicNavItems: NavItem[];
   plan?: string;
   planStatus?: string;
   trialEndsAt?: string | null;
+  templateType: string;
+  hasOrg: boolean;
 }
 
 export default function ClientLayout({ children, initialData }: { children: ReactNode, initialData: InitialDashboardData }) {
@@ -138,6 +132,23 @@ export default function ClientLayout({ children, initialData }: { children: Reac
     const diff = new Date(initialData.trialEndsAt).getTime() - new Date().getTime()
     trialDaysLeft = Math.max(0, Math.ceil(diff / (1000 * 3600 * 24)))
   }
+
+  const managerItems: NavItem[] = [
+    { href: '/dashboard/customers', label: 'CRM & Loyalty', icon: Users },
+    { href: '/dashboard/team-performance', label: 'Team Performance', icon: BarChart3 },
+    { href: '/dashboard/manage/feedback', label: 'Feedback Inbox', icon: MessageSquare },
+    { href: '/dashboard/qr', label: 'QR Generator', icon: QrCode },
+    { 
+      href: '/dashboard/menu', 
+      label: initialData.templateType === 'booking' ? 'Services Manager' : 
+             initialData.templateType === 'listing' ? 'Listings Manager' : 
+             initialData.templateType === 'rate_card' ? 'Offerings Manager' : 'Catalog Manager', 
+      icon: BookOpen 
+    },
+    { href: '/dashboard/pages', label: 'Your Pages', icon: FileText },
+    { href: '/dashboard/settings', label: 'Settings & Team', icon: Settings },
+    { href: '/dashboard/billing', label: 'Billing & Plan', icon: CreditCard },
+  ]
 
   useEffect(() => {
     // Data is now fetched server-side in layout.tsx, so we don't need the client fetcher 
@@ -199,7 +210,7 @@ export default function ClientLayout({ children, initialData }: { children: Reac
             ))}
           </div>
 
-          {isOwnerOrManager && (
+          {isOwnerOrManager && initialData.hasOrg && (
             <div className="space-y-1">
               <div className="px-3 flex items-center gap-2 mb-3">
                 <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Management</h3>
@@ -211,7 +222,17 @@ export default function ClientLayout({ children, initialData }: { children: Reac
             </div>
           )}
 
-          {(userEmail === (process.env.ADMIN_EMAIL || 'kryptopacy@gmail.com')) && (
+          {isOwnerOrManager && !initialData.hasOrg && (
+            <div className="space-y-1">
+              <div className="px-3 flex items-center gap-2 mb-3">
+                <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Setup</h3>
+                <div className="h-px flex-1 bg-zinc-800/50"></div>
+              </div>
+              <NavLink href="/dashboard/settings" label="Settings & Team" icon={Settings} onClick={onClose} />
+            </div>
+          )}
+
+          {initialData.isAdmin && (
             <div className="space-y-1">
               <div className="px-3 flex items-center gap-2 mb-3 mt-4">
                 <h3 className="text-xs font-bold text-violet-500 uppercase tracking-wider">Superadmin</h3>
@@ -330,7 +351,7 @@ export default function ClientLayout({ children, initialData }: { children: Reac
             {orgName ? (
               <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest">{orgName}</span>
             ) : (
-              <div className="h-3 w-24 bg-zinc-800 rounded-full animate-pulse" />
+              <span className="text-xs font-bold text-orange-400 uppercase tracking-widest">Setup Workspace</span>
             )}
           </div>
         </div>

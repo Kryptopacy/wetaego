@@ -30,6 +30,9 @@ export function ActionForm({ action, successMessage, children, ...props }: Actio
             toast.success(successMessage || 'Saved successfully')
           }
         } catch (error: unknown) {
+          if (error instanceof Error && error.message === 'NEXT_REDIRECT') {
+            throw error
+          }
           toast.error((error as Error).message || 'An unexpected error occurred')
         }
       }}

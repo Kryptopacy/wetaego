@@ -67,10 +67,11 @@ export default async function DashboardOverviewPage() {
   }
 
   // Fetch real stats or use mock stats
-  let menuCount = 48
-  let qrCount = 12
-  let orderCount = 127
-  let requestCount = 3
+  // Use 0 as default so onboarding works correctly for new users
+  let menuCount = 0
+  let qrCount = 0
+  let orderCount = 0
+  let requestCount = 0
 
   if (orgId) {
     const [menuItemsRes, qrScansRes, ordersRes, requestsRes] = await Promise.all([
@@ -207,17 +208,27 @@ export default async function DashboardOverviewPage() {
       {/* === WELCOME HEADER === */}
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-zinc-500 text-sm mb-1">Good morning, {orgName} 👋</p>
-          <h1 className="text-3xl font-bold text-white tracking-tight">Overview</h1>
-          <p className="text-zinc-400 text-sm mt-1">Here&apos;s what&apos;s happening across your venue today.</p>
+          <p className="text-zinc-500 text-sm mb-1">
+            {orgId ? `Good morning, ${orgName} 👋` : `Welcome to OurMenu OS 👋`}
+          </p>
+          <h1 className="text-3xl font-bold text-white tracking-tight">
+            {orgId ? 'Overview' : 'Get Started'}
+          </h1>
+          <p className="text-zinc-400 text-sm mt-1">
+            {orgId 
+              ? `Here's what's happening across your venue today.` 
+              : `Complete your business profile to unlock your dashboard.`}
+          </p>
         </div>
-        <Link
-          href="/dashboard/menu"
-          className="hidden md:flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-sm font-bold hover:from-violet-500 hover:to-indigo-500 transition-all shadow-lg shadow-violet-900/30"
-        >
-          <Sparkles className="w-4 h-4" />
-          Open AI Studio
-        </Link>
+        {orgId && (
+          <Link
+            href="/dashboard/menu"
+            className="hidden md:flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-sm font-bold hover:from-violet-500 hover:to-indigo-500 transition-all shadow-lg shadow-violet-900/30"
+          >
+            <Sparkles className="w-4 h-4" />
+            Open AI Studio
+          </Link>
+        )}
       </div>
 
       <OnboardingChecklist 
@@ -228,10 +239,12 @@ export default async function DashboardOverviewPage() {
         templateType={templateType}
       />
 
-      {/* === REVENUE CHART === */}
-      <div className="w-full">
-        <RevenueChart data={chartData} currencyCode={currencyCode} />
-      </div>
+      {!!orgId && (
+        <>
+          {/* === REVENUE CHART === */}
+          <div className="w-full">
+            <RevenueChart data={chartData} currencyCode={currencyCode} />
+          </div>
 
       {/* === QUICK ACTIONS === */}
       <div className="rounded-2xl border border-white/[0.06] bg-zinc-900/60 backdrop-blur p-6">
@@ -319,6 +332,8 @@ export default async function DashboardOverviewPage() {
           ))}
         </div>
       </div>
+        </>
+      )}
     </div>
   )
 }

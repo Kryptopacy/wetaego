@@ -14,6 +14,8 @@ import { getPlanLimits } from '@/lib/utils/settings'
 import { savePaymentSettings, saveManualPaymentSettings } from './payment-actions'
 import { TaxesView } from './taxes-view'
 import AiFaqBuilder from './ai-faq-builder'
+import { BUSINESS_TYPE_GROUPS, getPresetsByGroup } from '@/lib/templates/presets'
+import { BusinessTypePicker } from './business-type-picker'
 
 
 
@@ -44,7 +46,7 @@ export default async function SettingsPage({
 
   const { data: member } = await supabase
     .from('organization_members')
-    .select('role, organizations(id, name, slug, subscription_tier, purchased_credits, monthly_free_credits_used)')
+    .select('role, organizations(id, name, slug, business_type, subscription_tier, purchased_credits, monthly_free_credits_used)')
     .eq('user_id', userId)
     .single()
 
@@ -60,7 +62,7 @@ export default async function SettingsPage({
   } else {
     const { data: org } = await supabase
       .from('organizations')
-      .select('id, name, slug, subscription_tier, purchased_credits, monthly_free_credits_used')
+      .select('id, name, slug, business_type, subscription_tier, purchased_credits, monthly_free_credits_used')
       .eq('created_by', userId)
       .single()
     organization = org
@@ -79,6 +81,11 @@ export default async function SettingsPage({
   // If not owner/manager and they are on a restricted tab, redirect them to their profile
   if (!isOwnerOrManager && tab !== 'profile') {
     redirect('/dashboard/settings?tab=profile')
+  }
+
+  // If no organization, force them to the general tab to complete setup
+  if (!organization && tab !== 'general' && tab !== 'profile') {
+    redirect('/dashboard/settings?tab=general')
   }
 
   let paymentSettings = null
@@ -287,6 +294,12 @@ export default async function SettingsPage({
                 className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                 placeholder="My Lounge"
               />
+            </div>
+            
+            <div>
+              <label className="mb-2 block text-sm font-medium text-zinc-300">Primary Business Type</label>
+              <BusinessTypePicker defaultValue={organization?.business_type || 'restaurant'} />
+              <p className="mt-2 text-xs text-zinc-500">This configures your dashboard tools and auto-generates your primary public page.</p>
             </div>
             <div>
               <label className="mb-2 block text-sm font-medium text-zinc-300">Public Slug (URL)</label>

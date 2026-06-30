@@ -13,6 +13,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   const cookieStore = await cookies()
 
   let orgName = ''
+  let orgId = ''
   let isOwnerOrManager = true
   const userEmail = userData?.user?.email || ''
   let credits: number | null = null
@@ -22,6 +23,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   let plan = 'lite'
   let planStatus = 'trial'
   let trialEndsAt: string | null = null
+  let firstTemplate = 'catalog'
   const baseNavItems: NavItem[] = [
     { href: '/dashboard', label: 'Overview', icon: 'LayoutDashboard', exact: true },
   ]
@@ -47,7 +49,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
       planStatus = orgData.subscription_status || 'trial'
       trialEndsAt = orgData.trial_ends_at || null
 
-      const orgId = orgData.id
+      orgId = orgData.id
       if (orgId) {
         const { data: locs } = await supabase
           .from('locations')
@@ -73,6 +75,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
           const templates = new Set<string>()
           if (pages) {
             pages.forEach(p => templates.add(p.template_type))
+            if (pages.length > 0) firstTemplate = pages[0].template_type
           }
 
           if (templates.has('restaurant') || templates.has('catalog')) {
@@ -95,6 +98,8 @@ export default async function DashboardLayout({ children }: { children: ReactNod
     }
   }
 
+  const isAdmin = userEmail === (process.env.ADMIN_EMAIL || 'kryptopacy@gmail.com')
+
   const initialData: InitialDashboardData = {
     orgName,
     locations,
@@ -102,11 +107,14 @@ export default async function DashboardLayout({ children }: { children: ReactNod
     locationSlug,
     isOwnerOrManager,
     userEmail,
+    isAdmin,
     credits,
     dynamicNavItems,
     plan,
     planStatus,
-    trialEndsAt
+    trialEndsAt,
+    templateType: firstTemplate,
+    hasOrg: !!orgId
   }
 
   return (

@@ -1,6 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import { zfd } from 'zod-form-data'
 import { authActionClient } from '@/lib/safe-action'
@@ -9,9 +10,10 @@ import { getTrialSettings } from '@/lib/utils/settings'
 export const updateOrganization = authActionClient
   .schema(zfd.formData({
     name: zfd.text(z.string().min(2, "Name must be at least 2 characters")),
-    slug: zfd.text(z.string().min(3, "Slug must be at least 3 characters").regex(/^[a-z0-9-]+$/, "Slug can only contain lowercase letters, numbers, and hyphens"))
+    slug: zfd.text(z.string().min(3, "Slug must be at least 3 characters").regex(/^[a-z0-9-]+$/, "Slug can only contain lowercase letters, numbers, and hyphens")),
+    business_type: zfd.text(z.string().optional())
   }))
-  .action(async ({ parsedInput: { name, slug }, ctx: { supabase, user } }) => {
+  .action(async ({ parsedInput: { name, slug, business_type }, ctx: { supabase, user } }) => {
     const { cookies } = await import('next/headers')
     if ((await cookies()).get('demo_mode')?.value === '1') {
       revalidatePath('/dashboard/settings')
@@ -31,7 +33,7 @@ export const updateOrganization = authActionClient
       // Update existing org
       const { error } = await supabase
         .from('organizations')
-        .update({ name, slug })
+        .update({ name, slug, ...(business_type ? { business_type } : {}) })
         .eq('id', org.id)
       
       if (error) throw new Error('Failed to update organization')
@@ -66,7 +68,8 @@ export const updateOrganization = authActionClient
           slug,
           created_by: user.id,
           referred_by_affiliate_id: referredByAffiliateId,
-          trial_ends_at: trialEndsAt
+          trial_ends_at: trialEndsAt,
+          business_type: business_type || null
         })
         .select('id')
         .single()
@@ -101,11 +104,36 @@ export const updateOrganization = authActionClient
           location_id: newLoc.id,
           name: 'Main Menu',
         })
+
+        // Auto-create their primary page based on their selected business type
+        if (business_type) {
+          const { BUSINESS_TYPE_PRESETS, buildPageTitle } = await import('@/lib/templates/presets')
+          const preset = BUSINESS_TYPE_PRESETS[business_type]
+          if (preset) {
+            await supabase.from('location_pages').insert({
+              location_id: newLoc.id,
+              title: buildPageTitle(preset, name),
+              slug: 'home',
+              template_type: preset.template_type,
+              is_primary: true,
+              billing_enabled: preset.billing_enabled,
+              billing_mode: preset.billing_mode,
+              payment_mode: preset.payment_mode,
+              deposit_percentage: preset.deposit_percentage || null,
+              business_type_preset: business_type,
+              is_published: true,
+            })
+          }
+        }
       }
     }
 
-    revalidatePath('/dashboard/settings')
-    return { success: true }
+    if (!org) {
+      redirect('/dashboard')
+    } else {
+      revalidatePath('/dashboard/settings')
+      return { success: true }
+    }
   })
 
 export const saveLocationAiSettings = authActionClient

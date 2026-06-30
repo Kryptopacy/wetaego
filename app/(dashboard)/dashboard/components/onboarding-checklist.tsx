@@ -87,8 +87,8 @@ export function OnboardingChecklist({ hasOrg, hasLocation, hasMenu, hasQR, templ
   const completedCount = steps.filter((s) => s.isComplete).length
   const progress = (completedCount / steps.length) * 100
 
-  // Hide entirely if fully complete, not mounted yet, or user dismissed it
-  if (!mounted || completedCount === steps.length || dismissed) {
+  // Hide entirely if fully complete, not mounted yet, or user dismissed it (only if they have an org)
+  if (!mounted || completedCount === steps.length || (dismissed && hasOrg)) {
     return null
   }
 
@@ -103,18 +103,24 @@ export function OnboardingChecklist({ hasOrg, hasLocation, hasMenu, hasQR, templ
         <div className="absolute top-0 right-0 w-64 h-64 bg-violet-500/10 blur-[100px] rounded-full pointer-events-none" />
         
         <div className="relative z-10">
-          <button 
-            onClick={handleDismiss}
-            className="absolute top-0 right-0 text-zinc-500 hover:text-white bg-zinc-900 hover:bg-zinc-800 p-2 rounded-full transition-colors flex items-center justify-center gap-2 group"
-            title="Skip for now"
-          >
-            <span className="text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity absolute right-10 whitespace-nowrap">Skip for now</span>
-            <X className="w-4 h-4" />
-          </button>
+          {hasOrg && (
+            <button 
+              onClick={handleDismiss}
+              className="absolute top-0 right-0 text-zinc-500 hover:text-white bg-zinc-900 hover:bg-zinc-800 p-2 rounded-full transition-colors flex items-center justify-center gap-2 group"
+              title="Skip for now"
+            >
+              <span className="text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity absolute right-10 whitespace-nowrap">Skip for now</span>
+              <X className="w-4 h-4" />
+            </button>
+          )}
 
           <div className="mb-6 pr-12">
             <h2 className="text-xl md:text-2xl font-bold text-white mb-2">Welcome to OurMenu OS</h2>
-            <p className="text-zinc-400">Complete these steps to launch your digital storefront and start accepting {templateType === 'catalog' ? 'orders' : 'requests'}.</p>
+            <p className="text-zinc-400">
+              {hasOrg 
+                ? `Complete these final steps to launch your digital storefront. You can always dismiss this and finish later.` 
+                : `Just one quick step to create your workspace. You can complete the rest of the setup at your own pace.`}
+            </p>
           </div>
 
           <div className="mb-8">
