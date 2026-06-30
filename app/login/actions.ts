@@ -199,7 +199,7 @@ export async function startInteractiveDemo() {
     manual_payment_account_name: 'Pacy Grills Demo',
     manual_payment_account_number: '0000000000',
     manual_payment_instructions: 'This is a demo. No real payment is required. Just click "I Have Transferred" to test the ordering flow!'
-  }).select('id').single()
+  }).select('id, slug').single()
 
   if (!loc) return { error: 'Location not found' }
 
@@ -399,7 +399,7 @@ export async function startInteractiveDemo() {
 
   // We are fully logged in and provisioned!
   revalidatePath('/', 'layout')
-  revalidateTag(`location_${loc.slug}`)
-  revalidateTag(`location_pages_${loc.id}`)
+  revalidateTag(`location_${loc.slug}`, 'default')
+  revalidateTag(`location_pages_${loc.id}`, 'default')
   redirect('/dashboard')
 }
