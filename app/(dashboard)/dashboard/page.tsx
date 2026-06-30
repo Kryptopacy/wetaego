@@ -8,6 +8,10 @@ import {
   QrCode, Sparkles, TrendingUp, Users, Zap, ArrowRight,
   Globe, AlertTriangle
 } from 'lucide-react'
+import { OnboardingChecklist } from './components/onboarding-checklist'
+import { RevenueChart, RevenueDataPoint } from './components/revenue-chart'
+import { BUSINESS_TYPE_PRESETS } from '@/lib/templates/presets'
+import { format, subDays, startOfDay, endOfDay } from 'date-fns'
 
 export default async function DashboardOverviewPage() {
   const supabase = await createClient()
@@ -23,24 +27,33 @@ export default async function DashboardOverviewPage() {
   let orgId = ''
   let orgName = 'Your Venue'
   let locationSlug = ''
+  let orgBusinessType: string | null = null
 
   const { data: member } = await supabase
     .from('organization_members')
-    .select('role, organizations(id, name)')
+    .select('role, organizations(id, name, business_type)')
     .eq('user_id', user!.id)
     .single()
 
   if (member?.organizations) {
-    orgId = (member.organizations as unknown as { id: string, name: string })?.id
-    orgName = (member.organizations as unknown as { id: string, name: string })?.name || 'Your Venue'
+    const org = member.organizations as unknown as { id: string, name: string, business_type: string | null }
+    orgId = org.id
+    orgName = org.name || 'Your Venue'
+    orgBusinessType = org.business_type
   } else {
     const { data: org } = await supabase
       .from('organizations')
-      .select('id, name')
+      .select('id, name, business_type')
       .eq('created_by', user!.id)
       .single()
     orgId = org?.id || ''
     orgName = org?.name || 'Your Venue'
+    orgBusinessType = org?.business_type || null
+  }
+
+  let templateType = 'catalog'
+  if (orgBusinessType && BUSINESS_TYPE_PRESETS[orgBusinessType]) {
+    templateType = BUSINESS_TYPE_PRESETS[orgBusinessType].template_type
   }
 
   if (orgId) {
@@ -75,9 +88,41 @@ export default async function DashboardOverviewPage() {
     requestCount = requestsRes.count ?? 0
   }
 
+  // Fetch chart data for last 7 days
+  let chartData: RevenueDataPoint[] = []
+  if (orgId) {
+    const sevenDaysAgo = startOfDay(subDays(new Date(), 6)).toISOString()
+    const { data: recentOrders } = await supabase
+      .from('orders')
+      .select('created_at, total_amount_minor, status')
+      .eq('organization_id', orgId)
+      .eq('status', 'paid')
+      .gte('created_at', sevenDaysAgo)
+
+    // Build default 7 days structure with zero values
+    const daysMap = new Map<string, RevenueDataPoint>()
+    for (let i = 6; i >= 0; i--) {
+      const d = subDays(new Date(), i)
+      daysMap.set(format(d, 'yyyy-MM-dd'), { date: format(d, 'EEE'), revenue: 0, orders: 0 })
+    }
+
+    if (recentOrders) {
+      recentOrders.forEach(order => {
+        const dateKey = format(new Date(order.created_at), 'yyyy-MM-dd')
+        if (daysMap.has(dateKey)) {
+          const entry = daysMap.get(dateKey)!
+          entry.revenue += order.total_amount_minor || 0
+          entry.orders += 1
+        }
+      })
+    }
+
+    chartData = Array.from(daysMap.values())
+  }
+
   const stats = [
     {
-      label: 'Menu Items',
+      label: templateType === 'catalog' ? 'Menu Items' : templateType === 'booking' ? 'Services' : templateType === 'listing' ? 'Listings' : 'Offerings',
       value: menuCount,
       icon: BookOpen,
       color: 'from-violet-600 to-indigo-600',
@@ -86,7 +131,7 @@ export default async function DashboardOverviewPage() {
       trend: 'up',
     },
     {
-      label: "Today's Orders",
+      label: templateType === 'catalog' ? "Today's Orders" : templateType === 'booking' ? "Today's Bookings" : templateType === 'listing' ? "Today's Inquiries" : "Today's Requests",
       value: orderCount,
       icon: TrendingUp,
       color: 'from-emerald-600 to-teal-600',
@@ -95,16 +140,16 @@ export default async function DashboardOverviewPage() {
       trend: 'up',
     },
     {
-      label: 'Active QR Codes',
+      label: templateType === 'listing' ? 'Printed Signs' : 'Active QR Codes',
       value: qrCount,
       icon: QrCode,
       color: 'from-blue-600 to-cyan-600',
       glow: 'shadow-blue-900/40',
-      change: 'Across all tables',
+      change: 'All locations',
       trend: 'neutral',
     },
     {
-      label: 'Pending Requests',
+      label: 'Service Requests',
       value: requestCount,
       icon: AlertTriangle,
       color: requestCount ? 'from-orange-600 to-red-600' : 'from-zinc-600 to-zinc-700',
@@ -153,6 +198,9 @@ export default async function DashboardOverviewPage() {
     },
   ]
 
+  // Use the template's default currency if none is found on the org (defaults to NGN)
+  const currencyCode = 'NGN' // Note: In a real multi-currency setup, this would come from the org settings
+
   return (
     <div className="max-w-6xl mx-auto space-y-8">
 
@@ -172,6 +220,19 @@ export default async function DashboardOverviewPage() {
         </Link>
       </div>
 
+      <OnboardingChecklist 
+        hasOrg={!!orgId} 
+        hasLocation={!!locationSlug} 
+        hasMenu={menuCount > 0} 
+        hasQR={qrCount > 0} 
+        templateType={templateType}
+      />
+
+      {/* === REVENUE CHART === */}
+      <div className="w-full">
+        <RevenueChart data={chartData} currencyCode={currencyCode} />
+      </div>
+
       {/* === QUICK ACTIONS === */}
       <div className="rounded-2xl border border-white/[0.06] bg-zinc-900/60 backdrop-blur p-6">
         <h2 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
@@ -184,14 +245,14 @@ export default async function DashboardOverviewPage() {
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-sm font-bold hover:from-violet-500 hover:to-indigo-500 transition-all shadow-md shadow-violet-900/30"
           >
             <ClipboardList className="w-4 h-4" />
-            Live Fulfillment
+            {templateType === 'catalog' ? 'Live Fulfillment' : templateType === 'booking' ? 'Live Bookings' : templateType === 'listing' ? 'Live Inquiries' : 'Live Requests'}
           </Link>
           <Link
             href="/dashboard/menu"
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm font-semibold hover:bg-white/10 transition-all"
           >
             <BookOpen className="w-4 h-4" />
-            Catalog Manager
+            {templateType === 'catalog' ? 'Catalog Manager' : templateType === 'booking' ? 'Services Manager' : templateType === 'listing' ? 'Listings Manager' : 'Offerings Manager'}
           </Link>
           <Link
             href="/dashboard/forecast"

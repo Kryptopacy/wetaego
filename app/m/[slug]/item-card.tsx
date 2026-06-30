@@ -28,7 +28,8 @@ export function ItemCard({ item }: ItemCardProps) {
     const cartItemId = modifiers.trim() ? `${item.id}-${Date.now()}` : item.id
     
     addItem({ 
-      id: cartItemId, 
+      id: item.id,
+      cartKey: cartItemId,
       name: finalName, 
       price_minor: item.price_minor 
     })
@@ -107,14 +108,14 @@ export function ItemCard({ item }: ItemCardProps) {
               cartItem ? (
                 <div className="flex items-center gap-3 bg-emerald-50 dark:bg-zinc-800 rounded-full p-1 border border-emerald-100 dark:border-zinc-700 shadow-sm">
                   <button 
-                    onClick={() => updateQuantity(item.id, -1)}
+                    onClick={() => updateQuantity(cartItem.cartKey, -1)}
                     className="w-7 h-7 flex items-center justify-center rounded-full bg-white dark:bg-zinc-700 text-emerald-600 dark:text-emerald-400 shadow-sm hover:scale-105 transition-transform"
                   >
                     <Minus className="w-4 h-4" />
                   </button>
                   <span className="text-emerald-700 dark:text-white font-bold text-sm min-w-[16px] text-center">{cartItem.quantity}</span>
                   <button 
-                    onClick={() => updateQuantity(item.id, 1)}
+                    onClick={() => updateQuantity(cartItem.cartKey, 1)}
                     className="w-7 h-7 flex items-center justify-center rounded-full bg-emerald-500 text-white shadow-sm hover:bg-emerald-600 hover:scale-105 transition-all"
                   >
                     <Plus className="w-4 h-4" />

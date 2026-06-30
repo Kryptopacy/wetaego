@@ -8,6 +8,7 @@ import { toast } from 'sonner'
 import { addPageItem, updatePageItem, deletePageItem } from '../(dashboard)/dashboard/pages/actions'
 import { AiGenerateButton } from './ai-generate-button'
 import { formatCurrency } from '@/lib/utils/currency'
+import { VariantBuilderField, type VariantGroup } from './variant-builder-field'
 
 interface PageItem {
   id: string
@@ -35,6 +36,8 @@ export function PageBuilderForm({ pageId, templateType, initialItems, orgId }: P
   const [isAdding, setIsAdding] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [isSaving, setIsSaving] = useState(false)
+  // Track pending variants for the active form (add or edit)
+  const [pendingVariants, setPendingVariants] = useState<VariantGroup[]>([])
 
   const handleAddSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -45,9 +48,10 @@ export function PageBuilderForm({ pageId, templateType, initialItems, orgId }: P
     // Depending on templateType, format item_data properly if needed.
     if (templateType === 'catalog') {
       const category = formData.get('category') as string
-      if (category) {
-        formData.set('item_data', JSON.stringify({ category }))
-      }
+      formData.set('item_data', JSON.stringify({
+        category: category || undefined,
+        variants: pendingVariants.length > 0 ? pendingVariants : undefined,
+      }))
     } else if (templateType === 'quote') {
       const unit = formData.get('unit') as string
       const price_range = formData.get('price_range') as string
@@ -77,9 +81,10 @@ export function PageBuilderForm({ pageId, templateType, initialItems, orgId }: P
 
     if (templateType === 'catalog') {
       const category = formData.get('category') as string
-      if (category) {
-        formData.set('item_data', JSON.stringify({ category }))
-      }
+      formData.set('item_data', JSON.stringify({
+        category: category || undefined,
+        variants: pendingVariants.length > 0 ? pendingVariants : undefined,
+      }))
     } else if (templateType === 'quote') {
       const unit = formData.get('unit') as string
       const price_range = formData.get('price_range') as string
@@ -165,10 +170,16 @@ export function PageBuilderForm({ pageId, templateType, initialItems, orgId }: P
         </div>
 
         {templateType === 'catalog' && (
-          <div>
-            <label className="block text-xs font-medium text-zinc-400 mb-1">Category</label>
-            <input name="category" defaultValue={category} className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white" placeholder="e.g. Services" />
-          </div>
+          <>
+            <div>
+              <label className="block text-xs font-medium text-zinc-400 mb-1">Category</label>
+              <input name="category" defaultValue={category} className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white" placeholder="e.g. Services" />
+            </div>
+            <VariantBuilderField
+              initialVariants={(item?.item_data as any)?.variants || []}
+              onChange={setPendingVariants}
+            />
+          </>
         )}
 
         {templateType === 'quote' && (

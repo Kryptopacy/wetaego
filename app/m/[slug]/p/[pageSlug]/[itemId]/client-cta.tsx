@@ -43,7 +43,8 @@ export function ClientCTA({ item, pageInfo, location, isAvailable, themeColor, s
     }
 
     addItem({
-      id: item.id + JSON.stringify(selectedVariants), // Unique ID for this variant combo
+      id: item.id,
+      cartKey: item.id + JSON.stringify(selectedVariants), // Unique key for this variant combo
       name: item.title + variantSuffix,
       price_minor: item.price_minor || 0,
     })

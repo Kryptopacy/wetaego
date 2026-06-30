@@ -8,11 +8,13 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 import { formatCurrency } from '@/lib/utils/currency'
 import type { Database } from '@/lib/supabase/types'
+import { DownloadReceiptButton } from './components/receipt-pdf'
 
 type OrderRow = Database['public']['Tables']['orders']['Row']
 
 export function OrderStatusClient({ 
   initialOrder, 
+  orgName,
   manualPaymentBankName, 
   manualPaymentAccountName, 
   manualPaymentAccountNumber, 
@@ -21,6 +23,7 @@ export function OrderStatusClient({
   slug 
 }: { 
   initialOrder: OrderRow
+  orgName: string
   manualPaymentBankName?: string
   manualPaymentAccountName?: string
   manualPaymentAccountNumber?: string
@@ -146,9 +149,13 @@ export function OrderStatusClient({
               The kitchen is now preparing your order.
             </p>
 
-            <a href={`/m/${slug}`} className="w-full h-14 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl flex items-center justify-center transition-colors">
-              Return to Menu
-            </a>
+            <div className="w-full space-y-3">
+              <DownloadReceiptButton order={order} orgName={orgName} currencyCode={currencyCode} />
+              
+              <a href={`/m/${slug}`} className="w-full h-14 bg-zinc-800 hover:bg-zinc-700 text-white font-bold rounded-xl flex items-center justify-center transition-colors">
+                Return to Menu
+              </a>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

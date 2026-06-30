@@ -2,26 +2,37 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Checkout Golden Path', () => {
   test('User can browse a menu, add an item, and open checkout', async ({ page }) => {
-    // 1. Visit a live storefront (Assuming 'demo' slug exists for test environments)
-    // Replace 'demo' with the actual storefront slug used in test seeding
-    await page.goto('/m/demo');
+    // 1. Create a dynamic demo storefront
+    await page.goto('/');
+    
+    // Click 'Try Demo Mode'
+    await page.getByRole('button', { name: /Try Demo Mode/i }).click();
+
+    // Wait for the dashboard to load (demo setup complete)
+    await expect(page).toHaveURL(/\/dashboard/);
+
+    // Get the generated location slug from the dashboard or via navigation
+    // We can extract it by going to the Live Menu link
+    const liveMenuLink = page.getByRole('link', { name: /View Live Menu/i });
+    if (await liveMenuLink.isVisible()) {
+      const href = await liveMenuLink.getAttribute('href');
+      if (href) await page.goto(href);
+    } else {
+      // Fallback: Just look for a link that starts with /m/
+      const anyMenuLink = page.locator('a[href^="/m/"]').first();
+      const href = await anyMenuLink.getAttribute('href');
+      if (href) await page.goto(href);
+    }
     
     // 2. Wait for the page to load
-    await expect(page).toHaveTitle(/OurMenu/i);
+    await expect(page).toHaveTitle(/OurMenu|Pacy/i);
     
-    // 3. Find the first 'Add to Cart' or 'Plus' button on a menu item
-    // Note: Depends on the exact UI implementation, using aria-labels if possible
-    const firstItemAddBtn = page.getByRole('button', { name: /increase quantity/i }).first().or(
-      page.getByRole('button', { name: /add to cart/i }).first()
-    );
+    // Wait for items to be rendered (wait for network idle or text)
+    await expect(page.getByText('Spicy Asun Rolls').or(page.locator('button', { hasText: /Add to Cart/i }).first())).toBeVisible();
     
-    // Fallback if the above doesn't match the specific UI text
-    if (await firstItemAddBtn.isVisible()) {
-      await firstItemAddBtn.click();
-    } else {
-      // Use a generic locator for the item card plus button
-      await page.locator('.group button').filter({ hasText: '+' }).first().click();
-    }
+    // 3. Wait for and click the first 'Add to Cart' button
+    const firstItemAddBtn = page.getByRole('button', { name: /add to cart/i }).first();
+    await firstItemAddBtn.click();
 
     // 4. Verify the Cart FAB appears
     const cartFab = page.getByRole('button', { name: /checkout cart/i });

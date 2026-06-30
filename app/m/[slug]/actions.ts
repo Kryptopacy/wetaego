@@ -135,6 +135,10 @@ export async function processCheckout(params: {
   }
 
   const checkoutLogic = async () => {
+    if (!items || items.length === 0) {
+      throw new Error('Your cart is empty. Please add items before checking out.')
+    }
+
     // 1. Server-side price verification — never trust client-supplied totals
     const itemIds = items.map(i => i.id as string).filter(Boolean)
     const { data: dbItems, error: dbItemsError } = await supabase
@@ -155,7 +159,9 @@ export async function processCheckout(params: {
 
     // Apply discount server-side, capped at subtotal to prevent negative totals
     const clampedDiscountMinor = Math.min(discountAmountMinor || 0, serverSubtotalMinor)
-    const verifiedTotalMinor = Math.max(0, serverSubtotalMinor - clampedDiscountMinor)
+    
+    // Calculate final total (Taxes are included upfront, but Tips are handled post-service)
+    const verifiedTotalMinor = Math.max(0, serverSubtotalMinor - clampedDiscountMinor) + (taxTotalMinor || 0)
 
     // Guard: reject if client total deviates >5% from server-computed total (fraud detection)
     const deviation = Math.abs(verifiedTotalMinor - totalAmountMinor) / Math.max(verifiedTotalMinor, 1)

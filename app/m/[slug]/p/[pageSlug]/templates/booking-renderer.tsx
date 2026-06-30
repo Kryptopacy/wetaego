@@ -346,29 +346,50 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
               {/* Price summary */}
               {selectedItems.some(i => i.price_minor) && (
                 <div className="rounded-xl bg-zinc-800/50 border border-zinc-700 p-4 space-y-2">
-                  {selectedItems.map((i, idx) => (
-                    <div key={idx} className="flex justify-between text-sm">
-                      <span className="text-zinc-400">{i.title}</span>
-                      {(i.price_minor !== undefined && i.price_minor !== null) && (
-                      <span className="text-white font-semibold">{formatCurrency(i.price_minor, location.currency || 'NGN')}</span>
-                    )}</div>
-                  ))}
-                  
-                  <div className="flex justify-between text-sm border-t border-zinc-700 pt-2 mb-1">
-                    <span className="text-zinc-400">Add-ons Subtotal</span>
-                    <span className="text-white">{formatCurrency(selectedItems.reduce((sum, i) => sum + (i.price_minor || 0), 0), location.currency || 'NGN')}</span>
-                  </div>
+                  {(() => {
+                    let multiplier = 1;
+                    if (form.booking_date && form.booking_end_date && form.booking_date !== form.booking_end_date) {
+                      const start = new Date(form.booking_date);
+                      const end = new Date(form.booking_end_date);
+                      if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
+                        const diffTime = Math.abs(end.getTime() - start.getTime());
+                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                        if (diffDays > 0) multiplier = diffDays;
+                      }
+                    }
+                    
+                    const subtotalBase = selectedItems.reduce((sum, i) => sum + (i.price_minor || 0), 0);
+                    const totalAmount = subtotalBase * multiplier;
+                    const maxDepositPct = Math.max(...selectedItems.map(i => i.deposit_percentage || 0), page.deposit_percentage || 30);
 
-                  {(selectedItems.some(i => i.payment_mode === 'deposit') || page.payment_mode === 'deposit') && (
-                    <div className="flex justify-between text-sm border-t border-zinc-700 pt-2">
-                      <span className="text-amber-400 font-medium">
-                        Due now ({Math.max(...selectedItems.map(i => i.deposit_percentage || 0), page.deposit_percentage || 30)}% deposit)
-                      </span>
-                      <span className="text-amber-400 font-bold">
-                        {formatCurrency(Math.round(selectedItems.reduce((sum, i) => sum + (i.price_minor || 0), 0) * (Math.max(...selectedItems.map(i => i.deposit_percentage || 0), page.deposit_percentage || 30) / 100)), location.currency || 'NGN')}
-                      </span>
-                    </div>
-                  )}
+                    return (
+                      <>
+                        {selectedItems.map((i, idx) => (
+                          <div key={idx} className="flex justify-between text-sm">
+                            <span className="text-zinc-400">{i.title}</span>
+                            {(i.price_minor !== undefined && i.price_minor !== null) && (
+                            <span className="text-white font-semibold">{formatCurrency(i.price_minor, location.currency || 'NGN')}</span>
+                          )}</div>
+                        ))}
+                        
+                        <div className="flex justify-between text-sm border-t border-zinc-700 pt-2 mb-1">
+                          <span className="text-zinc-400">Total {multiplier > 1 ? `(${multiplier} nights/days)` : ''}</span>
+                          <span className="text-white">{formatCurrency(totalAmount, location.currency || 'NGN')}</span>
+                        </div>
+
+                        {(selectedItems.some(i => i.payment_mode === 'deposit') || page.payment_mode === 'deposit') && (
+                          <div className="flex justify-between text-sm border-t border-zinc-700 pt-2">
+                            <span className="text-amber-400 font-medium">
+                              Due now ({maxDepositPct}% deposit)
+                            </span>
+                            <span className="text-amber-400 font-bold">
+                              {formatCurrency(Math.round(totalAmount * (maxDepositPct / 100)), location.currency || 'NGN')}
+                            </span>
+                          </div>
+                        )}
+                      </>
+                    );
+                  })()}
                 </div>
               )}
 

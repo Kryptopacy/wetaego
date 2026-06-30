@@ -246,8 +246,9 @@ export async function startInteractiveDemo() {
       location_id: loc.id,
       slug: 'restaurant',
       title: 'Pacy Grills & Lounge',
-      template_type: 'restaurant',
-      is_published: true
+      template_type: 'catalog',
+      is_published: true,
+      billing_enabled: true
     },
     {
       location_id: loc.id,
@@ -256,7 +257,8 @@ export async function startInteractiveDemo() {
       template_type: 'rate_card',
       business_type_preset: 'influencer',
       is_published: true,
-      randomizer_enabled: false
+      randomizer_enabled: false,
+      billing_enabled: true
     },
     {
       location_id: loc.id,

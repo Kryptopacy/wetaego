@@ -73,7 +73,7 @@ export function AIChat({
           const item = menuItems.find((i) => i.id === itemId)
           if (item) {
             for (let i = 0; i < quantity; i++) {
-              addItem({ id: item.id, name: item.name, price_minor: item.price_minor })
+              addItem({ id: item.id, cartKey: item.id, name: item.name, price_minor: item.price_minor })
             }
             toast.success(`Added ${quantity}x ${item.name} to cart`)
             addToolResult({ tool: toolCall.toolName as never, toolCallId: toolCall.toolCallId, output: `Successfully added ${quantity}x ${item.name} to cart.` })
@@ -87,7 +87,7 @@ export function AIChat({
           const { itemId } = (toolCall as unknown as { args: { itemId: string } }).args
           const item = menuItems.find((i) => i.id === itemId)
           if (item) {
-            removeItem(itemId)
+            removeItem(itemId)  // itemId == cartKey for non-variant items
             toast.success(`Removed ${item.name} from cart`)
             addToolResult({ tool: toolCall.toolName as never, toolCallId: toolCall.toolCallId, output: `Successfully removed ${item.name} from cart.` })
             return

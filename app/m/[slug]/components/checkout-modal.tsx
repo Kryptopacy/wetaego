@@ -50,10 +50,12 @@ export function FloatingInput({
 
 export interface CheckoutCartItem {
   id: string;
+  cartKey: string;
   name: string;
   price_minor: number;
   quantity: number;
-  options?: Record<string, string>;
+  variantLabel?: string;
+  variantSelections?: Record<string, string>;
   image_url?: string;
 }
 
@@ -229,7 +231,7 @@ export function CheckoutModal({
 
   const handleAddUpsell = () => {
     if (upsellItemDetails) {
-      addItem({ id: upsellItemDetails.id, name: upsellItemDetails.name, price_minor: upsellItemDetails.price_minor || 0 })
+      addItem({ id: upsellItemDetails.id, cartKey: upsellItemDetails.id, name: upsellItemDetails.name, price_minor: upsellItemDetails.price_minor || 0 })
       toast.success(`Added ${upsellItemDetails.name} ✨`)
       setUpsellData(null)
     }
@@ -630,17 +632,20 @@ export function CheckoutModal({
                               animate={{ opacity: 1, x: 0, scale: 1 }}
                               exit={{ opacity: 0, x: 20, scale: 0.95 }}
                               transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                              key={item.id} 
+                              key={item.cartKey} 
                               className="flex justify-between items-center group"
                             >
                               <div className="flex-1 min-w-0 pr-4">
-                                <h4 className="text-[14px] font-medium text-zinc-900 dark:text-white truncate">{item.name}</h4>
+                                <h4 className="text-[14px] font-medium text-zinc-900 dark:text-white truncate">
+                                  {item.name}
+                                  {item.variantLabel && <span className="ml-2 text-[12px] font-normal text-zinc-500">({item.variantLabel})</span>}
+                                </h4>
                                 <span className="text-[13px] text-zinc-500">{formatCurrency(item.price_minor )}</span>
                               </div>
                               <div className="flex items-center gap-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-full p-1 shadow-sm opacity-100 transition-opacity">
-                                <button type="button" aria-label={`Decrease quantity of ${item.name}`} onClick={() => updateQuantity(item.id, -1)} className="w-6 h-6 flex items-center justify-center bg-zinc-100 dark:bg-zinc-800 rounded-full text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-95 transition-transform"><Minus className="w-3 h-3" /></button>
+                                <button type="button" aria-label={`Decrease quantity of ${item.name}`} onClick={() => updateQuantity(item.cartKey, -1)} className="w-6 h-6 flex items-center justify-center bg-zinc-100 dark:bg-zinc-800 rounded-full text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-95 transition-transform"><Minus className="w-3 h-3" /></button>
                                 <span className="text-zinc-900 dark:text-white font-bold text-[13px] w-3 text-center">{item.quantity}</span>
-                                <button type="button" aria-label={`Increase quantity of ${item.name}`} onClick={() => updateQuantity(item.id, 1)} className="w-6 h-6 flex items-center justify-center bg-zinc-100 dark:bg-zinc-800 rounded-full text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-95 transition-transform"><Plus className="w-3 h-3" /></button>
+                                <button type="button" aria-label={`Increase quantity of ${item.name}`} onClick={() => updateQuantity(item.cartKey, 1)} className="w-6 h-6 flex items-center justify-center bg-zinc-100 dark:bg-zinc-800 rounded-full text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-95 transition-transform"><Plus className="w-3 h-3" /></button>
                               </div>
                             </motion.div>
                           ))}

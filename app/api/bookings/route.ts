@@ -90,6 +90,21 @@ export async function POST(req: Request) {
       if (items && items.length > 0) {
         firstItem = items[0]
         basePrice = items.reduce((sum, i) => sum + (i.price_minor || 0), 0)
+        
+        // Calculate nights/days multiplier for accommodations
+        let multiplier = 1
+        if (booking_date && booking_end_date && booking_date !== booking_end_date) {
+          const start = new Date(booking_date)
+          const end = new Date(booking_end_date)
+          if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
+            const diffTime = Math.abs(end.getTime() - start.getTime())
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+            if (diffDays > 0) multiplier = diffDays
+          }
+        }
+        
+        basePrice = basePrice * multiplier
+
         // Use the strictest payment mode from items or page
         if (items.some(i => i.payment_mode === 'full')) paymentMode = 'full'
         else if (items.some(i => i.payment_mode === 'deposit')) paymentMode = 'deposit'

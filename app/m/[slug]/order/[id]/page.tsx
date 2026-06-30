@@ -44,6 +44,7 @@ export default async function OrderStatusPage(props: { params: Promise<{ slug: s
       <div className="w-full max-w-md">
         <OrderStatusClient 
           initialOrder={order} 
+          orgName={location.name || 'OurMenu Partner'}
           manualPaymentBankName={location.manual_payment_bank_name}
           manualPaymentAccountName={location.manual_payment_account_name}
           manualPaymentAccountNumber={location.manual_payment_account_number}

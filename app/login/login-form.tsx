@@ -44,8 +44,12 @@ function LoginFormInner() {
       res = await signup(payload)
     }
     
+    console.log("Login Action Response:", res);
+    
     if (res?.data?.redirect) {
       window.location.href = res.data.redirect
+    } else if (res?.serverError || res?.validationErrors) {
+      console.error("Login Action Error:", res.serverError || res.validationErrors);
     }
   }
 

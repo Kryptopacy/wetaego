@@ -1,10 +1,12 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useCartStore } from '@/lib/store/cart'
 import { motion } from 'framer-motion'
 import { CartFAB } from '../../../cart-fab'
+import { VariantSelector } from '@/components/variant-selector'
 import { formatCurrency } from '@/lib/utils/currency'
 
 // The catalog page renderer is a light version for pages created via the pages builder
@@ -19,7 +21,10 @@ interface PageItem {
   price_minor?: number
   price_display?: string
   availability_status: string
-  item_data?: { category?: string }
+  item_data?: {
+    category?: string
+    variants?: { name: string; options: string[]; required: boolean }[]
+  }
 }
 
 interface CatalogPageRendererProps {
@@ -70,6 +75,29 @@ const AVAILABILITY_LABELS: Record<string, string> = {
 export function CatalogPageRenderer({ location, page, items, locationSlug, paymentIsLive }: CatalogPageRendererProps) {
   const themeColor = location.theme_color || '#7c3aed'
   const { addItem } = useCartStore()
+  const [variantItem, setVariantItem] = useState<PageItem | null>(null)
+
+  function handleAddToCart(item: PageItem) {
+    const variants = item.item_data?.variants
+    if (variants && variants.length > 0) {
+      setVariantItem(item)
+    } else {
+      addItem({ id: item.id, cartKey: item.id, name: item.title, price_minor: item.price_minor || 0 })
+    }
+  }
+
+  function handleVariantConfirm(selections: Record<string, string>, cartKey: string, label: string) {
+    if (!variantItem) return
+    addItem({
+      id: variantItem.id,
+      cartKey,
+      name: variantItem.title,
+      price_minor: variantItem.price_minor || 0,
+      variantSelections: selections,
+      variantLabel: label,
+    })
+    setVariantItem(null)
+  }
 
   // Group by category if any items have one
   const categories = [...new Set(items.map(i => i.item_data?.category).filter(Boolean) as string[])]
@@ -162,15 +190,11 @@ export function CatalogPageRenderer({ location, page, items, locationSlug, payme
 
                       {isAvail && page.billing_enabled && item.price_minor ? (
                         <button
-                          onClick={() => addItem({
-                            id: item.id,
-                            name: item.title,
-                            price_minor: item.price_minor || 0
-                          })}
+                          onClick={() => handleAddToCart(item)}
                           className="mt-3 flex items-center justify-center gap-2 w-full py-2 rounded-xl text-xs font-bold text-white transition-all"
                           style={{ background: `linear-gradient(135deg, ${themeColor}cc, ${themeColor}88)` }}
                         >
-                          Add to Cart
+                          {item.item_data?.variants && item.item_data.variants.length > 0 ? 'Select Options' : 'Add to Cart'}
                         </button>
                       ) : isAvail && location.whatsapp_number ? (
                         <a
@@ -238,6 +262,23 @@ export function CatalogPageRenderer({ location, page, items, locationSlug, payme
           pageBillingMode={page.billing_mode}
         />
       )}
+
+      {/* Variant Selector Modal */}
+      {variantItem && variantItem.item_data?.variants && (
+        <VariantSelector
+          item={{
+            id: variantItem.id,
+            name: variantItem.title,
+            price_minor: variantItem.price_minor || 0,
+            variants: variantItem.item_data.variants,
+          }}
+          currency={location.currency || 'NGN'}
+          themeColor={themeColor}
+          onConfirm={handleVariantConfirm}
+          onCancel={() => setVariantItem(null)}
+        />
+      )}
     </div>
   )
 }
+

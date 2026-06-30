@@ -7,16 +7,12 @@ test.describe('Dashboard Tenant Management', () => {
   // loads fully hydrated with the user session.
   
   test.beforeEach(async ({ page }) => {
-    // Authenticate as a tenant
-    await page.goto('/login');
-    await page.fill('input[name="email"]', 'test-admin@ourmenuos.online');
-    await page.fill('input[name="password"]', 'testpassword123');
-    await page.click('button[type="submit"]');
+    // Authenticate as a tenant using the Interactive Demo
+    await page.goto('/');
+    await page.getByRole('button', { name: /Try Demo Mode/i }).click();
     
-    // Wait for redirect
+    // Wait for redirect to dashboard and full hydration
     await expect(page).toHaveURL(/\/dashboard/);
-    
-    // Wait for the dashboard shell to load
     await expect(page.locator('main')).toBeVisible();
   });
 

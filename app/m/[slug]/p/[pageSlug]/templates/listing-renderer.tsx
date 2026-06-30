@@ -93,7 +93,7 @@ export function ListingRenderer({ location, page, items, locationSlug }: Listing
     if (!selectedItem || !form.customer_name || !form.customer_phone) return
 
     startTransition(async () => {
-      const res = await fetch('/api/bookings', {
+      const res = await fetch('/api/inquiries', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -102,6 +102,7 @@ export function ListingRenderer({ location, page, items, locationSlug }: Listing
           customer_name: form.customer_name,
           customer_phone: form.customer_phone,
           customer_email: form.customer_email,
+          message: `Enquiry about: ${selectedItem.title}`,
         }),
       })
 

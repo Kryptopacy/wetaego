@@ -9,6 +9,7 @@ describe('Cart Zustand Store', () => {
   it('should add items correctly', () => {
     useCartStore.getState().addItem({
       id: 'item_1',
+      cartKey: 'item_1',
       name: 'Burger',
       price_minor: 1500,
     })
@@ -24,18 +25,21 @@ describe('Cart Zustand Store', () => {
     
     store.addItem({
       id: 'item_1',
+      cartKey: 'item_1',
       name: 'Burger',
       price_minor: 1500,
     })
     // Added twice to simulate quantity = 2
     store.addItem({
       id: 'item_1',
+      cartKey: 'item_1',
       name: 'Burger',
       price_minor: 1500,
     })
 
     store.addItem({
       id: 'item_2',
+      cartKey: 'item_2',
       name: 'Fries',
       price_minor: 500,
     })
@@ -50,6 +54,7 @@ describe('Cart Zustand Store', () => {
     
     store.addItem({
       id: 'item_1',
+      cartKey: 'item_1',
       name: 'Burger',
       price_minor: 1500,
     })
@@ -64,6 +69,7 @@ describe('Cart Zustand Store', () => {
     
     store.addItem({
       id: 'item_1',
+      cartKey: 'item_1',
       name: 'Steak',
       price_minor: 10000,
     })

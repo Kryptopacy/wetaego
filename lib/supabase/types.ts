@@ -942,6 +942,7 @@ export type Database = {
       }
       orders: {
         Row: {
+          abandoned_recovery_sent: boolean | null
           amount_paid_minor: number | null
           assigned_staff_id: string | null
           cancellation_reason: string | null
@@ -970,6 +971,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          abandoned_recovery_sent?: boolean | null
           amount_paid_minor?: number | null
           assigned_staff_id?: string | null
           cancellation_reason?: string | null
@@ -998,6 +1000,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          abandoned_recovery_sent?: boolean | null
           amount_paid_minor?: number | null
           assigned_staff_id?: string | null
           cancellation_reason?: string | null

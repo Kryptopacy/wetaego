@@ -6,7 +6,7 @@ test.describe('Multi-Business Fulfillment Flow', () => {
     await page.goto('/');
 
     // Check that we're on the landing page
-    await expect(page.locator('text=The ultimate digital menu')).toBeVisible();
+    await expect(page.locator('text=The ultimate digital storefront')).toBeVisible();
 
     // Click "Start Building" or navigate to dashboard directly
     await page.goto('/dashboard');
@@ -17,7 +17,7 @@ test.describe('Multi-Business Fulfillment Flow', () => {
     // Check that the live operations text is present or auth redirect happens
     const currentUrl = page.url();
     if (currentUrl.includes('/login')) {
-      await expect(page.locator('text=Sign In')).toBeVisible();
+      await expect(page.getByRole('button', { name: 'Sign In' }).first()).toBeVisible();
     } else {
       await expect(page.locator('text=Live Operations')).toBeVisible();
     }
