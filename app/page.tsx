@@ -58,14 +58,14 @@ export default async function HomePage() {
       {/* ── HERO: Cinematic full-bleed background composition ── */}
       <section className="relative min-h-screen flex items-center overflow-hidden">
         {/* Background image */}
-        <div className="absolute inset-0 z-0 bg-[#050505]">
+        <div className="absolute inset-0 z-0">
           <Image
             src={heroBg}
             placeholder="blur"
             alt="Hero Background"
             fill
             sizes="100vw"
-            className="object-cover object-center opacity-40 brightness-75 mix-blend-overlay"
+            className="object-cover object-center opacity-40 brightness-75"
             priority
             quality={75}
           />
