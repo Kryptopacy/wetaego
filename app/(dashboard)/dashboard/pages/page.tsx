@@ -123,8 +123,8 @@ export default async function PagesManager() {
           const fullUrl = `${baseUrl}/m/${locData!.slug}/p/${page.slug}`
           const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(fullUrl)}&color=ffffff&bgcolor=09090b`
   
-          const preset = page.template_type !== 'info' && page.template_type !== 'custom'
-            ? Object.values(BUSINESS_TYPE_PRESETS).find(p => p.template_type === page.template_type)
+          const presetKey = page.template_type !== 'info' && page.template_type !== 'custom'
+            ? Object.keys(BUSINESS_TYPE_PRESETS).find(k => BUSINESS_TYPE_PRESETS[k].template_type === page.template_type)
             : null
 
           return (
@@ -207,7 +207,7 @@ export default async function PagesManager() {
 
                   {/* Primary Action */}
                   <Link
-                    href={`/dashboard/pages/build/${page.template_type === 'custom' || page.template_type === 'info' ? 'hotel' : preset?.id}?mode=edit&pageId=${page.id}`}
+                    href={`/dashboard/pages/build/${page.template_type === 'custom' || page.template_type === 'info' ? 'hotel' : presetKey}?mode=edit&pageId=${page.id}`}
                     className="px-4 py-2 bg-white text-black text-sm font-semibold rounded-lg hover:bg-zinc-200 transition-colors shrink-0"
                   >
                     Edit

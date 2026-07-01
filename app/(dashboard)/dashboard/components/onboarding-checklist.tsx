@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import * as React from 'react'
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { CheckCircle2, Circle, ArrowRight, X } from 'lucide-react'
 import Link from 'next/link'
@@ -14,18 +15,18 @@ interface OnboardingProps {
 }
 
 export function OnboardingChecklist({ hasOrg, hasLocation, hasMenu, hasQR, templateType }: OnboardingProps) {
-  const [dismissed, setDismissed] = useState(true) // Default true to avoid SSR flicker
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-    const isDismissed = localStorage.getItem('ourmenu_onboarding_dismissed_v1') === 'true'
-    setDismissed(isDismissed)
-  }, [])
+  const isClient = React.useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  )
+  const [localDismiss, setLocalDismiss] = useState(false)
+  
+  const isDismissed = localDismiss || (isClient ? localStorage.getItem('ourmenu_onboarding_dismissed_v1') === 'true' : true)
 
   const handleDismiss = () => {
     localStorage.setItem('ourmenu_onboarding_dismissed_v1', 'true')
-    setDismissed(true)
+    setLocalDismiss(true)
   }
 
   // Dynamic terminology mapping
@@ -88,7 +89,7 @@ export function OnboardingChecklist({ hasOrg, hasLocation, hasMenu, hasQR, templ
   const progress = (completedCount / steps.length) * 100
 
   // Hide entirely if fully complete, not mounted yet, or user dismissed it (only if they have an org)
-  if (!mounted || completedCount === steps.length || (dismissed && hasOrg)) {
+  if (!isClient || completedCount === steps.length || (isDismissed && hasOrg)) {
     return null
   }
 

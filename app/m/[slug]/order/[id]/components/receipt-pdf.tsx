@@ -137,13 +137,13 @@ export const ReceiptDocument = ({ orderId, orgName, date, totalAmountMinor, curr
   </Document>
 )
 
+const emptySubscribe = () => () => {}
+const getClientSnapshot = () => true
+const getServerSnapshot = () => false
+
 export function DownloadReceiptButton({ order, orgName, currencyCode }: { order: any, orgName: string, currencyCode: string }) {
   // Client-side only rendering for PDFDownloadLink to avoid hydration mismatch
-  const [isClient, setIsClient] = React.useState(false)
-
-  React.useEffect(() => {
-    setIsClient(true)
-  }, [])
+  const isClient = React.useSyncExternalStore(emptySubscribe, getClientSnapshot, getServerSnapshot)
 
   if (!isClient) return <div className="w-full h-14 bg-zinc-800 rounded-xl animate-pulse"></div>
 

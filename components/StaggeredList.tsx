@@ -1,6 +1,6 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { motion, Variants } from 'framer-motion'
 import { ReactNode, Children, isValidElement } from 'react'
 
 interface StaggeredListProps {
@@ -9,7 +9,7 @@ interface StaggeredListProps {
 }
 
 export function StaggeredList({ children, className }: StaggeredListProps) {
-  const container = {
+  const container: Variants = {
     hidden: { opacity: 0 },
     show: {
       opacity: 1,
@@ -19,9 +19,9 @@ export function StaggeredList({ children, className }: StaggeredListProps) {
     }
   }
 
-  const item = {
+  const item: Variants = {
     hidden: { opacity: 0, y: 10 },
-    show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } }
+    show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } }
   }
 
   return (

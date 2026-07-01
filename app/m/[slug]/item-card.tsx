@@ -110,6 +110,7 @@ export function ItemCard({ item }: ItemCardProps) {
                   <button 
                     onClick={() => updateQuantity(cartItem.cartKey, -1)}
                     className="w-7 h-7 flex items-center justify-center rounded-full bg-white dark:bg-zinc-700 text-emerald-600 dark:text-emerald-400 shadow-sm hover:scale-105 transition-transform"
+                    aria-label="Decrease quantity"
                   >
                     <Minus className="w-4 h-4" />
                   </button>
@@ -117,6 +118,7 @@ export function ItemCard({ item }: ItemCardProps) {
                   <button 
                     onClick={() => updateQuantity(cartItem.cartKey, 1)}
                     className="w-7 h-7 flex items-center justify-center rounded-full bg-emerald-500 text-white shadow-sm hover:bg-emerald-600 hover:scale-105 transition-all"
+                    aria-label="Increase quantity"
                   >
                     <Plus className="w-4 h-4" />
                   </button>

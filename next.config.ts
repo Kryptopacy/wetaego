@@ -98,6 +98,10 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: '*.supabase.co',
       },
+      {
+        protocol: 'https',
+        hostname: 'api.qrserver.com',
+      },
     ],
   },
   async headers() {
@@ -123,7 +127,7 @@ const nextConfig: NextConfig = {
           },
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.paystack.co https://checkout.paystack.com https://vercel.live https://us-assets.i.posthog.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.unsplash.com https://picsum.photos https://api.dicebear.com *.supabase.co; font-src 'self' data:; connect-src 'self' *.supabase.co wss://*.supabase.co https://api.paystack.co https://us.i.posthog.com https://us-assets.i.posthog.com wss://ws-us2.pusher.com https://sockjs-us2.pusher.com wss://*.vercel.live https://*.vercel.live; frame-src 'self' https://checkout.paystack.com https://vercel.live;"
+            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.paystack.co https://checkout.paystack.com https://vercel.live https://us-assets.i.posthog.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.unsplash.com https://picsum.photos https://api.dicebear.com *.supabase.co https://api.qrserver.com; font-src 'self' data:; connect-src 'self' *.supabase.co wss://*.supabase.co https://api.paystack.co https://us.i.posthog.com https://us-assets.i.posthog.com wss://ws-us2.pusher.com https://sockjs-us2.pusher.com wss://*.vercel.live https://*.vercel.live; frame-src 'self' https://checkout.paystack.com https://vercel.live;"
           },
         ],
       },
@@ -140,12 +144,16 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withSentryConfig(withBundleAnalyzer(withPWA(withNextIntl(nextConfig))), {
-  org: process.env.SENTRY_ORG || "ourmenu",
-  project: process.env.SENTRY_PROJECT || "ourmenu",
-  silent: !process.env.CI,
-  widenClientFileUpload: true,
-  tunnelRoute: "/monitoring",
-  sourcemaps: { disable: true },
-  release: { create: false },
-});
+const finalConfig = withBundleAnalyzer(withPWA(withNextIntl(nextConfig)));
+
+export default process.env.ENABLE_SENTRY_BUILD === "true"
+  ? withSentryConfig(finalConfig, {
+      org: process.env.SENTRY_ORG || "ourmenu",
+      project: process.env.SENTRY_PROJECT || "ourmenu",
+      silent: !process.env.CI,
+      widenClientFileUpload: true,
+      tunnelRoute: "/monitoring",
+      sourcemaps: { disable: true },
+      release: { create: false },
+    })
+  : finalConfig;

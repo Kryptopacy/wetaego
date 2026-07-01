@@ -2,7 +2,6 @@
 
 import { toast } from 'sonner'
 import { ReactNode } from 'react'
-import confetti from 'canvas-confetti'
 
 type LegacyActionResponse = { error?: string; success?: boolean; data?: unknown } | void
 type SafeActionResponse = { serverError?: string; validationErrors?: Record<string, string[]>; data?: unknown } | void
@@ -31,6 +30,7 @@ export function ActionForm({ action, successMessage, triggerConfettiOnSuccess, c
           } else if ((res && 'success' in res && res.success) || (res && 'data' in res && res.data) || successMessage) {
             toast.success(successMessage || 'Saved successfully')
             if (triggerConfettiOnSuccess) {
+              const confetti = (await import('canvas-confetti')).default
               confetti({
                 particleCount: 100,
                 spread: 70,

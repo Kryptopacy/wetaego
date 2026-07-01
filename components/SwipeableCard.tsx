@@ -69,6 +69,8 @@ export function SwipeableCard({
         whileTap={{ cursor: 'grabbing' }}
         className={`relative z-10 bg-zinc-950 ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} h-full w-full rounded-2xl`}
         style={{ touchAction: 'pan-y' }}
+        role="group"
+        aria-roledescription="swipeable card"
       >
         {children}
         {/* Invisible overlay to close if open */}

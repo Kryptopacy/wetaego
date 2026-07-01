@@ -4,27 +4,22 @@ import * as React from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { WifiOff } from 'lucide-react'
 
+const subscribe = (callback: () => void) => {
+  if (typeof window === 'undefined') return () => {};
+  window.addEventListener('online', callback)
+  window.addEventListener('offline', callback)
+  return () => {
+    window.removeEventListener('online', callback)
+    window.removeEventListener('offline', callback)
+  }
+}
+
+const getSnapshot = () => navigator.onLine
+const getServerSnapshot = () => true
+
 export function GlobalOfflineBanner() {
-  const [isOffline, setIsOffline] = React.useState(false)
-
-  React.useEffect(() => {
-    // Only run in browser
-    if (typeof window === 'undefined') return
-
-    const handleOnline = () => setIsOffline(false)
-    const handleOffline = () => setIsOffline(true)
-
-    // Initial check
-    setIsOffline(!navigator.onLine)
-
-    window.addEventListener('online', handleOnline)
-    window.addEventListener('offline', handleOffline)
-
-    return () => {
-      window.removeEventListener('online', handleOnline)
-      window.removeEventListener('offline', handleOffline)
-    }
-  }, [])
+  const isOnline = React.useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
+  const isOffline = !isOnline
 
   return (
     <AnimatePresence>
