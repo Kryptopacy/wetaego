@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { formatCurrency } from '@/lib/utils/currency'
 import { createClient } from '@/lib/supabase/client'
 import { Database } from '@/lib/supabase/types'
+import { Skeleton } from '@/components/ui/skeleton'
+import { StaggeredList } from '@/components/StaggeredList'
 
 type CustomerProfile = Database['public']['Tables']['customer_profiles']['Row']
 
@@ -70,7 +72,7 @@ export function CustomersClient({ organizationId, initialProfiles, currencyCode 
         <h2 className="text-lg font-semibold text-white">Customer Directory</h2>
         <span className="text-xs text-zinc-500">Showing {profiles.length} profiles</span>
       </div>
-      <div className="overflow-x-auto">
+      <div className="hidden sm:block overflow-x-auto">
         <table className="w-full text-left text-sm text-zinc-400">
           <thead className="bg-zinc-800/50 text-xs uppercase text-zinc-500">
             <tr>
@@ -117,29 +119,107 @@ export function CustomersClient({ organizationId, initialProfiles, currencyCode 
             )}
           </tbody>
         </table>
-        
-        {hasMore && (
-          <div className="p-4 border-t border-zinc-800 flex justify-center">
-            <button
-              onClick={loadMore}
-              disabled={isLoading}
-              className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-medium rounded-lg transition-colors text-sm disabled:opacity-50 flex items-center gap-2"
-            >
-              {isLoading ? (
-                <>
-                  <svg className="animate-spin h-4 w-4 text-zinc-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Loading...
-                </>
-              ) : (
-                'Load More Customers'
-              )}
-            </button>
-          </div>
-        )}
       </div>
+
+      {/* Mobile Cards View */}
+      <StaggeredList className="sm:hidden divide-y divide-zinc-800">
+        {profiles.length === 0 ? (
+          <div className="p-8 text-center text-zinc-500 text-sm">
+            No customers found. Shadow profiles are built automatically when customers checkout.
+          </div>
+        ) : (
+          profiles.map((profile) => (
+            <div key={profile.id} className="p-4 flex flex-col gap-3 hover:bg-zinc-800/30 transition-colors">
+              <div className="flex justify-between items-start">
+                <div className="font-medium text-zinc-200">{profile.email}</div>
+                {profile.marketing_opt_in ? (
+                  <span className="inline-flex items-center rounded-full bg-emerald-500/10 px-2 py-1 text-[10px] font-medium text-emerald-400 ring-1 ring-inset ring-emerald-500/20">
+                    Opted In
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center rounded-full bg-zinc-500/10 px-2 py-1 text-[10px] font-medium text-zinc-400 ring-1 ring-inset ring-zinc-500/20">
+                    Unsubscribed
+                  </span>
+                )}
+              </div>
+              
+              <div className="grid grid-cols-2 gap-2 text-sm mt-1">
+                <div>
+                  <div className="text-xs text-zinc-500 mb-1">Orders</div>
+                  <div className="text-zinc-300">{profile.total_orders}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-zinc-500 mb-1">Lifetime Value</div>
+                  <div className="font-medium text-emerald-400">
+                    {formatCurrency(profile.total_spend_minor || 0, currencyCode)}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-xs text-zinc-500 mb-1">Loyalty Points</div>
+                  <div className="font-bold text-blue-400">{profile.loyalty_points || 0}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-zinc-500 mb-1">Last Visit</div>
+                  <div className="text-zinc-300">
+                    {profile.last_visit_at ? new Date(profile.last_visit_at).toLocaleDateString() : 'N/A'}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+      </StaggeredList>
+      
+      {hasMore && (
+        <div className="p-4 border-t border-zinc-800 flex justify-center">
+          <button
+            onClick={loadMore}
+            disabled={isLoading}
+            className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-medium rounded-lg transition-colors text-sm disabled:opacity-50 flex items-center gap-2"
+          >
+            {isLoading ? (
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-4 w-4 rounded-full" />
+                Loading more...
+              </div>
+            ) : (
+              'Load More Customers'
+            )}
+          </button>
+        </div>
+      )}
+
+      {/* Skeletons to show while loading more */}
+      {isLoading && (
+        <div className="divide-y divide-zinc-800 border-t border-zinc-800">
+          {[...Array(3)].map((_, i) => (
+            <div key={`skeleton-${i}`} className="p-4 flex flex-col gap-3">
+              <div className="flex justify-between items-start">
+                <Skeleton className="h-5 w-40" />
+                <Skeleton className="h-5 w-20 rounded-full" />
+              </div>
+              <div className="grid grid-cols-2 gap-2 text-sm mt-1">
+                <div>
+                  <Skeleton className="h-3 w-12 mb-2" />
+                  <Skeleton className="h-4 w-8" />
+                </div>
+                <div>
+                  <Skeleton className="h-3 w-20 mb-2" />
+                  <Skeleton className="h-4 w-16" />
+                </div>
+                <div>
+                  <Skeleton className="h-3 w-24 mb-2" />
+                  <Skeleton className="h-4 w-12" />
+                </div>
+                <div>
+                  <Skeleton className="h-3 w-16 mb-2" />
+                  <Skeleton className="h-4 w-20" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

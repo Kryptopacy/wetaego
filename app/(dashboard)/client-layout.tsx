@@ -97,6 +97,42 @@ function NavLink({ href, label, icon: iconProp, badge, exact, onClick }: {
   )
 }
 
+function BottomNavItem({ href, label, icon: iconProp, badge, exact, onClick }: {
+  href: string; label: string; icon: React.ElementType | string; badge?: string; exact?: boolean; onClick?: () => void
+}) {
+  const pathname = usePathname()
+  const isActive = exact ? pathname === href : pathname.startsWith(href)
+  const Icon = typeof iconProp === 'string' ? ICON_MAP[iconProp] : iconProp
+  
+  if (!Icon) return null;
+
+  return (
+    <Link
+      href={href}
+      onClick={onClick}
+      className={`relative flex flex-col items-center justify-center w-full py-1 gap-1 transition-colors ${
+        isActive ? 'text-violet-400' : 'text-zinc-500 hover:text-zinc-300'
+      }`}
+    >
+      <div className="relative">
+        <Icon className={`w-6 h-6 transition-transform ${isActive ? 'scale-110' : 'scale-100'}`} />
+        {badge && (
+          <span className="absolute -top-1 -right-2 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-[#0a0a0a]" />
+        )}
+      </div>
+      <span className={`text-[10px] font-medium ${isActive ? 'font-bold' : ''}`}>{label}</span>
+      {isActive && (
+        <motion.div
+          layoutId="activeBottomNav"
+          className="absolute -bottom-2 w-8 h-1 bg-violet-500 rounded-t-full shadow-[0_-2px_10px_rgba(139,92,246,0.5)]"
+          initial={false}
+          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        />
+      )}
+    </Link>
+  )
+}
+
 export interface InitialDashboardData {
   orgName: string;
   locations: { id: string, name: string }[];
@@ -340,7 +376,7 @@ export default function ClientLayout({ children, initialData }: { children: Reac
       )}
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col min-h-screen relative pt-16 md:pt-0 print:pt-0">
+      <main className="flex-1 flex flex-col min-h-screen relative pt-16 pb-20 md:pt-0 md:pb-0 print:pt-0 print:pb-0">
         <CommandPalette />
         <div className="absolute top-0 right-0 p-6 z-10 hidden md:block print:hidden">
           <div className="flex items-center gap-4 bg-zinc-900/50 backdrop-blur-md border border-zinc-800/50 px-4 py-2 rounded-full shadow-xl">
@@ -359,6 +395,16 @@ export default function ClientLayout({ children, initialData }: { children: Reac
           {children}
         </div>
       </main>
+
+      {/* Mobile Bottom Navigation */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-[#0a0a0a]/95 backdrop-blur-md border-t border-white/10 z-50 flex items-center justify-around px-2 pb-safe pt-2 print:hidden shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+        <BottomNavItem href="/dashboard" icon={LayoutDashboard} label="Home" exact />
+        {dynamicNavItems[0] && (
+          <BottomNavItem href={dynamicNavItems[0].href} icon={dynamicNavItems[0].icon} label={dynamicNavItems[0].label} badge={dynamicNavItems[0].badge} />
+        )}
+        <BottomNavItem href="/dashboard/pages" icon={FileText} label="Pages" />
+        <BottomNavItem href="/dashboard/settings" icon={Settings} label="Settings" />
+      </div>
     </div>
   )
 }

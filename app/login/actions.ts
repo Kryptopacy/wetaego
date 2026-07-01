@@ -6,6 +6,15 @@ import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { sendWelcomeEmail } from '@/lib/notifications/email'
 import { z } from 'zod'
 import { actionClient } from '@/lib/safe-action'
+import { Ratelimit } from '@upstash/ratelimit'
+import { Redis } from '@upstash/redis'
+
+const ratelimit = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(2, "1 h"),
+  analytics: true,
+})
+
 
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -35,7 +44,7 @@ export const login = actionClient
 
     // If a demo user is currently logged in, clear their session before proceeding
     const { data: { user } } = await supabase.auth.getUser()
-    if (user && user.email?.includes('demo-') && user.email?.includes('@ourmenuos.online')) {
+    if (user && user.email?.startsWith('demo-')) {
       await supabase.auth.signOut()
     }
 
@@ -57,7 +66,7 @@ export const signup = actionClient
 
     // If a demo user is currently logged in, clear their session before proceeding
     const { data: { user } } = await supabase.auth.getUser()
-    if (user && user.email?.includes('demo-') && user.email?.includes('@ourmenuos.online')) {
+    if (user && user.email?.startsWith('demo-')) {
       await supabase.auth.signOut()
     }
 
@@ -79,7 +88,7 @@ export async function signInWithGoogle() {
   
   // If a demo user is currently logged in, clear their session before proceeding
   const { data: { user } } = await supabase.auth.getUser()
-  if (user && user.email?.includes('demo-') && user.email?.includes('@ourmenuos.online')) {
+  if (user && user.email?.startsWith('demo-')) {
     await supabase.auth.signOut()
   }
 
@@ -107,6 +116,18 @@ export async function signInWithGoogle() {
 }
 
 export async function startInteractiveDemo() {
+  const { headers } = await import('next/headers')
+  const headersList = await headers()
+  const ip = headersList.get('x-forwarded-for') || headersList.get('x-real-ip') || 'unknown'
+
+  if (ip !== 'unknown') {
+    const { success } = await ratelimit.limit(`demo_creation_${ip}`)
+    if (!success) {
+      redirect(`/login?message=${encodeURIComponent('Too many demo workspaces created. Try again later.')}`)
+      return
+    }
+  }
+
   const supabase = await createClient()
   
   const uid = crypto.randomUUID().split('-')[0]
@@ -332,7 +353,8 @@ export async function startInteractiveDemo() {
         ]
       }),
       is_published: true,
-      randomizer_enabled: false
+      randomizer_enabled: false,
+      billing_enabled: false
     }
   ]).select('id, slug')
 

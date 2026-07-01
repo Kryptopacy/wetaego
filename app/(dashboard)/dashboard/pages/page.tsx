@@ -5,9 +5,12 @@ import { togglePageStatus, deletePage } from './actions'
 import { ActionForm } from '@/components/ActionForm'
 import Link from 'next/link'
 import Image from 'next/image'
+import { StaggeredList } from '@/components/StaggeredList'
+import { SwipeableCard } from '@/components/SwipeableCard'
 
 import { BUSINESS_TYPE_PRESETS } from '@/lib/templates/presets'
 import { ShareButton } from '@/components/ShareButton'
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
 
 export default async function PagesManager() {
   const supabase = await createClient()
@@ -26,7 +29,7 @@ export default async function PagesManager() {
   let pages: {
     id: string; title: string; slug: string; is_published: boolean;
     template_type: string; is_primary: boolean; created_at: string;
-    business_type_preset?: string
+    business_type_preset?: string; billing_enabled?: boolean; billing_mode?: string
   }[] = []
 
   const { data: member } = await supabase
@@ -59,7 +62,7 @@ export default async function PagesManager() {
   if (locData) {
     const { data: pagesData } = await supabase
       .from('location_pages')
-      .select('id, title, slug, is_published, template_type, is_primary, created_at, business_type_preset')
+      .select('id, title, slug, is_published, template_type, is_primary, created_at, business_type_preset, billing_enabled, billing_mode')
       .eq('location_id', locData.id)
       .order('is_primary', { ascending: false })
       .order('created_at', { ascending: false })
@@ -115,7 +118,7 @@ export default async function PagesManager() {
       </div>
 
       {/* Pages list */}
-      <div className="space-y-3">
+      <StaggeredList className="space-y-3">
         {pages.map((page) => {
           const fullUrl = `${baseUrl}/m/${locData!.slug}/p/${page.slug}`
           const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(fullUrl)}&color=ffffff&bgcolor=09090b`
@@ -125,106 +128,153 @@ export default async function PagesManager() {
             : null
 
           return (
-            <div
+            <SwipeableCard
               key={page.id}
-              className={`flex items-center justify-between rounded-2xl border p-5 transition-all ${
-                page.is_primary
-                  ? 'border-violet-500/30 bg-violet-900/10'
-                  : 'border-zinc-800 bg-zinc-900/40'
-              }`}
-            >
-              <div className="flex items-center gap-5">
-                {/* QR */}
-                <div className="bg-zinc-950 p-1.5 rounded-lg border border-zinc-800 shrink-0">
-                  { }
-                  <Image src={qrImageUrl} alt="QR Code" width={56} height={56} className="w-14 h-14 rounded-md" crossOrigin="anonymous" />
+              className="rounded-2xl"
+              rightThreshold={100}
+              rightAction={
+                <div className="flex items-center h-full gap-2">
+                  <ActionForm action={deletePage} successMessage="Page deleted successfully" className="h-full">
+                    <input type="hidden" name="pageId" value={page.id} />
+                    <button type="submit" className="h-full px-4 bg-red-500/20 text-red-400 rounded-xl font-medium flex items-center justify-center">
+                      Delete
+                    </button>
+                  </ActionForm>
                 </div>
-
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <h3 className="text-base font-bold text-white">{page.title}</h3>
-                    {page.is_primary && (
-                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-violet-500/20 text-violet-400 border border-violet-500/30 uppercase tracking-wider">
-                        Primary
-                      </span>
-                    )}
-                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider ${templateBadgeClasses(page.template_type)}`}>
-                      {templateTypeLabel(page.template_type)}
-                    </span>
+              }
+            >
+              <div
+                className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-0 rounded-2xl border p-4 sm:p-5 transition-all w-full h-full ${
+                  page.is_primary
+                    ? 'border-violet-500/30 bg-violet-900/10'
+                    : 'border-zinc-800 bg-zinc-900/40'
+                }`}
+              >
+                <div className="flex items-center gap-4 sm:gap-5">
+                  {/* QR */}
+                  <div className="bg-zinc-950 p-1.5 rounded-lg border border-zinc-800 shrink-0">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <Image src={qrImageUrl} alt="QR Code" width={56} height={56} className="w-14 h-14 rounded-md" crossOrigin="anonymous" />
                   </div>
 
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="text-base font-bold text-white">{page.title}</h3>
+                      {page.is_primary && (
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-violet-500/20 text-violet-400 border border-violet-500/30 uppercase tracking-wider">
+                          Primary
+                        </span>
+                      )}
+                      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider ${templateBadgeClasses(page.template_type)}`}>
+                        {templateTypeLabel(page.template_type)}
+                      </span>
+                    </div>
+
+                    <Link
+                      href={`/m/${locData!.slug}/p/${page.slug}?preview=true`}
+                      target="_blank"
+                      className="text-xs text-blue-400 hover:underline flex items-center gap-1"
+                    >
+                      {baseUrl.replace('https://', '')}/m/{locData!.slug}/p/{page.slug}
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                    </Link>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto">
+                  {/* Stats / Badges */}
+                  <div className="flex items-center gap-2 flex-1 sm:flex-none">
+                    <div className={`px-2 py-1 rounded-full text-xs font-medium border flex items-center gap-1.5 ${
+                      page.is_published 
+                        ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                        : 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20'
+                    }`}>
+                      <div className={`w-1.5 h-1.5 rounded-full ${page.is_published ? 'bg-emerald-400' : 'bg-zinc-400'}`} />
+                      {page.is_published ? 'Live' : 'Hidden'}
+                    </div>
+
+                    {page.billing_enabled && (
+                      <div className="px-2 py-1 rounded-full text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20 flex items-center gap-1">
+                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                        </svg>
+                        {page.billing_mode === 'reservation_deposit' ? 'Deposits' : 'Payments'}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Primary Action */}
                   <Link
-                    href={`/m/${locData!.slug}/p/${page.slug}?preview=true`}
-                    target="_blank"
-                    className="text-xs text-blue-400 hover:underline flex items-center gap-1"
+                    href={`/dashboard/pages/build/${page.template_type === 'custom' || page.template_type === 'info' ? 'hotel' : preset?.id}?mode=edit&pageId=${page.id}`}
+                    className="px-4 py-2 bg-white text-black text-sm font-semibold rounded-lg hover:bg-zinc-200 transition-colors shrink-0"
                   >
-                    {baseUrl.replace('https://', '')}/m/{locData!.slug}/p/{page.slug}
-                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                    </svg>
+                    Edit
                   </Link>
+
+                  {/* Dropdown Menu */}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button className="p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors shrink-0">
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                        </svg>
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48">
+                      {/* Share Option */}
+                      <DropdownMenuItem asChild>
+                        <ShareButton 
+                          url={fullUrl} 
+                          title={page.title} 
+                          className="w-full flex items-center gap-2 px-2 py-1.5 cursor-pointer"
+                        >
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                          </svg>
+                          Share Link
+                        </ShareButton>
+                      </DropdownMenuItem>
+                      
+                      {/* Publish/Unpublish */}
+                      <DropdownMenuItem asChild>
+                        <ActionForm 
+                          action={togglePageStatus} 
+                          successMessage={page.is_published ? "Page hidden successfully" : "Page is now live!"}
+                          triggerConfettiOnSuccess={!page.is_published}
+                        >
+                          <input type="hidden" name="pageId" value={page.id} />
+                          <input type="hidden" name="currentStatus" value={page.is_published.toString()} />
+                          <button type="submit" className="w-full flex items-center gap-2 px-2 py-1.5 cursor-pointer text-left">
+                            <div className={`w-2 h-2 rounded-full ${page.is_published ? 'bg-zinc-500' : 'bg-green-500'}`} />
+                            {page.is_published ? 'Set as Hidden' : 'Set as Live'}
+                          </button>
+                        </ActionForm>
+                      </DropdownMenuItem>
+                      
+                      <DropdownMenuSeparator />
+
+                      {/* Delete */}
+                      <DropdownMenuItem asChild>
+                        <ActionForm action={deletePage} successMessage="Page deleted successfully">
+                          <input type="hidden" name="pageId" value={page.id} />
+                          <button type="submit" className="w-full flex items-center gap-2 px-2 py-1.5 cursor-pointer text-red-400">
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                            Delete Page
+                          </button>
+                        </ActionForm>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </div>
-
-              {/* Actions */}
-              <div className="flex items-center gap-2 shrink-0">
-                {/* Share button */}
-                <ShareButton
-                  url={fullUrl}
-                  title={`Check out ${page.title}`}
-                  description={`View our live ${templateTypeLabel(page.template_type).toLowerCase()} at Our Venue.`}
-                  className="p-2 rounded-lg text-zinc-500 hover:text-violet-400 hover:bg-violet-500/10 transition-colors"
-                >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                  </svg>
-                </ShareButton>
-
-                {/* Edit button */}
-                <Link
-                  href={page.business_type_preset ? `/dashboard/pages/build/${page.business_type_preset}?pageId=${page.id}` : `/dashboard/pages/${page.id}/edit`}
-                  className="px-4 py-2 rounded-xl text-xs font-bold bg-white/5 hover:bg-white/10 transition-colors border border-white/10 flex items-center gap-2"
-                >
-                  Edit Page
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                  </svg>
-                </Link>
-
-                {/* Publish/Unpublish */}
-                <ActionForm action={togglePageStatus}>
-                  <input type="hidden" name="pageId" value={page.id} />
-                  <input type="hidden" name="currentStatus" value={page.is_published.toString()} />
-                  <button
-                    type="submit"
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
-                      page.is_published
-                        ? 'border-green-500/30 bg-green-500/10 text-green-400 hover:bg-green-500/20'
-                        : 'border-zinc-700 bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
-                    }`}
-                  >
-                    {page.is_published ? 'Live' : 'Hidden'}
-                  </button>
-                </ActionForm>
-
-                {/* Delete */}
-                <ActionForm action={deletePage}>
-                  <input type="hidden" name="pageId" value={page.id} />
-                  <button
-                    type="submit"
-                    className="p-2 rounded-lg text-zinc-600 hover:text-red-400 hover:bg-red-500/10 transition-colors"
-                    title="Delete"
-                  >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                  </button>
-                </ActionForm>
-              </div>
-            </div>
+            </SwipeableCard>
           )
         })}
-      </div>
+      </StaggeredList>
     </div>
   )
 }

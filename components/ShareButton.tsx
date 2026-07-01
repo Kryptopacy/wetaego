@@ -1,17 +1,15 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, forwardRef } from 'react'
 import { ShareModal } from './ShareModal'
 
-interface ShareButtonProps {
+interface ShareButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   url: string
   title: string
   description?: string
-  className?: string
-  children: React.ReactNode
 }
 
-export function ShareButton({ url, title, description, className, children }: ShareButtonProps) {
+export const ShareButton = forwardRef<HTMLButtonElement, ShareButtonProps>(({ url, title, description, className, children, onClick, ...props }, ref) => {
   const [isOpen, setIsOpen] = useState(false)
 
   const handleShare = async (e: React.MouseEvent) => {
@@ -41,10 +39,15 @@ export function ShareButton({ url, title, description, className, children }: Sh
   return (
     <>
       <button 
-        onClick={handleShare}
+        ref={ref}
+        onClick={(e) => {
+          handleShare(e)
+          onClick?.(e as any)
+        }}
         className={className}
         aria-haspopup="dialog"
         aria-expanded={isOpen}
+        {...props}
       >
         {children}
       </button>
@@ -58,4 +61,4 @@ export function ShareButton({ url, title, description, className, children }: Sh
       />
     </>
   )
-}
+})

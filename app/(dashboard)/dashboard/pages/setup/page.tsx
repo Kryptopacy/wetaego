@@ -51,18 +51,18 @@ export default async function BusinessTypeSetupPage({
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Header */}
-      <div className="sticky top-0 z-20 flex items-center justify-between px-6 md:px-12 h-16 bg-black/80 backdrop-blur-xl border-b border-white/[0.05]">
-        <Link href="/dashboard/pages" className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors text-sm">
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <div className="sticky top-0 z-20 flex items-center justify-between px-4 sm:px-6 md:px-12 h-16 bg-black/80 backdrop-blur-xl border-b border-white/[0.05]">
+        <Link href="/dashboard/pages" className="flex items-center gap-1 sm:gap-2 text-zinc-400 hover:text-white transition-colors text-sm shrink-0">
+          <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-          Back
+          <span className="hidden sm:inline">Back</span>
         </Link>
-        <div className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Page Setup</div>
-        <div className="w-16" />
+        <div className="text-[10px] sm:text-xs font-bold text-zinc-500 uppercase tracking-widest text-center truncate px-2">Page Setup</div>
+        <div className="w-8 sm:w-16 shrink-0" />
       </div>
 
-      <div className="max-w-5xl mx-auto px-6 md:px-12 py-16">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 md:px-12 py-12 sm:py-16">
         {/* Hero copy */}
         <div className="text-center mb-16">
           {isPrimary ? (
@@ -97,10 +97,13 @@ export default async function BusinessTypeSetupPage({
 
             return (
               <div key={group.id}>
-                <div className="flex items-center gap-3 mb-5">
-                  <h2 className="text-base font-bold text-white">{group.label}</h2>
-                  <div className="flex-1 h-px bg-white/[0.06]" />
-                  <span className="text-xs text-zinc-600">{group.description}</span>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-5">
+                  <div className="flex items-center gap-3">
+                    <h2 className="text-base font-bold text-white shrink-0">{group.label}</h2>
+                    <div className="h-px bg-white/[0.06] flex-1 sm:hidden" />
+                  </div>
+                  <div className="hidden sm:block flex-1 h-px bg-white/[0.06]" />
+                  <span className="text-xs text-zinc-600 sm:text-right">{group.description}</span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
