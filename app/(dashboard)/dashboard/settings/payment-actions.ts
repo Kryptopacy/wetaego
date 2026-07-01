@@ -21,11 +21,14 @@ export const savePaymentSettings = authActionClient
     // Find existing org for this user
     const { data: org } = await supabase
       .from('organizations')
-      .select('id')
+      .select('id, is_demo')
       .eq('created_by', user.id)
       .single()
 
     if (!org) throw new Error('Organization not found')
+    if (org.is_demo) {
+      throw new Error('Bank details cannot be modified in demo workspaces to protect end customers.')
+    }
 
     let subaccountCode = ''
     try {
@@ -98,17 +101,25 @@ export const saveManualPaymentSettings = authActionClient
       .single()
 
     let isAuthorized = member?.role === 'owner' || member?.role === 'manager'
-    if (!member) {
-      const { data: org } = await supabase
-        .from('organizations')
-        .select('id')
-        .eq('id', loc.organization_id)
-        .eq('created_by', user.id)
-        .single()
-      isAuthorized = !!org
+    let isDemo = false
+
+    const { data: org } = await supabase
+      .from('organizations')
+      .select('id, is_demo, created_by')
+      .eq('id', loc.organization_id)
+      .single()
+
+    if (org) {
+      isDemo = !!org.is_demo
+      if (!member && org.created_by === user.id) {
+        isAuthorized = true
+      }
     }
 
     if (!isAuthorized) throw new Error('Unauthorized')
+    if (isDemo) {
+      throw new Error('Manual payment details cannot be modified in demo workspaces to protect end customers.')
+    }
 
     const { error } = await supabase
       .from('locations')

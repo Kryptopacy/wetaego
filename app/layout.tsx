@@ -71,6 +71,8 @@ import { OfflineBanner } from '@/components/offline-banner'
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages } from 'next-intl/server'
 
+import { AuthErrorToast } from '@/components/AuthErrorToast'
+
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -87,6 +89,7 @@ export default async function RootLayout({
       <body className="min-h-full flex flex-col bg-zinc-950 text-zinc-50">
         <PostHogProvider>
           <NextIntlClientProvider messages={messages}>
+            <AuthErrorToast />
             <OfflineBanner />
             {children}
             <PwaInstallPrompt />

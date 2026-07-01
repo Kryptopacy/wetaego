@@ -64,9 +64,7 @@ export function UseCases() {
   return (
     <section className="py-32 px-6 max-w-7xl mx-auto relative z-10">
       <div className="text-center mb-16">
-        <span className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-zinc-300 text-xs font-bold uppercase tracking-widest mb-6">
-          Universal Architecture
-        </span>
+
         <h2 className="text-4xl md:text-6xl font-black text-white mb-6 tracking-tight">
           One Operating System.<br />
           <span className="text-transparent bg-clip-text bg-gradient-to-br from-zinc-400 to-zinc-600">Every Business Type.</span>

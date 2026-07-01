@@ -182,9 +182,7 @@ export default async function HomePage() {
       {/* ── AFFILIATES TEASER ── */}
       <section className="py-24 px-6 border-t border-white/[0.04] relative">
         <div className="max-w-4xl mx-auto text-center relative z-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold mb-6">
-            <Star className="w-3.5 h-3.5" /> Partner Program
-          </div>
+
           <h2 className="text-4xl md:text-5xl font-black text-white mb-6 tracking-tight">
             Grow with us. <span className="text-zinc-400">Earn recurring revenue.</span>
           </h2>
