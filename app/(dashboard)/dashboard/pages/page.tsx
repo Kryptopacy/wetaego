@@ -153,7 +153,7 @@ export default async function PagesManager() {
                 <div className="flex items-center gap-4 sm:gap-5">
                   {/* QR */}
                   <div className="bg-zinc-950 p-1.5 rounded-lg border border-zinc-800 shrink-0">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    { }
                     <Image src={qrImageUrl} alt="QR Code" width={56} height={56} className="w-14 h-14 rounded-md" crossOrigin="anonymous" />
                   </div>
 

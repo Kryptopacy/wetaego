@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { MessageCircle, X, Image as ImageIcon, Send, Mic, Paperclip, Loader2 } from 'lucide-react'
+import { MessageCircle, X, Send, Mic, Paperclip, Loader2 } from 'lucide-react'
 import { VoiceRecorder } from './voice-recorder'
 import { format } from 'date-fns'
 
@@ -39,26 +39,59 @@ export function IntercomWidget({ userId, organizationId }: { userId: string, org
   
   const supabase = createClient()
 
-  // Fetch Channels
+  // Fetch Channels — managers see all org channels via RLS bypass
   useEffect(() => {
     if (!isOpen || !userId || !organizationId) return
 
     const loadChannels = async () => {
-      // Fetch channels where user is a member
-      const { data: memberData } = await supabase
-        .from('intercom_channel_members')
-        .select('channel_id, intercom_channels(id, name, channel_type)')
+      // Check if current user is owner/manager
+      const { data: memberRow } = await supabase
+        .from('organization_members')
+        .select('role')
+        .eq('organization_id', organizationId)
         .eq('user_id', userId)
+        .single()
 
-      if (memberData) {
-        const userChannels = memberData.map(m => m.intercom_channels as any as IntercomChannel)
-        setChannels(userChannels)
-        if (userChannels.length > 0 && !activeChannelId) {
-          setActiveChannelId(userChannels[0].id)
+      const isManager = memberRow?.role === 'owner' || memberRow?.role === 'manager'
+
+      if (isManager) {
+        // Managers see ALL channels in their org (RLS allows this)
+        const { data: allChannels } = await supabase
+          .from('intercom_channels')
+          .select('id, name, type')
+          .eq('organization_id', organizationId)
+          .order('type', { ascending: true })
+
+        if (allChannels) {
+          const mapped: IntercomChannel[] = allChannels.map(c => ({
+            id: c.id,
+            name: c.name || 'Direct',
+            channel_type: c.type,
+          }))
+          setChannels(mapped)
+          if (mapped.length > 0 && !activeChannelId) setActiveChannelId(mapped[0].id)
+        }
+      } else {
+        // Regular staff: only channels they are members of
+        const { data: memberData } = await supabase
+          .from('intercom_channel_members')
+          .select('channel_id, intercom_channels(id, name, type)')
+          .eq('user_id', userId)
+
+        if (memberData) {
+          const userChannels: IntercomChannel[] = memberData
+            .filter(m => m.intercom_channels)
+            .map(m => {
+              const ch = m.intercom_channels as { id: string; name: string | null; type: string }
+              return { id: ch.id, name: ch.name || 'Channel', channel_type: ch.type }
+            })
+          setChannels(userChannels)
+          if (userChannels.length > 0 && !activeChannelId) setActiveChannelId(userChannels[0].id)
         }
       }
     }
     loadChannels()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, userId, organizationId])
 
   // Fetch Messages & Subscribe
@@ -160,7 +193,7 @@ export function IntercomWidget({ userId, organizationId }: { userId: string, org
       const ext = file.name.split('.').pop()
       const fileName = `${organizationId}/${activeChannelId}/${Date.now()}.${ext}`
       
-      const { error: uploadError, data } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('intercom_media')
         .upload(fileName, file)
 
@@ -242,20 +275,24 @@ export function IntercomWidget({ userId, organizationId }: { userId: string, org
 
       {/* Channels row */}
       {channels.length > 0 && (
-        <div className="flex overflow-x-auto p-2 bg-zinc-800/50 border-b border-zinc-800 no-scrollbar gap-2">
-          {channels.map(c => (
-            <button
-              key={c.id}
-              onClick={() => setActiveChannelId(c.id)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
-                activeChannelId === c.id 
-                  ? 'bg-blue-600 text-white' 
-                  : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white'
-              }`}
-            >
-              {c.name}
-            </button>
-          ))}
+      <div className="flex overflow-x-auto p-2 bg-zinc-800/50 border-b border-zinc-800 no-scrollbar gap-2">
+          {channels.map(c => {
+            const icon = c.channel_type === 'department' ? '🏢' : c.channel_type === 'direct' ? '💬' : '🌐'
+            return (
+              <button
+                key={c.id}
+                onClick={() => setActiveChannelId(c.id)}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors flex items-center gap-1.5 ${
+                  activeChannelId === c.id 
+                    ? 'bg-blue-600 text-white' 
+                    : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white'
+                }`}
+              >
+                <span>{icon}</span>
+                {c.name}
+              </button>
+            )
+          })}
         </div>
       )}
 

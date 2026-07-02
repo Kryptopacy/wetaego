@@ -44,9 +44,10 @@ export const createInviteAction = authActionClient
   .schema(z.object({
     orgId: z.string().min(1),
     email: z.string().email(),
-    role: z.enum(['owner', 'manager', 'editor', 'viewer'])
+    role: z.enum(['owner', 'manager', 'editor', 'viewer']),
+    department: z.string().trim().optional(),
   }))
-  .action(async ({ parsedInput: { orgId, email, role }, ctx: { supabase, user } }) => {
+  .action(async ({ parsedInput: { orgId, email, role, department }, ctx: { supabase, user } }) => {
     const { userId } = await verifyOwnerOrManager(orgId, supabase, user)
 
     // Create the invite
@@ -56,6 +57,7 @@ export const createInviteAction = authActionClient
         organization_id: orgId,
         email: email.trim().toLowerCase(),
         role,
+        department: department || null,
         invited_by: userId,
       })
       .select('token')
@@ -203,6 +205,32 @@ export const updateMemberRoleAction = authActionClient
     const { error } = await supabase
       .from('organization_members')
       .update({ role: newRole as "owner" | "manager" | "editor" | "viewer" })
+      .eq('organization_id', orgId)
+      .eq('user_id', targetUserId)
+
+    if (orgId === 'demo-org') {
+      revalidatePath('/dashboard/settings/team')
+      return { success: true }
+    }
+
+    if (error) throw new Error(error.message)
+
+    revalidatePath('/dashboard/settings/team')
+    return { success: true }
+  })
+
+export const updateMemberDepartmentAction = authActionClient
+  .schema(z.object({
+    orgId: z.string().min(1),
+    targetUserId: z.string().min(1),
+    department: z.string().trim().nullable(),
+  }))
+  .action(async ({ parsedInput: { orgId, targetUserId, department }, ctx: { supabase, user } }) => {
+    await verifyOwnerOrManager(orgId, supabase, user)
+
+    const { error } = await supabase
+      .from('organization_members')
+      .update({ department })
       .eq('organization_id', orgId)
       .eq('user_id', targetUserId)
 

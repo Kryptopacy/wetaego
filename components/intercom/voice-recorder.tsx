@@ -17,17 +17,7 @@ export function VoiceRecorder({ onRecordingComplete, onCancel }: VoiceRecorderPr
   const audioChunks = useRef<Blob[]>([])
   const timerInterval = useRef<NodeJS.Timeout | null>(null)
 
-  useEffect(() => {
-    startRecording()
-    return () => {
-      if (timerInterval.current) clearInterval(timerInterval.current)
-      if (mediaRecorder.current && mediaRecorder.current.state === 'recording') {
-        mediaRecorder.current.stop()
-      }
-    }
-  }, [])
-
-  const startRecording = async () => {
+  async function startRecording() {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
       mediaRecorder.current = new MediaRecorder(stream)
@@ -59,6 +49,16 @@ export function VoiceRecorder({ onRecordingComplete, onCancel }: VoiceRecorderPr
     }
   }
 
+  useEffect(() => {
+    startRecording()
+    return () => {
+      if (timerInterval.current) clearInterval(timerInterval.current)
+      if (mediaRecorder.current && mediaRecorder.current.state === 'recording') {
+        mediaRecorder.current.stop()
+      }
+    }
+  }, [])
+
   const stopRecording = () => {
     if (mediaRecorder.current && mediaRecorder.current.state === 'recording') {
       mediaRecorder.current.stop()
@@ -78,7 +78,11 @@ export function VoiceRecorder({ onRecordingComplete, onCancel }: VoiceRecorderPr
       {!audioBlob ? (
         <>
           <div className="flex-1 flex items-center gap-2 px-2">
-            <div className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+            {isRecording ? (
+              <Mic className="w-4 h-4 text-rose-500 animate-pulse" />
+            ) : (
+              <div className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+            )}
             <span className="text-sm font-mono text-rose-400">{formatTime(recordingTime)}</span>
           </div>
           <button

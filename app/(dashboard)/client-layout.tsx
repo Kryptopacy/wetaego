@@ -7,7 +7,7 @@ import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { ReactNode, useEffect, useState } from 'react'
   
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { createClient } from '@/lib/supabase/client'
 import { setActiveLocationCookie } from './layout-actions'
 import {
@@ -158,7 +158,6 @@ export default function ClientLayout({ children, initialData }: { children: Reac
   const [isOwnerOrManager] = useState(initialData.isOwnerOrManager)
   const [time, setTime] = useState('')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [userEmail] = useState(initialData.userEmail)
   const [dynamicNavItems] = useState<NavItem[]>(initialData.dynamicNavItems)
 
   const [credits] = useState<number | null>(initialData.credits)

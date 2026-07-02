@@ -33,11 +33,12 @@ export default async function TeamPage() {
     role: string; 
     created_at: string; 
     full_name?: string;
+    department?: string;
     bank_name?: string;
     account_number?: string;
     account_name?: string;
   }[] = []
-  let invites: { id: string; email: string; role: string; token: string; expires_at: string }[] = []
+  let invites: { id: string; email: string; role: string; token: string; expires_at: string; department?: string }[] = []
 
   const { data: member } = await supabase
     .from('organization_members')
@@ -74,12 +75,13 @@ export default async function TeamPage() {
 
     members = (membersRaw || []).map(m => {
       
-      const profile = profilesMap.get(m.user_id as string) as any
+      const profile = profilesMap.get(m.user_id as string) as { full_name?: string; bank_name?: string; account_number?: string; account_name?: string } | undefined
       return {
         user_id: m.user_id as string,
         email: m.email as string,
         role: m.role as string,
         created_at: m.created_at as string,
+        department: m.department as string | undefined,
         full_name: profile?.full_name,
         bank_name: profile?.bank_name,
         account_number: profile?.account_number,
@@ -99,6 +101,7 @@ export default async function TeamPage() {
       role: i.role as string,
       token: i.token as string,
       expires_at: i.expires_at as string,
+      department: i.department as string | undefined,
     }))
 
   // Only owners and managers can access this page

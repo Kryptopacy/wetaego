@@ -1,5 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
-// @ts-ignore
+// @ts-expect-error - process is not typed but available
 import dotenv from 'dotenv';
 dotenv.config({ path: '.env.local' });
 
