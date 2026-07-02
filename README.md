@@ -101,7 +101,17 @@ Seamlessly scale operations across multiple venues, cities, or countries from a 
 - **Order Cancellation Lifecycle:** Businesses can safely reject/cancel orders, logging a strict cancellation reason for analytics while offering front-desk operations the choice to restock rejected inventory instantly or withhold it.
 - **Optimistic UI Validation:** Fully responsive UI updates allow waitstaff and cashiers to modify stock limits dynamically from the dashboard, synchronizing globally without page refreshes.
 
-### 9. Back-of-House Operations Engine
+### 9. Customer IOU & Store Credit System
+- **B2B & B2C Credit Management:** Organizations can manually approve trusted customers for a "Buy Now, Pay Later" (IOU) tab, complete with dynamic credit limits and auto-approval thresholds based on historical spend.
+- **Omnichannel Credit Checkout:** Integrated directly into the guest checkout flow, allowing approved customers to bypass card/cash payments and deduct instantly from their Store Credit balance.
+- **Automated Bookkeeping & Reminders:** The system tracks `iou_transactions`, logs installment payments, automatically restricts customers who exceed limits, and dispatches cron-driven overdue reminders.
+
+### 10. Realtime Staff Intercom
+- **Internal Team Chat:** A floating, globally accessible communication widget for staff and management to coordinate in real-time.
+- **Rich Media Support:** Supports text messaging, image attachments (securely uploaded to cloud buckets), and voice notes.
+- **WebSocket Synchronization:** Powered by Supabase Realtime subscriptions, ensuring messages instantly propagate across all active staff dashboard sessions.
+
+### 11. Back-of-House Operations Engine
 OurMenu OS is a true operating system, extending far beyond the customer-facing frontend into deep backend workflows:
 - **Demo Mode Bypass:** A dedicated `?demo=1` architectural flow allowing prospective users to experience the full dashboard, analytics, and CRM mock data without creating an account.
 - **Automated Daily Reports:** Nightly cron jobs that aggregate key business metrics (sales, velocity, feedback) and email summarized briefings directly to owners.

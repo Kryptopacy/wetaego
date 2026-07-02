@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Database } from '@/lib/supabase/types'
 import { Skeleton } from '@/components/ui/skeleton'
 import { StaggeredList } from '@/components/StaggeredList'
+import { CustomerIouDialog } from './customer-iou-dialog'
 
 type CustomerProfile = Database['public']['Tables']['customer_profiles']['Row']
 
@@ -19,6 +20,7 @@ export function CustomersClient({ organizationId, initialProfiles, currencyCode 
   const [profiles, setProfiles] = useState<CustomerProfile[]>(initialProfiles)
   const [isLoading, setIsLoading] = useState(false)
   const [hasMore, setHasMore] = useState(initialProfiles.length >= 50)
+  const [selectedCustomer, setSelectedCustomer] = useState<CustomerProfile | null>(null)
   const supabase = createClient()
 
   const loadMore = async () => {
@@ -78,8 +80,9 @@ export function CustomersClient({ organizationId, initialProfiles, currencyCode 
             <tr>
               <th className="px-6 py-4 font-medium">Customer Email</th>
               <th className="px-6 py-4 font-medium">Orders</th>
-              <th className="px-6 py-4 font-medium">Lifetime Value</th>
-              <th className="px-6 py-4 font-medium">Loyalty Points</th>
+              <th className="px-6 py-4 font-medium">LTV</th>
+              <th className="px-6 py-4 font-medium">IOU Balance</th>
+              <th className="px-6 py-4 font-medium">IOU Limit</th>
               <th className="px-6 py-4 font-medium">Last Visit</th>
               <th className="px-6 py-4 font-medium text-right">Marketing</th>
             </tr>
@@ -93,13 +96,22 @@ export function CustomersClient({ organizationId, initialProfiles, currencyCode 
               </tr>
             ) : (
               profiles.map((profile) => (
-                <tr key={profile.id} className="hover:bg-zinc-800/30 transition-colors">
+                <tr 
+                  key={profile.id} 
+                  className="hover:bg-zinc-800/50 transition-colors cursor-pointer"
+                  onClick={() => setSelectedCustomer(profile)}
+                >
                   <td className="px-6 py-4 font-medium text-zinc-200">{profile.email}</td>
                   <td className="px-6 py-4">{profile.total_orders}</td>
                   <td className="px-6 py-4 font-medium text-emerald-400">
                     {formatCurrency(profile.total_spend_minor || 0, currencyCode)}
                   </td>
-                  <td className="px-6 py-4 font-bold text-blue-400">{profile.loyalty_points || 0}</td>
+                  <td className={`px-6 py-4 font-bold ${(profile.credit_balance_minor || 0) > 0 ? 'text-rose-500' : 'text-zinc-500'}`}>
+                    {formatCurrency(profile.credit_balance_minor || 0, currencyCode)}
+                  </td>
+                  <td className="px-6 py-4 text-zinc-300">
+                    {profile.is_iou_approved ? formatCurrency(profile.credit_limit_minor || 0, currencyCode) : 'Not Approved'}
+                  </td>
                   <td className="px-6 py-4">
                     {profile.last_visit_at ? new Date(profile.last_visit_at).toLocaleDateString() : 'N/A'}
                   </td>
@@ -129,7 +141,11 @@ export function CustomersClient({ organizationId, initialProfiles, currencyCode 
           </div>
         ) : (
           profiles.map((profile) => (
-            <div key={profile.id} className="p-4 flex flex-col gap-3 hover:bg-zinc-800/30 transition-colors">
+            <div 
+              key={profile.id} 
+              className="p-4 flex flex-col gap-3 hover:bg-zinc-800/50 transition-colors cursor-pointer"
+              onClick={() => setSelectedCustomer(profile)}
+            >
               <div className="flex justify-between items-start">
                 <div className="font-medium text-zinc-200">{profile.email}</div>
                 {profile.marketing_opt_in ? (
@@ -155,8 +171,10 @@ export function CustomersClient({ organizationId, initialProfiles, currencyCode 
                   </div>
                 </div>
                 <div>
-                  <div className="text-xs text-zinc-500 mb-1">Loyalty Points</div>
-                  <div className="font-bold text-blue-400">{profile.loyalty_points || 0}</div>
+                  <div className="text-xs text-zinc-500 mb-1">IOU Balance</div>
+                  <div className={`font-bold ${(profile.credit_balance_minor || 0) > 0 ? 'text-rose-500' : 'text-zinc-400'}`}>
+                    {formatCurrency(profile.credit_balance_minor || 0, currencyCode)}
+                  </div>
                 </div>
                 <div>
                   <div className="text-xs text-zinc-500 mb-1">Last Visit</div>
@@ -220,6 +238,18 @@ export function CustomersClient({ organizationId, initialProfiles, currencyCode 
           ))}
         </div>
       )}
+      
+      <CustomerIouDialog
+        isOpen={!!selectedCustomer}
+        onClose={() => setSelectedCustomer(null)}
+        customer={selectedCustomer}
+        organizationId={organizationId}
+        currencyCode={currencyCode}
+        onUpdate={(updated) => {
+          setProfiles(prev => prev.map(p => p.id === updated.id ? updated : p))
+          setSelectedCustomer(updated)
+        }}
+      />
     </div>
   )
 }

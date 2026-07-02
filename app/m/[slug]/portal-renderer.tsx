@@ -66,7 +66,7 @@ export function PortalRenderer({location,pages}:{
               {location.name.substring(0,2).toUpperCase()}
             </div>
           )}
-          <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">{location.name}</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">{location.portal_display_name || location.name}</h1>
           {location.tagline&&<p className="text-zinc-400 text-sm mt-1.5 max-w-xs leading-relaxed">{location.tagline}</p>}
         </motion.div>
 

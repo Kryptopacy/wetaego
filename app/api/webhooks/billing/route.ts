@@ -65,12 +65,17 @@ export async function POST(req: Request) {
     if (event.event === 'subscription.create') {
       const metadata = event.data?.metadata || event.data?.customer?.metadata
       if (metadata && metadata.organization_id) {
+        // Use exact next_payment_date if provided, else fallback to 30 days
+        const nextPaymentDate = event.data.next_payment_date 
+          ? new Date(event.data.next_payment_date).toISOString() 
+          : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+
         await supabase
           .from('organizations')
           .update({
             subscription_status: 'active',
             subscription_plan: event.data.plan?.plan_code || 'pro',
-            current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+            current_period_end: nextPaymentDate
           })
           .eq('id', metadata.organization_id)
       }
@@ -94,11 +99,15 @@ export async function POST(req: Request) {
       
       if (metadata && metadata.is_subscription && metadata.organization_id) {
         // This is a successful recurring charge!
+        const nextPaymentDate = event.data.next_payment_date 
+          ? new Date(event.data.next_payment_date).toISOString() 
+          : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+          
         await supabase
           .from('organizations')
           .update({ 
             subscription_status: 'active',
-            current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // roughly 30 days
+            current_period_end: nextPaymentDate
           })
           .eq('id', metadata.organization_id)
           
@@ -137,6 +146,63 @@ export async function POST(req: Request) {
               `Your purchase of 1 Extra Custom Page was successful. You were charged ${amountStr}.\n\nThank you for using OurMenu OS!`
             )
           }
+        }
+      } else if (metadata && metadata.is_iou_repayment && metadata.organization_id && metadata.customer_id) {
+        // This is a successful IOU Repayment
+        
+        // 1. Record the repayment transaction
+        await supabase.from('iou_transactions').insert({
+          organization_id: metadata.organization_id,
+          customer_id: metadata.customer_id,
+          type: 'repayment',
+          amount_minor: event.data.amount,
+          reference: event.data.reference
+        });
+
+        // 2. Decrement the customer's credit_balance_minor
+        // We use an RPC call or fetch and update if no RPC exists. We will fetch and update to keep it simple.
+        const { data: customer } = await supabase
+          .from('customer_profiles')
+          .select('credit_balance_minor')
+          .eq('id', metadata.customer_id)
+          .single()
+          
+        if (customer) {
+          const newBalance = Math.max(0, (customer.credit_balance_minor || 0) - event.data.amount)
+          await supabase
+            .from('customer_profiles')
+            .update({ credit_balance_minor: newBalance })
+            .eq('id', metadata.customer_id)
+        }
+
+        // 3. Mark any matching pending installments as paid
+        await supabase
+          .from('iou_installments')
+          .update({ status: 'paid' })
+          .eq('organization_id', metadata.organization_id)
+          .eq('customer_id', metadata.customer_id)
+          .eq('status', 'pending')
+          // Optionally, we could match by amount or reference if we stored it, but marking all pending as paid or partial is complex. For now, mark all pending as paid if they made a payment (assuming single active link).
+      }
+    }
+
+    if (event.event === 'invoice.payment_failed') {
+      const metadata = event.data?.metadata || event.data?.customer?.metadata || event.data?.subscription?.metadata
+      if (metadata && metadata.organization_id) {
+        await supabase
+          .from('organizations')
+          .update({
+            subscription_status: 'past_due'
+          })
+          .eq('id', metadata.organization_id)
+          
+        if (event.data.customer?.email) {
+          const { sendEmailNotification } = await import('@/lib/notifications/email')
+          await sendEmailNotification(
+            event.data.customer.email, 
+            'Action Required: Your OurMenu OS Subscription Renewal Failed', 
+            `We attempted to renew your subscription but the charge failed. Please update your payment method to avoid service interruption.\n\nThank you for using OurMenu OS!`
+          )
         }
       }
     }

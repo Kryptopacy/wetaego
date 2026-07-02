@@ -101,7 +101,7 @@ export async function processCheckout(params: {
   customerNote?: string,
   customerEmail?: string,
   paymentFractionMinor?: number,
-  paymentMethod?: 'card' | 'transfer',
+  paymentMethod?: 'card' | 'transfer' | 'iou',
   discountAmountMinor?: number,
   customerName?: string,
   customerPhone?: string,
@@ -232,12 +232,63 @@ export async function processCheckout(params: {
     throw new Error(stockError.message || 'One or more items in your cart just sold out. Please review your cart.')
   }
 
+  const chargeAmountMinor = paymentFractionMinor ?? verifiedTotalMinor
+
+  // 4c. IOU Payment Verification & Balance Update
+  if (paymentMethod === 'iou') {
+    if (!customerEmail) {
+      await supabase.from('orders').delete().eq('id', order.id)
+      throw new Error('Email is required to use Pay Later (IOU).')
+    }
+
+    // Verify IOU status and limits
+    const { data: customer } = await supabase
+      .from('customer_profiles')
+      .select('id, is_iou_approved, credit_limit_minor, credit_balance_minor')
+      .eq('organization_id', organizationId)
+      .eq('email', customerEmail)
+      .single()
+
+    if (!customer || !customer.is_iou_approved) {
+      await supabase.from('orders').delete().eq('id', order.id)
+      throw new Error('You are not approved for Pay Later purchases.')
+    }
+
+    const currentBalance = customer.credit_balance_minor || 0
+    const limit = customer.credit_limit_minor || 0
+    
+    if (currentBalance + chargeAmountMinor > limit) {
+      await supabase.from('orders').delete().eq('id', order.id)
+      throw new Error(`Insufficient IOU credit. Available: ${((limit - currentBalance)/100).toFixed(2)}`)
+    }
+
+    // Update customer balance
+    await supabase
+      .from('customer_profiles')
+      .update({ credit_balance_minor: currentBalance + chargeAmountMinor })
+      .eq('id', customer.id)
+
+    // Log the transaction
+    await supabase.from('iou_transactions').insert({
+      organization_id: organizationId,
+      customer_id: customer.id,
+      order_id: order.id,
+      type: 'purchase',
+      amount_minor: chargeAmountMinor,
+      reference: order.id
+    })
+    
+    // Mark order as paid because it's on credit
+    await supabase.from('orders').update({ amount_paid_minor: chargeAmountMinor }).eq('id', order.id)
+
+    return { data: { orderId: order.id, paymentMethod: 'iou' } }
+  }
+
   // 5. Initialize Paystack Transaction if Active and method is card
   const isPaystackLive = paySettings?.is_active && paySettings?.provider_account_id
   
-  if (isPaystackLive && paymentMethod !== 'transfer' && !isUnevenSplit) {
+  if (isPaystackLive && paymentMethod === 'card' && !isUnevenSplit) {
     // Use verified server total for Paystack — split payment uses fractional amount
-    const chargeAmountMinor = paymentFractionMinor ?? verifiedTotalMinor
     const email = customerEmail || `order_${order.id}@ourmenuos.online`
 
     // Dynamically calculate platform fee to enforce OurMenuOS percentages
@@ -429,6 +480,23 @@ export async function optInMarketing(params: { orderId: string }): Promise<SafeR
     return { serverError: err instanceof Error ? err.message : 'Failed to opt in' }
   }
 }
+
+export async function checkIouStatus(organizationId: string): Promise<boolean> {
+  if (!organizationId) return false;
+  try {
+    const supabase = await createClient()
+    const { data } = await supabase
+      .from('iou_settings')
+      .select('is_enabled')
+      .eq('organization_id', organizationId)
+      .maybeSingle()
+    
+    return data?.is_enabled ?? false
+  } catch (e) {
+    return false
+  }
+}
+
 
 const quoteSchema = z.object({
   page_id: z.string().uuid(),

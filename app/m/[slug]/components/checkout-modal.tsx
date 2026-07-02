@@ -6,7 +6,7 @@ import { X, MapPin, Sparkles, Plus, Minus, ShoppingBag, ChevronDown } from 'luci
 import { formatCurrency } from '@/lib/utils/currency'
 import { CheckoutPaymentForm } from './checkout-payment-form'
 import { toast } from 'sonner'
-import { processCheckout } from '../actions'
+import { processCheckout, checkIouStatus } from '../actions'
 
 // Extracted Floating Input
 export function FloatingInput({ 
@@ -96,6 +96,7 @@ interface CheckoutModalProps {
   globalDiscountPercentage?: number | null
   menuItems?: CheckoutMenuItem[]
   templateType?: string
+  iouPaymentEnabled?: boolean
   deliveryEnabled?: boolean | null
   deliveryFeeMinor?: number | null
   deliveryMinimumOrderMinor?: number | null
@@ -132,6 +133,7 @@ export function CheckoutModal({
   globalDiscountPercentage,
   menuItems = [],
   templateType = 'catalog',
+  iouPaymentEnabled = false,
   deliveryEnabled,
   deliveryFeeMinor,
   deliveryMinimumOrderMinor,
@@ -171,7 +173,14 @@ export function CheckoutModal({
   
   const [splitCount, setSplitCount] = useState(1)
   const [splitType, setSplitType] = useState<'even' | 'uneven'>('even')
-  const [paymentMethod, setPaymentMethod] = useState<'card' | 'transfer'>(paymentIsLive ? 'card' : 'transfer')
+  const [paymentMethod, setPaymentMethod] = useState<'card' | 'transfer' | 'iou'>(paymentIsLive ? 'card' : 'transfer')
+  const [isIouGloballyEnabled, setIsIouGloballyEnabled] = useState(iouPaymentEnabled)
+
+  useEffect(() => {
+    if (isOpen && organizationId) {
+      checkIouStatus(organizationId).then(enabled => setIsIouGloballyEnabled(enabled))
+    }
+  }, [isOpen, organizationId])
 
   // Auto-fill customer data on load
   useEffect(() => {
@@ -732,6 +741,7 @@ export function CheckoutModal({
                 hideAddressField={hideAddressField}
                 tableNumber={tableNumber}
                 templateType={templateType}
+                iouPaymentEnabled={isIouGloballyEnabled}
               />
               
               {refundPolicy && (

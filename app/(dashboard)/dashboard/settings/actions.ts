@@ -238,6 +238,7 @@ export const saveLocationInfoSettings = authActionClient
     googleMapsUrl: zfd.text(z.string().max(300).url().optional().or(z.literal(''))),
     operatingHours: zfd.text(z.string().max(200).optional()),
     fulfillmentLocationLabel: zfd.text(z.string().max(50).optional()),
+    portalDisplayName: zfd.text(z.string().max(100).optional()),
     randomizerEnabled: zfd.checkbox(),
     isSearchVisible: zfd.checkbox(),
   }))
@@ -296,6 +297,7 @@ export const saveLocationInfoSettings = authActionClient
         google_maps_url: parsedInput.googleMapsUrl === '' ? null : (parsedInput.googleMapsUrl || null),
         operating_hours: parsedInput.operatingHours || null,
         fulfillment_location_label: parsedInput.fulfillmentLocationLabel || null,
+        portal_display_name: parsedInput.portalDisplayName || null,
         randomizer_enabled: parsedInput.randomizerEnabled,
         is_search_visible: parsedInput.isSearchVisible,
       })

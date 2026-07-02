@@ -10,8 +10,8 @@ interface CheckoutPaymentFormProps {
   manualPaymentAccountName?: string | null
   manualPaymentAccountNumber?: string | null
   manualPaymentInstructions?: string | null
-  paymentMethod: 'card' | 'transfer'
-  setPaymentMethod: (method: 'card' | 'transfer') => void
+  paymentMethod: 'card' | 'transfer' | 'iou'
+  setPaymentMethod: (method: 'card' | 'transfer' | 'iou') => void
   splitCount: number
   setSplitCount: (count: number) => void
   finalTotalMinor: number
@@ -20,6 +20,7 @@ interface CheckoutPaymentFormProps {
   tableNumber: string
   templateType: string
   isUnevenSplit?: boolean
+  iouPaymentEnabled?: boolean
 }
 
 export function CheckoutPaymentForm({
@@ -38,7 +39,8 @@ export function CheckoutPaymentForm({
   hideAddressField,
   tableNumber,
   templateType,
-  isUnevenSplit
+  isUnevenSplit,
+  iouPaymentEnabled = false
 }: CheckoutPaymentFormProps) {
   return (
     <>
@@ -63,6 +65,18 @@ export function CheckoutPaymentForm({
               <Building2 className="w-6 h-6" />
               <span className="text-sm font-bold">Transfer</span>
             </button>
+            {iouPaymentEnabled && (
+              <button 
+                type="button"
+                onClick={() => { setPaymentMethod('iou'); setSplitCount(1); }}
+                className={`flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border-2 transition-all ${paymentMethod === 'iou' ? 'border-zinc-900 dark:border-white bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-md' : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:border-zinc-300 dark:hover:border-zinc-700'}`}
+              >
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="text-sm font-bold">Pay Later (IOU)</span>
+              </button>
+            )}
           </div>
         </div>
       )}
@@ -103,7 +117,7 @@ export function CheckoutPaymentForm({
                 <span className="text-[16px] tracking-tight">{isUnevenSplit ? formatCurrency(finalTotalMinor) : (splitCount > 1 ? formatCurrency(Math.ceil(finalTotalMinor / splitCount)) : formatCurrency(finalTotalMinor))}</span>
               </div>
               <div className="flex items-center gap-1.5 bg-white/10 dark:bg-black/10 py-1.5 px-3 rounded-xl backdrop-blur-sm">
-                {isUnevenSplit ? 'Share Link' : (paymentMethod === 'transfer' ? 'Transfer' : 'Complete Order')}
+                {isUnevenSplit ? 'Share Link' : (paymentMethod === 'transfer' ? 'Transfer' : paymentMethod === 'iou' ? 'Charge IOU' : 'Complete Order')}
                 <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </div>
             </div>

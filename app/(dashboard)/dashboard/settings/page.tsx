@@ -90,6 +90,7 @@ export default async function SettingsPage({
 
   let paymentSettings = null
   let location = null
+  let iouSettings = null
   if (organization && isOwnerOrManager) {
     const { data: paySettings } = await supabase
       .from('organization_payment_settings')
@@ -97,6 +98,13 @@ export default async function SettingsPage({
       .eq('organization_id', organization.id)
       .single()
     paymentSettings = paySettings
+
+    const { data: iouData } = await supabase
+      .from('iou_settings')
+      .select('*')
+      .eq('organization_id', organization.id)
+      .maybeSingle()
+    iouSettings = iouData
 
     const { data: loc } = await supabase
       .from('locations')
@@ -683,6 +691,22 @@ export default async function SettingsPage({
                 />
               </div>
 
+              <div>
+                <label className="mb-2 flex items-center justify-between text-sm font-medium text-zinc-300">
+                  <span>Portal Display Name</span>
+                  <span className="rounded bg-zinc-800 px-1.5 py-0.5 text-[10px] text-zinc-400">Optional</span>
+                </label>
+                <input
+                  type="text"
+                  name="portalDisplayName"
+                  defaultValue={location.portal_display_name || ''}
+                  className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm"
+                  placeholder="e.g. The Pacy Group"
+                  maxLength={100}
+                />
+                <p className="mt-1 text-xs text-zinc-500">Overrides the location name shown on the customer-facing portal.</p>
+              </div>
+
               <div className="mt-6">
                 <button type="submit" className="px-6 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium transition-colors">
                   Save Venue Info
@@ -977,6 +1001,80 @@ export default async function SettingsPage({
               <div className="mt-2 flex items-center justify-between">
                 <button type="submit" className="px-6 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium transition-colors">
                   Save Add-ons
+                </button>
+              </div>
+            </ActionForm>
+          </div>
+        )}
+        
+        {tab === 'addons' && organization && (
+          <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 mt-6">
+            <h2 className="text-lg font-semibold text-white mb-2 flex items-center gap-2">
+              IOU (Pay Later) Settings
+            </h2>
+            <p className="text-sm text-zinc-400 mb-6">
+              Configure your credit and installment system to allow trusted customers to buy on credit.
+            </p>
+
+            <ActionForm action={async (formData) => {
+              'use server'
+              const { saveIouSettings } = await import('./addons-actions')
+              return await saveIouSettings(formData)
+            }} className="flex flex-col gap-8">
+              <input type="hidden" name="organizationId" value={organization.id} />
+              
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-4 bg-zinc-800/30 border border-zinc-700 rounded-xl">
+                  <div>
+                    <p className="text-sm font-bold text-white">Enable IOU System</p>
+                    <p className="text-xs text-zinc-400 mt-0.5">Allow staff to assign credit limits to customers.</p>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" name="is_enabled" value="true" defaultChecked={iouSettings?.is_enabled || false} className="sr-only peer" />
+                    <div className="w-11 h-6 bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
+                  </label>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-zinc-300">Auto-Approve Spend Threshold (Minor Units)</label>
+                  <input
+                    type="number"
+                    name="auto_approve_spend_threshold_minor"
+                    defaultValue={iouSettings?.auto_approve_spend_threshold_minor || ''}
+                    className="w-full rounded-xl bg-zinc-800 border-zinc-700 px-4 py-3 text-white outline-none focus:border-blue-500"
+                    placeholder="e.g. 1000000 (Leave blank for manual only)"
+                  />
+                  <p className="text-xs text-zinc-500 mt-2">Automatically approve customers who have spent this much historically.</p>
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-zinc-300">Default Credit Limit (Minor Units)</label>
+                  <input
+                    type="number"
+                    name="default_credit_limit_minor"
+                    defaultValue={iouSettings?.default_credit_limit_minor || 0}
+                    className="w-full rounded-xl bg-zinc-800 border-zinc-700 px-4 py-3 text-white outline-none focus:border-blue-500"
+                    placeholder="e.g. 5000000"
+                  />
+                  <p className="text-xs text-zinc-500 mt-2">The starting limit for auto-approved customers.</p>
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-zinc-300">Reminder Frequency (Days)</label>
+                  <input
+                    type="number"
+                    name="reminder_frequency_days"
+                    defaultValue={iouSettings?.reminder_frequency_days || 7}
+                    className="w-full rounded-xl bg-zinc-800 border-zinc-700 px-4 py-3 text-white outline-none focus:border-blue-500"
+                    placeholder="e.g. 7"
+                  />
+                  <p className="text-xs text-zinc-500 mt-2">How often to remind customers with overdue balances.</p>
+                </div>
+              </div>
+
+              <div className="mt-2 flex items-center justify-between">
+                <button type="submit" className="px-6 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium transition-colors">
+                  Save IOU Settings
                 </button>
               </div>
             </ActionForm>

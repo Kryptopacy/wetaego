@@ -6,6 +6,7 @@ import {
   LayoutDashboard, ClipboardList, BarChart3, BookOpen,
   FileText, Settings, Users, QrCode, TrendingUp, MessageSquare
 } from 'lucide-react'
+import { IntercomWidget } from '@/components/intercom/intercom-widget'
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
   const supabase = await createClient()
@@ -120,6 +121,9 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   return (
     <ClientLayout initialData={initialData}>
       {children}
+      {userData?.user && orgId && (
+        <IntercomWidget userId={userData.user.id} organizationId={orgId} />
+      )}
     </ClientLayout>
   )
 }

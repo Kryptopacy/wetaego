@@ -59,3 +59,41 @@ export const saveAddonsSettings = authActionClient
     revalidatePath('/dashboard/settings')
     return { success: true }
   })
+
+export const saveIouSettings = authActionClient
+  .schema(zfd.formData({
+    organizationId: zfd.text(z.string().uuid()),
+    is_enabled: zfd.checkbox(),
+    auto_approve_spend_threshold_minor: zfd.numeric(z.number().optional()),
+    default_credit_limit_minor: zfd.numeric(z.number().default(0)),
+    reminder_frequency_days: zfd.numeric(z.number().default(7)),
+  }))
+  .action(async ({ parsedInput, ctx: { supabase } }) => {
+    const { cookies } = await import('next/headers')
+    if ((await cookies()).get('demo_mode')?.value === '1') {
+      return { success: true }
+    }
+
+    const {
+      organizationId,
+      is_enabled,
+      auto_approve_spend_threshold_minor,
+      default_credit_limit_minor,
+      reminder_frequency_days,
+    } = parsedInput
+
+    const { error } = await supabase
+      .from('iou_settings')
+      .upsert({
+        organization_id: organizationId,
+        is_enabled,
+        auto_approve_spend_threshold_minor: auto_approve_spend_threshold_minor || null,
+        default_credit_limit_minor,
+        reminder_frequency_days,
+      })
+
+    if (error) throw new Error((error as Error).message)
+
+    revalidatePath('/dashboard/settings')
+    return { success: true }
+  })

@@ -1,0 +1,1 @@
+ALTER TABLE public.locations ADD COLUMN portal_display_name TEXT;
