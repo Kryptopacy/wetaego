@@ -1,4 +1,4 @@
-﻿export type Json =
+export type Json =
   | string
   | number
   | boolean
@@ -723,6 +723,99 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      inventory_items: {
+        Row: {
+          id: string
+          organization_id: string
+          location_id: string
+          name: string
+          sku: string | null
+          category: string
+          unit: string
+          current_quantity: number
+          reorder_threshold: number | null
+          cost_price_minor: number | null
+          notes: string | null
+          is_archived: boolean
+          created_at: string
+          updated_at: string
+          created_by: string | null
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          location_id: string
+          name: string
+          sku?: string | null
+          category?: string
+          unit?: string
+          current_quantity?: number
+          reorder_threshold?: number | null
+          cost_price_minor?: number | null
+          notes?: string | null
+          is_archived?: boolean
+          created_at?: string
+          updated_at?: string
+          created_by?: string | null
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          location_id?: string
+          name?: string
+          sku?: string | null
+          category?: string
+          unit?: string
+          current_quantity?: number
+          reorder_threshold?: number | null
+          cost_price_minor?: number | null
+          notes?: string | null
+          is_archived?: boolean
+          created_at?: string
+          updated_at?: string
+          created_by?: string | null
+        }
+        Relationships: []
+      }
+      inventory_movements: {
+        Row: {
+          id: string
+          organization_id: string
+          location_id: string
+          item_id: string
+          movement_type: 'restock' | 'use' | 'wastage' | 'sale' | 'adjustment'
+          quantity: number
+          note: string | null
+          order_id: string | null
+          recorded_by: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          location_id: string
+          item_id: string
+          movement_type: 'restock' | 'use' | 'wastage' | 'sale' | 'adjustment'
+          quantity: number
+          note?: string | null
+          order_id?: string | null
+          recorded_by?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          location_id?: string
+          item_id?: string
+          movement_type?: 'restock' | 'use' | 'wastage' | 'sale' | 'adjustment'
+          quantity?: number
+          note?: string | null
+          order_id?: string | null
+          recorded_by?: string | null
+          created_at?: string
+        }
+        Relationships: []
       }
       locations: {
         Row: {

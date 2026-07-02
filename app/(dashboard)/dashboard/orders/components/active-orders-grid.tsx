@@ -16,9 +16,10 @@ interface ActiveOrdersGridProps {
   onMarkPaidOffline: (id: string) => Promise<void>
   onCompleteOrder: (id: string) => Promise<void>
   onCancelOrder: (id: string, reason: string, restock: boolean) => Promise<void>
+  onSendPaymentLink: (id: string) => Promise<void>
 }
 
-export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, templateType, onClaimOrder, onMarkPaidOffline, onCompleteOrder, onCancelOrder }: ActiveOrdersGridProps) {
+export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, templateType, onClaimOrder, onMarkPaidOffline, onCompleteOrder, onCancelOrder, onSendPaymentLink }: ActiveOrdersGridProps) {
   const [optimisticOrders, addOptimisticOrder] = useOptimistic(
     activeOrders,
     (state: UIOrder[], updatedOrder: Partial<UIOrder> & { id: string }) => {
@@ -105,8 +106,13 @@ export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, tem
             </div>
           ) : (
             filteredOrders.map(order => (
-              <div key={order.id} className={`p-5 rounded-lg border ${order.status === 'paid' ? 'border-blue-500/50 bg-blue-500/5' : 'border-zinc-800 bg-zinc-900/50'}`}>
-                <div className="flex justify-between items-start mb-4 border-b border-zinc-800/50 pb-4">
+              <div key={order.id} className="relative overflow-hidden rounded-lg sm:overflow-visible">
+                {/* Mobile Swipe Container (CSS Scroll Snap) */}
+                <div className="flex w-full overflow-x-auto snap-x snap-mandatory hide-scrollbar sm:block sm:overflow-visible">
+                  
+                  {/* Main Card Content */}
+                  <div className={`w-full shrink-0 snap-center p-5 border sm:rounded-lg ${order.status === 'paid' ? 'border-blue-500/50 bg-blue-500/5' : 'border-zinc-800 bg-zinc-900/50'}`}>
+                    <div className="flex justify-between items-start mb-4 border-b border-zinc-800/50 pb-4">
                   <div>
                     <div className="flex items-center gap-3 mb-1">
                       <span className="font-bold text-xl text-white">{order.table_identifier || 'Takeaway'}</span>
@@ -168,7 +174,8 @@ export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, tem
                   </div>
                 )}
 
-                <div className={`flex justify-between items-center mt-4 pt-4 border-t border-zinc-800/50 ${templateType === 'restaurant' ? 'flex-col gap-4 sm:flex-row' : ''}`}>
+                {/* Desktop Inline Actions (Hidden on Mobile) */}
+                <div className={`hidden sm:flex justify-between items-center mt-4 pt-4 border-t border-zinc-800/50 ${templateType === 'restaurant' ? 'flex-col gap-4 sm:flex-row' : ''}`}>
                   <button
                     onClick={() => {
                       const reason = window.prompt('Reason for cancellation (e.g. Sold out, Guest left)?')
@@ -203,6 +210,18 @@ export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, tem
                           <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
                           Waiting for payment
                         </span>
+                        
+                        {/* Send Payment Link Button */}
+                        {order.customer_email && (
+                          <button 
+                            onClick={() => onSendPaymentLink(order.id)}
+                            className="px-4 py-2 rounded-lg bg-teal-600/20 hover:bg-teal-600/30 text-teal-400 font-medium transition-colors text-sm border border-teal-500/20 hover:border-teal-500/40"
+                            title={`Send link to ${order.customer_email}`}
+                          >
+                            Send Payment Link
+                          </button>
+                        )}
+                        
                         <button 
                           onClick={async () => {
                             startTransition(() => {
@@ -217,17 +236,27 @@ export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, tem
                       </div>
                     )}
                     {order.status === 'pending' && billingMode === 'table_service' && (
-                      <button 
-                        onClick={async () => {
-                          startTransition(() => {
-                            addOptimisticOrder({ id: order.id, status: 'paid' })
-                          })
-                          await onMarkPaidOffline(order.id)
-                        }}
-                        className="px-6 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-medium transition-colors"
-                      >
-                        Mark Paid Offline
-                      </button>
+                      <div className="flex items-center gap-3">
+                        {order.customer_email && (
+                          <button 
+                            onClick={() => onSendPaymentLink(order.id)}
+                            className="px-6 py-2 rounded-lg bg-teal-600/20 hover:bg-teal-600/30 text-teal-400 font-medium transition-colors border border-teal-500/20 hover:border-teal-500/40"
+                          >
+                            Send Payment Link
+                          </button>
+                        )}
+                        <button 
+                          onClick={async () => {
+                            startTransition(() => {
+                              addOptimisticOrder({ id: order.id, status: 'paid' })
+                            })
+                            await onMarkPaidOffline(order.id)
+                          }}
+                          className="px-6 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-medium transition-colors"
+                        >
+                          Mark Paid Offline
+                        </button>
+                      </div>
                     )}
                     {order.status === 'preparing' && order.assigned_staff_id === currentUserId && (
                       <button 
@@ -250,6 +279,58 @@ export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, tem
                   </div>
                 </div>
               </div>
+
+              {/* Mobile Swipe Actions Panel */}
+              <div className="w-[85%] shrink-0 snap-center bg-zinc-900/80 border-y border-r border-zinc-800 flex flex-col items-center justify-center p-6 sm:hidden space-y-4">
+                <span className="text-xs text-zinc-500 uppercase tracking-widest font-bold mb-2">Swipe Actions</span>
+                
+                {/* Cancel Action */}
+                <button
+                  onClick={() => {
+                    const reason = window.prompt('Reason for cancellation?')
+                    if (!reason) return
+                    const restock = window.confirm('Restock these items?')
+                    startTransition(() => {
+                      addOptimisticOrder({ id: order.id, status: 'cancelled' })
+                    })
+                    onCancelOrder(order.id, reason, restock)
+                  }}
+                  className="w-full px-4 py-3 rounded-xl bg-red-500/10 text-red-400 border border-red-500/20 font-bold active:bg-red-500/20"
+                >
+                  Cancel Order
+                </button>
+
+                {/* Claim / Complete Actions */}
+                {(!order.assigned_staff_id && (order.status === 'paid' || (order.status === 'pending' && billingMode === 'table_service'))) && (
+                  <button 
+                    onClick={() => {
+                      startTransition(() => {
+                        addOptimisticOrder({ id: order.id, assigned_staff_id: currentUserId, status: 'preparing' })
+                      })
+                      onClaimOrder(order.id)
+                    }}
+                    className="w-full px-4 py-3 rounded-xl bg-indigo-600 text-white font-bold active:bg-indigo-700"
+                  >
+                    {order.status === 'pending' ? 'Accept Order' : 'Claim Order'}
+                  </button>
+                )}
+                
+                {order.status === 'preparing' && order.assigned_staff_id === currentUserId && (
+                  <button 
+                    onClick={async () => {
+                      startTransition(() => {
+                        addOptimisticOrder({ id: order.id, status: 'completed' })
+                      })
+                      await onCompleteOrder(order.id)
+                    }}
+                    className="w-full px-4 py-3 rounded-xl bg-emerald-600 text-white font-bold active:bg-emerald-700"
+                  >
+                    {templateType === 'restaurant' ? 'Bump Order' : 'Complete Order'}
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
             ))
           )}
         </div>

@@ -4,7 +4,7 @@ import ClientLayout, { InitialDashboardData, NavItem } from './client-layout'
 import { cookies } from 'next/headers'
 import {
   LayoutDashboard, ClipboardList, BarChart3, BookOpen,
-  FileText, Settings, Users, QrCode, TrendingUp, MessageSquare
+  FileText, Settings, Users, QrCode, TrendingUp, MessageSquare, Package
 } from 'lucide-react'
 import { IntercomWidget } from '@/components/intercom/intercom-widget'
 

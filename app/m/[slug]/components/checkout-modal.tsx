@@ -107,6 +107,7 @@ interface CheckoutModalProps {
   pageFulfillmentOptions?: { pickup: boolean, delivery: boolean, table: boolean }
   __pageBillingMode?: string; pageBillingMode?: string
   locationTaxes?: CheckoutTax[]
+  pagePaymentOptions?: string[]
 }
 
 export function CheckoutModal({
@@ -143,7 +144,8 @@ export function CheckoutModal({
   refundPolicy,
   pageFulfillmentOptions,
   pageBillingMode: _pageBillingMode,
-  locationTaxes = []
+  locationTaxes = [],
+  pagePaymentOptions = []
 }: CheckoutModalProps) {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -173,7 +175,7 @@ export function CheckoutModal({
   
   const [splitCount, setSplitCount] = useState(1)
   const [splitType, setSplitType] = useState<'even' | 'uneven'>('even')
-  const [paymentMethod, setPaymentMethod] = useState<'card' | 'transfer' | 'iou'>(paymentIsLive ? 'card' : 'transfer')
+  const [paymentMethod, setPaymentMethod] = useState<'card' | 'transfer' | 'iou' | 'pay_on_delivery_cash' | 'pay_on_delivery_link' | 'pay_after_service'>(paymentIsLive ? 'card' : 'transfer')
   const [isIouGloballyEnabled, setIsIouGloballyEnabled] = useState(iouPaymentEnabled)
 
   useEffect(() => {
@@ -308,6 +310,12 @@ export function CheckoutModal({
       toast.error(`Minimum order for delivery is ${formatCurrency(deliveryMinimumOrderMinor)}`)
       return
     }
+    // Email required for payment methods that send a payment link
+    const emailRequiredMethods = ['pay_on_delivery_link', 'pay_after_service', 'iou']
+    if (emailRequiredMethods.includes(paymentMethod) && !customerEmail) {
+      toast.error('Please enter your email — it\'s needed to send your payment link')
+      return
+    }
 
     setIsCheckingOut(true)
     if (!navigator.onLine) {
@@ -363,16 +371,24 @@ export function CheckoutModal({
         console.error('Failed to save past orders', e)
       }
       
-      if (paymentMethod === 'transfer' && manualPaymentEnabled) {
+      if ((paymentMethod === 'transfer' || paymentMethod === 'pay_on_delivery_cash') && manualPaymentEnabled) {
         const currentSlug = window.location.pathname.split('/')[2]
         window.location.href = `/m/${currentSlug}/order/${orderId}`
+      } else if (paymentMethod === 'pay_on_delivery_cash' || paymentMethod === 'pay_after_service' || paymentMethod === 'pay_on_delivery_link') {
+        // No gateway — show confirmation toast
+        toast.success(
+          paymentMethod === 'pay_on_delivery_cash' ? 'Order placed! Pay when your delivery arrives.' :
+          paymentMethod === 'pay_after_service' ? 'Order placed! You\'ll be billed after service.' :
+          'Order placed! You\'ll receive a payment link when your rider arrives.'
+        )
+        onClose()
       } else if (splitCount > 1) {
         const currentSlug = window.location.pathname.split('/')[2]
         window.location.href = `/pay/${orderId}/share?split=${splitCount}&slug=${currentSlug}`
       } else if (checkoutUrl) {
         window.location.href = checkoutUrl
       } else {
-        toast.success('Order Sent to Kitchen!')
+        toast.success('Order placed!')
         onClose()
       }
     } catch (e: unknown) {
@@ -481,7 +497,6 @@ export function CheckoutModal({
                 </div>
               )}
 
-              {/* Customer Details */}
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <FloatingInput 
@@ -499,7 +514,7 @@ export function CheckoutModal({
                   />
                 </div>
                 <FloatingInput 
-                  label="Email for receipt (Optional)"
+                  label={['pay_on_delivery_link', 'pay_after_service', 'iou'].includes(paymentMethod) ? 'Email *' : 'Email'}
                   type="email"
                   value={customerEmail}
                   onChange={(e) => setCustomerEmail(e.target.value)}
@@ -733,7 +748,7 @@ export function CheckoutModal({
                 manualPaymentAccountNumber={manualPaymentAccountNumber}
                 manualPaymentInstructions={manualPaymentInstructions}
                 paymentMethod={paymentMethod}
-                setPaymentMethod={setPaymentMethod}
+                setPaymentMethod={setPaymentMethod as (m: string) => void}
                 splitCount={splitCount}
                 setSplitCount={setSplitCount}
                 finalTotalMinor={finalTotalMinor}
@@ -742,7 +757,10 @@ export function CheckoutModal({
                 tableNumber={tableNumber}
                 templateType={templateType}
                 iouPaymentEnabled={isIouGloballyEnabled}
+                pagePaymentOptions={pagePaymentOptions}
+                fulfillmentType={fulfillmentType}
               />
+
               
               {refundPolicy && (
                 <div className="p-4 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/20">

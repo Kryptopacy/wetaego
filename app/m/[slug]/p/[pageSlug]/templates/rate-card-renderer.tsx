@@ -154,13 +154,16 @@ export function RateCardRenderer({ location, page, items, locationSlug, paymentI
       {/* Hero */}
       <div className="relative w-full h-[40vh] min-h-[260px] max-h-[420px] overflow-hidden">
         {location.cover_image_url ? (
-          <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${location.cover_image_url})` }} />
+          <>
+            <div className="absolute inset-0 bg-cover bg-top" style={{ backgroundImage: `url(${location.cover_image_url})` }} />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-transparent" />
+          </>
         ) : (
           <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${themeColor}30, #0a0a0f 60%)` }}>
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[length:30px_30px]" />
           </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-black/20 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-black/30 to-transparent" />
         <div className="absolute bottom-0 left-0 right-0 p-6 max-w-2xl mx-auto flex items-end gap-4">
           {location.organizations?.logo_url && (
             <div className="relative w-16 h-16 rounded-xl overflow-hidden shrink-0 bg-black/40 p-1 border border-white/10">

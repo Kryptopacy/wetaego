@@ -114,11 +114,14 @@ export function CatalogPageRenderer({ location, page, items, locationSlug, payme
       {/* Hero */}
       <div className="relative w-full min-h-[32vh] md:max-h-[340px] flex flex-col justify-end overflow-hidden">
         {location.cover_image_url ? (
-          <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${location.cover_image_url})` }} />
+          <>
+            <div className="absolute inset-0 bg-cover bg-top" style={{ backgroundImage: `url(${location.cover_image_url})` }} />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-transparent" />
+          </>
         ) : (
           <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${themeColor}30, #0a0a0f)` }} />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-black/30 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-black/40 to-transparent" />
         <div className="relative z-10 w-full p-5 pt-[calc(env(safe-area-inset-top,24px)+40px)] max-w-4xl mx-auto flex flex-col justify-end mt-auto">
           {location.organizations?.logo_url && (
             <div className="relative h-10 w-24 mb-3 drop-shadow-lg">
@@ -260,6 +263,7 @@ export function CatalogPageRenderer({ location, page, items, locationSlug, payme
             page.template_data?.fulfillment_options as { pickup: boolean, delivery: boolean, table: boolean } | undefined
           }
           pageBillingMode={page.billing_mode}
+          pagePaymentOptions={(page.template_data?.payment_options as string[]) || []}
         />
       )}
 

@@ -47,11 +47,15 @@ export function PortalRenderer({location,pages}:{
     <div className="min-h-screen bg-zinc-950 font-sans overflow-x-hidden">
       <div className="relative h-72 sm:h-80 overflow-hidden">
         {location.cover_image_url?(
-          <Image src={location.cover_image_url} alt={location.name} fill className="object-cover" priority/>
+          <>
+            <Image src={location.cover_image_url} alt={location.name} fill className="object-cover object-top" priority sizes="100vw"/>
+            {/* Dark scrim so bright photos don't wash out content below */}
+            <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-zinc-950"/>
+          </>
         ):(
           <div className="absolute inset-0" style={{backgroundColor:themeColor,opacity:0.3}}/>
         )}
-        <div className="absolute inset-0" style={{background:`linear-gradient(to bottom,${hexToRgba(themeColor,0.2)} 0%,rgba(9,9,11,0.6) 60%,rgba(9,9,11,1) 100%)`}}/>
+        <div className="absolute inset-0" style={{background:`linear-gradient(to bottom,${hexToRgba(themeColor,0.15)} 0%,rgba(9,9,11,0.5) 60%,rgba(9,9,11,1) 100%)`}}/>
         <div className="absolute top-0 left-0 right-0 h-1" style={{backgroundColor:themeColor}}/>
       </div>
 

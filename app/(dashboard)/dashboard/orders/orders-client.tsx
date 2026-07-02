@@ -15,7 +15,7 @@ import { mapSupabaseOrderToUI } from '@/lib/utils/transformers'
 import { UIOrder } from '@/lib/types/frontend'
 import { useOfflineSync } from '@/hooks/use-offline-sync'
 import { QueuedAction } from '@/lib/stores/offline-queue-store'
-import { markOrderPaidOffline, completeOrderAction, cancelOrderAction } from './actions'
+import { completeOrderAction, markOrderPaidOffline, cancelOrderAction, sendPaymentLinkAction } from './actions'
 import { OfflineIndicator } from './components/offline-indicator'
 import { HardwareSettingsView } from './components/hardware-settings-view'
 import { usePrinterStore } from '@/lib/stores/printer-store'
@@ -304,6 +304,35 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
     )
   }
 
+  const handleSendPaymentLink = async (orderId: string) => {
+    const order = orders.find(o => o.id === orderId)
+    if (!order?.customer_email) {
+      toast.error('Customer email is required to send a payment link')
+      return
+    }
+    
+    toast.loading('Generating payment link...', { id: `link-${orderId}` })
+    
+    await executeOrQueue(
+      { type: 'sendPaymentLink', payload: { orderId } },
+      () => {},
+      async () => {
+        try {
+          const res = await sendPaymentLinkAction({ orderId })
+          if (res?.serverError || res?.validationErrors) {
+            toast.error(res.serverError || 'Failed to send payment link', { id: `link-${orderId}` })
+            return false
+          }
+          toast.success('Payment link sent to customer!', { id: `link-${orderId}` })
+          return true
+        } catch (e: any) {
+          toast.error(e.message || 'Error sending link', { id: `link-${orderId}` })
+          return false
+        }
+      }
+    )
+  }
+
   const handleCompleteOrder = async (orderId: string) => {
     await executeOrQueue(
       { type: 'completeOrder', payload: { orderId } },
@@ -399,6 +428,7 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
             onMarkPaidOffline={handleMarkPaidOffline}
             onCompleteOrder={handleCompleteOrder}
             onCancelOrder={handleCancelOrder}
+            onSendPaymentLink={handleSendPaymentLink}
           />
         </div>
       ) : activeTab === 'history' ? (

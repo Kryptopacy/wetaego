@@ -97,29 +97,40 @@ Seamlessly scale operations across multiple venues, cities, or countries from a 
 - **Answer Engine Optimization (AEO):** Screen-reader-only descriptive blocks feed AI tools (ChatGPT, Perplexity) context around business identities. 
 - **Privacy-First Indexing:** A strict opt-in framework controls web crawlers. All tenant directories default to `noindex, nofollow` to protect private menus, only enabling public indexing when the tenant explicitly grants consent via the compliance dashboard.
 
-### 8. Live Inventory & Intelligent Cancellation Engine
-- **Atomic Stock Management:** Items can optionally track finite units via robust, race-condition-free database RPCs, automatically switching to "Sold Out" when availability runs out.
-- **Order Cancellation Lifecycle:** Businesses can safely reject/cancel orders, logging a strict cancellation reason for analytics while offering front-desk operations the choice to restock rejected inventory instantly or withhold it.
-- **Optimistic UI Validation:** Fully responsive UI updates allow waitstaff and cashiers to modify stock limits dynamically from the dashboard, synchronizing globally without page refreshes.
+### 8. Inventory Manager (Physical Stock Tracking)
+A purpose-built, real-time stock management system designed for any physical business — roadside grills, cafes, retail stores, salons — that needs to track tangible assets without a complex ERP:
+- **Live Item Ledger:** Every item has a running quantity, category, unit, SKU, optional cost price, reorder threshold, and notes. Items are per-location, so multi-branch orgs stay fully isolated.
+- **5 Movement Types:** `Restock`, `Use`, `Wastage/Loss`, `Sale`, and `Manual Adjustment` — each with an optional note for accountability.
+- **Signed Quantity Trigger:** A Postgres trigger (`sync_inventory_quantity`) atomically applies every movement to the item's `current_quantity`, making the ledger race-condition-safe.
+- **Stock Status Alerts:** Items automatically surface as *In Stock*, *Low Stock* (approaching the reorder threshold), or *Out of Stock* with distinct colour-coded visual states.
+- **Quick-Log Dialog:** Staff tap a single button on any item to open a fast-entry modal — select movement type, enter quantity, optionally add a note. Outbound movements block submission if stock would go negative.
+- **Movement Log Tab:** A full chronological audit log of every stock event across the location — filterable and reverse-sorted by time.
+- **Stats Row:** At-a-glance totals for Total Items, Low Stock count, and Out-of-Stock count with clickable filter shortcuts.
 
-### 9. Customer IOU & Store Credit System
+### 9. Order Cancellation & Smart Sell-Out Engine
+- **Atomic Sell-Out Tracking:** Items can optionally track finite units via race-condition-free database RPCs, automatically switching to *Sold Out* when availability reaches zero.
+- **Order Cancellation Lifecycle:** Businesses can safely reject orders with a logged reason for analytics, with the option to instantly restock rejected inventory.
+- **Optimistic UI Validation:** Waitstaff can modify stock limits dynamically from the dashboard without page refreshes.
+
+### 10. Customer IOU & Store Credit System
 - **B2B & B2C Credit Management:** Organizations can manually approve trusted customers for a "Buy Now, Pay Later" (IOU) tab, complete with dynamic credit limits and auto-approval thresholds based on historical spend.
 - **Omnichannel Credit Checkout:** Integrated directly into the guest checkout flow, allowing approved customers to bypass card/cash payments and deduct instantly from their Store Credit balance.
 - **Automated Bookkeeping & Reminders:** The system tracks `iou_transactions`, logs installment payments, automatically restricts customers who exceed limits, and dispatches cron-driven overdue reminders.
 
-### 10. Enterprise Team & Intercom Orchestration
+### 11. Enterprise Team & Intercom Orchestration
 - **Department-Based Routing & Roles:** Organizations can group staff into bespoke departments (e.g., *Kitchen*, *Concierge*, *Housekeeping*). The platform natively provisions strict Row Level Security (RLS) to isolate staff members to their designated domains.
 - **Realtime Internal Chat:** A floating, globally accessible communication widget for staff to coordinate in real-time, featuring dedicated channels per department.
 - **Managerial Oversight:** Owners and Managers automatically inherit read/write bypasses allowing them to oversee and communicate across all departmental channels simultaneously.
 - **Rich Media & WebSocket Synchronization:** Powered by Supabase Realtime subscriptions, ensuring messages (text, voice notes, cloud-backed images) instantly propagate across all active staff dashboard sessions.
 
-### 11. Back-of-House Operations Engine
+### 12. Back-of-House Operations Engine
 OurMenu OS is a true operating system, extending far beyond the customer-facing frontend into deep backend workflows:
 - **Demo Mode Bypass:** A dedicated `?demo=1` architectural flow allowing prospective users to experience the full dashboard, analytics, and CRM mock data without creating an account.
 - **Automated Daily Reports:** Nightly cron jobs that aggregate key business metrics (sales, velocity, feedback) and email summarized briefings directly to owners.
 - **Quotes Engine:** A dedicated pipeline for consultants, freelancers, and agencies to track, manage, and respond to custom B2B rate inquiries instantly.
 - **Properties & Shifts Management:** Dedicated infrastructure for scheduling staff shifts and managing complex real estate and lodging templates.
 - **Developer Console & Metrics Export:** Deep administrative tooling allowing platform owners to export cross-organizational analytics (e.g., Hackathon metrics, platform-wide sales volume) instantly.
+
 
 ---
 
@@ -192,7 +203,7 @@ OurMenu OS features a built-in Affiliate system designed for aggressive B2B scal
 pnpm install
 pnpm dev
 ```
-Open [http://localhost:3000](http://localhost:3000) (or https://ourmenuos.online in production) to access the dashboard.
+Open https://ourmenuos.online to access the dashboard.
 
 ### 2. Supabase Edge Functions
 To test Webhooks or Push Notifications locally, install the Supabase CLI:

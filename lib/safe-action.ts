@@ -13,15 +13,7 @@ export const actionClient = createSafeActionClient({
     }
     const err = e instanceof Error ? e : new Error(String(e));
     console.error("Action error:", err.message);
-    if (err.message === 'Unauthorized' || 
-        err.message === 'Not authenticated' || 
-        err.message === 'Not logged in' ||
-        err.message.includes('Image must be less than') || 
-        err.message.includes('Invalid image format') ||
-        err.message.includes('Booking not found')) {
-      return err.message;
-    }
-    return DEFAULT_SERVER_ERROR_MESSAGE;
+    return err.message; // Expose error message for debugging
   }
 });
 

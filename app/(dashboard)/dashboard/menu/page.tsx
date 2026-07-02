@@ -47,10 +47,12 @@ export default async function MenuManagerPage() {
   const cookieStore = await cookies()
   const savedLocId = cookieStore.get('ourmenu_active_location_id')?.value
 
+  // Verify the savedLocId belongs to the org
+  const { data: orgLocs } = await supabase.from('locations').select('id').eq('organization_id', org?.id || '')
+  
   let locationId = savedLocId
-  if (!locationId) {
-    const { data: loc } = await supabase.from('locations').select('id').eq('organization_id', org?.id || '').limit(1).single()
-    locationId = loc?.id
+  if (!orgLocs?.find(l => l.id === savedLocId)) {
+    locationId = orgLocs?.[0]?.id || ''
   }
   const activeLocationId = locationId || ''
 

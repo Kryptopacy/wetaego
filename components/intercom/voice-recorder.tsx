@@ -49,8 +49,13 @@ export function VoiceRecorder({ onRecordingComplete, onCancel }: VoiceRecorderPr
     }
   }
 
+  const isInitialized = useRef(false)
+
   useEffect(() => {
-    startRecording()
+    if (!isInitialized.current) {
+      isInitialized.current = true
+      startRecording()
+    }
     return () => {
       if (timerInterval.current) clearInterval(timerInterval.current)
       if (mediaRecorder.current && mediaRecorder.current.state === 'recording') {

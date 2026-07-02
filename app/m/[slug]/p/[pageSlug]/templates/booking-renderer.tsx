@@ -133,7 +133,10 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
       {/* Hero */}
       <div className="relative w-full h-[40vh] min-h-[260px] max-h-[380px] overflow-hidden">
         {location.cover_image_url ? (
-          <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${location.cover_image_url})` }} />
+          <>
+            <div className="absolute inset-0 bg-cover bg-top" style={{ backgroundImage: `url(${location.cover_image_url})` }} />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-transparent" />
+          </>
         ) : (
           <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${themeColor}40 0%, #0a0a0f 100%)` }} />
         )}

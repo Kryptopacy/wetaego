@@ -101,7 +101,7 @@ export async function processCheckout(params: {
   customerNote?: string,
   customerEmail?: string,
   paymentFractionMinor?: number,
-  paymentMethod?: 'card' | 'transfer' | 'iou',
+  paymentMethod?: 'card' | 'transfer' | 'iou' | 'pay_on_delivery_cash' | 'pay_on_delivery_link' | 'pay_after_service',
   discountAmountMinor?: number,
   customerName?: string,
   customerPhone?: string,
@@ -321,33 +321,41 @@ export async function processCheckout(params: {
     return { data: { checkoutUrl, orderId: order.id, paymentMethod: 'card' } }
   }
 
-  // Fallback to manual payment: trigger push notification immediately
-  const { sendPushToOrg, newOrderNotification } = await import('@/lib/notifications/push')
-  waitUntil(sendPushToOrg(organizationId, newOrderNotification(tableIdentifier || 'Takeaway', verifiedTotalMinor)))
-
-  // Record platform fee for manual offline payment
-  if (verifiedTotalMinor > 0 && !isUnevenSplit && paymentMethod === 'transfer') {
-    try {
-      const platformFeesConfig = await getPlatformFees()
-      const businessFeePercent = platformFeesConfig.business_subaccount || 5
-      const feeAmountMinor = Math.floor(verifiedTotalMinor * (businessFeePercent / 100))
-      
-      if (feeAmountMinor > 0) {
-        await supabase.from('platform_fee_ledger').insert({
-          organization_id: organizationId,
-          location_id: locationId,
-          order_id: order.id,
-          fee_amount_minor: feeAmountMinor,
-          status: 'unpaid'
-        })
+  // Fallback to manual/offline payment: trigger push notification immediately
+  // For offline payments (cash, transfer, pay after service), the order is confirmed instantly.
+  const isOfflinePayment = ['transfer', 'pay_on_delivery_cash', 'pay_on_delivery_link', 'pay_after_service'].includes(paymentMethod)
+  
+  if (isOfflinePayment) {
+    const { sendPushToOrg, newOrderNotification } = await import('@/lib/notifications/push')
+    waitUntil(sendPushToOrg(organizationId, newOrderNotification(tableIdentifier || 'Takeaway', verifiedTotalMinor)))
+    
+    // Record platform fee for offline payments that aren't uneven split shares
+    if (verifiedTotalMinor > 0 && !isUnevenSplit) {
+      try {
+        const platformFeesConfig = await getPlatformFees()
+        const businessFeePercent = platformFeesConfig.business_subaccount || 5
+        const feeAmountMinor = Math.floor(verifiedTotalMinor * (businessFeePercent / 100))
+        
+        if (feeAmountMinor > 0) {
+          await supabase.from('platform_fee_ledger').insert({
+            organization_id: organizationId,
+            location_id: locationId,
+            order_id: order.id,
+            fee_amount_minor: feeAmountMinor,
+            status: 'unpaid'
+          })
+        }
+      } catch (e) {
+        console.error('Failed to log platform fee to ledger:', e)
       }
-    } catch (e) {
-      console.error('Failed to log platform fee to ledger:', e)
     }
+    
+    return { data: { orderId: order.id, paymentMethod } }
   }
 
-    return { data: { orderId: order.id, paymentMethod: 'transfer' } };
-  };
+  // Catch-all fallback
+  return { data: { orderId: order.id, paymentMethod } };
+};
 
   if (idempotencyKey) {
     return await withIdempotency(idempotencyKey, checkoutLogic);

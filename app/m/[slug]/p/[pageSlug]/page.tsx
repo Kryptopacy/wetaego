@@ -89,8 +89,8 @@ export default async function PublicPageView({
   const supabase = await createClient()
 
   const fetchLocation = async () => {
-
-    const { data } = await supabase
+    const anonSupabase = createAnonClient()
+    const { data } = await anonSupabase
       .from('locations')
       .select('id, name, organization_id, is_search_visible, theme_color, cover_image_url, ai_enabled, ai_name, instagram_handle, x_handle, tiktok_handle, whatsapp_number, phone_number, organizations(logo_url), manual_payment_enabled, manual_payment_bank_name, manual_payment_account_name, manual_payment_account_number, manual_payment_instructions, delivery_enabled, delivery_fee_minor, delivery_minimum_order_minor, delivery_note, fulfillment_location_label, currency_code, portal_display_name, location_taxes(*)')
       .eq('slug', slug)

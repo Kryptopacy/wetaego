@@ -155,6 +155,7 @@ export const updatePage = authActionClient
     randomizer_enabled: zfd.checkbox(),
     hide_delivery: zfd.checkbox(),
     payment_channels: zfd.repeatableOfType(zfd.text()),
+    payment_options: zfd.repeatableOfType(zfd.text()),
     refund_policy: zfd.text(z.string().optional()),
     milestones_enabled: zfd.checkbox(),
     whatsapp_number: zfd.text(z.string().optional()),
@@ -167,7 +168,7 @@ export const updatePage = authActionClient
   .action(async ({ parsedInput, ctx: { supabase } }) => {
     const {
       pageId, title, content, billing_enabled, billing_mode, payment_mode, deposit_percentage,
-      randomizer_enabled, hide_delivery, payment_channels, refund_policy, milestones_enabled,
+      randomizer_enabled, hide_delivery, payment_channels, payment_options, refund_policy, milestones_enabled,
       whatsapp_number, phone_number, instagram_handle, x_handle, tiktok_handle, fulfillment_options
     } = parsedInput
 
@@ -186,7 +187,8 @@ export const updatePage = authActionClient
     const template_data = { 
       ...((existing?.template_data as Record<string, unknown>) || {}), 
       hide_delivery, 
-      payment_channels: payment_channels.length > 0 ? payment_channels : undefined, 
+      payment_channels: payment_channels.length > 0 ? payment_channels : undefined,
+      payment_options: payment_options.length > 0 ? payment_options : undefined,
       refund_policy, 
       milestones_enabled,
       whatsapp_number,

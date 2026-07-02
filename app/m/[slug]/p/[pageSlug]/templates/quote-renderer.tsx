@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import Link from 'next/link'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { formatCurrency } from '@/lib/utils/currency'
@@ -138,9 +139,11 @@ export function QuoteRenderer({ location, page, items, locationSlug }: QuoteRend
             <p className="text-sm text-zinc-500 mb-1">Your Reference Number</p>
             <p className="text-2xl font-mono text-white tracking-widest">{referenceNumber}</p>
           </div>
-          <a href={`/m/${locationSlug}`} className="inline-flex w-full justify-center px-6 py-4 rounded-xl font-bold text-white transition-colors" style={{ backgroundColor: themeColor }}>
-            Return to Homepage
-          </a>
+          <div className="p-6">
+            <Link href={`/m/${locationSlug}`} className="inline-flex w-full justify-center px-6 py-4 rounded-xl font-bold text-white transition-colors" style={{ backgroundColor: themeColor }}>
+              Back to Ecosystem
+            </Link>
+          </div>
         </motion.div>
       </div>
     )
@@ -151,7 +154,10 @@ export function QuoteRenderer({ location, page, items, locationSlug }: QuoteRend
       {/* Hero */}
       <div className="relative w-full h-[35vh] min-h-[260px] max-h-[380px] overflow-hidden">
         {location.cover_image_url ? (
-          <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${location.cover_image_url})` }} />
+          <>
+            <div className="absolute inset-0 bg-cover bg-top" style={{ backgroundImage: `url(${location.cover_image_url})` }} />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-transparent" />
+          </>
         ) : (
           <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${themeColor}40 0%, #0a0a0f 100%)` }} />
         )}

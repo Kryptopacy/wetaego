@@ -12,7 +12,7 @@ import { createClient } from '@/lib/supabase/client'
 import { setActiveLocationCookie } from './layout-actions'
 import {
   LayoutDashboard, ClipboardList, BarChart3, BookOpen,
-  FileText, Settings, CreditCard, LogOut, Zap, Menu, X, Users, QrCode, TrendingUp, MessageSquare
+  FileText, Settings, CreditCard, LogOut, Zap, Menu, X, Users, QrCode, TrendingUp, MessageSquare, Package
 } from 'lucide-react'
 import { GlobalRealtime } from './global-realtime'
 import { NotificationCenter } from './notification-center'
@@ -43,7 +43,8 @@ const ICON_MAP: Record<string, React.ElementType> = {
   Users,
   QrCode,
   TrendingUp,
-  MessageSquare
+  MessageSquare,
+  Package
 }
 
 
@@ -169,6 +170,7 @@ export default function ClientLayout({ children, initialData }: { children: Reac
   }
 
   const managerItems: NavItem[] = [
+    { href: '/dashboard/inventory', label: 'Inventory', icon: Package },
     { href: '/dashboard/customers', label: 'CRM & Loyalty', icon: Users },
     { href: '/dashboard/team-performance', label: 'Team Performance', icon: BarChart3 },
     { href: '/dashboard/manage/feedback', label: 'Feedback Inbox', icon: MessageSquare },
@@ -336,7 +338,7 @@ export default function ClientLayout({ children, initialData }: { children: Reac
   )
 
   return (
-    <div className="min-h-screen bg-black flex selection:bg-violet-500/30 print:bg-white">
+    <div className="h-[100dvh] overflow-hidden bg-black flex selection:bg-violet-500/30 print:bg-white print:h-auto print:overflow-visible">
       <GlobalRealtime />
       <ServiceWorkerRegistration />
       
@@ -375,7 +377,7 @@ export default function ClientLayout({ children, initialData }: { children: Reac
       )}
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col min-h-screen relative pt-16 pb-20 md:pt-0 md:pb-0 print:pt-0 print:pb-0">
+      <main className="flex-1 flex flex-col h-full relative pt-16 pb-20 md:pt-0 md:pb-0 overflow-y-auto print:pt-0 print:pb-0 print:overflow-visible">
         <CommandPalette />
         <div className="absolute top-0 right-0 p-6 z-10 hidden md:block print:hidden">
           <div className="flex items-center gap-4 bg-zinc-900/50 backdrop-blur-md border border-zinc-800/50 px-4 py-2 rounded-full shadow-xl">

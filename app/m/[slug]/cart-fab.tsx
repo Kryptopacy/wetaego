@@ -32,6 +32,7 @@ interface CartFABProps {
   pageFulfillmentOptions?: { pickup: boolean, delivery: boolean, table: boolean }
   pageBillingMode?: string
   locationTaxes?: { name: string; percentage: number }[]
+  pagePaymentOptions?: string[]
 }
 
 export function CartFAB(props: CartFABProps) {

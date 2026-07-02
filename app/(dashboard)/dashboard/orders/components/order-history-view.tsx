@@ -138,7 +138,11 @@ export function OrderHistoryView({ organizationId, locationId, initialOrders }: 
             </div>
           ) : (
             orders.map((order) => (
-              <div key={order.id} className="p-4 flex flex-col gap-3 hover:bg-zinc-800/30 transition-colors">
+              <div 
+                key={order.id} 
+                className="p-4 flex flex-col gap-3 hover:bg-zinc-800/30 transition-colors"
+                style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 200px' }}
+              >
                 <div className="flex justify-between items-start">
                   <div className="flex items-center gap-2">
                     <span className="font-mono text-xs text-zinc-500">#{order.id.split('-')[0]}</span>

@@ -22,6 +22,7 @@ export type OfflineActionType =
   | 'toggleStock' 
   | 'resolveServiceRequest' 
   | 'markOrderPaid'
+  | 'sendPaymentLink'
 
 export interface QueuedAction {
   id: string

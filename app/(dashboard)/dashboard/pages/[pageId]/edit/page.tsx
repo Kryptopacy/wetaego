@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { PageBuilderForm } from '@/app/components/page-builder-form'
 import { updatePage } from '../../actions'
 import { ActionForm } from '@/components/ActionForm'
+import { BillingOptionsSelector } from './billing-options-selector'
 
 export default async function PageEditDashboard({
   params
@@ -87,10 +88,9 @@ export default async function PageEditDashboard({
         <h2 className="text-xl font-bold text-white mb-6">Page Settings</h2>
         <ActionForm action={updatePage} className="space-y-4 max-w-xl">
           <input type="hidden" name="pageId" value={page.id} />
-          <input type="hidden" name="billing_enabled" value={page.billing_enabled ? 'true' : 'false'} />
-          <input type="hidden" name="billing_mode" value={page.billing_mode || ''} />
-          <input type="hidden" name="payment_mode" value={page.payment_mode || ''} />
-          <input type="hidden" name="deposit_percentage" value={page.deposit_percentage || ''} />
+          <input type="hidden" name="billing_enabled" value="true" />
+          <input type="hidden" name="billing_mode" value={page.billing_mode || 'standard_checkout'} />
+          <input type="hidden" name="payment_mode" value={page.payment_mode || 'full'} />
 
           <div>
             <label className="block text-xs font-medium text-zinc-400 mb-1">Page Title</label>
@@ -129,28 +129,23 @@ export default async function PageEditDashboard({
           )}
 
           <div className="space-y-4 pt-4 border-t border-white/5">
-            <div>
-              <label className="block text-xs font-medium text-zinc-400 mb-2">Allowed Payment Methods</label>
-              <div className="flex gap-4">
-                {['card', 'bank_transfer', 'ussd'].map((method) => {
-                  // @ts-expect-error JSONB typing
-                  const channels = page.template_data?.payment_channels as string[] | undefined
-                  // If channels is undefined, we assume all are allowed by default. 
-                  const isChecked = channels ? channels.includes(method) : true
-                  return (
-                    <label key={method} className="flex items-center gap-2 text-sm text-white cursor-pointer">
-                      <input type="checkbox" name="payment_channels" value={method} defaultChecked={isChecked} className="rounded bg-zinc-900 border-zinc-800 text-purple-500 focus:ring-purple-500" />
-                      {method.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                    </label>
-                  )
-                })}
+            {/* Billing Options */}
+            <div className="space-y-2">
+              <div>
+                <h3 className="text-sm font-bold text-white">Checkout & Billing Options</h3>
+                <p className="text-xs text-zinc-500 mt-0.5">Choose which payment methods your customers can use on this page. You can enable more than one.</p>
               </div>
+              <BillingOptionsSelector
+                {/* @ts-expect-error JSONB typing */}
+                initialOptions={(page.template_data?.payment_options as string[]) || []}
+                initialDepositPercentage={page.deposit_percentage}
+              />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-zinc-400 mb-1">Cancellation & Refund Policy (Optional)</label>
+              <label className="block text-xs font-medium text-zinc-400 mb-1">Cancellation & Refund Policy</label>
               {/* @ts-expect-error JSONB typing */}
-              <textarea name="refund_policy" defaultValue={page.template_data?.refund_policy || ''} placeholder="e.g. Deposits are non-refundable if cancelled within 48 hours." className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white h-16" />
+              <textarea name="refund_policy" defaultValue={page.template_data?.refund_policy || ''} placeholder="e.g. Deposits are non-refundable if cancelled within 48 hours." className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white h-16 placeholder:text-zinc-600" />
             </div>
           </div>
 

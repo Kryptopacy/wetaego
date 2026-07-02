@@ -6,6 +6,9 @@ import { FeedbackEmail } from '@/emails/feedback-email'
 import { waitUntil } from '@vercel/functions'
 import { authActionClient } from '@/lib/safe-action'
 import { z } from 'zod'
+import { paymentProvider } from '@/lib/payments/paystack'
+import { getPlatformFees } from '@/lib/utils/settings'
+import { PaymentLinkEmail } from '@/emails/payment-link-email'
 
 const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy')
 
@@ -150,4 +153,100 @@ export const cancelOrderAction = authActionClient
     }
 
     return { success: true }
+  })
+
+export const sendPaymentLinkAction = authActionClient
+  .schema(z.object({ orderId: z.string() }))
+  .action(async ({ parsedInput: { orderId }, ctx: { user } }) => {
+    const { supabase, order } = await requireOrderAuth(orderId, user)
+
+    if (!order.customer_email) {
+      throw new Error('Customer email is missing on this order. Cannot send payment link.')
+    }
+
+    // 1. Fetch full order details
+    const { data: fullOrder, error: orderError } = await supabase
+      .from('orders')
+      .select(`
+        *,
+        order_items(item_name, quantity, price_minor),
+        organizations(name)
+      `)
+      .eq('id', orderId)
+      .single()
+
+    if (orderError || !fullOrder) {
+      throw new Error('Failed to fetch complete order details')
+    }
+
+    // 2. Fetch Payment Settings
+    const { data: paySettings } = await supabase
+      .from('organization_payment_settings')
+      .select('provider_account_id, is_active')
+      .eq('organization_id', fullOrder.organization_id)
+      .single()
+
+    const isPaystackLive = paySettings?.is_active && paySettings?.provider_account_id
+    if (!isPaystackLive) {
+      throw new Error('Your Paystack integration is not active. Cannot generate payment link.')
+    }
+
+    const subaccountCode = paySettings.provider_account_id
+
+    // 3. Generate Payment Link
+    const platformFeesConfig = await getPlatformFees()
+    const businessFeePercent = platformFeesConfig.business_subaccount || 5
+    const chargeAmountMinor = fullOrder.total_amount_minor - (fullOrder.amount_paid_minor || 0)
+    
+    if (chargeAmountMinor <= 0) {
+      throw new Error('Order is already fully paid.')
+    }
+
+    const transactionChargeMinor = subaccountCode && businessFeePercent > 0
+      ? Math.floor(chargeAmountMinor * (businessFeePercent / 100))
+      : undefined
+
+    const { authorizationUrl: checkoutUrl } = await paymentProvider.initiatePayment({
+      amountMinor: chargeAmountMinor,
+      customerEmail: fullOrder.customer_email!,
+      reference: `${orderId}-link-${Date.now()}`,
+      currency: 'NGN',
+      callbackUrl: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://ourmenuos.online'}/api/bookings/callback`,
+      subaccountCode: subaccountCode || undefined,
+      transactionChargeMinor,
+      channels: ['card', 'bank_transfer', 'ussd']
+    })
+
+    if (!checkoutUrl) {
+      throw new Error('Failed to generate checkout link from Paystack.')
+    }
+
+    // 4. Send Email
+    const orgName = (fullOrder.organizations as unknown as { name?: string })?.name || 'OurMenu Partner'
+    const items = (fullOrder.order_items as any[]).map(i => ({
+      name: i.item_name,
+      quantity: i.quantity,
+      priceMinor: i.price_minor
+    }))
+
+    waitUntil((async () => {
+      try {
+        await resend.emails.send({
+          from: 'OurMenu Payments <noreply@ourmenuos.online>',
+          to: fullOrder.customer_email!,
+          subject: `Complete your payment for Order #${orderId.substring(0, 8)}`,
+          react: PaymentLinkEmail({
+            organizationName: orgName,
+            orderId,
+            totalAmountMinor: chargeAmountMinor,
+            paymentUrl: checkoutUrl,
+            items
+          })
+        })
+      } catch (err) {
+        console.error('Failed to send payment link email:', err)
+      }
+    })())
+
+    return { success: true, checkoutUrl }
   })
