@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { MessageCircle, X, Send, Mic, Paperclip, Loader2 } from 'lucide-react'
 import { VoiceRecorder } from './voice-recorder'
@@ -94,6 +94,12 @@ export function IntercomWidget({ userId, organizationId }: { userId: string, org
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, userId, organizationId])
 
+  const scrollToBottom = useCallback(() => {
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }, 100)
+  }, [])
+
   // Fetch Messages & Subscribe
   useEffect(() => {
     if (!activeChannelId) return
@@ -162,13 +168,8 @@ export function IntercomWidget({ userId, organizationId }: { userId: string, org
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [activeChannelId])
+  }, [activeChannelId, scrollToBottom])
 
-  const scrollToBottom = () => {
-    setTimeout(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-    }, 100)
-  }
 
   const handleSendText = async (e: React.FormEvent) => {
     e.preventDefault()
