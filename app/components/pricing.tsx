@@ -15,7 +15,7 @@ export async function Pricing() {
       name: 'Lite',
       price: formatCurrency(litePrice * 100),
       period: 'per month',
-      description: 'Perfect for testing the platform at your venue. 30-day free trial included.',
+      description: 'Perfect for testing the platform at your venue. Free trial included.',
       features: ['Includes 10 Credits/mo', 'Customizable AI Assistant (guest-facing)', 'Edge Translator (40+ languages)', 'Up to 2 QR codes', '1 active location', '0 Extra Custom Pages (10 credits/page)'],
       cta: 'Start Free Trial',
       href: '/dashboard',

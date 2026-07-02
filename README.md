@@ -44,6 +44,7 @@ OurMenu OS is fundamentally decoupled from the concept of a "restaurant." It is 
 4. **Consultants & Agencies (Rate Card & Quote Templates):** Freelancers, marketing agencies, and consultants deploying polished, interactive digital rate cards for standardized B2B pricing, alongside dynamic Quote Generator templates.
 5. **Real Estate & Automotive (Listings Template):** Property rentals, car dealerships, and equipment rentals requiring image-heavy, location-based galleries.
 6. **Portal Mode:** A dynamic macro-landing page that seamlessly routes customers to multiple specialized sub-pages (e.g., A massive Hotel routing guests to a Restaurant menu, a Spa booking page, and a Room Service catalog from a single QR scan).
+7. **Custom Layout Builder:** An advanced, block-based page builder allowing organizations to create completely bespoke digital environments by stacking generic text, video, image, header, and action-button blocks dynamically.
 
 ---
 
@@ -106,10 +107,11 @@ Seamlessly scale operations across multiple venues, cities, or countries from a 
 - **Omnichannel Credit Checkout:** Integrated directly into the guest checkout flow, allowing approved customers to bypass card/cash payments and deduct instantly from their Store Credit balance.
 - **Automated Bookkeeping & Reminders:** The system tracks `iou_transactions`, logs installment payments, automatically restricts customers who exceed limits, and dispatches cron-driven overdue reminders.
 
-### 10. Realtime Staff Intercom
-- **Internal Team Chat:** A floating, globally accessible communication widget for staff and management to coordinate in real-time.
-- **Rich Media Support:** Supports text messaging, image attachments (securely uploaded to cloud buckets), and voice notes.
-- **WebSocket Synchronization:** Powered by Supabase Realtime subscriptions, ensuring messages instantly propagate across all active staff dashboard sessions.
+### 10. Enterprise Team & Intercom Orchestration
+- **Department-Based Routing & Roles:** Organizations can group staff into bespoke departments (e.g., *Kitchen*, *Concierge*, *Housekeeping*). The platform natively provisions strict Row Level Security (RLS) to isolate staff members to their designated domains.
+- **Realtime Internal Chat:** A floating, globally accessible communication widget for staff to coordinate in real-time, featuring dedicated channels per department.
+- **Managerial Oversight:** Owners and Managers automatically inherit read/write bypasses allowing them to oversee and communicate across all departmental channels simultaneously.
+- **Rich Media & WebSocket Synchronization:** Powered by Supabase Realtime subscriptions, ensuring messages (text, voice notes, cloud-backed images) instantly propagate across all active staff dashboard sessions.
 
 ### 11. Back-of-House Operations Engine
 OurMenu OS is a true operating system, extending far beyond the customer-facing frontend into deep backend workflows:

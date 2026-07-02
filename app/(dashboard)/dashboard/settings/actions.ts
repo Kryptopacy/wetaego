@@ -11,9 +11,10 @@ export const updateOrganization = authActionClient
   .schema(zfd.formData({
     name: zfd.text(z.string().min(2, "Name must be at least 2 characters")),
     slug: zfd.text(z.string().min(3, "Slug must be at least 3 characters").regex(/^[a-z0-9-]+$/, "Slug can only contain lowercase letters, numbers, and hyphens")),
-    business_type: zfd.text(z.string().optional())
+    business_type: zfd.text(z.string().optional()),
+    logo_url: zfd.text(z.string().optional())
   }))
-  .action(async ({ parsedInput: { name, slug, business_type }, ctx: { supabase, user } }) => {
+  .action(async ({ parsedInput: { name, slug, business_type, logo_url }, ctx: { supabase, user } }) => {
     const { cookies } = await import('next/headers')
     if ((await cookies()).get('demo_mode')?.value === '1') {
       revalidatePath('/dashboard/settings')
@@ -33,7 +34,7 @@ export const updateOrganization = authActionClient
       // Update existing org
       const { error } = await supabase
         .from('organizations')
-        .update({ name, slug, ...(business_type ? { business_type } : {}) })
+        .update({ name, slug, ...(business_type ? { business_type } : {}), ...(logo_url !== undefined ? { logo_url } : {}) })
         .eq('id', org.id)
       
       if (error) throw new Error('Failed to update organization')
@@ -69,7 +70,8 @@ export const updateOrganization = authActionClient
           created_by: user.id,
           referred_by_affiliate_id: referredByAffiliateId,
           trial_ends_at: trialEndsAt,
-          business_type: business_type || null
+          business_type: business_type || null,
+          logo_url: logo_url || null
         })
         .select('id')
         .single()

@@ -10,11 +10,12 @@ import { RateCardRenderer } from './templates/rate-card-renderer'
 import { QuoteRenderer } from './templates/quote-renderer'
 import { InfoRenderer } from './templates/info-renderer'
 import { RestaurantRenderer } from './templates/restaurant-renderer'
+import { PortfolioRenderer } from './templates/portfolio-renderer'
 import { AIChat } from '../../ai-chat'
 import { RouletteFAB } from '../../roulette-fab'
 import { CallStaffFAB } from '../../call-staff-fab'
 import { FabGroup } from '../../components/fab-group'
-import { EcosystemNav } from '@/components/layout/ecosystem-nav'
+import { PortalNav } from '../../components/portal-nav'
 import { unstable_cache } from 'next/cache'
 import { PreviewBanner } from '@/components/preview-banner'
 
@@ -91,7 +92,7 @@ export default async function PublicPageView({
 
     const { data } = await supabase
       .from('locations')
-      .select('id, name, organization_id, is_search_visible, theme_color, cover_image_url, ai_enabled, ai_name, instagram_handle, x_handle, tiktok_handle, whatsapp_number, phone_number, organizations(logo_url), manual_payment_enabled, manual_payment_bank_name, manual_payment_account_name, manual_payment_account_number, manual_payment_instructions, delivery_enabled, delivery_fee_minor, delivery_minimum_order_minor, delivery_note, fulfillment_location_label, currency_code, location_taxes(*)')
+      .select('id, name, organization_id, is_search_visible, theme_color, cover_image_url, ai_enabled, ai_name, instagram_handle, x_handle, tiktok_handle, whatsapp_number, phone_number, organizations(logo_url), manual_payment_enabled, manual_payment_bank_name, manual_payment_account_name, manual_payment_account_number, manual_payment_instructions, delivery_enabled, delivery_fee_minor, delivery_minimum_order_minor, delivery_note, fulfillment_location_label, currency_code, portal_display_name, location_taxes(*)')
       .eq('slug', slug)
       .single()
     return data
@@ -155,6 +156,30 @@ export default async function PublicPageView({
       )()
 
   if (!page) notFound()
+
+  // 2.5 Fetch published pages count to determine if we show the PortalNav
+  const fetchPublishedPagesCount = async () => {
+    const anonSupabase = createAnonClient()
+    let query = anonSupabase
+      .from('location_pages')
+      .select('*', { count: 'exact', head: true })
+      .eq('location_id', loc.id)
+
+    if (!isPreview) {
+      query = query.eq('is_published', true)
+    }
+
+    const { count } = await query
+    return count || 0
+  }
+  
+  const publishedPagesCount = isPreview
+    ? await fetchPublishedPagesCount()
+    : await unstable_cache(
+        fetchPublishedPagesCount,
+        [`location_pages_count_${loc.id}`],
+        { revalidate: 60, tags: [`location_pages_count_${loc.id}`] }
+      )()
 
   // 3. Items (for catalog, booking, listing, rate_card)
   const fetchItems = async () => {
@@ -224,6 +249,9 @@ export default async function PublicPageView({
     case 'quote':
       RendererContent = <QuoteRenderer {...sharedProps} />
       break
+    case 'portfolio':
+      RendererContent = <PortfolioRenderer {...sharedProps} />
+      break
     case 'info':
     case 'custom':
     default:
@@ -263,7 +291,11 @@ export default async function PublicPageView({
       )}
       {isPreview && <PreviewBanner />}
       {RendererContent}
-      <EcosystemNav locationId={loc.id} slug={slug} currentPath={page.slug} />
+      
+      {publishedPagesCount > 1 && (
+        <PortalNav slug={slug} portalName={loc.portal_display_name || loc.name} />
+      )}
+      
       <FabGroup>
         {loc.ai_enabled && (
           <AIChat

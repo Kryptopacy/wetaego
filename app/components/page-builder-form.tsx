@@ -57,6 +57,11 @@ export function PageBuilderForm({ pageId, templateType, initialItems, orgId }: P
       const price_range = formData.get('price_range') as string
       const turnaround = formData.get('turnaround') as string
       formData.set('item_data', JSON.stringify({ unit, price_range, turnaround }))
+    } else if (templateType === 'portfolio') {
+      const github_url = formData.get('github_url') as string
+      const live_url = formData.get('live_url') as string
+      const skills = formData.get('skills') as string
+      formData.set('item_data', JSON.stringify({ github_url, live_url, skills }))
     }
 
     try {
@@ -90,6 +95,11 @@ export function PageBuilderForm({ pageId, templateType, initialItems, orgId }: P
       const price_range = formData.get('price_range') as string
       const turnaround = formData.get('turnaround') as string
       formData.set('item_data', JSON.stringify({ unit, price_range, turnaround }))
+    } else if (templateType === 'portfolio') {
+      const github_url = formData.get('github_url') as string
+      const live_url = formData.get('live_url') as string
+      const skills = formData.get('skills') as string
+      formData.set('item_data', JSON.stringify({ github_url, live_url, skills }))
     }
 
     try {
@@ -196,6 +206,25 @@ export function PageBuilderForm({ pageId, templateType, initialItems, orgId }: P
               <div>
                 <label className="block text-xs font-medium text-zinc-400 mb-1">Turnaround Time</label>
                 <input name="turnaround" defaultValue={item?.item_data?.turnaround || ''} className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white" placeholder="e.g. 2-3 weeks" />
+              </div>
+            </div>
+          </>
+        )}
+
+        {templateType === 'portfolio' && (
+          <>
+            <div>
+              <label className="block text-xs font-medium text-zinc-400 mb-1">Skills & Tech Stack (Optional)</label>
+              <input name="skills" defaultValue={item?.item_data?.skills || ''} className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white" placeholder="e.g. React, Next.js, Tailwind CSS" />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-medium text-zinc-400 mb-1">GitHub / Source URL (Optional)</label>
+                <input name="github_url" defaultValue={item?.item_data?.github_url || ''} className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white" placeholder="https://github.com/..." />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-zinc-400 mb-1">Live Demo URL (Optional)</label>
+                <input name="live_url" defaultValue={item?.item_data?.live_url || ''} className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white" placeholder="https://..." />
               </div>
             </div>
           </>

@@ -58,8 +58,8 @@ export function PortalRenderer({location,pages}:{
       <div className="relative z-10 -mt-24 px-5 max-w-lg mx-auto">
         <motion.div initial={{opacity:0,y:24}} animate={{opacity:1,y:0}} transition={{duration:0.45,ease:[0.22,1,0.36,1]}} className="flex flex-col items-center text-center">
           {logoUrl?(
-            <div className="w-24 h-24 rounded-2xl overflow-hidden border-4 border-zinc-900 shadow-2xl mb-4" style={{boxShadow:`0 0 0 1px ${hexToRgba(themeColor,0.4)},0 20px 60px -12px ${hexToRgba(themeColor,0.3)}`}}>
-              <Image src={logoUrl} alt={location.name} width={96} height={96} className="w-full h-full object-cover"/>
+            <div className="mb-6 flex justify-center items-center h-20 sm:h-24 w-full">
+              <Image src={logoUrl} alt={location.name} width={256} height={128} className="w-auto h-full object-contain drop-shadow-2xl"/>
             </div>
           ):(
             <div className={`w-24 h-24 rounded-2xl flex items-center justify-center text-3xl font-black shadow-2xl mb-4 border-4 border-zinc-900 ${onThemeText}`} style={{backgroundColor:themeColor,boxShadow:`0 0 0 1px ${hexToRgba(themeColor,0.4)},0 20px 60px -12px ${hexToRgba(themeColor,0.4)}`}}>

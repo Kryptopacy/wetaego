@@ -7,7 +7,7 @@
  * — they just pick their business type and everything is pre-configured.
  */
 
-export type TemplateType = 'catalog' | 'booking' | 'listing' | 'rate_card' | 'info' | 'custom' | 'quote'
+export type TemplateType = 'catalog' | 'booking' | 'listing' | 'rate_card' | 'info' | 'custom' | 'quote' | 'portfolio'
 export type BillingMode = 'table_service' | 'standard_checkout'
 export type PaymentMode = 'full' | 'deposit'
 
@@ -242,11 +242,11 @@ export const BUSINESS_TYPE_PRESETS: Record<string, BusinessTypePreset> = {
     ai_item_hint: 'a fashion item description, style-forward and aspirational',
     group: 'retail',
   },
-  creative_portfolio: {
-    label: 'Creative Portfolio',
-    description: 'A visual showcase of your work, projects, and case studies',
-    icon: '🎨',
-    template_type: 'info',
+  portfolio: {
+    label: 'Portfolio & Showcases',
+    description: 'A sleek visual showcase for your projects, skills, and case studies',
+    icon: '🧑‍💻',
+    template_type: 'portfolio',
     billing_enabled: false,
     billing_mode: 'standard_checkout',
     payment_mode: 'full',

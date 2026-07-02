@@ -14,7 +14,6 @@ import { getPlanLimits } from '@/lib/utils/settings'
 import { savePaymentSettings, saveManualPaymentSettings } from './payment-actions'
 import { TaxesView } from './taxes-view'
 import AiFaqBuilder from './ai-faq-builder'
-import { BUSINESS_TYPE_GROUPS, getPresetsByGroup } from '@/lib/templates/presets'
 import { BusinessTypePicker } from './business-type-picker'
 
 
@@ -46,7 +45,7 @@ export default async function SettingsPage({
 
   const { data: member } = await supabase
     .from('organization_members')
-    .select('role, organizations(id, name, slug, business_type, subscription_tier, purchased_credits, monthly_free_credits_used)')
+    .select('role, organizations(id, name, slug, logo_url, business_type, subscription_tier, purchased_credits, monthly_free_credits_used)')
     .eq('user_id', userId)
     .single()
 
@@ -62,7 +61,7 @@ export default async function SettingsPage({
   } else {
     const { data: org } = await supabase
       .from('organizations')
-      .select('id, name, slug, business_type, subscription_tier, purchased_credits, monthly_free_credits_used')
+      .select('id, name, slug, logo_url, business_type, subscription_tier, purchased_credits, monthly_free_credits_used')
       .eq('created_by', userId)
       .single()
     organization = org
@@ -292,6 +291,17 @@ export default async function SettingsPage({
             <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
           <h2 className="text-lg font-semibold text-white mb-4">General Info</h2>
           <ActionForm action={updateOrganization} className="flex flex-col gap-4">
+            <div>
+              <label className="mb-2 block text-sm font-medium text-zinc-300">Business Logo URL</label>
+              <input
+                type="url"
+                name="logo_url"
+                defaultValue={organization?.logo_url || ''}
+                className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                placeholder="https://example.com/logo.png"
+              />
+              <p className="mt-2 text-xs text-zinc-500">This logo will be displayed across your customer portals and digital menus.</p>
+            </div>
             <div>
               <label className="mb-2 block text-sm font-medium text-zinc-300">Business Name</label>
               <input
