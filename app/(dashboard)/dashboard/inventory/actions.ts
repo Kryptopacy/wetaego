@@ -109,7 +109,7 @@ export const logInventoryMovement = authActionClient
     if (sign === -1) {
       const { data: item } = await supabase
         .from('inventory_items')
-        .select('current_quantity, name')
+        .select('current_quantity, name, unit')
         .eq('id', input.item_id)
         .single()
 

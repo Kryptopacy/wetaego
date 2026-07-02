@@ -136,7 +136,7 @@ export default async function PageEditDashboard({
                 <p className="text-xs text-zinc-500 mt-0.5">Choose which payment methods your customers can use on this page. You can enable more than one.</p>
               </div>
               <BillingOptionsSelector
-                {/* @ts-expect-error JSONB typing */}
+                // @ts-expect-error JSONB typing
                 initialOptions={(page.template_data?.payment_options as string[]) || []}
                 initialDepositPercentage={page.deposit_percentage}
               />

@@ -59,7 +59,7 @@ export const updateOrganization = authActionClient
       }
 
       const trialSettings = await getTrialSettings()
-      const trialDays = (trialSettings as any).default_trial_days ?? 30
+      const trialDays = (trialSettings as any).default_trial_days ?? 15
       const trialEndsAt = trialDays > 0 ? new Date(Date.now() + trialDays * 24 * 60 * 60 * 1000).toISOString() : undefined
 
       const { data: newOrg, error } = await supabase

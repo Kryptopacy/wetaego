@@ -81,7 +81,7 @@ export const getPlatformFees = unstable_cache(
   { revalidate: 86400, tags: ['platform_fees'] }
 )
 
-const DEFAULT_TRIAL_SETTINGS = { default_trial_days: 30 }
+const DEFAULT_TRIAL_SETTINGS = { default_trial_days: 15 }
 export const getTrialSettings = unstable_cache(
   async () => fetchSystemSettingFromDB('trial_settings', DEFAULT_TRIAL_SETTINGS),
   ['system_setting_trial_settings'],
