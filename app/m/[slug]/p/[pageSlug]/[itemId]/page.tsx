@@ -165,7 +165,7 @@ export default async function ItemDetailsPage({
             {/* CTA section */}
             <div className="mt-8">
               <ClientCTA 
-                item={{ ...item, item_data: item.item_data as Record<string, unknown> }}
+                item={{ ...item, item_data: item.item_data as Record<string, unknown>, page_id: item.page_id }}
                 pageInfo={pageInfo as { template_type: string, billing_enabled: boolean, slug: string }}
                 location={loc}
                 isAvailable={isAvailable}

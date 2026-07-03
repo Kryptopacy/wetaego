@@ -31,6 +31,15 @@ interface QuoteRendererProps {
     cover_image_url?: string
     organizations?: { logo_url?: string }
     currency?: string
+    operating_hours?: string | null
+    wifi_network?: string | null
+    wifi_password?: string | null
+    instagram_handle?: string | null
+    twitter_handle?: string | null
+    facebook_handle?: string | null
+    whatsapp_number?: string | null
+    phone_number?: string | null
+    google_maps_url?: string | null
   }
   page: {
     id: string

@@ -10,6 +10,7 @@ interface ClientCTAProps {
     title: string
     price_minor: number | null
     item_data?: Record<string, unknown>
+    page_id: string
   }
   pageInfo: {
     template_type: string
