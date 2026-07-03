@@ -87,3 +87,10 @@ export const getTrialSettings = unstable_cache(
   ['system_setting_trial_settings'],
   { revalidate: 86400, tags: ['trial_settings'] }
 )
+
+const DEFAULT_GLOBAL_PAYMENT = { global_manual_payment_override: false }
+export const getGlobalManualPayment = unstable_cache(
+  async () => fetchSystemSettingFromDB('global_payment', DEFAULT_GLOBAL_PAYMENT),
+  ['system_setting_global_payment'],
+  { revalidate: 86400, tags: ['global_payment'] }
+)

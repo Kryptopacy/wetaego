@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react'
 export interface CartItem {
   id: string          // page_items.id
   cartKey: string     // id + variant combo, used for deduplication
+  pageId: string      // which page this item belongs to (for cross-page scoping)
   name: string
   price_minor: number
   quantity: number
@@ -14,29 +15,35 @@ export interface CartItem {
 
 interface CartState {
   items: CartItem[]
+  savedAt: number | null
   addItem: (item: Omit<CartItem, 'quantity'>) => void
   removeItem: (cartKey: string) => void
   updateQuantity: (cartKey: string, delta: number) => void
   totalAmountMinor: () => number
+  totalAmountMinorForPage: (pageId: string) => number
   spinnerDiscount: number | null
   setSpinnerDiscount: (discount: number | null) => void
   clearCart: () => void
 }
 
+const CART_TTL_MS = 24 * 60 * 60 * 1000 // 24 hours
+
 export const useCartStore = create<CartState>()(
   persist(
     (set, get) => ({
       items: [],
+      savedAt: null,
       addItem: (item) => set((state) => {
         const existingItem = state.items.find(i => i.cartKey === item.cartKey)
         if (existingItem) {
           return {
             items: state.items.map(i =>
               i.cartKey === item.cartKey ? { ...i, quantity: i.quantity + 1 } : i
-            )
+            ),
+            savedAt: Date.now()
           }
         }
-        return { items: [...state.items, { ...item, quantity: 1 }] }
+        return { items: [...state.items, { ...item, quantity: 1 }], savedAt: Date.now() }
       }),
       removeItem: (cartKey) => set((state) => ({
         items: state.items.filter(i => i.cartKey !== cartKey)
@@ -52,10 +59,16 @@ export const useCartStore = create<CartState>()(
           items: state.items.map(i => i.cartKey === cartKey ? { ...i, quantity: newQuantity } : i)
         }
       }),
-      clearCart: () => set({ items: [], spinnerDiscount: null }),
+      clearCart: () => set({ items: [], spinnerDiscount: null, savedAt: null }),
       totalAmountMinor: () => {
         const { items } = get()
         return items.reduce((total, item) => total + (item.price_minor * item.quantity), 0)
+      },
+      totalAmountMinorForPage: (pageId: string) => {
+        const { items } = get()
+        return items
+          .filter(i => i.pageId === pageId)
+          .reduce((total, item) => total + (item.price_minor * item.quantity), 0)
       },
       spinnerDiscount: null,
       setSpinnerDiscount: (discount) => set({ spinnerDiscount: discount })
@@ -71,7 +84,14 @@ export function useCartHydration() {
   const [hasHydrated, setHasHydrated] = useState(false)
 
   useEffect(() => {
-    useCartStore.persist.onFinishHydration(() => setHasHydrated(true))
+    useCartStore.persist.onFinishHydration(() => {
+      // Auto-clear cart if older than 24 hours (covers stale demo sessions)
+      const state = useCartStore.getState()
+      if (state.savedAt && Date.now() - state.savedAt > CART_TTL_MS) {
+        state.clearCart()
+      }
+      setHasHydrated(true)
+    })
     useCartStore.persist.rehydrate()
   }, [])
 

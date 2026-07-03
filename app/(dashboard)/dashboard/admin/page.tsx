@@ -1,5 +1,5 @@
 
-import { getPricingSettings, getCreditCosts, getPlanLimits, getAiModels, getPlatformFees, getTrialSettings } from '@/lib/utils/settings'
+import { getPricingSettings, getCreditCosts, getPlanLimits, getAiModels, getPlatformFees, getTrialSettings, getGlobalManualPayment } from '@/lib/utils/settings'
 import { updateSetting } from './actions'
 import { ActionForm } from '@/components/ActionForm'
 
@@ -15,6 +15,7 @@ export default async function AdminPage() {
   const aiModels = await getAiModels()
   const platformFees = await getPlatformFees()
   const trialSettings = await getTrialSettings()
+  const globalPayment = await getGlobalManualPayment()
 
   const supabase = await createClient()
   const { data: userData } = await supabase.auth.getUser()
@@ -55,6 +56,31 @@ export default async function AdminPage() {
       </div>
 
       <div className="grid gap-6">
+        {/* Global Developer Switches */}
+        <section className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 border-l-4 border-l-red-500">
+          <h2 className="text-lg font-bold text-white mb-2">Danger Zone (Global Overrides)</h2>
+          <p className="text-zinc-400 text-sm mb-4">These switches immediately affect all businesses on the platform.</p>
+          <ActionForm action={updateSetting} className="space-y-4">
+            <input type="hidden" name="key" value="global_payment" />
+            <input type="hidden" name="is_json" value="true" />
+            
+            <div className="flex items-center gap-3">
+              <input 
+                type="checkbox" 
+                id="global_manual_payment_override"
+                name="global_manual_payment_override" 
+                value="true"
+                defaultChecked={(globalPayment as any).global_manual_payment_override === true} 
+                className="w-5 h-5 rounded bg-zinc-800 border-zinc-700 text-red-500 focus:ring-red-500" 
+              />
+              <label htmlFor="global_manual_payment_override" className="text-sm font-medium text-red-400">
+                FORCE MANUAL PAYMENT FALLBACK (Bypasses Paystack for all checkouts globally)
+              </label>
+            </div>
+            <button type="submit" className="px-4 py-2 bg-red-600/20 text-red-500 border border-red-500/50 rounded-lg text-sm font-medium hover:bg-red-500 hover:text-white transition">Apply Global Override</button>
+          </ActionForm>
+        </section>
+
         {/* Trial Settings */}
         <section className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
           <h2 className="text-lg font-bold text-white mb-4">Trial Configuration</h2>

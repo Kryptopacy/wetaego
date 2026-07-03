@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import Link from 'next/link'
+import { BackButton } from '../../components/back-button'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ExternalLink, X, Mail, ArrowRight } from 'lucide-react'

@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useMemo, useTransition } from 'react'
-import Link from 'next/link'
+import { BackButton } from '../../components/back-button'
+import { InfoStrip } from '../../components/info-strip'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
@@ -134,16 +135,17 @@ export function ListingRenderer({ location, page, items, locationSlug }: Listing
           )}
           <h1 className="text-3xl font-black text-white tracking-tight drop-shadow-lg">{page.title}</h1>
           {page.content && <p className="text-white/60 text-sm mt-1 max-w-lg">{page.content}</p>}
+          <InfoStrip location={location} />
         </div>
       </div>
 
       <div className="max-w-5xl mx-auto px-4 md:px-6 py-8">
-        <Link href={`/m/${locationSlug}`} className="inline-flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-300 mb-6 transition-colors">
+        <BackButton className="inline-flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-300 mb-6 transition-colors">
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
           {location.name}
-        </Link>
+        </BackButton>
 
         {/* Stats bar */}
         <div className="flex gap-4 mb-6 text-xs text-zinc-500 font-medium">

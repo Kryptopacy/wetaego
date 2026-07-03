@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import Link from 'next/link'
+import { BackButton } from '../../components/back-button'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { formatCurrency } from '@/lib/utils/currency'
@@ -140,9 +140,9 @@ export function QuoteRenderer({ location, page, items, locationSlug }: QuoteRend
             <p className="text-2xl font-mono text-white tracking-widest">{referenceNumber}</p>
           </div>
           <div className="p-6">
-            <Link href={`/m/${locationSlug}`} className="inline-flex w-full justify-center px-6 py-4 rounded-xl font-bold text-white transition-colors" style={{ backgroundColor: themeColor }}>
-              Back to Ecosystem
-            </Link>
+            <BackButton className="inline-flex w-full justify-center px-6 py-4 rounded-xl font-bold text-white transition-colors" style={{ backgroundColor: themeColor }}>
+              Return to Catalog
+            </BackButton>
           </div>
         </motion.div>
       </div>

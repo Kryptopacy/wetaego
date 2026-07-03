@@ -190,6 +190,7 @@ export async function startInteractiveDemo() {
   const { data: loc } = await adminClient.from('locations').insert({
     organization_id: org.id,
     name: 'Pacy Grills & Lounge',
+    portal_display_name: 'Pacy Group',
     slug: `pacy-grills-${uid}`,
     address: '42 Victoria Island, Lagos',
     currency_code: 'NGN',
@@ -280,7 +281,7 @@ export async function startInteractiveDemo() {
       location_id: loc.id,
       slug: 'restaurant',
       title: 'Pacy Grills & Lounge',
-      template_type: 'catalog',
+      template_type: 'restaurant',
       is_published: true,
       billing_enabled: true
     },
@@ -343,6 +344,17 @@ export async function startInteractiveDemo() {
     },
     {
       location_id: loc.id,
+      slug: 'pacy-gadgets',
+      title: 'Pacy Gadgets',
+      template_type: 'catalog',
+      business_type_preset: 'tech',
+      billing_enabled: true,
+      billing_mode: 'standard_checkout',
+      payment_mode: 'full',
+      is_published: true,
+    },
+    {
+      location_id: loc.id,
       slug: 'links',
       title: 'Our Links',
       template_type: 'info',
@@ -391,8 +403,24 @@ export async function startInteractiveDemo() {
     const boutiquePage = pages.find((p: { id: string, slug: string }) => p.slug === 'pacy-boutique')
     if (boutiquePage) {
       pageItems.push(
-        { page_id: boutiquePage.id, title: 'Silk Wrap Dress', description: 'Emerald green 100% silk dress.', price_minor: 4500000, sort_order: 0, availability_status: 'available', images: ['https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&w=800&q=80'] },
-        { page_id: boutiquePage.id, title: 'Leather Tote Bag', description: 'Handcrafted genuine leather tote.', price_minor: 8500000, sort_order: 1, availability_status: 'available', images: ['https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=800&q=80'] }
+        { page_id: boutiquePage.id, title: 'Silk Wrap Dress', description: 'Emerald green 100% silk dress.', price_minor: 4500000, sort_order: 0, availability_status: 'available', images: ['https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&w=800&q=80'], item_data: { variants: [{ name: 'Size', options: ['S', 'M', 'L', 'XL'], required: true }, { name: 'Color', options: ['Emerald Green', 'Navy Blue'], required: true }] } },
+        { page_id: boutiquePage.id, title: 'Leather Tote Bag', description: 'Handcrafted genuine leather tote.', price_minor: 8500000, sort_order: 1, availability_status: 'available', images: ['https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=800&q=80'] },
+        { page_id: boutiquePage.id, title: 'Gold Hoop Earrings', description: '18k gold plated hoops.', price_minor: 1200000, sort_order: 2, availability_status: 'available', images: ['https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=800&q=80'] },
+        { page_id: boutiquePage.id, title: 'Summer Maxi Dress', description: 'Floral pattern maxi dress perfect for the beach.', price_minor: 3500000, sort_order: 3, availability_status: 'available', images: ['https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?auto=format&fit=crop&w=800&q=80'], item_data: { variants: [{ name: 'Size', options: ['S', 'M', 'L'], required: true }] } },
+        { page_id: boutiquePage.id, title: 'Classic Denim Jacket', description: 'Vintage wash denim jacket.', price_minor: 5500000, sort_order: 4, availability_status: 'available', images: ['https://images.unsplash.com/photo-1576995853123-5a10305d93c0?auto=format&fit=crop&w=800&q=80'], item_data: { variants: [{ name: 'Size', options: ['S', 'M', 'L', 'XL'], required: true }] } },
+        { page_id: boutiquePage.id, title: 'Suede Ankle Boots', description: 'Tan suede boots with a small heel.', price_minor: 9500000, sort_order: 5, availability_status: 'available', images: ['https://images.unsplash.com/photo-1520639888713-7851133b1ed0?auto=format&fit=crop&w=800&q=80'], item_data: { variants: [{ name: 'Shoe Size (EU)', options: ['38', '39', '40', '41', '42'], required: true }] } }
+      )
+    }
+
+    const gadgetsPage = pages.find((p: { id: string, slug: string }) => p.slug === 'pacy-gadgets')
+    if (gadgetsPage) {
+      pageItems.push(
+        { page_id: gadgetsPage.id, title: 'Smartphone X', description: 'The latest high-end smartphone with OLED screen.', price_minor: 120000000, sort_order: 0, availability_status: 'available', images: ['https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=800&q=80'], item_data: { variants: [{ name: 'Storage', options: ['128GB', '256GB', '512GB'], required: true }, { name: 'Color', options: ['Space Gray', 'Silver'], required: true }] } },
+        { page_id: gadgetsPage.id, title: 'Noise-Cancelling Headphones', description: 'Premium over-ear wireless headphones.', price_minor: 35000000, sort_order: 1, availability_status: 'available', images: ['https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80'], item_data: { variants: [{ name: 'Color', options: ['Matte Black', 'Silver'], required: true }] } },
+        { page_id: gadgetsPage.id, title: '4K Action Camera', description: 'Waterproof action camera with 4K recording.', price_minor: 45000000, sort_order: 2, availability_status: 'available', images: ['https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?auto=format&fit=crop&w=800&q=80'] },
+        { page_id: gadgetsPage.id, title: 'Smart Watch Series 5', description: 'Fitness and health tracking smartwatch.', price_minor: 25000000, sort_order: 3, availability_status: 'available', images: ['https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?auto=format&fit=crop&w=800&q=80'], item_data: { variants: [{ name: 'Band Color', options: ['Black', 'White', 'Pink'], required: true }] } },
+        { page_id: gadgetsPage.id, title: 'Portable Bluetooth Speaker', description: 'Rugged, waterproof speaker with 20h battery life.', price_minor: 15000000, sort_order: 4, availability_status: 'available', images: ['https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?auto=format&fit=crop&w=800&q=80'], item_data: { variants: [{ name: 'Color', options: ['Black', 'Blue', 'Red'], required: true }] } },
+        { page_id: gadgetsPage.id, title: 'Wireless Charging Pad', description: 'Fast charging pad for phones and earbuds.', price_minor: 5000000, sort_order: 5, availability_status: 'available', images: ['https://images.unsplash.com/photo-1586816879360-004f5b0c51e3?auto=format&fit=crop&w=800&q=80'] }
       )
     }
 

@@ -18,6 +18,7 @@ import { FabGroup } from '../../components/fab-group'
 import { PortalNav } from '../../components/portal-nav'
 import { unstable_cache } from 'next/cache'
 import { PreviewBanner } from '@/components/preview-banner'
+import { getGlobalManualPayment } from '@/lib/utils/settings'
 
 export async function generateMetadata({
   params,
@@ -211,9 +212,10 @@ export default async function PublicPageView({
         { revalidate: 60, tags: [`page_items_${page.id}`] }
       )()
 
-  const [items, { data: paymentSettings }] = await Promise.all([
+  const [items, { data: paymentSettings }, globalManualPayment] = await Promise.all([
     itemsPromise,
-    paymentSettingsPromise
+    paymentSettingsPromise,
+    getGlobalManualPayment()
   ])
 
   const sharedProps = {
@@ -226,6 +228,7 @@ export default async function PublicPageView({
     locationSlug: slug,
     referralSource: ref,
     paymentIsLive: paymentSettings?.is_active ?? false,
+    globalManualPaymentOverride: (globalManualPayment as any)?.global_manual_payment_override === true,
   }
 
   // Route to the right renderer

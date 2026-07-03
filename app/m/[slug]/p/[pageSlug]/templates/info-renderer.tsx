@@ -1,5 +1,5 @@
-import Link from 'next/link'
 import Image from 'next/image'
+import { BackButton } from '../../components/back-button'
 
 interface InfoRendererProps {
   location: {
@@ -89,16 +89,42 @@ export function InfoRenderer({ location, page, locationSlug }: InfoRendererProps
       </div>
 
       <div className="max-w-2xl mx-auto px-6 py-8">
-        <Link href={`/m/${locationSlug}`} className="inline-flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-300 mb-8 transition-colors">
+        <BackButton className="inline-flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-300 mb-8 transition-colors">
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
           {location.name}
-        </Link>
+        </BackButton>
 
-        <div className="prose-custom space-y-1">
-          {lines.map((line, i) => renderLine(line, i))}
-        </div>
+        {(() => {
+          try {
+            const parsed = JSON.parse(page.content || '{}')
+            if (parsed && Array.isArray(parsed.links)) {
+              return (
+                <div className="space-y-4">
+                  {parsed.links.map((link: { label: string, url: string }, i: number) => (
+                    <a
+                      key={i}
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center w-full px-6 py-4 rounded-xl font-bold text-zinc-900 bg-white hover:bg-zinc-200 transition-colors shadow-sm"
+                    >
+                      {link.label}
+                    </a>
+                  ))}
+                </div>
+              )
+            }
+          } catch (e) {
+            // Not JSON, continue to markdown render
+          }
+          return (
+            <div className="prose-custom space-y-1">
+              {lines.map((line, i) => renderLine(line, i))}
+            </div>
+          )
+        })()}
 
         {/* Contact Strip */}
         {(whatsapp || phone || instagram || xHandle || tiktok) && (

@@ -33,10 +33,11 @@ interface CartFABProps {
   pageBillingMode?: string
   locationTaxes?: { name: string; percentage: number }[]
   pagePaymentOptions?: string[]
+  globalManualPaymentOverride?: boolean
 }
 
 export function CartFAB(props: CartFABProps) {
-  const { items, totalAmountMinor, addItem, updateQuantity, clearCart, spinnerDiscount } = useCartStore()
+  const { items, totalAmountMinorForPage, addItem, updateQuantity, clearCart, spinnerDiscount } = useCartStore()
   const [isMounted, setIsMounted] = useState(false)
   const [showCheckoutModal, setShowCheckoutModal] = useState(false)
   
@@ -47,8 +48,9 @@ export function CartFAB(props: CartFABProps) {
     return () => window.removeEventListener('open-checkout-modal', handleOpenModal)
   }, [])
 
-  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)
-  const subtotalMinor = totalAmountMinor()
+  const pageItems = items.filter(i => i.pageId === props.pageId)
+  const totalItems = pageItems.reduce((sum, item) => sum + item.quantity, 0)
+  const subtotalMinor = totalAmountMinorForPage(props.pageId || '')
   
   const effectiveGlobalPercent = (props.globalDiscountEnabled && props.globalDiscountPercentage) ? props.globalDiscountPercentage : 0
   const effectivePercent = Math.max(effectiveGlobalPercent, spinnerDiscount || 0)
@@ -115,7 +117,7 @@ export function CartFAB(props: CartFABProps) {
         isOpen={showCheckoutModal}
         onClose={() => setShowCheckoutModal(false)}
         items={items}
-        totalAmountMinor={totalAmountMinor}
+        totalAmountMinor={totalAmountMinorForPage(props.pageId || '')}
         addItem={addItem}
         updateQuantity={updateQuantity}
         clearCart={clearCart}
@@ -124,6 +126,7 @@ export function CartFAB(props: CartFABProps) {
         pageBillingMode={props.pageBillingMode}
         locationTaxes={props.locationTaxes}
         {...props}
+        manualPaymentEnabled={props.globalManualPaymentOverride || props.manualPaymentEnabled}
       />
     </>
   )
