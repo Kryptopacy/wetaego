@@ -16,13 +16,13 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL('https://ourmenuos.online'),
   title: {
-    default: "OurMenu OS",
+    default: "OurMenu OS | Storefronts & Operations for Hospitality, Retail & Services",
     template: "%s | OurMenu OS"
   },
-  description: "The complete operating layer for modern businesses. Build your digital storefront, manage operations, and process payments instantly. Tailored for restaurants, boutiques, hotels, wellness spas, and creators.",
+  description: "The complete operating layer for modern businesses. Build your digital storefront, manage operations, and process payments instantly. Tailored for hospitality (restaurants, bars, food trucks), retail boutiques (gadgets, fashion, pharmacies), services (salons, spas, tutors), consultants, agencies, real estate, and automotive dealerships.",
   keywords: ["ourmenuos", "our menu os", "digital storefront", "restaurant os", "qr menu", "hospitality software", "online ordering", "service booking", "hotel pms", "boutique ecommerce", "spa booking system", "media rate card", "real estate listings", "consulting portal", "food truck pos", "salon scheduling", "omnichannel os", "payment roulette", "digital rate card", "b2b rate cards", "ai demand forecasting", "bill splitting randomizer", "who pays the bill randomizer", "restaurant bill roulette", "split the check game"],
-  authors: [{ name: "CruiseHQ" }],
-  creator: "CruiseHQ",
+  authors: [{ name: "KRYPTOPACY" }],
+  creator: "KRYPTOPACY",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -40,12 +40,12 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_US',
     url: 'https://ourmenuos.online',
-    title: 'OurMenu OS - The ultimate digital storefront & operations suite',
-    description: 'A complete management suite for restaurants, boutiques, hotels, wellness spas, consultants, and real estate. Ditch expensive custom websites and terrible PDF links.',
+    title: 'OurMenu OS | Storefronts & Operations for Hospitality, Retail & Services',
+    description: 'A complete management suite for hospitality, retail boutiques, wellness spas, consultants, real estate, and automotive. Ditch expensive custom websites and terrible PDF links.',
     siteName: 'OurMenu OS',
     images: [
       {
-        url: '/hero_restaurant_bg.png',
+        url: '/hero_premium_multibusiness.png',
         width: 1200,
         height: 630,
         alt: 'OurMenu OS Dashboard and Guest Experience',
@@ -54,9 +54,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'OurMenu OS',
-    description: 'The ultimate digital storefront & operations suite for hospitality, retail, and services.',
-    images: ['/hero_restaurant_bg.png'],
+    title: 'OurMenu OS | Storefronts & Operations for Hospitality, Retail & Services',
+    description: 'The ultimate digital storefront & operations suite for hospitality, retail boutiques, spas, consultants, real estate, and automotive.',
+    images: ['/hero_premium_multibusiness.png'],
   },
 };
 

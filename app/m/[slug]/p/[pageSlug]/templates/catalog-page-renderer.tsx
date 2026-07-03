@@ -22,6 +22,7 @@ interface PageItem {
   price_minor?: number
   price_display?: string
   availability_status: string
+  images?: string[]
   item_data?: {
     category?: string
     variants?: { name: string; options: string[]; required: boolean }[]
@@ -177,6 +178,11 @@ export function CatalogPageRenderer({ location, page, items, locationSlug, payme
                       className={`rounded-2xl border p-4 transition-all ${isAvail ? 'border-zinc-800 bg-zinc-900/50 hover:border-zinc-700 backdrop-blur-sm' : 'border-zinc-800/40 bg-zinc-900/20 opacity-60'}`}
                     >
                       <div className="flex items-start justify-between gap-3">
+                        {item.images?.[0] && (
+                          <div className="w-[72px] h-[72px] shrink-0 rounded-xl overflow-hidden bg-zinc-800 relative hidden sm:block">
+                            <Image src={item.images[0]} alt={item.title} fill className="object-cover" />
+                          </div>
+                        )}
                         <div className="flex-1 min-w-0">
                           <h3 className="font-bold text-white text-sm">{item.title}</h3>
                           {item.subtitle && <p className="text-xs text-zinc-500 mt-0.5">{item.subtitle}</p>}

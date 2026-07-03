@@ -1,5 +1,5 @@
 import { ActionForm } from '@/components/ActionForm'
-import heroBg from '../public/hero_restaurant_bg.png'
+import heroBg from '../public/hero_premium_multibusiness.png'
 import Image from 'next/image'
 import Link from 'next/link'
 import { startInteractiveDemo } from './login/actions'
@@ -12,6 +12,7 @@ import { DirectorySearch } from './components/directory-search'
 import { Pricing } from './components/pricing'
 import { LandingNavbar } from '../components/LandingNavbar'
 import { UseCases } from './components/use-cases'
+import { RouletteTeaser } from './components/roulette-teaser'
 
 export default async function HomePage() {
   const jsonLd = {
@@ -21,7 +22,7 @@ export default async function HomePage() {
     "alternateName": "ourmenuos",
     "operatingSystem": "Web",
     "applicationCategory": "BusinessApplication",
-    "description": "The ultimate operating layer for multi-business operations. Supports dynamic templates for Hospitality, Retail Boutiques, Wellness Services, Real Estate Listings, Consultant Rate Cards, and Multi-venue Portals.",
+    "description": "The ultimate operating layer for multi-business operations. Supports dynamic templates for Hospitality, Retail Boutiques, Wellness Services, Real Estate Listings, Consultant Rate Cards, Automotive Dealerships, and Multi-venue Portals.",
     "featureList": [
       "Omnichannel Checkout",
       "Live Fulfillment Dashboard",
@@ -41,7 +42,7 @@ export default async function HomePage() {
     },
     "provider": {
       "@type": "Organization",
-      "name": "CruiseHQ"
+      "name": "KRYPTOPACY"
     }
   };
 
@@ -176,6 +177,9 @@ export default async function HomePage() {
       {/* ── DYNAMIC TRUSTED BY ── */}
       <TrustedBy />
 
+      {/* ── ROULETTE GAMIFICATION ── */}
+      <RouletteTeaser />
+
       {/* ── PRICING ── */}
       <Pricing />
 
@@ -229,7 +233,7 @@ export default async function HomePage() {
             <Image src="/ourmenu-qr-icon.svg" alt="OurMenu Logo" width={20} height={20} className="object-contain grayscale opacity-70" />
             <span className="font-semibold text-white text-sm">OurMenu</span>
           </div>
-          <p className="text-zinc-600 text-sm">© {new Date().getFullYear()} OurMenu. A CruiseHQ concept.</p>
+          <p className="text-zinc-600 text-sm">© {new Date().getFullYear()} OurMenu. A CRUISEHQ LTD concept.</p>
           <div className="flex items-center gap-6 text-zinc-500 text-sm">
             <Link href="/privacy" className="hover:text-white transition-colors">Privacy</Link>
             <Link href="/terms" className="hover:text-white transition-colors">Terms</Link>
@@ -243,8 +247,8 @@ export default async function HomePage() {
         <h2>What is ourmenuos?</h2>
         <p>
           ourmenuos (OurMenu OS) is the ultimate software and digital storefront platform providing comprehensive business templates and applications for multiple industries. 
-          ourmenuos offers specialized software for hospitality, restaurant os, QR menus, hotel PMS, retail boutiques, spa booking systems, media rate cards, real estate listings, consulting portals, food truck POS, and salon scheduling. 
-          With ourmenuos, you can manage omnichannel checkouts, live fulfillment, and process payments instantly.
+          ourmenuos offers specialized software for hospitality, restaurant os, QR menus, retail boutiques, gadget shops, fashion stores, spa booking systems, salon scheduling, media rate cards, consulting portals, real estate listings, automotive dealerships, and hotel PMS. 
+          With ourmenuos, you can manage omnichannel checkouts, physical inventory, live fulfillment, loyalty programs, and process payments instantly across any vertical.
         </p>
       </section>
 

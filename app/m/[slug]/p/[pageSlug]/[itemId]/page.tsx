@@ -13,7 +13,7 @@ export async function generateMetadata({
 }: {
   params: Promise<{ slug: string; pageSlug: string; itemId: string }>
 }): Promise<Metadata> {
-  const { slug, itemId } = await params
+  const { slug, pageSlug, itemId } = await params
   const supabase = await createClient()
 
   const itemQuery = supabase
@@ -28,6 +28,9 @@ export async function generateMetadata({
   return {
     title: item.title,
     description: item.description?.slice(0, 160) || '',
+    alternates: {
+      canonical: `https://ourmenuos.online/m/${slug}/p/${pageSlug}/${itemId}`
+    },
     openGraph: {
       title: item.title,
       description: item.description?.slice(0, 160) || '',

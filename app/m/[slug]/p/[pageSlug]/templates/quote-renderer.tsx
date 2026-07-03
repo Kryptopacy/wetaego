@@ -240,6 +240,11 @@ export function QuoteRenderer({ location, page, items, locationSlug }: QuoteRend
                     }`}
                   >
                     <div className="flex items-start gap-4">
+                      {item.images?.[0] && (
+                        <div className="w-16 h-16 shrink-0 rounded-xl overflow-hidden bg-zinc-800 hidden sm:block">
+                          <Image src={item.images[0]} alt={item.title} width={64} height={64} className="w-full h-full object-cover" />
+                        </div>
+                      )}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between mb-1">
                           <h3 className="font-bold text-white text-lg truncate">{item.title}</h3>

@@ -59,6 +59,9 @@ export async function generateMetadata({
   return {
     title: `${page.title} | ${loc.name}`,
     description,
+    alternates: {
+      canonical: `https://ourmenuos.online/m/${slug}/p/${pageSlug}`
+    },
     robots: {
       index: loc.is_search_visible ?? false,
       follow: loc.is_search_visible ?? false,

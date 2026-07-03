@@ -260,25 +260,25 @@ export function ListingRenderer({ location, page, items, locationSlug }: Listing
                 className={`rounded-2xl border overflow-hidden transition-all ${isAvail ? 'border-zinc-800 bg-zinc-900/50 hover:border-zinc-700' : 'border-zinc-800/40 bg-zinc-900/20 opacity-60'}`}
               >
                 <Link href={`/m/${locationSlug}/p/${page.slug || page.id}/${item.id}`} className="block">
-                  {/* Image placeholder */}
-                  <div className="h-44 relative overflow-hidden" style={{ background: `linear-gradient(135deg, ${themeColor}20, #0a0a0f)` }}>
-                    {item.images?.[0] ? (
+                  {item.images?.[0] && (
+                    <div className="h-44 relative overflow-hidden bg-zinc-900 border-b border-zinc-800/50">
                       <Image src={item.images[0]} alt={item.title} fill sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw" className="object-cover transition-transform hover:scale-105 duration-500" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <svg className="w-12 h-12 text-zinc-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
-                        </svg>
-                      </div>
-                    )}
-                    {!isAvail && (
-                      <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                        <span className="text-xs font-bold text-zinc-400 bg-zinc-900 px-3 py-1 rounded-full">
-                          {item.availability_status === 'sold_out' ? 'Taken' : 'Unavailable'}
-                        </span>
-                      </div>
-                    )}
-                  </div>
+                      {!isAvail && (
+                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                          <span className="text-xs font-bold text-zinc-400 bg-zinc-900 px-3 py-1 rounded-full">
+                            {item.availability_status === 'sold_out' ? 'Taken' : 'Unavailable'}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {!item.images?.[0] && !isAvail && (
+                    <div className="px-4 pt-4 -mb-2">
+                       <span className="text-xs font-bold text-zinc-400 bg-zinc-800/50 px-2 py-1 rounded">
+                         {item.availability_status === 'sold_out' ? 'Taken' : 'Unavailable'}
+                       </span>
+                    </div>
+                  )}
                 </Link>
 
                 <div className="p-4">

@@ -64,3 +64,4 @@ swagger.json
 playwright-report/
 test-results/
 unused_vars_report.md
+report.xlsx

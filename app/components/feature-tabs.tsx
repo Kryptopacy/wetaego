@@ -4,7 +4,7 @@ import { useState } from 'react'
 import {
   Zap, ChefHat, Globe, BarChart3, ClipboardList,
   QrCode, Bell, FileText, ShieldCheck, CreditCard,
-  Star, Users, MessageCircle
+  Star, Users, MessageCircle, Gamepad2, Wallet, Package, MessagesSquare
 } from 'lucide-react'
 import { StaggerContainer, StaggerItem } from './animations'
 
@@ -50,6 +50,14 @@ const categories = [
         badge: 'Gemini-powered',
         title: 'Your best associate, always on shift.',
         description: 'Clients chat to get recommendations, ask about services, customize items, and add to cart — all without flagging down staff.',
+      },
+      {
+        icon: Package,
+        color: 'from-purple-600 to-indigo-600',
+        tag: 'Inventory Manager',
+        badge: 'Atomic Tracking',
+        title: 'Real-time physical stock tracking.',
+        description: 'Track retail items, kitchen ingredients, or spa products. Features low-stock alerts, wastage logs, and instant atomic sell-out triggers to prevent overselling.',
       }
     ]
   },
@@ -154,6 +162,36 @@ const categories = [
         badge: 'Zero race conditions',
         title: 'No double-prep. No hoarding.',
         description: 'Staff claim requests securely. The system actively limits how many tasks a single associate can hoard, keeping your operations flowing smoothly.',
+      },
+      {
+        icon: MessagesSquare,
+        color: 'from-blue-500 to-indigo-500',
+        tag: 'Enterprise Intercom',
+        badge: 'Real-time Comms',
+        title: 'Internal chat. Zero walkie-talkies.',
+        description: 'Department-specific internal channels (e.g. Kitchen, Concierge). Supabase Realtime WebSockets ensure messages propagate across staff dashboards instantly.',
+      }
+    ]
+  },
+  {
+    id: 'crm-gamification',
+    label: 'CRM & Gamification',
+    features: [
+      {
+        icon: Gamepad2,
+        color: 'from-pink-500 to-rose-500',
+        tag: 'Payment Roulette',
+        badge: 'Viral Engagement',
+        title: 'Who pays the bill? Spin the wheel.',
+        description: 'Transform group payments. A gamified "spin to win" bill-splitting randomizer that turns checkout friction into a highly engaging, viral group experience.',
+      },
+      {
+        icon: Wallet,
+        color: 'from-emerald-600 to-teal-500',
+        tag: 'Store Credit & IOUs',
+        badge: 'B2B & B2C',
+        title: 'Buy now. Pay later. Built-in.',
+        description: 'Approve trusted clients for a Store Credit tab. They bypass card payments at checkout and deduct instantly from their tab, tracked automatically in your dashboard ledger.',
       }
     ]
   }

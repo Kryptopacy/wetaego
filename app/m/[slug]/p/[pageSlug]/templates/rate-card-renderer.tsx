@@ -18,6 +18,7 @@ interface PageItem {
   availability_status: string
   payment_mode?: string
   deposit_percentage?: number
+  images?: string[]
   item_data?: {
     category?: string     // 'basic' | 'standard' | 'premium' | 'addon'
     includes?: string     // comma-separated list
@@ -262,20 +263,27 @@ export function RateCardRenderer({ location, page, items, locationSlug, paymentI
                           {isSelected && <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
                         </div>
                         <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:justify-between gap-4">
-                          <div>
-                            <div className="font-semibold text-white text-sm">{item.title}</div>
-                            {item.subtitle && <div className="text-xs text-zinc-500 mt-0.5">{item.subtitle}</div>}
-                            {item.description && <div className="text-xs text-zinc-400 mt-1.5 leading-relaxed">{item.description}</div>}
-                            {item.item_data?.includes && (
-                              <div className="flex flex-wrap gap-1.5 mt-2">
-                                {item.item_data.includes.split(',').map((inc, i) => (
-                                  <span key={i} className="text-[10px] bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded-full">✓ {inc.trim()}</span>
-                                ))}
+                          <div className="flex gap-4 items-start">
+                            {item.images?.[0] && (
+                              <div className="w-[60px] h-[60px] shrink-0 rounded-lg overflow-hidden bg-zinc-800 relative hidden sm:block">
+                                <Image src={item.images[0]} alt={item.title} fill className="object-cover" />
                               </div>
                             )}
-                            {item.item_data?.turnaround && (
-                              <div className="text-xs text-zinc-500 mt-1.5">⏱ {item.item_data.turnaround}</div>
-                            )}
+                            <div>
+                              <div className="font-semibold text-white text-sm">{item.title}</div>
+                              {item.subtitle && <div className="text-xs text-zinc-500 mt-0.5">{item.subtitle}</div>}
+                              {item.description && <div className="text-xs text-zinc-400 mt-1.5 leading-relaxed">{item.description}</div>}
+                              {item.item_data?.includes && (
+                                <div className="flex flex-wrap gap-1.5 mt-2">
+                                  {item.item_data.includes.split(',').map((inc, i) => (
+                                    <span key={i} className="text-[10px] bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded-full">✓ {inc.trim()}</span>
+                                  ))}
+                                </div>
+                              )}
+                              {item.item_data?.turnaround && (
+                                <div className="text-xs text-zinc-500 mt-1.5">⏱ {item.item_data.turnaround}</div>
+                              )}
+                            </div>
                           </div>
                           <div className="text-left sm:text-right shrink-0">
                             {item.price_display ? (

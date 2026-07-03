@@ -32,7 +32,7 @@ export function ItemCard({ item }: ItemCardProps) {
       cartKey: cartItemId,
       name: finalName, 
       price_minor: item.price_minor,
-      pageId: pageId || ''
+      pageId: ''
     })
     
     setShowModifierModal(false)
@@ -52,7 +52,7 @@ export function ItemCard({ item }: ItemCardProps) {
         className={`group relative flex gap-4 p-4 bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-100 dark:border-zinc-800 shadow-sm hover:shadow-md transition-all duration-300 ${!isAvailable ? 'opacity-60 grayscale-[0.5]' : ''}`}
       >
         {/* Product Image */}
-        {item.image_url ? (
+        {item.image_url && (
           <div className="w-[88px] h-[88px] shrink-0 relative rounded-xl overflow-hidden bg-zinc-100 dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-800">
             <Image 
               src={item.image_url} 
@@ -63,10 +63,6 @@ export function ItemCard({ item }: ItemCardProps) {
               placeholder="blur"
               blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mN88B8AAsUB4ZtvxwAAAABJRU5ErkJggg=="
             />
-          </div>
-        ) : (
-          <div className="w-[88px] h-[88px] shrink-0 rounded-xl bg-gradient-to-br from-zinc-50 to-zinc-100 dark:from-zinc-800 dark:to-zinc-900 border border-zinc-100 dark:border-zinc-800 flex items-center justify-center text-zinc-300 dark:text-zinc-600 font-black text-2xl uppercase shadow-inner">
-            {item.name.slice(0, 1)}
           </div>
         )}
 

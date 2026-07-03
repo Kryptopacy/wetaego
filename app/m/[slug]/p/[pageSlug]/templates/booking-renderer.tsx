@@ -411,10 +411,6 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
                 ) : 'Confirm Booking'}
               </button>
 
-              <div className="mt-4 flex items-center justify-center gap-1.5 opacity-60">
-                <Lock className="w-3 h-3 text-zinc-500" />
-                <span className="text-[11px] text-zinc-500 font-medium">Payments securely processed by CruiseHQ (OurMenu)</span>
-              </div>
 
               {/* Manual payment fallback */}
               {location.manual_payment_enabled && page.billing_enabled && (
@@ -498,6 +494,11 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
                 >
                   <div className="p-5">
                     <div className="flex items-start justify-between gap-4">
+                      {item.images?.[0] && (
+                        <div className="w-[72px] h-[72px] shrink-0 rounded-xl overflow-hidden bg-zinc-800 relative hidden sm:block">
+                          <Image src={item.images[0]} alt={item.title} fill className="object-cover" />
+                        </div>
+                      )}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
                           <h3 className="font-bold text-white">{item.title}</h3>
@@ -527,10 +528,6 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
                           {selectedItems.some(i => i.id === item.id) ? 'Selected ✓' : 'Select Service'}
                         </button>
                 
-                <div className="mt-4 flex items-center justify-center gap-1.5 opacity-60">
-                  <Lock className="w-3 h-3 text-zinc-500" />
-                  <span className="text-[11px] text-zinc-500 font-medium">Payments securely processed by CruiseHQ (OurMenu)</span>
-                </div>
                         <Link
                           href={`/m/${locationSlug}/p/${page.slug || page.id}/${item.id}`}
                           className="px-4 py-2.5 rounded-xl text-sm font-bold transition-all text-zinc-300 bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 whitespace-nowrap"

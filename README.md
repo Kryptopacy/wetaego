@@ -6,9 +6,9 @@
 
 ---
 
-OurMenu OS is a comprehensive, enterprise-grade SaaS platform engineered to power the customer-facing digital presence of dynamic businesses. Originally architected for the hospitality industry, it has evolved into a highly scalable, multi-tenant operating layer serving retail boutiques, service professionals, spas, consultants, and real estate agencies.
+OurMenu OS is a comprehensive, enterprise-grade SaaS platform engineered to power the customer-facing digital presence of dynamic businesses. It is a highly scalable, multi-tenant operating layer serving retail boutiques, service professionals, spas, consultants, and real estate agencies.
 
-By deploying dynamic, template-driven digital environments reachable via custom QR codes, NFC tags, or direct links, businesses completely bypass the friction of native app downloads. OurMenu OS delivers real-time catalogs, interactive service bookings, intelligent digital rate cards, and a seamless omnichannel checkout experience—instantly, right in the browser.
+By deploying dynamic, template-driven digital environments reachable via custom QR codes or direct links, businesses completely bypass the friction of native app downloads. OurMenu OS delivers real-time catalogs, interactive service bookings, intelligent digital rate cards, and a seamless omnichannel checkout experience—instantly, right in the browser.
 
 ---
 
