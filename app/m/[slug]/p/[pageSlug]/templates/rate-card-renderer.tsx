@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { BackButton } from '../../components/back-button'
+import { InfoStrip } from '../../components/info-strip'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
@@ -218,6 +219,7 @@ export function RateCardRenderer({ location, page, items, locationSlug, paymentI
             {page.content}
           </div>
         )}
+        <InfoStrip location={location} />
 
         {/* Success state */}
         {formSuccess && (

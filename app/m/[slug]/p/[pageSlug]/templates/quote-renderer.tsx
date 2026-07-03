@@ -170,6 +170,7 @@ export function QuoteRenderer({ location, page, items, locationSlug }: QuoteRend
           {page.content && (
             <p className="text-white/70 text-sm mt-2 max-w-md leading-relaxed">{page.content}</p>
           )}
+          <InfoStrip location={location} />
         </div>
       </div>
 
