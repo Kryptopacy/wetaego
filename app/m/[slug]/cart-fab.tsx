@@ -118,7 +118,7 @@ export function CartFAB(props: CartFABProps) {
         onClose={() => setShowCheckoutModal(false)}
         items={items}
         totalAmountMinor={totalAmountMinorForPage(props.pageId || '')}
-        addItem={addItem}
+        addItem={(item) => addItem({ ...item, pageId: props.pageId || '' })}
         updateQuantity={updateQuantity}
         clearCart={clearCart}
         spinnerDiscount={spinnerDiscount}

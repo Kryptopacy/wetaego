@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { BackButton } from '../../components/back-button'
 import { InfoStrip } from '../../components/info-strip'
+import Link from 'next/link'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ExternalLink, X, Mail, ArrowRight } from 'lucide-react'

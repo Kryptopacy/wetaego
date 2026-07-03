@@ -76,7 +76,7 @@ interface CheckoutModalProps {
   isOpen: boolean
   onClose: () => void
   items: CheckoutCartItem[]
-  totalAmountMinor: () => number
+  totalAmountMinor: number
   addItem: (item: Omit<CheckoutCartItem, 'quantity'>) => void
   updateQuantity: (id: string, delta: number) => void
   clearCart: () => void
@@ -248,7 +248,7 @@ export function CheckoutModal({
     }
   }
 
-  const subtotalMinor = totalAmountMinor()
+  const subtotalMinor = totalAmountMinor
   const effectiveGlobalPercent = (globalDiscountEnabled && globalDiscountPercentage) ? globalDiscountPercentage : 0
   const effectivePercent = Math.max(effectiveGlobalPercent, spinnerDiscount || 0)
   

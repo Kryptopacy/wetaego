@@ -225,44 +225,6 @@ export async function startInteractiveDemo() {
 
   if (!loc) return { error: 'Location not found' }
 
-  // 5. Create Menu
-  const { data: menu } = await adminClient.from('menus').insert({
-    organization_id: org.id,
-    location_id: loc.id,
-    name: 'Evening Menu',
-    publication_status: 'published'
-  }).select('id').single()
-
-  if (!menu) return { error: 'Unknown error' }
-
-  // 6. Create Categories
-  const { data: cat1 } = await adminClient.from('menu_categories').insert({ organization_id: org.id, menu_id: menu.id, name: 'Starters & Bites', sort_order: 0 }).select('id').single()
-  const { data: cat2 } = await adminClient.from('menu_categories').insert({ organization_id: org.id, menu_id: menu.id, name: 'Premium Mains', sort_order: 1 }).select('id').single()
-  const { data: cat3 } = await adminClient.from('menu_categories').insert({ organization_id: org.id, menu_id: menu.id, name: 'Signature Cocktails', sort_order: 2 }).select('id').single()
-  const { data: cat4 } = await adminClient.from('menu_categories').insert({ organization_id: org.id, menu_id: menu.id, name: 'Desserts', sort_order: 3 }).select('id').single()
-
-  if (!cat1 || !cat2 || !cat3 || !cat4) return { error: 'Unknown error' }
-
-  // 7. Add Menu Items (Zero latency image seeding)
-  const { error: itemsError } = await adminClient.from('menu_items').insert([
-    // Starters
-    { organization_id: org.id, category_id: cat1.id, name: 'Spicy Asun Rolls', description: 'Smoked goat meat wrapped in crispy pastry, served with pepper sauce.', price_minor: 650000, is_featured: true, availability_status: 'available', image_url: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80' },
-    { organization_id: org.id, category_id: cat1.id, name: 'Truffle Plantain Fries', description: 'Crispy plantain tossed in truffle oil and parmesan.', price_minor: 450000, is_featured: false, availability_status: 'available', image_url: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=800&q=80' },
-    // Mains
-    { organization_id: org.id, category_id: cat2.id, name: '24-Hour Suya Steak', description: 'Prime ribeye marinated in our signature suya spice blend, grilled to perfection.', price_minor: 2800000, is_featured: true, availability_status: 'available', image_url: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=800&q=80' },
-    { organization_id: org.id, category_id: cat2.id, name: 'Jollof Paella', description: 'Rich, smoky jollof rice mixed with grilled prawns, calamari, and spicy chorizo.', price_minor: 1850000, is_featured: false, availability_status: 'available', image_url: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=800&q=80' },
-    { organization_id: org.id, category_id: cat2.id, name: 'Charcoal Grilled Croaker', description: 'Whole croaker fish stuffed with herbs, served with roasted yam.', price_minor: 1500000, is_featured: false, availability_status: 'sold_out', image_url: 'https://images.unsplash.com/photo-1482049016688-2d3e1b311543?auto=format&fit=crop&w=800&q=80' },
-    // Cocktails
-    { organization_id: org.id, category_id: cat3.id, name: 'Zobo Margarita', description: 'Tequila, fresh zobo extract, lime, and a spicy salt rim.', price_minor: 550000, is_featured: true, availability_status: 'available', image_url: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=800&q=80' },
-    { organization_id: org.id, category_id: cat3.id, name: 'Palm Wine Spritz', description: 'Fresh palm wine, prosecco, and a splash of elderflower.', price_minor: 600000, is_featured: false, availability_status: 'available', image_url: 'https://images.unsplash.com/photo-1551538827-9c037cb4f32a?auto=format&fit=crop&w=800&q=80' },
-    // Desserts
-    { organization_id: org.id, category_id: cat4.id, name: 'Puff-Puff Beignets', description: 'Warm puff-puff served with rich dark chocolate dipping sauce.', price_minor: 400000, is_featured: true, availability_status: 'available', image_url: 'https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=800&q=80' },
-    { organization_id: org.id, category_id: cat4.id, name: 'Mango Sorbet', description: 'Fresh, icy mango sorbet made in-house.', price_minor: 350000, is_featured: false, availability_status: 'available', image_url: 'https://images.unsplash.com/photo-1563805042-7684c8a9e9cb?auto=format&fit=crop&w=800&q=80' }
-  ])
-
-  if (itemsError) {
-    console.error('Failed to insert demo menu items', itemsError)
-  }
 
   // 8. Add strict demo credits (financial defense)
   await adminClient.from('credit_transactions').insert({
@@ -281,7 +243,7 @@ export async function startInteractiveDemo() {
       location_id: loc.id,
       slug: 'restaurant',
       title: 'Pacy Grills & Lounge',
-      template_type: 'restaurant',
+      template_type: 'catalog',
       is_published: true,
       billing_enabled: true
     },
@@ -375,6 +337,21 @@ export async function startInteractiveDemo() {
   } else {
     // Insert page items for the demo templates
     const pageItems = []
+
+    const restaurantPage = pages.find((p: { id: string, slug: string }) => p.slug === 'restaurant')
+    if (restaurantPage) {
+      pageItems.push(
+        { page_id: restaurantPage.id, title: 'Spicy Asun Rolls', description: 'Smoked goat meat wrapped in crispy pastry, served with pepper sauce.', price_minor: 650000, sort_order: 0, availability_status: 'available', images: ['https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80'], item_data: { category: 'Starters & Bites' } },
+        { page_id: restaurantPage.id, title: 'Truffle Plantain Fries', description: 'Crispy plantain tossed in truffle oil and parmesan.', price_minor: 450000, sort_order: 1, availability_status: 'available', images: ['https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=800&q=80'], item_data: { category: 'Starters & Bites' } },
+        { page_id: restaurantPage.id, title: '24-Hour Suya Steak', description: 'Prime ribeye marinated in our signature suya spice blend, grilled to perfection.', price_minor: 2800000, sort_order: 2, availability_status: 'available', images: ['https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=800&q=80'], item_data: { category: 'Premium Mains' } },
+        { page_id: restaurantPage.id, title: 'Jollof Paella', description: 'Rich, smoky jollof rice mixed with grilled prawns, calamari, and spicy chorizo.', price_minor: 1850000, sort_order: 3, availability_status: 'available', images: ['https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=800&q=80'], item_data: { category: 'Premium Mains' } },
+        { page_id: restaurantPage.id, title: 'Charcoal Grilled Croaker', description: 'Whole croaker fish stuffed with herbs, served with roasted yam.', price_minor: 1500000, sort_order: 4, availability_status: 'sold_out', images: ['https://images.unsplash.com/photo-1482049016688-2d3e1b311543?auto=format&fit=crop&w=800&q=80'], item_data: { category: 'Premium Mains' } },
+        { page_id: restaurantPage.id, title: 'Zobo Margarita', description: 'Tequila, fresh zobo extract, lime, and a spicy salt rim.', price_minor: 550000, sort_order: 5, availability_status: 'available', images: ['https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=800&q=80'], item_data: { category: 'Signature Cocktails' } },
+        { page_id: restaurantPage.id, title: 'Palm Wine Spritz', description: 'Fresh palm wine, prosecco, and a splash of elderflower.', price_minor: 600000, sort_order: 6, availability_status: 'available', images: ['https://images.unsplash.com/photo-1551538827-9c037cb4f32a?auto=format&fit=crop&w=800&q=80'], item_data: { category: 'Signature Cocktails' } },
+        { page_id: restaurantPage.id, title: 'Puff-Puff Beignets', description: 'Warm puff-puff served with rich dark chocolate dipping sauce.', price_minor: 400000, sort_order: 7, availability_status: 'available', images: ['https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=800&q=80'], item_data: { category: 'Desserts' } },
+        { page_id: restaurantPage.id, title: 'Mango Sorbet', description: 'Fresh, icy mango sorbet made in-house.', price_minor: 350000, sort_order: 8, availability_status: 'available', images: ['https://images.unsplash.com/photo-1563805042-7684c8a9e9cb?auto=format&fit=crop&w=800&q=80'], item_data: { category: 'Desserts' } }
+      )
+    }
 
     const mediaPage = pages.find((p: { id: string, slug: string }) => p.slug === 'pacy-media')
     if (mediaPage) {

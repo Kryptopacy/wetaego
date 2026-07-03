@@ -83,7 +83,7 @@ export function CatalogPageRenderer({ location, page, items, locationSlug, payme
     if (variants && variants.length > 0) {
       setVariantItem(item)
     } else {
-      addItem({ id: item.id, cartKey: item.id, name: item.title, price_minor: item.price_minor || 0 })
+      addItem({ id: item.id, cartKey: item.id, name: item.title, price_minor: item.price_minor || 0, pageId: page.id })
     }
   }
 
@@ -96,6 +96,7 @@ export function CatalogPageRenderer({ location, page, items, locationSlug, payme
       price_minor: variantItem.price_minor || 0,
       variantSelections: selections,
       variantLabel: label,
+      pageId: page.id,
     })
     setVariantItem(null)
   }
