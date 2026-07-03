@@ -10,7 +10,7 @@ type LineItem = { title: string; qty: number; unit_price_minor: number }
 
 export function QuoteNegotiateClient({
   quoteId,
-  pageId,
+  pageId: _pageId,
   lineItems,
   currency,
   themeColor,

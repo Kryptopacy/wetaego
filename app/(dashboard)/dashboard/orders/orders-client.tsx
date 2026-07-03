@@ -131,8 +131,6 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
       })
       .subscribe()
 
-      .subscribe()
-
     // Subscribe to Menu Items
     const menuSubscription = supabase
       .channel('menu-channel')

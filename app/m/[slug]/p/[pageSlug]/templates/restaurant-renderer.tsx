@@ -1,4 +1,4 @@
-import { createClient, createAnonClient } from '@/lib/supabase/server'
+import { createAnonClient } from '@/lib/supabase/server'
 import { unstable_cache } from 'next/cache'
 import { MenuRenderer } from '../../../menu-renderer'
 import { LiveOrderTracker } from '../../../live-order-tracker'

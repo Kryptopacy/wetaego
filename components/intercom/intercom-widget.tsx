@@ -322,6 +322,7 @@ export function IntercomWidget({ userId, organizationId }: { userId: string, org
                 >
                   {msg.content_text && <p className="text-sm break-words">{msg.content_text}</p>}
                   {!msg.audio_url && msg.media_url && (
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img src={msg.media_url} alt="Shared image" className="rounded-lg max-h-48 object-cover mt-1" />
                   )}
                   {msg.audio_url && (

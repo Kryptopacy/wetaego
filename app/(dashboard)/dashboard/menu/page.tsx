@@ -10,9 +10,6 @@ export default async function MenuManagerPage() {
   const supabase = await createClient()
   const { data: userData } = await supabase.auth.getUser()
   const user = userData?.user
-  if (!user) {
-    // We handle the redirect below
-  }
 
   if (!user) {
     redirect('/login')

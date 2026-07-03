@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useTransition, useMemo } from 'react'
+import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ExternalLink, X, Mail, FileText, ArrowRight, Code } from 'lucide-react'
+import { ExternalLink, X, Mail, ArrowRight } from 'lucide-react'
 
 // Simple SVG Icons for Socials
 const Instagram = ({ className }: { className?: string }) => (

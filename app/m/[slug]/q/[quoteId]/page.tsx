@@ -1,4 +1,4 @@
-import { createClient, createAnonClient } from '@/lib/supabase/server'
+import { createAnonClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'

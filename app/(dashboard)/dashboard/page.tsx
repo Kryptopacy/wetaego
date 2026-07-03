@@ -56,6 +56,10 @@ export default async function DashboardOverviewPage() {
     templateType = BUSINESS_TYPE_PRESETS[orgBusinessType].template_type
   }
 
+  // Time-aware greeting
+  const hour = new Date().getHours()
+  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
+
   if (orgId) {
     const { data: loc } = await supabase
       .from('locations')
@@ -128,8 +132,8 @@ export default async function DashboardOverviewPage() {
       icon: BookOpen,
       color: 'from-violet-600 to-indigo-600',
       glow: 'shadow-violet-900/40',
-      change: '+2 this week',
-      trend: 'up',
+      change: menuCount > 0 ? `${menuCount} active` : 'None yet',
+      trend: 'neutral',
     },
     {
       label: templateType === 'catalog' ? "Today's Orders" : templateType === 'booking' ? "Today's Bookings" : templateType === 'listing' ? "Today's Inquiries" : "Today's Requests",
@@ -209,7 +213,7 @@ export default async function DashboardOverviewPage() {
       <div className="flex items-start justify-between">
         <div>
           <p className="text-zinc-500 text-sm mb-1">
-            {orgId ? `Good morning, ${orgName} 👋` : `Welcome to OurMenu OS 👋`}
+            {orgId ? `${greeting}, ${orgName} 👋` : `Welcome to OurMenu OS 👋`}
           </p>
           <h1 className="text-3xl font-bold text-white tracking-tight">
             {orgId ? 'Overview' : 'Get Started'}

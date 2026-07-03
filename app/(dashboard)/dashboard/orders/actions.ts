@@ -223,7 +223,7 @@ export const sendPaymentLinkAction = authActionClient
 
     // 4. Send Email
     const orgName = (fullOrder.organizations as unknown as { name?: string })?.name || 'OurMenu Partner'
-    const items = (fullOrder.order_items as any[]).map(i => ({
+    const items = (fullOrder.order_items as { item_name: string; quantity: number; price_minor: number }[]).map(i => ({
       name: i.item_name,
       quantity: i.quantity,
       priceMinor: i.price_minor

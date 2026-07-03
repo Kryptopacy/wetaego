@@ -62,6 +62,7 @@ export function VoiceRecorder({ onRecordingComplete, onCancel }: VoiceRecorderPr
         mediaRecorder.current.stop()
       }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const stopRecording = () => {

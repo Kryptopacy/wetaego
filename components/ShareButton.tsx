@@ -42,7 +42,7 @@ export const ShareButton = forwardRef<HTMLButtonElement, ShareButtonProps>(({ ur
         ref={ref}
         onClick={(e) => {
           handleShare(e)
-          onClick?.(e as any)
+          onClick?.(e as React.MouseEvent<HTMLButtonElement>)
         }}
         className={className}
         aria-haspopup="dialog"
@@ -62,3 +62,5 @@ export const ShareButton = forwardRef<HTMLButtonElement, ShareButtonProps>(({ ur
     </>
   )
 })
+ShareButton.displayName = 'ShareButton'
+

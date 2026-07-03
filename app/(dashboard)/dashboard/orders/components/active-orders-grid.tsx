@@ -35,6 +35,7 @@ export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, tem
   const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'paid' | 'preparing'>('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [, setTick] = useState(0)
+  const [cancelState, setCancelState] = useState<{ orderId: string; reason: string; restock: boolean } | null>(null)
 
   // Force re-render every 30 seconds to update SLA timers
   useEffect(() => {
@@ -79,7 +80,7 @@ export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, tem
             {['all', 'pending', 'paid', 'preparing'].map((status) => (
               <button
                 key={status}
-                onClick={() => setFilterStatus(status as any)}
+                onClick={() => setFilterStatus(status as 'all' | 'pending' | 'paid' | 'preparing')}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${
                   filterStatus === status 
                     ? 'bg-blue-600 text-white' 
@@ -91,6 +92,55 @@ export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, tem
             ))}
           </div>
         </div>
+
+        {/* Cancel Order Modal */}
+        {cancelState && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+            <div className="bg-zinc-900 border border-zinc-700 rounded-2xl p-6 w-full max-w-md shadow-2xl">
+              <h3 className="text-white font-bold text-lg mb-1">Cancel Order</h3>
+              <p className="text-zinc-400 text-sm mb-4">This cannot be undone. Provide a reason below.</p>
+              <textarea
+                autoFocus
+                value={cancelState.reason}
+                onChange={(e) => setCancelState(s => s ? { ...s, reason: e.target.value } : null)}
+                placeholder="e.g. Sold out, Guest left, Wrong order..."
+                className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white text-sm placeholder-zinc-500 focus:outline-none focus:border-red-500/50 resize-none mb-4"
+                rows={3}
+              />
+              <label className="flex items-center gap-3 mb-5 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={cancelState.restock}
+                  onChange={(e) => setCancelState(s => s ? { ...s, restock: e.target.checked } : null)}
+                  className="w-4 h-4 rounded accent-emerald-500"
+                />
+                <span className="text-sm text-zinc-300">Restock items back into inventory</span>
+              </label>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setCancelState(null)}
+                  className="flex-1 px-4 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-medium transition-colors"
+                >
+                  Keep Order
+                </button>
+                <button
+                  disabled={!cancelState.reason.trim()}
+                  onClick={() => {
+                    if (!cancelState.reason.trim()) return
+                    startTransition(() => {
+                      addOptimisticOrder({ id: cancelState.orderId, status: 'cancelled' })
+                    })
+                    onCancelOrder(cancelState.orderId, cancelState.reason, cancelState.restock)
+                    setCancelState(null)
+                  }}
+                  className="flex-1 px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold transition-colors"
+                >
+                  Confirm Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
         
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {filteredOrders.length === 0 ? (
@@ -177,15 +227,7 @@ export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, tem
                 {/* Desktop Inline Actions (Hidden on Mobile) */}
                 <div className={`hidden sm:flex justify-between items-center mt-4 pt-4 border-t border-zinc-800/50 ${templateType === 'restaurant' ? 'flex-col gap-4 sm:flex-row' : ''}`}>
                   <button
-                    onClick={() => {
-                      const reason = window.prompt('Reason for cancellation (e.g. Sold out, Guest left)?')
-                      if (!reason) return
-                      const restock = window.confirm('Restock these items back into inventory? (Click OK to restock, Cancel to keep inventory depleted)')
-                      startTransition(() => {
-                        addOptimisticOrder({ id: order.id, status: 'cancelled' })
-                      })
-                      onCancelOrder(order.id, reason, restock)
-                    }}
+                    onClick={() => setCancelState({ orderId: order.id, reason: '', restock: true })}
                     className="px-4 py-2 rounded-lg text-red-400 hover:bg-red-500/10 font-medium transition-colors text-sm"
                   >
                     Reject Order
@@ -286,15 +328,7 @@ export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, tem
                 
                 {/* Cancel Action */}
                 <button
-                  onClick={() => {
-                    const reason = window.prompt('Reason for cancellation?')
-                    if (!reason) return
-                    const restock = window.confirm('Restock these items?')
-                    startTransition(() => {
-                      addOptimisticOrder({ id: order.id, status: 'cancelled' })
-                    })
-                    onCancelOrder(order.id, reason, restock)
-                  }}
+                  onClick={() => setCancelState({ orderId: order.id, reason: '', restock: true })}
                   className="w-full px-4 py-3 rounded-xl bg-red-500/10 text-red-400 border border-red-500/20 font-bold active:bg-red-500/20"
                 >
                   Cancel Order
