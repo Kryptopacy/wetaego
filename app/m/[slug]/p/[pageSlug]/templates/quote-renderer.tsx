@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { BackButton } from '../../components/back-button'
-import { InfoStrip } from '../../components/info-strip'
+import { BackButton } from '../../../components/back-button'
+import { InfoStrip } from '../../../components/info-strip'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { formatCurrency } from '@/lib/utils/currency'

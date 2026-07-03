@@ -12,6 +12,7 @@ describe('Cart Zustand Store', () => {
       cartKey: 'item_1',
       name: 'Burger',
       price_minor: 1500,
+      pageId: 'test'
     })
 
     const state = useCartStore.getState()
@@ -28,6 +29,7 @@ describe('Cart Zustand Store', () => {
       cartKey: 'item_1',
       name: 'Burger',
       price_minor: 1500,
+      pageId: 'test'
     })
     // Added twice to simulate quantity = 2
     store.addItem({
@@ -35,6 +37,7 @@ describe('Cart Zustand Store', () => {
       cartKey: 'item_1',
       name: 'Burger',
       price_minor: 1500,
+      pageId: 'test'
     })
 
     store.addItem({
@@ -42,11 +45,12 @@ describe('Cart Zustand Store', () => {
       cartKey: 'item_2',
       name: 'Fries',
       price_minor: 500,
+      pageId: 'test'
     })
 
     // Subtotal: 1500*2 + 500 = 3500
     const state = useCartStore.getState()
-    expect(state.totalAmountMinor()).toBe(3500)
+    expect(state.totalAmountMinorForPage('test')).toBe(3500)
   })
 
   it('should handle removing items', () => {
@@ -57,6 +61,7 @@ describe('Cart Zustand Store', () => {
       cartKey: 'item_1',
       name: 'Burger',
       price_minor: 1500,
+      pageId: 'test'
     })
     store.removeItem('item_1')
 
@@ -72,10 +77,11 @@ describe('Cart Zustand Store', () => {
       cartKey: 'item_1',
       name: 'Steak',
       price_minor: 10000,
+      pageId: 'test'
     })
 
     // Total should be 10000
-    expect(store.totalAmountMinor()).toBe(10000)
+    expect(store.totalAmountMinorForPage('test')).toBe(10000)
 
     store.setSpinnerDiscount(1500)
     

@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { BackButton } from '../../components/back-button'
-import { InfoStrip } from '../../components/info-strip'
+import { BackButton } from '../../../components/back-button'
+import { InfoStrip } from '../../../components/info-strip'
 import Image from 'next/image'
 import { useCartStore } from '@/lib/store/cart'
 import { motion } from 'framer-motion'

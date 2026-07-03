@@ -1,5 +1,6 @@
 import { ShareButton } from '@/app/components/share-button'
 import { InfoStrip } from './info-strip'
+import Image from 'next/image'
 
 interface VenueHeaderProps {
   location: {

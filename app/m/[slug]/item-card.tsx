@@ -31,7 +31,8 @@ export function ItemCard({ item }: ItemCardProps) {
       id: item.id,
       cartKey: cartItemId,
       name: finalName, 
-      price_minor: item.price_minor 
+      price_minor: item.price_minor,
+      pageId: pageId || ''
     })
     
     setShowModifierModal(false)

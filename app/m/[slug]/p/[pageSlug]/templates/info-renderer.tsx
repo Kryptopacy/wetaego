@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import { BackButton } from '../../components/back-button'
+import { BackButton } from '../../../components/back-button'
 
 interface InfoRendererProps {
   location: {

@@ -47,6 +47,7 @@ export function ClientCTA({ item, pageInfo, location, isAvailable, themeColor, s
       cartKey: item.id + JSON.stringify(selectedVariants), // Unique key for this variant combo
       name: item.title + variantSuffix,
       price_minor: item.price_minor || 0,
+      pageId: item.page_id || ''
     })
   }
 
