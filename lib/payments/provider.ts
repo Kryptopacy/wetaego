@@ -27,6 +27,8 @@ export interface PaymentParams {
   transactionChargeMinor?: number
   /** Restrict payment methods (e.g. ['card', 'bank_transfer']) */
   channels?: string[]
+  /** Override to use test environment keys (Admin Testing only) */
+  useTestKeys?: boolean
 }
 
 export interface PaymentVerification {
@@ -43,6 +45,6 @@ export interface PaymentVerification {
 export interface PaymentProvider {
   readonly name: string
   initiatePayment(params: PaymentParams): Promise<{ authorizationUrl: string; reference: string }>
-  verifyPayment(reference: string): Promise<PaymentVerification>
+  verifyPayment(reference: string, useTestKeys?: boolean): Promise<PaymentVerification>
   validateWebhookSignature(payload: string, signature: string): boolean
 }

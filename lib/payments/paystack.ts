@@ -13,7 +13,7 @@ export const paystackProvider: PaymentProvider = {
   name: 'paystack',
 
   async initiatePayment(params: PaymentParams) {
-    const secretKey = process.env.PAYSTACK_SECRET_KEY
+    const secretKey = params.useTestKeys ? process.env.PAYSTACK_TEST_SECRET_KEY : process.env.PAYSTACK_SECRET_KEY
     if (!secretKey) throw new Error('PAYSTACK_SECRET_KEY is not configured')
 
     const res = await fetch(`${PAYSTACK_BASE}/transaction/initialize`, {
@@ -52,8 +52,8 @@ export const paystackProvider: PaymentProvider = {
     }
   },
 
-  async verifyPayment(reference: string): Promise<PaymentVerification> {
-    const secretKey = process.env.PAYSTACK_SECRET_KEY
+  async verifyPayment(reference: string, useTestKeys?: boolean): Promise<PaymentVerification> {
+    const secretKey = useTestKeys ? process.env.PAYSTACK_TEST_SECRET_KEY : process.env.PAYSTACK_SECRET_KEY
     if (!secretKey) throw new Error('PAYSTACK_SECRET_KEY is not configured')
 
     const res = await fetch(`${PAYSTACK_BASE}/transaction/verify/${encodeURIComponent(reference)}`, {
@@ -86,11 +86,26 @@ export const paystackProvider: PaymentProvider = {
   },
 
   validateWebhookSignature(payload: string, signature: string): boolean {
-    const secretKey = process.env.PAYSTACK_SECRET_KEY
-    if (!secretKey) return false
-    const hash = crypto.createHmac('sha512', secretKey).update(payload).digest('hex')
-    if (hash.length !== signature.length) return false
-    return crypto.timingSafeEqual(Buffer.from(hash), Buffer.from(signature))
+    const liveKey = process.env.PAYSTACK_SECRET_KEY
+    const testKey = process.env.PAYSTACK_TEST_SECRET_KEY
+
+    let liveValid = false
+    if (liveKey) {
+      const hash = crypto.createHmac('sha512', liveKey).update(payload).digest('hex')
+      if (hash.length === signature.length) {
+        liveValid = crypto.timingSafeEqual(Buffer.from(hash), Buffer.from(signature))
+      }
+    }
+
+    let testValid = false
+    if (testKey) {
+      const hash = crypto.createHmac('sha512', testKey).update(payload).digest('hex')
+      if (hash.length === signature.length) {
+        testValid = crypto.timingSafeEqual(Buffer.from(hash), Buffer.from(signature))
+      }
+    }
+
+    return liveValid || testValid
   },
 }
 

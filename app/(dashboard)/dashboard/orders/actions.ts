@@ -211,7 +211,7 @@ export const sendPaymentLinkAction = authActionClient
       customerEmail: fullOrder.customer_email!,
       reference: `${orderId}-link-${Date.now()}`,
       currency: 'NGN',
-      callbackUrl: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://ourmenuos.online'}/api/bookings/callback`,
+      callbackUrl: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://ourmenuos.online'}/dashboard/orders`,
       subaccountCode: subaccountCode || undefined,
       transactionChargeMinor,
       channels: ['card', 'bank_transfer', 'ussd']

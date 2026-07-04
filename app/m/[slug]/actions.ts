@@ -312,7 +312,7 @@ export async function processCheckout(params: {
       customerEmail: email,
       reference: order.id,
       currency: 'NGN',
-      callbackUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/api/bookings/callback`,
+      callbackUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/m/${slug}/payment-callback`,
       subaccountCode: subaccountCode || undefined,
       transactionChargeMinor,
       channels
@@ -444,7 +444,7 @@ export async function processExistingOrderPayment(params: {
       customerEmail: email,
       reference: reference,
       currency: 'NGN',
-      callbackUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/api/bookings/callback`,
+      callbackUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/m/${slug}/payment-callback`,
       subaccountCode: subaccountCode || undefined,
       transactionChargeMinor
     })

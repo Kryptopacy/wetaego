@@ -49,6 +49,12 @@ export async function POST(req: Request) {
 
       // ── Determine what was paid: order or booking ────────────────────────────
 
+      // ── Admin Tester Mode ───────────────────────────────────────────────────
+      if (event.data.metadata?.is_test_mode === true) {
+        console.log('✅ Admin test payment processed successfully:', rawReference)
+        return NextResponse.json({ status: 'test_mode_success' }, { status: 200 })
+      }
+
       // Booking references are prefixed: "book_<bookingId>_<hash>"
       if (rawReference.startsWith('book_')) {
         const bookingId = rawReference.replace('book_', '').split('_')[0]
