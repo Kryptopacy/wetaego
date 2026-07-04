@@ -78,8 +78,9 @@ Seamlessly scale operations across multiple venues, cities, or countries from a 
 - **Decoupled Hardware Provisioning & Smart Routing:** Print thousands of generic "dummy" QR codes in bulk, deploy them globally, and securely re-map them remotely. QR codes can be dynamically routed to specific location pages (e.g. routing directly to a "Room Service" sub-page or "Spa Bookings") from the dashboard without ever reprinting physical assets.
 - **Scoped Data Views:** Operations, Menu Managers, and Analytics dashboards automatically and securely filter down to the active location context via encrypted cookies.
 
-### 5. AI-Powered Operations
-- **Conversational AI Assistant:** A customizable, domain-aware conversational agent that guides customers through the catalog, menu, or services.
+### 5. AI-Powered Operations (Copilot & Agents)
+- **Admin AI Copilot with RBAC:** A deeply integrated, conversational assistant built directly into the merchant dashboard. The Copilot possesses profound domain knowledge of OurMenuOS and enforces strict **Role-Based Access Control (RBAC)**. It can autonomously execute dashboard actions—like dynamically creating menu categories or adding items via AI SDK Tools—while blocking unauthorized staff from accessing financial reports.
+- **Fail-Safe AI Architecture:** All Vercel AI SDK integrations (`generateObject`, `generateText`, `streamText`) are wrapped in rigorous exception handlers. AI provider timeouts, overloads, or hallucinations are gracefully caught and mapped to `503 Service Unavailable`, guaranteeing the edge functions never silently crash.
 - **Voice Dictation & Hands-Free UI:** Customers can use natural voice dictation via the Web Speech API to interact with the AI, enabling a fully seamless two-way conversational back-and-forth. The AI autonomously manages their shopping cart (add/remove) and calls staff directly via AI tool execution.
 - **Multimodal Menu Importer:** Powered by Gemini 3.5 Vision, physical menus can be photographed and instantly parsed into structured digital catalogs with superior spatial understanding, replacing legacy OCR techniques.
 - **Structured AI Rules Engine:** Configure strict guardrails including Base Personalities (Professional, Casual, Witty), Escalation Contacts, and a dynamic JSON-based FAQ builder that seamlessly injects venue-specific context directly into the system prompt.
@@ -87,18 +88,25 @@ Seamlessly scale operations across multiple venues, cities, or countries from a 
 - **AI Demand Forecasting (`/api/ai/forecast`):** Analyzes 30-day sales velocity and utilizes Google Gemini to predict 7-day demand trajectories, issuing smart inventory alerts (Critical, Order Soon, Sufficient).
 - **Smart Upselling Engine (`/api/upsell`):** Intelligent checkout add-on engine dynamically analyzes cart contents to suggest highly relevant cross-sells, maximizing Average Order Value (AOV).
 
-### 6. CRM, Loyalty & Gamification
+### 6. Superadmin Developer Console
+A powerful, centralized control panel allowing platform owners to dictate global configurations without touching code or running SQL queries:
+- **Real-Time Global Configuration:** Instantly modify SaaS subscription pricing, platform fee percentages, and default trial periods dynamically.
+- **Customizable AI Credit Economics:** Dynamically adjust the exact credit cost (e.g., 1 credit, 3 credits) for individual AI actions across the platform, including Demand Forecasting, Auto-Fill, and Image Generation.
+- **Global Manual Fallback Overrides:** Instantly enforce a global bypass of the payment provider (Paystack) during regional downtimes, forcing all checkouts to use manual bank transfers.
+- **Tenant Directory & Hackathon Exports:** A bird's-eye view of all registered businesses with instant CSV generation for hackathon or investor metrics.
+
+### 7. CRM, Loyalty & Gamification
 - **Customer Profiles & LTV:** Automatically builds rich CRM profiles at checkout, tracking Lifetime Value (LTV), order frequency, and marketing opt-ins.
 - **Bespoke Loyalty Programs:** Organizations can launch custom point-based reward systems, configurable down to the fractional currency unit.
 - **Payment Roulette & Bill Splitting:** A gamified "spin to win" bill-splitting randomizer that transforms the friction of group payments into a highly engaging, viral experience. 
 - **PIN-Protected Post-Service Feedback:** Automated email receipts include a cryptographic 4-digit PIN ensuring only verified customers can rate staff performance, populating the gamified Team Performance Leaderboard and the centralized **Feedback Inbox** within the dashboard.
 
-### 7. Global SEO, AEO & Privacy Compliance
+### 8. Global SEO, AEO & Privacy Compliance
 - **Dynamic Semantic JSON-LD:** Intelligent generation of `LocalBusiness`, `ItemList`, and `Product` schemas tailored for each specific business and catalog, boosting local SEO visibility.
 - **Answer Engine Optimization (AEO):** Screen-reader-only descriptive blocks feed AI tools (ChatGPT, Perplexity) context around business identities. 
 - **Privacy-First Indexing:** A strict opt-in framework controls web crawlers. All tenant directories default to `noindex, nofollow` to protect private menus, only enabling public indexing when the tenant explicitly grants consent via the compliance dashboard.
 
-### 8. Inventory Manager (Physical Stock Tracking)
+### 9. Inventory Manager (Physical Stock Tracking)
 A purpose-built, real-time stock management system designed for any physical business — roadside grills, cafes, retail stores, salons — that needs to track tangible assets without a complex ERP:
 - **Live Item Ledger:** Every item has a running quantity, category, unit, SKU, optional cost price, reorder threshold, and notes. Items are per-location, so multi-branch orgs stay fully isolated.
 - **5 Movement Types:** `Restock`, `Use`, `Wastage/Loss`, `Sale`, and `Manual Adjustment` — each with an optional note for accountability.
