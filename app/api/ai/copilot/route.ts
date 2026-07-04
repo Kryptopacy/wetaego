@@ -179,6 +179,71 @@ export async function POST(req: Request) {
               orderCount: completed.length
             }
           }
+        }),
+        create_menu_category: tool({
+          description: 'Create a new menu category for a specific location.',
+          parameters: z.object({
+            locationId: z.string().uuid(),
+            menuId: z.string().uuid(),
+            categoryName: z.string()
+          }),
+          // @ts-ignore
+          execute: async ({ locationId, menuId, categoryName }: { locationId: string; menuId: string; categoryName: string }): Promise<any> => {
+            if (userRole !== 'owner' && userRole !== 'manager') {
+              return { error: 'Unauthorized: Only owners and managers can create categories.' }
+            }
+            
+            const { data, error } = await supabase
+              .from('menu_categories')
+              .insert({
+                organization_id: organizationId,
+                location_id: locationId,
+                menu_id: menuId,
+                name: categoryName
+              } as any)
+              .select('id')
+              .single()
+              
+            if (error) throw new Error(error.message)
+            return { success: true, categoryId: data.id, name: categoryName }
+          }
+        }),
+        add_menu_item: tool({
+          description: 'Add a new item to a menu category.',
+          parameters: z.object({
+            locationId: z.string().uuid(),
+            categoryId: z.string().uuid(),
+            name: z.string(),
+            description: z.string().optional(),
+            priceMinor: z.number().describe('The price in minor units (e.g., kobo, cents). 1000 NGN = 100000 minor units.')
+          }),
+          // @ts-ignore
+          execute: async ({ locationId, categoryId, name, description, priceMinor }: { locationId: string; categoryId: string; name: string; description?: string; priceMinor: number }): Promise<any> => {
+            if (userRole !== 'owner' && userRole !== 'manager') {
+              return { error: 'Unauthorized: Only owners and managers can add menu items.' }
+            }
+            
+            // Generate a slug
+            const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '') + '-' + Date.now().toString().slice(-4)
+            
+            const { data, error } = await supabase
+              .from('menu_items')
+              .insert({
+                organization_id: organizationId,
+                location_id: locationId,
+                category_id: categoryId,
+                name: name,
+                slug: slug,
+                description: description || null,
+                price_minor: priceMinor,
+                is_available: true
+              } as any)
+              .select('id')
+              .single()
+              
+            if (error) throw new Error(error.message)
+            return { success: true, itemId: data.id, name }
+          }
         })
       }
     })
