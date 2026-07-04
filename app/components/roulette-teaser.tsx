@@ -151,9 +151,7 @@ export function RouletteTeaser() {
         <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-purple-500/20 blur-[100px] rounded-full pointer-events-none group-hover:bg-purple-500/30 transition-colors duration-700" />
         
         <div className="lg:w-1/2 relative z-10">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-sm font-bold mb-6">
-            <Dices className="w-4 h-4" /> Built-in Add-on
-          </div>
+
           <h2 className="text-4xl md:text-5xl font-black text-white tracking-tight leading-tight mb-6">
             Who pays the bill? <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-fuchsia-400">Spin the wheel.</span>
