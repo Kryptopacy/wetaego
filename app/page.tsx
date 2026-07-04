@@ -71,8 +71,8 @@ export default async function HomePage() {
             quality={75}
           />
           {/* Multi-layer gradient overlay for text legibility on left, reveal on right */}
-          <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-black/20" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/40" />
+          <div className="absolute inset-0 bg-gradient-to-b md:bg-gradient-to-r from-[#050505]/95 via-[#050505]/80 md:via-[#050505]/60 to-[#050505]/40 md:to-[#050505]/20" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-black/40" />
         </div>
 
         {/* Content grid */}

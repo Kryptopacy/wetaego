@@ -206,17 +206,17 @@ export function FeatureTabs() {
     <div className="flex flex-col lg:flex-row gap-8 lg:gap-16">
       {/* Navigation - Horizontal on mobile, Vertical on desktop */}
       <div className="lg:w-1/4 shrink-0">
-        <div className="flex lg:flex-col gap-2 overflow-x-auto pb-4 lg:pb-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] -mx-6 px-6 lg:mx-0 lg:px-0 lg:sticky lg:top-24">
+        <div className="flex lg:flex-col gap-2 overflow-x-auto pb-4 lg:pb-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] -mx-6 px-6 lg:mx-0 lg:px-0 lg:sticky lg:top-24 snap-x snap-mandatory">
           {categories.map((category) => {
             const isActive = category.id === activeTab
             return (
               <button
                 key={category.id}
                 onClick={() => setActiveTab(category.id)}
-                className={`flex-shrink-0 text-left px-5 py-4 rounded-2xl transition-all duration-300 font-bold whitespace-nowrap lg:whitespace-normal group relative overflow-hidden ${
+                className={`flex-shrink-0 snap-start text-left px-4 py-3 text-sm lg:text-base lg:px-5 lg:py-4 rounded-2xl transition-all duration-300 font-bold whitespace-nowrap lg:whitespace-normal group relative overflow-hidden ${
                   isActive 
-                    ? 'text-white' 
-                    : 'text-zinc-500 hover:text-zinc-300'
+                    ? 'text-white bg-white/5 lg:bg-transparent' 
+                    : 'text-zinc-500 hover:text-zinc-300 bg-white/[0.02] lg:bg-transparent border border-transparent lg:border-none'
                 }`}
               >
                 {isActive && (

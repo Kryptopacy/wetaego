@@ -85,7 +85,7 @@ export function AICopilotWidget({ organizationId }: { organizationId: string }) 
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setIsOpen(true)}
-            className="fixed bottom-6 right-6 z-[90] bg-gradient-to-r from-indigo-600 to-purple-600 p-4 rounded-full shadow-2xl border border-white/10 group flex items-center justify-center"
+            className="fixed bottom-24 md:bottom-6 right-6 z-[90] bg-gradient-to-r from-indigo-600 to-purple-600 p-4 rounded-full shadow-2xl border border-white/10 group flex items-center justify-center"
           >
             <div className="absolute inset-0 rounded-full bg-white/20 blur opacity-0 group-hover:opacity-100 transition-opacity" />
             <Sparkles className="w-6 h-6 text-white relative z-10" />
