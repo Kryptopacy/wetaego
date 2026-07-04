@@ -90,7 +90,7 @@ export default async function AdminPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-zinc-400 mb-1">Default Trial Days (0 = No Free Trial)</label>
-                <input type="number" name="default_trial_days" defaultValue={(trialSettings as Record<string, number>).default_trial_days ?? 30} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white" />
+                <input type="number" name="default_trial_days" defaultValue={(trialSettings as Record<string, number>).default_trial_days ?? 15} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white" />
               </div>
             </div>
             <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-500 transition">Save Trial Settings</button>
@@ -105,11 +105,11 @@ export default async function AdminPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-zinc-400 mb-1">Lite Monthly (NGN)</label>
-                <input type="number" name="lite_monthly_ngn" defaultValue={(pricing as Record<string, number>).lite_monthly_ngn || 14999} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white" />
+                <input type="number" name="lite_monthly_ngn" defaultValue={(pricing as Record<string, number>).lite_monthly_ngn || 19999} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white" />
               </div>
               <div>
                 <label className="block text-xs font-medium text-zinc-400 mb-1">Pro Plan (Monthly)</label>
-                <input type="number" name="pro_monthly_ngn" defaultValue={(pricing as Record<string, number>).pro_monthly_ngn || 49999} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white" />
+                <input type="number" name="pro_monthly_ngn" defaultValue={(pricing as Record<string, number>).pro_monthly_ngn || 69000} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white" />
               </div>
               <div>
                 <label className="block text-xs font-medium text-zinc-400 mb-1">Enterprise Plan (Monthly)</label>

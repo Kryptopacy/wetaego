@@ -7,8 +7,8 @@ export async function Pricing() {
   const pricing = await getPricingSettings()
   const planLimits = await getPlanLimits()
 
-  const litePrice = pricing.lite_monthly_ngn || 14999
-  const proPrice = pricing.pro_monthly_ngn || 49999
+  const litePrice = pricing.lite_monthly_ngn || 19999
+  const proPrice = pricing.pro_monthly_ngn || 69000
 
   const plans = [
     {

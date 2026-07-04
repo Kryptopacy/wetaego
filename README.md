@@ -139,7 +139,7 @@ OurMenu OS is a true operating system, extending far beyond the customer-facing 
 
 OurMenu OS monetizes via three tiered subscription plans, driven by a unified credit system that seamlessly up-sells usage into Pro and Enterprise tiers.
 
-### 🟢 Lite Plan (₦14,999 / month)
+### 🟢 Lite Plan (₦19,999 / month)
 *Perfect for testing the system at a single venue.*
 - **Credits:** 10 Monthly Credits
 - **Locations:** 1 active location
@@ -147,7 +147,7 @@ OurMenu OS monetizes via three tiered subscription plans, driven by a unified cr
 - **AI Assistant:** Customizable, domain-specific AI Assistant (guest-facing chat)
 - **Edge Translator:** Real-time menu translation for 40+ languages
 
-### 🔵 Pro Plan (₦49,999 / month)
+### 🔵 Pro Plan (₦69,000 / month)
 *For serious operators who want every edge.*
 - **Credits:** 50 Monthly Credits (Refreshes every month)
 - **Locations:** 1 active location

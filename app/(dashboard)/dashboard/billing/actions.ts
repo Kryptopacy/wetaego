@@ -36,7 +36,7 @@ export const subscribeToLite = authActionClient
     const rate = await getUsdToNgnRate()
     const pricing = await getPricingSettings()
     
-    const baseNgn = pricing.lite_monthly_ngn || 14999
+    const baseNgn = pricing.lite_monthly_ngn || 19999
     let amountMinor = 0
     if (currency === 'USD') {
       const amountUsd = baseNgn / rate
@@ -70,7 +70,7 @@ export const subscribeToPro = authActionClient
     const rate = await getUsdToNgnRate()
     const pricing = await getPricingSettings()
     
-    const baseNgn = pricing.pro_monthly_ngn || 49999
+    const baseNgn = pricing.pro_monthly_ngn || 69000
     let amountMinor = 0
     if (currency === 'USD') {
       const amountUsd = baseNgn / rate
