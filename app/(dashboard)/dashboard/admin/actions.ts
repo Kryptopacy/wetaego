@@ -5,13 +5,14 @@ import { revalidatePath } from 'next/cache'
 import { authActionClient } from '@/lib/safe-action'
 import { z } from 'zod'
 import { zfd } from 'zod-form-data'
+import { isAdminEmail } from '@/lib/utils/admin'
 
 export const updateSetting = authActionClient
   .schema(zfd.formData(z.any()))
   .action(async ({ parsedInput: formData, ctx: { user } }) => {
     const supabase = await createClient()
 
-    if (user.email !== (process.env.ADMIN_EMAIL || 'kryptopacy@gmail.com')) {
+    if (!isAdminEmail(user.email)) {
       throw new Error('Unauthorized')
     }
 
@@ -64,7 +65,7 @@ export const overrideTenantPlan = authActionClient
   .action(async ({ parsedInput: formData, ctx: { user } }) => {
     const supabase = await createClient()
 
-    if (user.email !== (process.env.ADMIN_EMAIL || 'kryptopacy@gmail.com')) {
+    if (!isAdminEmail(user.email)) {
       throw new Error('Unauthorized')
     }
 
@@ -98,7 +99,7 @@ export const createCoupon = authActionClient
   .action(async ({ parsedInput: formData, ctx: { user } }) => {
     const supabase = await createClient()
 
-    if (user.email !== (process.env.ADMIN_EMAIL || 'kryptopacy@gmail.com')) {
+    if (!isAdminEmail(user.email)) {
       throw new Error('Unauthorized')
     }
 

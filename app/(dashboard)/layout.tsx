@@ -6,6 +6,7 @@ import {
   LayoutDashboard, ClipboardList, BarChart3, BookOpen,
   FileText, Settings, Users, QrCode, TrendingUp, MessageSquare, Package
 } from 'lucide-react'
+import { isAdminEmail } from '@/lib/utils/admin'
 import { IntercomWidget } from '@/components/intercom/intercom-widget'
 import { AICopilotWidget } from './dashboard/components/ai-copilot-widget'
 
@@ -100,7 +101,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
     }
   }
 
-  const isAdmin = userEmail === (process.env.ADMIN_EMAIL || 'kryptopacy@gmail.com')
+  const isAdmin = isAdminEmail(userEmail)
 
   const initialData: InitialDashboardData = {
     orgName,

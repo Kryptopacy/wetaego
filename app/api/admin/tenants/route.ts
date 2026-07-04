@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { isAdminEmail } from '@/lib/utils/admin'
 import { NextResponse } from 'next/server'
 
 export async function GET(req: Request) {
@@ -7,7 +8,7 @@ export async function GET(req: Request) {
 
     // Ensure the user is the admin
     const { data: userData } = await supabase.auth.getUser()
-    if (userData?.user?.email !== (process.env.ADMIN_EMAIL || 'kryptopacy@gmail.com')) {
+    if (!isAdminEmail(userData?.user?.email)) {
       return new NextResponse('Unauthorized', { status: 401 })
     }
 

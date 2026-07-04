@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { TenantDirectory } from './tenant-directory'
 import { CouponsManager } from './coupons-manager'
+import { isAdminEmail } from '@/lib/utils/admin'
 
 export default async function AdminPage() {
   const pricing = await getPricingSettings()
@@ -20,7 +21,7 @@ export default async function AdminPage() {
   const supabase = await createClient()
   const { data: userData } = await supabase.auth.getUser()
 
-  if (userData?.user?.email !== (process.env.ADMIN_EMAIL || 'kryptopacy@gmail.com')) {
+  if (!isAdminEmail(userData?.user?.email)) {
     redirect('/dashboard')
   }
 

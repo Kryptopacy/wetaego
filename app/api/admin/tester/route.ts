@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { paymentProvider } from '@/lib/payments/paystack'
+import { isAdminEmail } from '@/lib/utils/admin'
 
 // This will use the generic paymentProvider mapped to paystackProvider behind the scenes.
 // Actually, it's safer to directly import paystackProvider so we can ensure useTestKeys is supported.
@@ -11,7 +12,7 @@ export async function POST(req: Request) {
     const supabase = await createClient()
     const { data: userData } = await supabase.auth.getUser()
 
-    if (userData?.user?.email !== (process.env.ADMIN_EMAIL || 'kryptopacy@gmail.com')) {
+    if (!isAdminEmail(userData?.user?.email)) {
       return NextResponse.json({ error: 'Unauthorized. Superadmin only.' }, { status: 401 })
     }
 
