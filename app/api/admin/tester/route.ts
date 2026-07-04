@@ -19,7 +19,7 @@ export async function POST(req: Request) {
     const { type } = await req.json()
 
     const HOST = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-    const adminEmail = userData.user.email
+    const adminEmail = userData.user?.email || 'kryptopacy@gmail.com'
 
     let amountMinor = 0
     let metadata = {}

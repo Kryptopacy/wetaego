@@ -307,6 +307,16 @@ export async function processCheckout(params: {
       }
     }
 
+    // Lookup the slug from the pageId or locationId for the callback URL
+    let slug = 'default'
+    if (pageId) {
+      const { data: pageData } = await supabase.from('location_pages').select('slug').eq('id', pageId).single()
+      if (pageData?.slug) slug = pageData.slug
+    } else if (locationId) {
+      const { data: pageData } = await supabase.from('location_pages').select('slug').eq('location_id', locationId).limit(1).single()
+      if (pageData?.slug) slug = pageData.slug
+    }
+
     const { authorizationUrl: checkoutUrl } = await paymentProvider.initiatePayment({
       amountMinor: chargeAmountMinor,
       customerEmail: email,
@@ -412,7 +422,7 @@ export async function processExistingOrderPayment(params: {
     // Fetch the order to get org info
     const { data: order, error: orderError } = await supabase
       .from('orders')
-      .select('id, organization_id, total_amount_minor, customer_email')
+      .select('id, organization_id, total_amount_minor, customer_email, location_id')
       .eq('id', orderId)
       .single()
 
@@ -438,6 +448,12 @@ export async function processExistingOrderPayment(params: {
     const transactionChargeMinor = subaccountCode && businessFeePercent > 0
       ? Math.floor(amountMinor * (businessFeePercent / 100))
       : undefined
+
+    let slug = 'default'
+    if (order.location_id) {
+      const { data: pageData } = await supabase.from('location_pages').select('slug').eq('location_id', order.location_id).limit(1).single()
+      if (pageData?.slug) slug = pageData.slug
+    }
 
     const { authorizationUrl: checkoutUrl } = await paymentProvider.initiatePayment({
       amountMinor: amountMinor,
