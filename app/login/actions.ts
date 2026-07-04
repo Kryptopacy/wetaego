@@ -415,33 +415,43 @@ export async function startInteractiveDemo() {
     }
 
     // Insert legacy menu categories and items for the restaurant to fix the onboarding tracker
-    const { data: category } = await adminClient.from('menu_categories').insert({
+    const { data: menu } = await adminClient.from('menus').insert({
       organization_id: org.id,
-      name: 'Starters & Bites',
-      sort_order: 0
+      location_id: loc.id,
+      name: 'Main Menu',
+      description: 'Default demo menu'
     }).select('id').single()
 
-    if (category) {
-      await adminClient.from('menu_items').insert([
-        {
-          organization_id: org.id,
-          category_id: category.id,
-          name: 'Spicy Asun Rolls',
-          description: 'Smoked goat meat wrapped in crispy pastry, served with pepper sauce.',
-          price_minor: 650000,
-          image_url: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80',
-          sort_order: 0
-        },
-        {
-          organization_id: org.id,
-          category_id: category.id,
-          name: 'Truffle Plantain Fries',
-          description: 'Crispy plantain tossed in truffle oil and parmesan.',
-          price_minor: 450000,
-          image_url: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=800&q=80',
-          sort_order: 1
-        }
-      ])
+    if (menu) {
+      const { data: category } = await adminClient.from('menu_categories').insert({
+        organization_id: org.id,
+        menu_id: menu.id,
+        name: 'Starters & Bites',
+        sort_order: 0
+      }).select('id').single()
+
+      if (category) {
+        await adminClient.from('menu_items').insert([
+          {
+            organization_id: org.id,
+            category_id: category.id,
+            name: 'Spicy Asun Rolls',
+            description: 'Smoked goat meat wrapped in crispy pastry, served with pepper sauce.',
+            price_minor: 650000,
+            image_url: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80',
+            sort_order: 0
+          },
+          {
+            organization_id: org.id,
+            category_id: category.id,
+            name: 'Truffle Plantain Fries',
+            description: 'Crispy plantain tossed in truffle oil and parmesan.',
+            price_minor: 450000,
+            image_url: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=800&q=80',
+            sort_order: 1
+          }
+        ])
+      }
     }
   }
 

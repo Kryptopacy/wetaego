@@ -80,7 +80,8 @@ Seamlessly scale operations across multiple venues, cities, or countries from a 
 
 ### 5. AI-Powered Operations
 - **Conversational AI Assistant:** A customizable, domain-aware conversational agent that guides customers through the catalog, menu, or services.
-- **Voice Dictation & Smart Cart Integration:** Customers can use natural voice dictation via the Web Speech API to interact with the AI, which autonomously manages their shopping cart (add/remove) and calls staff directly via AI tool execution.
+- **Voice Dictation & Hands-Free UI:** Customers can use natural voice dictation via the Web Speech API to interact with the AI, enabling a fully seamless two-way conversational back-and-forth. The AI autonomously manages their shopping cart (add/remove) and calls staff directly via AI tool execution.
+- **Multimodal Menu Importer:** Powered by Gemini 3.5 Vision, physical menus can be photographed and instantly parsed into structured digital catalogs with superior spatial understanding, replacing legacy OCR techniques.
 - **Structured AI Rules Engine:** Configure strict guardrails including Base Personalities (Professional, Casual, Witty), Escalation Contacts, and a dynamic JSON-based FAQ builder that seamlessly injects venue-specific context directly into the system prompt.
 - **AI Copywriter & Image Studio:** Generative AI deeply integrated into the Page Builder, assisting businesses in writing high-converting item descriptions and generating stunning, professional cover images on the fly.
 - **AI Demand Forecasting (`/api/ai/forecast`):** Analyzes 30-day sales velocity and utilizes Google Gemini to predict 7-day demand trajectories, issuing smart inventory alerts (Critical, Order Soon, Sufficient).
@@ -179,7 +180,7 @@ OurMenu OS features a built-in Affiliate system designed for aggressive B2B scal
 - **Database & Auth:** Supabase (PostgreSQL, Row Level Security, Edge Functions)
 - **State Management:** Zustand (with fully synchronized SSR hydration middleware)
 - **Validation & Security:** Zod (Strict, impenetrable API boundaries)
-- **AI Engine:** Google AI SDK (`@ai-sdk/google`) + Gemini 3.1 Flash
+- **AI Engine:** Google AI SDK (`@ai-sdk/google`) + Gemini 3.5 Flash (Vision & Text)
 - **Caching & Rate Limiting:** Upstash Redis (`@upstash/redis`, `@upstash/ratelimit`)
 - **Error Tracking & Observability:** Sentry (`@sentry/nextjs`)
 - **End-to-End Testing:** Playwright (`@playwright/test`)

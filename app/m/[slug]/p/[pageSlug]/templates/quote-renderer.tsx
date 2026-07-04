@@ -241,7 +241,7 @@ export function QuoteRenderer({ location, page, items, locationSlug }: QuoteRend
                   >
                     <div className="flex items-start gap-4">
                       {item.images?.[0] && (
-                        <div className="w-16 h-16 shrink-0 rounded-xl overflow-hidden bg-zinc-800 hidden sm:block">
+                        <div className="w-16 h-16 shrink-0 rounded-xl overflow-hidden bg-zinc-800 block">
                           <Image src={item.images[0]} alt={item.title} width={64} height={64} className="w-full h-full object-cover" />
                         </div>
                       )}

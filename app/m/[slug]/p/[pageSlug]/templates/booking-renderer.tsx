@@ -495,7 +495,7 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
                   <div className="p-5">
                     <div className="flex items-start justify-between gap-4">
                       {item.images?.[0] && (
-                        <div className="w-[72px] h-[72px] shrink-0 rounded-xl overflow-hidden bg-zinc-800 relative hidden sm:block">
+                        <div className="w-[72px] h-[72px] shrink-0 rounded-xl overflow-hidden bg-zinc-800 relative block">
                           <Image src={item.images[0]} alt={item.title} fill className="object-cover" />
                         </div>
                       )}

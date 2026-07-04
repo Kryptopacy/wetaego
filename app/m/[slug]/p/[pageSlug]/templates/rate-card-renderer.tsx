@@ -265,7 +265,7 @@ export function RateCardRenderer({ location, page, items, locationSlug, paymentI
                         <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:justify-between gap-4">
                           <div className="flex gap-4 items-start">
                             {item.images?.[0] && (
-                              <div className="w-[60px] h-[60px] shrink-0 rounded-lg overflow-hidden bg-zinc-800 relative hidden sm:block">
+                              <div className="w-[60px] h-[60px] shrink-0 rounded-lg overflow-hidden bg-zinc-800 relative block">
                                 <Image src={item.images[0]} alt={item.title} fill className="object-cover" />
                               </div>
                             )}
