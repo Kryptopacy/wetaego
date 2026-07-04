@@ -110,6 +110,22 @@ const categories = [
         badge: '30-day data window',
         title: 'Never stock out on your best-sellers.',
         description: 'Analyses 30 days of sales velocity. Predicts the next 7 days of demand, and fires stock alerts before shelves run dry. Bestsellers trending up? We knew two days ago.',
+      },
+      {
+        icon: MessagesSquare,
+        color: 'from-fuchsia-500 to-pink-600',
+        tag: 'Admin AI Copilot',
+        badge: 'Actionable & Secure',
+        title: 'Manage your business via chat.',
+        description: 'A deeply integrated dashboard assistant with strict role-based access control. Simply ask it to generate financial reports, create menu categories, or instantly add items to your catalog.',
+      },
+      {
+        icon: FileText,
+        color: 'from-cyan-500 to-blue-600',
+        tag: 'Multimodal Menu Importer',
+        badge: 'Zero typing',
+        title: 'Snap a picture. We build the menu.',
+        description: 'Upload a photo of your physical menu. Our vision AI instantly reads and structures it into a beautiful digital catalog, saving you hours of manual data entry.',
       }
     ]
   },
