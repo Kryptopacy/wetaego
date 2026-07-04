@@ -1,6 +1,7 @@
 import { google } from '@ai-sdk/google'
 import { generateObject } from 'ai'
 import { z } from 'zod'
+import { getAiModels } from '@/lib/utils/settings'
 
 export const maxDuration = 15 // Short duration since it's a quick upsell
 
@@ -50,8 +51,11 @@ Examples:
 - (Rate Card) "Add drone coverage for your shoot?"
 `
 
+    const aiModels = await getAiModels() as Record<string, string>
+    const modelName = aiModels.text_generation || 'gemini-3.5-flash'
+
     const { object } = await generateObject({
-      model: google('gemini-2.5-flash'),
+      model: google(modelName),
       schema: z.object({
         suggestedItemId: z.string().describe('The ID of the suggested item from availableItems'),
         pitch: z.string().describe('A short, enticing 1-sentence pitch (max 10 words)')

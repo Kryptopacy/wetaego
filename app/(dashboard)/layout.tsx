@@ -7,6 +7,7 @@ import {
   FileText, Settings, Users, QrCode, TrendingUp, MessageSquare, Package
 } from 'lucide-react'
 import { IntercomWidget } from '@/components/intercom/intercom-widget'
+import { AICopilotWidget } from './dashboard/components/ai-copilot-widget'
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
   const supabase = await createClient()
@@ -122,7 +123,10 @@ export default async function DashboardLayout({ children }: { children: ReactNod
     <ClientLayout initialData={initialData}>
       {children}
       {userData?.user && orgId && (
-        <IntercomWidget userId={userData.user.id} organizationId={orgId} />
+        <>
+          <IntercomWidget userId={userData.user.id} organizationId={orgId} />
+          <AICopilotWidget organizationId={orgId} />
+        </>
       )}
     </ClientLayout>
   )

@@ -273,3 +273,55 @@ export const applyTranslations = authActionClient
     revalidatePath('/dashboard/menu')
     return { success: true }
   })
+
+export const bulkInsertMenu = authActionClient
+  .schema(zfd.formData(z.any()))
+  .action(async ({ parsedInput: formData, ctx: { supabase } }) => {
+    const orgId = formData.get('organization_id') as string
+    const menuId = formData.get('menu_id') as string
+    const itemsRaw = formData.get('items') as string
+    
+    if (orgId === 'demo-org') {
+      revalidatePath('/dashboard/menu')
+      return { success: true }
+    }
+
+    const items = JSON.parse(itemsRaw)
+
+    // Group items by category_name
+    const categorized = items.reduce((acc: any, item: any) => {
+      if (!acc[item.category_name]) acc[item.category_name] = []
+      acc[item.category_name].push(item)
+      return acc
+    }, {})
+
+    // For each category, create it if it doesn't exist, then insert items
+    for (const catName of Object.keys(categorized)) {
+      // Create category
+      const { data: newCat, error: catError } = await supabase
+        .from('menu_categories')
+        .insert({ organization_id: orgId, menu_id: menuId, name: catName })
+        .select('id').single()
+
+      if (catError || !newCat) {
+        console.error('Failed to create category:', catName)
+        continue
+      }
+
+      const catItems = categorized[catName].map((i: any) => ({
+        organization_id: orgId,
+        category_id: newCat.id,
+        name: i.name,
+        description: i.description || null,
+        price: i.price,
+      }))
+
+      if (catItems.length > 0) {
+        await supabase.from('menu_items').insert(catItems)
+      }
+    }
+
+    await purgeStorefrontCache(orgId)
+    revalidatePath('/dashboard/menu')
+    return { success: true }
+  })

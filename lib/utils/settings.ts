@@ -15,7 +15,7 @@ const DEFAULT_PLAN_LIMITS = {
   pro: { credits: 50, pages: 1, qr_codes: 9999 },
   enterprise: { credits: 200, pages: 5, qr_codes: 9999 }
 }
-const DEFAULT_AI_MODELS = { text_generation: "gemini-3.5-flash", image_generation: "imagen-3.0-generate-001" }
+const DEFAULT_AI_MODELS = { text_generation: "gemini-3.5-flash", image_generation: "gemini-3.1-flash-image" }
 const DEFAULT_EXCHANGE_RATES = { usd_to_ngn: 1500 }
 const DEFAULT_AFFILIATE = { default_percentage: 10 }
 const DEFAULT_PLATFORM_FEES = { business_subaccount: 5, affiliate_subaccount: 5, staff_tip_subaccount: 0 }

@@ -26,8 +26,9 @@ export default async function AdminPage() {
 
   const { data: orgs } = await supabase
     .from('organizations')
-    .select('id, name, subscription_plan, subscription_status, purchased_credits, created_at')
+    .select('id, name, slug, subscription_plan, subscription_status, purchased_credits, created_at')
     .order('created_at', { ascending: false })
+    .limit(10)
 
   const { data: coupons } = await supabase
     .from('coupons')
@@ -183,13 +184,33 @@ export default async function AdminPage() {
           </ActionForm>
         </section>
 
-        {/* Advanced JSON Sections for Limits & Costs */}
+        {/* Credit Cost Configuration */}
         <section className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
-          <h2 className="text-lg font-bold text-white mb-4">Credit Usage Costs (JSON)</h2>
+          <h2 className="text-lg font-bold text-white mb-4">Credit Costs Configuration</h2>
           <ActionForm action={updateSetting} className="space-y-4">
             <input type="hidden" name="key" value="credit_costs" />
-            <input type="hidden" name="is_json" value="true" />
-            <textarea name="json_value" defaultValue={JSON.stringify(creditCosts, null, 2)} rows={6} className="w-full font-mono text-sm rounded-lg bg-zinc-800 border border-zinc-700 px-4 py-3 text-white" />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-zinc-400 mb-1">Demand Forecast</label>
+                <input type="number" name="forecast" defaultValue={(creditCosts as Record<string, number>).forecast ?? 3} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-zinc-400 mb-1">AI Menu OCR Auto-Fill</label>
+                <input type="number" name="auto_fill" defaultValue={(creditCosts as Record<string, number>).auto_fill ?? 2} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-zinc-400 mb-1">AI Copywriter (Text Gen)</label>
+                <input type="number" name="text_generation" defaultValue={(creditCosts as Record<string, number>).text_generation ?? 1} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-zinc-400 mb-1">AI Image Generation</label>
+                <input type="number" name="image_generation" defaultValue={(creditCosts as Record<string, number>).image_generation ?? 2} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-zinc-400 mb-1">Admin AI Co-Pilot</label>
+                <input type="number" name="copilot" defaultValue={(creditCosts as Record<string, number>).copilot ?? 1} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white" />
+              </div>
+            </div>
             <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-500 transition">Save Credit Costs</button>
           </ActionForm>
         </section>

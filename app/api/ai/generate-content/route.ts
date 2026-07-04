@@ -3,6 +3,7 @@ import { generateText } from 'ai'
 import { google } from '@ai-sdk/google'
 import { z } from 'zod'
 import { checkRateLimit } from '@/lib/upstash'
+import { getAiModels } from '@/lib/utils/settings'
 
 const generateContentSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -41,8 +42,11 @@ Keep it between 2 to 4 sentences. Do not use emojis unless absolutely necessary.
 Make it sound premium and appealing to customers.
 DO NOT wrap the response in quotes.`
 
+    const aiModels = await getAiModels() as Record<string, string>
+    const modelName = aiModels.text_generation || 'gemini-3.5-flash'
+
     const { text } = await generateText({
-      model: google('gemini-2.5-flash'),
+      model: google(modelName),
       system: systemPrompt,
       prompt: `Item Title: ${title}`,
     })

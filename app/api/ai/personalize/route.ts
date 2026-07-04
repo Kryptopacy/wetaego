@@ -3,6 +3,7 @@ import { google } from '@ai-sdk/google'
 import { generateObject } from 'ai'
 import { z } from 'zod'
 import { NextResponse } from 'next/server'
+import { getAiModels } from '@/lib/utils/settings'
 
 export const maxDuration = 30
 
@@ -42,8 +43,11 @@ export async function POST(req: Request) {
     Return exactly 3 item IDs as recommendations. Do not recommend items they have already ordered if there are good alternatives.
     `
 
+    const aiModels = await getAiModels() as Record<string, string>
+    const modelName = aiModels.text_generation || 'gemini-3.5-flash'
+
     const result = await generateObject({
-      model: google('gemini-2.5-flash'),
+      model: google(modelName),
       schema: z.object({
         recommendedItemIds: z.array(z.string()).max(3).min(1),
       }),

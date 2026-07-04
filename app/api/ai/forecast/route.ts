@@ -4,8 +4,9 @@ import { google } from '@ai-sdk/google'
 import { generateObject } from 'ai'
 import { z } from 'zod'
 import { NextResponse } from 'next/server'
-import { getAiModels } from '@/lib/utils/settings'
+import { getAiModels, getCreditCosts } from '@/lib/utils/settings'
 import { createClient } from '@/lib/supabase/server'
+import { chargeCredits } from '@/lib/payments/credits'
 
 const forecastSchema = z.object({
   locationId: z.string().uuid('Invalid location ID')
@@ -28,6 +29,56 @@ export async function POST(req: Request) {
     const { locationId } = parsed.data
 
     const supabase = await createClient()
+
+    const { data: userData, error: authError } = await supabase.auth.getUser()
+    if (authError || !userData?.user) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+    }
+
+    // Get location to find organization_id
+    const { data: locationData } = await supabase
+      .from('locations')
+      .select('organization_id')
+      .eq('id', locationId)
+      .single()
+
+    if (!locationData) {
+      return NextResponse.json({ error: 'Location not found' }, { status: 404 })
+    }
+
+    const organizationId = locationData.organization_id
+
+    // Verify user belongs to org
+    const { data: member } = await supabase
+      .from('organization_members')
+      .select('role')
+      .eq('organization_id', organizationId)
+      .eq('user_id', userData.user.id)
+      .single()
+
+    let isAuthorized = !!member
+    if (!member) {
+      const { data: org } = await supabase
+        .from('organizations')
+        .select('id')
+        .eq('id', organizationId)
+        .eq('created_by', userData.user.id)
+        .single()
+      isAuthorized = !!org
+    }
+
+    if (!isAuthorized) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+    }
+
+    // Charge credits
+    const creditCosts = await getCreditCosts() as Record<string, number>
+    const cost = creditCosts.forecast || 3 // Forecasts are expensive
+    const charge = await chargeCredits(organizationId, cost, 'Demand Forecasting', userData.user.id)
+    
+    if (!charge.success) {
+      return NextResponse.json({ error: charge.error }, { status: 402 })
+    }
 
     // 1. Pull last 30 days of order_items data for this location
     const thirtyDaysAgo = new Date()

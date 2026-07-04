@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { createCategory } from './actions'
 import { CategoryTabs } from './category-tabs'
 import { TranslateMenuButton } from './translate-menu-button'
+import { AutoImportButton } from './auto-import-button'
 import { cookies } from 'next/headers'
 
 export default async function MenuManagerPage() {
@@ -91,7 +92,10 @@ export default async function MenuManagerPage() {
     <div className="max-w-5xl">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-4">
         <h1 className="text-2xl font-bold text-white">Primary Catalog</h1>
-        <TranslateMenuButton orgId={org.id} categories={categories} />
+        <div className="flex items-center gap-3">
+          <AutoImportButton orgId={org.id} menuId={menu.id} />
+          <TranslateMenuButton orgId={org.id} categories={categories} />
+        </div>
       </div>
 
       <CategoryTabs categories={categories} orgId={org.id} menuId={menu.id} />

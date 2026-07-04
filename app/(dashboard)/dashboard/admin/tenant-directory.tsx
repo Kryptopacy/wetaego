@@ -1,42 +1,90 @@
 'use client'
 
-
-
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
   
-import { MoreHorizontal, ShieldAlert, CreditCard } from 'lucide-react'
+import { MoreHorizontal, ShieldAlert, Search, ChevronLeft, ChevronRight } from 'lucide-react'
 import { overrideTenantPlan } from './actions'
 import { useRouter } from 'next/navigation'
 
 export interface OrgTenant {
   id: string
   name: string
+  slug: string
   subscription_plan?: string
   subscription_status?: string
   purchased_credits?: number
+  created_at: string
   [key: string]: unknown
 }
 
-export function TenantDirectory({ organizations }: { organizations: OrgTenant[] }) {
+export function TenantDirectory({ organizations: initialOrgs }: { organizations: OrgTenant[] }) {
+  const [organizations, setOrganizations] = useState<OrgTenant[]>(initialOrgs)
   const [editingOrg, setEditingOrg] = useState<OrgTenant | null>(null)
+  const [search, setSearch] = useState('')
+  const [page, setPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [loading, setLoading] = useState(false)
   const router = useRouter()
+
+  const fetchTenants = useCallback(async (searchQuery: string, pageNum: number) => {
+    setLoading(true)
+    try {
+      const res = await fetch(`/api/admin/tenants?search=${encodeURIComponent(searchQuery)}&page=${pageNum}&pageSize=10`)
+      if (res.ok) {
+        const data = await res.json()
+        setOrganizations(data.data)
+        setTotalPages(data.totalPages)
+      }
+    } catch (err) {
+      console.error('Failed to fetch tenants:', err)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchTenants(search, page)
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [search, page, fetchTenants])
 
   const handleOverride = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
     await overrideTenantPlan(formData)
     setEditingOrg(null)
-    router.refresh()
+    fetchTenants(search, page)
   }
 
   return (
     <>
-      <div className="overflow-x-auto">
+      <div className="mb-4 relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+        <input 
+          type="text" 
+          placeholder="Search by business name or slug..." 
+          value={search}
+          onChange={(e) => {
+            setSearch(e.target.value)
+            setPage(1)
+          }}
+          className="w-full pl-9 pr-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-sm text-white outline-none focus:border-blue-500"
+        />
+      </div>
+      
+      <div className="overflow-x-auto relative">
+        {loading && (
+          <div className="absolute inset-0 bg-zinc-900/50 backdrop-blur-[1px] flex items-center justify-center z-10">
+            <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+          </div>
+        )}
         <table className="w-full text-left text-sm text-zinc-400">
           <thead className="text-xs uppercase bg-zinc-800/50 text-zinc-500">
             <tr>
               <th className="px-4 py-3 rounded-tl-lg">Organization</th>
+              <th className="px-4 py-3">Slug</th>
               <th className="px-4 py-3">Plan</th>
               <th className="px-4 py-3">Status</th>
               <th className="px-4 py-3">Credits</th>
@@ -47,6 +95,7 @@ export function TenantDirectory({ organizations }: { organizations: OrgTenant[] 
             {organizations.map((org) => (
               <tr key={org.id} className="border-b border-zinc-800/50 hover:bg-white/[0.02]">
                 <td className="px-4 py-3 font-medium text-white">{org.name}</td>
+                <td className="px-4 py-3">{org.slug}</td>
                 <td className="px-4 py-3">
                   <span className={`px-2 py-1 rounded text-xs font-bold uppercase ${
                     org.subscription_plan === 'enterprise' ? 'bg-purple-500/20 text-purple-400' :
@@ -74,8 +123,37 @@ export function TenantDirectory({ organizations }: { organizations: OrgTenant[] 
                 </td>
               </tr>
             ))}
+            {organizations.length === 0 && !loading && (
+              <tr>
+                <td colSpan={6} className="px-4 py-8 text-center text-zinc-500">
+                  No tenants found.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
+      </div>
+
+      <div className="mt-4 flex items-center justify-between text-sm text-zinc-400">
+        <div>
+          Page {page} of {Math.max(1, totalPages)}
+        </div>
+        <div className="flex items-center gap-2">
+          <button 
+            disabled={page === 1}
+            onClick={() => setPage(p => Math.max(1, p - 1))}
+            className="p-1 rounded hover:bg-zinc-800 disabled:opacity-50 disabled:hover:bg-transparent"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <button 
+            disabled={page >= totalPages}
+            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+            className="p-1 rounded hover:bg-zinc-800 disabled:opacity-50 disabled:hover:bg-transparent"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        </div>
       </div>
 
       {editingOrg && (

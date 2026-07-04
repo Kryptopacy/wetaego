@@ -12,9 +12,10 @@ export const updateOrganization = authActionClient
     name: zfd.text(z.string().min(2, "Name must be at least 2 characters")),
     slug: zfd.text(z.string().min(3, "Slug must be at least 3 characters").regex(/^[a-z0-9-]+$/, "Slug can only contain lowercase letters, numbers, and hyphens")),
     business_type: zfd.text(z.string().optional()),
-    logo_url: zfd.text(z.string().optional())
+    logo_url: zfd.text(z.string().optional()),
+    role: zfd.text(z.enum(['owner', 'manager']).optional())
   }))
-  .action(async ({ parsedInput: { name, slug, business_type, logo_url }, ctx: { supabase, user } }) => {
+  .action(async ({ parsedInput: { name, slug, business_type, logo_url, role }, ctx: { supabase, user } }) => {
     const { cookies } = await import('next/headers')
     if ((await cookies()).get('demo_mode')?.value === '1') {
       revalidatePath('/dashboard/settings')
@@ -78,6 +79,14 @@ export const updateOrganization = authActionClient
       
       if (error || !newOrg) throw new Error('Failed to create organization')
       currentOrgId = newOrg.id
+
+      // Add the creator to organization_members with the selected role (or default to owner)
+      const selectedRole = role || 'owner'
+      await supabase.from('organization_members').insert({
+        organization_id: currentOrgId,
+        user_id: user.id,
+        role: selectedRole
+      })
     }
 
     // Always ensure a default location exists

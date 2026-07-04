@@ -313,6 +313,21 @@ export default async function SettingsPage({
                 placeholder="My Lounge"
               />
             </div>
+
+            {!organization && (
+              <div>
+                <label className="mb-2 block text-sm font-medium text-zinc-300">Your Role</label>
+                <select 
+                  name="role" 
+                  defaultValue="owner"
+                  className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                >
+                  <option value="owner">Owner</option>
+                  <option value="manager">Manager</option>
+                </select>
+                <p className="mt-2 text-xs text-zinc-500">Select whether you are the owner or a manager setting this up.</p>
+              </div>
+            )}
             
             <div>
               <label className="mb-2 block text-sm font-medium text-zinc-300">Primary Business Type</label>

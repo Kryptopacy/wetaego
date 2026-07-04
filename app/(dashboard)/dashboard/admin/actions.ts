@@ -32,7 +32,7 @@ export const updateSetting = authActionClient
       // Collect all other keys into an object
       formData.forEach((val: FormDataEntryValue, k: string) => {
         if (k !== 'key' && k !== 'is_json' && !k.startsWith('$ACTION')) {
-          if (key === 'pricing' || key === 'trial_settings') {
+          if (key === 'pricing' || key === 'trial_settings' || key === 'credit_costs') {
             value[k] = Number(val)
           } else {
             value[k] = val
