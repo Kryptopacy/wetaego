@@ -121,7 +121,7 @@ export default async function HomePage() {
 
             <h1 className="text-4xl md:text-7xl font-black text-white tracking-[-0.04em] leading-[1.05] md:leading-[1.02] mb-5 md:mb-6 drop-shadow-md">
               The ultimate digital storefront.<br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-br from-violet-300 via-white to-zinc-400 drop-shadow-sm">
+              <span className="text-transparent bg-clip-text bg-gradient-to-br from-emerald-300 via-green-200 to-teal-400 drop-shadow-[0_0_15px_rgba(52,211,153,0.3)]">
                 A complete operating layer.
               </span>
             </h1>
