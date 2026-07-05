@@ -98,18 +98,18 @@ export default async function HomePage() {
               alt="Hero Background"
               fill
               sizes="100vw"
-              className="object-cover object-center opacity-50 brightness-75"
+              className="object-cover object-center opacity-75 md:opacity-50 brightness-100 md:brightness-75"
               priority
               quality={85}
             />
           </div>
           {/* Multi-layer gradient overlay for text legibility on left, reveal on right */}
-          <div className="absolute inset-0 bg-gradient-to-b md:bg-gradient-to-r from-[#050505]/95 via-[#050505]/80 md:via-[#050505]/60 to-[#050505]/40 md:to-[#050505]/20" />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-black/40" />
+          <div className="absolute inset-0 bg-gradient-to-b md:bg-gradient-to-r from-[#050505]/85 via-[#050505]/60 md:via-[#050505]/80 to-[#050505]/20 md:to-[#050505]/20" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/30 md:via-transparent to-transparent" />
         </div>
 
         {/* Content grid */}
-        <div className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-12 pt-24 pb-16 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center min-h-screen">
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-12 pt-28 md:pt-24 pb-16 grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-center min-h-screen">
 
           {/* Top right Search Bar */}
           <div className="absolute top-32 right-6 md:right-12 z-50 w-full max-w-sm hidden lg:block">
@@ -117,20 +117,20 @@ export default async function HomePage() {
           </div>
 
           {/* Left — Copy */}
-          <FadeIn className="flex flex-col justify-center">
+          <FadeIn className="flex flex-col justify-center mt-12 md:mt-0">
 
-            <h1 className="text-5xl md:text-7xl font-black text-white tracking-[-0.04em] leading-[1.02] mb-6">
+            <h1 className="text-4xl md:text-7xl font-black text-white tracking-[-0.04em] leading-[1.05] md:leading-[1.02] mb-5 md:mb-6 drop-shadow-md">
               The ultimate digital storefront.<br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-br from-violet-300 via-white to-zinc-400">
+              <span className="text-transparent bg-clip-text bg-gradient-to-br from-violet-300 via-white to-zinc-400 drop-shadow-sm">
                 A complete operating layer.
               </span>
             </h1>
-            <p className="text-lg md:text-xl text-zinc-300 max-w-xl font-light leading-relaxed mb-10">
-              <strong>OurMenu OS is the complete platform to build your online presence, manage operations, and engage clients.</strong><br /><br />
-              Ditch expensive custom websites and terrible PDF links. Whether you are processing restaurant orders, booking salon appointments, selling retail inventory, or quoting consulting retainers, our dynamic templates instantly generate a stunning digital storefront. Delight your clients with an AI Digital Concierge that handles inquiries and processes payments, while your team stays flawlessly synced with the Live Fulfillment Dashboard.
+            <p className="text-base md:text-xl text-zinc-200 md:text-zinc-300 max-w-xl font-light leading-relaxed mb-8 md:mb-10 drop-shadow-sm">
+              <strong>OurMenu OS is the complete platform to build your online presence, manage operations, and engage clients.</strong><br className="hidden md:block" /><br className="hidden md:block" />
+              <span className="mt-2 md:mt-0 block">Ditch expensive custom websites and terrible PDF links. Whether you are processing restaurant orders, booking salon appointments, selling retail inventory, or quoting consulting retainers, our dynamic templates instantly generate a stunning digital storefront.</span>
             </p>
-            <div className="flex flex-col sm:flex-row items-start gap-4">
-              <Link href="/login" className="flex items-center gap-2 px-8 py-3.5 rounded-full bg-white text-black text-sm font-bold hover:scale-105 transition-all duration-300 shadow-[0_0_30px_rgba(255,255,255,0.15)]">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 md:gap-4">
+              <Link href="/login" className="flex items-center justify-center gap-2 px-8 py-3.5 rounded-full bg-white text-black text-sm font-bold hover:scale-105 transition-all duration-300 shadow-[0_0_30px_rgba(255,255,255,0.2)]">
                 Start Building <ArrowRight className="w-4 h-4" />
               </Link>
               <ActionForm action={startInteractiveDemo}>
