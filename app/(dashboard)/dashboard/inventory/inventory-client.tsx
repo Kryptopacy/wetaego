@@ -47,7 +47,7 @@ const MOVEMENT_LABELS = {
   restock: { label: 'Restocked', color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20', icon: '↑' },
   use: { label: 'Used', color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20', icon: '↓' },
   wastage: { label: 'Wasted', color: 'text-orange-400', bg: 'bg-orange-500/10 border-orange-500/20', icon: '✕' },
-  sale: { label: 'Sold', color: 'text-violet-400', bg: 'bg-violet-500/10 border-violet-500/20', icon: '↓' },
+  sale: { label: 'Sold', color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20', icon: '↓' },
   adjustment: { label: 'Adjusted', color: 'text-zinc-400', bg: 'bg-zinc-500/10 border-zinc-500/20', icon: '~' },
 }
 
@@ -135,7 +135,7 @@ function QuickLogDialog({
     { value: 'use', label: 'Used', desc: 'Staff consumed or deployed', color: 'border-blue-500 bg-blue-500/10 text-blue-400' },
     { value: 'restock', label: 'Restocked', desc: 'New stock arrived', color: 'border-emerald-500 bg-emerald-500/10 text-emerald-400' },
     { value: 'wastage', label: 'Wasted / Lost', desc: 'Spoiled, damaged or missing', color: 'border-orange-500 bg-orange-500/10 text-orange-400' },
-    { value: 'sale', label: 'Sold', desc: 'Item was sold directly', color: 'border-violet-500 bg-violet-500/10 text-violet-400' },
+    { value: 'sale', label: 'Sold', desc: 'Item was sold directly', color: 'border-emerald-500 bg-emerald-500/10 text-emerald-400' },
     { value: 'adjustment', label: 'Adjustment', desc: 'Manual correction', color: 'border-zinc-600 bg-zinc-700/30 text-zinc-400' },
   ]
 
@@ -182,7 +182,7 @@ function QuickLogDialog({
                 min="0.001"
                 step="0.001"
                 placeholder="0"
-                className="flex-1 bg-zinc-950 border border-zinc-700 rounded-xl px-4 py-3 text-white text-lg font-bold focus:outline-none focus:border-violet-500 transition-colors"
+                className="flex-1 bg-zinc-950 border border-zinc-700 rounded-xl px-4 py-3 text-white text-lg font-bold focus:outline-none focus:border-emerald-500 transition-colors"
                 autoFocus
                 required
               />
@@ -208,7 +208,7 @@ function QuickLogDialog({
               value={note}
               onChange={(e) => setNote(e.target.value)}
               placeholder={type === 'wastage' ? 'e.g. Expired, dropped…' : type === 'restock' ? 'e.g. Supplier delivery' : 'e.g. Evening service'}
-              className="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-600 focus:outline-none focus:border-violet-500 transition-colors"
+              className="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-600 focus:outline-none focus:border-emerald-500 transition-colors"
             />
           </div>
 
@@ -319,40 +319,40 @@ function AddItemDialog({
           <div className="grid grid-cols-2 gap-3">
             <div className="col-span-2">
               <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5 block">Item Name *</label>
-              <input name="name" defaultValue={editItem?.name} required placeholder="e.g. Fresh Tilapia, Charcoal, Pepper" className="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-4 py-2.5 text-white placeholder-zinc-600 focus:outline-none focus:border-violet-500 transition-colors" />
+              <input name="name" defaultValue={editItem?.name} required placeholder="e.g. Fresh Tilapia, Charcoal, Pepper" className="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-4 py-2.5 text-white placeholder-zinc-600 focus:outline-none focus:border-emerald-500 transition-colors" />
             </div>
             <div>
               <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5 block">Category</label>
-              <input name="category" defaultValue={editItem?.category ?? 'General'} list="categories-list" placeholder="General" className="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-4 py-2.5 text-white placeholder-zinc-600 focus:outline-none focus:border-violet-500 transition-colors" />
+              <input name="category" defaultValue={editItem?.category ?? 'General'} list="categories-list" placeholder="General" className="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-4 py-2.5 text-white placeholder-zinc-600 focus:outline-none focus:border-emerald-500 transition-colors" />
               <datalist id="categories-list">{allCategories.map(c => <option key={c} value={c} />)}</datalist>
             </div>
             <div>
               <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5 block">Unit</label>
-              <select name="unit" defaultValue={editItem?.unit ?? 'pieces'} className="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-violet-500 transition-colors">
+              <select name="unit" defaultValue={editItem?.unit ?? 'pieces'} className="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-emerald-500 transition-colors">
                 {units.map(u => <option key={u} value={u}>{u}</option>)}
               </select>
             </div>
             {!isEdit && (
               <div>
                 <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5 block">Starting Stock</label>
-                <input name="initial_quantity" type="number" step="0.001" min="0" defaultValue="0" className="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-violet-500 transition-colors" />
+                <input name="initial_quantity" type="number" step="0.001" min="0" defaultValue="0" className="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-emerald-500 transition-colors" />
               </div>
             )}
             <div>
               <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5 block">Low Stock Alert</label>
-              <input name="reorder_threshold" type="number" step="0.001" min="0" defaultValue={editItem?.reorder_threshold ?? ''} placeholder="e.g. 5" className="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-4 py-2.5 text-white placeholder-zinc-600 focus:outline-none focus:border-violet-500 transition-colors" />
+              <input name="reorder_threshold" type="number" step="0.001" min="0" defaultValue={editItem?.reorder_threshold ?? ''} placeholder="e.g. 5" className="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-4 py-2.5 text-white placeholder-zinc-600 focus:outline-none focus:border-emerald-500 transition-colors" />
             </div>
             <div>
               <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5 block">SKU / Code</label>
-              <input name="sku" defaultValue={editItem?.sku ?? ''} placeholder="Optional" className="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-4 py-2.5 text-white placeholder-zinc-600 focus:outline-none focus:border-violet-500 transition-colors" />
+              <input name="sku" defaultValue={editItem?.sku ?? ''} placeholder="Optional" className="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-4 py-2.5 text-white placeholder-zinc-600 focus:outline-none focus:border-emerald-500 transition-colors" />
             </div>
             <div>
               <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5 block">Cost Price</label>
-              <input name="cost_price" type="number" step="0.01" min="0" defaultValue={editItem?.cost_price_minor ? (editItem.cost_price_minor / 100).toFixed(2) : ''} placeholder="Optional" className="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-4 py-2.5 text-white placeholder-zinc-600 focus:outline-none focus:border-violet-500 transition-colors" />
+              <input name="cost_price" type="number" step="0.01" min="0" defaultValue={editItem?.cost_price_minor ? (editItem.cost_price_minor / 100).toFixed(2) : ''} placeholder="Optional" className="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-4 py-2.5 text-white placeholder-zinc-600 focus:outline-none focus:border-emerald-500 transition-colors" />
             </div>
             <div className="col-span-2">
               <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5 block">Notes</label>
-              <input name="notes" defaultValue={editItem?.notes ?? ''} placeholder="e.g. Keep refrigerated, order from Ade's market" className="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-4 py-2.5 text-white placeholder-zinc-600 focus:outline-none focus:border-violet-500 transition-colors" />
+              <input name="notes" defaultValue={editItem?.notes ?? ''} placeholder="e.g. Keep refrigerated, order from Ade's market" className="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-4 py-2.5 text-white placeholder-zinc-600 focus:outline-none focus:border-emerald-500 transition-colors" />
             </div>
           </div>
 
@@ -471,13 +471,13 @@ export function InventoryClient({
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 placeholder="Search items..."
-                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl pl-9 pr-4 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-violet-500 transition-colors"
+                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl pl-9 pr-4 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-emerald-500 transition-colors"
               />
             </div>
             <select
               value={categoryFilter}
               onChange={e => setCategoryFilter(e.target.value)}
-              className="bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-zinc-300 focus:outline-none focus:border-violet-500 transition-colors"
+              className="bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-zinc-300 focus:outline-none focus:border-emerald-500 transition-colors"
             >
               <option value="all">All Categories</option>
               {categories.map(c => <option key={c} value={c}>{c}</option>)}
@@ -494,7 +494,7 @@ export function InventoryClient({
                   : 'No items match your filters.'}
               </p>
               {isEditor && items.length === 0 && (
-                <button onClick={() => setAddDialogOpen(true)} className="mt-4 text-violet-400 hover:text-violet-300 text-sm font-medium transition-colors">
+                <button onClick={() => setAddDialogOpen(true)} className="mt-4 text-emerald-400 hover:text-emerald-300 text-sm font-medium transition-colors">
                   + Add first item
                 </button>
               )}
@@ -536,7 +536,7 @@ export function InventoryClient({
                         {isEditor && (
                           <button
                             onClick={() => setLogItem(item)}
-                            className="p-2.5 rounded-xl bg-violet-500/10 hover:bg-violet-500/20 border border-violet-500/20 text-violet-400 transition-all"
+                            className="p-2.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-400 transition-all"
                             title="Log movement"
                           >
                             <BarChart2 className="w-4 h-4" />

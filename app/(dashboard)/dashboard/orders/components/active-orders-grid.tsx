@@ -241,7 +241,7 @@ export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, tem
                           })
                           onClaimOrder(order.id)
                         }}
-                        className="px-6 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-medium transition-colors animate-pulse"
+                        className="px-6 py-2 rounded-lg bg-teal-600 hover:bg-teal-500 text-white font-medium transition-colors animate-pulse"
                       >
                         {order.status === 'pending' ? 'Accept (Pay After)' : 'Claim Order'}
                       </button>
@@ -343,7 +343,7 @@ export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, tem
                       })
                       onClaimOrder(order.id)
                     }}
-                    className="w-full px-4 py-3 rounded-xl bg-indigo-600 text-white font-bold active:bg-indigo-700"
+                    className="w-full px-4 py-3 rounded-xl bg-teal-600 text-white font-bold active:bg-teal-700"
                   >
                     {order.status === 'pending' ? 'Accept Order' : 'Claim Order'}
                   </button>

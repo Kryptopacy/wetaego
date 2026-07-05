@@ -182,7 +182,7 @@ export function QuoteNegotiateClient({
                 rows={4}
                 required
                 placeholder="e.g. Can we remove Item 2 and reduce Item 3 quantity to 2? Our budget is around ₦500,000."
-                className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-violet-500 focus:outline-none resize-none"
+                className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-emerald-500 focus:outline-none resize-none"
               />
               <div className="flex gap-3">
                 <button

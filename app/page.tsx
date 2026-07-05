@@ -52,7 +52,7 @@ export default async function HomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <main className="bg-[#050505] min-h-screen selection:bg-violet-500/30 selection:text-white">
+      <main className="bg-[#050505] min-h-screen selection:bg-emerald-500/30 selection:text-white">
         {/* ── Navbar ── */}
         <LandingNavbar />
 
@@ -146,7 +146,7 @@ export default async function HomePage() {
           <FadeIn delay={0.3} className="hidden lg:flex items-center justify-center">
             <div className="relative animate-float">
               {/* Glow behind phone */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-violet-500/25 blur-[100px] rounded-full pointer-events-none" />
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-emerald-500/25 blur-[100px] rounded-full pointer-events-none" />
 
               {/* Phone frame */}
               <div className="relative w-[300px] rotate-[-4deg] drop-shadow-[0_60px_80px_rgba(0,0,0,0.8)]">

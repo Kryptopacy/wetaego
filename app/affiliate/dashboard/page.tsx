@@ -86,7 +86,7 @@ export default async function AffiliateDashboardPage() {
               url={referralLink}
               title="Join OurMenu OS - Partner Program"
               description="Sign up for OurMenu OS using my referral link and transform your restaurant's digital experience."
-              className="px-6 py-3 bg-violet-600 hover:bg-violet-500 rounded-lg font-medium transition-colors"
+              className="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 rounded-lg font-medium transition-colors"
             >
               Share Link
             </ShareButton>

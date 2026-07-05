@@ -26,10 +26,10 @@ const OPTIONS: PaymentOptionConfig[] = [
     label: 'Pay by Card',
     description: 'Visa, Mastercard · instant confirmation',
     icon: <CreditCard className="w-5 h-5" />,
-    gradient: 'from-indigo-500/20 to-violet-500/20',
-    ring: 'ring-indigo-400/60 dark:ring-indigo-500/60',
+    gradient: 'from-teal-500/20 to-emerald-500/20',
+    ring: 'ring-teal-400/60 dark:ring-teal-500/60',
     badge: '✦ Recommended',
-    badgeStyle: 'bg-indigo-50 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400',
+    badgeStyle: 'bg-teal-50 text-teal-600 dark:bg-teal-500/20 dark:text-teal-400',
   },
   {
     id: 'transfer',
@@ -65,8 +65,8 @@ const OPTIONS: PaymentOptionConfig[] = [
     label: 'Pay After Service',
     description: 'Enjoy now, settle the bill at the end',
     icon: <Clock className="w-5 h-5" />,
-    gradient: 'from-purple-500/20 to-fuchsia-500/20',
-    ring: 'ring-purple-400/60 dark:ring-purple-500/60',
+    gradient: 'from-emerald-500/20 to-fuchsia-500/20',
+    ring: 'ring-emerald-400/60 dark:ring-emerald-500/60',
     infoText: 'Your order is confirmed now. The business will present your bill after service — settle by card, transfer, or cash.',
     tableOnly: true,
   },
@@ -287,11 +287,11 @@ export function CheckoutPaymentForm({
         {/* Pay-after-service info */}
         {paymentMethod === 'pay_after_service' && (
           <motion.div key="after-service" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden">
-            <div className="rounded-2xl border border-purple-200/80 dark:border-purple-500/25 bg-gradient-to-br from-purple-50 to-fuchsia-50/50 dark:from-purple-500/10 dark:to-fuchsia-500/5 p-4 flex items-start gap-3">
-              <div className="w-6 h-6 rounded-lg bg-purple-100 dark:bg-purple-500/20 flex items-center justify-center shrink-0 mt-0.5">
-                <Clock className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+            <div className="rounded-2xl border border-emerald-200/80 dark:border-emerald-500/25 bg-gradient-to-br from-emerald-50 to-fuchsia-50/50 dark:from-emerald-500/10 dark:to-fuchsia-500/5 p-4 flex items-start gap-3">
+              <div className="w-6 h-6 rounded-lg bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center shrink-0 mt-0.5">
+                <Clock className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
               </div>
-              <p className="text-[13px] text-purple-900 dark:text-purple-200 leading-relaxed">
+              <p className="text-[13px] text-emerald-900 dark:text-emerald-200 leading-relaxed">
                 Your order is confirmed instantly. The business will present your bill when you're done — you can pay by card, transfer, or cash.
               </p>
             </div>

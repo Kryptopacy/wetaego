@@ -46,7 +46,7 @@ export async function GET(req: Request) {
       const location = order.locations as { name?: string; slug?: string; currency_code?: string }
       const orgName = location?.name || 'OurMenu Partner'
       const currency = location?.currency_code || 'NGN'
-      const payLink = `${process.env.NEXT_PUBLIC_APP_URL}/pay/${order.id}`
+      const payLink = `${process.env.NEXT_PUBLIC_SITE_URL}/pay/${order.id}`
 
       try {
         await resendClient.emails.send({
@@ -68,7 +68,7 @@ export async function GET(req: Request) {
 
               <p style="color: #444; font-size: 16px;">Your items are waiting for you! Click below to complete your payment and send your order straight to the kitchen.</p>
               
-              <a href="${payLink}" style="display: inline-block; background-color: #8b5cf6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 10px;">
+              <a href="${payLink}" style="display: inline-block; background-color: #10b981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 10px;">
                 Complete My Order
               </a>
             </div>

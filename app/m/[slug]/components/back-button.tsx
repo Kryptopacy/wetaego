@@ -3,8 +3,19 @@
 import { useRouter } from 'next/navigation'
 import { ReactNode } from 'react'
 
-export function BackButton({ children, className, style }: { children: ReactNode; className?: string; style?: React.CSSProperties }) {
+import Link from 'next/link'
+
+export function BackButton({ children, className, style, href }: { children: ReactNode; className?: string; style?: React.CSSProperties; href?: string }) {
   const router = useRouter()
+  
+  if (href) {
+    return (
+      <Link href={href} className={className} style={style}>
+        {children}
+      </Link>
+    )
+  }
+
   return (
     <button 
       onClick={() => router.back()} 

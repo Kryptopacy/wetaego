@@ -384,7 +384,7 @@ export function CheckoutModal({
         onClose()
       } else if (splitCount > 1) {
         const currentSlug = window.location.pathname.split('/')[2]
-        window.location.href = `/pay/${orderId}/share?split=${splitCount}&slug=${currentSlug}`
+        window.location.href = `/pay/${orderId}/share?split=${splitCount}&type=${splitType}&slug=${currentSlug}`
       } else if (checkoutUrl) {
         window.location.href = checkoutUrl
       } else {
@@ -597,11 +597,11 @@ export function CheckoutModal({
                     initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
                     className="overflow-hidden"
                   >
-                    <div className="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950/30 dark:to-purple-950/30 border border-indigo-100 dark:border-indigo-500/20 rounded-2xl p-4 flex items-center justify-between gap-4 mt-2 mb-2">
+                    <div className="bg-gradient-to-br from-teal-50 to-emerald-50 dark:from-teal-950/30 dark:to-emerald-950/30 border border-teal-100 dark:border-teal-500/20 rounded-2xl p-4 flex items-center justify-between gap-4 mt-2 mb-2">
                       <div>
                         <div className="flex items-center gap-1.5 mb-1.5">
-                          <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
-                          <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">Pairs well</span>
+                          <Sparkles className="w-3.5 h-3.5 text-teal-500" />
+                          <span className="text-[10px] font-bold text-teal-600 dark:text-teal-400 uppercase tracking-widest">Pairs well</span>
                         </div>
                         <p className="text-[14px] text-zinc-900 dark:text-white font-semibold leading-tight">{upsellData.pitch}</p>
                         <p className="text-[13px] text-zinc-500 dark:text-zinc-400 mt-1">{upsellItemDetails.name} • {formatCurrency(upsellItemDetails.price_minor )}</p>
@@ -610,7 +610,7 @@ export function CheckoutModal({
                         type="button"
                         aria-label="Add upsell to cart"
                         onClick={handleAddUpsell}
-                        className="shrink-0 w-10 h-10 rounded-full bg-white dark:bg-indigo-500 hover:scale-105 text-indigo-600 dark:text-white flex items-center justify-center transition-transform shadow-sm border border-indigo-100 dark:border-indigo-600"
+                        className="shrink-0 w-10 h-10 rounded-full bg-white dark:bg-teal-500 hover:scale-105 text-teal-600 dark:text-white flex items-center justify-center transition-transform shadow-sm border border-teal-100 dark:border-teal-600"
                       >
                         <Plus className="w-5 h-5" />
                       </button>

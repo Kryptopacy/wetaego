@@ -34,14 +34,14 @@ export function RevenueChart({ data, currencyCode = 'NGN' }: RevenueChartProps) 
   if (isAllZero) {
     return (
       <div className="w-full h-full min-h-[300px] flex flex-col items-center justify-center bg-zinc-900/50 rounded-2xl border border-zinc-800/50 border-dashed relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-violet-900/10 opacity-50"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-emerald-900/10 opacity-50"></div>
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           className="relative z-10 flex flex-col items-center text-center p-6"
         >
-          <div className="w-16 h-16 mb-4 rounded-full bg-violet-500/10 flex items-center justify-center">
-            <svg className="w-8 h-8 text-violet-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="w-16 h-16 mb-4 rounded-full bg-emerald-500/10 flex items-center justify-center">
+            <svg className="w-8 h-8 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
             </svg>
           </div>

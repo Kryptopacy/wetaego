@@ -188,6 +188,25 @@ export async function POST(req: Request) {
       }
     }
 
+    // ── Decrement Inventory FIRST to prevent overselling ──
+    if (targetItemIds.length > 0) {
+      const guests = number_of_guests || 1
+      
+      const payload = targetItemIds.map(id => ({
+        item_id: id,
+        quantity: guests
+      }))
+
+      const { error: stockError } = await supabase.rpc('decrement_stock', {
+        p_items: payload
+      })
+
+      if (stockError) {
+        console.error('Stock decrement error:', stockError)
+        return NextResponse.json({ error: 'One or more items are out of stock or have insufficient capacity.' }, { status: 400 })
+      }
+    }
+
     // Check if org has active Paystack integration
     const { data: paymentSettings } = await supabase
       .from('organization_payment_settings')
@@ -247,39 +266,6 @@ export async function POST(req: Request) {
       .from('page_bookings')
       .update({ status: 'confirmed' })
       .eq('id', booking.id)
-
-    // Decrement inventory if applicable
-    if (targetItemIds.length > 0) {
-      const guests = number_of_guests || 1
-      for (const id of targetItemIds) {
-        const { data: itemData } = await supabase
-          .from('page_items')
-          .select('inventory_count')
-          .eq('id', id)
-          .single()
-          
-        if (itemData && itemData.inventory_count !== null) {
-          const newCount = itemData.inventory_count - guests
-          const isSoldOut = newCount <= 0;
-          await supabase
-            .from('page_items')
-            .update({
-              inventory_count: newCount < 0 ? 0 : newCount,
-              availability_status: isSoldOut ? 'sold_out' : 'available'
-            })
-            .eq('id', id)
-
-          if (isSoldOut) {
-            await notifyBusiness(location.id, {
-              title: '🚨 Item Sold Out',
-              body: `An item has reached 0 inventory and is now marked as sold out.`,
-              url: '/dashboard/pages',
-              tag: 'inventory-alert'
-            }).catch(console.error)
-          }
-        }
-      }
-    }
 
     return NextResponse.json({ booking_id: booking.id, status: 'confirmed' })
 

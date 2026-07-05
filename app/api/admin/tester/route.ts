@@ -18,7 +18,8 @@ export async function POST(req: Request) {
 
     const { type } = await req.json()
 
-    const HOST = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+    const origin = req.headers.get('origin') || process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+    const HOST = origin.endsWith('/') ? origin.slice(0, -1) : origin
     const adminEmail = userData.user?.email || 'kryptopacy@gmail.com'
 
     let amountMinor = 0

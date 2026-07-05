@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { MessageCircle, X, Send, Mic, Paperclip, Loader2 } from 'lucide-react'
 import { VoiceRecorder } from './voice-recorder'
 import { format } from 'date-fns'
+import { motion, AnimatePresence } from 'framer-motion'
 
 interface IntercomChannel {
   id: string
@@ -248,35 +249,52 @@ export function IntercomWidget({ userId, organizationId }: { userId: string, org
     }
   }
 
-  if (!isOpen) {
-    return (
-      <button
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 left-6 z-50 p-4 rounded-full bg-blue-600 hover:bg-blue-500 text-white shadow-lg transition-transform hover:scale-105"
-      >
-        <MessageCircle className="w-6 h-6" />
-      </button>
-    )
-  }
-
   return (
-    <div className="fixed bottom-6 left-6 z-50 w-[380px] h-[600px] max-h-[80vh] flex flex-col bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden">
-      {/* Header */}
-      <div className="p-4 bg-zinc-800 flex justify-between items-center border-b border-zinc-700">
-        <div>
-          <h3 className="font-bold text-white flex items-center gap-2">
-            Staff Intercom
-          </h3>
-          <p className="text-xs text-zinc-400">Internal communication</p>
-        </div>
-        <button onClick={() => setIsOpen(false)} className="p-1 rounded hover:bg-zinc-700 text-zinc-400">
-          <X className="w-5 h-5" />
-        </button>
-      </div>
+    <>
+      <AnimatePresence>
+        {!isOpen && (
+          <motion.button
+            drag
+            dragMomentum={false}
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0, opacity: 0 }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setIsOpen(true)}
+            className="fixed bottom-20 md:bottom-6 left-4 md:left-6 z-50 p-4 rounded-full bg-blue-600 hover:bg-blue-500 text-white shadow-lg cursor-grab active:cursor-grabbing"
+          >
+            <MessageCircle className="w-6 h-6 pointer-events-none" />
+          </motion.button>
+        )}
+      </AnimatePresence>
 
-      {/* Channels row */}
-      {channels.length > 0 && (
-      <div className="flex overflow-x-auto p-2 bg-zinc-800/50 border-b border-zinc-800 no-scrollbar gap-2">
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div 
+            drag
+            dragMomentum={false}
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            className="fixed bottom-20 md:bottom-6 left-2 md:left-6 z-50 w-full sm:w-[380px] max-w-[calc(100vw-1rem)] sm:max-w-[calc(100vw-3rem)] h-[600px] max-h-[80vh] flex flex-col bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden"
+          >
+            {/* Header */}
+            <div className="p-4 bg-zinc-800 flex justify-between items-center border-b border-zinc-700 cursor-grab active:cursor-grabbing">
+              <div>
+                <h3 className="font-bold text-white flex items-center gap-2">
+                  Staff Intercom
+                </h3>
+                <p className="text-xs text-zinc-400">Internal communication</p>
+              </div>
+              <button onClick={() => setIsOpen(false)} className="p-1 rounded hover:bg-zinc-700 text-zinc-400">
+                <X className="w-5 h-5 pointer-events-none" />
+              </button>
+            </div>
+
+            {/* Channels row */}
+            {channels.length > 0 && (
+            <div className="flex overflow-x-auto p-2 bg-zinc-800/50 border-b border-zinc-800 no-scrollbar gap-2">
           {channels.map(c => {
             const icon = c.channel_type === 'department' ? '🏢' : c.channel_type === 'direct' ? '💬' : '🌐'
             return (
@@ -390,6 +408,9 @@ export function IntercomWidget({ userId, organizationId }: { userId: string, org
           </form>
         )}
       </div>
-    </div>
+    </motion.div>
+    )}
+    </AnimatePresence>
+    </>
   )
 }

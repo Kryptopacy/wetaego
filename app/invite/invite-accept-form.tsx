@@ -52,7 +52,7 @@ export default function InviteAcceptForm({
       case 'owner':
         return 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
       case 'manager':
-        return 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
+        return 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
       case 'editor':
         return 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
       case 'viewer':

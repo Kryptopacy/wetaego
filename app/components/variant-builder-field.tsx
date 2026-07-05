@@ -125,7 +125,7 @@ export function VariantBuilderField({ initialVariants, onChange }: VariantBuilde
           <select
             value={preset}
             onChange={e => applyPreset(e.target.value)}
-            className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2.5 text-sm text-white focus:border-violet-500 outline-none appearance-none pr-8"
+            className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2.5 text-sm text-white focus:border-emerald-500 outline-none appearance-none pr-8"
           >
             {Object.entries(PRESET_LABELS).map(([key, label]) => (
               <option key={key} value={key}>{label}</option>
@@ -151,14 +151,14 @@ export function VariantBuilderField({ initialVariants, onChange }: VariantBuilde
                   value={group.name}
                   onChange={e => updateGroup(gIdx, { name: e.target.value })}
                   placeholder="Group name (e.g. Size, Color)"
-                  className="flex-1 bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-1.5 text-sm text-white outline-none focus:border-violet-500 placeholder:text-zinc-600"
+                  className="flex-1 bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-1.5 text-sm text-white outline-none focus:border-emerald-500 placeholder:text-zinc-600"
                 />
                 <label className="flex items-center gap-1.5 text-xs text-zinc-400 whitespace-nowrap cursor-pointer">
                   <input
                     type="checkbox"
                     checked={group.required}
                     onChange={e => updateGroup(gIdx, { required: e.target.checked })}
-                    className="rounded accent-violet-500"
+                    className="rounded accent-emerald-500"
                   />
                   Required
                 </label>
@@ -198,7 +198,7 @@ export function VariantBuilderField({ initialVariants, onChange }: VariantBuilde
                   onChange={e => setNewOptionInputs(prev => ({ ...prev, [gIdx]: e.target.value }))}
                   onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addOption(gIdx) } }}
                   placeholder="Add option & press Enter"
-                  className="flex-1 bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-1.5 text-xs text-white outline-none focus:border-violet-500 placeholder:text-zinc-600"
+                  className="flex-1 bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-1.5 text-xs text-white outline-none focus:border-emerald-500 placeholder:text-zinc-600"
                 />
                 <button
                   type="button"
@@ -214,7 +214,7 @@ export function VariantBuilderField({ initialVariants, onChange }: VariantBuilde
           <button
             type="button"
             onClick={addGroup}
-            className="flex items-center gap-2 text-xs text-violet-400 hover:text-violet-300 font-medium transition-colors"
+            className="flex items-center gap-2 text-xs text-emerald-400 hover:text-emerald-300 font-medium transition-colors"
           >
             <Plus className="w-3.5 h-3.5" /> Add Variant Group
           </button>

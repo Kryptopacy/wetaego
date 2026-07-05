@@ -39,8 +39,8 @@ export default async function LeadsPage() {
     <div className="max-w-5xl space-y-8 pb-24">
       <div>
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-violet-500/10 flex items-center justify-center">
-            <Building2 className="w-5 h-5 text-violet-400" />
+          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+            <Building2 className="w-5 h-5 text-emerald-400" />
           </div>
           <div>
             <h1 className="text-2xl font-bold text-white tracking-tight">Leads Pipeline</h1>

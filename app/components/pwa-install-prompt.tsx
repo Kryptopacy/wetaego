@@ -90,7 +90,7 @@ export function PwaInstallPrompt() {
           <X className="w-3 h-3" />
         </button>
         
-        <div className="w-12 h-12 bg-gradient-to-br from-violet-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-inner shrink-0">
+        <div className="w-12 h-12 bg-gradient-to-br from-emerald-600 to-teal-600 rounded-xl flex items-center justify-center shadow-inner shrink-0">
           <Download className="w-6 h-6 text-white" />
         </div>
         

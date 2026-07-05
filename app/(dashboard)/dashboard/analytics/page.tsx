@@ -31,53 +31,79 @@ export default async function AnalyticsDashboardPage() {
   }
 
   // 1. Module Discovery (What is the business actually selling?)
-  const { data: locs } = await supabase.from('locations').select('id').eq('organization_id', orgId)
+  const { data: locs } = await supabase.from('locations').select('id, currency_code').eq('organization_id', orgId)
   const typedLocs = locs as LocationRow[] | null
   const locIds = typedLocs?.map(l => l.id) || []
   
-  const { data: pages } = await supabase
+  const currencyCode = typedLocs?.[0]?.currency_code || 'NGN'
+
+  // Date constants
+  const today = new Date()
+  const thirtyDaysAgo = new Date(today)
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+  
+  const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1).toISOString()
+  const sevenDaysAgo = new Date(today)
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6)
+
+  // 2. Concurrent Data Fetching
+  const pagesPromise = supabase
     .from('location_pages')
     .select('template_type')
     .in('location_id', locIds)
     .eq('is_published', true)
 
-  const typedPages = pages as LocationPageRow[] | null
-  const activeModules = new Set(typedPages?.map(p => p.template_type))
-  const hasCatalog = activeModules.has('catalog')
-  const hasBooking = activeModules.has('booking')
-  const hasRateCard = activeModules.has('rate_card')
-
-  // 2. Fetch Aggregated Data
-  // Fetch currency code from first location
-  const { data: firstLoc } = await supabase
-    .from('locations')
-    .select('currency_code')
-    .in('id', locIds)
-    .limit(1)
-    .single()
-  const currencyCode = firstLoc?.currency_code || 'NGN'
-
-  // Fetch orders for the last 30 days
-  const thirtyDaysAgo = new Date()
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
-
-  const { data: orders } = await supabase
+  const ordersPromise = supabase
     .from('orders')
     .select('id, total_amount_minor, tip_amount_minor, created_at, assigned_staff_id, status')
     .eq('organization_id', orgId)
     .gte('created_at', thirtyDaysAgo.toISOString())
     .order('created_at', { ascending: true })
 
-  const { data: orderItems } = await supabase
+  const orderItemsPromise = supabase
     .from('order_items')
     .select('item_name, quantity, price_minor, orders!inner(organization_id)')
     .eq('orders.organization_id', orgId)
 
-  // Waitstaff/Reviews
-  const { data: reviews } = await supabase
+  const reviewsPromise = supabase
     .from('order_reviews')
     .select('staff_rating, staff_id, orders!inner(organization_id)')
     .eq('orders.organization_id', orgId)
+
+  // We fetch bookings concurrently too. We'll ignore the result later if !hasBooking
+  const bookingsCountPromise = supabase
+    .from('page_bookings')
+    .select('id', { count: 'exact', head: true })
+    .eq('location_pages.locations.organization_id', orgId)
+    .gte('created_at', startOfMonth)
+
+  const recentBookingsPromise = supabase
+    .from('page_bookings')
+    .select('created_at, location_pages!inner(locations!inner(organization_id))')
+    .eq('location_pages.locations.organization_id', orgId)
+    .gte('created_at', sevenDaysAgo.toISOString())
+
+  const [
+    { data: pages },
+    { data: orders },
+    { data: orderItems },
+    { data: reviews },
+    { count: bookingsCount },
+    { data: recentBookings }
+  ] = await Promise.all([
+    pagesPromise,
+    ordersPromise,
+    orderItemsPromise,
+    reviewsPromise,
+    bookingsCountPromise,
+    recentBookingsPromise
+  ])
+
+  const typedPages = pages as LocationPageRow[] | null
+  const activeModules = new Set(typedPages?.map(p => p.template_type))
+  const hasCatalog = activeModules.has('catalog')
+  const hasBooking = activeModules.has('booking')
+  const hasRateCard = activeModules.has('rate_card')
 
   const typedOrders = orders as OrderRow[] | null
   const typedOrderItems = orderItems as OrderItemRow[] | null
@@ -89,7 +115,6 @@ export default async function AnalyticsDashboardPage() {
 
   // Real per-day revenue chart (last 14 days)
   const revenueByDay: Record<string, number> = {}
-  const today = new Date()
   for (let i = 13; i >= 0; i--) {
     const d = new Date(today)
     d.setDate(d.getDate() - i)
@@ -168,22 +193,7 @@ export default async function AnalyticsDashboardPage() {
   let bookingBars: { date: string; count: number; height: number }[] = []
 
   if (hasBooking) {
-    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1).toISOString()
-    const { count } = await supabase
-      .from('page_bookings')
-      .select('id', { count: 'exact', head: true })
-      .eq('location_pages.locations.organization_id', orgId)
-      .gte('created_at', startOfMonth)
-    bookingsThisMonth = count || 0
-
-    // Fetch last 7 days of bookings for per-day chart
-    const sevenDaysAgo = new Date(today)
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6)
-    const { data: recentBookings } = await supabase
-      .from('page_bookings')
-      .select('created_at, location_pages!inner(locations!inner(organization_id))')
-      .eq('location_pages.locations.organization_id', orgId)
-      .gte('created_at', sevenDaysAgo.toISOString())
+    bookingsThisMonth = bookingsCount || 0
 
     // Build per-day count map
     const bookingsByDay: Record<string, number> = {}
@@ -268,14 +278,14 @@ export default async function AnalyticsDashboardPage() {
         {(hasCatalog || hasRateCard) && (
           <section className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8">
             <h2 className="text-xl font-black text-white flex items-center gap-2 mb-6">
-              <ShoppingBag className="w-5 h-5 text-violet-400" />
+              <ShoppingBag className="w-5 h-5 text-emerald-400" />
               {hasRateCard ? 'Top Services Booked' : 'Top Items Sold'}
             </h2>
             <div className="space-y-4">
               {topItems.length > 0 ? topItems.map((item, i) => (
                 <div key={i} className="flex items-center justify-between p-4 bg-zinc-900 border border-zinc-800/50 rounded-2xl hover:border-zinc-700 transition-colors">
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-violet-500/10 text-violet-400 flex items-center justify-center font-bold">
+                    <div className="w-10 h-10 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center font-bold">
                       #{i + 1}
                     </div>
                     <div>

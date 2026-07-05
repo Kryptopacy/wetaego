@@ -51,7 +51,7 @@ export default async function ForecastPage() {
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-2">
-          <div className="w-10 h-10 bg-gradient-to-br from-violet-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-900/40">
+          <div className="w-10 h-10 bg-gradient-to-br from-emerald-600 to-teal-600 rounded-xl flex items-center justify-center shadow-lg shadow-teal-900/40">
             <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
             </svg>
@@ -61,7 +61,7 @@ export default async function ForecastPage() {
             <p className="text-zinc-500 text-sm">{location.name}</p>
           </div>
         </div>
-        <div className="mt-4 p-4 bg-gradient-to-r from-violet-900/30 to-indigo-900/20 border border-violet-800/40 rounded-xl text-sm text-violet-300 flex items-start gap-3">
+        <div className="mt-4 p-4 bg-gradient-to-r from-emerald-900/30 to-teal-900/20 border border-emerald-800/40 rounded-xl text-sm text-emerald-300 flex items-start gap-3">
           <svg className="w-5 h-5 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
           <span>Our AI analyses your last <strong>30 days</strong> of actual order data to predict which items to stock up on, flag potential shortages, and surface rising stars before they sell out.</span>
         </div>

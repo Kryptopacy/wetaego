@@ -163,7 +163,7 @@ export function ListingRenderer({ location, page, items, locationSlug }: Listing
               <div key={filterKey} className="flex flex-col gap-1.5">
                 <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider pl-1">{filterKey.replace('_', ' ')}</label>
                 <select
-                  className="bg-zinc-800 border border-zinc-700 text-white text-sm rounded-lg px-3 py-2 outline-none focus:border-violet-500 min-w-[120px]"
+                  className="bg-zinc-800 border border-zinc-700 text-white text-sm rounded-lg px-3 py-2 outline-none focus:border-emerald-500 min-w-[120px]"
                   value={activeFilters[filterKey] || ''}
                   onChange={e => setActiveFilters(prev => ({ ...prev, [filterKey]: e.target.value }))}
                 >
@@ -205,7 +205,7 @@ export function ListingRenderer({ location, page, items, locationSlug }: Listing
                     onChange={e => setForm(f => ({ ...f, customer_name: e.target.value }))}
                     required
                     placeholder="Full name"
-                    className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-violet-500 focus:outline-none"
+                    className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-emerald-500 focus:outline-none"
                   />
                 </div>
                 <div>
@@ -216,7 +216,7 @@ export function ListingRenderer({ location, page, items, locationSlug }: Listing
                     required
                     type="tel"
                     placeholder="Phone number"
-                    className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-violet-500 focus:outline-none"
+                    className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-emerald-500 focus:outline-none"
                   />
                 </div>
                 <div>
@@ -226,7 +226,7 @@ export function ListingRenderer({ location, page, items, locationSlug }: Listing
                     onChange={e => setForm(f => ({ ...f, customer_email: e.target.value }))}
                     type="email"
                     placeholder="Email address"
-                    className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-violet-500 focus:outline-none"
+                    className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-emerald-500 focus:outline-none"
                   />
                 </div>
                 <button

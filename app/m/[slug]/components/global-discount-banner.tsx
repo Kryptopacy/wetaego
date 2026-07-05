@@ -13,7 +13,7 @@ export function GlobalDiscountBanner({ bannerText, percentage }: GlobalDiscountB
       initial={{ y: -50, opacity: 0 }} 
       animate={{ y: 0, opacity: 1 }} 
       transition={{ type: 'spring', damping: 20 }}
-      className="mb-6 w-full rounded-2xl bg-gradient-to-r from-blue-600 to-violet-600 p-4 shadow-lg flex items-center gap-4 text-white"
+      className="mb-6 w-full rounded-2xl bg-gradient-to-r from-blue-600 to-emerald-600 p-4 shadow-lg flex items-center gap-4 text-white"
     >
       <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center shrink-0">
         <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">

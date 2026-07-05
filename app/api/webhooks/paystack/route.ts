@@ -78,7 +78,7 @@ export async function POST(req: Request) {
           throw e
         }
 
-        return NextResponse.json({ status: 'booking_confirmed' }, { status: 200 })
+        return NextResponse.json({ status: 'quote_milestone_confirmed' }, { status: 200 })
       }
 
       // ── Subscription payment ───────────────────────────────────────────────
@@ -103,6 +103,29 @@ export async function POST(req: Request) {
           await processCreditPackPayment(supabase, orgId, credits, amountPaidMinor, currency, event.data.reference)
         }
         return NextResponse.json({ status: 'credit_pack_confirmed' }, { status: 200 })
+      }
+
+      // ── IOU Installment Repayment ──────────────────────────────────────────
+      if (event.data.metadata?.is_iou_repayment) {
+        const installmentId = event.data.metadata.installment_id
+        const orgId = event.data.metadata.organization_id
+        const customerId = event.data.metadata.customer_id
+        
+        if (installmentId && orgId && customerId) {
+          const { error: rpcError } = await supabase.rpc('process_iou_repayment', {
+            p_installment_id: installmentId,
+            p_organization_id: orgId,
+            p_customer_id: customerId,
+            p_amount_minor: amountPaidMinor,
+            p_reference: rawReference
+          })
+          
+          if (rpcError) {
+            console.error('IOU Repayment RPC Error:', rpcError)
+            return NextResponse.json({ error: 'Failed to process IOU repayment' }, { status: 500 })
+          }
+        }
+        return NextResponse.json({ status: 'iou_installment_paid' }, { status: 200 })
       }
 
       // ── Standard order payment ───────────────────────────────────────────────

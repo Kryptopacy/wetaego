@@ -62,8 +62,8 @@ export default async function InventoryPage() {
     )
   }
 
-  // Load inventory items
-  const { data: items } = await supabase
+  // Load inventory items and movements concurrently
+  const itemsPromise = supabase
     .from('inventory_items')
     .select('*')
     .eq('organization_id', org.id)
@@ -72,14 +72,18 @@ export default async function InventoryPage() {
     .order('category')
     .order('name')
 
-  // Load recent movements (last 50)
-  const { data: movements } = await supabase
+  const movementsPromise = supabase
     .from('inventory_movements')
     .select('*')
     .eq('organization_id', org.id)
     .eq('location_id', activeLoc.id)
     .order('created_at', { ascending: false })
     .limit(50)
+
+  const [{ data: items }, { data: movements }] = await Promise.all([
+    itemsPromise,
+    movementsPromise
+  ])
 
   return (
     <div className="max-w-6xl">

@@ -154,7 +154,7 @@ export default function TeamManager({
       case 'owner':
         return 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
       case 'manager':
-        return 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
+        return 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
       case 'editor':
         return 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
       case 'viewer':
@@ -266,7 +266,7 @@ export default function TeamManager({
                 value={inviteDepartment}
                 onChange={(e) => setInviteDepartment(e.target.value)}
                 placeholder="e.g. Kitchen, Bar, Front Desk, Poolside…"
-                className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500"
+                className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
               />
               <datalist id="dept-suggestions">
                 {DEPARTMENT_SUGGESTIONS.map(d => <option key={d} value={d} />)}
@@ -305,7 +305,7 @@ export default function TeamManager({
                   <div className="font-medium text-white">{invite.email}</div>
                   <div className="flex items-center gap-2 mt-1 flex-wrap">
                     {invite.department && (
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-400">
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
                         {invite.department}
                       </span>
                     )}
@@ -341,7 +341,7 @@ export default function TeamManager({
           <div key={dept} className="rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden">
             <div className="px-6 py-3 border-b border-zinc-800 flex items-center gap-2">
               {dept !== 'General' ? (
-                <span className="text-xs font-bold uppercase tracking-widest text-violet-400 bg-violet-500/10 border border-violet-500/20 px-2.5 py-1 rounded-full">
+                <span className="text-xs font-bold uppercase tracking-widest text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full">
                   {dept}
                 </span>
               ) : (
@@ -381,7 +381,7 @@ export default function TeamManager({
                             }
                           }}
                           placeholder="Assign department…"
-                          className="text-xs bg-zinc-800 border border-zinc-700 rounded-md px-2 py-1 text-zinc-300 outline-none focus:border-violet-500 w-40"
+                          className="text-xs bg-zinc-800 border border-zinc-700 rounded-md px-2 py-1 text-zinc-300 outline-none focus:border-emerald-500 w-40"
                         />
                       </div>
                     )}

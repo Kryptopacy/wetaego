@@ -91,7 +91,7 @@ export function ForecastClient({ locationId }: ForecastClientProps) {
         <button
           onClick={handleGenerate}
           disabled={isLoading}
-          className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-sm font-bold rounded-xl hover:from-violet-500 hover:to-indigo-500 disabled:opacity-50 transition-all shadow-lg shadow-indigo-900/30"
+          className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-sm font-bold rounded-xl hover:from-emerald-500 hover:to-teal-500 disabled:opacity-50 transition-all shadow-lg shadow-teal-900/30"
         >
           {isLoading ? (
             <>
@@ -110,8 +110,8 @@ export function ForecastClient({ locationId }: ForecastClientProps) {
       {/* Empty / Message state */}
       {!hasGenerated && !isLoading && (
         <div className="flex flex-col items-center justify-center py-28 text-center border border-dashed border-zinc-800 rounded-2xl">
-          <div className="w-16 h-16 bg-violet-500/10 rounded-2xl flex items-center justify-center mb-4">
-            <svg className="w-8 h-8 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+          <div className="w-16 h-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center mb-4">
+            <svg className="w-8 h-8 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
           </div>
           <h3 className="text-white font-semibold text-lg mb-2">Ready to forecast</h3>
           <p className="text-zinc-500 text-sm max-w-xs">Hit &quot;Generate Forecast&quot; and our AI will crunch 30 days of sales data to tell you exactly what to restock.</p>

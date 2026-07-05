@@ -80,11 +80,11 @@ export function HardwareSettingsView() {
     <div className="max-w-3xl animate-in fade-in slide-in-from-bottom-4 duration-500 ease-out">
       <div className="relative overflow-hidden border border-white/5 rounded-2xl bg-black/20 backdrop-blur-xl p-8 shadow-2xl">
         {/* Subtle decorative gradient */}
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-indigo-500/10 blur-[100px] rounded-full pointer-events-none" />
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-teal-500/10 blur-[100px] rounded-full pointer-events-none" />
         
         <div className="flex items-center gap-3 mb-2">
-          <div className="p-2 bg-indigo-500/10 rounded-lg">
-            <Settings className="w-5 h-5 text-indigo-400" />
+          <div className="p-2 bg-teal-500/10 rounded-lg">
+            <Settings className="w-5 h-5 text-teal-400" />
           </div>
           <h2 className="text-2xl font-semibold tracking-tight text-white">Device Integrations</h2>
         </div>
@@ -96,14 +96,14 @@ export function HardwareSettingsView() {
           <div className="grid gap-6 sm:grid-cols-2">
             <div className="space-y-3 group">
               <label className="text-sm font-medium text-zinc-300 flex items-center gap-2">
-                <Network className="w-4 h-4 text-zinc-500 group-hover:text-indigo-400 transition-colors" />
+                <Network className="w-4 h-4 text-zinc-500 group-hover:text-teal-400 transition-colors" />
                 Connection Protocol
               </label>
               <div className="relative">
                 <select 
                   name="mode" 
                   defaultValue={mode}
-                  className="w-full appearance-none p-3.5 pl-4 pr-10 rounded-xl bg-zinc-900/50 border border-zinc-800 text-white outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all hover:bg-zinc-800/50"
+                  className="w-full appearance-none p-3.5 pl-4 pr-10 rounded-xl bg-zinc-900/50 border border-zinc-800 text-white outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-all hover:bg-zinc-800/50"
                 >
                   <option value="html_kiosk">Browser Kiosk Mode (Universal USB)</option>
                   <option value="epson_epos">Network Print (Epson ePOS Standard)</option>
@@ -116,7 +116,7 @@ export function HardwareSettingsView() {
 
             <div className="space-y-3 group">
               <label className="text-sm font-medium text-zinc-300 flex items-center gap-2">
-                <Printer className="w-4 h-4 text-zinc-500 group-hover:text-indigo-400 transition-colors" />
+                <Printer className="w-4 h-4 text-zinc-500 group-hover:text-teal-400 transition-colors" />
                 IPv4 Address
               </label>
               <input 
@@ -124,7 +124,7 @@ export function HardwareSettingsView() {
                 name="ipAddress" 
                 defaultValue={ipAddress}
                 placeholder="e.g. 192.168.1.50"
-                className="w-full p-3.5 rounded-xl bg-zinc-900/50 border border-zinc-800 text-white outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all hover:bg-zinc-800/50 placeholder:text-zinc-600"
+                className="w-full p-3.5 rounded-xl bg-zinc-900/50 border border-zinc-800 text-white outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-all hover:bg-zinc-800/50 placeholder:text-zinc-600"
               />
             </div>
           </div>
@@ -138,7 +138,7 @@ export function HardwareSettingsView() {
                 defaultChecked={autoPrintReceipts}
                 className="peer sr-only"
               />
-              <div className="w-10 h-6 bg-zinc-800 rounded-full peer peer-checked:bg-indigo-500 transition-colors duration-300 ease-in-out"></div>
+              <div className="w-10 h-6 bg-zinc-800 rounded-full peer peer-checked:bg-teal-500 transition-colors duration-300 ease-in-out"></div>
               <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform duration-300 ease-in-out peer-checked:translate-x-4 shadow-sm"></div>
             </div>
             <label htmlFor="autoPrint" className="text-sm font-medium text-zinc-300 cursor-pointer group-hover:text-white transition-colors">
@@ -148,7 +148,7 @@ export function HardwareSettingsView() {
 
           <div className="pt-6 border-t border-white/5 space-y-3 group">
             <label className="text-sm font-medium text-zinc-300 flex items-center gap-2">
-              <Globe className="w-4 h-4 text-zinc-500 group-hover:text-indigo-400 transition-colors" />
+              <Globe className="w-4 h-4 text-zinc-500 group-hover:text-teal-400 transition-colors" />
               {t('language')}
             </label>
             <p className="text-xs text-zinc-500 mb-2">{t('languageDesc')}</p>
@@ -157,7 +157,7 @@ export function HardwareSettingsView() {
                 value={locale}
                 onChange={handleLanguageChange}
                 disabled={isPending}
-                className="w-full appearance-none p-3.5 pl-4 pr-10 rounded-xl bg-zinc-900/50 border border-zinc-800 text-white outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all hover:bg-zinc-800/50 disabled:opacity-50"
+                className="w-full appearance-none p-3.5 pl-4 pr-10 rounded-xl bg-zinc-900/50 border border-zinc-800 text-white outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-all hover:bg-zinc-800/50 disabled:opacity-50"
               >
                 <option value="en">English (US)</option>
                 <option value="es">Español (ES)</option>

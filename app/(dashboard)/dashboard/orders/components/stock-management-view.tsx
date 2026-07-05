@@ -25,7 +25,7 @@ export function StockManagementView({ menuItems, onToggleStock }: StockManagemen
                   <div className="font-medium text-white flex items-center gap-2">
                     {item.name}
                     {item.stock_count !== null && (
-                      <span className="text-xs bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-full border border-indigo-500/30">
+                      <span className="text-xs bg-teal-500/20 text-teal-300 px-2 py-0.5 rounded-full border border-teal-500/30">
                         {item.stock_count} left
                       </span>
                     )}

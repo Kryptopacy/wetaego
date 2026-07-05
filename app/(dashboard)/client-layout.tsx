@@ -72,7 +72,7 @@ function NavLink({ href, label, icon: iconProp, badge, exact, onClick }: {
       {isActive && (
         <motion.div
           layoutId="activeNavBg"
-          className="absolute inset-0 bg-gradient-to-r from-violet-600/20 to-indigo-600/10 border border-violet-500/30 rounded-xl shadow-lg shadow-violet-900/20"
+          className="absolute inset-0 bg-gradient-to-r from-emerald-600/20 to-teal-600/10 border border-emerald-500/30 rounded-xl shadow-lg shadow-emerald-900/20"
           initial={false}
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
         />
@@ -80,13 +80,13 @@ function NavLink({ href, label, icon: iconProp, badge, exact, onClick }: {
       {isActive && (
         <motion.span 
           layoutId="activeNavIndicator"
-          className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-gradient-to-b from-violet-400 to-indigo-400 rounded-full z-10" 
+          className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-gradient-to-b from-emerald-400 to-teal-400 rounded-full z-10" 
           initial={false}
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
         />
       )}
       <div className="relative flex items-center gap-3 w-full z-10">
-        <Icon className={`w-4 h-4 shrink-0 transition-colors ${isActive ? 'text-violet-400' : 'text-zinc-500 group-hover:text-zinc-300'}`} />
+        <Icon className={`w-4 h-4 shrink-0 transition-colors ${isActive ? 'text-emerald-400' : 'text-zinc-500 group-hover:text-zinc-300'}`} />
         <span className="flex-1">{label}</span>
         {badge && (
           <span className="px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 animate-pulse">
@@ -112,7 +112,7 @@ function BottomNavItem({ href, label, icon: iconProp, badge, exact, onClick }: {
       href={href}
       onClick={onClick}
       className={`relative flex flex-col items-center justify-center w-full py-1 gap-1 transition-colors ${
-        isActive ? 'text-violet-400' : 'text-zinc-500 hover:text-zinc-300'
+        isActive ? 'text-emerald-400' : 'text-zinc-500 hover:text-zinc-300'
       }`}
     >
       <div className="relative">
@@ -125,7 +125,7 @@ function BottomNavItem({ href, label, icon: iconProp, badge, exact, onClick }: {
       {isActive && (
         <motion.div
           layoutId="activeBottomNav"
-          className="absolute -bottom-2 w-8 h-1 bg-violet-500 rounded-t-full shadow-[0_-2px_10px_rgba(139,92,246,0.5)]"
+          className="absolute -bottom-2 w-8 h-1 bg-emerald-500 rounded-t-full shadow-[0_-2px_10px_rgba(139,92,246,0.5)]"
           initial={false}
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
         />
@@ -219,7 +219,7 @@ export default function ClientLayout({ children, initialData }: { children: Reac
           {locations.length > 0 && (
             <div className="relative">
               <select
-                className="w-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-sm rounded-lg px-3 py-2 appearance-none focus:outline-none focus:border-violet-500 transition-colors"
+                className="w-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-sm rounded-lg px-3 py-2 appearance-none focus:outline-none focus:border-emerald-500 transition-colors"
                 value={activeLocationId}
                 onChange={async (e) => {
                   const newId = e.target.value
@@ -272,8 +272,8 @@ export default function ClientLayout({ children, initialData }: { children: Reac
           {initialData.isAdmin && (
             <div className="space-y-1">
               <div className="px-3 flex items-center gap-2 mb-3 mt-4">
-                <h3 className="text-xs font-bold text-violet-500 uppercase tracking-wider">Superadmin</h3>
-                <div className="h-px flex-1 bg-violet-500/20"></div>
+                <h3 className="text-xs font-bold text-emerald-500 uppercase tracking-wider">Superadmin</h3>
+                <div className="h-px flex-1 bg-emerald-500/20"></div>
               </div>
               <NavLink href="/dashboard/admin" label="Developer Console" icon={Zap} onClick={onClose} />
             </div>
@@ -294,12 +294,12 @@ export default function ClientLayout({ children, initialData }: { children: Reac
            </div>
           )}
           {credits !== null && (
-            <Link href="/dashboard/billing" className="flex items-center justify-between px-3 py-2.5 bg-violet-500/10 hover:bg-violet-500/20 rounded-xl border border-violet-500/20 mb-4 transition-colors group" onClick={onClose}>
+            <Link href="/dashboard/billing" className="flex items-center justify-between px-3 py-2.5 bg-emerald-500/10 hover:bg-emerald-500/20 rounded-xl border border-emerald-500/20 mb-4 transition-colors group" onClick={onClose}>
               <div className="flex items-center gap-2">
-                <Zap className="w-4 h-4 text-violet-400" />
-                <span className="text-xs font-bold text-violet-100">Credits</span>
+                <Zap className="w-4 h-4 text-emerald-400" />
+                <span className="text-xs font-bold text-emerald-100">Credits</span>
               </div>
-              <span className="text-xs font-black text-violet-400 group-hover:scale-110 transition-transform">{credits}</span>
+              <span className="text-xs font-black text-emerald-400 group-hover:scale-110 transition-transform">{credits}</span>
             </Link>
           )}
           {locationSlug && (
@@ -338,7 +338,7 @@ export default function ClientLayout({ children, initialData }: { children: Reac
   )
 
   return (
-    <div className="h-[100dvh] overflow-hidden bg-black flex selection:bg-violet-500/30 print:bg-white print:h-auto print:overflow-visible">
+    <div className="h-[100dvh] overflow-hidden bg-black flex selection:bg-emerald-500/30 print:bg-white print:h-auto print:overflow-visible">
       <GlobalRealtime />
       <ServiceWorkerRegistration />
       

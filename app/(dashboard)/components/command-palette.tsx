@@ -93,7 +93,7 @@ export function CommandPalette() {
                       onSelect={() => runCommand(() => router.push('/dashboard/pages'))}
                       className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-2.5 text-sm outline-none aria-selected:bg-zinc-800 aria-selected:text-white transition-colors"
                     >
-                      <FileText className="mr-2 h-4 w-4 text-violet-400" />
+                      <FileText className="mr-2 h-4 w-4 text-emerald-400" />
                       Your Pages
                     </Command.Item>
                   </Command.Group>

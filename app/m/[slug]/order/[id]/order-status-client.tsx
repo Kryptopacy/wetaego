@@ -11,6 +11,11 @@ import type { Database } from '@/lib/supabase/types'
 import { DownloadReceiptButton } from './components/receipt-pdf'
 
 type OrderRow = Database['public']['Tables']['orders']['Row']
+type OrderPaymentRow = Database['public']['Tables']['order_payments']['Row']
+
+type OrderWithRelations = OrderRow & {
+  order_payments?: OrderPaymentRow[]
+}
 
 export function OrderStatusClient({ 
   initialOrder, 
@@ -22,7 +27,7 @@ export function OrderStatusClient({
   currencyCode,
   slug 
 }: { 
-  initialOrder: OrderRow
+  initialOrder: OrderWithRelations
   orgName: string
   manualPaymentBankName?: string
   manualPaymentAccountName?: string
@@ -31,11 +36,11 @@ export function OrderStatusClient({
   currencyCode: string
   slug: string
 }) {
-  const [order, setOrder] = useState(initialOrder)
+  const [order, setOrder] = useState<OrderWithRelations>(initialOrder)
   const supabase = createClient()
 
   useEffect(() => {
-    const channel = supabase
+    const orderChannel = supabase
       .channel(`order-${order.id}`)
       .on('postgres_changes', {
         event: 'UPDATE',
@@ -43,19 +48,36 @@ export function OrderStatusClient({
         table: 'orders',
         filter: `id=eq.${order.id}`
       }, (payload: { new: Partial<OrderRow> }) => {
-        setOrder((prev: OrderRow) => {
+        setOrder((prev) => {
           if (payload.new.status === 'paid' && prev.status === 'pending') {
-            toast.success('Payment confirmed by cashier! Your food is being prepared.')
+            toast.success('Payment completed! Your food is being prepared.')
           }
           return { ...prev, ...payload.new }
         })
       })
       .subscribe()
 
+    const paymentsChannel = supabase
+      .channel(`order-payments-${order.id}`)
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'order_payments',
+        filter: `order_id=eq.${order.id}`
+      }, (payload: { new: OrderPaymentRow }) => {
+        setOrder((prev) => {
+          const updatedPayments = [...(prev.order_payments || []), payload.new]
+          toast.success(`Payment share of ${formatCurrency(payload.new.amount_minor, currencyCode)} received!`)
+          return { ...prev, order_payments: updatedPayments }
+        })
+      })
+      .subscribe()
+
     return () => {
-      supabase.removeChannel(channel)
+      supabase.removeChannel(orderChannel)
+      supabase.removeChannel(paymentsChannel)
     }
-  }, [order.id, supabase])
+  }, [order.id, supabase, currencyCode])
 
   const copyToClipboard = () => {
     if (manualPaymentAccountNumber) {
@@ -64,11 +86,18 @@ export function OrderStatusClient({
     }
   }
 
+  const payments = order.order_payments || []
+  const amountPaid = payments.reduce((sum, p) => sum + p.amount_minor, 0)
+  const totalAmount = order.total_amount_minor
+  const amountRemaining = Math.max(0, totalAmount - amountPaid)
+  const progressPercent = Math.min(100, (amountPaid / totalAmount) * 100)
+  const isPartiallyPaid = amountPaid > 0 && amountPaid < totalAmount
+
   return (
     <div className="w-full bg-zinc-900 border border-zinc-800 rounded-3xl p-6 shadow-2xl">
       <div className="text-center mb-6 border-b border-zinc-800 pb-6">
         <h1 className="text-2xl font-bold text-white mb-2">Order #{order.id.split('-')[0]}</h1>
-        <p className="text-zinc-400">Total: <span className="font-bold text-white">{formatCurrency(order.total_amount_minor, currencyCode)}</span></p>
+        <p className="text-zinc-400">Total: <span className="font-bold text-white">{formatCurrency(totalAmount, currencyCode)}</span></p>
       </div>
 
       <AnimatePresence mode="wait">
@@ -80,16 +109,50 @@ export function OrderStatusClient({
             exit={{ opacity: 0, scale: 0.95 }}
             className="flex flex-col items-center"
           >
-            <div className="w-16 h-16 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mb-4 relative overflow-hidden">
-              <div className="absolute inset-0 bg-amber-500/20 animate-pulse"></div>
-              <svg className="w-8 h-8 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
+            {isPartiallyPaid ? (
+              <div className="w-full mb-8">
+                <div className="flex justify-between items-end mb-2">
+                  <h3 className="text-white font-bold">Split Progress</h3>
+                  <span className="text-emerald-400 text-sm font-medium">{Math.round(progressPercent)}% Paid</span>
+                </div>
+                <div className="h-3 w-full bg-zinc-800 rounded-full overflow-hidden mb-3">
+                  <motion.div 
+                    initial={{ width: 0 }} 
+                    animate={{ width: `${progressPercent}%` }} 
+                    className="h-full bg-emerald-500 rounded-full"
+                  />
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-zinc-400">Paid: <span className="text-white">{formatCurrency(amountPaid, currencyCode)}</span></span>
+                  <span className="text-amber-400 font-medium">Left: {formatCurrency(amountRemaining, currencyCode)}</span>
+                </div>
+
+                {payments.length > 0 && (
+                  <div className="mt-6 pt-6 border-t border-zinc-800 w-full text-left">
+                    <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-3">Received Shares</p>
+                    <div className="space-y-2">
+                      {payments.map((p, idx) => (
+                        <div key={p.id || idx} className="flex justify-between items-center bg-zinc-800/30 p-2 px-3 rounded-lg border border-zinc-700/30">
+                          <span className="text-zinc-300 text-sm">Share #{idx + 1}</span>
+                          <span className="text-emerald-400 font-medium text-sm">+{formatCurrency(p.amount_minor, currencyCode)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="w-16 h-16 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mb-4 relative overflow-hidden">
+                <div className="absolute inset-0 bg-amber-500/20 animate-pulse"></div>
+                <svg className="w-8 h-8 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+            )}
             
-            <h2 className="text-xl font-bold text-white mb-2">Awaiting Transfer</h2>
+            <h2 className="text-xl font-bold text-white mb-2">{isPartiallyPaid ? 'Awaiting Remaining Balance' : 'Awaiting Transfer'}</h2>
             <p className="text-zinc-400 text-center text-sm mb-6 max-w-[280px]">
-              Please make a transfer of <strong className="text-white">{formatCurrency(order.total_amount_minor, currencyCode)}</strong> to the account below. The cashier will verify and approve your order.
+              {isPartiallyPaid ? 'Waiting for the rest of the group to pay their share.' : `Please make a transfer of ${formatCurrency(totalAmount, currencyCode)} to the account below.`} The cashier will verify and approve your order.
             </p>
 
             <div className="w-full bg-zinc-800/50 rounded-xl p-5 mb-6 relative overflow-hidden">
@@ -109,7 +172,7 @@ export function OrderStatusClient({
                 <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1">Account Number</p>
                 <div className="flex items-center justify-between bg-black/20 rounded-lg p-3 group border border-zinc-700/50">
                   <p className="font-mono text-xl text-white tracking-wider">{manualPaymentAccountNumber || 'N/A'}</p>
-                  <button onClick={copyToClipboard} className="text-blue-400 hover:text-blue-300 transition-colors p-2 -mr-2">
+                  <button onClick={copyToClipboard} className="text-emerald-400 hover:text-emerald-300 transition-colors p-2 -mr-2">
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
                   </button>
                 </div>

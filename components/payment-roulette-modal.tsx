@@ -187,7 +187,7 @@ export function PaymentRouletteModal({ isOpen, onClose }: PaymentRouletteModalPr
             className="fixed inset-4 md:inset-auto md:top-24 md:w-96 bg-zinc-900 border border-zinc-800 rounded-3xl shadow-2xl p-6 overflow-y-auto max-h-[80vh] flex flex-col z-[70] custom-scrollbar"
           >
             {/* Glow effect */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-32 bg-purple-500/20 blur-3xl rounded-full" />
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-32 bg-emerald-500/20 blur-3xl rounded-full" />
             
             <div className="relative z-10 flex flex-col h-full">
               <div className="flex justify-between items-center mb-6">
@@ -255,14 +255,14 @@ export function PaymentRouletteModal({ isOpen, onClose }: PaymentRouletteModalPr
                           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
                         </button>
                       </div>
-                      <p className="text-xs text-purple-400 font-medium">Pick a number amongst yourselves!</p>
+                      <p className="text-xs text-emerald-400 font-medium">Pick a number amongst yourselves!</p>
                     </div>
                   ) : (
                     <textarea 
                       value={namesText}
                       onChange={(e) => setNamesText(e.target.value)}
                       placeholder="John, Sarah, Mike, Lisa..."
-                      className="w-full h-24 bg-zinc-950 border border-zinc-800 rounded-xl p-4 text-white resize-none focus:outline-none focus:border-purple-500 text-center text-lg leading-tight"
+                      className="w-full h-24 bg-zinc-950 border border-zinc-800 rounded-xl p-4 text-white resize-none focus:outline-none focus:border-emerald-500 text-center text-lg leading-tight"
                     />
                   )}
 
@@ -282,7 +282,7 @@ export function PaymentRouletteModal({ isOpen, onClose }: PaymentRouletteModalPr
                     whileTap={{ scale: 0.98 }}
                     onClick={handleSpin}
                     disabled={namesList.length < 2 || (mode === 'squad' && squadSize >= namesList.length)}
-                    className="w-full relative overflow-hidden bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white font-black py-4 rounded-xl shadow-[0_0_30px_rgba(168,85,247,0.4)] transition-all disabled:opacity-50 mt-2 group"
+                    className="w-full relative overflow-hidden bg-gradient-to-r from-emerald-600 to-fuchsia-600 text-white font-black py-4 rounded-xl shadow-[0_0_30px_rgba(168,85,247,0.4)] transition-all disabled:opacity-50 mt-2 group"
                   >
                     <div className="absolute inset-0 bg-white/20 translate-y-[-100%] group-hover:translate-y-[100%] transition-transform duration-500 ease-in-out" />
                     <span className="relative z-10 flex items-center justify-center gap-2">
@@ -296,13 +296,13 @@ export function PaymentRouletteModal({ isOpen, onClose }: PaymentRouletteModalPr
                   {/* The Spinner Screen */}
                   {mode !== 'chaos' || !isFinished ? (
                     <div className="w-full h-32 bg-zinc-950 border-2 border-zinc-800 rounded-2xl flex items-center justify-center p-4 relative overflow-hidden">
-                      {spinning && <div className="absolute inset-0 border-4 border-purple-500 rounded-2xl animate-pulse shadow-[inset_0_0_30px_rgba(168,85,247,0.4)]" />}
+                      {spinning && <div className="absolute inset-0 border-4 border-emerald-500 rounded-2xl animate-pulse shadow-[inset_0_0_30px_rgba(168,85,247,0.4)]" />}
                       <motion.div 
                         key={currentDisplay}
                         initial={{ y: 30, opacity: 0, filter: 'blur(5px)' }}
                         animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
                         transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                        className={`text-3xl md:text-4xl font-black text-center ${(isFinished && mode !== 'survivor') ? 'text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-fuchsia-400 drop-shadow-[0_0_15px_rgba(168,85,247,0.5)]' : 'text-white drop-shadow-lg'}`}
+                        className={`text-3xl md:text-4xl font-black text-center ${(isFinished && mode !== 'survivor') ? 'text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-fuchsia-400 drop-shadow-[0_0_15px_rgba(168,85,247,0.5)]' : 'text-white drop-shadow-lg'}`}
                       >
                         {currentDisplay}
                       </motion.div>
@@ -326,11 +326,11 @@ export function PaymentRouletteModal({ isOpen, onClose }: PaymentRouletteModalPr
                     <div className="w-full space-y-4 animate-in fade-in zoom-in duration-500">
                       
                       {(mode === 'classic' || mode === 'squad') && (
-                        <div className="bg-purple-500/10 border border-purple-500/30 p-4 rounded-xl text-center">
-                          <span className="block text-purple-400 text-xs font-bold uppercase tracking-widest mb-2">The Chosen Ones</span>
+                        <div className="bg-emerald-500/10 border border-emerald-500/30 p-4 rounded-xl text-center">
+                          <span className="block text-emerald-400 text-xs font-bold uppercase tracking-widest mb-2">The Chosen Ones</span>
                           <div className="flex flex-wrap gap-2 justify-center">
                             {winners.map(w => (
-                              <span key={w} className="text-white text-lg font-medium bg-zinc-900 px-3 py-1 rounded-lg border border-purple-500/50">{w}</span>
+                              <span key={w} className="text-white text-lg font-medium bg-zinc-900 px-3 py-1 rounded-lg border border-emerald-500/50">{w}</span>
                             ))}
                           </div>
                           <p className="text-zinc-400 text-sm mt-3 font-medium">Split it {mode === 'classic' ? 'all' : winners.length + ' ways'} via checkout!</p>
@@ -346,11 +346,11 @@ export function PaymentRouletteModal({ isOpen, onClose }: PaymentRouletteModalPr
 
                       {mode === 'chaos' && (
                         <div className="space-y-3">
-                          <span className="block text-purple-400 text-xs font-bold uppercase tracking-widest mb-2 text-center">The Chaos Split</span>
+                          <span className="block text-emerald-400 text-xs font-bold uppercase tracking-widest mb-2 text-center">The Chaos Split</span>
                           {chaosResults.map((r, i) => (
                             <div key={i} className="flex items-center justify-between bg-zinc-950 p-3 rounded-lg border border-zinc-800">
                               <span className="text-white font-medium">{r.name}</span>
-                              <span className="text-purple-400 font-bold">{r.percentage}%</span>
+                              <span className="text-emerald-400 font-bold">{r.percentage}%</span>
                             </div>
                           ))}
                           <p className="text-zinc-400 text-sm mt-4">

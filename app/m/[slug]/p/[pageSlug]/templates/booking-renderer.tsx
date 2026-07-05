@@ -194,7 +194,7 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
                     onChange={e => setForm(f => ({ ...f, customer_name: e.target.value }))}
                     required
                     placeholder="Full name"
-                    className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-violet-500 focus:outline-none"
+                    className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-emerald-500 focus:outline-none"
                   />
                 </div>
                 <div>
@@ -205,7 +205,7 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
                     required
                     type="tel"
                     placeholder="+234 800 000 0000"
-                    className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-violet-500 focus:outline-none"
+                    className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-emerald-500 focus:outline-none"
                   />
                 </div>
               </div>
@@ -217,7 +217,7 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
                   onChange={e => setForm(f => ({ ...f, customer_email: e.target.value }))}
                   type="email"
                   placeholder="for booking confirmation"
-                  className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-violet-500 focus:outline-none"
+                  className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-emerald-500 focus:outline-none"
                 />
               </div>
 
@@ -232,7 +232,7 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
                       required
                       type="date"
                       min={new Date().toISOString().split('T')[0]}
-                      className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-violet-500 focus:outline-none"
+                      className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-emerald-500 focus:outline-none"
                     />
                   </div>
                   <div>
@@ -243,7 +243,7 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
                       required
                       type="date"
                       min={form.booking_date || new Date().toISOString().split('T')[0]}
-                      className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-violet-500 focus:outline-none"
+                      className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-emerald-500 focus:outline-none"
                     />
                   </div>
                 </div>
@@ -259,7 +259,7 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
                       required
                       type="date"
                       min={new Date().toISOString().split('T')[0]}
-                      className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-violet-500 focus:outline-none"
+                      className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-emerald-500 focus:outline-none"
                     />
                   </div>
                   <div>
@@ -269,7 +269,7 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
                       onChange={e => setForm(f => ({ ...f, booking_time: e.target.value }))}
                       required
                       type="time"
-                      className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-violet-500 focus:outline-none"
+                      className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-emerald-500 focus:outline-none"
                     />
                   </div>
                 </div>
@@ -285,7 +285,7 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
                         onChange={e => setForm(f => ({ ...f, booking_date: e.target.value }))}
                         type="date"
                         min={new Date().toISOString().split('T')[0]}
-                        className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-violet-500 focus:outline-none"
+                        className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-emerald-500 focus:outline-none"
                       />
                     </div>
                     <div>
@@ -295,7 +295,7 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
                         onChange={e => setForm(f => ({ ...f, booking_end_date: e.target.value }))}
                         type="date"
                         min={form.booking_date || new Date().toISOString().split('T')[0]}
-                        className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-violet-500 focus:outline-none"
+                        className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-emerald-500 focus:outline-none"
                       />
                     </div>
                   </div>
@@ -306,7 +306,7 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
                         value={form.booking_time}
                         onChange={e => setForm(f => ({ ...f, booking_time: e.target.value }))}
                         type="time"
-                        className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-violet-500 focus:outline-none"
+                        className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-emerald-500 focus:outline-none"
                       />
                     </div>
                     <div>
@@ -315,7 +315,7 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
                         value={form.booking_end_time}
                         onChange={e => setForm(f => ({ ...f, booking_end_time: e.target.value }))}
                         type="time"
-                        className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-violet-500 focus:outline-none"
+                        className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-emerald-500 focus:outline-none"
                       />
                     </div>
                   </div>
@@ -330,7 +330,7 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
                   <select
                     value={form.number_of_guests}
                     onChange={e => setForm(f => ({ ...f, number_of_guests: e.target.value }))}
-                    className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-violet-500 focus:outline-none appearance-none"
+                    className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-emerald-500 focus:outline-none appearance-none"
                   >
                     {[1,2,3,4,5,6,7,8,9,10].map(n => <option key={n} value={n}>{n}</option>)}
                   </select>
@@ -344,7 +344,7 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
                   onChange={e => setForm(f => ({ ...f, booking_notes: e.target.value }))}
                   rows={2}
                   placeholder="Any special requirements?"
-                  className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-violet-500 focus:outline-none resize-none"
+                  className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-emerald-500 focus:outline-none resize-none"
                 />
               </div>
 

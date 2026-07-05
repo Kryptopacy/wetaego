@@ -91,7 +91,7 @@ export default async function PropertiesDashboard() {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <button className="text-violet-400 hover:text-violet-300 font-medium text-sm transition-colors">
+                      <button className="text-emerald-400 hover:text-emerald-300 font-medium text-sm transition-colors">
                         View Details
                       </button>
                     </td>

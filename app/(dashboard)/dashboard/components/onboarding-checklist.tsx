@@ -101,7 +101,7 @@ export function OnboardingChecklist({ hasOrg, hasLocation, hasMenu, hasQR, templ
         exit={{ opacity: 0, scale: 0.95 }}
         className="bg-gradient-to-br from-zinc-900/80 to-black border border-zinc-800/80 rounded-2xl p-6 md:p-8 mb-8 shadow-2xl relative overflow-hidden"
       >
-        <div className="absolute top-0 right-0 w-64 h-64 bg-violet-500/10 blur-[100px] rounded-full pointer-events-none" />
+        <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 blur-[100px] rounded-full pointer-events-none" />
         
         <div className="relative z-10">
           {hasOrg && (
@@ -127,14 +127,14 @@ export function OnboardingChecklist({ hasOrg, hasLocation, hasMenu, hasQR, templ
           <div className="mb-8">
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm font-medium text-zinc-300">Setup Progress</span>
-              <span className="text-sm font-bold text-violet-400">{progress}%</span>
+              <span className="text-sm font-bold text-emerald-400">{progress}%</span>
             </div>
             <div className="w-full h-2 bg-zinc-800 rounded-full overflow-hidden">
               <motion.div 
                 initial={{ width: 0 }}
                 animate={{ width: `${progress}%` }}
                 transition={{ duration: 1, ease: 'easeOut' }}
-                className="h-full bg-gradient-to-r from-violet-600 to-fuchsia-500 rounded-full"
+                className="h-full bg-gradient-to-r from-emerald-600 to-fuchsia-500 rounded-full"
               />
             </div>
           </div>
@@ -148,14 +148,14 @@ export function OnboardingChecklist({ hasOrg, hasLocation, hasMenu, hasQR, templ
                     step.isComplete 
                       ? 'bg-emerald-950/20 border-emerald-900/30 opacity-70' 
                       : isActive 
-                        ? 'bg-violet-950/20 border-violet-500/30 hover:border-violet-500/60 shadow-[0_0_15px_rgba(139,92,246,0.1)]' 
+                        ? 'bg-emerald-950/20 border-emerald-500/30 hover:border-emerald-500/60 shadow-[0_0_15px_rgba(139,92,246,0.1)]' 
                         : 'bg-zinc-900/30 border-zinc-800/50 hover:border-zinc-700'
                   }`}>
                     <div className="mt-0.5 flex-shrink-0">
                       {step.isComplete ? (
                         <CheckCircle2 className="w-6 h-6 text-emerald-500" />
                       ) : (
-                        <Circle className={`w-6 h-6 ${isActive ? 'text-violet-400' : 'text-zinc-600'}`} />
+                        <Circle className={`w-6 h-6 ${isActive ? 'text-emerald-400' : 'text-zinc-600'}`} />
                       )}
                     </div>
                     <div className="flex-1">
@@ -165,7 +165,7 @@ export function OnboardingChecklist({ hasOrg, hasLocation, hasMenu, hasQR, templ
                       <p className="text-sm text-zinc-500">{step.description}</p>
                     </div>
                     {!step.isComplete && isActive && (
-                      <ArrowRight className="w-5 h-5 text-violet-400 self-center opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <ArrowRight className="w-5 h-5 text-emerald-400 self-center opacity-0 group-hover:opacity-100 transition-opacity" />
                     )}
                   </div>
                 </Link>

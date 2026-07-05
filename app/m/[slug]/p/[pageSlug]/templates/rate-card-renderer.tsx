@@ -65,7 +65,7 @@ const CATEGORY_LABELS: Record<string, { label: string; color: string; bg: string
   basic: { label: 'Basic', color: 'text-zinc-300', bg: 'bg-zinc-800/60' },
   standard: { label: 'Standard', color: 'text-blue-300', bg: 'bg-blue-500/10' },
   premium: { label: 'Premium', color: 'text-amber-300', bg: 'bg-amber-500/10' },
-  addon: { label: 'Add-on', color: 'text-violet-300', bg: 'bg-violet-500/10' },
+  addon: { label: 'Add-on', color: 'text-emerald-300', bg: 'bg-emerald-500/10' },
 }
 
 export function RateCardRenderer({ location, page, items, locationSlug, paymentIsLive }: RateCardRendererProps) {
@@ -197,7 +197,7 @@ export function RateCardRenderer({ location, page, items, locationSlug, paymentI
 
       <div className="max-w-2xl mx-auto px-4 md:px-6 py-8">
         <div className="flex items-center justify-between mb-6">
-          <BackButton className="inline-flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-300 transition-colors">
+          <BackButton href={`/m/${locationSlug}`} className="inline-flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-300 transition-colors">
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
@@ -257,9 +257,9 @@ export function RateCardRenderer({ location, page, items, locationSlug, paymentI
                       <div 
                         key={item.id} 
                         onClick={() => isAvail && handleToggleItem(item)}
-                        className={`flex items-start gap-4 rounded-xl border transition-all p-4 ${!isAvail ? 'opacity-50 cursor-not-allowed border-zinc-800 bg-zinc-900/10' : isSelected ? 'border-violet-500 bg-violet-500/10' : 'border-zinc-800 bg-zinc-900/30 hover:border-zinc-700 cursor-pointer'}`}
+                        className={`flex items-start gap-4 rounded-xl border transition-all p-4 ${!isAvail ? 'opacity-50 cursor-not-allowed border-zinc-800 bg-zinc-900/10' : isSelected ? 'border-emerald-500 bg-emerald-500/10' : 'border-zinc-800 bg-zinc-900/30 hover:border-zinc-700 cursor-pointer'}`}
                       >
-                        <div className={`mt-0.5 shrink-0 w-5 h-5 rounded border flex items-center justify-center transition-colors ${isSelected ? 'bg-violet-500 border-violet-500' : 'border-zinc-600 bg-zinc-800'}`}>
+                        <div className={`mt-0.5 shrink-0 w-5 h-5 rounded border flex items-center justify-center transition-colors ${isSelected ? 'bg-emerald-500 border-emerald-500' : 'border-zinc-600 bg-zinc-800'}`}>
                           {isSelected && <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
                         </div>
                         <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:justify-between gap-4">
@@ -427,7 +427,7 @@ export function RateCardRenderer({ location, page, items, locationSlug, paymentI
                     onChange={e => setForm(f => ({ ...f, customer_name: e.target.value }))}
                     required
                     placeholder="Full name or Company"
-                    className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-violet-500 focus:outline-none"
+                    className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-emerald-500 focus:outline-none"
                   />
                 </div>
                 <div>
@@ -438,7 +438,7 @@ export function RateCardRenderer({ location, page, items, locationSlug, paymentI
                     required
                     type="tel"
                     placeholder="+234 800 000 0000"
-                    className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-violet-500 focus:outline-none"
+                    className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-emerald-500 focus:outline-none"
                   />
                 </div>
                 <div>
@@ -449,7 +449,7 @@ export function RateCardRenderer({ location, page, items, locationSlug, paymentI
                     required
                     type="email"
                     placeholder="Email address"
-                    className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-violet-500 focus:outline-none"
+                    className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-emerald-500 focus:outline-none"
                   />
                 </div>
                 <div>
@@ -459,7 +459,7 @@ export function RateCardRenderer({ location, page, items, locationSlug, paymentI
                     onChange={e => setForm(f => ({ ...f, booking_notes: e.target.value }))}
                     rows={3}
                     placeholder="Briefly describe your project goals..."
-                    className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-violet-500 focus:outline-none resize-none"
+                    className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-emerald-500 focus:outline-none resize-none"
                   />
                 </div>
                 <button

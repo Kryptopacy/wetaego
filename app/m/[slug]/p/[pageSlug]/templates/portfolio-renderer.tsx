@@ -102,6 +102,15 @@ export function PortfolioRenderer({ location, page, items, locationSlug }: Portf
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 font-sans text-zinc-900 dark:text-zinc-100 selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black">
       
+      <div className="w-full max-w-5xl mx-auto px-6 md:px-12 pt-8">
+        <BackButton href={`/m/${locationSlug}`} className="inline-flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300 transition-colors">
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          {location.name}
+        </BackButton>
+      </div>
+
       {/* 1. HERO SECTION */}
       <header className="relative pt-32 pb-16 px-6 md:px-12 max-w-5xl mx-auto flex flex-col items-center text-center">
         {location.organizations?.logo_url ? (
@@ -132,7 +141,7 @@ export function PortfolioRenderer({ location, page, items, locationSlug }: Portf
         )}
 
         {/* Socials */}
-        <div className="flex items-center gap-4 justify-center">
+        <div className="flex items-center gap-4 justify-center mb-8">
           {location.instagram_handle && (
             <a href={`https://instagram.com/${location.instagram_handle.replace('@', '')}`} target="_blank" rel="noreferrer" className="w-12 h-12 rounded-full bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors">
               <Instagram className="w-5 h-5" />
@@ -149,6 +158,8 @@ export function PortfolioRenderer({ location, page, items, locationSlug }: Portf
             </a>
           )}
         </div>
+        
+        <InfoStrip location={location as any} />
       </header>
 
       <main className="max-w-6xl mx-auto px-6 md:px-12 pb-24">

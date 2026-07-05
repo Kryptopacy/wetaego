@@ -283,7 +283,7 @@ export default async function BillingPage(props: { searchParams: Promise<{ curre
             <ActionForm action={buyCredits} className="relative z-10">
               <input type="hidden" name="organization_id" value={org.id} />
               <input type="hidden" name="credits" value="50" />
-              <button type="submit" className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-lg text-sm font-bold transition-colors shadow-lg">
+              <button type="submit" className="px-4 py-2 bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-500 hover:to-teal-500 text-white rounded-lg text-sm font-bold transition-colors shadow-lg">
                 Buy 50
               </button>
             </ActionForm>

@@ -22,7 +22,7 @@ const cases = [
     title: 'Retail & Boutiques',
     subtitle: 'Gadgets, Fashion, Pharmacies & Stores',
     description: 'Deploy a high-converting digital storefront in minutes. Track inventory automatically, alert staff on low stock, and offer seamless pickup or delivery checkout.',
-    color: 'from-blue-500 to-indigo-600',
+    color: 'from-blue-500 to-teal-600',
     metrics: ['Inventory Sync', 'Omnichannel', 'Low Stock Alerts'],
     image: '/hero_restaurant_bg.png'
   },
@@ -52,7 +52,7 @@ const cases = [
     title: 'Real Estate & Auto',
     subtitle: 'Property Rentals & Dealerships',
     description: 'Showcase high-value assets with image-heavy, immersive galleries. Capture leads effortlessly and allow clients to schedule viewings or test drives.',
-    color: 'from-violet-500 to-purple-600',
+    color: 'from-emerald-500 to-emerald-600',
     metrics: ['Immersive Galleries', 'Lead Capture', 'Scheduling'],
     image: '/hero_restaurant_bg.png'
   }

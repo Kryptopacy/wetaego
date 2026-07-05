@@ -947,7 +947,7 @@ export default async function SettingsPage({
                     id="spinner_enabled"
                     name="spinner_enabled" 
                     defaultChecked={location.spinner_enabled || false}
-                    className="w-5 h-5 rounded border-zinc-600 text-purple-500 bg-zinc-800"
+                    className="w-5 h-5 rounded border-zinc-600 text-emerald-500 bg-zinc-800"
                   />
                   <label htmlFor="spinner_enabled" className="text-sm font-medium text-white flex-1 cursor-pointer">
                     Enable Spin the Wheel
@@ -961,7 +961,7 @@ export default async function SettingsPage({
                     name="spinner_config"
                     defaultValue={location.spinner_config ? JSON.stringify(location.spinner_config, null, 2) : '[\n  { "label": "10% Off", "value": 10, "type": "win" },\n  { "label": "Try Again", "value": 0, "type": "loss" },\n  { "label": "5% Off", "value": 5, "type": "win" },\n  { "label": "No Luck", "value": 0, "type": "loss" }\n]'}
                     rows={6}
-                    className="w-full rounded-xl bg-zinc-800 border-zinc-700 px-4 py-3 text-white outline-none focus:border-purple-500 font-mono text-sm"
+                    className="w-full rounded-xl bg-zinc-800 border-zinc-700 px-4 py-3 text-white outline-none focus:border-emerald-500 font-mono text-sm"
                   />
                   <p className="text-xs text-zinc-500 mt-2">Customize the wheel segments. &quot;value&quot; is the discount percentage won.</p>
                 </div>

@@ -6,6 +6,7 @@ import { DefaultChatTransport } from 'ai'
 import { Bot, X, MessageSquare, Send, Sparkles, AlertCircle, Mic, MicOff, Volume2, VolumeX } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useSpeech } from '@/hooks/use-speech'
+import Image from 'next/image'
 
 export function AICopilotWidget({ organizationId }: { organizationId: string }) {
   const [isOpen, setIsOpen] = useState(false)
@@ -79,19 +80,22 @@ export function AICopilotWidget({ organizationId }: { organizationId: string }) 
       <AnimatePresence>
         {!isOpen && (
           <motion.button
+            drag
+            dragMomentum={false}
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setIsOpen(true)}
-            className="fixed bottom-24 md:bottom-6 right-6 z-[90] bg-gradient-to-r from-indigo-600 to-purple-600 p-4 rounded-full shadow-2xl border border-white/10 group flex items-center justify-center"
+            className="fixed bottom-20 md:bottom-6 right-6 z-[90] w-14 h-14 rounded-full shadow-2xl border border-white/20 group flex items-center justify-center overflow-hidden cursor-grab active:cursor-grabbing"
           >
-            <div className="absolute inset-0 rounded-full bg-white/20 blur opacity-0 group-hover:opacity-100 transition-opacity" />
-            <Sparkles className="w-6 h-6 text-white relative z-10" />
+            <Image src="/hero_emerald_gemstone.png" alt="AI Copilot" fill className="object-cover opacity-90 group-hover:opacity-100 transition-opacity" />
+            <div className="absolute inset-0 bg-teal-900/30 mix-blend-overlay group-hover:bg-teal-900/10 transition-colors" />
+            <Sparkles className="w-6 h-6 text-white relative z-10 drop-shadow-lg" />
             
             {/* Notification Dot (Simulated) */}
-            <span className="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 border-indigo-900 animate-pulse" />
+            <span className="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 border-teal-900 animate-pulse" />
           </motion.button>
         )}
       </AnimatePresence>
@@ -99,16 +103,20 @@ export function AICopilotWidget({ organizationId }: { organizationId: string }) 
       <AnimatePresence>
         {isOpen && (
           <motion.div
+            drag
+            dragMomentum={false}
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-6 right-6 z-[100] w-[380px] h-[600px] max-h-[80vh] flex flex-col bg-zinc-950 border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden"
+            className="fixed bottom-20 md:bottom-6 right-2 md:right-6 z-[100] w-full sm:w-[380px] max-w-[calc(100vw-1rem)] sm:max-w-[calc(100vw-3rem)] h-[600px] max-h-[80vh] flex flex-col bg-zinc-950 border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden"
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-4 bg-zinc-900 border-b border-zinc-800">
+            <div className="flex items-center justify-between p-4 bg-zinc-900 border-b border-zinc-800 cursor-grab active:cursor-grabbing">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-purple-500/20 rounded-lg border border-purple-500/30">
-                  <Bot className="w-5 h-5 text-purple-400" />
+                <div className="relative w-10 h-10 rounded-lg border border-emerald-500/30 shadow-lg overflow-hidden flex items-center justify-center">
+                  <Image src="/hero_emerald_gemstone.png" alt="AI" fill className="object-cover opacity-80" />
+                  <div className="absolute inset-0 bg-emerald-500/20 mix-blend-overlay" />
+                  <Sparkles className="relative z-10 w-5 h-5 text-white drop-shadow-md" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-white text-sm">Admin Co-Pilot</h3>
@@ -130,7 +138,7 @@ export function AICopilotWidget({ organizationId }: { organizationId: string }) 
                     }}
                     className={`p-1.5 rounded-lg transition-colors flex items-center gap-1.5 text-xs font-medium border ${
                       conversationMode 
-                        ? 'bg-purple-600 border-purple-500 text-white' 
+                        ? 'bg-emerald-600 border-emerald-500 text-white' 
                         : 'bg-zinc-800 border-zinc-700 text-zinc-400 hover:text-white'
                     }`}
                     title="Conversation Mode"
@@ -167,7 +175,7 @@ export function AICopilotWidget({ organizationId }: { organizationId: string }) 
                   <div
                     className={`max-w-[85%] rounded-2xl px-4 py-2 text-sm ${
                       m.role === 'user'
-                        ? 'bg-purple-600 text-white rounded-br-none'
+                        ? 'bg-emerald-600 text-white rounded-br-none'
                         : 'bg-zinc-800 text-zinc-200 border border-zinc-700 rounded-bl-none'
                     }`}
                   >
@@ -206,7 +214,7 @@ export function AICopilotWidget({ organizationId }: { organizationId: string }) 
                   value={input}
                   onChange={handleInputChange}
                   placeholder="Ask me to do something..."
-                  className="w-full bg-zinc-950 border border-zinc-700 focus:border-purple-500 rounded-xl pl-4 pr-20 py-3 text-sm text-white placeholder:text-zinc-500 focus:outline-none transition-colors"
+                  className="w-full bg-zinc-950 border border-zinc-700 focus:border-emerald-500 rounded-xl pl-4 pr-20 py-3 text-sm text-white placeholder:text-zinc-500 focus:outline-none transition-colors"
                   disabled={isLoading}
                 />
                 <div className="absolute right-2 flex items-center gap-1">
@@ -232,7 +240,7 @@ export function AICopilotWidget({ organizationId }: { organizationId: string }) 
                   <button
                     type="submit"
                     disabled={isLoading || !input.trim()}
-                    className="p-1.5 bg-purple-600 hover:bg-purple-500 disabled:bg-zinc-800 disabled:text-zinc-600 text-white rounded-lg transition-colors"
+                    className="p-1.5 bg-emerald-600 hover:bg-emerald-500 disabled:bg-zinc-800 disabled:text-zinc-600 text-white rounded-lg transition-colors"
                   >
                     <Send className="w-4 h-4" />
                   </button>

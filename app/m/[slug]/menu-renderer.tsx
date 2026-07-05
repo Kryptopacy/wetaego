@@ -286,14 +286,14 @@ export function MenuRenderer({ initialCategories }: { initialCategories: Categor
               {!searchQuery && (recommendedItems.length > 0 || isPersonalizing) && (
                 <section className="scroll-mt-40">
                   <div className="flex items-center gap-2 mb-6">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-teal-500 to-emerald-500 flex items-center justify-center shadow-lg shadow-teal-500/20">
                       <Sparkles className="w-4 h-4 text-white" />
                     </div>
                     <h2 className="text-2xl font-black tracking-tight text-zinc-900 dark:text-white">
                       For You
                     </h2>
                     {isPersonalizing && (
-                      <div className="ml-2 w-4 h-4 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+                      <div className="ml-2 w-4 h-4 border-2 border-teal-500 border-t-transparent rounded-full animate-spin"></div>
                     )}
                   </div>
                   <div className="grid gap-4">

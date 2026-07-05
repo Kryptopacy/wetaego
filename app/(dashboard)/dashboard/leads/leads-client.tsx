@@ -21,7 +21,7 @@ type Inquiry = {
 const PIPELINE_STAGES = [
   { key: 'new', label: 'New Inquiry', color: 'bg-blue-500/20 text-blue-400 border-blue-500/30' },
   { key: 'contacted', label: 'Contacted', color: 'bg-amber-500/20 text-amber-400 border-amber-500/30' },
-  { key: 'viewing', label: 'Viewing / Test Drive', color: 'bg-violet-500/20 text-violet-400 border-violet-500/30' },
+  { key: 'viewing', label: 'Viewing / Test Drive', color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' },
   { key: 'offer', label: 'Offer Made', color: 'bg-orange-500/20 text-orange-400 border-orange-500/30' },
   { key: 'won', label: 'Won / Closed', color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' },
   { key: 'lost', label: 'Lost', color: 'bg-zinc-500/20 text-zinc-400 border-zinc-500/30' },
@@ -179,7 +179,7 @@ export function LeadsClient({ initialInquiries }: { initialInquiries: Inquiry[] 
                       value={lead.status}
                       onChange={e => handleStatusChange(lead.id, e.target.value)}
                       disabled={isPending}
-                      className="bg-zinc-900 border border-zinc-700 text-white text-sm rounded-xl px-3 py-2 focus:outline-none focus:border-violet-500 transition-colors cursor-pointer disabled:opacity-50"
+                      className="bg-zinc-900 border border-zinc-700 text-white text-sm rounded-xl px-3 py-2 focus:outline-none focus:border-emerald-500 transition-colors cursor-pointer disabled:opacity-50"
                     >
                       {PIPELINE_STAGES.map(s => (
                         <option key={s.key} value={s.key}>{s.label}</option>

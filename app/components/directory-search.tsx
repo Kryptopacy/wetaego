@@ -25,12 +25,12 @@ export function DirectorySearch() {
   return (
     <form onSubmit={handleSearch} className="relative w-full max-w-sm group">
       <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-        <Search className="h-4 w-4 text-zinc-400 group-focus-within:text-violet-400 transition-colors" />
+        <Search className="h-4 w-4 text-zinc-400 group-focus-within:text-emerald-400 transition-colors" />
       </div>
       <input
         type="text"
         name="query"
-        className="block w-full pl-10 pr-12 py-3 bg-white/5 border border-white/10 rounded-full text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50 transition-all shadow-[0_0_15px_rgba(255,255,255,0.05)] focus:bg-white/10"
+        className="block w-full pl-10 pr-12 py-3 bg-white/5 border border-white/10 rounded-full text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all shadow-[0_0_15px_rgba(255,255,255,0.05)] focus:bg-white/10"
         placeholder="Find venue menu (e.g. Pacy Grills)..."
         required
       />

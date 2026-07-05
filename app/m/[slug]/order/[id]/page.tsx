@@ -30,7 +30,7 @@ export default async function OrderStatusPage(props: { params: Promise<{ slug: s
   // 2. Fetch Order — scope to the resolved location to prevent IDOR
   const { data: order } = await supabase
     .from('orders')
-    .select('*, order_items(*)')
+    .select('*, order_items(*), order_payments(*)')
     .eq('id', id)
     .eq('location_id', location.id)
     .single()

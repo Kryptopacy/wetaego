@@ -148,7 +148,7 @@ export function QuoteActions({
         <div className="flex gap-2 mt-2">
           <button
             onClick={() => setShowProposalEditor(v => !v)}
-            className="flex-1 py-2 bg-violet-500/10 hover:bg-violet-500/20 text-violet-400 border border-violet-500/20 rounded-xl font-medium text-sm transition-colors flex items-center justify-center gap-2"
+            className="flex-1 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 rounded-xl font-medium text-sm transition-colors flex items-center justify-center gap-2"
           >
             <FileEdit className="w-4 h-4" /> Build Proposal
           </button>
@@ -176,8 +176,8 @@ export function QuoteActions({
 
       {/* Proposal Builder */}
       {showProposalEditor && (
-        <div className="border border-violet-500/20 bg-violet-500/5 rounded-2xl p-5 space-y-4">
-          <h3 className="text-sm font-bold text-violet-300">Build Proposal</h3>
+        <div className="border border-emerald-500/20 bg-emerald-500/5 rounded-2xl p-5 space-y-4">
+          <h3 className="text-sm font-bold text-emerald-300">Build Proposal</h3>
           
           {pricedItems.length === 0 ? (
             <p className="text-xs text-zinc-500">No services were requested in this quote.</p>
@@ -218,14 +218,14 @@ export function QuoteActions({
               type="date"
               value={expiryDate}
               onChange={e => setExpiryDate(e.target.value)}
-              className="bg-zinc-900 border border-zinc-700 text-white text-sm rounded-xl px-4 py-2.5 focus:border-violet-500 outline-none w-full"
+              className="bg-zinc-900 border border-zinc-700 text-white text-sm rounded-xl px-4 py-2.5 focus:border-emerald-500 outline-none w-full"
             />
           </div>
 
           <button
             onClick={saveProposal}
             disabled={isPending || pricedItems.length === 0}
-            className="w-full py-3 rounded-xl font-bold text-white text-sm bg-violet-600 hover:bg-violet-500 disabled:opacity-50 transition-colors"
+            className="w-full py-3 rounded-xl font-bold text-white text-sm bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 transition-colors"
           >
             {isPending ? 'Saving…' : 'Save & Send Proposal to Client'}
           </button>

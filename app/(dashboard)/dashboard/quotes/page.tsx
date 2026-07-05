@@ -87,7 +87,7 @@ export default async function QuotesDashboard() {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <Link href={`/dashboard/quotes/${quote.id}`} className="text-violet-400 hover:text-violet-300 font-medium text-sm transition-colors">
+                      <Link href={`/dashboard/quotes/${quote.id}`} className="text-emerald-400 hover:text-emerald-300 font-medium text-sm transition-colors">
                         View & Reply
                       </Link>
                     </td>

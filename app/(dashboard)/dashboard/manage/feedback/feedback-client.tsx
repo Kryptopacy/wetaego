@@ -66,7 +66,7 @@ export function FeedbackInboxClient({
           <select 
             value={filterType}
             onChange={(e) => setFilterType(e.target.value as 'all' | 'business' | 'staff')}
-            className="bg-zinc-900 border border-zinc-800 text-sm text-white rounded-lg px-3 py-2 outline-none focus:border-purple-500"
+            className="bg-zinc-900 border border-zinc-800 text-sm text-white rounded-lg px-3 py-2 outline-none focus:border-emerald-500"
           >
             <option value="all">All Feedback</option>
             <option value="business">Business Reviews</option>
@@ -76,7 +76,7 @@ export function FeedbackInboxClient({
           <select 
             value={staffFilter}
             onChange={(e) => setStaffFilter(e.target.value)}
-            className="bg-zinc-900 border border-zinc-800 text-sm text-white rounded-lg px-3 py-2 outline-none focus:border-purple-500"
+            className="bg-zinc-900 border border-zinc-800 text-sm text-white rounded-lg px-3 py-2 outline-none focus:border-emerald-500"
           >
             <option value="all">All Staff</option>
             {staffList.map(staff => (
@@ -92,7 +92,7 @@ export function FeedbackInboxClient({
             placeholder="Search keywords or names..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full md:w-64 bg-zinc-900 border border-zinc-800 text-sm text-white rounded-lg pl-9 pr-3 py-2 outline-none focus:border-purple-500"
+            className="w-full md:w-64 bg-zinc-900 border border-zinc-800 text-sm text-white rounded-lg pl-9 pr-3 py-2 outline-none focus:border-emerald-500"
           />
         </div>
       </div>

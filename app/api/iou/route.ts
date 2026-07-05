@@ -45,26 +45,10 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'Customer email not found' }, { status: 400 })
       }
 
-      // 2. Generate unique reference
+      // 3. Generate unique reference
       const reference = `iou_${organizationId.substring(0,8)}_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`
 
-      // 3. Initiate payment via Paystack
-      const callbackUrl = `${process.env.NEXT_PUBLIC_APP_URL}/iou/callback` // Or some generic success page
-      
-      const { authorizationUrl } = await paystackProvider.initiatePayment({
-        amountMinor: amountDueMinor,
-        currency: 'NGN', // Assuming NGN for now, ideally fetched from locations
-        customerEmail: customer.email,
-        reference,
-        callbackUrl,
-        metadata: {
-          is_iou_repayment: true,
-          organization_id: organizationId,
-          customer_id: customerId,
-        }
-      })
-
-      // 4. Create an installment record linked to this payment link
+      // 4. Create an installment record BEFORE initiating payment so we have its ID
       const { data: installment, error: insertError } = await supabase
         .from('iou_installments')
         .insert({
@@ -72,13 +56,44 @@ export async function POST(req: Request) {
           customer_id: customerId,
           amount_due_minor: amountDueMinor,
           due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days from now
-          payment_link: authorizationUrl,
           status: 'pending'
         })
         .select()
         .single()
 
       if (insertError) throw insertError
+
+      // 5. Initiate payment via Paystack, passing the installment ID in metadata
+      const callbackUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/iou/callback` // Or some generic success page
+      
+      const { data: locationData } = await supabase
+        .from('locations')
+        .select('currency_code')
+        .eq('organization_id', organizationId)
+        .limit(1)
+        .single()
+        
+      const currency = locationData?.currency_code || 'NGN'
+      
+      const { authorizationUrl } = await paystackProvider.initiatePayment({
+        amountMinor: amountDueMinor,
+        currency: currency,
+        customerEmail: customer.email,
+        reference,
+        callbackUrl,
+        metadata: {
+          is_iou_repayment: true,
+          organization_id: organizationId,
+          customer_id: customerId,
+          installment_id: installment.id
+        }
+      })
+
+      // 6. Update the installment record with the generated payment link
+      await supabase
+        .from('iou_installments')
+        .update({ payment_link: authorizationUrl })
+        .eq('id', installment.id)
 
       return NextResponse.json({ success: true, authorizationUrl, installment })
     }

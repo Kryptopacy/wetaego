@@ -8,7 +8,7 @@ export const metadata = {
 
 export default function AffiliatesLandingPage() {
   return (
-    <div className="min-h-screen bg-black text-white selection:bg-violet-500/30">
+    <div className="min-h-screen bg-black text-white selection:bg-emerald-500/30">
       <LandingNavbar />
       
       {/* ── SEO/AEO JSON-LD ── */}
@@ -35,16 +35,16 @@ export default function AffiliatesLandingPage() {
       <main>
         {/* Hero Section */}
         <section className="relative pt-32 pb-20 overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-violet-900/20 via-black to-black"></div>
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-900/20 via-black to-black"></div>
           
           <div className="max-w-5xl mx-auto px-6 relative z-10 text-center">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-300 text-sm font-medium mb-8">
-              <span className="flex w-2 h-2 rounded-full bg-violet-500 animate-pulse"></span>
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-sm font-medium mb-8">
+              <span className="flex w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               Partnership Program
             </div>
             
             <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6">
-              Earn <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-indigo-400">Recurring</span> Revenue
+              Earn <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400">Recurring</span> Revenue
             </h1>
             
             <p className="text-xl text-zinc-400 mb-10 max-w-2xl mx-auto leading-relaxed">
@@ -82,8 +82,8 @@ export default function AffiliatesLandingPage() {
                 { step: '02', title: 'Refer Venues', desc: 'Share OurMenu OS with restaurants, bars, and hotels in your network.' },
                 { step: '03', title: 'Earn Monthly', desc: 'Get paid 10% every time your referred venues renew their subscription.' }
               ].map(s => (
-                <div key={s.step} className="bg-zinc-900/50 border border-zinc-800/50 p-8 rounded-3xl relative overflow-hidden group hover:border-violet-500/30 transition-colors">
-                  <div className="text-6xl font-black text-zinc-800/30 absolute -top-4 -right-4 group-hover:text-violet-500/10 transition-colors">
+                <div key={s.step} className="bg-zinc-900/50 border border-zinc-800/50 p-8 rounded-3xl relative overflow-hidden group hover:border-emerald-500/30 transition-colors">
+                  <div className="text-6xl font-black text-zinc-800/30 absolute -top-4 -right-4 group-hover:text-emerald-500/10 transition-colors">
                     {s.step}
                   </div>
                   <h3 className="text-xl font-bold mb-3 relative z-10">{s.title}</h3>
@@ -107,8 +107,8 @@ export default function AffiliatesLandingPage() {
                 { title: 'Dedicated Dashboard', desc: 'Track your clicks, referrals, and payouts in real-time with our transparent dashboard.' }
               ].map(b => (
                 <div key={b.title} className="flex gap-4 p-6 rounded-2xl bg-zinc-900/30 border border-zinc-800/50">
-                  <div className="w-10 h-10 rounded-full bg-violet-500/10 flex items-center justify-center shrink-0">
-                    <svg className="w-5 h-5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
+                    <svg className="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                   </div>
@@ -134,7 +134,7 @@ export default function AffiliatesLandingPage() {
 
         {/* Final CTA */}
         <section className="py-24 border-t border-zinc-900 relative overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,_var(--tw-gradient-stops))] from-indigo-900/20 via-black to-black"></div>
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,_var(--tw-gradient-stops))] from-teal-900/20 via-black to-black"></div>
           <div className="max-w-3xl mx-auto px-6 text-center relative z-10">
             <h2 className="text-4xl font-bold mb-6">Ready to start earning?</h2>
             <p className="text-xl text-zinc-400 mb-10">
@@ -142,7 +142,7 @@ export default function AffiliatesLandingPage() {
             </p>
             <Link 
               href="/affiliate/register"
-              className="inline-block px-10 py-5 bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-bold rounded-full hover:from-violet-500 hover:to-indigo-500 transition-all shadow-xl shadow-violet-900/20 transform hover:-translate-y-1"
+              className="inline-block px-10 py-5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold rounded-full hover:from-emerald-500 hover:to-teal-500 transition-all shadow-xl shadow-emerald-900/20 transform hover:-translate-y-1"
             >
               Join Affiliate Program
             </Link>

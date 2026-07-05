@@ -15,7 +15,7 @@ const categories = [
     features: [
       {
         icon: Globe,
-        color: 'from-blue-600 to-indigo-600',
+        color: 'from-blue-600 to-teal-600',
         tag: 'Multi-template/Multibusiness',
         badge: 'Any business type',
         title: 'Built for more than just restaurants.',
@@ -23,7 +23,7 @@ const categories = [
       },
       {
         icon: FileText,
-        color: 'from-violet-600 to-fuchsia-600',
+        color: 'from-emerald-600 to-fuchsia-600',
         tag: 'Custom Flows & Structure',
         badge: 'Tailored to you',
         title: 'Design your own operational flows.',
@@ -53,7 +53,7 @@ const categories = [
       },
       {
         icon: Package,
-        color: 'from-purple-600 to-indigo-600',
+        color: 'from-emerald-600 to-teal-600',
         tag: 'Inventory Manager',
         badge: 'Atomic Tracking',
         title: 'Real-time physical stock tracking.',
@@ -67,7 +67,7 @@ const categories = [
     features: [
       {
         icon: QrCode,
-        color: 'from-violet-600 to-indigo-600',
+        color: 'from-emerald-600 to-teal-600',
         tag: 'Dynamic Location Mapping',
         badge: 'Precision routing',
         title: 'Every table, room, or desk has an identity.',
@@ -97,7 +97,7 @@ const categories = [
     features: [
       {
         icon: ChefHat,
-        color: 'from-violet-600 to-indigo-600',
+        color: 'from-emerald-600 to-teal-600',
         tag: 'AI Copywriter + Cover Studio',
         badge: '3× faster menu updates',
         title: 'Studio-quality menus. Zero effort.',
@@ -135,7 +135,7 @@ const categories = [
     features: [
       {
         icon: FileText,
-        color: 'from-blue-600 to-indigo-600',
+        color: 'from-blue-600 to-teal-600',
         tag: 'Custom Pages',
         badge: 'Unlimited creativity',
         title: 'More than a menu.',
@@ -181,7 +181,7 @@ const categories = [
       },
       {
         icon: MessagesSquare,
-        color: 'from-blue-500 to-indigo-500',
+        color: 'from-blue-500 to-teal-500',
         tag: 'Enterprise Intercom',
         badge: 'Real-time Comms',
         title: 'Internal chat. Zero walkie-talkies.',

@@ -229,14 +229,14 @@ export function NotificationCenter() {
   const colorMap = {
     blue: 'bg-blue-500/10 border-blue-500/20 hover:bg-blue-500/15',
     yellow: 'bg-yellow-500/10 border-yellow-500/20 hover:bg-yellow-500/15',
-    violet: 'bg-violet-500/10 border-violet-500/20 hover:bg-violet-500/15',
+    violet: 'bg-emerald-500/10 border-emerald-500/20 hover:bg-emerald-500/15',
     emerald: 'bg-emerald-500/10 border-emerald-500/20 hover:bg-emerald-500/15',
   }
 
   const labelColorMap = {
     blue: 'text-blue-400',
     yellow: 'text-yellow-400',
-    violet: 'text-violet-400',
+    violet: 'text-emerald-400',
     emerald: 'text-emerald-400',
   }
 

@@ -40,7 +40,7 @@ export default async function AffiliateRegisterPage() {
               id="referral_code" 
               required 
               placeholder="e.g. YOURNAME2026"
-              className="mt-1 block w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
+              className="mt-1 block w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
             <p className="text-xs text-zinc-500 mt-1">This will be used in your unique affiliate link.</p>
           </div>
@@ -56,7 +56,7 @@ export default async function AffiliateRegisterPage() {
               id="bank_code" 
               required 
               placeholder="e.g. 058 (GTBank)"
-              className="mt-1 block w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
+              className="mt-1 block w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
           </div>
 
@@ -68,7 +68,7 @@ export default async function AffiliateRegisterPage() {
               id="account_number" 
               required 
               placeholder="0123456789"
-              className="mt-1 block w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
+              className="mt-1 block w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
           </div>
 
@@ -80,13 +80,13 @@ export default async function AffiliateRegisterPage() {
               id="account_name" 
               required 
               placeholder="John Doe"
-              className="mt-1 block w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
+              className="mt-1 block w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
           </div>
 
           <button 
             type="submit" 
-            className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-violet-600 hover:bg-violet-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500 transition-colors"
+            className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors"
           >
             Register as Affiliate
           </button>

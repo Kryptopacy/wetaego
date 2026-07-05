@@ -108,7 +108,7 @@ export default async function PagesManager() {
         </div>
         <Link
           href="/dashboard/pages/setup?mode=new"
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-sm font-bold hover:from-violet-500 hover:to-indigo-500 transition-all shadow-lg shadow-violet-900/30"
+          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-sm font-bold hover:from-emerald-500 hover:to-teal-500 transition-all shadow-lg shadow-emerald-900/30"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -146,7 +146,7 @@ export default async function PagesManager() {
               <div
                 className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-0 rounded-2xl border p-4 sm:p-5 transition-all w-full h-full ${
                   page.is_primary
-                    ? 'border-violet-500/30 bg-violet-900/10'
+                    ? 'border-emerald-500/30 bg-emerald-900/10'
                     : 'border-zinc-800 bg-zinc-900/40'
                 }`}
               >
@@ -161,7 +161,7 @@ export default async function PagesManager() {
                     <div className="flex items-center gap-2 mb-1">
                       <h3 className="text-base font-bold text-white">{page.title}</h3>
                       {page.is_primary && (
-                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-violet-500/20 text-violet-400 border border-violet-500/30 uppercase tracking-wider">
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 uppercase tracking-wider">
                           Primary
                         </span>
                       )}
@@ -293,7 +293,7 @@ function templateTypeLabel(type: string): string {
 
 function templateBadgeClasses(type: string): string {
   const classes: Record<string, string> = {
-    catalog: 'bg-violet-500/10 text-violet-400 border border-violet-500/20',
+    catalog: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
     booking: 'bg-blue-500/10 text-blue-400 border border-blue-500/20',
     listing: 'bg-amber-500/10 text-amber-400 border border-amber-500/20',
     rate_card: 'bg-pink-500/10 text-pink-400 border border-pink-500/20',

@@ -69,7 +69,7 @@ export default async function BusinessTypeSetupPage({
             <>
               <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-4">
                 What kind of business<br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-br from-violet-300 via-white to-zinc-400">
+                <span className="text-transparent bg-clip-text bg-gradient-to-br from-emerald-300 via-white to-zinc-400">
                   are you running?
                 </span>
               </h1>
@@ -114,7 +114,7 @@ export default async function BusinessTypeSetupPage({
                       <input type="hidden" name="mode" value={mode} />
                       <button
                         type="submit"
-                        className="group w-full text-left rounded-2xl border border-white/[0.07] bg-zinc-900/50 p-5 hover:border-violet-500/40 hover:bg-zinc-900 transition-all duration-200 hover:shadow-lg hover:shadow-violet-900/10 active:scale-[0.98] cursor-pointer"
+                        className="group w-full text-left rounded-2xl border border-white/[0.07] bg-zinc-900/50 p-5 hover:border-emerald-500/40 hover:bg-zinc-900 transition-all duration-200 hover:shadow-lg hover:shadow-emerald-900/10 active:scale-[0.98] cursor-pointer"
                       >
                         <div className="flex items-start justify-between mb-3">
                           <span className="text-2xl">{preset.icon}</span>
@@ -123,7 +123,7 @@ export default async function BusinessTypeSetupPage({
                             {templateLabel(preset.template_type)}
                           </span>
                         </div>
-                        <h3 className="font-bold text-white text-sm mb-1 group-hover:text-violet-200 transition-colors">
+                        <h3 className="font-bold text-white text-sm mb-1 group-hover:text-emerald-200 transition-colors">
                           {preset.label}
                         </h3>
                         <p className="text-xs text-zinc-500 leading-relaxed">
@@ -199,7 +199,7 @@ function templateLabel(type: string): string {
 
 function templateBadge(type: string): string {
   const styles: Record<string, string> = {
-    catalog: 'bg-violet-500/10 text-violet-400 border-violet-500/20',
+    catalog: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
     booking: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
     listing: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
     rate_card: 'bg-pink-500/10 text-pink-400 border-pink-500/20',

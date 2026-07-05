@@ -149,42 +149,21 @@ export async function POST(req: Request) {
             )
           }
         }
-      } else if (metadata && metadata.is_iou_repayment && metadata.organization_id && metadata.customer_id) {
+      } else if (metadata && metadata.is_iou_repayment && metadata.organization_id && metadata.customer_id && metadata.installment_id) {
         // This is a successful IOU Repayment
         
-        // 1. Record the repayment transaction
-        await supabase.from('iou_transactions').insert({
-          organization_id: metadata.organization_id,
-          customer_id: metadata.customer_id,
-          type: 'repayment',
-          amount_minor: event.data.amount,
-          reference: event.data.reference
-        });
+        const { error: rpcError } = await supabase.rpc('process_iou_repayment', {
+          p_installment_id: metadata.installment_id,
+          p_organization_id: metadata.organization_id,
+          p_customer_id: metadata.customer_id,
+          p_amount_minor: event.data.amount,
+          p_reference: event.data.reference
+        })
 
-        // 2. Decrement the customer's credit_balance_minor
-        // We use an RPC call or fetch and update if no RPC exists. We will fetch and update to keep it simple.
-        const { data: customer } = await supabase
-          .from('customer_profiles')
-          .select('credit_balance_minor')
-          .eq('id', metadata.customer_id)
-          .single()
-          
-        if (customer) {
-          const newBalance = Math.max(0, (customer.credit_balance_minor || 0) - event.data.amount)
-          await supabase
-            .from('customer_profiles')
-            .update({ credit_balance_minor: newBalance })
-            .eq('id', metadata.customer_id)
+        if (rpcError) {
+          console.error('IOU Repayment RPC Error in Billing:', rpcError)
+          return NextResponse.json({ error: 'Failed to process IOU repayment' }, { status: 500 })
         }
-
-        // 3. Mark any matching pending installments as paid
-        await supabase
-          .from('iou_installments')
-          .update({ status: 'paid' })
-          .eq('organization_id', metadata.organization_id)
-          .eq('customer_id', metadata.customer_id)
-          .eq('status', 'pending')
-          // Optionally, we could match by amount or reference if we stored it, but marking all pending as paid or partial is complex. For now, mark all pending as paid if they made a payment (assuming single active link).
       }
     }
 

@@ -12,7 +12,7 @@ function SubmitButton() {
     <button
       type="submit"
       disabled={pending}
-      className="flex items-center gap-2 bg-violet-600 hover:bg-violet-500 disabled:bg-zinc-800 disabled:text-zinc-500 text-white px-6 py-3 rounded-xl font-bold transition-all"
+      className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 disabled:bg-zinc-800 disabled:text-zinc-500 text-white px-6 py-3 rounded-xl font-bold transition-all"
     >
       <Send className="w-4 h-4" />
       {pending ? 'Sending Broadcast...' : 'Send to All Customers'}
@@ -47,7 +47,7 @@ export function MarketingClient({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-            <Megaphone className="w-6 h-6 text-violet-400" />
+            <Megaphone className="w-6 h-6 text-emerald-400" />
             Broadcast Marketing
           </h1>
           <p className="text-zinc-400 mt-1">
@@ -59,8 +59,8 @@ export function MarketingClient({
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-5 flex items-center gap-4">
-          <div className="w-10 h-10 rounded-full bg-violet-500/10 flex items-center justify-center">
-            <Users className="w-5 h-5 text-violet-400" />
+          <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center">
+            <Users className="w-5 h-5 text-emerald-400" />
           </div>
           <div>
             <div className="text-xs text-zinc-500 font-medium uppercase tracking-wide">Opt-in Recipients</div>
@@ -129,7 +129,7 @@ export function MarketingClient({
               name="subject"
               required
               maxLength={200}
-              className="w-full bg-zinc-800/50 border border-zinc-700 text-white rounded-xl px-4 py-3 text-sm outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 placeholder:text-zinc-500 transition-colors"
+              className="w-full bg-zinc-800/50 border border-zinc-700 text-white rounded-xl px-4 py-3 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 placeholder:text-zinc-500 transition-colors"
               placeholder="e.g. 50% off all Pasta this Friday!"
             />
           </div>
@@ -141,7 +141,7 @@ export function MarketingClient({
               required
               rows={8}
               maxLength={2000}
-              className="w-full bg-zinc-800/50 border border-zinc-700 text-white rounded-xl px-4 py-3 text-sm outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 placeholder:text-zinc-500 font-sans resize-none transition-colors"
+              className="w-full bg-zinc-800/50 border border-zinc-700 text-white rounded-xl px-4 py-3 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 placeholder:text-zinc-500 font-sans resize-none transition-colors"
               placeholder="Write your message here..."
             />
           </div>

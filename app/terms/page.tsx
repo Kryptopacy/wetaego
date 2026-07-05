@@ -7,7 +7,7 @@ export const metadata = {
 
 export default function TermsPage() {
   return (
-    <div className="min-h-screen bg-[#050505] text-zinc-300 selection:bg-violet-500/30 selection:text-white pb-24 pt-32 px-6">
+    <div className="min-h-screen bg-[#050505] text-zinc-300 selection:bg-emerald-500/30 selection:text-white pb-24 pt-32 px-6">
       <div className="max-w-3xl mx-auto">
         <h1 className="text-4xl md:text-5xl font-black text-white mb-8 tracking-tight">Terms of Service</h1>
         <p className="text-zinc-500 mb-12">Last Updated: June 2026</p>
@@ -55,7 +55,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-2xl font-bold text-white mb-4">5. Contact Information</h2>
             <p>
-              For questions regarding these Terms of Service, please contact us at <a href="mailto:legal@ourmenuos.online" className="text-violet-400 hover:text-violet-300">legal@ourmenuos.online</a>.
+              For questions regarding these Terms of Service, please contact us at <a href="mailto:legal@ourmenuos.online" className="text-emerald-400 hover:text-emerald-300">legal@ourmenuos.online</a>.
             </p>
           </section>
         </div>

@@ -153,12 +153,12 @@ export default async function QuoteDetailsPage({
               </div>
               <div className="flex flex-col gap-2">
                 {quote.customer_email && (
-                  <a href={`mailto:${quote.customer_email}`} className="flex items-center gap-2 text-sm text-violet-400 hover:text-violet-300 transition-colors">
+                  <a href={`mailto:${quote.customer_email}`} className="flex items-center gap-2 text-sm text-emerald-400 hover:text-emerald-300 transition-colors">
                     <Mail className="w-4 h-4" /> {quote.customer_email}
                   </a>
                 )}
                 {quote.customer_phone && (
-                  <a href={`https://wa.me/${quote.customer_phone.replace(/\D/g,'')}`} target="_blank" rel="noreferrer" className="flex items-center gap-2 text-sm text-violet-400 hover:text-violet-300 transition-colors">
+                  <a href={`https://wa.me/${quote.customer_phone.replace(/\D/g,'')}`} target="_blank" rel="noreferrer" className="flex items-center gap-2 text-sm text-emerald-400 hover:text-emerald-300 transition-colors">
                     <Phone className="w-4 h-4" /> {quote.customer_phone}
                   </a>
                 )}

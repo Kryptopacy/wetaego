@@ -46,8 +46,8 @@ export default function PaymentTesterPage() {
       name: 'Subscription Purchase',
       description: 'Simulates a user upgrading their organization to the Pro plan (₦69,000/mo).',
       icon: Repeat,
-      color: 'text-indigo-500',
-      bg: 'bg-indigo-500/10',
+      color: 'text-teal-500',
+      bg: 'bg-teal-500/10',
     },
     {
       id: 'credits',

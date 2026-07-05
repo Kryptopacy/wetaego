@@ -7,7 +7,7 @@ export const metadata = {
 
 export default function PrivacyPage() {
   return (
-    <div className="min-h-screen bg-[#050505] text-zinc-300 selection:bg-violet-500/30 selection:text-white pb-24 pt-32 px-6">
+    <div className="min-h-screen bg-[#050505] text-zinc-300 selection:bg-emerald-500/30 selection:text-white pb-24 pt-32 px-6">
       <div className="max-w-3xl mx-auto">
         <h1 className="text-4xl md:text-5xl font-black text-white mb-8 tracking-tight">Privacy Policy</h1>
         <p className="text-zinc-500 mb-12">Last Updated: June 2026</p>
@@ -67,7 +67,7 @@ export default function PrivacyPage() {
               <li>Withdraw consent for data processing at any time.</li>
             </ul>
             <p className="mt-4">
-              To exercise these rights, please contact our Data Protection Officer at <a href="mailto:privacy@ourmenuos.online" className="text-violet-400 hover:text-violet-300">privacy@ourmenuos.online</a>. We will respond to all requests within 30 days.
+              To exercise these rights, please contact our Data Protection Officer at <a href="mailto:privacy@ourmenuos.online" className="text-emerald-400 hover:text-emerald-300">privacy@ourmenuos.online</a>. We will respond to all requests within 30 days.
             </p>
           </section>
         </div>

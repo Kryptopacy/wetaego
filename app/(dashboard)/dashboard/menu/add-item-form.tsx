@@ -110,7 +110,7 @@ export function AddItemForm({ orgId, categoryId, categoryName }: { orgId: string
             type="button" 
             onClick={handleMagicFill} 
             disabled={isGenerating || !name}
-            className="absolute right-1 top-1 bottom-1 px-3 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white rounded-md text-xs font-bold transition-all disabled:opacity-50 disabled:grayscale flex items-center gap-1 shadow-lg"
+            className="absolute right-1 top-1 bottom-1 px-3 bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-400 hover:to-emerald-500 text-white rounded-md text-xs font-bold transition-all disabled:opacity-50 disabled:grayscale flex items-center gap-1 shadow-lg"
           >
             {isGenerating ? 'Wait...' : '✨ Magic Fill'}
           </button>
@@ -141,7 +141,7 @@ export function AddItemForm({ orgId, categoryId, categoryName }: { orgId: string
                 type="button"
                 onClick={handleGenerateImage}
                 disabled={isGeneratingImg || !name}
-                className="w-full px-3 py-1.5 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white rounded-lg text-xs font-bold transition-all disabled:opacity-50 disabled:grayscale flex items-center justify-center gap-1 shadow-lg"
+                className="w-full px-3 py-1.5 bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-400 hover:to-emerald-500 text-white rounded-lg text-xs font-bold transition-all disabled:opacity-50 disabled:grayscale flex items-center justify-center gap-1 shadow-lg"
               >
                 {isGeneratingImg ? 'Generating...' : '✨ AI Image Studio'}
               </button>
