@@ -67,12 +67,26 @@ export default async function HomePage() {
             animation: breathe-scale 25s ease-in-out infinite;
             will-change: transform;
           }
+          @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-12px); }
+          }
+          .animate-float {
+            animation: float 6s ease-in-out infinite;
+          }
           @keyframes glow-pulse {
             0%, 100% { filter: drop-shadow(0px 0px 10px rgba(16,185,129,0.4)); opacity: 0.9; }
             50% { filter: drop-shadow(0px 0px 25px rgba(16,185,129,1)); opacity: 1; }
           }
           .animate-glow-pulse {
             animation: glow-pulse 4s ease-in-out infinite;
+          }
+          @media (prefers-reduced-motion: reduce) {
+            .animate-breathe, .animate-glow-pulse, .animate-float {
+              animation: none !important;
+              transform: none !important;
+              filter: none !important;
+            }
           }
         `}</style>
         {/* Background image */}
@@ -104,15 +118,7 @@ export default async function HomePage() {
 
           {/* Left — Copy */}
           <FadeIn className="flex flex-col justify-center">
-            <div className="mb-8">
-              <Image 
-                src="/ourmenu-qr-logo.svg" 
-                alt="OurMenu OS" 
-                width={220} 
-                height={48} 
-                className="object-contain animate-glow-pulse" 
-              />
-            </div>
+
             <h1 className="text-5xl md:text-7xl font-black text-white tracking-[-0.04em] leading-[1.02] mb-6">
               The ultimate digital storefront.<br />
               <span className="text-transparent bg-clip-text bg-gradient-to-br from-violet-300 via-white to-zinc-400">
@@ -138,7 +144,7 @@ export default async function HomePage() {
 
           {/* Right — Phone mockup with actual guest menu screen */}
           <FadeIn delay={0.3} className="hidden lg:flex items-center justify-center">
-            <div className="relative">
+            <div className="relative animate-float">
               {/* Glow behind phone */}
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-violet-500/25 blur-[100px] rounded-full pointer-events-none" />
 

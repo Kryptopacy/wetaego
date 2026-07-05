@@ -45,7 +45,7 @@ export const metadata: Metadata = {
     siteName: 'OurMenu OS',
     images: [
       {
-        url: '/hero_premium_multibusiness.png',
+        url: '/hero_emerald_gemstone.png',
         width: 1200,
         height: 630,
         alt: 'OurMenu OS Dashboard and Guest Experience',
@@ -56,7 +56,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'OurMenu OS | Storefronts & Operations for Hospitality, Retail & Services',
     description: 'The ultimate digital storefront & operations suite for hospitality, retail boutiques, spas, consultants, real estate, and automotive.',
-    images: ['/hero_premium_multibusiness.png'],
+    images: ['/hero_emerald_gemstone.png'],
   },
 };
 
