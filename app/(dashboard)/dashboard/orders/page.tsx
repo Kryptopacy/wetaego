@@ -47,48 +47,46 @@ export default async function OrdersPage() {
       activeLocationId = locationId || ''
 
       if (activeLocationId) {
-        // Fetch Orders
-        const { data: ordersData } = await supabase
-          .from('orders')
-          .select('*, order_items(*)')
-          .eq('organization_id', org.id)
-          .eq('location_id', activeLocationId)
-          .order('created_at', { ascending: false })
-          .limit(50)
-        
-        orders = (ordersData || []).map(mapSupabaseOrderToUI)
+        // Run independent queries concurrently
+        const [
+          ordersResult,
+          requestsResult,
+          pageResult,
+          itemsResult
+        ] = await Promise.all([
+          supabase
+            .from('orders')
+            .select('*, order_items(*)')
+            .eq('organization_id', org.id)
+            .eq('location_id', activeLocationId)
+            .order('created_at', { ascending: false })
+            .limit(50),
+          supabase
+            .from('service_requests')
+            .select('*')
+            .eq('organization_id', org.id)
+            .eq('location_id', activeLocationId)
+            .order('created_at', { ascending: true }),
+          supabase
+            .from('location_pages')
+            .select('billing_mode, template_type')
+            .eq('location_id', activeLocationId)
+            .eq('is_published', true)
+            .limit(1)
+            .single(),
+          supabase
+            .from('menu_items')
+            .select('*')
+            .eq('organization_id', org.id)
+            .order('name')
+        ])
 
-        // Fetch Service Requests
-        const { data: requestsData } = await supabase
-          .from('service_requests')
-          .select('*')
-          .eq('organization_id', org.id)
-          .eq('location_id', activeLocationId)
-          .order('created_at', { ascending: true })
-        
-        serviceRequests = requestsData || []
-
-        // Fetch billing mode and template type
-        const { data: pageData } = await supabase
-          .from('location_pages')
-          .select('billing_mode, template_type')
-          .eq('location_id', activeLocationId)
-          .eq('is_published', true)
-          .limit(1)
-          .single()
-        
-        billingMode = pageData?.billing_mode || 'standard_checkout'
-        templateType = pageData?.template_type || 'catalog'
+        orders = (ordersResult.data || []).map(mapSupabaseOrderToUI)
+        serviceRequests = requestsResult.data || []
+        billingMode = pageResult.data?.billing_mode || 'standard_checkout'
+        templateType = pageResult.data?.template_type || 'catalog'
+        menuItems = itemsResult.data || []
       }
-
-      // Fetch Menu Items (usually org-wide)
-      const { data: itemsData } = await supabase
-        .from('menu_items')
-        .select('*')
-        .eq('organization_id', org.id)
-        .order('name')
-      
-      menuItems = itemsData || []
     }
   }
 

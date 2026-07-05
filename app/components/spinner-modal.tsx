@@ -116,7 +116,7 @@ export function SpinnerModal({ locationId, config }: SpinnerModalProps) {
   const conicGradient = config.map((_, i) => {
     const start = (i * 100) / config.length
     const end = ((i + 1) * 100) / config.length
-    const color = i % 2 === 0 ? '#3b82f6' : '#8b5cf6' // Alternate colors: blue and purple
+    const color = i % 2 === 0 ? '#10b981' : '#34d399' // Alternate colors: emerald and green
     return `${color} ${start}% ${end}%`
   }).join(', ')
 
@@ -168,7 +168,7 @@ export function SpinnerModal({ locationId, config }: SpinnerModalProps) {
                 
                 {/* Wheel */}
                 <div 
-                  className="w-full h-full rounded-full border-4 border-zinc-800 shadow-[0_0_50px_rgba(139,92,246,0.3)] relative overflow-hidden transition-transform duration-[4000ms] ease-[cubic-bezier(0.15,0.85,0.15,1)]"
+                  className="w-full h-full rounded-full border-4 border-zinc-800 shadow-[0_0_50px_rgba(16,185,129,0.3)] relative overflow-hidden transition-transform duration-[4000ms] ease-[cubic-bezier(0.15,0.85,0.15,1)]"
                   style={{ 
                     transform: `rotate(${rotation}deg)`,
                     background: `conic-gradient(${conicGradient})`
@@ -208,7 +208,7 @@ export function SpinnerModal({ locationId, config }: SpinnerModalProps) {
                 <button
                   onClick={spinWheel}
                   disabled={isSpinning}
-                  className="w-full h-14 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold rounded-xl flex items-center justify-center transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                  className="w-full h-14 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white font-bold rounded-xl flex items-center justify-center transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
                 >
                   {isSpinning ? 'Spinning...' : 'Spin the Wheel!'}
                 </button>

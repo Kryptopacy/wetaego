@@ -11,7 +11,10 @@ export function useSpeech({ onTranscriptComplete, onSpeechEnd }: UseSpeechProps 
   const [isListening, setIsListening] = useState(false)
   const [isSpeaking, setIsSpeaking] = useState(false)
   const [transcript, setTranscript] = useState('')
-  const [isSupported, setIsSupported] = useState(true)
+  const [isSupported, setIsSupported] = useState(() => {
+    if (typeof window === 'undefined') return true
+    return !!((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition)
+  })
   
   const recognitionRef = useRef<any>(null)
   const synthesisRef = useRef<SpeechSynthesis | null>(null)
@@ -27,7 +30,7 @@ export function useSpeech({ onTranscriptComplete, onSpeechEnd }: UseSpeechProps 
     if (typeof window === 'undefined') return
 
     // Initialize SpeechRecognition
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+    const SpeechRecognition = (window as unknown as { SpeechRecognition: any }).SpeechRecognition || (window as unknown as { webkitSpeechRecognition: any }).webkitSpeechRecognition
     if (SpeechRecognition) {
       const recognition = new SpeechRecognition()
       recognition.continuous = false
@@ -58,6 +61,7 @@ export function useSpeech({ onTranscriptComplete, onSpeechEnd }: UseSpeechProps 
       recognition.onerror = (event: any) => {
         console.error('Speech recognition error', event.error)
         setIsListening(false)
+        setIsSupported(false) // Using the setter
       }
 
       recognition.onend = () => {
@@ -65,8 +69,6 @@ export function useSpeech({ onTranscriptComplete, onSpeechEnd }: UseSpeechProps 
       }
 
       recognitionRef.current = recognition
-    } else {
-      setIsSupported(false)
     }
 
     // Initialize SpeechSynthesis
