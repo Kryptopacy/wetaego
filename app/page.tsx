@@ -120,8 +120,8 @@ export default async function HomePage() {
           <FadeIn className="flex flex-col justify-center mt-12 md:mt-0">
 
             <h1 className="text-5xl md:text-7xl font-black text-white tracking-[-0.04em] leading-[1.05] md:leading-[1.02] mb-5 md:mb-6 drop-shadow-md">
-              The ultimate digital storefront.<br className="hidden md:block" />
-              <span className="text-transparent bg-clip-text bg-gradient-to-br from-emerald-300 via-green-200 to-teal-400 drop-shadow-[0_0_15px_rgba(52,211,153,0.3)]">
+              The ultimate digital storefront.
+              <span className="block mt-1 md:mt-2 text-transparent bg-clip-text bg-gradient-to-br from-emerald-300 via-green-200 to-teal-400 drop-shadow-[0_0_15px_rgba(52,211,153,0.3)]">
                 A complete operating layer.
               </span>
             </h1>
@@ -236,13 +236,12 @@ export default async function HomePage() {
       {/* ── FINAL CTA ── */}
       <section className="py-32 px-6 bg-[#050505] relative overflow-hidden">
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="w-[600px] h-[600px] bg-violet-600/10 blur-[120px] rounded-full" />
+          <div className="w-[600px] h-[600px] bg-emerald-600/10 blur-[120px] rounded-full" />
         </div>
         <FadeIn className="max-w-4xl mx-auto text-center relative z-10">
-          <span className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-zinc-300 text-xs font-bold uppercase tracking-widest mb-8">Get Started Today</span>
           <h2 className="text-5xl md:text-7xl font-black text-white tracking-[-0.04em] leading-[1.02] mb-8">
             Your venue deserves<br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-br from-violet-300 via-white to-zinc-400">better infrastructure.</span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-br from-emerald-300 via-white to-zinc-400">better infrastructure.</span>
           </h2>
           <p className="text-zinc-400 text-xl font-light mb-12 max-w-2xl mx-auto">
             Join forward-thinking venues running on OurMenu. Setup takes under 10 minutes.

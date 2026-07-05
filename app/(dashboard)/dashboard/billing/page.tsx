@@ -111,7 +111,7 @@ export default async function BillingPage(props: { searchParams: Promise<{ curre
 
           <div className="flex justify-between items-center py-3 border-b border-zinc-800">
             <span className="text-zinc-400">Credits</span>
-            <span className="text-violet-400 font-bold">
+            <span className="text-emerald-400 font-bold">
               {creditsRemaining}
             </span>
           </div>
@@ -177,9 +177,9 @@ export default async function BillingPage(props: { searchParams: Promise<{ curre
         </div>
 
         {/* Pro Upgrade Card */}
-        <div className="bg-gradient-to-br from-violet-900/20 to-zinc-950 border border-violet-500/30 rounded-2xl p-6 relative overflow-hidden">
+        <div className="bg-gradient-to-br from-emerald-900/20 to-zinc-950 border border-emerald-500/30 rounded-2xl p-6 relative overflow-hidden">
           <div className="absolute top-0 right-0 p-4 opacity-10">
-            <svg className="w-24 h-24 text-violet-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 22h20L12 2zm0 4.5l6.5 13.5h-13L12 6.5z"/></svg>
+            <svg className="w-24 h-24 text-emerald-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 22h20L12 2zm0 4.5l6.5 13.5h-13L12 6.5z"/></svg>
           </div>
           
           <h2 className="text-2xl font-bold text-white mb-2 relative z-10">OurMenu OS Pro</h2>
@@ -195,7 +195,7 @@ export default async function BillingPage(props: { searchParams: Promise<{ curre
           <ul className="space-y-3 mb-8 relative z-10">
             {['Everything in Lite', 'Live Kitchen Display System', 'Demand Forecasting', 'Smart Triaging'].map(feature => (
               <li key={feature} className="flex items-center gap-3 text-zinc-300 text-sm">
-                <svg className="w-5 h-5 text-violet-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                <svg className="w-5 h-5 text-emerald-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                 {feature}
               </li>
             ))}
@@ -207,7 +207,7 @@ export default async function BillingPage(props: { searchParams: Promise<{ curre
             <button 
               type="submit" 
               disabled={org.subscription_status === 'active' && org.subscription_plan === 'pro'}
-              className="w-full bg-violet-600 hover:bg-violet-500 disabled:bg-zinc-800 disabled:text-zinc-500 text-white font-bold py-3 rounded-xl transition-colors"
+              className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:bg-zinc-800 disabled:text-zinc-500 text-white font-bold py-3 rounded-xl transition-colors"
             >
               {(org.subscription_status === 'active' && org.subscription_plan === 'pro') ? 'Current Plan' : 'Subscribe via Paystack'}
             </button>
@@ -264,12 +264,12 @@ export default async function BillingPage(props: { searchParams: Promise<{ curre
           <div className="flex items-center justify-between py-4 border-b border-zinc-800">
             <div>
               <div className="font-semibold text-white">25 Credits</div>
-              <div className="text-xs text-violet-400 font-medium">Most Popular — {formatPrice(credits25Price)}</div>
+              <div className="text-xs text-emerald-400 font-medium">Most Popular — {formatPrice(credits25Price)}</div>
             </div>
             <ActionForm action={buyCredits} className="relative z-10">
               <input type="hidden" name="organization_id" value={org.id} />
               <input type="hidden" name="credits" value="25" />
-              <button type="submit" className="px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white rounded-lg text-sm font-bold transition-colors">
+              <button type="submit" className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-sm font-bold transition-colors">
                 Buy 25
               </button>
             </ActionForm>
