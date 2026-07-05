@@ -1,5 +1,5 @@
 import { ActionForm } from '@/components/ActionForm'
-import heroBg from '../public/hero_premium_multibusiness.png'
+import heroBg from '../public/hero_emerald_gemstone.png'
 import Image from 'next/image'
 import Link from 'next/link'
 import { startInteractiveDemo } from './login/actions'
@@ -58,18 +58,37 @@ export default async function HomePage() {
 
       {/* ── HERO: Cinematic full-bleed background composition ── */}
       <section className="relative min-h-screen flex items-center overflow-hidden">
+        <style>{`
+          @keyframes breathe-scale {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+          }
+          .animate-breathe {
+            animation: breathe-scale 25s ease-in-out infinite;
+            will-change: transform;
+          }
+          @keyframes glow-pulse {
+            0%, 100% { filter: drop-shadow(0px 0px 10px rgba(16,185,129,0.4)); opacity: 0.9; }
+            50% { filter: drop-shadow(0px 0px 25px rgba(16,185,129,1)); opacity: 1; }
+          }
+          .animate-glow-pulse {
+            animation: glow-pulse 4s ease-in-out infinite;
+          }
+        `}</style>
         {/* Background image */}
-        <div className="absolute inset-0 z-0">
-          <Image
-            src={heroBg}
-            placeholder="blur"
-            alt="Hero Background"
-            fill
-            sizes="100vw"
-            className="object-cover object-center opacity-40 brightness-75"
-            priority
-            quality={75}
-          />
+        <div className="absolute inset-0 z-0 overflow-hidden">
+          <div className="absolute inset-0 animate-breathe origin-center">
+            <Image
+              src={heroBg}
+              placeholder="blur"
+              alt="Hero Background"
+              fill
+              sizes="100vw"
+              className="object-cover object-center opacity-50 brightness-75"
+              priority
+              quality={85}
+            />
+          </div>
           {/* Multi-layer gradient overlay for text legibility on left, reveal on right */}
           <div className="absolute inset-0 bg-gradient-to-b md:bg-gradient-to-r from-[#050505]/95 via-[#050505]/80 md:via-[#050505]/60 to-[#050505]/40 md:to-[#050505]/20" />
           <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-black/40" />
@@ -85,7 +104,16 @@ export default async function HomePage() {
 
           {/* Left — Copy */}
           <FadeIn className="flex flex-col justify-center">
-            <h1 className="text-5xl md:text-7xl font-black text-white tracking-[-0.04em] leading-[1.02] mb-6 mt-8">
+            <div className="mb-8">
+              <Image 
+                src="/ourmenu-qr-logo.svg" 
+                alt="OurMenu OS" 
+                width={220} 
+                height={48} 
+                className="object-contain animate-glow-pulse" 
+              />
+            </div>
+            <h1 className="text-5xl md:text-7xl font-black text-white tracking-[-0.04em] leading-[1.02] mb-6">
               The ultimate digital storefront.<br />
               <span className="text-transparent bg-clip-text bg-gradient-to-br from-violet-300 via-white to-zinc-400">
                 A complete operating layer.
