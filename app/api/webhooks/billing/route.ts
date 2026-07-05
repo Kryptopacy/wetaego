@@ -75,7 +75,8 @@ export async function POST(req: Request) {
           .update({
             subscription_status: 'active',
             subscription_plan: event.data.plan?.plan_code || 'pro',
-            current_period_end: nextPaymentDate
+            current_period_end: nextPaymentDate,
+            monthly_free_credits_used: 0
           })
           .eq('id', metadata.organization_id)
       }
@@ -107,7 +108,8 @@ export async function POST(req: Request) {
           .from('organizations')
           .update({ 
             subscription_status: 'active',
-            current_period_end: nextPaymentDate
+            current_period_end: nextPaymentDate,
+            monthly_free_credits_used: 0
           })
           .eq('id', metadata.organization_id)
           

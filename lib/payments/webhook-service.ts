@@ -125,7 +125,10 @@ export async function processSubscriptionPayment(
   currency: string,
   reference: string
 ) {
-  const updateData: { subscription_status: string; subscription_plan?: string } = { subscription_status: 'active' }
+  const updateData: { subscription_status: string; subscription_plan?: string; monthly_free_credits_used?: number } = { 
+    subscription_status: 'active',
+    monthly_free_credits_used: 0
+  }
   if (planType) {
     updateData.subscription_plan = planType
   }
