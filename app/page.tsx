@@ -119,8 +119,8 @@ export default async function HomePage() {
           {/* Left — Copy */}
           <FadeIn className="flex flex-col justify-center mt-12 md:mt-0">
 
-            <h1 className="text-4xl md:text-7xl font-black text-white tracking-[-0.04em] leading-[1.05] md:leading-[1.02] mb-5 md:mb-6 drop-shadow-md">
-              The ultimate digital storefront.<br />
+            <h1 className="text-5xl md:text-7xl font-black text-white tracking-[-0.04em] leading-[1.05] md:leading-[1.02] mb-5 md:mb-6 drop-shadow-md">
+              The ultimate digital storefront.<br className="hidden md:block" />
               <span className="text-transparent bg-clip-text bg-gradient-to-br from-emerald-300 via-green-200 to-teal-400 drop-shadow-[0_0_15px_rgba(52,211,153,0.3)]">
                 A complete operating layer.
               </span>
@@ -129,12 +129,12 @@ export default async function HomePage() {
               <strong>OurMenu OS is the complete platform to build your online presence, manage operations, and engage clients.</strong><br className="hidden md:block" /><br className="hidden md:block" />
               <span className="mt-2 md:mt-0 block">Ditch expensive custom websites and terrible PDF links. Whether you are processing restaurant orders, booking salon appointments, selling retail inventory, or quoting consulting retainers, our dynamic templates instantly generate a stunning digital storefront.</span>
             </p>
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 md:gap-4">
-              <Link href="/login" className="flex items-center justify-center gap-2 px-8 py-3.5 rounded-full bg-white text-black text-sm font-bold hover:scale-105 transition-all duration-300 shadow-[0_0_30px_rgba(255,255,255,0.2)]">
+            <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto mt-2">
+              <Link href="/login" className="flex items-center justify-center gap-2 w-full sm:w-auto px-8 py-3.5 rounded-full bg-white text-black text-sm font-bold hover:scale-105 transition-all duration-300 shadow-[0_0_30px_rgba(255,255,255,0.2)]">
                 Start Building <ArrowRight className="w-4 h-4" />
               </Link>
-              <ActionForm action={startInteractiveDemo}>
-                <DemoSubmitButton className="flex items-center gap-2 px-8 py-3.5 rounded-full bg-white/5 border border-white/15 text-white text-sm font-semibold hover:bg-white/10 backdrop-blur-md transition-all duration-300">
+              <ActionForm action={startInteractiveDemo} className="w-full sm:w-auto">
+                <DemoSubmitButton className="flex items-center justify-center gap-2 w-full sm:w-auto px-8 py-3.5 rounded-full bg-white/10 border border-white/20 text-white text-sm font-semibold hover:bg-white/20 backdrop-blur-md transition-all duration-300">
                   Experience Demo Mode
                 </DemoSubmitButton>
               </ActionForm>

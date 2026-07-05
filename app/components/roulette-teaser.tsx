@@ -67,7 +67,7 @@ export function RouletteTeaser() {
         particleCount: 100,
         spread: 70,
         origin: { y: 0.6 },
-        colors: ['#a855f7', '#d946ef', '#ffffff']
+        colors: ['#10b981', '#34d399', '#ffffff']
       })
     }
     else if (mode === 'survivor') {
@@ -131,7 +131,7 @@ export function RouletteTeaser() {
         particleCount: 150,
         spread: 120,
         origin: { y: 0.5 },
-        colors: ['#a855f7', '#ec4899', '#eab308', '#3b82f6', '#22c55e']
+        colors: ['#10b981', '#34d399', '#eab308', '#3b82f6', '#22c55e']
       })
     }
   }
@@ -148,13 +148,13 @@ export function RouletteTeaser() {
     <section className="py-24 px-6 max-w-7xl mx-auto relative z-10 border-t border-white/[0.04]">
       <FadeIn className="bg-zinc-900/40 border border-white/10 backdrop-blur-xl rounded-3xl p-8 md:p-16 flex flex-col lg:flex-row items-center gap-12 lg:gap-20 relative overflow-hidden group">
         {/* Glow effect */}
-        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-purple-500/20 blur-[100px] rounded-full pointer-events-none group-hover:bg-purple-500/30 transition-colors duration-700" />
+        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-emerald-500/20 blur-[100px] rounded-full pointer-events-none group-hover:bg-emerald-500/30 transition-colors duration-700" />
         
         <div className="lg:w-1/2 relative z-10">
 
           <h2 className="text-4xl md:text-5xl font-black text-white tracking-tight leading-tight mb-6">
             Who pays the bill? <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-fuchsia-400">Spin the wheel.</span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-green-400">Spin the wheel.</span>
           </h2>
           <p className="text-zinc-400 text-lg leading-relaxed mb-8">
             Transform the awkwardness of group payments into a viral experience. The <strong className="text-white">Payment Roulette</strong> randomizer is built directly into your checkout page. It dramatically increases engagement, drives higher tips, and turns checkout friction into fun.
@@ -240,7 +240,7 @@ export function RouletteTeaser() {
                     value={namesText}
                     onChange={(e) => setNamesText(e.target.value)}
                     placeholder="John, Sarah, Mike, Lisa..."
-                    className="w-full h-24 bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-white resize-none focus:outline-none focus:border-purple-500 text-center text-lg leading-tight"
+                    className="w-full h-24 bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-white resize-none focus:outline-none focus:border-emerald-500 text-center text-lg leading-tight"
                   />
                 )}
 
@@ -260,7 +260,7 @@ export function RouletteTeaser() {
                   whileTap={{ scale: 0.98 }}
                   onClick={handleSpin}
                   disabled={namesList.length < 2 || (mode === 'squad' && squadSize >= namesList.length)}
-                  className="w-full relative overflow-hidden bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white font-black py-4 rounded-xl shadow-[0_0_30px_rgba(168,85,247,0.4)] transition-all disabled:opacity-50 mt-2 group"
+                  className="w-full relative overflow-hidden bg-gradient-to-r from-emerald-600 to-green-600 text-white font-black py-4 rounded-xl shadow-[0_0_30px_rgba(16,185,129,0.4)] transition-all disabled:opacity-50 mt-2 group"
                 >
                   <div className="absolute inset-0 bg-white/20 translate-y-[-100%] group-hover:translate-y-[100%] transition-transform duration-500 ease-in-out" />
                   <span className="relative z-10 flex items-center justify-center gap-2">
@@ -273,13 +273,13 @@ export function RouletteTeaser() {
                 
                 {mode !== 'chaos' || !isFinished ? (
                   <div className="w-full h-32 bg-zinc-900 border-2 border-zinc-800 rounded-2xl flex items-center justify-center p-4 relative overflow-hidden">
-                    {spinning && <div className="absolute inset-0 border-4 border-purple-500 rounded-2xl animate-pulse shadow-[inset_0_0_30px_rgba(168,85,247,0.4)]" />}
+                    {spinning && <div className="absolute inset-0 border-4 border-emerald-500 rounded-2xl animate-pulse shadow-[inset_0_0_30px_rgba(16,185,129,0.4)]" />}
                     <motion.div 
                       key={currentDisplay}
                       initial={{ y: 30, opacity: 0, filter: 'blur(5px)' }}
                       animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
                       transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                      className={`text-3xl md:text-4xl font-black text-center ${(isFinished && mode !== 'survivor') ? 'text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-fuchsia-400 drop-shadow-[0_0_15px_rgba(168,85,247,0.5)]' : 'text-white drop-shadow-lg'}`}
+                      className={`text-3xl md:text-4xl font-black text-center ${(isFinished && mode !== 'survivor') ? 'text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-green-400 drop-shadow-[0_0_15px_rgba(16,185,129,0.5)]' : 'text-white drop-shadow-lg'}`}
                     >
                       {currentDisplay}
                     </motion.div>
@@ -300,11 +300,11 @@ export function RouletteTeaser() {
                 {isFinished && (
                   <div className="w-full space-y-4 animate-in fade-in zoom-in duration-500">
                     {(mode === 'classic' || mode === 'squad') && (
-                      <div className="bg-purple-500/10 border border-purple-500/30 p-4 rounded-xl text-center">
-                        <span className="block text-purple-400 text-xs font-bold uppercase tracking-widest mb-2">The Chosen Ones</span>
+                      <div className="bg-emerald-500/10 border border-emerald-500/30 p-4 rounded-xl text-center">
+                        <span className="block text-emerald-400 text-xs font-bold uppercase tracking-widest mb-2">The Chosen Ones</span>
                         <div className="flex flex-wrap gap-2 justify-center">
                           {winners.map(w => (
-                            <span key={w} className="text-white text-lg font-medium bg-zinc-900 px-3 py-1 rounded-lg border border-purple-500/50">{w}</span>
+                            <span key={w} className="text-white text-lg font-medium bg-zinc-900 px-3 py-1 rounded-lg border border-emerald-500/50">{w}</span>
                           ))}
                         </div>
                       </div>
@@ -319,11 +319,11 @@ export function RouletteTeaser() {
 
                     {mode === 'chaos' && (
                       <div className="space-y-3">
-                        <span className="block text-purple-400 text-xs font-bold uppercase tracking-widest mb-2 text-center">The Chaos Split</span>
+                        <span className="block text-emerald-400 text-xs font-bold uppercase tracking-widest mb-2 text-center">The Chaos Split</span>
                         {chaosResults.map((r, i) => (
                           <div key={i} className="flex items-center justify-between bg-zinc-900 p-3 rounded-lg border border-zinc-800">
                             <span className="text-white font-medium">{r.name}</span>
-                            <span className="text-purple-400 font-bold">{r.percentage}%</span>
+                            <span className="text-emerald-400 font-bold">{r.percentage}%</span>
                           </div>
                         ))}
                       </div>
