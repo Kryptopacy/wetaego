@@ -78,6 +78,9 @@ const withPWA = withPWAInit({
 });
 
 const nextConfig: NextConfig = {
+  experimental: {
+    reactCompiler: true,
+  },
   allowedDevOrigins: ['127.0.0.1'],
   images: {
     remotePatterns: [
