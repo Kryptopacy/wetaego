@@ -76,11 +76,11 @@ export async function Pricing() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
           {plans.map((plan, i) => (
             <FadeIn key={plan.name} delay={i * 0.1} className={`relative rounded-3xl p-10 flex flex-col gap-8 transition-all duration-500 ${plan.highlighted
-                ? 'bg-gradient-to-b from-violet-900/30 to-[#0a0a0f] border border-violet-500/40 shadow-2xl shadow-violet-900/20 md:-translate-y-4'
+                ? 'bg-gradient-to-b from-emerald-900/30 to-[#0a0a0f] border border-emerald-500/40 shadow-2xl shadow-emerald-900/20 md:-translate-y-4'
                 : 'bg-white/[0.02] border border-white/[0.05] hover:border-white/10'
               }`}>
               {plan.highlighted && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-5 py-1.5 rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-xs font-bold shadow-lg shadow-violet-900/50">Most Popular</div>
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-5 py-1.5 rounded-full bg-gradient-to-r from-emerald-600 to-green-600 text-white text-xs font-bold shadow-lg shadow-emerald-900/50">Most Popular</div>
               )}
               <div>
                 <p className="text-sm font-bold text-zinc-400 uppercase tracking-wider mb-4">{plan.name}</p>
@@ -118,13 +118,13 @@ export async function Pricing() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {creditPacks.map((pack, i) => (
               <FadeIn key={pack.amount} delay={i * 0.1} className={`relative rounded-3xl p-8 flex flex-col items-center text-center transition-all duration-300 ${pack.popular
-                  ? 'bg-gradient-to-b from-violet-900/20 to-zinc-900/50 border border-violet-500/30 shadow-lg shadow-violet-900/10'
+                  ? 'bg-gradient-to-b from-emerald-900/20 to-zinc-900/50 border border-emerald-500/30 shadow-lg shadow-emerald-900/10'
                   : 'bg-white/[0.02] border border-white/[0.05] hover:border-white/10'
                 }`}>
                 {pack.popular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-violet-600 text-white text-[10px] font-bold uppercase tracking-wider">Most Popular</div>
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-emerald-600 text-white text-[10px] font-bold uppercase tracking-wider">Most Popular</div>
                 )}
-                <Zap className={`w-8 h-8 mb-6 ${pack.popular ? 'text-violet-400' : 'text-zinc-500'}`} aria-hidden="true" />
+                <Zap className={`w-8 h-8 mb-6 ${pack.popular ? 'text-emerald-400' : 'text-zinc-500'}`} aria-hidden="true" />
                 <h4 className="text-2xl font-bold text-white mb-2">{pack.amount} Credits</h4>
                 <div className="text-3xl font-black text-white mb-8">{formatCurrency(pack.price * 100)}</div>
                 <a href="/dashboard/billing" className={`w-full py-3 rounded-xl text-sm font-bold transition-all duration-300 ${pack.popular

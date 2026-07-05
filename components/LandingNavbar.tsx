@@ -82,7 +82,7 @@ export function LandingNavbar() {
           <button
             onClick={() => setIsRouletteOpen(true)}
             aria-label="Who's paying? Free randomizer for who pays the restaurant bill"
-            className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full border border-purple-500/30 text-purple-400 text-sm font-semibold hover:bg-purple-500/10 transition-colors"
+            className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full border border-emerald-500/30 text-emerald-400 text-sm font-semibold hover:bg-emerald-500/10 transition-colors"
           >
             Who's paying? 🎲
           </button>
@@ -203,7 +203,7 @@ export function LandingNavbar() {
                     setIsOpen(false);
                     setIsRouletteOpen(true);
                   }}
-                  className="w-full mt-4 flex items-center justify-between px-6 py-4 rounded-2xl bg-purple-500/10 border border-purple-500/30 text-purple-400 hover:bg-purple-500/20 transition-all shadow-xl"
+                  className="w-full mt-4 flex items-center justify-between px-6 py-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 transition-all shadow-xl"
                 >
                   <span className="font-medium text-lg">Who's paying? 🎲</span>
                 </button>
