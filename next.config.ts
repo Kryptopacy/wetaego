@@ -79,6 +79,7 @@ const withPWA = withPWAInit({
 
 const nextConfig: NextConfig = {
   experimental: {
+    // @ts-ignore - Next.js types may not be fully up to date with canary compiler flags
     reactCompiler: true,
   },
   allowedDevOrigins: ['127.0.0.1'],
