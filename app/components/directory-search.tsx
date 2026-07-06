@@ -3,6 +3,7 @@
 import React, { useState } from 'react'
 import { searchDirectory } from '../actions'
 import { Search, Loader2 } from 'lucide-react'
+import { GemstoneSpinner } from '@/components/ui/gemstone-spinner'
 import { toast } from 'sonner'
 
 export function DirectorySearch() {
@@ -39,7 +40,7 @@ export function DirectorySearch() {
         disabled={isSearching}
         className="absolute inset-y-1.5 right-1.5 px-3 bg-white text-black text-xs font-bold rounded-full hover:bg-zinc-200 transition-colors flex items-center justify-center disabled:opacity-50"
       >
-        {isSearching ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Go'}
+        {isSearching ? <GemstoneSpinner size="xs" /> : 'Go'}
       </button>
     </form>
   )

@@ -113,7 +113,7 @@ export function CatalogPageRenderer({ location, page, items, locationSlug, payme
   const uncategorized = hasCategories ? items.filter(i => !i.item_data?.category) : []
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white font-sans">
+    <div className="min-h-screen bg-zinc-950 text-white font-sans" style={{ backgroundColor: (page as any).background_color || undefined }}>
       {/* Hero */}
       <div className="relative w-full min-h-[32vh] md:max-h-[340px] flex flex-col justify-end overflow-hidden">
         {location.cover_image_url ? (

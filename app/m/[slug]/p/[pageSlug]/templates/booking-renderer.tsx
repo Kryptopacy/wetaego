@@ -131,7 +131,7 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white font-sans">
+    <div className="min-h-screen bg-zinc-950 text-white font-sans" style={{ backgroundColor: (page as any).background_color || undefined }}>
       {/* Hero */}
       <div className="relative w-full h-[40vh] min-h-[260px] max-h-[380px] overflow-hidden">
         {location.cover_image_url ? (
@@ -437,7 +437,7 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
               initial={{ opacity: 0, scale: 0.9 }} 
               animate={{ opacity: 1, scale: 1 }}
               transition={{ type: 'spring', damping: 20 }}
-              className="mb-8 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-8 text-center backdrop-blur-md"
+              className="mb-8 rounded-2xl border border-theme/30 bg-theme/10 p-8 text-center backdrop-blur-md"
             >
               <motion.div 
                 initial={{ scale: 0 }} 

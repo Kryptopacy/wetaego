@@ -233,6 +233,59 @@ export const saveLocationAiSettings = authActionClient
     return { success: true }
   })
 
+export const saveLocationTheme = authActionClient
+  .schema(zfd.formData({
+    locationId: zfd.text(z.string().uuid()),
+    themeColor: zfd.text(z.string().regex(/^#[0-9a-fA-F]{6}$/, "Must be a valid hex color")),
+  }))
+  .action(async ({ parsedInput, ctx: { supabase, user } }) => {
+    const { cookies } = await import('next/headers')
+    if ((await cookies()).get('demo_mode')?.value === '1') {
+      revalidatePath('/dashboard/settings')
+      return { success: true }
+    }
+
+    const { locationId, themeColor } = parsedInput
+
+    const { data: loc, error: locError } = await supabase
+      .from('locations')
+      .select('organization_id')
+      .eq('id', locationId)
+      .single()
+
+    if (locError || !loc) throw new Error('Location not found')
+
+    const { data: member } = await supabase
+      .from('organization_members')
+      .select('role')
+      .eq('organization_id', loc.organization_id)
+      .eq('user_id', user.id)
+      .single()
+
+    let isAuthorized = member?.role === 'owner' || member?.role === 'manager'
+    if (!member) {
+      const { data: org } = await supabase
+        .from('organizations')
+        .select('id')
+        .eq('id', loc.organization_id)
+        .eq('created_by', user.id)
+        .single()
+      isAuthorized = !!org
+    }
+
+    if (!isAuthorized) throw new Error('Unauthorized')
+
+    const { error: updateError } = await supabase
+      .from('locations')
+      .update({ theme_color: themeColor })
+      .eq('id', locationId)
+
+    if (updateError) throw new Error('Failed to update theme color')
+
+    revalidatePath('/dashboard/settings')
+    return { success: true }
+  })
+
 export const saveLocationInfoSettings = authActionClient
   .schema(zfd.formData({
     locationId: zfd.text(z.string().uuid()),

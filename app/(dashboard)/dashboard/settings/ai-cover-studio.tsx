@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { toast } from 'sonner'
 import { Loader2, Wand2, ImageIcon } from 'lucide-react'
 import Image from 'next/image'
+import { GemstoneSpinner } from '@/components/ui/gemstone-spinner'
 
 export function AICoverStudio({ 
   locationId, 
@@ -107,7 +108,7 @@ export function AICoverStudio({
           >
             {isGenerating ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <GemstoneSpinner size="xs" />
                 Generating...
               </>
             ) : (

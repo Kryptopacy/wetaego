@@ -164,12 +164,15 @@ export const updatePage = authActionClient
     x_handle: zfd.text(z.string().optional()),
     tiktok_handle: zfd.text(z.string().optional()),
     fulfillment_options: zfd.text(z.string().optional()),
+    theme_color: zfd.text(z.string().max(7).optional()),
+    background_color: zfd.text(z.string().max(7).optional()),
   }))
   .action(async ({ parsedInput, ctx: { supabase } }) => {
     const {
       pageId, title, content, billing_enabled, billing_mode, payment_mode, deposit_percentage,
       randomizer_enabled, hide_delivery, payment_channels, payment_options, refund_policy, milestones_enabled,
-      whatsapp_number, phone_number, instagram_handle, x_handle, tiktok_handle, fulfillment_options
+      whatsapp_number, phone_number, instagram_handle, x_handle, tiktok_handle, fulfillment_options,
+      theme_color, background_color
     } = parsedInput
 
     if (pageId.startsWith('page-')) {
@@ -201,7 +204,12 @@ export const updatePage = authActionClient
 
     const { error } = await supabase
       .from('location_pages')
-      .update({ title, content, billing_enabled, billing_mode, payment_mode, deposit_percentage: deposit_percentage || null, randomizer_enabled, template_data })
+      .update({ 
+        title, content, billing_enabled, billing_mode, payment_mode, 
+        deposit_percentage: deposit_percentage || null, randomizer_enabled, template_data,
+        theme_color: theme_color || null,
+        background_color: background_color || null
+      })
       .eq('id', pageId)
 
     if (error) throw new Error((error as Error).message)

@@ -136,7 +136,7 @@ export function QuoteRenderer({ location, page, items, locationSlug }: QuoteRend
 
   if (formSuccess) {
     return (
-      <div className="min-h-screen bg-zinc-950 text-white flex flex-col items-center justify-center p-6 text-center">
+      <div className="min-h-screen bg-zinc-950 text-white flex flex-col items-center justify-center p-6 text-center" style={{ backgroundColor: (page as any).background_color || undefined }}>
         <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="max-w-md w-full">
           <div className="w-20 h-20 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(16,185,129,0.2)]">
             <Check className="w-10 h-10" />
@@ -160,7 +160,7 @@ export function QuoteRenderer({ location, page, items, locationSlug }: QuoteRend
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white font-sans pb-32">
+    <div className="min-h-screen bg-zinc-950 text-white font-sans pb-32" style={{ backgroundColor: (page as any).background_color || undefined }}>
       {/* Hero */}
       <div className="relative w-full h-[35vh] min-h-[260px] max-h-[380px] overflow-hidden">
         {location.cover_image_url ? (

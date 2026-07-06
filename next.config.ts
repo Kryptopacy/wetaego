@@ -17,6 +17,8 @@ if (!process.env.SENTRY_AUTH_TOKEN) {
 const withPWA = withPWAInit({
   dest: "public",
   disable: process.env.NODE_ENV === "development",
+  cacheStartUrl: false,
+  dynamicStartUrl: false,
   workboxOptions: {
     runtimeCaching: [
       {
@@ -78,10 +80,6 @@ const withPWA = withPWAInit({
 });
 
 const nextConfig: NextConfig = {
-  experimental: {
-    // @ts-ignore - Next.js types may not be fully up to date with canary compiler flags
-    reactCompiler: true,
-  },
   allowedDevOrigins: ['127.0.0.1'],
   images: {
     remotePatterns: [

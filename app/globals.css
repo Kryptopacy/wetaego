@@ -8,6 +8,7 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --color-theme: var(--theme-color, #10b981);
 }
 
 body {

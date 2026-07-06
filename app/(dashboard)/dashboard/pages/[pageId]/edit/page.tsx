@@ -6,6 +6,7 @@ import { PageBuilderForm } from '@/app/components/page-builder-form'
 import { updatePage } from '../../actions'
 import { ActionForm } from '@/components/ActionForm'
 import { BillingOptionsSelector } from './billing-options-selector'
+import { PageThemePickers } from './page-theme-pickers'
 
 export default async function PageEditDashboard({
   params
@@ -159,6 +160,10 @@ export default async function PageEditDashboard({
               <input type="checkbox" name="milestones_enabled" value="true" defaultChecked={page.template_data?.milestones_enabled || false} className="sr-only peer" />
               <div className="w-11 h-6 bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
             </label>
+          </div>
+
+          <div className="pt-4 border-t border-white/5">
+            <PageThemePickers initialThemeColor={page.theme_color} initialBgColor={page.background_color} />
           </div>
 
           <div className="pt-4">

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Clock, Play, Square, Loader2 } from 'lucide-react'
+import { GemstoneSpinner } from '@/components/ui/gemstone-spinner'
 import { clockIn, clockOut } from './dashboard/shifts/actions'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
@@ -104,7 +105,7 @@ export function TimeclockWidget({ locationId }: { locationId: string }) {
         }`}
       >
         {loading ? (
-          <Loader2 className="w-3 h-3 animate-spin" />
+          <GemstoneSpinner size="xs" className="w-3 h-3" />
         ) : activeShiftId ? (
           <>
             <Square className="w-3 h-3 fill-current" />

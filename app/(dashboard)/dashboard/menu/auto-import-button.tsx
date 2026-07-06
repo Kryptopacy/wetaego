@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FileUp, Loader2, Check, X, ShieldAlert } from 'lucide-react'
+import { GemstoneSpinner } from '@/components/ui/gemstone-spinner'
 import { bulkInsertMenu } from './actions'
 
 interface AutoImportButtonProps {
@@ -83,7 +84,7 @@ export function AutoImportButton({ orgId, menuId }: AutoImportButtonProps) {
           disabled={loading}
           className="flex items-center gap-2 px-4 py-2 bg-blue-600/10 text-blue-500 hover:bg-blue-600/20 rounded-lg text-sm font-medium transition disabled:opacity-50"
         >
-          {loading && !showPreview ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileUp className="w-4 h-4" />}
+          {loading && !showPreview ? <GemstoneSpinner size="xs" /> : <FileUp className="w-4 h-4" />}
           Auto-Import Menu (OCR)
         </button>
       </div>

@@ -100,7 +100,7 @@ export function PortfolioRenderer({ location, page, items, locationSlug }: Portf
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 font-sans text-zinc-900 dark:text-zinc-100 selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black">
+    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 font-sans text-zinc-900 dark:text-zinc-100 selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black" style={{ backgroundColor: (page as any).background_color || undefined }}>
       
       <div className="w-full max-w-5xl mx-auto px-6 md:px-12 pt-8">
         <BackButton href={`/m/${locationSlug}`} className="inline-flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300 transition-colors">

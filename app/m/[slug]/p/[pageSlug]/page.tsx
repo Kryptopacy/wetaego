@@ -140,7 +140,7 @@ export default async function PublicPageView({
     const anonSupabase = createAnonClient()
     let query = anonSupabase
       .from('location_pages')
-      .select('id, title, slug, content, template_type, billing_enabled, billing_mode, payment_mode, deposit_percentage, business_type_preset, randomizer_enabled, template_data, is_published')
+      .select('id, title, slug, content, template_type, billing_enabled, billing_mode, payment_mode, deposit_percentage, business_type_preset, randomizer_enabled, template_data, is_published, theme_color, background_color')
       .eq('location_id', loc.id)
       .eq('slug', pageSlug)
 
@@ -221,9 +221,11 @@ export default async function PublicPageView({
     getGlobalManualPayment()
   ])
 
+  const pageThemeColor = (page as any).theme_color || loc.theme_color || '#10b981'
+
   const sharedProps = {
      
-    location: { ...loc, cover_image_url: loc.cover_image_url ?? undefined, currency: loc.currency_code } as never,
+    location: { ...loc, cover_image_url: loc.cover_image_url ?? undefined, currency: loc.currency_code, theme_color: pageThemeColor } as never,
      
     page: page as never,
      

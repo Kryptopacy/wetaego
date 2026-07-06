@@ -15,11 +15,13 @@ export async function RestaurantRenderer({
   slug,
   tableIdentifier,
   paymentIsLive,
+  page,
 }: {
   location: Location
   slug: string
   tableIdentifier?: string
   paymentIsLive: boolean
+  page: any
 }) {
   const fetchMenuCategories = async () => {
     const anonSupabase = createAnonClient()
@@ -61,7 +63,7 @@ export async function RestaurantRenderer({
   )
 
   return (
-    <main className="min-h-screen bg-[#f5f7f5] dark:bg-zinc-950 font-sans text-[#17201b] dark:text-zinc-100 pb-32 transition-colors">
+    <main className="min-h-screen bg-[#f5f7f5] dark:bg-zinc-950 font-sans text-[#17201b] dark:text-zinc-100 pb-32 transition-colors" style={{ backgroundColor: (page as any).background_color || undefined }}>
       <VenueHeader 
         location={location} 
         slug={slug} 

@@ -170,18 +170,18 @@ export default async function DashboardOverviewPage() {
       icon: Sparkles,
       label: 'AI Copywriter & Image Studio',
       desc: 'Auto-generate engaging descriptions and professional images for your items and services.',
-      color: 'from-emerald-600/20 to-teal-600/10',
-      border: 'border-emerald-500/20',
-      iconColor: 'text-emerald-400',
+      color: 'from-violet-600/20 to-fuchsia-600/10',
+      border: 'border-violet-500/20',
+      iconColor: 'text-violet-400',
     },
     {
       href: '/dashboard/forecast',
       icon: BarChart3,
       label: 'Demand Forecast',
       desc: 'Predict which items to stock up on in the next 7 days.',
-      color: 'from-emerald-600/20 to-teal-600/10',
-      border: 'border-emerald-500/20',
-      iconColor: 'text-emerald-400',
+      color: 'from-violet-600/20 to-fuchsia-600/10',
+      border: 'border-violet-500/20',
+      iconColor: 'text-violet-400',
     },
     {
       href: '/dashboard/orders',
@@ -227,7 +227,7 @@ export default async function DashboardOverviewPage() {
         {orgId && (
           <Link
             href="/dashboard/menu"
-            className="hidden md:flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-sm font-bold hover:from-emerald-500 hover:to-teal-500 transition-all shadow-lg shadow-emerald-900/30"
+            className="hidden md:flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white text-sm font-bold hover:from-violet-500 hover:to-fuchsia-500 transition-all shadow-lg shadow-violet-900/30"
           >
             <Sparkles className="w-4 h-4" />
             Open AI Studio
@@ -259,9 +259,9 @@ export default async function DashboardOverviewPage() {
         <div className="flex flex-wrap gap-3">
           <Link
             href="/dashboard/orders"
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-sm font-bold hover:from-emerald-500 hover:to-teal-500 transition-all shadow-md shadow-emerald-900/30"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white text-sm font-bold hover:from-violet-500 hover:to-fuchsia-500 transition-all shadow-md shadow-violet-900/30"
           >
-            <ClipboardList className="w-4 h-4" />
+            <Sparkles className="w-4 h-4" />
             {templateType === 'catalog' ? 'Live Fulfillment' : templateType === 'booking' ? 'Live Bookings' : templateType === 'listing' ? 'Live Inquiries' : 'Live Requests'}
           </Link>
           <Link
@@ -313,11 +313,11 @@ export default async function DashboardOverviewPage() {
       {/* === AI MODULES GRID === */}
       <div>
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-emerald-600 to-teal-600 flex items-center justify-center">
-            <Zap className="w-3.5 h-3.5 text-white" />
+          <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-violet-600 to-fuchsia-600 flex items-center justify-center">
+            <Sparkles className="w-3.5 h-3.5 text-white" />
           </div>
           <h2 className="text-base font-bold text-white">AI Engine Modules</h2>
-          <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">4 ACTIVE</span>
+          <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-violet-500/20 text-violet-400 border border-violet-500/30">4 ACTIVE</span>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {aiModules.map(({ href, icon: Icon, label, desc, color, border, iconColor }) => (

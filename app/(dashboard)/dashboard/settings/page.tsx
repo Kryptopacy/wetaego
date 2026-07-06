@@ -15,6 +15,7 @@ import { savePaymentSettings, saveManualPaymentSettings } from './payment-action
 import { TaxesView } from './taxes-view'
 import AiFaqBuilder from './ai-faq-builder'
 import { BusinessTypePicker } from './business-type-picker'
+import { ThemeColorPicker } from './theme-color-picker'
 
 
 
@@ -503,6 +504,7 @@ export default async function SettingsPage({
         )}
 
         {tab === 'venue' && location && (
+          <>
           <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
             <h2 className="text-lg font-semibold text-white mb-2 flex items-center gap-2">
               Venue Information
@@ -739,6 +741,11 @@ export default async function SettingsPage({
               </div>
             </ActionForm>
           </div>
+          
+          <div className="mt-8">
+            <ThemeColorPicker locationId={location.id} initialColor={location.theme_color || '#10b981'} />
+          </div>
+          </>
         )}
 
         {tab === 'promotions' && location && (

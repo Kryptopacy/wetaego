@@ -100,7 +100,7 @@ export default async function HomePage() {
               sizes="100vw"
               className="object-cover object-center opacity-75 md:opacity-50 brightness-100 md:brightness-75"
               priority
-              quality={85}
+              quality={100}
             />
           </div>
           {/* Multi-layer gradient overlay for text legibility on left, reveal on right */}

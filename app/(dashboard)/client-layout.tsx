@@ -72,7 +72,7 @@ function NavLink({ href, label, icon: iconProp, badge, exact, onClick }: {
       {isActive && (
         <motion.div
           layoutId="activeNavBg"
-          className="absolute inset-0 bg-gradient-to-r from-emerald-600/20 to-teal-600/10 border border-emerald-500/30 rounded-xl shadow-lg shadow-emerald-900/20"
+          className="absolute inset-0 bg-zinc-800/50 border border-zinc-700/50 rounded-xl"
           initial={false}
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
         />
@@ -80,7 +80,7 @@ function NavLink({ href, label, icon: iconProp, badge, exact, onClick }: {
       {isActive && (
         <motion.span 
           layoutId="activeNavIndicator"
-          className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-gradient-to-b from-emerald-400 to-teal-400 rounded-full z-10" 
+          className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-emerald-500 rounded-full z-10" 
           initial={false}
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
         />

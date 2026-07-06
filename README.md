@@ -23,6 +23,53 @@ Build the live, intelligent, and deeply integrated operating layer for what cust
 
 OurMenu OS is engineered for massive scale, zero downtime, and bank-grade security. It passes the strictest enterprise audits out-of-the-box:
 
+```mermaid
+graph TD
+    %% Client Tier
+    subgraph Client [Client / Frontend]
+        PWA[PWA / Mobile Browser]
+        SW[Service Workers<br>Offline & Web Push]
+    end
+
+    %% Edge / Application Tier
+    subgraph AppServer [Next.js Application Layer]
+        RSC[React Server Components<br>SSR & Routing]
+        SA[Server Actions<br>Zod Validated Mutations]
+        API[API Routes<br>AI, Webhooks, Jobs]
+    end
+
+    %% Database & Auth Tier
+    subgraph Supabase [Supabase Infrastructure]
+        Auth[Supabase Auth<br>JWT & RBAC]
+        DB[(PostgreSQL Database<br>RLS & Realtime)]
+        Storage[S3 Storage<br>Secure Uploads]
+    end
+
+    %% Third-Party Services
+    subgraph External [External Services & Integrations]
+        Paystack[Paystack<br>Payment Gateway]
+        Gemini[Google Gemini<br>AI SDK]
+        Termii[Termii<br>SMS/WhatsApp]
+        Upstash[(Upstash Redis<br>Cache & Rate Limit)]
+        Resend[Resend<br>Email Dispatch]
+    end
+
+    %% Connections
+    PWA <-->|HTTP/WS| AppServer
+    PWA --> SW
+    
+    RSC -->|Fetch| DB
+    SA -->|RPC / Mutate| DB
+    SA -->|Validate| Auth
+    
+    API -->|Prompt / Stream| Gemini
+    API -->|Dispatch| Resend
+    API -->|Dispatch| Termii
+    API <-->|Webhook / Verify| Paystack
+    
+    AppServer <-->|Cache / Limit| Upstash
+```
+
 - **Impenetrable API Boundaries (Zod):** Every single Server Action and API route is rigorously validated via strict `zod` schema typing. It is mathematically impossible for malformed payloads to reach the database layer.
 - **Absolute IDOR Protection:** Deep relational authorization matrices ensure that hardware provisioning (QR mapping), location configurations, and page builder tools are cryptographically isolated. A malicious actor cannot modify or access data belonging to another tenant or location.
 - **Flawless React SSR Hydration:** Utilizing advanced Zustand `skipHydration: true` middleware synchronized perfectly with React lifecycle hooks, the platform guarantees zero UI flashing, layout shifts, or Server-Side Rendering (SSR) mismatches between the Edge server and the client browser.
@@ -44,7 +91,7 @@ OurMenu OS is fundamentally decoupled from the concept of a "restaurant." It is 
 4. **Consultants & Agencies (Rate Card & Quote Templates):** Freelancers, marketing agencies, and consultants deploying polished, interactive digital rate cards for standardized B2B pricing, alongside dynamic Quote Generator templates.
 5. **Real Estate & Automotive (Listings Template):** Property rentals, car dealerships, and equipment rentals requiring image-heavy, location-based galleries.
 6. **Portal Mode:** A dynamic macro-landing page that seamlessly routes customers to multiple specialized sub-pages (e.g., A massive Hotel routing guests to a Restaurant menu, a Spa booking page, and a Room Service catalog from a single QR scan).
-7. **Custom Layout Builder:** An advanced, block-based page builder allowing organizations to create completely bespoke digital environments by stacking generic text, video, image, header, and action-button blocks dynamically.
+7. **Custom Layout Builder & Per-Page Theming:** An advanced, block-based page builder allowing organizations to create completely bespoke digital environments. Features granular per-page aesthetic overrides, allowing unique background and accent colors that gracefully fall back to the brand default.
 
 ---
 

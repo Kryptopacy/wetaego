@@ -80,7 +80,7 @@ export function CartFAB(props: CartFABProps) {
               onClick={() => setShowCheckoutModal(true)}
               className="pointer-events-auto group relative w-full max-w-sm overflow-hidden bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-bold h-16 rounded-[2rem] shadow-2xl flex items-center justify-between px-2 transition-all active:scale-95"
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="absolute inset-0 bg-theme/20 opacity-0 group-hover:opacity-100 transition-opacity" />
               
               <div className="relative flex items-center gap-3 pl-4">
                 <div className="bg-zinc-800 dark:bg-zinc-100 w-10 h-10 rounded-full flex items-center justify-center relative">
@@ -88,7 +88,7 @@ export function CartFAB(props: CartFABProps) {
                   <motion.div 
                     key={totalItems}
                     initial={{ scale: 0 }} animate={{ scale: 1 }}
-                    className="absolute -top-1 -right-1 bg-emerald-500 text-white w-5 h-5 text-[11px] font-black rounded-full flex items-center justify-center border-2 border-zinc-900 dark:border-white"
+                    className="absolute -top-1 -right-1 bg-theme text-white w-5 h-5 text-[11px] font-black rounded-full flex items-center justify-center border-2 border-zinc-900 dark:border-white"
                   >
                     {totalItems}
                   </motion.div>

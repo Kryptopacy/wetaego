@@ -69,7 +69,7 @@ export default async function BusinessTypeSetupPage({
             <>
               <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-4">
                 What kind of business<br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-br from-emerald-300 via-white to-zinc-400">
+                <span className="text-transparent bg-clip-text bg-gradient-to-br from-white to-zinc-500">
                   are you running?
                 </span>
               </h1>
@@ -114,7 +114,7 @@ export default async function BusinessTypeSetupPage({
                       <input type="hidden" name="mode" value={mode} />
                       <button
                         type="submit"
-                        className="group w-full text-left rounded-2xl border border-white/[0.07] bg-zinc-900/50 p-5 hover:border-emerald-500/40 hover:bg-zinc-900 transition-all duration-200 hover:shadow-lg hover:shadow-emerald-900/10 active:scale-[0.98] cursor-pointer"
+                        className="group w-full text-left rounded-2xl border border-white/[0.07] bg-zinc-900/50 p-5 hover:border-zinc-500/40 hover:bg-zinc-900 transition-all duration-200 hover:shadow-lg hover:shadow-white/5 active:scale-[0.98] cursor-pointer"
                       >
                         <div className="flex items-start justify-between mb-3">
                           <span className="text-2xl">{preset.icon}</span>
@@ -123,7 +123,7 @@ export default async function BusinessTypeSetupPage({
                             {templateLabel(preset.template_type)}
                           </span>
                         </div>
-                        <h3 className="font-bold text-white text-sm mb-1 group-hover:text-emerald-200 transition-colors">
+                        <h3 className="font-bold text-zinc-300 text-sm mb-1 group-hover:text-white transition-colors">
                           {preset.label}
                         </h3>
                         <p className="text-xs text-zinc-500 leading-relaxed">

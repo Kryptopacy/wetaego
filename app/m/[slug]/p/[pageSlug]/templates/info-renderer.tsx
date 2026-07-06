@@ -80,11 +80,11 @@ export function InfoRenderer({ location, page, locationSlug }: InfoRendererProps
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white font-sans">
+    <div className="min-h-screen bg-zinc-950 text-white font-sans" style={{ backgroundColor: (page as any).background_color || undefined }}>
       {/* Hero */}
       <div className="relative w-full h-[30vh] min-h-[200px] max-h-[300px] overflow-hidden">
         {location.cover_image_url ? (
-          <Image src={location.cover_image_url} alt="Cover" fill className="object-cover object-center priority" priority sizes="100vw" />
+          <Image src={location.cover_image_url} alt="Cover" fill className="object-cover object-center priority" priority quality={90} sizes="100vw" />
         ) : (
           <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${themeColor}30 0%, #0a0a0f 100%)` }} />
         )}
