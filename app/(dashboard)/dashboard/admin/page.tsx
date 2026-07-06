@@ -1,5 +1,5 @@
 
-import { getPricingSettings, getCreditCosts, getPlanLimits, getAiModels, getPlatformFees, getTrialSettings, getGlobalManualPayment } from '@/lib/utils/settings'
+import { getPricingSettings, getCreditCosts, getPlanLimits, getAiModels, getPlatformFees, getTrialSettings, getGlobalManualPayment, getKycSettings } from '@/lib/utils/settings'
 import { updateSetting } from './actions'
 import { ActionForm } from '@/components/ActionForm'
 
@@ -9,6 +9,7 @@ import { TenantDirectory } from './tenant-directory'
 import { CouponsManager } from './coupons-manager'
 import { isAdminEmail } from '@/lib/utils/admin'
 import { AdminTabs } from './admin-tabs'
+import { AffiliatesRegistry } from './affiliates-registry'
 
 export default async function AdminPage() {
   const pricing = await getPricingSettings()
@@ -18,6 +19,7 @@ export default async function AdminPage() {
   const platformFees = await getPlatformFees()
   const trialSettings = await getTrialSettings()
   const globalPayment = await getGlobalManualPayment()
+  const kycSettings = await getKycSettings() as { require_kyc_to_publish?: boolean }
 
   const supabase = await createClient()
   const { data: userData } = await supabase.auth.getUser()
@@ -35,6 +37,17 @@ export default async function AdminPage() {
   const { data: coupons } = await supabase
     .from('coupons')
     .select('*')
+    .order('created_at', { ascending: false })
+
+  const { data: affiliates } = await supabase
+    .from('affiliates')
+    .select(`
+      id,
+      referral_code,
+      status,
+      created_at,
+      paystack_subaccount_code
+    `)
     .order('created_at', { ascending: false })
 
   return (
@@ -68,7 +81,7 @@ export default async function AdminPage() {
       </div>
 
       {/* Grouped Tab Layout */}
-      <AdminTabs tabs={['Tenants & Coupons', 'Pricing & Fees', 'AI & Limits', 'Danger Zone']}>
+      <AdminTabs tabs={['Tenants & Coupons', 'Pricing & Fees', 'AI & Limits', 'Danger Zone', 'Affiliates']}>
         {/* Tab 0: Tenants & Coupons */}
         <div className="space-y-8 min-w-0">
           <section className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-xl w-full">
@@ -231,6 +244,27 @@ export default async function AdminPage() {
           <section className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 border-t-4 border-t-red-500 shadow-xl overflow-hidden w-full">
             <h2 className="text-lg font-bold text-white mb-2">Danger Zone</h2>
             <p className="text-zinc-400 text-sm mb-4">Global platform overrides.</p>
+            <ActionForm action={updateSetting} className="space-y-4 mb-8">
+              <input type="hidden" name="key" value="require_kyc_to_publish" />
+              <input type="hidden" name="is_json" value="true" />
+              
+              <div className="flex items-start gap-3 bg-zinc-800/50 p-4 rounded-xl border border-zinc-700/50 w-full">
+                <input 
+                  type="checkbox" 
+                  id="require_kyc_to_publish"
+                  name="require_kyc_to_publish" 
+                  value="true"
+                  defaultChecked={kycSettings?.require_kyc_to_publish === true} 
+                  className="mt-1 w-4 h-4 rounded bg-zinc-800 border-zinc-700 text-blue-500 focus:ring-blue-500 shrink-0" 
+                />
+                <label htmlFor="require_kyc_to_publish" className="text-sm font-medium text-white leading-tight cursor-pointer">
+                  Require KYC to Publish
+                  <span className="block text-xs text-zinc-400 font-normal mt-1">If enabled, businesses cannot publish their portals until their KYC is manually approved by you.</span>
+                </label>
+              </div>
+              <button type="submit" className="w-full px-4 py-2 bg-blue-600/20 text-blue-400 border border-blue-500/50 rounded-lg text-sm font-medium hover:bg-blue-600 hover:text-white transition">Save Compliance Settings</button>
+            </ActionForm>
+
             <ActionForm action={updateSetting} className="space-y-4">
               <input type="hidden" name="key" value="global_payment" />
               <input type="hidden" name="is_json" value="true" />
@@ -251,6 +285,11 @@ export default async function AdminPage() {
               <button type="submit" className="w-full px-4 py-2 bg-red-600/20 text-red-500 border border-red-500/50 rounded-lg text-sm font-medium hover:bg-red-500 hover:text-white transition">Apply Global Override</button>
             </ActionForm>
           </section>
+        </div>
+
+        {/* Tab 4: Affiliates */}
+        <div className="space-y-8 min-w-0">
+          <AffiliatesRegistry affiliates={affiliates || []} />
         </div>
       </AdminTabs>
     </div>

@@ -21,7 +21,7 @@ export async function GET(req: Request) {
 
     let query = supabase
       .from('organizations')
-      .select('id, name, subscription_plan, subscription_status, purchased_credits, created_at, slug', { count: 'exact' })
+      .select('id, name, subscription_plan, subscription_status, purchased_credits, created_at, slug, status', { count: 'exact' })
       
     if (search) {
       query = query.or(`name.ilike.%${search}%,slug.ilike.%${search}%`)

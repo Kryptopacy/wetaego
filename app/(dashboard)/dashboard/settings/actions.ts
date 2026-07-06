@@ -149,7 +149,7 @@ export const updateOrganization = authActionClient
 
 export const saveLocationAiSettings = authActionClient
   .schema(zfd.formData({
-    locationId: zfd.text(z.string().uuid()),
+    pageId: zfd.text(z.string().uuid()),
     aiEnabled: zfd.checkbox(),
     aiName: zfd.text(z.string().min(1, "AI Name is required").max(30, "Name must be 30 characters or less")),
     aiBasePersonality: zfd.text(z.string().optional()),
@@ -166,7 +166,7 @@ export const saveLocationAiSettings = authActionClient
     }
 
     const {
-      locationId,
+      pageId,
       aiEnabled,
       aiName,
       aiBasePersonality,
@@ -183,11 +183,19 @@ export const saveLocationAiSettings = authActionClient
       // Ignore parse error
     }
 
-    // Fetch the location to find its organization
+    // Fetch the page to find its location and then organization
+    const { data: page, error: pageError } = await supabase
+      .from('location_pages')
+      .select('location_id')
+      .eq('id', pageId)
+      .single()
+
+    if (pageError || !page) throw new Error('Page not found')
+
     const { data: loc, error: locError } = await supabase
       .from('locations')
       .select('organization_id')
-      .eq('id', locationId)
+      .eq('id', page.location_id)
       .single()
 
     if (locError || !loc) throw new Error('Location not found')
@@ -213,9 +221,9 @@ export const saveLocationAiSettings = authActionClient
 
     if (!isAuthorized) throw new Error('Unauthorized')
 
-    // Update settings
-    const { error: updateError } = await supabase
-      .from('locations')
+    // Update settings on the page
+    const { error: updateError } = await (supabase as any)
+      .from('location_pages')
       .update({
         ai_enabled: aiEnabled,
         ai_name: aiName,
@@ -223,9 +231,14 @@ export const saveLocationAiSettings = authActionClient
         ai_escalation_contact: aiEscalationContact || null,
         ai_instructions: aiInstructions || null,
         ai_faqs: parsedFaqs,
-        brand_knowledge: brandKnowledge || null,
       })
-      .eq('id', locationId)
+      .eq('id', pageId)
+
+    // Also update brand_knowledge on the location since it's venue-wide
+    await supabase
+      .from('locations')
+      .update({ brand_knowledge: brandKnowledge || null })
+      .eq('id', page.location_id)
 
     if (updateError) throw new Error('Failed to update AI settings')
 

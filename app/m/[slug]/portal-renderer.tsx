@@ -33,29 +33,40 @@ const TEMPLATE_META: Record<string,{icon:React.ReactNode;subtitle:string}> = {
 };
 
 export function PortalRenderer({location,pages}:{
-  location:Tables<'locations'>&{organizations?:{logo_url:string|null, name?:string|null}|null};
+  location:Tables<'locations'>&{organizations?:{
+    logo_url?:string|null, 
+    name?:string|null,
+    portal_name?:string|null,
+    portal_theme_color?:string|null,
+    portal_background_color?:string|null,
+    portal_cover_image_url?:string|null
+  }|null};
   pages:{id:string;slug:string;title:string;template_type:string;is_published:boolean}[];
 }) {
-  const themeColor = location.theme_color||'#6d28d9';
+  const org = location.organizations;
+  const themeColor = org?.portal_theme_color || location.theme_color || '#6d28d9';
+  const bgColor = org?.portal_background_color || '#09090b'; // zinc-950
   const isLight = getLuminance(themeColor)>0.5;
   const onThemeText = isLight?'text-zinc-950':'text-white';
   const hasSocials = !!(location.instagram_handle||location.twitter_handle||location.x_handle||location.tiktok_handle||location.whatsapp_number);
   const hasContact = !!(location.address||location.phone_number);
-  const logoUrl = (location as Tables<'locations'>&{organizations?:{logo_url?:string|null}|null}).organizations?.logo_url;
+  const logoUrl = org?.logo_url;
+  const coverImageUrl = org?.portal_cover_image_url || location.cover_image_url;
+  const displayName = org?.portal_name || location.portal_display_name || org?.name || location.name;
 
   return (
-    <div className="min-h-screen bg-zinc-950 font-sans overflow-x-hidden">
+    <div className="min-h-screen font-sans overflow-x-hidden" style={{ backgroundColor: bgColor }}>
       <div className="relative h-72 sm:h-80 overflow-hidden">
-        {location.cover_image_url?(
+        {coverImageUrl?(
           <>
-            <Image src={location.cover_image_url} alt={location.name} fill className="object-cover object-top" priority quality={90} sizes="100vw"/>
+            <Image src={coverImageUrl} alt={displayName} fill className="object-cover object-top" priority quality={90} sizes="100vw"/>
             {/* Dark scrim so bright photos don't wash out content below */}
-            <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-zinc-950"/>
+            <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent" style={{ backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, transparent 50%, ${bgColor} 100%)` }}/>
           </>
         ):(
           <div className="absolute inset-0" style={{backgroundColor:themeColor,opacity:0.3}}/>
         )}
-        <div className="absolute inset-0" style={{background:`linear-gradient(to bottom,${hexToRgba(themeColor,0.15)} 0%,rgba(9,9,11,0.5) 60%,rgba(9,9,11,1) 100%)`}}/>
+        <div className="absolute inset-0" style={{background:`linear-gradient(to bottom,${hexToRgba(themeColor,0.15)} 0%, ${hexToRgba(bgColor, 0.5)} 60%, ${bgColor} 100%)`}}/>
         <div className="absolute top-0 left-0 right-0 h-1" style={{backgroundColor:themeColor}}/>
       </div>
 
@@ -63,15 +74,15 @@ export function PortalRenderer({location,pages}:{
         <motion.div initial={{opacity:0,y:24}} animate={{opacity:1,y:0}} transition={{duration:0.45,ease:[0.22,1,0.36,1]}} className="flex flex-col items-center text-center">
           {logoUrl?(
             <div className="mb-6 flex justify-center items-center h-20 sm:h-24 w-full">
-              <Image src={logoUrl} alt={location.portal_display_name || location.organizations?.name || location.name} width={256} height={128} className="w-auto h-full object-contain drop-shadow-2xl"/>
+              <Image src={logoUrl} alt={displayName} width={256} height={128} className="w-auto h-full object-contain drop-shadow-2xl"/>
             </div>
           ):(
-            <div className={`w-24 h-24 rounded-2xl flex items-center justify-center text-3xl font-black shadow-2xl mb-4 border-4 border-zinc-900 ${onThemeText}`} style={{backgroundColor:themeColor,boxShadow:`0 0 0 1px ${hexToRgba(themeColor,0.4)},0 20px 60px -12px ${hexToRgba(themeColor,0.4)}`}}>
-              {(location.portal_display_name || location.organizations?.name || location.name).substring(0,2).toUpperCase()}
+            <div className={`w-24 h-24 rounded-2xl flex items-center justify-center text-3xl font-black shadow-2xl mb-4 border-4 border-white/5 ${onThemeText}`} style={{backgroundColor:themeColor,boxShadow:`0 0 0 1px ${hexToRgba(themeColor,0.4)},0 20px 60px -12px ${hexToRgba(themeColor,0.4)}`}}>
+              {displayName.substring(0,2).toUpperCase()}
             </div>
           )}
-          <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">{location.portal_display_name || location.organizations?.name || location.name}</h1>
-          {location.tagline&&<p className="text-zinc-400 text-sm mt-1.5 max-w-xs leading-relaxed">{location.tagline}</p>}
+          <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">{displayName}</h1>
+          {location.tagline&&<p className="text-white/60 text-sm mt-1.5 max-w-xs leading-relaxed">{location.tagline}</p>}
         </motion.div>
 
         <motion.div className="mt-8 space-y-3" initial="hidden" animate="show" variants={{hidden:{},show:{transition:{staggerChildren:0.08,delayChildren:0.15}}}}>

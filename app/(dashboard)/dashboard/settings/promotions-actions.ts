@@ -7,12 +7,10 @@ import { authActionClient } from '@/lib/safe-action'
 
 export const saveLocationPromotions = authActionClient
   .schema(zfd.formData({
-    locationId: zfd.text(z.string().uuid()),
+    pageId: zfd.text(z.string().uuid()),
     global_discount_enabled: zfd.checkbox(),
     global_discount_percentage: zfd.numeric(z.number().default(0)),
     global_discount_banner_text: zfd.text(z.string().optional()),
-    spinner_enabled: zfd.checkbox(),
-    spinner_config: zfd.text(z.string().optional()),
   }))
   .action(async ({ parsedInput, ctx: { supabase } }) => {
     const { cookies } = await import('next/headers')
@@ -21,32 +19,20 @@ export const saveLocationPromotions = authActionClient
     }
 
     const {
-      locationId,
+      pageId,
       global_discount_enabled,
       global_discount_percentage,
       global_discount_banner_text,
-      spinner_enabled,
     } = parsedInput
 
-    let spinner_config = null
-    try {
-      if (parsedInput.spinner_config) {
-        spinner_config = JSON.parse(parsedInput.spinner_config)
-      }
-    } catch {
-      throw new Error('Invalid JSON for Wheel Segments')
-    }
-
-    const { error } = await supabase
-      .from('locations')
+    const { error } = await (supabase as any)
+      .from('location_pages')
       .update({
         global_discount_enabled,
         global_discount_percentage,
         global_discount_banner_text: global_discount_banner_text || null,
-        spinner_enabled,
-        spinner_config
       })
-      .eq('id', locationId)
+      .eq('id', pageId)
 
     if (error) throw new Error((error as Error).message)
 

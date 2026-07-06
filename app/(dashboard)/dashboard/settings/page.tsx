@@ -16,6 +16,9 @@ import { TaxesView } from './taxes-view'
 import AiFaqBuilder from './ai-faq-builder'
 import { BusinessTypePicker } from './business-type-picker'
 import { ThemeColorPicker } from './theme-color-picker'
+import { ImageUpload } from '@/components/ui/image-upload'
+import { SettingsNavigation } from '@/components/settings/settings-navigation'
+import { WheelBuilder } from '@/components/ui/wheel-builder'
 
 
 
@@ -40,7 +43,7 @@ export default async function SettingsPage({
   const userId = user?.id || 'demo-user-id'
 
   // Fetch their organization and role
-  let organization = null
+  let organization: any = null
   let role = 'viewer'
   let creditsRemaining = 0
 
@@ -89,7 +92,7 @@ export default async function SettingsPage({
   }
 
   let paymentSettings = null
-  let location = null
+  let location: any = null
   let iouSettings = null
   if (organization && isOwnerOrManager) {
     const { data: paySettings } = await supabase
@@ -140,82 +143,12 @@ export default async function SettingsPage({
         )}
       </div>
 
-      <div className="flex space-x-1 border-b border-zinc-800 mb-6 overflow-x-auto no-scrollbar">
-        {isOwnerOrManager && (
-          <>
-            <Link 
-              href="?tab=general"
-              className={`px-4 py-2.5 text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${
-                tab === 'general' ? 'border-blue-500 text-white' : 'border-transparent text-zinc-400 hover:text-zinc-200 hover:border-zinc-700'
-              }`}
-            >
-              General & Payments
-            </Link>
-            <Link 
-              href="?tab=venue"
-              className={`px-4 py-2.5 text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${
-                tab === 'venue' ? 'border-blue-500 text-white' : 'border-transparent text-zinc-400 hover:text-zinc-200 hover:border-zinc-700'
-              }`}
-            >
-              Venue Information
-            </Link>
-            <Link 
-              href="?tab=ai"
-              className={`px-4 py-2.5 text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${
-                tab === 'ai' ? 'border-blue-500 text-white' : 'border-transparent text-zinc-400 hover:text-zinc-200 hover:border-zinc-700'
-              }`}
-            >
-              AI Assistant
-            </Link>
-            <Link 
-              href="?tab=promotions"
-              className={`px-4 py-2.5 text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${
-                tab === 'promotions' ? 'border-blue-500 text-white' : 'border-transparent text-zinc-400 hover:text-zinc-200 hover:border-zinc-700'
-              }`}
-            >
-              Promotions
-            </Link>
-          </>
-        )}
-        <Link 
-          href="?tab=profile"
-          className={`px-4 py-2.5 text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${
-            tab === 'profile' ? 'border-blue-500 text-white' : 'border-transparent text-zinc-400 hover:text-zinc-200 hover:border-zinc-700'
-          }`}
-        >
-          My Profile
-        </Link>
-        {isOwnerOrManager && (
-          <>
-            <Link 
-              href="?tab=loyalty"
-              className={`px-4 py-2.5 text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${
-                tab === 'loyalty' ? 'border-blue-500 text-white' : 'border-transparent text-zinc-400 hover:text-zinc-200 hover:border-zinc-700'
-              }`}
-            >
-              Loyalty & CRM
-            </Link>
-            <Link 
-              href="?tab=addons"
-              className={`px-4 py-2.5 text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${
-                tab === 'addons' ? 'border-blue-500 text-white' : 'border-transparent text-zinc-400 hover:text-zinc-200 hover:border-zinc-700'
-              }`}
-            >
-              Add-ons
-            </Link>
-            <Link 
-              href="?tab=taxes"
-              className={`px-4 py-2.5 text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${
-                tab === 'taxes' ? 'border-blue-500 text-white' : 'border-transparent text-zinc-400 hover:text-zinc-200 hover:border-zinc-700'
-              }`}
-            >
-              Taxes & Fees
-            </Link>
-          </>
-        )}
-      </div>
+      <div className="flex flex-col md:flex-row gap-8">
+        <div className="w-full md:w-64 shrink-0">
+          <SettingsNavigation currentTab={tab} isOwnerOrManager={isOwnerOrManager} />
+        </div>
 
-      <div className="space-y-6">
+        <div className="flex-1 space-y-6 min-w-0">
         {tab === 'profile' && user && (
           <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
             <h2 className="text-lg font-semibold text-white mb-2">My Profile</h2>
@@ -294,13 +227,7 @@ export default async function SettingsPage({
           <ActionForm action={updateOrganization} className="flex flex-col gap-4">
             <div>
               <label className="mb-2 block text-sm font-medium text-zinc-300">Business Logo URL</label>
-              <input
-                type="url"
-                name="logo_url"
-                defaultValue={organization?.logo_url || ''}
-                className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                placeholder="https://example.com/logo.png"
-              />
+              <ImageUpload name="logo_url" defaultValue={organization?.logo_url || ''} />
               <p className="mt-2 text-xs text-zinc-500">This logo will be displayed across your customer portals and digital menus.</p>
             </div>
             <div>
@@ -964,12 +891,7 @@ export default async function SettingsPage({
 
                 <div>
                   <label className="mb-2 block text-sm font-medium text-zinc-300">Wheel Segments (JSON)</label>
-                  <textarea
-                    name="spinner_config"
-                    defaultValue={location.spinner_config ? JSON.stringify(location.spinner_config, null, 2) : '[\n  { "label": "10% Off", "value": 10, "type": "win" },\n  { "label": "Try Again", "value": 0, "type": "loss" },\n  { "label": "5% Off", "value": 5, "type": "win" },\n  { "label": "No Luck", "value": 0, "type": "loss" }\n]'}
-                    rows={6}
-                    className="w-full rounded-xl bg-zinc-800 border-zinc-700 px-4 py-3 text-white outline-none focus:border-emerald-500 font-mono text-sm"
-                  />
+                  <WheelBuilder name="spinner_config" defaultValue={location.spinner_config ? JSON.stringify(location.spinner_config) : ''} />
                   <p className="text-xs text-zinc-500 mt-2">Customize the wheel segments. &quot;value&quot; is the discount percentage won.</p>
                 </div>
               </div>
@@ -1114,11 +1036,8 @@ export default async function SettingsPage({
         )}
         
         {/* Removed AICoverStudio from here as it was moved inside Venue Information */}
+        </div>
       </div>
     </div>
   )
 }
-
-
-
-

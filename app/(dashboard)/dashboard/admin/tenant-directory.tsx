@@ -15,6 +15,7 @@ export interface OrgTenant {
   subscription_status?: string
   purchased_credits?: number
   created_at: string
+  status?: string
   [key: string]: unknown
 }
 
@@ -114,12 +115,27 @@ export function TenantDirectory({ organizations: initialOrgs }: { organizations:
                     <div className={`w-1.5 h-1.5 rounded-full ${org.subscription_status === 'active' ? 'bg-emerald-400' : org.subscription_status === 'past_due' ? 'bg-amber-400' : 'bg-rose-400'}`} />
                     {org.subscription_status || 'active'}
                   </span>
+                  <div className="mt-1">
+                    <span className={`text-[10px] uppercase font-bold px-1.5 py-0.5 rounded ${
+                      org.status === 'approved' ? 'bg-emerald-500/20 text-emerald-400' :
+                      org.status === 'in_review' ? 'bg-amber-500/20 text-amber-400' :
+                      org.status === 'suspended' ? 'bg-rose-500/20 text-rose-400' :
+                      'bg-zinc-500/20 text-zinc-400'
+                    }`}>
+                      {org.status?.replace('_', ' ') || 'pending kyc'}
+                    </span>
+                  </div>
                 </td>
                 <td className="px-4 py-3">{org.purchased_credits || 0}</td>
                 <td className="px-4 py-3">
-                  <button onClick={() => setEditingOrg(org)} className="p-1 hover:bg-white/10 rounded transition text-zinc-400 hover:text-white">
-                    <MoreHorizontal className="w-4 h-4" />
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <a href={`/dashboard/admin/kyc/${org.id}`} className="px-2 py-1 bg-zinc-800 hover:bg-zinc-700 text-xs rounded text-zinc-300 transition-colors">
+                      Review KYC
+                    </a>
+                    <button onClick={() => setEditingOrg(org)} className="p-1 hover:bg-white/10 rounded transition text-zinc-400 hover:text-white">
+                      <MoreHorizontal className="w-4 h-4" />
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}

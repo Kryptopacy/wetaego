@@ -2,10 +2,37 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { MessageCircle, X, Send, Mic, Paperclip, Loader2 } from 'lucide-react'
+import { X, Send, Mic, Paperclip, Loader2 } from 'lucide-react'
 import { VoiceRecorder } from './voice-recorder'
 import { format } from 'date-fns'
 import { motion, AnimatePresence } from 'framer-motion'
+
+function GramophoneIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      {/* Box base */}
+      <path d="M5 16h14v6H5z" />
+      <path d="M5 16l2-3h10l2 3" />
+      {/* Horn neck */}
+      <path d="M13 13V8s0-2 2-2h1" />
+      {/* Horn bell */}
+      <path d="M16 6s0-4-3-4-7 3-7 7c0 2 2 3 2 3l5-4" />
+      {/* Crank */}
+      <path d="M20 18h2v2" />
+    </svg>
+  )
+}
 
 interface IntercomChannel {
   id: string
@@ -262,9 +289,10 @@ export function IntercomWidget({ userId, organizationId }: { userId: string, org
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setIsOpen(true)}
-            className="fixed bottom-20 md:bottom-6 left-4 md:left-6 z-50 p-4 rounded-full bg-blue-600 hover:bg-blue-500 text-white shadow-lg cursor-grab active:cursor-grabbing"
+            className="fixed bottom-20 md:bottom-6 left-4 md:left-6 z-50 h-12 px-5 rounded-full bg-blue-600 hover:bg-blue-500 text-white shadow-lg cursor-grab active:cursor-grabbing flex items-center gap-2"
           >
-            <MessageCircle className="w-6 h-6 pointer-events-none" />
+            <GramophoneIcon className="w-5 h-5 pointer-events-none" />
+            <span className="font-semibold text-sm pointer-events-none">Staff Intercom</span>
           </motion.button>
         )}
       </AnimatePresence>

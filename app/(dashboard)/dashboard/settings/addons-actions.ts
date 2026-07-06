@@ -8,6 +8,7 @@ import { authActionClient } from '@/lib/safe-action'
 export const saveAddonsSettings = authActionClient
   .schema(zfd.formData({
     locationId: zfd.text(z.string().uuid()),
+    pageId: zfd.text(z.string().uuid()),
     randomizerEnabled: zfd.checkbox(),
     spinner_enabled: zfd.checkbox(),
     spinner_config: zfd.text(z.string().optional()),
@@ -24,6 +25,7 @@ export const saveAddonsSettings = authActionClient
 
     const {
       locationId,
+      pageId,
       randomizerEnabled,
       spinner_enabled,
       delivery_enabled,
@@ -41,10 +43,18 @@ export const saveAddonsSettings = authActionClient
       throw new Error('Invalid JSON for Wheel Segments')
     }
 
-    const { error } = await supabase
+    const { error: locError } = await supabase
       .from('locations')
       .update({
         randomizer_enabled: randomizerEnabled,
+      })
+      .eq('id', locationId)
+
+    if (locError) throw new Error((locError as Error).message)
+
+    const { error: pageError } = await (supabase as any)
+      .from('location_pages')
+      .update({
         spinner_enabled,
         spinner_config,
         delivery_enabled,
@@ -52,9 +62,9 @@ export const saveAddonsSettings = authActionClient
         delivery_minimum_order_minor,
         delivery_note: delivery_note || null
       })
-      .eq('id', locationId)
+      .eq('id', pageId)
 
-    if (error) throw new Error((error as Error).message)
+    if (pageError) throw new Error((pageError as Error).message)
 
     revalidatePath('/dashboard/settings')
     return { success: true }

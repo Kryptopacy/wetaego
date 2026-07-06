@@ -28,8 +28,8 @@ export const paystackProvider: PaymentProvider = {
         email: params.customerEmail,
         reference: params.reference,
         callback_url: params.callbackUrl,
-        ...(params.subaccountCode ? { subaccount: params.subaccountCode } : {}),
-        ...(params.splitCode ? { split_code: params.splitCode } : {}),
+        ...(params.subaccountCode ? { subaccount: params.subaccountCode, bearer: 'subaccount' } : {}),
+        ...(params.splitCode ? { split_code: params.splitCode, bearer: 'subaccount' } : {}),
         ...(params.transactionChargeMinor ? { transaction_charge: params.transactionChargeMinor } : {}),
         ...(params.channels ? { channels: params.channels } : {}),
         metadata: {

@@ -19,6 +19,7 @@ const DEFAULT_AI_MODELS = { text_generation: "gemini-3.5-flash", image_generatio
 const DEFAULT_EXCHANGE_RATES = { usd_to_ngn: 1500 }
 const DEFAULT_AFFILIATE = { default_percentage: 10 }
 const DEFAULT_PLATFORM_FEES = { business_subaccount: 5, affiliate_subaccount: 5, staff_tip_subaccount: 0 }
+const DEFAULT_KYC_SETTINGS = { require_kyc_to_publish: false }
 
 async function fetchSystemSettingFromDB<T>(key: string, fallback: T): Promise<T> {
   try {
@@ -94,3 +95,10 @@ export const getGlobalManualPayment = unstable_cache(
   ['system_setting_global_payment'],
   { revalidate: 86400, tags: ['global_payment'] }
 )
+
+export const getKycSettings = unstable_cache(
+  async () => fetchSystemSettingFromDB('kyc_settings', DEFAULT_KYC_SETTINGS),
+  ['system_setting_kyc_settings'],
+  { revalidate: 86400, tags: ['kyc_settings'] }
+)
+

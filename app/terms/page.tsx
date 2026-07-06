@@ -36,12 +36,17 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold text-white mb-4">3. Payments, Overpayments, and Refunds</h2>
+            <h2 className="text-2xl font-bold text-white mb-4">3. Payments, Platform Fees, and KYC</h2>
             <p className="mb-4">
-              OurMenu facilitates payments via third-party processors (e.g., Paystack). Because the Merchant is the Merchant of Record, <strong>all requests for refunds, including instances of customer overpayment or order cancellation, must be directed to and handled by the Merchant.</strong>
+              OurMenu facilitates payments via third-party processors (e.g., Paystack). We utilize <strong>Subaccounts</strong> to route transactions directly to the Merchant. By enabling live payments, the Merchant agrees to the following fee structure and compliance requirements:
             </p>
+            <ul className="list-disc pl-6 space-y-2 text-zinc-400 mb-4">
+              <li><strong>Platform Fee:</strong> OurMenu charges a standard platform fee (e.g., 5%) per successful transaction processed through the Service, deducted automatically prior to payout.</li>
+              <li><strong>Payment Gateway Fees:</strong> In addition to the platform fee, the Merchant is fully responsible for absorbing the standard transaction processing fees levied by the payment gateway (e.g., 1.5% + 100 NGN).</li>
+              <li><strong>KYC Verification:</strong> To comply with financial regulations, Merchants must submit valid Know Your Customer (KYC) documentation (e.g., RC Number, NIN/BVN, Government IDs). We reserve the right to withhold payouts, suspend processing, or block public access to the Merchant&apos;s digital environment until KYC verification is approved by our compliance team.</li>
+            </ul>
             <p>
-              OurMenu does not hold customer funds and cannot issue refunds on behalf of a Merchant. If a customer pays more than the required total amount via manual bank transfer or other means, the Merchant is solely responsible for reconciling the difference with the customer.
+              Because the Merchant is the Merchant of Record, <strong>all requests for refunds, including instances of customer overpayment or order cancellation, must be directed to and handled by the Merchant.</strong> OurMenu does not hold customer funds and cannot issue refunds on behalf of a Merchant.
             </p>
           </section>
 

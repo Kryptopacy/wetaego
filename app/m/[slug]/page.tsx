@@ -87,7 +87,7 @@ export default async function PublicMenuPage({
     const anonSupabase = createAnonClient()
     const { data } = await anonSupabase
       .from('locations')
-      .select('id, slug, name, organization_id, is_search_visible, ai_enabled, ai_name, theme_color, cover_image_url, operating_hours, wifi_network, wifi_password, instagram_handle, twitter_handle, facebook_handle, whatsapp_number, phone_number, google_maps_url, randomizer_enabled, spinner_enabled, spinner_config, global_discount_enabled, global_discount_banner_text, global_discount_percentage, manual_payment_enabled, manual_payment_bank_name, manual_payment_account_name, manual_payment_account_number, manual_payment_instructions, delivery_enabled, delivery_fee_minor, delivery_minimum_order_minor, delivery_note, fulfillment_location_label, organizations(logo_url, name)')
+      .select('id, slug, name, organization_id, is_search_visible, ai_enabled, ai_name, theme_color, cover_image_url, operating_hours, wifi_network, wifi_password, instagram_handle, twitter_handle, facebook_handle, whatsapp_number, phone_number, google_maps_url, randomizer_enabled, spinner_enabled, spinner_config, global_discount_enabled, global_discount_banner_text, global_discount_percentage, manual_payment_enabled, manual_payment_bank_name, manual_payment_account_name, manual_payment_account_number, manual_payment_instructions, delivery_enabled, delivery_fee_minor, delivery_minimum_order_minor, delivery_note, fulfillment_location_label, organizations(logo_url, name, status, portal_name, portal_cover_image_url, portal_theme_color, portal_background_color)')
       .eq('slug', slug)
       .single()
     return data;
@@ -127,6 +127,34 @@ export default async function PublicMenuPage({
           .single()
         if (org) isPreview = true
       }
+    }
+  }
+
+  // Check KYC status
+  const org = location.organizations as any;
+  const orgStatus = org?.status || 'approved';
+  
+  if (!isPreview && orgStatus !== 'approved') {
+    const { getKycSettings } = await import('@/lib/utils/settings')
+    const kycSettings = await getKycSettings() as { require_kyc_to_publish?: boolean }
+    if (kycSettings?.require_kyc_to_publish) {
+      return (
+        <main className="min-h-screen bg-[#f5f7f5] dark:bg-zinc-950 font-sans flex flex-col items-center justify-center p-6 text-center">
+          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl p-10 max-w-md w-full shadow-2xl border border-black/5 dark:border-white/10">
+            <div className="w-16 h-16 bg-emerald-500/10 rounded-2xl mx-auto flex items-center justify-center mb-6">
+              <svg className="w-8 h-8 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              </svg>
+            </div>
+            <h1 className="text-2xl font-bold text-[#17201b] dark:text-white mb-3">
+              Setting up shop!
+            </h1>
+            <p className="text-zinc-500 dark:text-zinc-400">
+              We're putting the final touches on our digital menu. Check back shortly to explore what we have to offer.
+            </p>
+          </div>
+        </main>
+      )
     }
   }
 
