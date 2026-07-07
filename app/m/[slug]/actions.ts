@@ -13,6 +13,10 @@ import { getPlatformFees } from '@/lib/utils/settings'
 import { waitUntil } from '@vercel/functions'
 import { z } from 'zod'
 import * as Sentry from '@sentry/nextjs'
+import { Resend } from 'resend'
+import { ReceiptEmail } from '@/emails/receipt-email'
+
+const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy')
 
 export type SafeResult<T> = 
   | { data: T; serverError?: undefined; validationErrors?: undefined }
@@ -114,14 +118,16 @@ export async function processCheckout(params: {
   subtotalMinor?: number,
   taxTotalMinor?: number,
   taxBreakdown?: unknown[],
-  isUnevenSplit?: boolean
+  isUnevenSplit?: boolean,
+  resourceId?: string
 }): Promise<SafeResult<{ checkoutUrl?: string, orderId: string, paymentMethod: string }>> {
   const {
     organizationId, locationId, items, totalAmountMinor, tipAmountMinor = 0,
     tableIdentifier, customerNote, customerEmail, paymentFractionMinor,
     paymentMethod = 'card', discountAmountMinor = 0, customerName, customerPhone,
     fulfillmentType, deliveryInstructions, staffId: _staffId, staffSubaccountOverride,
-    pageId, idempotencyKey, subtotalMinor, taxTotalMinor, taxBreakdown, isUnevenSplit
+    pageId, idempotencyKey, subtotalMinor, taxTotalMinor, taxBreakdown, isUnevenSplit,
+    resourceId
   } = params;
   const supabase = await createClient()
 
@@ -141,9 +147,13 @@ export async function processCheckout(params: {
 
     // 1. Server-side price verification — never trust client-supplied totals
     const itemIds = items.map(i => i.id as string).filter(Boolean)
+    
+    // If pageId is provided, items are from page_items, otherwise menu_items
+    const tableToQuery = pageId ? 'page_items' : 'menu_items'
+    
     const { data: dbItems, error: dbItemsError } = await supabase
-      .from('menu_items')
-      .select('id, price_minor')
+      .from(tableToQuery)
+      .select('id, price_minor, department')
       .in('id', itemIds)
     
     if (dbItemsError || !dbItems) {
@@ -201,18 +211,49 @@ export async function processCheckout(params: {
       subtotal_minor: subtotalMinor || 0,
       tax_total_minor: taxTotalMinor || 0,
       tax_breakdown: taxBreakdown || [],
+      resource_id: resourceId || null,
     } as never).select('id').single()
 
   if (orderError || !order) throw new Error('Failed to create order')
 
-  // 4. Create Order Items using server-verified prices
-  const orderItemsData = items.map(item => ({
-    order_id: order.id,
-    item_id: item.id,
-    item_name: item.name,
-    quantity: item.quantity,
-    price_minor: priceMap.get(item.id) ?? item.price_minor
-  }))
+  // 4. Create Order Items using server-verified prices and metadata
+  // 4. Create Order Items using server-verified prices and metadata
+  const dbItemMap = new Map(dbItems?.map(i => [i.id, i]) || [])
+  
+  // Calculate COGS from BOM
+  let cogsMap = new Map<string, number>()
+  if (itemIds.length > 0) {
+    const formattedIds = itemIds.map(id => `"${id}"`).join(',')
+    const { data: bomData } = await supabase
+      .from('item_ingredients')
+      .select('menu_item_id, page_item_id, quantity_required, inventory_items(cost_price_minor)')
+      .or(`menu_item_id.in.(${formattedIds}),page_item_id.in.(${formattedIds})`)
+      
+    if (bomData) {
+      for (const bom of bomData) {
+        const targetId = bom.menu_item_id || bom.page_item_id
+        if (targetId) {
+          const itemCost = (bom.inventory_items as any)?.cost_price_minor || 0
+          const currentCost = cogsMap.get(targetId) || 0
+          // Math.round in case quantity_required is fractional
+          cogsMap.set(targetId, currentCost + Math.round(itemCost * Number(bom.quantity_required)))
+        }
+      }
+    }
+  }
+  
+  const orderItemsData = items.map(item => {
+    const dbItem = dbItemMap.get(item.id)
+    return {
+      order_id: order.id,
+      item_id: item.id,
+      item_name: item.name,
+      quantity: item.quantity,
+      price_minor: dbItem?.price_minor ?? item.price_minor,
+      cogs_minor: cogsMap.get(item.id) ?? null,
+      metadata: dbItem?.department ? { department: dbItem.department } : null
+    }
+  })
 
   const { error: itemsError } = await supabase.from('order_items').insert(orderItemsData)
   if (itemsError) {
@@ -352,6 +393,35 @@ export async function processCheckout(params: {
       } catch (e) {
         console.error('Failed to log platform fee to ledger:', e)
       }
+    }
+    
+    // Dispatch Receipt Email if customer email exists
+    if (customerEmail) {
+      waitUntil((async () => {
+        try {
+          // Fetch org name for the email
+          const { data: org } = await supabase.from('organizations').select('name').eq('id', organizationId).single()
+          const orgName = org?.name || 'OurMenu Partner'
+
+          await resend.emails.send({
+            from: 'OurMenu Orders <orders@ourmenuos.online>',
+            to: customerEmail,
+            subject: `Order Confirmation #${order.id.substring(0, 8)}`,
+            react: ReceiptEmail({
+              organizationName: orgName,
+              orderId: order.id,
+              totalAmountMinor: verifiedTotalMinor,
+              items: items.map(i => ({
+                name: i.name,
+                quantity: i.quantity,
+                priceMinor: i.price_minor
+              }))
+            })
+          })
+        } catch (err) {
+          console.error('Failed to send receipt email:', err)
+        }
+      })())
     }
     
     return { data: { orderId: order.id, paymentMethod } }

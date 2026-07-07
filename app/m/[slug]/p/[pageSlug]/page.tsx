@@ -85,10 +85,10 @@ export default async function PublicPageView({
   searchParams,
 }: {
   params: Promise<{ slug: string; pageSlug: string }>
-  searchParams: Promise<{ qr_id?: string; ref?: string; preview?: string }>
+  searchParams: Promise<{ qr_id?: string; ref?: string; preview?: string; resource?: string }>
 }) {
   const { slug, pageSlug } = await params
-  const { ref, preview } = await searchParams
+  const { ref, preview, qr_id, resource: resourceId } = await searchParams
 
   const supabase = await createClient()
 
@@ -96,7 +96,7 @@ export default async function PublicPageView({
     const anonSupabase = createAnonClient()
     const { data } = await anonSupabase
       .from('locations')
-      .select('id, name, organization_id, is_search_visible, theme_color, cover_image_url, ai_enabled, ai_name, instagram_handle, x_handle, tiktok_handle, whatsapp_number, phone_number, organizations(logo_url, status), manual_payment_enabled, manual_payment_bank_name, manual_payment_account_name, manual_payment_account_number, manual_payment_instructions, delivery_enabled, delivery_fee_minor, delivery_minimum_order_minor, delivery_note, fulfillment_location_label, currency_code, portal_display_name, location_taxes(*)')
+      .select('id, name, organization_id, is_search_visible, theme_color, cover_image_url, ai_enabled, ai_name, instagram_handle, x_handle, tiktok_handle, whatsapp_number, phone_number, organizations(logo_url, status, refund_policy), manual_payment_enabled, manual_payment_bank_name, manual_payment_account_name, manual_payment_account_number, manual_payment_instructions, delivery_enabled, delivery_fee_minor, delivery_minimum_order_minor, delivery_note, fulfillment_location_label, currency_code, portal_display_name, location_taxes(*)')
       .eq('slug', slug)
       .single()
     return data
@@ -242,13 +242,20 @@ export default async function PublicPageView({
         { revalidate: 60, tags: [`page_items_${page.id}`] }
       )()
 
-  const [items, { data: paymentSettings }, globalManualPayment] = await Promise.all([
+  const [items, { data: paymentSettings }, globalManualPayment, resource] = await Promise.all([
     itemsPromise,
     paymentSettingsPromise,
-    getGlobalManualPayment()
+    getGlobalManualPayment(),
+    resourceId ? supabase.from('resources').select('id, name, type').eq('id', resourceId).single().then(r => r.data) : Promise.resolve(null)
   ])
 
   const pageThemeColor = (page as any).theme_color || loc.theme_color || '#10b981'
+  
+  // Resolve tableIdentifier from QR or Resource
+  let resolvedTableIdentifier = undefined
+  if (resource) {
+    resolvedTableIdentifier = resource.name
+  }
 
   const sharedProps = {
      
@@ -259,6 +266,7 @@ export default async function PublicPageView({
     items: items as never[],
     locationSlug: slug,
     referralSource: ref,
+    resourceId: resourceId || undefined,
     paymentIsLive: paymentSettings?.is_active ?? false,
     globalManualPaymentOverride: (globalManualPayment as any)?.global_manual_payment_override === true,
   }

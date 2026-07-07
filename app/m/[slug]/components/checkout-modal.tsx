@@ -108,6 +108,7 @@ interface CheckoutModalProps {
   __pageBillingMode?: string; pageBillingMode?: string
   locationTaxes?: CheckoutTax[]
   pagePaymentOptions?: string[]
+  resourceId?: string
 }
 
 export function CheckoutModal({
@@ -145,7 +146,8 @@ export function CheckoutModal({
   pageFulfillmentOptions,
   pageBillingMode: _pageBillingMode,
   locationTaxes = [],
-  pagePaymentOptions = []
+  pagePaymentOptions = [],
+  resourceId
 }: CheckoutModalProps) {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -348,7 +350,8 @@ export function CheckoutModal({
         paymentMethod, discountAmountMinor, customerName, customerPhone,
         fulfillmentType, deliveryInstructions, staffId: undefined, staffSubaccountOverride: undefined,
         pageId, idempotencyKey: undefined, subtotalMinor: discountedSubtotalMinor, taxTotalMinor, taxBreakdown,
-        isUnevenSplit
+        isUnevenSplit,
+        resourceId
       })
 
       if (result?.serverError || result?.validationErrors) {
@@ -738,6 +741,17 @@ export function CheckoutModal({
                   </div>
                 )}
               </div>
+
+              {/* Refund Policy */}
+              {refundPolicy && (
+                <details className="bg-zinc-100 dark:bg-zinc-800/50 p-4 rounded-xl border border-zinc-200 dark:border-zinc-700/50 group cursor-pointer marker:content-['']">
+                  <summary className="flex justify-between items-center text-xs font-bold text-zinc-900 dark:text-white uppercase tracking-wider outline-none">
+                    <span>Cancellation & Refund Policy</span>
+                    <ChevronDown className="w-4 h-4 text-zinc-500 transition-transform group-open:rotate-180" />
+                  </summary>
+                  <p className="mt-3 text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed whitespace-pre-wrap">{refundPolicy}</p>
+                </details>
+              )}
 
               {/* Payment Method / Action Buttons (Extracted Component) */}
               <CheckoutPaymentForm 

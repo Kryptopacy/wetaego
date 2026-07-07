@@ -282,7 +282,7 @@ export function CatalogPageRenderer({ location, page, items, locationSlug, payme
           deliveryNote={location.delivery_note ?? ''}
           fulfillmentLocationLabel={location.fulfillment_location_label ?? ''}
           pageId={page.id}
-          refundPolicy={page.template_data?.refund_policy as string | undefined}
+          refundPolicy={(location.organizations as any)?.refund_policy || (page.template_data?.refund_policy as string | undefined)}
           pageFulfillmentOptions={
             page.template_data?.fulfillment_options as { pickup: boolean, delivery: boolean, table: boolean } | undefined
           }

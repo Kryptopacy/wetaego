@@ -1,0 +1,1 @@
+ALTER TABLE menu_items ADD COLUMN IF NOT EXISTS department text; CREATE INDEX IF NOT EXISTS idx_menu_items_department ON menu_items(department);

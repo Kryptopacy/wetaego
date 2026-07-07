@@ -283,7 +283,7 @@ export async function processOrderPayment(
     try {
       const orgName = (order.locations as { name?: string })?.name || 'OurMenu Partner'
       await resend.emails.send({
-        from: 'OurMenu Orders <noreply@ourmenuos.online>',
+        from: 'OurMenu Orders <orders@ourmenuos.online>',
         to: order.customer_email,
         subject: `Receipt for your order at ${orgName}`,
         react: ReceiptEmail({

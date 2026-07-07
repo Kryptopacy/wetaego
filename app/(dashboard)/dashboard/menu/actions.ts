@@ -32,8 +32,8 @@ export const createCategory = authActionClient
     return { success: true }
   })
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
-const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
+const MAX_FILE_SIZE = 30 * 1024 * 1024 // 30MB
+const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'video/mp4', 'video/webm', 'video/quicktime']
 
 export const createItem = authActionClient
   .schema(zfd.formData({
@@ -46,6 +46,7 @@ export const createItem = authActionClient
     allergens: zfd.text(z.string().optional()),
     ai_image_url: zfd.text(z.string().url().optional().or(z.literal(''))),
     stock_count: zfd.numeric(z.number().nonnegative("Stock must be a non-negative number").optional()),
+    department: zfd.text(z.string().optional()),
     image: z.instanceof(File).optional()
   }))
   .action(async ({ parsedInput, ctx: { supabase } }) => {
@@ -59,6 +60,7 @@ export const createItem = authActionClient
       allergens: allergensRaw,
       ai_image_url: aiImageUrl,
       stock_count: stockCount,
+      department,
       image
     } = parsedInput
 
@@ -74,10 +76,10 @@ export const createItem = authActionClient
 
     if (image && image.size > 0) {
       if (image.size > MAX_FILE_SIZE) {
-        throw new Error('Image must be less than 5MB')
+        throw new Error('File must be less than 30MB')
       }
       if (!ACCEPTED_IMAGE_TYPES.includes(image.type)) {
-        throw new Error('Invalid image format. Only JPEG, PNG, and WebP are accepted.')
+        throw new Error('Invalid file format. Only JPEG, PNG, WebP, MP4, WebM, and MOV are accepted.')
       }
 
       const fileExt = image.name.split('.').pop()
@@ -105,7 +107,8 @@ export const createItem = authActionClient
       image_url,
       dietary_tags,
       allergen_tags,
-      stock_count: stockCount ?? null
+      stock_count: stockCount ?? null,
+      department: department || null
     })
 
     if (error) throw new Error(error.message)
@@ -123,6 +126,7 @@ export const updateItem = authActionClient
     description: zfd.text(z.string().max(1000, "Description must be less than 1000 characters").optional()),
     ai_image_url: zfd.text(z.string().url().optional().or(z.literal(''))),
     stock_count: zfd.numeric(z.number().nonnegative("Stock must be a non-negative number").optional()),
+    department: zfd.text(z.string().optional()),
     image: z.instanceof(File).optional()
   }))
   .action(async ({ parsedInput, ctx: { supabase } }) => {
@@ -133,6 +137,7 @@ export const updateItem = authActionClient
       description,
       ai_image_url: aiImageUrl,
       stock_count: stockCount,
+      department,
       image
     } = parsedInput
 
@@ -148,10 +153,10 @@ export const updateItem = authActionClient
 
     if (image && image.size > 0) {
       if (image.size > MAX_FILE_SIZE) {
-        throw new Error('Image must be less than 5MB')
+        throw new Error('File must be less than 30MB')
       }
       if (!ACCEPTED_IMAGE_TYPES.includes(image.type)) {
-        throw new Error('Invalid image format. Only JPEG, PNG, and WebP are accepted.')
+        throw new Error('Invalid file format. Only JPEG, PNG, WebP, MP4, WebM, and MOV are accepted.')
       }
 
       const fileExt = image.name.split('.').pop()
@@ -174,13 +179,15 @@ export const updateItem = authActionClient
       price_minor: number
       image_url?: string
       stock_count?: number | null
+      department?: string | null
     }
 
     const updatePayload: UpdatePayload = {
       name,
       description: description || null,
       price_minor: Math.round(price * 100),
-      stock_count: stockCount ?? null
+      stock_count: stockCount ?? null,
+      department: department || null
     }
     
     if (image_url) {

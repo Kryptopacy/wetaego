@@ -35,8 +35,9 @@ export interface UIOrder {
   total_amount_minor: number;
   tip_amount_minor: number | null;
   amount_paid_minor: number | null;
-  status: 'pending' | 'paid' | 'preparing' | 'out_for_delivery' | 'ready' | 'completed' | 'cancelled';
+  status: 'pending' | 'paid' | 'preparing' | 'out_for_delivery' | 'ready' | 'completed' | 'cancelled' | 'refunded' | 'voided';
   payment_method: string | null;
+  fulfillment_type?: string | null;
   customer_note: string | null;
   assigned_staff_id: string | null;
   cancellation_reason?: string | null;

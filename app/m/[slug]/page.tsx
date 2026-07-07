@@ -73,13 +73,14 @@ export default async function PublicMenuPage({
   searchParams
 }: { 
   params: Promise<{ slug: string }>,
-  searchParams: Promise<{ qr_id?: string, view?: string, preview?: string }>
+  searchParams: Promise<{ qr_id?: string, view?: string, preview?: string, resource?: string }>
 }) {
   const resolvedParams = await params
   const resolvedSearchParams = await searchParams
   const slug = resolvedParams.slug
   const qrId = resolvedSearchParams.qr_id
   const preview = resolvedSearchParams.preview
+  const resource = resolvedSearchParams.resource
 
   const supabase = await createClient()
 
@@ -231,8 +232,10 @@ export default async function PublicMenuPage({
 
   if (pageCount === 1 && locationPages) {
     const singlePage = locationPages[0]
-    const destination = `/m/${slug}/p/${singlePage.slug}${qrId ? `?qr_id=${qrId}` : ''}`
-    redirect(destination)
+    let destination = `/m/${slug}/p/${singlePage.slug}?`
+    if (qrId) destination += `qr_id=${qrId}&`
+    if (resource) destination += `resource=${resource}&`
+    redirect(destination.replace(/[\?&]$/, ''))
   }
 
   if (pageCount > 1 && locationPages) {

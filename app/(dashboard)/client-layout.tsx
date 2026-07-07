@@ -11,7 +11,7 @@ import { motion } from 'framer-motion'
 import { createClient } from '@/lib/supabase/client'
 import { setActiveLocationCookie } from './layout-actions'
 import {
-  LayoutDashboard, ClipboardList, BarChart3, BookOpen, ChevronRight, CreditCard, Home, Menu, MessageSquare, Package, QrCode, Settings, Store, Users, Zap, X, User, FileText, LogOut, TrendingUp, Truck
+  LayoutDashboard, ClipboardList, BarChart3, BookOpen, ChevronRight, CreditCard, Home, Menu, MessageSquare, Package, QrCode, Settings, Store, Users, Zap, X, User, FileText, LogOut, TrendingUp, Truck, MapPin
 } from 'lucide-react'
 import { GlobalRealtime } from './global-realtime'
 import { NotificationCenter } from './notification-center'
@@ -180,7 +180,8 @@ export default function ClientLayout({ children, initialData }: { children: Reac
   }
 
   const managerItems: NavItem[] = [
-    { href: '/dashboard/inventory', label: 'Inventory', icon: Package },
+    { href: '/dashboard/inventory', label: 'Inventory (BOM)', icon: Package },
+    { href: '/dashboard/resources', label: 'Visual Resources', icon: MapPin },
     { href: '/dashboard/customers', label: 'CRM & Loyalty', icon: Users },
     { href: '/dashboard/team-performance', label: 'Team Performance', icon: BarChart3 },
     { href: '/dashboard/manage/feedback', label: 'Feedback Inbox', icon: MessageSquare },

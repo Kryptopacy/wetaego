@@ -8,8 +8,8 @@ import { z } from 'zod'
 import { zfd } from 'zod-form-data'
 import { authActionClient } from '@/lib/safe-action'
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
-const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
+const MAX_FILE_SIZE = 30 * 1024 * 1024 // 30MB
+const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'video/mp4', 'video/webm', 'video/quicktime']
 
 // ─── Business Type Setup ───────────────────────────────────────────────────────
 
@@ -234,13 +234,14 @@ export const addPageItem = authActionClient
     deposit_percentage: zfd.numeric(z.number().min(0).max(100).optional()),
     payment_mode: zfd.text(z.string().default('full')),
     inventory_count: zfd.numeric(z.number().min(0).optional()),
+    department: zfd.text(z.string().optional()),
     image: zfd.file().optional(),
     ai_image_url: zfd.text(z.string().optional())
   }))
   .action(async ({ parsedInput, ctx: { supabase, user } }) => {
     const {
       page_id, title, subtitle, description, price_minor, original_price_minor, price_display, availability_status,
-      item_data, deposit_percentage, payment_mode, inventory_count, image, ai_image_url
+      item_data, deposit_percentage, payment_mode, inventory_count, department, image, ai_image_url
     } = parsedInput
 
     const { cookies } = await import('next/headers')
@@ -253,8 +254,8 @@ export const addPageItem = authActionClient
     if (ai_image_url) {
       images = [ai_image_url]
     } else if (image && image.size > 0) {
-      if (image.size > MAX_FILE_SIZE) throw new Error('Image must be less than 5MB')
-      if (!ACCEPTED_IMAGE_TYPES.includes(image.type)) throw new Error('Invalid image format.')
+      if (image.size > MAX_FILE_SIZE) throw new Error('File must be less than 30MB')
+      if (!ACCEPTED_IMAGE_TYPES.includes(image.type)) throw new Error('Invalid file format. Upload an image or video.')
 
       const fileExt = image.name.split('.').pop()
       const fileName = `page-items/${user.id}-${Date.now()}.${fileExt}`
@@ -284,6 +285,7 @@ export const addPageItem = authActionClient
       deposit_percentage: deposit_percentage ?? null,
       payment_mode,
       inventory_count: inventory_count ?? null,
+      department: department || null,
       images
     } as any)
 
@@ -305,13 +307,14 @@ export const updatePageItem = authActionClient
     availability_status: zfd.text(z.string().default('available')),
     item_data: zfd.text(z.string().optional()),
     inventory_count: zfd.numeric(z.number().min(0).optional()),
+    department: zfd.text(z.string().optional()),
     image: zfd.file().optional(),
     ai_image_url: zfd.text(z.string().optional())
   }))
   .action(async ({ parsedInput, ctx: { supabase, user } }) => {
     const {
       itemId, title, subtitle, description, price_minor, original_price_minor, price_display,
-      availability_status, item_data, inventory_count, image, ai_image_url
+      availability_status, item_data, inventory_count, department, image, ai_image_url
     } = parsedInput
 
     const { cookies } = await import('next/headers')
@@ -330,6 +333,7 @@ export const updatePageItem = authActionClient
       availability_status?: string
       item_data?: Json | null
       inventory_count?: number | null
+      department?: string | null
       images?: string[]
     } = { 
       title, 
@@ -340,14 +344,15 @@ export const updatePageItem = authActionClient
       price_display: price_display || null, 
       availability_status, 
       item_data: item_data ? JSON.parse(item_data) : null, 
-      inventory_count: inventory_count ?? null 
+      inventory_count: inventory_count ?? null,
+      department: department || null
     }
 
     if (ai_image_url) {
       updatePayload.images = [ai_image_url]
     } else if (image && image.size > 0) {
-      if (image.size > MAX_FILE_SIZE) throw new Error('Image must be less than 5MB')
-      if (!ACCEPTED_IMAGE_TYPES.includes(image.type)) throw new Error('Invalid image format.')
+      if (image.size > MAX_FILE_SIZE) throw new Error('File must be less than 30MB')
+      if (!ACCEPTED_IMAGE_TYPES.includes(image.type)) throw new Error('Invalid file format. Upload an image or video.')
 
       const fileExt = image.name.split('.').pop()
       const fileName = `page-items/${user.id}-${Date.now()}.${fileExt}`

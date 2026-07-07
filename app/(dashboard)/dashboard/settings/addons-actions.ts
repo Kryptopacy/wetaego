@@ -77,6 +77,8 @@ export const saveIouSettings = authActionClient
     auto_approve_spend_threshold_minor: zfd.numeric(z.number().optional()),
     default_credit_limit_minor: zfd.numeric(z.number().default(0)),
     reminder_frequency_days: zfd.numeric(z.number().default(7)),
+    minimum_balance_to_remind_minor: zfd.numeric(z.number().default(50000)),
+    minimum_repayment_percentage: zfd.numeric(z.number().min(1).max(100).default(100)),
   }))
   .action(async ({ parsedInput, ctx: { supabase } }) => {
     const { cookies } = await import('next/headers')
@@ -90,6 +92,8 @@ export const saveIouSettings = authActionClient
       auto_approve_spend_threshold_minor,
       default_credit_limit_minor,
       reminder_frequency_days,
+      minimum_balance_to_remind_minor,
+      minimum_repayment_percentage,
     } = parsedInput
 
     const { error } = await supabase
@@ -100,6 +104,8 @@ export const saveIouSettings = authActionClient
         auto_approve_spend_threshold_minor: auto_approve_spend_threshold_minor || null,
         default_credit_limit_minor,
         reminder_frequency_days,
+        minimum_balance_to_remind_minor,
+        minimum_repayment_percentage,
       })
 
     if (error) throw new Error((error as Error).message)

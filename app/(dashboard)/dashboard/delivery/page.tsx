@@ -30,13 +30,12 @@ export default async function DeliveryPage() {
     return <div className="p-8 text-white">Please select a location from the sidebar.</div>
   }
 
-  // Fetch only delivery orders (excluding cancelled)
+  // Fetch active orders
   const { data: orders } = await supabase
     .from('orders')
     .select('*, order_items(*)')
     .eq('organization_id', orgId)
     .eq('location_id', locationId)
-    .eq('fulfillment_type', 'delivery')
     .in('status', ['paid', 'preparing', 'out_for_delivery', 'completed'])
     .order('created_at', { ascending: false })
     .limit(100)
@@ -48,10 +47,10 @@ export default async function DeliveryPage() {
     <div className="max-w-7xl h-[calc(100vh-80px)] flex flex-col space-y-6 pb-6">
       <div>
         <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-          <Truck className="w-6 h-6 text-indigo-500" />
-          Delivery Hub
+          <Truck className="w-6 h-6 text-indigo-400" />
+          Fulfillment Board
         </h1>
-        <p className="text-zinc-400 mt-1">Manage delivery orders and dispatch riders.</p>
+        <p className="text-zinc-400 mt-1">Manage incoming orders and fulfillments.</p>
       </div>
 
       <DeliveryClient 

@@ -1,97 +1,118 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createAdminClient } from '@/lib/supabase/server'
 import { Resend } from 'resend'
-import { sendWhatsAppMessage } from '@/lib/notifications/termii'
-
-// Initialize Supabase admin client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-const supabase = createClient(supabaseUrl, supabaseServiceKey)
+import { IouReminderEmail } from '@/components/emails/IouReminderEmail'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
-async function sendEmailReminder(email: string, subject: string, text: string) {
-  if (!process.env.RESEND_API_KEY) {
-    console.warn('Resend key absent. Cannot send email.')
-    return false
-  }
-
-  try {
-    await resend.emails.send({
-      from: 'OurMenu <noreply@ourmenu.com>',
-      to: email,
-      subject,
-      text
-    })
-    return true
-  } catch (error) {
-    console.error('Failed to send email', error)
-    return false
-  }
-}
-
+// This route should be secured by Vercel Cron.
+// For testing locally, you can hit it manually, but in prod Vercel will send an auth header.
 export async function GET(request: Request) {
   try {
-    // 1. Fetch all customers with an active IOU
-    const { data: customers, error } = await supabase
-      .from('customer_profiles')
-      .select('*, organizations(name, metadata)')
-      .gt('credit_balance_minor', 0)
+    const authHeader = request.headers.get('authorization')
+    // In production, enforce VERCEL_CRON_SECRET
+    if (
+      process.env.NODE_ENV === 'production' &&
+      authHeader !== `Bearer ${process.env.VERCEL_CRON_SECRET}`
+    ) {
+      return new NextResponse('Unauthorized', { status: 401 })
+    }
 
-    if (error) throw error
+    const supabase = await createAdminClient()
 
-    let remindersSent = 0
+    // 1. Fetch all enabled IOU settings
+    const { data: orgSettings, error: settingsError } = await supabase
+      .from('iou_settings')
+      .select('organization_id, reminder_frequency_days, minimum_balance_to_remind_minor, minimum_repayment_percentage, organizations(name, slug)')
+      .eq('is_enabled', true)
 
-    for (const customer of customers || []) {
-      const orgMetadata = customer.organizations?.metadata as any || {}
-      const frequency = orgMetadata.iou_reminder_frequency || 'weekly'
-      const minInstallmentPct = orgMetadata.iou_min_installment_pct || 100
+    if (settingsError) {
+      console.error('Error fetching IOU settings:', settingsError)
+      return NextResponse.json({ error: 'Failed to fetch settings' }, { status: 500 })
+    }
 
-      // 2. Check if it's time to send a reminder based on frequency
-      if (customer.last_iou_reminder_sent_at) {
-        const lastSent = new Date(customer.last_iou_reminder_sent_at)
-        const now = new Date()
-        const daysSinceLastReminder = (now.getTime() - lastSent.getTime()) / (1000 * 3600 * 24)
+    if (!orgSettings || orgSettings.length === 0) {
+      return NextResponse.json({ message: 'No enabled IOU settings found.' })
+    }
 
-        if (frequency === 'daily' && daysSinceLastReminder < 1) continue
-        if (frequency === 'weekly' && daysSinceLastReminder < 7) continue
-        if (frequency === 'monthly' && daysSinceLastReminder < 30) continue
+    let emailsSent = 0
+
+    // 2. Iterate through organizations and find customers who need reminders
+    for (const settings of orgSettings) {
+      const orgId = settings.organization_id
+      const minBalance = settings.minimum_balance_to_remind_minor
+      const freqDays = settings.reminder_frequency_days
+      const orgName = (settings.organizations as any).name
+      const orgSlug = (settings.organizations as any).slug
+
+      // Customers whose credit balance exceeds minimum
+      const { data: customers, error: customersError } = await supabase
+        .from('customer_profiles')
+        .select('id, email, credit_balance_minor, last_iou_reminder_sent_at')
+        .eq('organization_id', orgId)
+        .gt('credit_balance_minor', minBalance || 0)
+
+      if (customersError) {
+        console.error(`Error fetching customers for org ${orgId}:`, customersError)
+        continue
       }
 
-      // 3. Prepare the reminder message
-      const balance = (customer.credit_balance_minor / 100).toFixed(2)
-      const minPayment = ((customer.credit_balance_minor / 100) * (minInstallmentPct / 100)).toFixed(2)
-      
-      const message = `Hello, this is a gentle reminder from ${customer.organizations?.name} regarding your open tab. ` +
-        `Your current outstanding balance is ${balance}. ` +
-        (minInstallmentPct < 100 ? `You can pay in installments. The minimum accepted payment is ${minPayment} (${minInstallmentPct}%). ` : '') +
-        `Please settle your tab at your earliest convenience.`
+      if (!customers) continue
 
-      // 4. Try WhatsApp first if phone exists
-      let success = false
-      if (customer.phone_number) {
-        success = await sendWhatsAppMessage(customer.phone_number, message)
-      }
+      const now = new Date()
 
-      // 5. Fallback to Email if WhatsApp failed or no phone exists
-      if (!success && customer.email) {
-        success = await sendEmailReminder(customer.email, `Tab Reminder from ${customer.organizations?.name}`, message)
-      }
+      for (const customer of customers) {
+        // Skip if no email
+        if (!customer.email) continue
 
-      // 6. Update last_iou_reminder_sent_at if successful
-      if (success) {
-        await supabase
-          .from('customer_profiles')
-          .update({ last_iou_reminder_sent_at: new Date().toISOString() })
-          .eq('id', customer.id)
-        
-        remindersSent++
+        let shouldSend = false
+
+        if (!customer.last_iou_reminder_sent_at) {
+          shouldSend = true
+        } else {
+          const lastSent = new Date(customer.last_iou_reminder_sent_at)
+          const diffTime = Math.abs(now.getTime() - lastSent.getTime())
+          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+          if (diffDays >= (freqDays || 7)) {
+            shouldSend = true
+          }
+        }
+
+        if (shouldSend) {
+          // Send email
+          const paymentLink = `https://ourmenuos.online/m/${orgSlug}/iou/${customer.id}`
+
+          try {
+            await resend.emails.send({
+              from: 'OurMenu IOU <reminder@ourmenuos.online>',
+              to: customer.email,
+              subject: `Action Required: Outstanding IOU Balance at ${orgName}`,
+              react: IouReminderEmail({
+                customerName: 'Customer',
+                organizationName: orgName,
+                balanceDueMinor: customer.credit_balance_minor || 0,
+                minimumRepaymentPercentage: settings.minimum_repayment_percentage || 100,
+                paymentLink,
+              }),
+            })
+
+            // Update last_iou_reminder_sent_at
+            await supabase
+              .from('customer_profiles')
+              .update({ last_iou_reminder_sent_at: new Date().toISOString() })
+              .eq('id', customer.id)
+
+            emailsSent++
+          } catch (e) {
+            console.error(`Failed to send email to ${customer.email}:`, e)
+          }
+        }
       }
     }
 
-    return NextResponse.json({ success: true, remindersSent })
-  } catch (error: any) {
-    console.error('IOU Reminder Cron Error:', error)
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+    return NextResponse.json({ success: true, emailsSent })
+  } catch (err: any) {
+    console.error('Unhandled Cron Error:', err)
+    return NextResponse.json({ error: err.message }, { status: 500 })
   }
 }

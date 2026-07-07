@@ -9,6 +9,8 @@ import { z } from 'zod'
 import { paymentProvider } from '@/lib/payments/paystack'
 import { getPlatformFees } from '@/lib/utils/settings'
 import { PaymentLinkEmail } from '@/emails/payment-link-email'
+import { OrderCancellationEmail } from '@/emails/order-cancellation-email'
+import { OrderRefundEmail } from '@/emails/order-refund-email'
 
 const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy')
 
@@ -125,7 +127,7 @@ export const cancelOrderAction = authActionClient
     restock: z.boolean()
   }))
   .action(async ({ parsedInput: { orderId, reason, restock }, ctx: { user } }) => {
-    const { supabase } = await requireOrderAuth(orderId, user)
+    const { supabase, order } = await requireOrderAuth(orderId, user)
 
     // 1. Update status to cancelled and store reason
     const { error: updateError } = await supabase
@@ -150,6 +152,26 @@ export const cancelOrderAction = authActionClient
           p_items: items
         })
       }
+    }
+
+    if (order.customer_email) {
+      const orgName = (order.organizations as unknown as { name?: string })?.name || 'OurMenu Partner'
+      waitUntil((async () => {
+        try {
+          await resend.emails.send({
+            from: 'OurMenu Orders <orders@ourmenuos.online>',
+            to: order.customer_email!,
+            subject: `Update on Order #${orderId.substring(0, 8)} - Cancelled`,
+            react: OrderCancellationEmail({
+              organizationName: orgName,
+              orderId,
+              reason
+            })
+          })
+        } catch (err) {
+          console.error('Failed to send cancellation email:', err)
+        }
+      })())
     }
 
     return { success: true }
@@ -249,4 +271,144 @@ export const sendPaymentLinkAction = authActionClient
     })())
 
     return { success: true, checkoutUrl }
+  })
+async function verifyManagerPin(supabase: any, organizationId: string, locationId: string, pin: string) {
+  // 1. Check location PIN
+  const { data: loc } = await supabase
+    .from('locations')
+    .select('manager_pin')
+    .eq('id', locationId)
+    .single()
+    
+  if (loc && loc.manager_pin === pin) return true
+  
+  // 2. Check org member PINs
+  const { data: members } = await supabase
+    .from('organization_members')
+    .select('manager_pin')
+    .eq('organization_id', organizationId)
+    .in('role', ['owner', 'manager'])
+    .not('manager_pin', 'is', null)
+    
+  if (members && members.some((m: any) => m.manager_pin === pin)) {
+    return true
+  }
+  
+  return false
+}
+
+export const voidOrderAction = authActionClient
+  .schema(z.object({
+    orderId: z.string(),
+    pin: z.string(),
+    restock: z.boolean().default(true)
+  }))
+  .action(async ({ parsedInput: { orderId, pin, restock }, ctx: { user } }) => {
+    const { supabase, order } = await requireOrderAuth(orderId, user)
+    
+    const { data: fullOrder } = await supabase.from('orders').select('location_id, status').eq('id', orderId).single()
+    if (!fullOrder) throw new Error('Order not found')
+    
+    const isValid = await verifyManagerPin(supabase, order.organization_id, fullOrder.location_id, pin)
+    if (!isValid) throw new Error('Invalid Manager PIN')
+    
+    const { error: updateError } = await supabase
+      .from('orders')
+      .update({ status: 'voided' })
+      .eq('id', orderId)
+      
+    if (updateError) throw new Error('Failed to void order')
+    
+    if (restock) {
+      const { data: items } = await supabase
+        .from('order_items')
+        .select('item_id, quantity')
+        .eq('order_id', orderId)
+        .not('item_id', 'is', null)
+
+      if (items && items.length > 0) {
+        await supabase.rpc('increment_stock', { p_items: items })
+      }
+    }
+    
+    if (order.customer_email) {
+      const orgName = (order.organizations as unknown as { name?: string })?.name || 'OurMenu Partner'
+      waitUntil((async () => {
+        try {
+          await resend.emails.send({
+            from: 'OurMenu Orders <orders@ourmenuos.online>',
+            to: order.customer_email!,
+            subject: `Update on Order #${orderId.substring(0, 8)} - Voided`,
+            react: OrderCancellationEmail({
+              organizationName: orgName,
+              orderId,
+              reason: 'Order was voided by management.'
+            })
+          })
+        } catch (err) {
+          console.error('Failed to send void email:', err)
+        }
+      })())
+    }
+
+    return { success: true }
+  })
+  
+export const refundOrderAction = authActionClient
+  .schema(z.object({
+    orderId: z.string(),
+    pin: z.string()
+  }))
+  .action(async ({ parsedInput: { orderId, pin }, ctx: { user } }) => {
+    const { supabase, order } = await requireOrderAuth(orderId, user)
+    
+    const { data: fullOrder } = await supabase.from('orders').select('location_id, status').eq('id', orderId).single()
+    if (!fullOrder) throw new Error('Order not found')
+    
+    const isValid = await verifyManagerPin(supabase, order.organization_id, fullOrder.location_id, pin)
+    if (!isValid) throw new Error('Invalid Manager PIN')
+    
+    const { data: payments } = await supabase
+      .from('order_payments')
+      .select('provider_reference, amount_minor')
+      .eq('order_id', orderId)
+      .gt('amount_minor', 0)
+      
+    const realPayment = payments?.find(p => p.provider_reference && !p.provider_reference.startsWith('offline'))
+    
+    if (realPayment && paymentProvider.refundPayment) {
+      const refundResult = await paymentProvider.refundPayment(realPayment.provider_reference, realPayment.amount_minor)
+      if (!refundResult.success) {
+        throw new Error(refundResult.message || 'Refund failed at payment gateway')
+      }
+    }
+    
+    const { error: updateError } = await supabase
+      .from('orders')
+      .update({ status: 'refunded' })
+      .eq('id', orderId)
+      
+    if (updateError) throw new Error('Failed to update order status')
+    
+    if (order.customer_email) {
+      const orgName = (order.organizations as unknown as { name?: string })?.name || 'OurMenu Partner'
+      waitUntil((async () => {
+        try {
+          await resend.emails.send({
+            from: 'OurMenu Orders <orders@ourmenuos.online>',
+            to: order.customer_email!,
+            subject: `Refund Processed for Order #${orderId.substring(0, 8)}`,
+            react: OrderRefundEmail({
+              organizationName: orgName,
+              orderId,
+              refundAmountMinor: realPayment?.amount_minor
+            })
+          })
+        } catch (err) {
+          console.error('Failed to send refund email:', err)
+        }
+      })())
+    }
+
+    return { success: true }
   })

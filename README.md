@@ -107,12 +107,12 @@ A resilient, globally aware checkout engine powers the entire ecosystem:
 - **Global Manual Fallback:** If API keys are pending or the payment provider experiences regional downtime, the system automatically degrades to a localized "Manual Bank Transfer" workflow, ensuring conversions are never blocked.
 - **Omnichannel Logistics & Per-Page Routing:** Full, robust support for Dine-in (Table-specific QR mapping), Pickup, and Delivery (with interactive delivery zones, SMS phone verification, and dynamic fees). Fulfillment logic is highly granular, allowing **per-page configuration** (e.g., a "Room Service" page forces table delivery, while a "Lobby Cafe" page allows pickup).
 
-### 2. Live Fulfillment Dashboard & Delivery Supervision
+### 2. Live Fulfillment Dashboard & Workstation Routing
 Re-architected to serve any industry, the operations center is a real-time, WebSocket-powered hub:
 - **Universal Tracking:** Tracks incoming restaurant orders, spa booking requests, and retail pickup orders simultaneously.
-- **Delivery Kanban Hub:** A dedicated drag-and-drop Kanban dashboard specifically built to supervise dispatch operations, seamlessly moving orders from *Preparing* to *Out for Delivery* to *Delivered*.
-- **Advanced Triaging & Deep Search:** Instantly filters active states (Pending, Preparing, Paid), calculates prep times, and supports deep-searching globally by Table ID, Order ID, and specific item names.
-- **Fulfillment States:** Seamless drag-and-drop state transitions from "Received" to "In Progress" to "Fulfilled."
+- **Dynamic Workstation Routing:** Orders are intelligently fragmented and routed to specific departments (e.g., *Grill*, *Tailoring*, *Bar*). Workstations can filter the board to only see the partial tickets relevant to them, ensuring extreme operational efficiency.
+- **Fulfillment Kanban Hub:** A dedicated drag-and-drop Kanban dashboard specifically built to supervise dispatch operations, seamlessly moving orders through generic states (*To Do* ➔ *In Progress* ➔ *Completed*).
+- **Advanced Triaging & Deep Search:** Instantly filters active states, calculates prep times, and supports deep-searching globally by Table ID, Order ID, and specific item names.
 
 ### 3. PWA & True Native App Experience
 OurMenu OS feels indistinguishable from a native iOS/Android application:
@@ -155,9 +155,10 @@ A powerful, centralized control panel allowing platform owners to dictate global
 - **Answer Engine Optimization (AEO):** Screen-reader-only descriptive blocks feed AI tools (ChatGPT, Perplexity) context around business identities. 
 - **Privacy-First Indexing:** A strict opt-in framework controls web crawlers. All tenant directories default to `noindex, nofollow` to protect private menus, only enabling public indexing when the tenant explicitly grants consent via the compliance dashboard.
 
-### 9. Inventory Manager (Physical Stock Tracking)
+### 9. Inventory Manager & Component Breakdown (BOM)
 A purpose-built, real-time stock management system designed for any physical business — roadside grills, cafes, retail stores, salons — that needs to track tangible assets without a complex ERP:
 - **Live Item Ledger:** Every item has a running quantity, category, unit, SKU, optional cost price, reorder threshold, and notes. Items are per-location, so multi-branch orgs stay fully isolated.
+- **Component Breakdown (BOM) Engine:** Dynamically map catalogue products to required raw materials (e.g. a "Burger" requires 1 "Bun" and 1 "Patty"). When a product is sold, the system atomically calculates historical **Cost of Goods Sold (COGS)** and deducts the exact ingredient quantities from the ledger.
 - **5 Movement Types:** `Restock`, `Use`, `Wastage/Loss`, `Sale`, and `Manual Adjustment` — each with an optional note for accountability.
 - **Signed Quantity Trigger:** A Postgres trigger (`sync_inventory_quantity`) atomically applies every movement to the item's `current_quantity`, making the ledger race-condition-safe.
 - **Stock Status Alerts:** Items automatically surface as *In Stock*, *Low Stock* (approaching the reorder threshold), or *Out of Stock* with distinct colour-coded visual states.
@@ -165,25 +166,27 @@ A purpose-built, real-time stock management system designed for any physical bus
 - **Movement Log Tab:** A full chronological audit log of every stock event across the location — filterable and reverse-sorted by time.
 - **Stats Row:** At-a-glance totals for Total Items, Low Stock count, and Out-of-Stock count with clickable filter shortcuts.
 
-### 9. Order Cancellation & Smart Sell-Out Engine
+### 10. Order Cancellation & Smart Sell-Out Engine
 - **Atomic Sell-Out Tracking:** Items can optionally track finite units via race-condition-free database RPCs, automatically switching to *Sold Out* when availability reaches zero.
 - **Order Cancellation Lifecycle:** Businesses can safely reject orders with a logged reason for analytics, with the option to instantly restock rejected inventory.
 - **Optimistic UI Validation:** Waitstaff can modify stock limits dynamically from the dashboard without page refreshes.
 
-### 10. Customer IOU & Store Credit System
+### 11. Customer IOU & Store Credit System
 - **B2B & B2C Credit Management:** Organizations can manually approve trusted customers for a "Buy Now, Pay Later" (IOU) tab, complete with dynamic credit limits and auto-approval thresholds based on historical spend.
 - **Omnichannel Credit Checkout:** Integrated directly into the guest checkout flow, allowing approved customers to bypass card/cash payments and deduct instantly from their Store Credit balance.
-- **Automated Bookkeeping & Reminders:** The system tracks `iou_transactions`, logs installment payments, automatically restricts customers who exceed limits, and dispatches cron-driven overdue reminders.
+- **Automated IOU Reminder Engine:** Vercel Cron orchestrator intelligently identifies customers whose balance exceeds organization thresholds and automatically dispatches rich HTML emails with direct payment links, enforcing minimum repayment percentages.
+- **Storefront Payment Portal:** A frictionless, no-login portal (`/m/[slug]/iou/[customerId]`) where customers can seamlessly clear partial or full debt balances directly via Paystack, triggering real-time webhook reconciliation against their credit limit.
 
-### 11. Enterprise Team & Intercom Orchestration
+### 12. Enterprise Team & Intercom Orchestration
 - **Department-Based Routing & Roles:** Organizations can group staff into bespoke departments (e.g., *Kitchen*, *Concierge*, *Housekeeping*). The platform natively provisions strict Row Level Security (RLS) to isolate staff members to their designated domains.
 - **Realtime Internal Chat:** A floating, globally accessible communication widget for staff to coordinate in real-time, featuring dedicated channels per department.
 - **Managerial Oversight:** Owners and Managers automatically inherit read/write bypasses allowing them to oversee and communicate across all departmental channels simultaneously.
 - **Rich Media & WebSocket Synchronization:** Powered by Supabase Realtime subscriptions, ensuring messages (text, voice notes, cloud-backed images) instantly propagate across all active staff dashboard sessions.
 
-### 12. Back-of-House Operations Engine
+### 13. Back-of-House Operations Engine
 OurMenu OS is a true operating system, extending far beyond the customer-facing frontend into deep backend workflows:
 - **Demo Mode Bypass:** A dedicated `?demo=1` architectural flow allowing prospective users to experience the full dashboard, analytics, and CRM mock data without creating an account.
+- **Master Cron Orchestrator:** Designed to bypass Vercel Hobby tier limitations by orchestrating multiple background jobs (Daily Reports, IOU Reminders, Abandoned Carts) within unified daily execution slots.
 - **Automated Daily Reports:** Nightly cron jobs that aggregate key business metrics (sales, velocity, feedback) and email summarized briefings directly to owners.
 - **Quotes Engine:** A dedicated pipeline for consultants, freelancers, and agencies to track, manage, and respond to custom B2B rate inquiries instantly.
 - **Properties & Shifts Management:** Dedicated infrastructure for scheduling staff shifts and managing complex real estate and lodging templates.
@@ -220,6 +223,15 @@ OurMenu OS monetizes via three tiered subscription plans, driven by a unified cr
 - **Locations:** Multi-location dashboard (Manage multiple venues under one org)
 - **Features included:** All premium AI tools, unlimited hardware provisioning, custom portals.
 - **Integrations:** Direct API access for PMS (Property Management System) integration.
+
+### Phase 3: Visual Resource Manager
+- **Status:** **Completed**
+- **Core Additions:**
+  - `public.resources` table for defining tables, rooms, and bays.
+  - UI grid grouping resources by logical Zones (e.g., "Main Floor").
+  - Order payloads now map directly to `resource_id` instead of raw strings.
+  - Generates instant QR codes that point to `?resource=[UUID]` for airtight cart tracking.
+  - Full mobile responsiveness utilizing modern flex/grid and micro-animations.
 
 ---
 

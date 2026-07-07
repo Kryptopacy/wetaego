@@ -15,7 +15,7 @@ import { mapSupabaseOrderToUI } from '@/lib/utils/transformers'
 import { UIOrder } from '@/lib/types/frontend'
 import { useOfflineSync } from '@/hooks/use-offline-sync'
 import { QueuedAction } from '@/lib/stores/offline-queue-store'
-import { completeOrderAction, markOrderPaidOffline, cancelOrderAction, sendPaymentLinkAction } from './actions'
+import { completeOrderAction, markOrderPaidOffline, cancelOrderAction, sendPaymentLinkAction, voidOrderAction, refundOrderAction } from './actions'
 import { OfflineIndicator } from './components/offline-indicator'
 import { HardwareSettingsView } from './components/hardware-settings-view'
 import { usePrinterStore } from '@/lib/stores/printer-store'
@@ -371,6 +371,35 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
     )
   }
 
+  const handleVoidOrder = async (orderId: string, pin: string) => {
+    try {
+      const res = await voidOrderAction({ orderId, pin, restock: true })
+      if (res?.serverError || res?.validationErrors) {
+        return { success: false, error: res.serverError || 'Failed to void order' }
+      }
+      toast.success('Order voided successfully.')
+      return { success: true }
+    } catch (e: any) {
+      return { success: false, error: e.message || 'Error voiding order' }
+    }
+  }
+
+  const handleRefundOrder = async (orderId: string, pin: string) => {
+    toast.loading('Processing refund...', { id: `refund-${orderId}` })
+    try {
+      const res = await refundOrderAction({ orderId, pin })
+      if (res?.serverError || res?.validationErrors) {
+        toast.error(res.serverError || 'Failed to refund order', { id: `refund-${orderId}` })
+        return { success: false, error: res.serverError || 'Failed to refund order' }
+      }
+      toast.success('Order refunded successfully.', { id: `refund-${orderId}` })
+      return { success: true }
+    } catch (e: any) {
+      toast.error(e.message || 'Error processing refund', { id: `refund-${orderId}` })
+      return { success: false, error: e.message || 'Error processing refund' }
+    }
+  }
+
   return (
     <div className="flex-1 flex flex-col mt-8">
       <OfflineIndicator socketStatus={socketStatus} />
@@ -427,6 +456,8 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
             onCompleteOrder={handleCompleteOrder}
             onCancelOrder={handleCancelOrder}
             onSendPaymentLink={handleSendPaymentLink}
+            onVoidOrder={handleVoidOrder}
+            onRefundOrder={handleRefundOrder}
           />
         </div>
       ) : activeTab === 'history' ? (

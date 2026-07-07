@@ -181,9 +181,15 @@ export function PageBuilderForm({ pageId, templateType, initialItems, orgId }: P
 
         {templateType === 'catalog' && (
           <>
-            <div>
-              <label className="block text-xs font-medium text-zinc-400 mb-1">Category</label>
-              <input name="category" defaultValue={category} className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white" placeholder="e.g. Services" />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-medium text-zinc-400 mb-1">Category</label>
+                <input name="category" defaultValue={category} className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white" placeholder="e.g. Services" />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-zinc-400 mb-1">Department / Workstation</label>
+                <input name="department" defaultValue={(item as any)?.department || ''} className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white" placeholder="e.g. Grill, Tailoring, Studio" />
+              </div>
             </div>
             <VariantBuilderField
               initialVariants={(item?.item_data as any)?.variants || []}
@@ -254,9 +260,9 @@ export function PageBuilderForm({ pageId, templateType, initialItems, orgId }: P
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-zinc-400 mb-1">Image / Photo (Optional)</label>
+          <label className="block text-xs font-medium text-zinc-400 mb-1">Image / Video (Optional)</label>
           <div className="flex gap-4 items-start">
-            <input type="file" name="image" accept="image/*" className="w-full text-xs text-zinc-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-medium file:bg-zinc-800 file:text-zinc-300 hover:file:bg-zinc-700 cursor-pointer" />
+            <input type="file" name="image" accept="image/*,video/mp4,video/webm,video/quicktime" className="w-full text-xs text-zinc-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-medium file:bg-zinc-800 file:text-zinc-300 hover:file:bg-zinc-700 cursor-pointer" />
             <button 
               type="button"
               onClick={async () => {

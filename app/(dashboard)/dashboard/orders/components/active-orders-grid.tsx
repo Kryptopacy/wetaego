@@ -6,6 +6,7 @@ import { UIOrder } from '@/lib/types/frontend'
 import { Printer } from 'lucide-react'
 import { usePrinterStore } from '@/lib/stores/printer-store'
 import { printOrder } from '@/lib/utils/printer'
+import { PINPromptModal } from './pin-prompt-modal'
 
 interface ActiveOrdersGridProps {
   activeOrders: UIOrder[]
@@ -17,9 +18,11 @@ interface ActiveOrdersGridProps {
   onCompleteOrder: (id: string) => Promise<void>
   onCancelOrder: (id: string, reason: string, restock: boolean) => Promise<void>
   onSendPaymentLink: (id: string) => Promise<void>
+  onVoidOrder: (id: string, pin: string) => Promise<{success: boolean, error?: string}>
+  onRefundOrder: (id: string, pin: string) => Promise<{success: boolean, error?: string}>
 }
 
-export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, templateType, onClaimOrder, onMarkPaidOffline, onCompleteOrder, onCancelOrder, onSendPaymentLink }: ActiveOrdersGridProps) {
+export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, templateType, onClaimOrder, onMarkPaidOffline, onCompleteOrder, onCancelOrder, onSendPaymentLink, onVoidOrder, onRefundOrder }: ActiveOrdersGridProps) {
   const [optimisticOrders, addOptimisticOrder] = useOptimistic(
     activeOrders,
     (state: UIOrder[], updatedOrder: Partial<UIOrder> & { id: string }) => {
@@ -36,6 +39,22 @@ export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, tem
   const [searchQuery, setSearchQuery] = useState('')
   const [, setTick] = useState(0)
   const [cancelState, setCancelState] = useState<{ orderId: string; reason: string; restock: boolean } | null>(null)
+  
+  // States for Void/Refund
+  const [voidState, setVoidState] = useState<{ orderId: string } | null>(null)
+  const [refundState, setRefundState] = useState<{ orderId: string } | null>(null)
+  const [isProcessingAction, setIsProcessingAction] = useState(false)
+  const [actionError, setActionError] = useState<string | null>(null)
+
+  const handleShareDispatch = async (orderId: string) => {
+    const link = `${window.location.origin}/d/${orderId}`
+    try {
+      await navigator.clipboard.writeText(link)
+      alert('Dispatch link copied to clipboard!')
+    } catch (err) {
+      alert(`Failed to copy. Share this link: ${link}`)
+    }
+  }
 
   // Force re-render every 30 seconds to update SLA timers
   useEffect(() => {
@@ -142,6 +161,71 @@ export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, tem
           </div>
         )}
         
+        {/* Void Order Modal */}
+        {voidState && (
+          <PINPromptModal
+            title="Void Unpaid Order"
+            description="Enter your Manager PIN to void this order."
+            actionLabel="Void Order"
+            isLoading={isProcessingAction}
+            onCancel={() => { setVoidState(null); setActionError(null); }}
+            onConfirm={async (pin) => {
+              setIsProcessingAction(true)
+              setActionError(null)
+              try {
+                const res = await onVoidOrder(voidState.orderId, pin)
+                if (res.success) {
+                  startTransition(() => {
+                    addOptimisticOrder({ id: voidState.orderId, status: 'cancelled' }) // using cancelled optimistic state to remove it
+                  })
+                  setVoidState(null)
+                } else {
+                  setActionError(res.error || 'Failed to void order')
+                }
+              } finally {
+                setIsProcessingAction(false)
+              }
+            }}
+          />
+        )}
+        
+        {/* Refund Order Modal */}
+        {refundState && (
+          <PINPromptModal
+            title="Refund Paid Order"
+            description="Enter your Manager PIN to refund this payment. This will initiate a gateway refund if paid online."
+            actionLabel="Refund Payment"
+            isLoading={isProcessingAction}
+            onCancel={() => { setRefundState(null); setActionError(null); }}
+            onConfirm={async (pin) => {
+              setIsProcessingAction(true)
+              setActionError(null)
+              try {
+                const res = await onRefundOrder(refundState.orderId, pin)
+                if (res.success) {
+                  startTransition(() => {
+                    addOptimisticOrder({ id: refundState.orderId, status: 'cancelled' }) // using cancelled optimistic state
+                  })
+                  setRefundState(null)
+                } else {
+                  setActionError(res.error || 'Failed to refund order')
+                }
+              } finally {
+                setIsProcessingAction(false)
+              }
+            }}
+          />
+        )}
+        
+        {/* Global Action Error Toast */}
+        {actionError && (
+          <div className="fixed bottom-4 right-4 z-50 bg-red-600 text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-3">
+            <span className="font-bold">Error:</span>
+            <span>{actionError}</span>
+            <button onClick={() => setActionError(null)} className="ml-2 font-bold text-red-200 hover:text-white">✕</button>
+          </div>
+        )}
+        
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {filteredOrders.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-zinc-500">
@@ -234,15 +318,40 @@ export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, tem
                     📝 Note: {order.customer_note}
                   </div>
                 )}
+                
+                {/* Dispatch Button for Delivery Orders */}
+                {order.fulfillment_type === 'delivery' && (
+                  <div className="mb-4">
+                    <button
+                      onClick={() => handleShareDispatch(order.id)}
+                      className="px-4 py-2 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-400 font-medium transition-colors text-sm border border-indigo-500/20 hover:border-indigo-500/40 w-fit flex items-center gap-2"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                      Share Dispatch Link
+                    </button>
+                  </div>
+                )}
 
                 {/* Desktop Inline Actions (Hidden on Mobile) */}
                 <div className={`hidden sm:flex justify-between items-center mt-4 pt-4 border-t border-zinc-800/50 ${templateType === 'restaurant' ? 'flex-col gap-4 sm:flex-row' : ''}`}>
-                  <button
-                    onClick={() => setCancelState({ orderId: order.id, reason: '', restock: true })}
-                    className="px-4 py-2 rounded-lg text-red-400 hover:bg-red-500/10 font-medium transition-colors text-sm"
-                  >
-                    Reject Order
-                  </button>
+                  <div className="flex items-center gap-2">
+                    {order.status === 'pending' && (
+                      <button
+                        onClick={() => setVoidState({ orderId: order.id })}
+                        className="px-4 py-2 rounded-lg text-red-400 hover:bg-red-500/10 font-medium transition-colors text-sm"
+                      >
+                        Void (Unpaid)
+                      </button>
+                    )}
+                    {(order.status === 'paid' || order.status === 'preparing') && (
+                      <button
+                        onClick={() => setRefundState({ orderId: order.id })}
+                        className="px-4 py-2 rounded-lg text-red-400 hover:bg-red-500/10 font-medium transition-colors text-sm"
+                      >
+                        Refund (Paid)
+                      </button>
+                    )}
+                  </div>
                   <div className={`flex items-center gap-3 ${templateType === 'restaurant' ? 'w-full sm:w-auto flex-col sm:flex-row' : ''}`}>
                     {(!order.assigned_staff_id && (order.status === 'paid' || (order.status === 'pending' && billingMode === 'table_service'))) && (
                       <button 
@@ -338,12 +447,21 @@ export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, tem
                 <span className="text-xs text-zinc-500 uppercase tracking-widest font-bold mb-2">Swipe Actions</span>
                 
                 {/* Cancel Action */}
-                <button
-                  onClick={() => setCancelState({ orderId: order.id, reason: '', restock: true })}
-                  className="w-full px-4 py-3 rounded-xl bg-red-500/10 text-red-400 border border-red-500/20 font-bold active:bg-red-500/20"
-                >
-                  Cancel Order
-                </button>
+                {order.status === 'pending' ? (
+                  <button
+                    onClick={() => setVoidState({ orderId: order.id })}
+                    className="w-full px-4 py-3 rounded-xl bg-red-500/10 text-red-400 border border-red-500/20 font-bold active:bg-red-500/20"
+                  >
+                    Void Order
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => setRefundState({ orderId: order.id })}
+                    className="w-full px-4 py-3 rounded-xl bg-red-500/10 text-red-400 border border-red-500/20 font-bold active:bg-red-500/20"
+                  >
+                    Refund Order
+                  </button>
+                )}
 
                 {/* Claim / Complete Actions */}
                 {(!order.assigned_staff_id && (order.status === 'paid' || (order.status === 'pending' && billingMode === 'table_service'))) && (

@@ -13,9 +13,10 @@ export const updateOrganization = authActionClient
     slug: zfd.text(z.string().min(3, "Slug must be at least 3 characters").regex(/^[a-z0-9-]+$/, "Slug can only contain lowercase letters, numbers, and hyphens")),
     business_type: zfd.text(z.string().optional()),
     logo_url: zfd.text(z.string().optional()),
-    role: zfd.text(z.enum(['owner', 'manager']).optional())
+    role: zfd.text(z.enum(['owner', 'manager']).optional()),
+    refund_policy: zfd.text(z.string().max(2000).optional())
   }))
-  .action(async ({ parsedInput: { name, slug, business_type, logo_url, role }, ctx: { supabase, user } }) => {
+  .action(async ({ parsedInput: { name, slug, business_type, logo_url, role, refund_policy }, ctx: { supabase, user } }) => {
     const { cookies } = await import('next/headers')
     if ((await cookies()).get('demo_mode')?.value === '1') {
       revalidatePath('/dashboard/settings')
@@ -35,7 +36,7 @@ export const updateOrganization = authActionClient
       // Update existing org
       const { error } = await supabase
         .from('organizations')
-        .update({ name, slug, ...(business_type ? { business_type } : {}), ...(logo_url !== undefined ? { logo_url } : {}) })
+        .update({ name, slug, ...(business_type ? { business_type } : {}), ...(logo_url !== undefined ? { logo_url } : {}), refund_policy: refund_policy || null })
         .eq('id', org.id)
       
       if (error) throw new Error('Failed to update organization')
@@ -72,7 +73,8 @@ export const updateOrganization = authActionClient
           referred_by_affiliate_id: referredByAffiliateId,
           trial_ends_at: trialEndsAt,
           business_type: business_type || null,
-          logo_url: logo_url || null
+          logo_url: logo_url || null,
+          refund_policy: refund_policy || null
         })
         .select('id')
         .single()
@@ -318,6 +320,7 @@ export const saveLocationInfoSettings = authActionClient
     portalDisplayName: zfd.text(z.string().max(100).optional()),
     randomizerEnabled: zfd.checkbox(),
     isSearchVisible: zfd.checkbox(),
+    managerPin: zfd.text(z.string().regex(/^\d{4,6}$/, "PIN must be 4-6 digits").optional().or(z.literal(''))),
   }))
   .action(async ({ parsedInput, ctx: { supabase, user } }) => {
     const { cookies } = await import('next/headers')
@@ -377,6 +380,7 @@ export const saveLocationInfoSettings = authActionClient
         portal_display_name: parsedInput.portalDisplayName || null,
         randomizer_enabled: parsedInput.randomizerEnabled,
         is_search_visible: parsedInput.isSearchVisible,
+        manager_pin: parsedInput.managerPin === '' ? null : (parsedInput.managerPin || null),
       })
       .eq('id', locationId)
 

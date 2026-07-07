@@ -85,6 +85,31 @@ export const paystackProvider: PaymentProvider = {
     }
   },
 
+  async refundPayment(reference: string, amountMinor?: number, useTestKeys?: boolean) {
+    const secretKey = useTestKeys ? process.env.PAYSTACK_TEST_SECRET_KEY : process.env.PAYSTACK_SECRET_KEY
+    if (!secretKey) throw new Error('PAYSTACK_SECRET_KEY is not configured')
+
+    const payload: any = { transaction: reference }
+    if (amountMinor) payload.amount = amountMinor
+
+    const res = await fetch(`${PAYSTACK_BASE}/refund`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${secretKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload)
+    })
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}))
+      console.error('Paystack refund failed:', err)
+      return { success: false, message: err.message || 'Refund failed at gateway' }
+    }
+
+    return { success: true }
+  },
+
   validateWebhookSignature(payload: string, signature: string): boolean {
     const liveKey = process.env.PAYSTACK_SECRET_KEY
     const testKey = process.env.PAYSTACK_TEST_SECRET_KEY

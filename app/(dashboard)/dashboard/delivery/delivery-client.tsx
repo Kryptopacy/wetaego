@@ -21,14 +21,19 @@ interface DeliveryClientProps {
 type ColumnStatus = 'preparing' | 'out_for_delivery' | 'completed'
 
 const COLUMNS: { id: ColumnStatus; label: string; icon: React.ElementType; color: string; border: string }[] = [
-  { id: 'preparing', label: 'Preparing', icon: Package, color: 'bg-amber-500/10 text-amber-500', border: 'border-amber-500/20' },
-  { id: 'out_for_delivery', label: 'Out for Delivery', icon: Truck, color: 'bg-indigo-500/10 text-indigo-400', border: 'border-indigo-500/20' },
-  { id: 'completed', label: 'Delivered', icon: CheckCircle, color: 'bg-emerald-500/10 text-emerald-500', border: 'border-emerald-500/20' }
+  { id: 'preparing', label: 'To Do', icon: Package, color: 'bg-amber-500/10 text-amber-500', border: 'border-amber-500/20' },
+  { id: 'out_for_delivery', label: 'In Progress', icon: Truck, color: 'bg-indigo-500/10 text-indigo-400', border: 'border-indigo-500/20' },
+  { id: 'completed', label: 'Completed', icon: CheckCircle, color: 'bg-emerald-500/10 text-emerald-500', border: 'border-emerald-500/20' }
 ]
 
 export function DeliveryClient({ initialOrders, organizationId, locationId, currencyCode }: DeliveryClientProps) {
   const [orders, setOrders] = useState<Order[]>(initialOrders)
+  const [selectedDepartment, setSelectedDepartment] = useState<string>('All')
   const supabase = createClient()
+  
+  const availableDepartments = Array.from(new Set(
+    orders.flatMap(o => o.order_items.map(i => ((i as any).metadata as any)?.department)).filter(Boolean)
+  )).sort() as string[]
 
   useEffect(() => {
     // Realtime updates for orders
@@ -39,9 +44,9 @@ export function DeliveryClient({ initialOrders, organizationId, locationId, curr
         table: 'orders',
         filter: `organization_id=eq.${organizationId}`
       }, async (payload) => {
-        if (payload.new && 'fulfillment_type' in payload.new && payload.new.fulfillment_type === 'delivery') {
+        if (payload.new && (payload.new as any).location_id === locationId) {
            // Refetch this order to get items
-           const { data } = await supabase.from('orders').select('*, order_items(*)').eq('id', payload.new.id).single()
+           const { data } = await supabase.from('orders').select('*, order_items(*)').eq('id', (payload.new as any).id).single()
            if (data) {
              setOrders(prev => {
                const exists = prev.find(o => o.id === data.id)
@@ -90,14 +95,53 @@ export function DeliveryClient({ initialOrders, organizationId, locationId, curr
       setOrders(previousOrders)
     }
   }
-
   return (
-    <div className="flex-1 flex gap-6 overflow-x-auto pb-4 snap-x snap-mandatory">
-      {COLUMNS.map(col => {
-        const columnOrders = orders.filter(o => {
-          if (col.id === 'preparing') return o.status === 'preparing' || o.status === 'paid'
-          return o.status === col.id
-        })
+    <div className="flex flex-col h-full gap-4">
+      {/* Filters */}
+      {availableDepartments.length > 0 && (
+        <div className="flex items-center gap-3">
+          <label className="text-sm text-zinc-400 font-medium">Workstation:</label>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setSelectedDepartment('All')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+                selectedDepartment === 'All' 
+                  ? 'bg-blue-500 text-white' 
+                  : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
+              }`}
+            >
+              All
+            </button>
+            {availableDepartments.map(dept => (
+              <button
+                key={dept}
+                onClick={() => setSelectedDepartment(dept)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+                  selectedDepartment === dept 
+                    ? 'bg-blue-500 text-white' 
+                    : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
+                }`}
+              >
+                {dept}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Board */}
+      <div className="flex-1 flex gap-6 overflow-x-auto pb-4 snap-x snap-mandatory">
+        {COLUMNS.map(col => {
+          const columnOrders = orders.filter(o => {
+            // Filter by department routing first
+            if (selectedDepartment !== 'All') {
+              const hasDepartmentItems = o.order_items.some(i => ((i as any).metadata as any)?.department === selectedDepartment)
+              if (!hasDepartmentItems) return false
+            }
+
+            if (col.id === 'preparing') return o.status === 'preparing' || o.status === 'paid'
+            return o.status === col.id
+          })
 
         return (
           <div 
@@ -162,10 +206,12 @@ export function DeliveryClient({ initialOrders, organizationId, locationId, curr
                     </div>
 
                     <div className="bg-zinc-900/50 rounded-lg p-2.5 space-y-1.5 mb-4">
-                      {order.order_items.map(item => (
-                        <div key={item.id} className="flex justify-between text-xs">
-                          <span className="text-zinc-300"><span className="text-zinc-500 font-bold mr-1">{item.quantity}x</span> {item.item_name}</span>
-                        </div>
+                      {order.order_items
+                        .filter(item => selectedDepartment === 'All' || ((item as any).metadata as any)?.department === selectedDepartment)
+                        .map(item => (
+                          <div key={item.id} className="flex justify-between text-xs">
+                            <span className="text-zinc-300"><span className="text-zinc-500 font-bold mr-1">{item.quantity}x</span> {item.item_name}</span>
+                          </div>
                       ))}
                     </div>
 
@@ -186,6 +232,7 @@ export function DeliveryClient({ initialOrders, organizationId, locationId, curr
           </div>
         )
       })}
+    </div>
     </div>
   )
 }

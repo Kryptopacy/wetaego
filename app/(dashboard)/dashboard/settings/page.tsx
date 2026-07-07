@@ -207,6 +207,19 @@ export default async function SettingsPage({
               </div>
               <p className="mt-1 text-xs text-zinc-500">Only lowercase letters, numbers, and hyphens.</p>
             </div>
+            
+            <div>
+              <label className="mb-2 block text-sm font-medium text-zinc-300">Refund & Cancellation Policy</label>
+              <textarea
+                name="refund_policy"
+                defaultValue={(organization as any)?.refund_policy || ''}
+                rows={3}
+                className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                placeholder="E.g., No refunds after 30 minutes, or a 10% fee applies."
+              />
+              <p className="mt-2 text-xs text-zinc-500">This policy will be shown to customers during checkout to ensure clarity.</p>
+            </div>
+
             <div className="mt-2 flex items-center justify-between">
               <SubmitButton>Save Changes</SubmitButton>
             </div>
@@ -433,6 +446,20 @@ export default async function SettingsPage({
                     maxLength={100}
                   />
                 </div>
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-medium text-amber-400">Manager PIN (Refunds & Voids)</label>
+                <input
+                  type="password"
+                  name="managerPin"
+                  defaultValue={(location as any).manager_pin || ''}
+                  className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  placeholder="4-6 digits"
+                  maxLength={6}
+                  pattern="\d{4,6}"
+                />
+                <p className="mt-2 text-xs text-zinc-500">This shared PIN is used by floor managers to authorize order refunds and voids.</p>
               </div>
 
               <div>
@@ -942,6 +969,20 @@ export default async function SettingsPage({
                   />
                   <p className="text-xs text-zinc-500 mt-2">The starting limit for auto-approved customers.</p>
                 </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-zinc-300">Minimum Balance To Remind (Minor Units)</label>
+                  <input
+                    type="number"
+                    name="minimum_balance_to_remind_minor"
+                    defaultValue={iouSettings?.minimum_balance_to_remind_minor || 50000}
+                    className="w-full rounded-xl bg-zinc-800 border-zinc-700 px-4 py-3 text-white outline-none focus:border-blue-500"
+                    placeholder="e.g. 50000"
+                  />
+                  <p className="text-xs text-zinc-500 mt-2">Do not send reminders if the balance is below this.</p>
+                </div>
                 <div>
                   <label className="mb-2 block text-sm font-medium text-zinc-300">Reminder Frequency (Days)</label>
                   <input
@@ -952,6 +993,24 @@ export default async function SettingsPage({
                     placeholder="e.g. 7"
                   />
                   <p className="text-xs text-zinc-500 mt-2">How often to remind customers with overdue balances.</p>
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-zinc-300">Minimum Repayment Percentage (%)</label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      name="minimum_repayment_percentage"
+                      defaultValue={iouSettings?.minimum_repayment_percentage || 100}
+                      min="1"
+                      max="100"
+                      className="w-full rounded-xl bg-zinc-800 border-zinc-700 px-4 py-3 text-white outline-none focus:border-blue-500 pl-10"
+                      placeholder="e.g. 100"
+                    />
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <span className="text-zinc-400">%</span>
+                    </div>
+                  </div>
+                  <p className="text-xs text-zinc-500 mt-2">The minimum percentage of their debt they must pay off per transaction.</p>
                 </div>
               </div>
 

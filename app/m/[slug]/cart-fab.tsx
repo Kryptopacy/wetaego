@@ -3,6 +3,7 @@
 import { useCartStore } from '@/lib/store/cart'
 import { formatCurrency } from '@/lib/utils/currency'
 import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ShoppingBag } from 'lucide-react'
 import { CheckoutModal } from './components/checkout-modal'
@@ -11,6 +12,7 @@ interface CartFABProps {
   organizationId: string
   locationId: string
   tableIdentifier?: string
+  resourceId?: string
   paymentIsLive?: boolean
   manualPaymentEnabled?: boolean
   manualPaymentBankName?: string | null
@@ -40,6 +42,8 @@ export function CartFAB(props: CartFABProps) {
   const { items, totalAmountMinorForPage, addItem, updateQuantity, clearCart, spinnerDiscount } = useCartStore()
   const [isMounted, setIsMounted] = useState(false)
   const [showCheckoutModal, setShowCheckoutModal] = useState(false)
+  const searchParams = useSearchParams()
+  const urlResourceId = searchParams.get('resource') || props.resourceId
   
   useEffect(() => {
     queueMicrotask(() => setIsMounted(true))
@@ -124,9 +128,11 @@ export function CartFAB(props: CartFABProps) {
         spinnerDiscount={spinnerDiscount}
         pageFulfillmentOptions={props.pageFulfillmentOptions}
         pageBillingMode={props.pageBillingMode}
+        refundPolicy={props.refundPolicy}
         locationTaxes={props.locationTaxes}
         {...props}
         manualPaymentEnabled={props.globalManualPaymentOverride || props.manualPaymentEnabled}
+        resourceId={urlResourceId}
       />
     </>
   )

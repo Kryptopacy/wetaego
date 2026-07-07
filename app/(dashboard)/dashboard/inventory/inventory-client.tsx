@@ -2,8 +2,9 @@
 
 import { useState, useMemo, useTransition } from 'react'
 import { toast } from 'sonner'
-import { Package, Plus, AlertTriangle, Search, BarChart2, Clock, Archive, ChevronDown, ChevronUp, X } from 'lucide-react'
+import { Archive, BarChart2, ChevronDown, ChevronUp, Package, Plus, Search, Tag, X, AlertTriangle, Clock } from 'lucide-react'
 import { addInventoryItem, updateInventoryItem, logInventoryMovement, archiveInventoryItem } from './actions'
+import { BomManager } from './components/bom-manager'
 
 type InventoryItem = {
   id: string
@@ -383,7 +384,7 @@ export function InventoryClient({
   const [logItem, setLogItem] = useState<InventoryItem | null>(null)
   const [addDialogOpen, setAddDialogOpen] = useState(false)
   const [editItem, setEditItem] = useState<InventoryItem | null>(null)
-  const [activeTab, setActiveTab] = useState<'items' | 'log'>('items')
+  const [activeTab, setActiveTab] = useState<'items' | 'log' | 'bom'>('items')
   const [isPending, startTransition] = useTransition()
   const [expandedItem, setExpandedItem] = useState<string | null>(null)
 
@@ -452,6 +453,9 @@ export function InventoryClient({
           </button>
           <button onClick={() => setActiveTab('log')} className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'log' ? 'bg-white text-black' : 'text-zinc-400 hover:text-white'}`}>
             <Clock className="w-4 h-4 inline mr-1.5 -mt-0.5" />Movement Log
+          </button>
+          <button onClick={() => setActiveTab('bom')} className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'bom' ? 'bg-white text-black' : 'text-zinc-400 hover:text-white'}`}>
+            <Tag className="w-4 h-4 inline mr-1.5 -mt-0.5" />BOM
           </button>
         </div>
         {isEditor && (
@@ -627,6 +631,13 @@ export function InventoryClient({
             })
           )}
         </div>
+      )}
+
+      {activeTab === 'bom' && (
+        <BomManager 
+          organizationId={organizationId} 
+          inventoryItems={items} 
+        />
       )}
 
       {/* Dialogs */}

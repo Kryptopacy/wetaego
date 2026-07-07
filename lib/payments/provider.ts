@@ -46,5 +46,6 @@ export interface PaymentProvider {
   readonly name: string
   initiatePayment(params: PaymentParams): Promise<{ authorizationUrl: string; reference: string }>
   verifyPayment(reference: string, useTestKeys?: boolean): Promise<PaymentVerification>
+  refundPayment?(reference: string, amountMinor?: number, useTestKeys?: boolean): Promise<{ success: boolean; message?: string }>
   validateWebhookSignature(payload: string, signature: string): boolean
 }

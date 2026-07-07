@@ -107,6 +107,7 @@ export async function RestaurantRenderer({
         deliveryMinimumOrderMinor={location.delivery_minimum_order_minor}
         deliveryNote={location.delivery_note}
         fulfillmentLocationLabel={location.fulfillment_location_label}
+        refundPolicy={(location as any).organizations?.refund_policy}
       />
     </main>
   )
