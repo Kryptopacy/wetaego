@@ -65,6 +65,11 @@ export async function POST(req: Request) {
           if (e instanceof Error && e.message === 'Booking not found') {
             return NextResponse.json({ error: 'Booking not found' }, { status: 404 })
           }
+          const errorMessage = e instanceof Error ? e.message : String(e)
+          await supabase
+            .from('webhook_events')
+            .update({ status: 'failed', error_message: errorMessage })
+            .eq('provider_reference', event.data.reference)
           throw e
         }
       } else if (rawReference.startsWith('QUOTE_')) {
@@ -73,6 +78,11 @@ export async function POST(req: Request) {
           await processQuoteMilestonePayment(supabase, rawReference, amountPaidMinor)
         } catch (e: unknown) {
           console.error('Failed to process quote payment', e)
+          const errorMessage = e instanceof Error ? e.message : String(e)
+          await supabase
+            .from('webhook_events')
+            .update({ status: 'failed', error_message: errorMessage })
+            .eq('provider_reference', event.data.reference)
           // We still return 200 so Paystack stops retrying if it's a structural error, 
           // or we can let it throw. For now, we'll just throw so it's logged.
           throw e
@@ -88,7 +98,16 @@ export async function POST(req: Request) {
         const currency = event.data.currency || 'NGN'
         
         if (orgId) {
-          await processSubscriptionPayment(supabase, orgId, planType, amountPaidMinor, currency, event.data.reference)
+          try {
+            await processSubscriptionPayment(supabase, orgId, planType, amountPaidMinor, currency, event.data.reference)
+          } catch (e: unknown) {
+            const errorMessage = e instanceof Error ? e.message : String(e)
+            await supabase
+              .from('webhook_events')
+              .update({ status: 'failed', error_message: errorMessage })
+              .eq('provider_reference', event.data.reference)
+            throw e
+          }
         }
         return NextResponse.json({ status: 'subscription_confirmed' }, { status: 200 })
       }
@@ -100,7 +119,16 @@ export async function POST(req: Request) {
         const currency = event.data.currency || 'NGN'
         
         if (orgId && credits > 0) {
-          await processCreditPackPayment(supabase, orgId, credits, amountPaidMinor, currency, event.data.reference)
+          try {
+            await processCreditPackPayment(supabase, orgId, credits, amountPaidMinor, currency, event.data.reference)
+          } catch (e: unknown) {
+            const errorMessage = e instanceof Error ? e.message : String(e)
+            await supabase
+              .from('webhook_events')
+              .update({ status: 'failed', error_message: errorMessage })
+              .eq('provider_reference', event.data.reference)
+            throw e
+          }
         }
         return NextResponse.json({ status: 'credit_pack_confirmed' }, { status: 200 })
       }
@@ -122,6 +150,10 @@ export async function POST(req: Request) {
           
           if (rpcError) {
             console.error('IOU Repayment RPC Error:', rpcError)
+            await supabase
+              .from('webhook_events')
+              .update({ status: 'failed', error_message: rpcError.message })
+              .eq('provider_reference', event.data.reference)
             return NextResponse.json({ error: 'Failed to process IOU repayment' }, { status: 500 })
           }
         }
@@ -140,7 +172,15 @@ export async function POST(req: Request) {
         if (e instanceof Error && e.message === 'Order not found') {
           return NextResponse.json({ error: 'Order not found' }, { status: 404 })
         }
-        return NextResponse.json({ error: 'Failed to record payment' }, { status: 500 })
+        
+        // DLQ Logic: Log the error to the webhook_events table
+        const errorMessage = e instanceof Error ? e.message : String(e)
+        await supabase
+          .from('webhook_events')
+          .update({ status: 'failed', error_message: errorMessage })
+          .eq('provider_reference', event.data.reference)
+          
+        return NextResponse.json({ error: 'Failed to record payment, logged to DLQ' }, { status: 500 })
       }
 
       return NextResponse.json({ status: 'success' }, { status: 200 })
