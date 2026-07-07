@@ -11,8 +11,7 @@ import { motion } from 'framer-motion'
 import { createClient } from '@/lib/supabase/client'
 import { setActiveLocationCookie } from './layout-actions'
 import {
-  LayoutDashboard, ClipboardList, BarChart3, BookOpen,
-  FileText, Settings, CreditCard, LogOut, Zap, Menu, X, Users, QrCode, TrendingUp, MessageSquare, Package
+  LayoutDashboard, ClipboardList, BarChart3, BookOpen, ChevronRight, CreditCard, Home, Menu, MessageSquare, Package, QrCode, Settings, Store, Users, Zap, X, User, FileText, LogOut, TrendingUp, Truck
 } from 'lucide-react'
 import { GlobalRealtime } from './global-realtime'
 import { NotificationCenter } from './notification-center'
@@ -159,7 +158,18 @@ export default function ClientLayout({ children, initialData }: { children: Reac
   const [isOwnerOrManager] = useState(initialData.isOwnerOrManager)
   const [time, setTime] = useState('')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [dynamicNavItems] = useState<NavItem[]>(initialData.dynamicNavItems)
+  const [dynamicNavItems, setDynamicNavItems] = useState<NavItem[]>(initialData.dynamicNavItems)
+  const [isTrialBannerDismissed, setIsTrialBannerDismissed] = useState(false)
+
+  // Append Delivery Kanban to daily operations if not already there
+  useEffect(() => {
+    setDynamicNavItems(prev => {
+      if (!prev.find(item => item.href === '/dashboard/delivery')) {
+        return [...prev, { href: '/dashboard/delivery', label: 'Delivery Hub', icon: Truck }]
+      }
+      return prev
+    })
+  }, [])
 
   const [credits] = useState<number | null>(initialData.credits)
 
@@ -281,10 +291,17 @@ export default function ClientLayout({ children, initialData }: { children: Reac
         </div>
 
         <div className="p-4 mt-auto">
-          {trialDaysLeft !== null && trialDaysLeft > 0 && (
-            <div className="flex items-center justify-between px-3 py-2.5 bg-blue-500/10 rounded-xl border border-blue-500/20 mb-3">
+          {!isTrialBannerDismissed && trialDaysLeft !== null && trialDaysLeft > 0 && (
+            <div className="relative flex items-center justify-between px-3 py-2.5 bg-blue-500/10 rounded-xl border border-blue-500/20 mb-3 pr-8">
               <span className="text-xs font-medium text-blue-400">Free Trial</span>
               <span className="text-xs font-bold text-blue-300">{trialDaysLeft} days left</span>
+              <button 
+                onClick={(e) => { e.preventDefault(); setIsTrialBannerDismissed(true) }} 
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-blue-400/70 hover:text-blue-300 hover:bg-blue-500/10 rounded-lg transition-colors"
+                aria-label="Dismiss trial banner"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
             </div>
           )}
           {trialDaysLeft === 0 && initialData.planStatus === 'trial' && (
@@ -313,6 +330,15 @@ export default function ClientLayout({ children, initialData }: { children: Reac
               <svg className="w-4 h-4 text-zinc-500 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
             </a>
           )}
+
+          <Link 
+            href="/dashboard/profile"
+            onClick={onClose}
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-zinc-400 hover:text-white hover:bg-white/5 transition-all w-full mb-1"
+          >
+            <User className="w-4 h-4" />
+            <span>My Profile</span>
+          </Link>
 
           <button 
             onClick={async () => {

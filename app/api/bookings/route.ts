@@ -84,10 +84,17 @@ export async function POST(req: Request) {
     if (targetItemIds.length > 0) {
       const { data: items } = await supabase
         .from('page_items')
-        .select('id, title, price_minor, payment_mode, deposit_percentage')
+        .select('id, title, price_minor, payment_mode, deposit_percentage, inventory_count')
         .in('id', targetItemIds)
       
       if (items && items.length > 0) {
+        // Validate inventory
+        const requestedGuests = number_of_guests || 1
+        const insufficientItem = items.find(i => i.inventory_count !== null && i.inventory_count < requestedGuests)
+        if (insufficientItem) {
+          return NextResponse.json({ error: `Not enough availability for ${insufficientItem.title}` }, { status: 409 })
+        }
+
         firstItem = items[0]
         basePrice = items.reduce((sum, i) => sum + (i.price_minor || 0), 0)
         
@@ -119,7 +126,6 @@ export async function POST(req: Request) {
       ? Math.round(basePrice * (depositPct / 100))
       : basePrice
 
-    // Check availability if this is tied to an item and has dates
     // Check availability if tied to items and has dates
     if (targetItemIds.length > 0 && booking_date) {
       for (const id of targetItemIds) {

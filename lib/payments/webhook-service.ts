@@ -3,6 +3,8 @@ import { notifyBusiness } from '@/lib/notifications/dispatcher'
 import { Resend } from 'resend'
 import { ReceiptEmail } from '../../emails/receipt-email'
 import { formatCurrency } from '@/lib/utils/currency'
+import { waitUntil } from '@vercel/functions'
+import { sendSubscriptionActivated, sendInvoice } from '../notifications/email'
 
 const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy')
 
@@ -43,30 +45,20 @@ export async function processBookingPayment(
     })
     .or(`id.eq.${bookingId},booking_notes.like.%[SYSTEM_CHILD_OF:${bookingId}]%`)
 
-  // If the booking(s) are tied to an item, decrement inventory
+  // ── Inventory was decremented atomically at booking creation ──
+  // Check if any items became sold out so we can notify the business
   if (relatedBookings && relatedBookings.length > 0) {
     for (const b of relatedBookings) {
       if (!b.item_id) continue
-      const guests = b.number_of_guests || 1
       const { data: itemData } = await supabase
         .from('page_items')
-        .select('inventory_count')
+        .select('availability_status')
         .eq('id', b.item_id)
         .single()
         
-      if (itemData && itemData.inventory_count !== null) {
-        const newCount = itemData.inventory_count - guests
-        const isSoldOut = newCount <= 0
-        await supabase
-          .from('page_items')
-          .update({
-            inventory_count: newCount < 0 ? 0 : newCount,
-            availability_status: isSoldOut ? 'sold_out' : 'available'
-          })
-          .eq('id', b.item_id)
-
+      if (itemData && itemData.availability_status === 'sold_out') {
         const locationId = (booking.location_pages as { location_id?: string })?.location_id
-        if (isSoldOut && locationId) {
+        if (locationId) {
           await notifyBusiness(
             locationId,
             {
@@ -184,6 +176,23 @@ export async function processSubscriptionPayment(
           amount_minor: earningsMinor,
           status: 'pending'
         })
+    }
+  }
+
+  // Fire emails asynchronously
+  const { data: orgOwner } = await supabase
+    .from('organizations')
+    .select('created_by, name')
+    .eq('id', orgId)
+    .single()
+
+  if (orgOwner) {
+    const { data: user } = await supabase.auth.admin.getUserById(orgOwner.created_by)
+    if (user?.user?.email) {
+      const email = user.user.email
+      const formattedAmount = (amountPaidMinor / 100).toLocaleString('en-NG', { style: 'currency', currency: currency || 'NGN' })
+      waitUntil(sendSubscriptionActivated(email, planType || 'Pro', user.user.user_metadata?.full_name))
+      waitUntil(sendInvoice(email, formattedAmount, reference, planType || 'Pro'))
     }
   }
 }

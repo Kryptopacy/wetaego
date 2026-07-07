@@ -227,6 +227,7 @@ export const addPageItem = authActionClient
     subtitle: zfd.text(z.string().max(200).optional()),
     description: zfd.text(z.string().max(1000).optional()),
     price_minor: zfd.numeric(z.number().min(0).optional()),
+    original_price_minor: zfd.numeric(z.number().min(0).optional()),
     price_display: zfd.text(z.string().max(50).optional()),
     availability_status: zfd.text(z.string().default('available')),
     item_data: zfd.text(z.string().optional()),
@@ -238,7 +239,7 @@ export const addPageItem = authActionClient
   }))
   .action(async ({ parsedInput, ctx: { supabase, user } }) => {
     const {
-      page_id, title, subtitle, description, price_minor, price_display, availability_status,
+      page_id, title, subtitle, description, price_minor, original_price_minor, price_display, availability_status,
       item_data, deposit_percentage, payment_mode, inventory_count, image, ai_image_url
     } = parsedInput
 
@@ -276,6 +277,7 @@ export const addPageItem = authActionClient
       subtitle: subtitle || null,
       description: description || null,
       price_minor: price_minor ?? null,
+      original_price_minor: original_price_minor ?? null,
       price_display: price_display || null,
       availability_status,
       item_data: item_data ? JSON.parse(item_data) : null,
@@ -283,7 +285,7 @@ export const addPageItem = authActionClient
       payment_mode,
       inventory_count: inventory_count ?? null,
       images
-    })
+    } as any)
 
     if (error) throw new Error((error as Error).message)
 
@@ -298,6 +300,7 @@ export const updatePageItem = authActionClient
     subtitle: zfd.text(z.string().max(200).optional()),
     description: zfd.text(z.string().max(1000).optional()),
     price_minor: zfd.numeric(z.number().min(0).optional()),
+    original_price_minor: zfd.numeric(z.number().min(0).optional()),
     price_display: zfd.text(z.string().max(50).optional()),
     availability_status: zfd.text(z.string().default('available')),
     item_data: zfd.text(z.string().optional()),
@@ -307,7 +310,7 @@ export const updatePageItem = authActionClient
   }))
   .action(async ({ parsedInput, ctx: { supabase, user } }) => {
     const {
-      itemId, title, subtitle, description, price_minor, price_display,
+      itemId, title, subtitle, description, price_minor, original_price_minor, price_display,
       availability_status, item_data, inventory_count, image, ai_image_url
     } = parsedInput
 
@@ -322,6 +325,7 @@ export const updatePageItem = authActionClient
       subtitle?: string | null
       description?: string | null
       price_minor?: number | null
+      original_price_minor?: number | null
       price_display?: string | null
       availability_status?: string
       item_data?: Json | null
@@ -332,6 +336,7 @@ export const updatePageItem = authActionClient
       subtitle: subtitle || null, 
       description: description || null, 
       price_minor: price_minor ?? null, 
+      original_price_minor: original_price_minor ?? null, 
       price_display: price_display || null, 
       availability_status, 
       item_data: item_data ? JSON.parse(item_data) : null, 
@@ -361,7 +366,7 @@ export const updatePageItem = authActionClient
 
     const { error } = await supabase
       .from('page_items')
-      .update(updatePayload)
+      .update(updatePayload as any)
       .eq('id', itemId)
 
     if (error) throw new Error((error as Error).message)

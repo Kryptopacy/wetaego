@@ -2,12 +2,14 @@
 
 import { useCartStore } from '@/lib/store/cart'
 import { formatCurrency } from '@/lib/utils/currency'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { Tables } from '@/types'
 import { Plus, Minus, ShoppingBag, X } from 'lucide-react'
 import { AnimatedDialog, AnimatedDialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
+import { useSearchParams, useRouter, usePathname } from 'next/navigation'
+import { ShareButton } from '@/app/components/share-button'
 
 interface ItemCardProps {
   item: Tables<'menu_items'>
@@ -18,7 +20,30 @@ export function ItemCard({ item }: ItemCardProps) {
   const cartItem = items.find(i => i.id === item.id)
   
   const [showModifierModal, setShowModifierModal] = useState(false)
+  const [showDetailsModal, setShowDetailsModal] = useState(false)
   const [modifiers, setModifiers] = useState('')
+
+  const searchParams = useSearchParams()
+  const pathname = usePathname()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (searchParams.get('item') === item.id) {
+      setShowDetailsModal(true)
+    }
+  }, [searchParams.get('item'), item.id])
+
+  const handleOpenDetails = () => {
+    router.replace(`${pathname}?item=${item.id}`, { scroll: false })
+    setShowDetailsModal(true)
+  }
+
+  const handleCloseDetails = () => {
+    setShowDetailsModal(false)
+    const newParams = new URLSearchParams(searchParams.toString())
+    newParams.delete('item')
+    router.replace(`${pathname}?${newParams.toString()}`, { scroll: false })
+  }
 
   const handleAddToCart = () => {
     let finalName = item.name
@@ -47,9 +72,10 @@ export function ItemCard({ item }: ItemCardProps) {
   return (
     <>
       <motion.div 
+        onClick={handleOpenDetails}
         whileHover={{ scale: 1.01 }}
         whileTap={{ scale: 0.99 }}
-        className={`group relative flex gap-4 p-4 bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-100 dark:border-zinc-800 shadow-sm hover:shadow-md transition-all duration-300 ${!isAvailable ? 'opacity-60 grayscale-[0.5]' : ''}`}
+        className={`group relative cursor-pointer flex gap-4 p-4 bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-100 dark:border-zinc-800 shadow-sm hover:shadow-md transition-all duration-300 ${!isAvailable ? 'opacity-60 grayscale-[0.5]' : ''}`}
       >
         {/* Product Image */}
         {item.image_url && (
@@ -74,9 +100,23 @@ export function ItemCard({ item }: ItemCardProps) {
                 {item.name}
               </h4>
               {isAvailable ? (
-                <span className="font-bold text-[15px] text-zinc-900 dark:text-white shrink-0">
-                  {formatCurrency(item.price_minor )}
-                </span>
+                <div className="flex flex-col items-end shrink-0">
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-[15px] text-zinc-900 dark:text-white">
+                      {formatCurrency(item.price_minor )}
+                    </span>
+                    {(item as any).original_price_minor && (item as any).original_price_minor > item.price_minor && (
+                      <span className="bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-full">
+                        {Math.round((((item as any).original_price_minor - item.price_minor) / (item as any).original_price_minor) * 100)}% OFF
+                      </span>
+                    )}
+                  </div>
+                  {(item as any).original_price_minor && (item as any).original_price_minor > item.price_minor && (
+                    <span className="text-[12px] text-zinc-500 line-through mt-0.5">
+                      {formatCurrency((item as any).original_price_minor)}
+                    </span>
+                  )}
+                </div>
               ) : (
                 <span className="text-[11px] px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-500/10 text-red-600 dark:text-red-400 font-bold shrink-0">Sold Out</span>
               )}
@@ -100,7 +140,7 @@ export function ItemCard({ item }: ItemCardProps) {
             )}
           </div>
           
-          <div className="flex items-center justify-end mt-3 gap-2">
+          <div className="flex items-center justify-end mt-3 gap-2" onClick={e => e.stopPropagation()}>
             {isAvailable && (
               cartItem ? (
                 <div className="flex items-center gap-3 bg-emerald-50 dark:bg-zinc-800 rounded-full p-1 border border-emerald-100 dark:border-zinc-700 shadow-sm">
@@ -172,6 +212,106 @@ export function ItemCard({ item }: ItemCardProps) {
             <ShoppingBag className="w-5 h-5" />
             Add to Order
           </button>
+        </AnimatedDialogContent>
+      </AnimatedDialog>
+      {/* Item Details Modal */}
+      <AnimatedDialog open={showDetailsModal} onOpenChange={handleCloseDetails}>
+        <AnimatedDialogContent isOpen={showDetailsModal} hideCloseButton>
+          <DialogTitle className="sr-only">{item.name} Details</DialogTitle>
+          <DialogDescription className="sr-only">Detailed view of {item.name}</DialogDescription>
+          
+          <div className="absolute top-4 right-4 flex items-center gap-2 z-10">
+            <ShareButton 
+              title={item.name}
+              description={item.description || `Check out ${item.name} on OurMenu`}
+              url={`https://ourmenuos.online${pathname}?item=${item.id}`}
+              className="w-10 h-10 flex items-center justify-center rounded-full bg-white/90 dark:bg-zinc-800/90 text-zinc-700 dark:text-zinc-300 hover:bg-white dark:hover:bg-zinc-700 backdrop-blur-md shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+            />
+            <button 
+              onClick={handleCloseDetails} 
+              className="w-10 h-10 flex items-center justify-center rounded-full bg-white/90 dark:bg-zinc-800/90 text-zinc-700 dark:text-zinc-300 hover:bg-white dark:hover:bg-zinc-700 backdrop-blur-md shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+              aria-label="Close dialog"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          <div className="flex flex-col h-full max-h-[85vh] overflow-y-auto scrollbar-hide -mx-6 px-6">
+            {item.image_url ? (
+              <div className="relative w-full aspect-square -mt-6 mb-6 rounded-b-3xl overflow-hidden bg-zinc-100 dark:bg-zinc-800">
+                <Image 
+                  src={item.image_url} 
+                  alt={item.name}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 500px"
+                  priority
+                />
+              </div>
+            ) : (
+              <div className="mt-8 mb-6" />
+            )}
+
+            <div className="mb-6">
+              <h3 className="text-2xl font-black text-zinc-900 dark:text-white tracking-tight leading-tight mb-2">{item.name}</h3>
+              <div className="flex items-center gap-3">
+                <span className="text-xl font-bold text-emerald-600 dark:text-emerald-400">
+                  {formatCurrency(item.price_minor)}
+                </span>
+                {(item as any).original_price_minor && (item as any).original_price_minor > item.price_minor && (
+                  <>
+                    <span className="text-[14px] text-zinc-500 line-through">
+                      {formatCurrency((item as any).original_price_minor)}
+                    </span>
+                    <span className="bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[11px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full">
+                      {Math.round((((item as any).original_price_minor - item.price_minor) / (item as any).original_price_minor) * 100)}% OFF
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {item.description && (
+              <div className="mb-8 space-y-3">
+                <h4 className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Description</h4>
+                <p className="text-[15px] text-zinc-600 dark:text-zinc-300 leading-relaxed whitespace-pre-line">
+                  {item.description}
+                </p>
+              </div>
+            )}
+
+            {(item.dietary_tags?.length > 0 || item.allergen_tags?.length > 0) && (
+              <div className="mb-8 space-y-3">
+                <h4 className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Tags</h4>
+                <div className="flex flex-wrap gap-2">
+                  {item.dietary_tags?.map(tag => (
+                    <span key={tag} className="text-xs font-bold px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 uppercase tracking-wider border border-emerald-100 dark:border-emerald-500/20">
+                      {tag}
+                    </span>
+                  ))}
+                  {item.allergen_tags?.map(tag => (
+                    <span key={tag} className="text-xs font-bold px-3 py-1 rounded-full bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400 uppercase tracking-wider border border-amber-100 dark:border-amber-500/20">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="mt-auto pt-6 pb-2">
+              <button
+                onClick={() => {
+                  handleCloseDetails()
+                  setShowModifierModal(true)
+                }}
+                disabled={!isAvailable}
+                className="w-full py-4 rounded-xl font-bold text-white text-[15px] bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:bg-zinc-400 shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2 transition-all active:scale-95 focus:outline-none"
+              >
+                <ShoppingBag className="w-5 h-5" />
+                {isAvailable ? 'Add to Order' : 'Sold Out'}
+              </button>
+            </div>
+          </div>
         </AnimatedDialogContent>
       </AnimatedDialog>
     </>

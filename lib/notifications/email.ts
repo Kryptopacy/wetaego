@@ -96,3 +96,97 @@ export async function sendWelcomeEmail(toEmail: string, name?: string) {
     return false;
   }
 }
+
+export async function sendSubscriptionActivated(toEmail: string, planName: string, name?: string) {
+  if (!process.env.RESEND_API_KEY) return true;
+  try {
+    const { error } = await resend.emails.send({
+      from: 'OurMenu Billing <billing@ourmenuos.online>',
+      to: [toEmail],
+      subject: 'Your Subscription is Active! 🎉',
+      html: `
+        <div style="font-family: sans-serif; max-w: 600px; margin: 0 auto; padding: 30px; border: 1px solid #eee; border-radius: 12px;">
+          <h1 style="color: #111; margin-top: 0;">Subscription Activated!</h1>
+          <p style="color: #444; font-size: 16px; line-height: 1.6;">
+            Hi ${name ? escapeHTML(name) : 'there'},<br/><br/>
+            Great news! Your <strong>${escapeHTML(planName)}</strong> subscription is now active. You have full access to all premium features.
+          </p>
+          <a href="${process.env.NEXT_PUBLIC_SITE_URL}/dashboard" style="display: inline-block; background: #10b981; color: #fff; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: bold;">Go to Dashboard</a>
+        </div>
+      `,
+    });
+    if (error) throw error;
+    return true;
+  } catch (err) {
+    console.error('Failed to send subscription activated email:', err);
+    return false;
+  }
+}
+
+export async function sendInvoice(toEmail: string, amount: string, reference: string, planName: string) {
+  if (!process.env.RESEND_API_KEY) return true;
+  try {
+    const { error } = await resend.emails.send({
+      from: 'OurMenu Billing <billing@ourmenuos.online>',
+      to: [toEmail],
+      subject: 'Payment Receipt - OurMenu OS',
+      html: `
+        <div style="font-family: sans-serif; max-w: 600px; margin: 0 auto; padding: 30px; border: 1px solid #eee; border-radius: 12px;">
+          <h1 style="color: #111; margin-top: 0;">Payment Receipt</h1>
+          <p style="color: #444; font-size: 16px; line-height: 1.6;">
+            Thank you for your payment. Here are the details of your recent transaction:
+          </p>
+          <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+            <tr>
+              <td style="padding: 10px; border-bottom: 1px solid #eee; color: #666;">Plan</td>
+              <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right; font-weight: bold;">${escapeHTML(planName)}</td>
+            </tr>
+            <tr>
+              <td style="padding: 10px; border-bottom: 1px solid #eee; color: #666;">Amount</td>
+              <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right; font-weight: bold;">${escapeHTML(amount)}</td>
+            </tr>
+            <tr>
+              <td style="padding: 10px; border-bottom: 1px solid #eee; color: #666;">Reference</td>
+              <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right; font-family: monospace;">${escapeHTML(reference)}</td>
+            </tr>
+          </table>
+          <p style="color: #888; font-size: 12px;">If you have any questions about this receipt, please contact support.</p>
+        </div>
+      `,
+    });
+    if (error) throw error;
+    return true;
+  } catch (err) {
+    console.error('Failed to send invoice email:', err);
+    return false;
+  }
+}
+
+export async function sendTrialExpirationReminder(toEmail: string, daysLeft: number, name?: string) {
+  if (!process.env.RESEND_API_KEY) return true;
+  try {
+    const { error } = await resend.emails.send({
+      from: 'OurMenu OS <support@ourmenuos.online>',
+      to: [toEmail],
+      subject: `Your free trial expires in ${daysLeft} days`,
+      html: `
+        <div style="font-family: sans-serif; max-w: 600px; margin: 0 auto; padding: 30px; border: 1px solid #eee; border-radius: 12px;">
+          <h1 style="color: #111; margin-top: 0;">Action Required</h1>
+          <p style="color: #444; font-size: 16px; line-height: 1.6;">
+            Hi ${name ? escapeHTML(name) : 'there'},<br/><br/>
+            We hope you're enjoying OurMenu OS! Your free trial is ending in exactly <strong>${daysLeft} days</strong>.
+          </p>
+          <p style="color: #444; font-size: 16px; line-height: 1.6;">
+            To keep your digital storefront and dashboard active without interruption, please add a payment method and select a plan.
+          </p>
+          <a href="${process.env.NEXT_PUBLIC_SITE_URL}/dashboard/billing" style="display: inline-block; background: #3b82f6; color: #fff; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: bold; margin-top: 10px;">Select a Plan</a>
+        </div>
+      `,
+    });
+    if (error) throw error;
+    return true;
+  } catch (err) {
+    console.error('Failed to send trial reminder email:', err);
+    return false;
+  }
+}

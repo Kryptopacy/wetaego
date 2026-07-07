@@ -81,13 +81,13 @@ export default async function SettingsPage({
 
   const isOwnerOrManager = role === 'owner' || role === 'manager'
   
-  // If not owner/manager and they are on a restricted tab, redirect them to their profile
-  if (!isOwnerOrManager && tab !== 'profile') {
-    redirect('/dashboard/settings?tab=profile')
+  // If not owner/manager, they should not access settings, redirect them to their profile
+  if (!isOwnerOrManager) {
+    redirect('/dashboard/profile')
   }
 
   // If no organization, force them to the general tab to complete setup
-  if (!organization && tab !== 'general' && tab !== 'profile') {
+  if (!organization && tab !== 'general') {
     redirect('/dashboard/settings?tab=general')
   }
 
@@ -149,77 +149,6 @@ export default async function SettingsPage({
         </div>
 
         <div className="flex-1 space-y-6 min-w-0">
-        {tab === 'profile' && user && (
-          <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
-            <h2 className="text-lg font-semibold text-white mb-2">My Profile</h2>
-            <p className="text-sm text-zinc-400 mb-6">
-              Set your personal profile details. This name will be visible to your team.
-            </p>
-            <ActionForm action={async (formData) => {
-              'use server'
-              const { updateProfile } = await import('./actions')
-              return await updateProfile(formData)
-            }} className="flex flex-col gap-4">
-              <div>
-                <label className="mb-2 block text-sm font-medium text-zinc-300">Full Name</label>
-                <input
-                  type="text"
-                  name="full_name"
-                  defaultValue={userProfile?.full_name || user.user_metadata?.full_name || ''}
-                  required
-                  className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                  placeholder="Jane Doe"
-                />
-              </div>
-
-              <div className="mt-4 pt-4 border-t border-zinc-800">
-                <h3 className="text-md font-semibold text-white mb-2">Payout Details (Tips & Earnings)</h3>
-                <p className="text-sm text-zinc-400 mb-4">
-                  Where should the business transfer your accumulated tips?
-                </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-zinc-300">Bank Name</label>
-                    <input
-                      type="text"
-                      name="bank_name"
-                      defaultValue={userProfile?.bank_name || ''}
-                      className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                      placeholder="e.g. Opay, Moniepoint, GTBank"
-                    />
-                  </div>
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-zinc-300">Account Number</label>
-                    <input
-                      type="text"
-                      name="account_number"
-                      defaultValue={userProfile?.account_number || ''}
-                      pattern="[0-9]{10}"
-                      maxLength={10}
-                      className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                      placeholder="0123456789"
-                    />
-                  </div>
-                </div>
-                <div className="mt-4">
-                  <label className="mb-2 block text-sm font-medium text-zinc-300">Account Name</label>
-                  <input
-                    type="text"
-                    name="account_name"
-                    defaultValue={userProfile?.account_name || ''}
-                    className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                    placeholder="e.g. Jane Doe"
-                  />
-                </div>
-              </div>
-
-              <div className="mt-4 flex items-center justify-between">
-                <SubmitButton>Save Profile & Payout Details</SubmitButton>
-              </div>
-            </ActionForm>
-          </div>
-        )}
-
         {tab === 'general' && (
           <>
             <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">

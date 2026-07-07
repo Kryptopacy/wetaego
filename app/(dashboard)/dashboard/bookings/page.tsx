@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { ActionForm } from '@/components/ActionForm'
 import { updateBookingStatus } from './actions'
-
+import { BookingsClient } from './bookings-client'
   
 import Link from 'next/link'
 import { format } from 'date-fns'
@@ -24,27 +24,20 @@ export default async function BookingsDashboard() {
 
   if (!member) redirect('/dashboard')
 
-  // Fetch bookings linked to 'booking' template pages
-  const { data: bookings } = await supabase
-    .from('page_bookings')
-    .select(`
-      *,
-      location_pages!inner(id, title, template_type, locations!inner(organization_id)),
-      page_items(title)
-    `)
-    .eq('location_pages.locations.organization_id', member.organization_id)
-    .eq('location_pages.template_type', 'booking')
-    .order('created_at', { ascending: false })
+    // Fetch bookings linked to 'booking' or 'listing' template pages
+    const { data: bookings } = await supabase
+      .from('page_bookings')
+      .select(`
+        *,
+        location_pages!inner(id, title, template_type, locations!inner(organization_id)),
+        page_items(title)
+      `)
+      .eq('location_pages.locations.organization_id', member.organization_id)
+      .in('location_pages.template_type', ['booking', 'listing'])
+      .order('created_at', { ascending: false })
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Booking Management System</h1>
-          <p className="text-sm text-zinc-400 mt-1">Manage reservations, appointments, and service bookings.</p>
-        </div>
-      </div>
-
+    <BookingsClient bookings={bookings || []}>
       <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl overflow-hidden shadow-2xl">
         <div className="hidden sm:block overflow-x-auto">
           <table className="w-full text-left text-sm whitespace-nowrap">
@@ -218,6 +211,6 @@ export default async function BookingsDashboard() {
           )}
         </div>
       </div>
-    </div>
+    </BookingsClient>
   )
 }

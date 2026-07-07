@@ -20,7 +20,6 @@ export function SettingsNavigation({ currentTab, isOwnerOrManager }: SettingsNav
       { id: 'portal', label: 'Portal Customization' },
       { id: 'kyc', label: 'KYC & Compliance' },
     ] : []),
-    { id: 'profile', label: 'My Profile' },
     ...(isOwnerOrManager ? [
       { id: 'loyalty', label: 'Loyalty & CRM' },
       { id: 'addons', label: 'Add-ons' },

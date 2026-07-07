@@ -212,8 +212,19 @@ export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, tem
                 
                 <div className="space-y-2 mb-4">
                   {order.order_items?.map((item) => (
-                    <div key={item.id} className="flex justify-between text-zinc-300">
-                      <span><span className="text-zinc-500 mr-2">{item.quantity}x</span> {item.item_name}</span>
+                    <div key={item.id} className="flex flex-col text-zinc-300">
+                      <div className="flex justify-between">
+                        <span><span className="text-zinc-500 mr-2">{item.quantity}x</span> {item.item_name}</span>
+                      </div>
+                      {item.metadata && typeof item.metadata === 'object' && Object.keys(item.metadata as object).length > 0 && (
+                        <div className="pl-6 mt-1 flex flex-col gap-0.5">
+                          {Object.entries(item.metadata as Record<string, any>).map(([key, value]) => (
+                            <span key={key} className="text-xs text-zinc-500 bg-zinc-800/30 px-1.5 py-0.5 rounded w-fit capitalize">
+                              {key.replace(/_/g, ' ')}: {String(value)}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>

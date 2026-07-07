@@ -101,14 +101,16 @@ OurMenu OS is fundamentally decoupled from the concept of a "restaurant." It is 
 A resilient, globally aware checkout engine powers the entire ecosystem:
 - **Paystack Native Integration:** Seamlessly handles split payments, automated service charges, and real-time reconciliation via cryptographic Webhooks.
 - **Automated SaaS Ledger (Platform Fees):** A transparent, built-in ledger system that extracts a configurable SaaS platform fee (e.g., 2%) on every transaction, driving pure MRR beyond monthly subscriptions.
+- **SaaS Lifecycle & Automated Billing Emails:** Integrated automated email sequences (powered by Resend and Vercel Cron) to handle Trial Expirations, Subscription Activations, and precise Invoicing without requiring external CRM orchestration.
 - **Enterprise Tax & Compliance Engine:** Dynamically calculates localized taxes (e.g., VAT, State Taxes) and applies them accurately before reaching the payment gateway, providing transparent itemized receipts for strict global compliance.
 - **Coupon & Discounts Manager:** A robust system allowing admins to distribute customizable coupons for free trials, free plans, credit extensions, or plan extensions to aggressively drive B2B acquisition and retention.
 - **Global Manual Fallback:** If API keys are pending or the payment provider experiences regional downtime, the system automatically degrades to a localized "Manual Bank Transfer" workflow, ensuring conversions are never blocked.
 - **Omnichannel Logistics & Per-Page Routing:** Full, robust support for Dine-in (Table-specific QR mapping), Pickup, and Delivery (with interactive delivery zones, SMS phone verification, and dynamic fees). Fulfillment logic is highly granular, allowing **per-page configuration** (e.g., a "Room Service" page forces table delivery, while a "Lobby Cafe" page allows pickup).
 
-### 2. Live Fulfillment Dashboard (formerly KDS)
-Re-architected to serve any industry, the **Live Fulfillment Dashboard** is a real-time, WebSocket-powered operations center:
+### 2. Live Fulfillment Dashboard & Delivery Supervision
+Re-architected to serve any industry, the operations center is a real-time, WebSocket-powered hub:
 - **Universal Tracking:** Tracks incoming restaurant orders, spa booking requests, and retail pickup orders simultaneously.
+- **Delivery Kanban Hub:** A dedicated drag-and-drop Kanban dashboard specifically built to supervise dispatch operations, seamlessly moving orders from *Preparing* to *Out for Delivery* to *Delivered*.
 - **Advanced Triaging & Deep Search:** Instantly filters active states (Pending, Preparing, Paid), calculates prep times, and supports deep-searching globally by Table ID, Order ID, and specific item names.
 - **Fulfillment States:** Seamless drag-and-drop state transitions from "Received" to "In Progress" to "Fulfilled."
 
@@ -143,7 +145,7 @@ A powerful, centralized control panel allowing platform owners to dictate global
 - **Tenant Directory & Hackathon Exports:** A bird's-eye view of all registered businesses with instant CSV generation for hackathon or investor metrics.
 
 ### 7. CRM, Loyalty & Gamification
-- **Customer Profiles & LTV:** Automatically builds rich CRM profiles at checkout, tracking Lifetime Value (LTV), order frequency, and marketing opt-ins.
+- **Customer Profiles & LTV:** Automatically builds rich CRM profiles at checkout, seamlessly syncing critical data like phone numbers across orders, and tracking Lifetime Value (LTV), order frequency, and marketing opt-ins.
 - **Bespoke Loyalty Programs:** Organizations can launch custom point-based reward systems, configurable down to the fractional currency unit.
 - **Payment Roulette & Bill Splitting:** A gamified "spin to win" bill-splitting randomizer that transforms the friction of group payments into a highly engaging, viral experience. 
 - **PIN-Protected Post-Service Feedback:** Automated email receipts include a cryptographic 4-digit PIN ensuring only verified customers can rate staff performance, populating the gamified Team Performance Leaderboard and the centralized **Feedback Inbox** within the dashboard.

@@ -8,6 +8,7 @@ import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 import { formatCurrency } from '@/lib/utils/currency'
+import { DatePicker } from '@/app/components/date-picker'
 
 interface PageItem {
   id: string
@@ -85,9 +86,64 @@ export function ListingRenderer({ location, page, items, locationSlug }: Listing
     customer_email: '',
   })
 
+  // Inspection Scheduling State
+  const [showInspectionForm, setShowInspectionForm] = useState(false)
+  const [inspectionItem, setInspectionItem] = useState<PageItem | null>(null)
+  const [inspectionPending, startInspectionTransition] = useTransition()
+  const [inspectionSuccess, setInspectionSuccess] = useState(false)
+  const [inspectionForm, setInspectionForm] = useState({
+    customer_name: '',
+    customer_phone: '',
+    customer_email: '',
+    booking_date: '',
+    time_slot: 'morning',
+  })
+
   function handleEnquire(item: PageItem) {
     setSelectedItem(item)
     setShowLeadForm(true)
+  }
+
+  function handleScheduleInspection(item: PageItem) {
+    setInspectionItem(item)
+    setInspectionSuccess(false)
+    setInspectionForm({ customer_name: '', customer_phone: '', customer_email: '', booking_date: '', time_slot: 'morning' })
+    setShowInspectionForm(true)
+  }
+
+  const TIME_SLOTS: Record<string, string> = {
+    morning: '9:00 AM – 12:00 PM',
+    afternoon: '12:00 PM – 3:00 PM',
+    evening: '3:00 PM – 6:00 PM',
+  }
+
+  function submitInspection(e: React.FormEvent) {
+    e.preventDefault()
+    if (!inspectionItem || !inspectionForm.customer_name || !inspectionForm.customer_phone || !inspectionForm.booking_date) return
+
+    startInspectionTransition(async () => {
+      const res = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          page_id: page.id,
+          item_id: inspectionItem.id,
+          customer_name: inspectionForm.customer_name,
+          customer_phone: inspectionForm.customer_phone,
+          customer_email: inspectionForm.customer_email || null,
+          booking_date: inspectionForm.booking_date,
+          booking_time: TIME_SLOTS[inspectionForm.time_slot],
+          booking_notes: `Property inspection request for: ${inspectionItem.title}. Preferred time: ${TIME_SLOTS[inspectionForm.time_slot]}`,
+        }),
+      })
+
+      if (res.ok) {
+        setInspectionSuccess(true)
+      } else {
+        const data = await res.json().catch(() => ({}))
+        toast.error(data?.error || 'Could not schedule inspection. Please try again.')
+      }
+    })
   }
 
   function submitLead(e: React.FormEvent) {
@@ -177,7 +233,129 @@ export function ListingRenderer({ location, page, items, locationSlug }: Listing
           </div>
         )}
 
-        {/* Lead Capture Modal */}
+        {/* Inspection Scheduling Modal */}
+        <AnimatePresence>
+        {showInspectionForm && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+              onClick={() => setShowInspectionForm(false)}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="relative w-full max-w-sm bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-2xl overflow-y-auto max-h-[90vh]"
+            >
+              <button onClick={() => setShowInspectionForm(false)} className="absolute top-4 right-4 text-zinc-500 hover:text-white transition-colors">✕</button>
+
+              {inspectionSuccess ? (
+                <div className="text-center py-4">
+                  <div className="text-4xl mb-3">✅</div>
+                  <h2 className="text-xl font-bold text-white mb-2">Inspection Scheduled!</h2>
+                  <p className="text-sm text-zinc-400 mb-2">We'll confirm your inspection for <span className="text-white font-semibold">{inspectionItem?.title}</span>.</p>
+                  <p className="text-xs text-zinc-500 mb-6">Expect a call from our team to confirm the exact time.</p>
+                  <button
+                    onClick={() => setShowInspectionForm(false)}
+                    className="text-zinc-400 text-sm hover:text-white transition-colors"
+                  >
+                    ← Back to listings
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <div className="mb-5">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-lg">🏠</span>
+                      <h2 className="text-lg font-bold text-white">Schedule Inspection</h2>
+                    </div>
+                    <p className="text-sm text-zinc-400">{inspectionItem?.title}</p>
+                    {inspectionItem?.price_display && (
+                      <p className="text-xs text-zinc-500 mt-0.5">{inspectionItem.price_display}</p>
+                    )}
+                  </div>
+
+                  <form onSubmit={submitInspection} className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">Your Name *</label>
+                      <input
+                        value={inspectionForm.customer_name}
+                        onChange={e => setInspectionForm(f => ({ ...f, customer_name: e.target.value }))}
+                        required
+                        placeholder="Full name"
+                        className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-emerald-500 focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">Phone Number *</label>
+                      <input
+                        value={inspectionForm.customer_phone}
+                        onChange={e => setInspectionForm(f => ({ ...f, customer_phone: e.target.value }))}
+                        required
+                        type="tel"
+                        placeholder="+234 800 000 0000"
+                        className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-emerald-500 focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">Email (Optional)</label>
+                      <input
+                        value={inspectionForm.customer_email}
+                        onChange={e => setInspectionForm(f => ({ ...f, customer_email: e.target.value }))}
+                        type="email"
+                        placeholder="for confirmation"
+                        className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-emerald-500 focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <DatePicker
+                        label="Preferred Date *"
+                        date={inspectionForm.booking_date ? new Date(inspectionForm.booking_date) : undefined}
+                        setDate={(d: Date | undefined) => setInspectionForm(f => ({ ...f, booking_date: d ? d.toISOString().split('T')[0] : '' }))}
+                        minDate={new Date()}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">Preferred Time Slot *</label>
+                      <div className="grid grid-cols-3 gap-2">
+                        {Object.entries(TIME_SLOTS).map(([key, label]) => (
+                          <button
+                            key={key}
+                            type="button"
+                            onClick={() => setInspectionForm(f => ({ ...f, time_slot: key }))}
+                            className={`py-2 px-2 rounded-xl text-xs font-bold border transition-all text-center ${
+                              inspectionForm.time_slot === key
+                                ? 'text-white border-transparent'
+                                : 'bg-zinc-800 border-zinc-700 text-zinc-400 hover:border-zinc-500'
+                            }`}
+                            style={inspectionForm.time_slot === key ? { backgroundColor: themeColor, borderColor: themeColor } : {}}
+                          >
+                            {label.split(' – ')[0]}
+                            <span className="block text-[10px] opacity-70 mt-0.5">{label.split(' – ')[1]}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={inspectionPending || !inspectionForm.customer_name || !inspectionForm.customer_phone || !inspectionForm.booking_date}
+                      className="w-full mt-2 py-3.5 rounded-xl font-bold text-white text-sm disabled:opacity-50 transition-all"
+                      style={{ background: `linear-gradient(135deg, ${themeColor}, ${themeColor}cc)` }}
+                    >
+                      {inspectionPending ? 'Scheduling…' : 'Confirm Inspection Request'}
+                    </button>
+                  </form>
+                </>
+              )}
+            </motion.div>
+          </div>
+        )}
+        </AnimatePresence>
+
+        {/* Enquiry Modal */}
         <AnimatePresence>
         {showLeadForm && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -308,13 +486,21 @@ export function ListingRenderer({ location, page, items, locationSlug }: Listing
                   )}
 
                   {isAvail && (
-                    <button
-                      onClick={() => handleEnquire(item)}
-                      className="mt-4 flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-bold text-white transition-all"
-                      style={{ background: `linear-gradient(135deg, ${themeColor}cc, ${themeColor}88)` }}
-                    >
-                      Enquire →
-                    </button>
+                    <div className="flex gap-2 mt-4">
+                      <button
+                        onClick={() => handleScheduleInspection(item)}
+                        className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-bold text-white transition-all"
+                        style={{ background: `linear-gradient(135deg, ${themeColor}cc, ${themeColor}88)` }}
+                      >
+                        <span>🏠</span> Inspect
+                      </button>
+                      <button
+                        onClick={() => handleEnquire(item)}
+                        className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-bold text-zinc-300 bg-zinc-800 border border-zinc-700 hover:bg-zinc-700 transition-all"
+                      >
+                        Enquire
+                      </button>
+                    </div>
                   )}
                 </div>
               </motion.div>

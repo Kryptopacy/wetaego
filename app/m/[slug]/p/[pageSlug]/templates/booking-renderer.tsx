@@ -8,6 +8,7 @@ import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Lock } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/currency'
+import { DatePicker } from '@/app/components/date-picker'
 
 interface PageItem {
   id: string
@@ -221,45 +222,35 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
                 />
               </div>
 
-              {/* Date & Time Section */}
-              {page.business_type_preset === 'accommodation' && (
+              {['accommodation', 'hotel', 'short_stay'].includes(page.business_type_preset || '') && (
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">Check-in Date *</label>
-                    <input
-                      value={form.booking_date}
-                      onChange={e => setForm(f => ({ ...f, booking_date: e.target.value }))}
-                      required
-                      type="date"
-                      min={new Date().toISOString().split('T')[0]}
-                      className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-emerald-500 focus:outline-none"
+                    <DatePicker
+                      label="Check-in Date *"
+                      date={form.booking_date ? new Date(form.booking_date) : undefined}
+                      setDate={(d: Date | undefined) => setForm(f => ({ ...f, booking_date: d ? d.toISOString().split('T')[0] : '' }))}
+                      minDate={new Date()}
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">Check-out Date *</label>
-                    <input
-                      value={form.booking_end_date}
-                      onChange={e => setForm(f => ({ ...f, booking_end_date: e.target.value }))}
-                      required
-                      type="date"
-                      min={form.booking_date || new Date().toISOString().split('T')[0]}
-                      className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-emerald-500 focus:outline-none"
+                    <DatePicker
+                      label="Check-out Date *"
+                      date={form.booking_end_date ? new Date(form.booking_end_date) : undefined}
+                      setDate={(d: Date | undefined) => setForm(f => ({ ...f, booking_end_date: d ? d.toISOString().split('T')[0] : '' }))}
+                      minDate={form.booking_date ? new Date(form.booking_date) : new Date()}
                     />
                   </div>
                 </div>
               )}
 
-              {page.business_type_preset === 'salon' && (
+              {['salon', 'spa_wellness'].includes(page.business_type_preset || '') && (
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">Date *</label>
-                    <input
-                      value={form.booking_date}
-                      onChange={e => setForm(f => ({ ...f, booking_date: e.target.value }))}
-                      required
-                      type="date"
-                      min={new Date().toISOString().split('T')[0]}
-                      className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-emerald-500 focus:outline-none"
+                    <DatePicker
+                      label="Date *"
+                      date={form.booking_date ? new Date(form.booking_date) : undefined}
+                      setDate={(d: Date | undefined) => setForm(f => ({ ...f, booking_date: d ? d.toISOString().split('T')[0] : '' }))}
+                      minDate={new Date()}
                     />
                   </div>
                   <div>
@@ -275,27 +266,23 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
                 </div>
               )}
 
-              {(!page.business_type_preset || !['accommodation', 'salon', 'event'].includes(page.business_type_preset)) && (
+              {(!page.business_type_preset || !['accommodation', 'hotel', 'short_stay', 'salon', 'spa_wellness', 'event'].includes(page.business_type_preset)) && (
                 <>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">Start Date</label>
-                      <input
-                        value={form.booking_date}
-                        onChange={e => setForm(f => ({ ...f, booking_date: e.target.value }))}
-                        type="date"
-                        min={new Date().toISOString().split('T')[0]}
-                        className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-emerald-500 focus:outline-none"
+                      <DatePicker
+                        label="Start Date"
+                        date={form.booking_date ? new Date(form.booking_date) : undefined}
+                        setDate={(d: Date | undefined) => setForm(f => ({ ...f, booking_date: d ? d.toISOString().split('T')[0] : '' }))}
+                        minDate={new Date()}
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">End Date (Optional)</label>
-                      <input
-                        value={form.booking_end_date}
-                        onChange={e => setForm(f => ({ ...f, booking_end_date: e.target.value }))}
-                        type="date"
-                        min={form.booking_date || new Date().toISOString().split('T')[0]}
-                        className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-emerald-500 focus:outline-none"
+                      <DatePicker
+                        label="End Date (Optional)"
+                        date={form.booking_end_date ? new Date(form.booking_end_date) : undefined}
+                        setDate={(d: Date | undefined) => setForm(f => ({ ...f, booking_end_date: d ? d.toISOString().split('T')[0] : '' }))}
+                        minDate={form.booking_date ? new Date(form.booking_date) : new Date()}
                       />
                     </div>
                   </div>
@@ -322,10 +309,11 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
                 </>
               )}
 
-              {page.business_type_preset !== 'salon' && (
+
+              {!['salon', 'spa_wellness'].includes(page.business_type_preset || '') && (
                 <div>
                   <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">
-                    {page.business_type_preset === 'event' ? 'Quantity' : 'Guests'}
+                    {page.business_type_preset === 'event' ? 'Quantity' : ['hotel', 'short_stay', 'accommodation'].includes(page.business_type_preset || '') ? 'Guests' : 'Guests'}
                   </label>
                   <select
                     value={form.number_of_guests}
@@ -336,6 +324,7 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
                   </select>
                 </div>
               )}
+
 
               <div>
                 <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">Special Requests (optional)</label>

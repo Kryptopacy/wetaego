@@ -79,6 +79,7 @@ export function CustomersClient({ organizationId, initialProfiles, currencyCode 
           <thead className="bg-zinc-800/50 text-xs uppercase text-zinc-500">
             <tr>
               <th className="px-6 py-4 font-medium">Customer Email</th>
+              <th className="px-6 py-4 font-medium">Phone Number</th>
               <th className="px-6 py-4 font-medium">Orders</th>
               <th className="px-6 py-4 font-medium">LTV</th>
               <th className="px-6 py-4 font-medium">IOU Balance</th>
@@ -102,6 +103,7 @@ export function CustomersClient({ organizationId, initialProfiles, currencyCode 
                   onClick={() => setSelectedCustomer(profile)}
                 >
                   <td className="px-6 py-4 font-medium text-zinc-200">{profile.email}</td>
+                  <td className="px-6 py-4 text-zinc-400">{profile.phone_number || '—'}</td>
                   <td className="px-6 py-4">{profile.total_orders}</td>
                   <td className="px-6 py-4 font-medium text-emerald-400">
                     {formatCurrency(profile.total_spend_minor || 0, currencyCode)}
@@ -147,7 +149,10 @@ export function CustomersClient({ organizationId, initialProfiles, currencyCode 
               onClick={() => setSelectedCustomer(profile)}
             >
               <div className="flex justify-between items-start">
-                <div className="font-medium text-zinc-200">{profile.email}</div>
+                <div className="flex flex-col">
+                  <span className="font-medium text-zinc-200">{profile.email}</span>
+                  {profile.phone_number && <span className="text-xs text-zinc-500">{profile.phone_number}</span>}
+                </div>
                 {profile.marketing_opt_in ? (
                   <span className="inline-flex items-center rounded-full bg-emerald-500/10 px-2 py-1 text-[10px] font-medium text-emerald-400 ring-1 ring-inset ring-emerald-500/20">
                     Opted In

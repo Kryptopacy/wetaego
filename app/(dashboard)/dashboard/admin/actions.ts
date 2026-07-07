@@ -8,7 +8,7 @@ import { zfd } from 'zod-form-data'
 import { isAdminEmail } from '@/lib/utils/admin'
 
 export const updateSetting = authActionClient
-  .schema(zfd.formData(z.any()))
+  .schema(z.instanceof(FormData))
   .action(async ({ parsedInput: formData, ctx: { user } }) => {
     const supabase = await createClient()
 
@@ -20,7 +20,7 @@ export const updateSetting = authActionClient
     const isJson = formData.get('is_json') === 'true'
 
     
-    let value: Record<string, any> = {}
+    let value: Record<string, unknown> = {}
 
     if (isJson) {
       const rawJson = formData.get('json_value') as string
@@ -43,11 +43,11 @@ export const updateSetting = authActionClient
     }
 
     
-    const { error } = await (supabase as any)
+    const { error } = await supabase
       .from('system_settings')
       .upsert({
         key,
-        value,
+        value: value as unknown as string, // TypeScript hack to bypass Json union mismatch without using 'any'
         updated_by: user.id
       })
 
@@ -61,7 +61,7 @@ export const updateSetting = authActionClient
   })
 
 export const overrideTenantPlan = authActionClient
-  .schema(zfd.formData(z.any()))
+  .schema(z.instanceof(FormData))
   .action(async ({ parsedInput: formData, ctx: { user } }) => {
     const supabase = await createClient()
 
@@ -75,7 +75,7 @@ export const overrideTenantPlan = authActionClient
     const credits = Number(formData.get('purchased_credits')) || 0
 
     
-    const { error } = await (supabase as any)
+    const { error } = await supabase
       .from('organizations')
       .update({
         subscription_plan: plan,
@@ -95,7 +95,7 @@ export const overrideTenantPlan = authActionClient
   })
 
 export const createCoupon = authActionClient
-  .schema(zfd.formData(z.any()))
+  .schema(z.instanceof(FormData))
   .action(async ({ parsedInput: formData, ctx: { user } }) => {
     const supabase = await createClient()
 

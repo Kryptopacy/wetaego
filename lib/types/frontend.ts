@@ -21,6 +21,7 @@ export interface UIOrderItem {
   quantity: number;
   price_minor: number;
   created_at: string;
+  metadata?: Record<string, unknown> | null;
 }
 
 export interface UIOrder {
@@ -34,7 +35,7 @@ export interface UIOrder {
   total_amount_minor: number;
   tip_amount_minor: number | null;
   amount_paid_minor: number | null;
-  status: 'pending' | 'paid' | 'preparing' | 'ready' | 'completed' | 'cancelled';
+  status: 'pending' | 'paid' | 'preparing' | 'out_for_delivery' | 'ready' | 'completed' | 'cancelled';
   payment_method: string | null;
   customer_note: string | null;
   assigned_staff_id: string | null;

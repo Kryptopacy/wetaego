@@ -262,24 +262,18 @@ export async function processCheckout(params: {
       throw new Error(`Insufficient IOU credit. Available: ${((limit - currentBalance)/100).toFixed(2)}`)
     }
 
-    // Update customer balance
-    await supabase
-      .from('customer_profiles')
-      .update({ credit_balance_minor: currentBalance + chargeAmountMinor })
-      .eq('id', customer.id)
-
-    // Log the transaction
-    await supabase.from('iou_transactions').insert({
-      organization_id: organizationId,
-      customer_id: customer.id,
-      order_id: order.id,
-      type: 'purchase',
-      amount_minor: chargeAmountMinor,
-      reference: order.id
+    // Process checkout atomically
+    const { error: rpcError } = await supabase.rpc('process_iou_checkout', {
+      p_order_id: order.id,
+      p_organization_id: organizationId,
+      p_customer_id: customer.id,
+      p_amount_minor: chargeAmountMinor
     })
-    
-    // Mark order as paid because it's on credit
-    await supabase.from('orders').update({ amount_paid_minor: chargeAmountMinor }).eq('id', order.id)
+
+    if (rpcError) {
+      await supabase.from('orders').delete().eq('id', order.id)
+      throw new Error(rpcError.message || 'Failed to process IOU payment')
+    }
 
     return { data: { orderId: order.id, paymentMethod: 'iou' } }
   }

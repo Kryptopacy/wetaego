@@ -20,6 +20,7 @@ interface PageItem {
   subtitle?: string
   description?: string
   price_minor?: number
+  original_price_minor?: number
   price_display?: string
   availability_status: string
   images?: string[]
@@ -195,7 +196,21 @@ export function CatalogPageRenderer({ location, page, items, locationSlug, payme
                           {item.price_display ? (
                             <div className="font-bold text-white text-sm">{item.price_display}</div>
                           ) : item.price_minor ? (
-                            <div className="font-bold text-white text-sm">{formatCurrency(item.price_minor, location.currency || 'NGN')}</div>
+                            <div className="flex flex-col items-end">
+                              <div className="font-bold text-white text-sm flex items-center gap-2">
+                                {formatCurrency(item.price_minor, location.currency || 'NGN')}
+                                {item.original_price_minor && item.original_price_minor > item.price_minor && (
+                                  <span className="bg-emerald-500/20 text-emerald-400 text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-full">
+                                    {Math.round(((item.original_price_minor - item.price_minor) / item.original_price_minor) * 100)}% OFF
+                                  </span>
+                                )}
+                              </div>
+                              {item.original_price_minor && item.original_price_minor > item.price_minor && (
+                                <div className="text-xs text-zinc-500 line-through mt-0.5">
+                                  {formatCurrency(item.original_price_minor, location.currency || 'NGN')}
+                                </div>
+                              )}
+                            </div>
                           ) : null}
                         </div>
                       </div>

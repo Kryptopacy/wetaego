@@ -1,13 +1,24 @@
 'use client'
 
 import { useState } from 'react'
-import { ArrowLeft, CreditCard, Repeat, ShoppingCart, Users, CheckCircle } from 'lucide-react'
+import { ArrowLeft, CreditCard, Repeat, ShoppingCart, Users, CheckCircle, Receipt } from 'lucide-react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
+import { useEffect } from 'react'
+import { toast } from 'sonner'
 
 export default function PaymentTesterPage() {
   const [loading, setLoading] = useState<string | null>(null)
   const [resultUrl, setResultUrl] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const searchParams = useSearchParams()
+  const reference = searchParams.get('reference') || searchParams.get('trxref')
+
+  useEffect(() => {
+    if (reference) {
+      toast.success("Payment Successful!")
+    }
+  }, [reference])
 
   const handleTest = async (type: string) => {
     setLoading(type)
@@ -108,6 +119,23 @@ export default function PaymentTesterPage() {
           <a href={resultUrl} target="_blank" rel="noreferrer" className="px-4 py-2 bg-emerald-500 text-white rounded-lg text-sm font-bold shadow-lg hover:bg-emerald-400">
             Open Manually
           </a>
+        </div>
+      )}
+
+      {reference && (
+        <div className="p-4 bg-zinc-900 border border-zinc-800 rounded-xl flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-emerald-500/10 rounded-lg">
+              <Receipt className="w-5 h-5 text-emerald-500" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-white">Payment Receipt</p>
+              <p className="text-xs text-zinc-400 font-mono">Ref: {reference}</p>
+            </div>
+          </div>
+          <div className="px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded-md text-xs font-bold">
+            PAID
+          </div>
         </div>
       )}
 
