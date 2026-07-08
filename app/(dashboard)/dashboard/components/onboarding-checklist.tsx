@@ -30,24 +30,20 @@ export function OnboardingChecklist({ hasOrg, hasLocation, hasMenu, hasQR, templ
   }
 
   // Dynamic terminology mapping
-  let itemNoun = 'menu items'
   let itemTitle = 'Create your catalog'
   let itemDesc = 'Add your first menu items, products, or services.'
   let qrTitle = 'Generate QR codes'
   let qrDesc = 'Print QR codes for your tables or storefront.'
 
   if (templateType === 'rate_card') {
-    itemNoun = 'services'
     itemTitle = 'Create your rate card'
     itemDesc = 'Add your service offerings and consulting packages.'
     qrTitle = 'Share your digital card'
     qrDesc = 'Get your personal QR code for networking.'
   } else if (templateType === 'booking') {
-    itemNoun = 'bookable services'
     itemTitle = 'Set up services'
     itemDesc = 'Add your available services and booking durations.'
   } else if (templateType === 'listing') {
-    itemNoun = 'listings'
     itemTitle = 'Create listings'
     itemDesc = 'Add your available properties, vehicles, or items.'
     qrTitle = 'Print listing signs'

@@ -47,6 +47,8 @@ interface PortfolioRendererProps {
     instagram_handle?: string
     twitter_handle?: string
     facebook_handle?: string
+    x_handle?: string
+    tiktok_handle?: string
     currency?: string
   }
   page: {
@@ -54,6 +56,7 @@ interface PortfolioRendererProps {
     title: string
     content?: string
     slug?: string
+    background_color?: string
   }
   items: PageItem[]
   locationSlug: string
@@ -100,7 +103,7 @@ export function PortfolioRenderer({ location, page, items, locationSlug }: Portf
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 font-sans text-zinc-900 dark:text-zinc-100 selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black" style={{ backgroundColor: (page as any).background_color || undefined }}>
+    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 font-sans text-zinc-900 dark:text-zinc-100 selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black" style={{ backgroundColor: page.background_color || undefined }}>
       
       <div className="w-full max-w-5xl mx-auto px-6 md:px-12 pt-8">
         <BackButton href={`/m/${locationSlug}`} className="inline-flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300 transition-colors">
@@ -159,7 +162,7 @@ export function PortfolioRenderer({ location, page, items, locationSlug }: Portf
           )}
         </div>
         
-        <InfoStrip location={location as any} />
+        <InfoStrip location={location as { name: string, organizations?: { logo_url?: string } | null, whatsapp_number?: string | null, phone_number?: string | null, instagram_handle?: string | null, x_handle?: string | null, tiktok_handle?: string | null, currency?: string | null }} />
       </header>
 
       <main className="max-w-6xl mx-auto px-6 md:px-12 pb-24">

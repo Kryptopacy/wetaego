@@ -12,7 +12,7 @@ import { AICoverStudio } from './ai-cover-studio'
 import { PlanType } from '@/lib/payments/credits'
 import { getPlanLimits } from '@/lib/utils/settings'
 import { savePaymentSettings, saveManualPaymentSettings } from './payment-actions'
-import { TaxesView } from './taxes-view'
+
 import AiFaqBuilder from './ai-faq-builder'
 import { BusinessTypePicker } from './business-type-picker'
 import { ThemeColorPicker } from './theme-color-picker'
@@ -43,7 +43,7 @@ export default async function SettingsPage({
   const userId = user?.id || 'demo-user-id'
 
   // Fetch their organization and role
-  let organization: any = null
+  let organization: Record<string, unknown> | null = null
   let role = 'viewer'
   let creditsRemaining = 0
 
@@ -92,7 +92,7 @@ export default async function SettingsPage({
   }
 
   let paymentSettings = null
-  let location: any = null
+  let location: Record<string, unknown> | null = null
   let iouSettings = null
   if (organization && isOwnerOrManager) {
     const { data: paySettings } = await supabase
@@ -120,7 +120,7 @@ export default async function SettingsPage({
 
   // Fetch their profile details for the inputs
   
-  const { data: userProfile } = await (supabase as any)
+  const { data: _userProfile } = await supabase
     .from('user_profiles')
     .select('full_name, bank_name, account_number, account_name')
     .eq('id', userId)
@@ -212,7 +212,7 @@ export default async function SettingsPage({
               <label className="mb-2 block text-sm font-medium text-zinc-300">Refund & Cancellation Policy</label>
               <textarea
                 name="refund_policy"
-                defaultValue={(organization as any)?.refund_policy || ''}
+                defaultValue={(organization as Record<string, unknown>)?.refund_policy as string || ''}
                 rows={3}
                 className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                 placeholder="E.g., No refunds after 30 minutes, or a 10% fee applies."
@@ -453,7 +453,7 @@ export default async function SettingsPage({
                 <input
                   type="password"
                   name="managerPin"
-                  defaultValue={(location as any).manager_pin || ''}
+                  defaultValue={(location as Record<string, unknown>).manager_pin as string || ''}
                   className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                   placeholder="4-6 digits"
                   maxLength={6}
@@ -775,7 +775,7 @@ export default async function SettingsPage({
               <div>
                 <label className="mb-2 block text-sm font-medium text-zinc-300">Frequently Asked Questions (FAQs)</label>
                 <p className="text-xs text-zinc-500 mb-3">Add specific questions and answers the AI should strictly adhere to.</p>
-                <AiFaqBuilder initialFaqs={(location.ai_faqs as any) || []} />
+                <AiFaqBuilder initialFaqs={(location.ai_faqs as Record<string, unknown>[]) || []} />
               </div>
 
               <div>

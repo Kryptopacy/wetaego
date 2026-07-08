@@ -24,6 +24,9 @@ export default async function AdminPage() {
   const supabase = await createClient()
   const { data: userData } = await supabase.auth.getUser()
 
+  const { data: affiliateData } = await supabase.from('system_settings').select('value').eq('key', 'affiliate').single()
+  const affiliateSettings = (affiliateData?.value as { default_percentage?: number }) || { default_percentage: 10 }
+
   if (!isAdminEmail(userData?.user?.email)) {
     redirect('/dashboard')
   }
@@ -46,7 +49,7 @@ export default async function AdminPage() {
       referral_code,
       status,
       created_at,
-      paystack_subaccount_code
+      paystack_recipient_code
     `)
     .order('created_at', { ascending: false })
 
@@ -160,15 +163,25 @@ export default async function AdminPage() {
                     <input type="number" name="business_subaccount" defaultValue={(platformFees as Record<string, number>).business_subaccount ?? 5} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white text-sm outline-none focus:border-emerald-500" />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-zinc-400 mb-1">Affiliate Payouts</label>
-                    <input type="number" name="affiliate_subaccount" defaultValue={(platformFees as Record<string, number>).affiliate_subaccount ?? 5} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white text-sm outline-none focus:border-emerald-500" />
-                  </div>
-                  <div className="col-span-2">
                     <label className="block text-xs font-medium text-zinc-400 mb-1">Staff Tips</label>
                     <input type="number" name="staff_tip_subaccount" defaultValue={(platformFees as Record<string, number>).staff_tip_subaccount ?? 0} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white text-sm outline-none focus:border-emerald-500" />
                   </div>
                 </div>
                 <button type="submit" className="w-full px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg text-sm font-medium transition border border-zinc-700">Save Fees</button>
+              </ActionForm>
+            </section>
+
+            <section className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-xl w-full">
+              <h2 className="text-lg font-bold text-white mb-4">Affiliate Program</h2>
+              <ActionForm action={updateSetting} className="space-y-4">
+                <input type="hidden" name="key" value="affiliate" />
+                <input type="hidden" name="is_json" value="true" />
+                <div>
+                  <label className="block text-xs font-medium text-zinc-400 mb-1">Earning Percentage (%)</label>
+                  <input type="number" name="default_percentage" defaultValue={affiliateSettings.default_percentage ?? 10} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white text-sm outline-none focus:border-emerald-500" />
+                  <p className="text-xs text-zinc-500 mt-2">Percentage of subscription revenue paid to affiliates.</p>
+                </div>
+                <button type="submit" className="w-full px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg text-sm font-medium transition border border-zinc-700">Save Setting</button>
               </ActionForm>
             </section>
           </div>
@@ -197,6 +210,10 @@ export default async function AdminPage() {
                   <div>
                     <label className="block text-xs font-medium text-zinc-400 mb-1">Image Gen</label>
                     <input type="number" name="image_generation" defaultValue={(creditCosts as Record<string, number>).image_generation ?? 2} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white text-sm outline-none focus:border-emerald-500" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-zinc-400 mb-1">QR Generation</label>
+                    <input type="number" name="qr_code" defaultValue={(creditCosts as Record<string, number>).qr_code ?? 1} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white text-sm outline-none focus:border-emerald-500" />
                   </div>
                   <div className="col-span-2">
                     <label className="block text-xs font-medium text-zinc-400 mb-1">Admin AI Co-Pilot</label>

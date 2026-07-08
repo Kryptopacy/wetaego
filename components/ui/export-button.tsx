@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import { FileDown, Loader2 } from 'lucide-react'
 
 interface ExportButtonProps {
-  data: any[]
+  data: Record<string, unknown>[]
   filename: string
   label?: string
   className?: string

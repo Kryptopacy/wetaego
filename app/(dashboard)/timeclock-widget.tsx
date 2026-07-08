@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Clock, Play, Square, Loader2 } from 'lucide-react'
+import { Clock, Play, Square } from 'lucide-react'
 import { GemstoneSpinner } from '@/components/ui/gemstone-spinner'
 import { clockIn, clockOut } from './dashboard/shifts/actions'
 import { useRouter } from 'next/navigation'

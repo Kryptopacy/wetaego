@@ -114,7 +114,7 @@ export function CatalogPageRenderer({ location, page, items, locationSlug, payme
   const uncategorized = hasCategories ? items.filter(i => !i.item_data?.category) : []
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white font-sans" style={{ backgroundColor: (page as any).background_color || undefined }}>
+    <div className="min-h-screen bg-zinc-950 text-white font-sans" style={{ backgroundColor: (page as { background_color?: string }).background_color || undefined }}>
       {/* Hero */}
       <div className="relative w-full min-h-[32vh] md:max-h-[340px] flex flex-col justify-end overflow-hidden">
         {location.cover_image_url ? (
@@ -282,7 +282,7 @@ export function CatalogPageRenderer({ location, page, items, locationSlug, payme
           deliveryNote={location.delivery_note ?? ''}
           fulfillmentLocationLabel={location.fulfillment_location_label ?? ''}
           pageId={page.id}
-          refundPolicy={(location.organizations as any)?.refund_policy || (page.template_data?.refund_policy as string | undefined)}
+          refundPolicy={(location.organizations as { refund_policy?: string })?.refund_policy || (page.template_data?.refund_policy as string | undefined)}
           pageFulfillmentOptions={
             page.template_data?.fulfillment_options as { pickup: boolean, delivery: boolean, table: boolean } | undefined
           }

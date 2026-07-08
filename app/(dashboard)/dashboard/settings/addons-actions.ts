@@ -52,7 +52,8 @@ export const saveAddonsSettings = authActionClient
 
     if (locError) throw new Error((locError as Error).message)
 
-    const { error: pageError } = await (supabase as any)
+    // @ts-expect-error - location_pages might not be in the generated types yet
+    const { error: pageError } = await supabase
       .from('location_pages')
       .update({
         spinner_enabled,

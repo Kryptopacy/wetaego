@@ -5,7 +5,7 @@ import { purgeStorefrontCache } from '@/lib/cache-purger'
 import { z } from 'zod'
 import { zfd } from 'zod-form-data'
 import { authActionClient } from '@/lib/safe-action'
-import { createAdminClient, createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 
 export const createCategory = authActionClient
   .schema(zfd.formData({
@@ -282,6 +282,7 @@ export const applyTranslations = authActionClient
   })
 
 export const bulkInsertMenu = authActionClient
+   
   .schema(zfd.formData(z.any()))
   .action(async ({ parsedInput: formData, ctx: { supabase } }) => {
     const orgId = formData.get('organization_id') as string
@@ -296,6 +297,7 @@ export const bulkInsertMenu = authActionClient
     const items = JSON.parse(itemsRaw)
 
     // Group items by category_name
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const categorized = items.reduce((acc: any, item: any) => {
       if (!acc[item.category_name]) acc[item.category_name] = []
       acc[item.category_name].push(item)
@@ -315,6 +317,7 @@ export const bulkInsertMenu = authActionClient
         continue
       }
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const catItems = categorized[catName].map((i: any) => ({
         organization_id: orgId,
         category_id: newCat.id,

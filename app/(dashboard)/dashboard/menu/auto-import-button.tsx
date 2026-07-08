@@ -14,7 +14,7 @@ interface AutoImportButtonProps {
 export function AutoImportButton({ orgId, menuId }: AutoImportButtonProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [previewItems, setPreviewItems] = useState<any[]>([])
+  const [previewItems, setPreviewItems] = useState<Record<string, unknown>[]>([])
   const [showPreview, setShowPreview] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -41,8 +41,8 @@ export function AutoImportButton({ orgId, menuId }: AutoImportButtonProps) {
       const data = await res.json()
       setPreviewItems(data.items || [])
       setShowPreview(true)
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError((err as Error).message)
     } finally {
       setLoading(false)
       if (fileInputRef.current) fileInputRef.current.value = ''
@@ -62,7 +62,7 @@ export function AutoImportButton({ orgId, menuId }: AutoImportButtonProps) {
         setShowPreview(false)
         setPreviewItems([])
       }
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to save items.')
     } finally {
       setLoading(false)

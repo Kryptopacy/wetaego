@@ -2,8 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { format } from 'date-fns'
-import { ArrowLeft, Mail, Phone, Building, ExternalLink, Receipt, Check, Copy } from 'lucide-react'
-import { formatCurrency } from '@/lib/utils/currency'
+import { ArrowLeft, Mail, Phone, Building } from 'lucide-react'
 import { QuoteActions } from './quote-actions'
 
 export default async function QuoteDetailsPage({
@@ -49,7 +48,7 @@ export default async function QuoteDetailsPage({
   if (isQuoteTemplate && quote.booking_notes) {
     try {
       parsedQuoteData = JSON.parse(quote.booking_notes)
-    } catch (e) {
+    } catch {
       // Not JSON, ignore
     }
   }

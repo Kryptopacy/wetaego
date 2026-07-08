@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { Check, X, RefreshCw, Link as LinkIcon, Copy, FileEdit, MessageSquare, Calendar } from 'lucide-react'
+import { X, RefreshCw, Link as LinkIcon, Copy, FileEdit, MessageSquare } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { formatCurrency } from '@/lib/utils/currency'
@@ -28,7 +28,12 @@ export function QuoteActions({
   
   // Parse existing data
   let initialMilestones: { id: string, name: string, percentage: number, status: 'unpaid' | 'paid' }[] = []
-  let parsedNotes: any = {}
+  let parsedNotes: {
+    milestones?: { id: string, name: string, percentage: number, status: 'unpaid' | 'paid' }[]
+    expiresAt?: string
+    lineItems?: { title: string; qty?: number; unit_price_minor?: number }[]
+    changeRequests?: { message: string; createdAt: string }[]
+  } = {}
   try {
     if (bookingNotes) {
       parsedNotes = JSON.parse(bookingNotes)
@@ -36,7 +41,7 @@ export function QuoteActions({
         initialMilestones = parsedNotes.milestones
       }
     }
-  } catch (e) {}
+  } catch {}
 
   const [milestones, setMilestones] = useState(initialMilestones)
 
@@ -44,7 +49,7 @@ export function QuoteActions({
   const [showProposalEditor, setShowProposalEditor] = useState(false)
   const [expiryDate, setExpiryDate] = useState<string>(parsedNotes.expiresAt ? parsedNotes.expiresAt.substring(0, 10) : '')
   const [pricedItems, setPricedItems] = useState<{ title: string; qty: number; unit_price_minor: number }[]>(
-    (parsedNotes.lineItems || []).map((item: any) => ({
+    (parsedNotes.lineItems || []).map((item) => ({
       title: item.title,
       qty: item.qty || 1,
       unit_price_minor: item.unit_price_minor || 0,

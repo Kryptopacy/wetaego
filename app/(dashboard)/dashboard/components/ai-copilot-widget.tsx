@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useChat, UIMessage, Chat } from '@ai-sdk/react'
 import { DefaultChatTransport } from 'ai'
-import { Bot, X, MessageSquare, Send, Sparkles, AlertCircle, Mic, MicOff, Volume2, VolumeX } from 'lucide-react'
+import { Bot, X, Send, Sparkles, AlertCircle, Mic, MicOff, Volume2, VolumeX } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useSpeech } from '@/hooks/use-speech'
 import Image from 'next/image'
@@ -21,7 +21,7 @@ export function AICopilotWidget({ organizationId }: { organizationId: string }) 
 
   const [conversationMode, setConversationMode] = useState(false)
 
-  const { isSupported, isListening, isSpeaking, startListening, stopListening, speak, cancelSpeech } = useSpeech({
+  const { isSupported, isListening, startListening, stopListening, speak, cancelSpeech } = useSpeech({
     onTranscriptComplete: (text) => {
       if (conversationMode) {
         sendMessage({ text })
@@ -38,9 +38,9 @@ export function AICopilotWidget({ organizationId }: { organizationId: string }) 
 
   const { messages, sendMessage, status, error } = useChat({
     chat: chatInstance,
-    onFinish: (message: any) => {
+    onFinish: (message: Record<string, unknown>) => {
       if (conversationMode) {
-        const text = message.parts?.filter((p: any) => p.type === 'text').map((p: any) => p.text).join('') || ''
+        const text = (message.parts as Record<string, unknown>[])?.filter(p => p.type === 'text').map(p => p.text as string).join('') || ''
         if (text) speak(text)
       }
     }
@@ -182,7 +182,7 @@ export function AICopilotWidget({ organizationId }: { organizationId: string }) 
                         : 'bg-zinc-800 text-zinc-200 border border-zinc-700 rounded-bl-none'
                     }`}
                   >
-                    {m.parts?.filter((p: any) => p.type === 'text').map((p: any) => p.text).join('')}
+                    {(m.parts as Record<string, unknown>[])?.filter(p => p.type === 'text').map(p => p.text as string).join('')}
                   </div>
                 </div>
               ))}

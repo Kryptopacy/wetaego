@@ -32,6 +32,8 @@ const serviceRequestSchema = z.object({
   urgency_tier: z.enum(['standard', 'critical', 'low']).default('standard')
 })
 
+import { notifyBusiness } from '@/lib/notifications/dispatcher'
+
 export async function submitServiceRequest(formData: FormData): Promise<SafeResult<{ success: boolean }>> {
   try {
     const { checkRateLimit } = await import('@/lib/upstash');
@@ -76,17 +78,13 @@ export async function submitServiceRequest(formData: FormData): Promise<SafeResu
       urgency_tier: urgencyTier as 'standard' | 'critical',
     })
 
-    // Fetch the location's configured WhatsApp number
-    const { data: location } = await supabase
-      .from('locations')
-      .select('whatsapp_number')
-      .eq('id', locId)
-      .single()
-
-    const whatsappNumber = location?.whatsapp_number || '08000000000'
-
-    // Fire WhatsApp Notification in the background without blocking the UI
-    waitUntil(sendWhatsAppMessage(whatsappNumber, `[${urgencyTier.toUpperCase()}] Table ${tableId} needs a ${requestType}! ${customRequestText || ''}`))
+    // Fire all notification channels (push, email, WhatsApp) via dispatcher
+    waitUntil(notifyBusiness(locId, {
+      title: `[${urgencyTier.toUpperCase()}] Staff Request — ${tableId}`,
+      body: customRequestText ? `"${customRequestText}" — ${requestType}` : requestType,
+      url: '/dashboard/orders',
+      tag: `service_request_${locId}`,
+    }))
     
     return { data: { success: true } };
   } catch (e: unknown) {
@@ -221,7 +219,7 @@ export async function processCheckout(params: {
   const dbItemMap = new Map(dbItems?.map(i => [i.id, i]) || [])
   
   // Calculate COGS from BOM
-  let cogsMap = new Map<string, number>()
+  const cogsMap = new Map<string, number>()
   if (itemIds.length > 0) {
     const formattedIds = itemIds.map(id => `"${id}"`).join(',')
     const { data: bomData } = await supabase
@@ -233,7 +231,7 @@ export async function processCheckout(params: {
       for (const bom of bomData) {
         const targetId = bom.menu_item_id || bom.page_item_id
         if (targetId) {
-          const itemCost = (bom.inventory_items as any)?.cost_price_minor || 0
+          const itemCost = (bom.inventory_items as Record<string, unknown>)?.cost_price_minor as number || 0
           const currentCost = cogsMap.get(targetId) || 0
           // Math.round in case quantity_required is fractional
           cogsMap.set(targetId, currentCost + Math.round(itemCost * Number(bom.quantity_required)))
@@ -580,7 +578,7 @@ export async function checkIouStatus(organizationId: string): Promise<boolean> {
       .maybeSingle()
     
     return data?.is_enabled ?? false
-  } catch (e) {
+  } catch {
     return false
   }
 }

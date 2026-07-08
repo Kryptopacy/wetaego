@@ -2,9 +2,8 @@
 
 import { useState } from 'react'
 import { FadeIn } from './animations'
-import { Dices, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import confetti from 'canvas-confetti'
 
 type GameMode = 'classic' | 'squad' | 'survivor' | 'chaos'

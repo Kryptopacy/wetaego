@@ -25,6 +25,7 @@ export const updateKycStatus = authActionClient
     // If 'waived', we just approve the org but don't strictly approve the KYC record 
     // (or we can mark the KYC record as 'waived' if it exists)
     if (status !== 'waived') {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await (supabase as any)
         .from('organization_kyc')
         .update({
@@ -37,6 +38,7 @@ export const updateKycStatus = authActionClient
     }
 
     // Update org table
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await (supabase as any)
       .from('organizations')
       .update({ status: (status === 'approved' || status === 'waived') ? 'approved' : 'pending_kyc' })

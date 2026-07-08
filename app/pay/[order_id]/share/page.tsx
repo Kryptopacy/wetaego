@@ -22,7 +22,7 @@ export default function SharingHubPage({
   const slug = searchParams.get('slug')
   
   const [origin, setOrigin] = useState('')
-  const [order, setOrder] = useState<any>(null)
+  const [order, setOrder] = useState<{ id?: string, total_amount_minor: number, amount_paid_minor: number, locations?: { currency_code: string } } | null>(null)
   const supabase = createClient()
 
   useEffect(() => {
@@ -44,7 +44,7 @@ export default function SharingHubPage({
       .on(
         'postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'orders', filter: `id=eq.${order_id}` },
-        (payload) => setOrder((prev: any) => ({ ...prev, ...payload.new }))
+        (payload) => setOrder((prev) => prev ? { ...prev, ...(payload.new as Partial<typeof prev>) } : null)
       )
       .subscribe()
       

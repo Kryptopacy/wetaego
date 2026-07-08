@@ -1,7 +1,7 @@
 import { Database } from '@/lib/supabase/types'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { createCategory } from './actions'
+
 import { CategoryTabs } from './category-tabs'
 import { TranslateMenuButton } from './translate-menu-button'
 import { AutoImportButton } from './auto-import-button'
@@ -18,7 +18,7 @@ export default async function MenuManagerPage() {
   const userId = user!.id
 
   let org: { id: string } | null = null
-  let role = 'viewer'
+
   let menu: { id: string } | null = null
   let categories: (Database['public']['Tables']['menu_categories']['Row'] & { menu_items?: Database['public']['Tables']['menu_items']['Row'][] })[] = []
 
@@ -30,7 +30,7 @@ export default async function MenuManagerPage() {
 
   if (member && member.organizations) {
     org = member.organizations
-    role = member.role
+
   } else {
     const { data } = await supabase
       .from('organizations')
@@ -38,8 +38,7 @@ export default async function MenuManagerPage() {
       .eq('created_by', userId)
       .single()
     org = data
-  
-    role = 'owner'
+    org = data
   }
 
   const cookieStore = await cookies()

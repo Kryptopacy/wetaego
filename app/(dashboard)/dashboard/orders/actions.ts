@@ -14,7 +14,7 @@ import { OrderRefundEmail } from '@/emails/order-refund-email'
 
 const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy')
 
-async function requireOrderAuth(orderId: string, user: any) {
+async function requireOrderAuth(orderId: string, user: { id: string }) {
   const supabase = await createClient()
 
   // Fetch order details
@@ -272,7 +272,8 @@ export const sendPaymentLinkAction = authActionClient
 
     return { success: true, checkoutUrl }
   })
-async function verifyManagerPin(supabase: any, organizationId: string, locationId: string, pin: string) {
+async function verifyManagerPin(organizationId: string, locationId: string, pin: string) {
+  const supabase = await createClient()
   // 1. Check location PIN
   const { data: loc } = await supabase
     .from('locations')
@@ -290,7 +291,7 @@ async function verifyManagerPin(supabase: any, organizationId: string, locationI
     .in('role', ['owner', 'manager'])
     .not('manager_pin', 'is', null)
     
-  if (members && members.some((m: any) => m.manager_pin === pin)) {
+  if (members && members.some((m: { manager_pin: string | null }) => m.manager_pin === pin)) {
     return true
   }
   
@@ -309,7 +310,7 @@ export const voidOrderAction = authActionClient
     const { data: fullOrder } = await supabase.from('orders').select('location_id, status').eq('id', orderId).single()
     if (!fullOrder) throw new Error('Order not found')
     
-    const isValid = await verifyManagerPin(supabase, order.organization_id, fullOrder.location_id, pin)
+    const isValid = await verifyManagerPin(order.organization_id, fullOrder.location_id, pin)
     if (!isValid) throw new Error('Invalid Manager PIN')
     
     const { error: updateError } = await supabase
@@ -365,7 +366,7 @@ export const refundOrderAction = authActionClient
     const { data: fullOrder } = await supabase.from('orders').select('location_id, status').eq('id', orderId).single()
     if (!fullOrder) throw new Error('Order not found')
     
-    const isValid = await verifyManagerPin(supabase, order.organization_id, fullOrder.location_id, pin)
+    const isValid = await verifyManagerPin(order.organization_id, fullOrder.location_id, pin)
     if (!isValid) throw new Error('Invalid Manager PIN')
     
     const { data: payments } = await supabase

@@ -42,10 +42,10 @@ export default function PaymentTesterPage() {
       
       // Auto-redirect to the Paystack checkout window
       if (data.url) {
-        window.location.href = data.url
+        window.location.assign(data.url)
       }
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError((err as Error).message)
     } finally {
       setLoading(null)
     }

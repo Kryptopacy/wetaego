@@ -1,5 +1,4 @@
 import { createAnonClient } from '@/lib/supabase/server'
-import { notFound } from 'next/navigation'
 
 export default async function LocationLayout({
   children,

@@ -27,6 +27,7 @@ export async function GET(request: Request) {
       .eq('is_enabled', true)
 
     if (settingsError) {
+       
       console.error('Error fetching IOU settings:', settingsError)
       return NextResponse.json({ error: 'Failed to fetch settings' }, { status: 500 })
     }
@@ -42,8 +43,8 @@ export async function GET(request: Request) {
       const orgId = settings.organization_id
       const minBalance = settings.minimum_balance_to_remind_minor
       const freqDays = settings.reminder_frequency_days
-      const orgName = (settings.organizations as any).name
-      const orgSlug = (settings.organizations as any).slug
+      const orgName = (settings.organizations as Record<string, unknown>).name as string
+      const orgSlug = (settings.organizations as Record<string, unknown>).slug as string
 
       // Customers whose credit balance exceeds minimum
       const { data: customers, error: customersError } = await supabase
@@ -53,6 +54,7 @@ export async function GET(request: Request) {
         .gt('credit_balance_minor', minBalance || 0)
 
       if (customersError) {
+         
         console.error(`Error fetching customers for org ${orgId}:`, customersError)
         continue
       }
@@ -104,6 +106,7 @@ export async function GET(request: Request) {
 
             emailsSent++
           } catch (e) {
+             
             console.error(`Failed to send email to ${customer.email}:`, e)
           }
         }
@@ -111,8 +114,10 @@ export async function GET(request: Request) {
     }
 
     return NextResponse.json({ success: true, emailsSent })
-  } catch (err: any) {
+  } catch (err) {
+     
     console.error('Unhandled Cron Error:', err)
-    return NextResponse.json({ error: err.message }, { status: 500 })
+    const message = err instanceof Error ? err.message : 'Unknown error'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

@@ -151,12 +151,14 @@ ${JSON.stringify(aggregated, null, 2)}`
     })
 
     return NextResponse.json(object)
-  } catch (error: any) {
+  } catch (error) {
+     
     console.error('Forecast Error:', error)
     
     // Catch AI Provider Timeouts & Overloads
-    const isTimeout = error?.name === 'TimeoutError' || error?.message?.includes('timeout')
-    const isOverloaded = error?.message?.includes('503') || error?.message?.includes('overloaded')
+    const err = error as Error & { message?: string, name?: string }
+    const isTimeout = err?.name === 'TimeoutError' || err?.message?.includes('timeout')
+    const isOverloaded = err?.message?.includes('503') || err?.message?.includes('overloaded')
     
     if (isTimeout || isOverloaded) {
       return NextResponse.json({ error: 'AI service is temporarily overloaded or timed out. Please try again in a moment.' }, { status: 503 })

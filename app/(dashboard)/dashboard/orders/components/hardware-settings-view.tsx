@@ -59,7 +59,7 @@ export function HardwareSettingsView() {
         }
       ]
     
-    } as any
+    } as unknown as UIOrder
 
     const success = await printOrder(testOrder, {
       mode,

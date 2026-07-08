@@ -5,13 +5,13 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import {
   BarChart3, BookOpen, ClipboardList, FileText,
-  QrCode, Sparkles, TrendingUp, Users, Zap, ArrowRight,
+  QrCode, Sparkles, TrendingUp, Users, ArrowRight,
   Globe, AlertTriangle
 } from 'lucide-react'
 import { OnboardingChecklist } from './components/onboarding-checklist'
 import { RevenueChart, RevenueDataPoint } from './components/revenue-chart'
 import { BUSINESS_TYPE_PRESETS } from '@/lib/templates/presets'
-import { format, subDays, startOfDay, endOfDay } from 'date-fns'
+import { format, subDays, startOfDay } from 'date-fns'
 
 export default async function DashboardOverviewPage() {
   const supabase = await createClient()

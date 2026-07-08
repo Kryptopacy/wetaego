@@ -9,7 +9,8 @@ import { waitUntil } from '@vercel/functions'
 
 const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy')
 
-async function verifyOwnerOrManager(orgId: string, supabase: any, user: any) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function verifyOwnerOrManager(orgId: string, supabase: any, user: { id: string }) {
   if (orgId === 'demo-org') return { userId: 'demo-user-id', role: 'owner' }
   const { cookies } = await import('next/headers')
   if ((await cookies()).get('demo_mode')?.value === '1') {
@@ -30,6 +31,7 @@ async function verifyOwnerOrManager(orgId: string, supabase: any, user: any) {
   return { userId: user.id, role: member?.role || 'owner' }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function checkIsCreator(orgId: string, userId: string, supabase: any): Promise<boolean> {
   const { data } = await supabase
     .from('organizations')

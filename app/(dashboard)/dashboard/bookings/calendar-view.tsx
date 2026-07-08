@@ -22,7 +22,7 @@ const STATUS_COLORS: Record<string, string> = {
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December']
 
-export function CalendarView({ bookings }: { bookings: any[] }) {
+export function CalendarView({ bookings }: { bookings: Record<string, unknown>[] }) {
   const [current, setCurrent] = useState(() => {
     const d = new Date()
     d.setDate(1)
@@ -34,15 +34,15 @@ export function CalendarView({ bookings }: { bookings: any[] }) {
   // Map bookings to events
   const events: BookingEvent[] = bookings.flatMap(b => {
     if (!b.booking_date) return []
-    const d = new Date(b.booking_date)
+    const d = new Date(b.booking_date as string)
     if (isNaN(d.getTime())) return []
     return [{
-      id: b.id,
+      id: b.id as string,
       date: d,
-      status: b.status || 'pending',
-      customerName: b.customer_name || 'Unknown',
-      title: b.customer_name || 'Booking',
-      itemTitle: b.page_items?.title || b.location_pages?.title,
+      status: (b.status as string) || 'pending',
+      customerName: (b.customer_name as string) || 'Unknown',
+      title: (b.customer_name as string) || 'Booking',
+      itemTitle: (b.page_items as { title: string })?.title || (b.location_pages as { title: string })?.title,
     }]
   })
 

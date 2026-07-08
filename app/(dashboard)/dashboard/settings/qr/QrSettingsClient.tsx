@@ -6,7 +6,7 @@ import { useState, useRef, useEffect } from "react";
 import { toast } from "sonner";
 import { DynamicQR } from "@/components/qr/DynamicQR";
 import { updateQrConfig } from "./actions";
-import { Download, Loader2, Save } from "lucide-react";
+import { Download, Save } from "lucide-react";
 import { GemstoneSpinner } from "@/components/ui/gemstone-spinner";
 import { Database } from "@/lib/supabase/types";
 

@@ -1,11 +1,11 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
 import { authActionClient } from '@/lib/safe-action'
-import { z } from 'zod'
-import { zfd } from 'zod-form-data'
 import { isAdminEmail } from '@/lib/utils/admin'
+import { initiateTransfer } from '@/lib/payments/paystack'
 
 export const updateSetting = authActionClient
   .schema(z.instanceof(FormData))
@@ -58,6 +58,34 @@ export const updateSetting = authActionClient
 
     revalidatePath('/', 'layout')
     return { success: true }
+  })
+
+export const payAffiliateEarnings = authActionClient
+  .schema(z.object({ affiliate_id: z.string() }))
+  .action(async ({ parsedInput: { affiliate_id }, ctx: { user } }) => {
+    const supabase = await createClient()
+    if (!isAdminEmail(user.email)) throw new Error('Unauthorized')
+
+    const { data: affiliate } = await supabase.from('affiliates').select('paystack_recipient_code').eq('id', affiliate_id).single()
+    if (!affiliate?.paystack_recipient_code) throw new Error('Affiliate has no payout recipient code configured')
+
+    const { data: earnings } = await supabase.from('affiliate_earnings').select('id, amount_minor').eq('affiliate_id', affiliate_id).eq('status', 'pending')
+    if (!earnings || earnings.length === 0) throw new Error('No pending earnings found')
+
+    const totalMinor = earnings.reduce((sum: number, e: { amount_minor: number }) => sum + e.amount_minor, 0)
+
+    try {
+      await initiateTransfer(totalMinor, affiliate.paystack_recipient_code, "Affiliate Payout")
+    } catch (error: any) {
+      console.error('Transfer failed:', error)
+      throw new Error('Transfer failed: ' + error.message)
+    }
+
+    const ids = earnings.map((e: { id: string }) => e.id)
+    await supabase.from('affiliate_earnings').update({ status: 'paid' }).in('id', ids)
+
+    revalidatePath('/', 'layout')
+    return { success: true, message: `Paid NGN ${(totalMinor / 100).toLocaleString()} successfully.` }
   })
 
 export const overrideTenantPlan = authActionClient

@@ -4,7 +4,7 @@ import { useState, useTransition } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { formatDistanceToNow } from 'date-fns'
 import { toast } from 'sonner'
-import { Phone, Mail, MessageCircle, ExternalLink, Building2, Tag } from 'lucide-react'
+import { Phone, Mail, MessageCircle, Tag } from 'lucide-react'
 
 type Inquiry = {
   id: string

@@ -24,7 +24,6 @@ export default async function PagesManager() {
   const userId = user.id
 
   let org: { id: string; subscription_tier: string; purchased_credits: number; monthly_free_credits_used: number; business_type: string | null } | null = null
-  let role = 'viewer'
   let locData: { id: string; slug: string } | null = null
   let pages: {
     id: string; title: string; slug: string; is_published: boolean;
@@ -40,7 +39,6 @@ export default async function PagesManager() {
 
   if (member && member.organizations) {
     org = member.organizations as unknown as typeof org
-    role = member.role
   } else {
     const { data } = await supabase
       .from('organizations')
@@ -49,7 +47,7 @@ export default async function PagesManager() {
       .single()
     org = data
 
-    role = 'owner'
+    org = data
   }
 
   const { data: locDataResult } = await supabase
@@ -88,10 +86,6 @@ export default async function PagesManager() {
   const currentCount = pages.length
   const isOverLimit = currentCount >= freeLimit
   
-  const creditsRemaining = (org.purchased_credits || 0) + Math.max(0, (
-    org.subscription_tier === 'pro' ? 50 :
-    org.subscription_tier === 'enterprise' ? 200 : 0
-  ) - (org.monthly_free_credits_used || 0))
 
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://ourmenuos.online'
 

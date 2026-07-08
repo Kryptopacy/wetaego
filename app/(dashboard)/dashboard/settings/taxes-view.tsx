@@ -6,7 +6,7 @@ import { SubmitButton } from '@/components/submit-button'
 import { saveTax, deleteTax } from './taxes/actions'
 import { toast } from 'sonner'
 
-export function TaxesView({ locationId, taxes }: { locationId: string, taxes: any[] }) {
+export function TaxesView({ locationId, taxes }: { locationId: string, taxes: { id: string, name: string, percentage: number, is_active: boolean }[] }) {
   const [isAdding, setIsAdding] = useState(false)
 
   return (

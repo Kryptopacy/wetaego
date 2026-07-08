@@ -11,7 +11,7 @@ import { motion } from 'framer-motion'
 import { createClient } from '@/lib/supabase/client'
 import { setActiveLocationCookie } from './layout-actions'
 import {
-  LayoutDashboard, ClipboardList, BarChart3, BookOpen, ChevronRight, CreditCard, Home, Menu, MessageSquare, Package, QrCode, Settings, Store, Users, Zap, X, User, FileText, LogOut, TrendingUp, Truck, MapPin
+  LayoutDashboard, ClipboardList, BarChart3, BookOpen, CreditCard, Menu, MessageSquare, Package, QrCode, Settings, Users, Zap, X, User, FileText, LogOut, TrendingUp, Truck, MapPin
 } from 'lucide-react'
 import { GlobalRealtime } from './global-realtime'
 import { NotificationCenter } from './notification-center'
@@ -163,11 +163,13 @@ export default function ClientLayout({ children, initialData }: { children: Reac
 
   // Append Delivery Kanban to daily operations if not already there
   useEffect(() => {
-    setDynamicNavItems(prev => {
-      if (!prev.find(item => item.href === '/dashboard/delivery')) {
-        return [...prev, { href: '/dashboard/delivery', label: 'Delivery Hub', icon: Truck }]
-      }
-      return prev
+    queueMicrotask(() => {
+      setDynamicNavItems(prev => {
+        if (!prev.find(item => item.href === '/dashboard/delivery')) {
+          return [...prev, { href: '/dashboard/delivery', label: 'Delivery Hub', icon: Truck }]
+        }
+        return prev
+      })
     })
   }, [])
 

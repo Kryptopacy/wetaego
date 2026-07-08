@@ -26,7 +26,7 @@ export const updateQrConfig = authActionClient
     if (!isAuthorized) throw new Error("Unauthorized");
 
     
-    const updatePayload: any = {
+    const updatePayload: Record<string, unknown> = {
       qr_text: config.qr_text ? config.qr_text.substring(0, 2) : null,
       qr_color: config.qr_color,
       logo_url: config.logo_url,

@@ -17,7 +17,8 @@ export const saveTax = authActionClient
     if (id) {
       // Update
       
-      const { error } = await (supabase as any)
+      // @ts-expect-error - location_taxes might not be in the generated types yet
+      const { error } = await supabase
         .from('location_taxes')
         .update({ name, percentage, is_active })
         .eq('id', id)
@@ -27,7 +28,8 @@ export const saveTax = authActionClient
     } else {
       // Insert
       
-      const { error } = await (supabase as any)
+      // @ts-expect-error - location_taxes might not be in the generated types yet
+      const { error } = await supabase
         .from('location_taxes')
         .insert({ location_id, name, percentage, is_active })
       
@@ -45,7 +47,8 @@ export const deleteTax = authActionClient
   }))
   .action(async ({ parsedInput: { taxId, locationId }, ctx: { supabase } }) => {
     
-    const { error } = await (supabase as any)
+    // @ts-expect-error - location_taxes might not be in the generated types yet
+    const { error } = await supabase
       .from('location_taxes')
       .delete()
       .eq('id', taxId)

@@ -5,11 +5,11 @@ import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 export function SettingsContextSwitcher({ 
   pages, 
   activePageId, 
-  currentTab 
+  _currentTab 
 }: { 
-  pages: any[], 
+  pages: { id: string, title: string, slug: string }[], 
   activePageId: string | null,
-  currentTab: string 
+  _currentTab?: string 
 }) {
   const router = useRouter()
   const pathname = usePathname()

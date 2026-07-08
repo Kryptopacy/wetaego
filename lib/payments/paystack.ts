@@ -89,7 +89,7 @@ export const paystackProvider: PaymentProvider = {
     const secretKey = useTestKeys ? process.env.PAYSTACK_TEST_SECRET_KEY : process.env.PAYSTACK_SECRET_KEY
     if (!secretKey) throw new Error('PAYSTACK_SECRET_KEY is not configured')
 
-    const payload: any = { transaction: reference }
+    const payload: { transaction: string; amount?: number } = { transaction: reference }
     if (amountMinor) payload.amount = amountMinor
 
     const res = await fetch(`${PAYSTACK_BASE}/refund`, {
@@ -166,4 +166,58 @@ export async function createSubaccount(bankCode: string, accountNumber: string, 
 
   const data = await res.json()
   return data.data.subaccount_code as string
+}
+
+export async function createTransferRecipient(name: string, accountNumber: string, bankCode: string): Promise<string> {
+  const secretKey = process.env.PAYSTACK_SECRET_KEY
+  if (!secretKey) throw new Error('PAYSTACK_SECRET_KEY is not configured')
+
+  const res = await fetch(`${PAYSTACK_BASE}/transferrecipient`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${secretKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      type: "nuban",
+      name: name,
+      account_number: accountNumber,
+      bank_code: bankCode,
+      currency: "NGN"
+    }),
+  })
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    throw new Error(`Paystack createTransferRecipient failed: ${JSON.stringify(err)}`)
+  }
+
+  const data = await res.json()
+  return data.data.recipient_code as string
+}
+
+export async function initiateTransfer(amountMinor: number, recipientCode: string, reason: string): Promise<boolean> {
+  const secretKey = process.env.PAYSTACK_SECRET_KEY
+  if (!secretKey) throw new Error('PAYSTACK_SECRET_KEY is not configured')
+
+  const res = await fetch(`${PAYSTACK_BASE}/transfer`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${secretKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      source: "balance",
+      amount: amountMinor,
+      recipient: recipientCode,
+      reason: reason
+    }),
+  })
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    throw new Error(`Paystack initiateTransfer failed: ${JSON.stringify(err)}`)
+  }
+
+  return true
 }

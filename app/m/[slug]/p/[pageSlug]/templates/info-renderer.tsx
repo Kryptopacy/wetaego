@@ -17,6 +17,7 @@ interface InfoRendererProps {
     title: string
     content?: string
     template_data?: Record<string, unknown>
+    background_color?: string
   }
   items: unknown[]
   locationSlug: string
@@ -80,7 +81,7 @@ export function InfoRenderer({ location, page, locationSlug }: InfoRendererProps
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white font-sans" style={{ backgroundColor: (page as any).background_color || undefined }}>
+    <div className="min-h-screen bg-zinc-950 text-white font-sans" style={{ backgroundColor: page.background_color || undefined }}>
       {/* Hero */}
       <div className="relative w-full h-[30vh] min-h-[200px] max-h-[300px] overflow-hidden">
         {location.cover_image_url ? (

@@ -44,6 +44,7 @@ export function AIChat({
   const [isOpen, setIsOpen] = useState(false)
   const [limitReached, setLimitReached] = useState(false)
   const [isListening, setIsListening] = useState(false)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const recognitionRef = useRef<any>(null)
   const chatEndRef = useRef<HTMLDivElement>(null)
 
@@ -158,7 +159,7 @@ export function AIChat({
       return
     }
 
-    // @ts-ignore
+    // @ts-expect-error - SpeechRecognition is not standard in lib.dom.d.ts
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
     if (!SpeechRecognition) {
       toast.error('Voice dictation is not supported in this browser.')
@@ -173,15 +174,15 @@ export function AIChat({
 
     recognition.onstart = () => setIsListening(true)
     
-    recognition.onresult = (event: any) => {
+    recognition.onresult = (event: { results: Iterable<unknown> }) => {
       const transcript = Array.from(event.results)
-        .map((result: any) => result[0])
-        .map((result: any) => result.transcript)
+        .map((result: unknown) => (result as { [key: number]: unknown })[0])
+        .map((result: unknown) => (result as { transcript: string }).transcript)
         .join('')
       setInput(initialInput ? initialInput + ' ' + transcript : transcript)
     }
 
-    recognition.onerror = (event: any) => {
+    recognition.onerror = (event: { error: unknown }) => {
       console.error('Speech recognition error', event.error)
       setIsListening(false)
     }

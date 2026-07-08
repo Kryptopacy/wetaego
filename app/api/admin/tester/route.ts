@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { paymentProvider } from '@/lib/payments/paystack'
 import { isAdminEmail } from '@/lib/utils/admin'
 
 // This will use the generic paymentProvider mapped to paystackProvider behind the scenes.
@@ -75,8 +74,10 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ url: authorizationUrl })
 
-  } catch (err: any) {
+  } catch (err) {
+     
     console.error('Tester API Error:', err)
-    return NextResponse.json({ error: err.message }, { status: 500 })
+    const message = err instanceof Error ? err.message : 'Unknown error'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

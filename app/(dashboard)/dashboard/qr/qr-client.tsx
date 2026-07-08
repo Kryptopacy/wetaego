@@ -5,15 +5,19 @@ import { useState } from 'react'
 import Image from 'next/image'
 import { generateQrBatch, deleteQrCode, assignQrTable } from './actions'
 import { toast } from 'sonner'
+import { DynamicQR } from '@/components/qr/DynamicQR'
 
-export function QrClient({ organizationId, orgLogo, locations, qrCodes, baseUrl }: {
+export function QrClient({ organizationId, orgLogo, locations, qrCodes, baseUrl, planLimit, creditBalance }: {
   organizationId: string
   orgLogo?: string | null
   locations: Database['public']['Tables']['locations']['Row'][]
   qrCodes: Database['public']['Tables']['qr_codes']['Row'][]
   baseUrl: string
+  planLimit?: number
+  creditBalance?: number
 }) {
   const [isGenerating, setIsGenerating] = useState(false)
+  const [quantity, setQuantity] = useState(1)
   
   // Modal state for assigning tables
   const [assignModalOpen, setAssignModalOpen] = useState(false)
@@ -59,8 +63,9 @@ export function QrClient({ organizationId, orgLogo, locations, qrCodes, baseUrl 
           </p>
         </div>
 
-        <form onSubmit={handleGenerate} className="flex gap-3">
-          <input type="hidden" name="organization_id" value={organizationId} />
+        <form onSubmit={handleGenerate} className="flex flex-col gap-3">
+          <div className="flex gap-3 items-center">
+            <input type="hidden" name="organization_id" value={organizationId} />
           
           <select name="location_id" className="bg-zinc-950 border border-zinc-800 text-white rounded-lg px-4 py-2 focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-all" required>
             {locations.map((loc) => (
@@ -73,19 +78,38 @@ export function QrClient({ organizationId, orgLogo, locations, qrCodes, baseUrl 
             name="quantity" 
             min="1" 
             max={organizationId === 'demo-org' ? "1" : "200"} 
-            defaultValue="1" 
+            value={quantity}
+            onChange={(e) => setQuantity(Number(e.target.value) || 1)}
             className="w-24 bg-zinc-950 border border-zinc-800 text-white rounded-lg px-4 py-2 focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-all"
             required
             title={organizationId === 'demo-org' ? "Demo mode is limited to 1 QR code" : "Number of QR codes to generate"}
           />
 
           <button 
-            disabled={isGenerating}
+            disabled={isGenerating || (Math.max(0, localQrCodes.length + quantity - (planLimit || 10)) > (creditBalance || 0))}
             type="submit" 
             className="bg-white hover:bg-zinc-200 text-black font-bold px-6 py-2 rounded-lg shadow-lg transition-all disabled:opacity-50 whitespace-nowrap"
           >
             {isGenerating ? 'Generating...' : 'Generate'}
           </button>
+          </div>
+          {(() => {
+            const currentCount = localQrCodes.length;
+            const free = planLimit || 10;
+            const totalAfter = currentCount + quantity;
+            const excess = totalAfter - Math.max(currentCount, free);
+            if (excess > 0) {
+              const cost = excess; // 1 credit per QR
+              const canAfford = (creditBalance || 0) >= cost;
+              return (
+                <div className={`text-xs px-2 ${canAfford ? 'text-emerald-400' : 'text-red-400 font-bold'}`}>
+                  Generating {quantity} will exceed your free limit. {excess} extra QR{excess > 1 ? 's' : ''} costs {cost} credit{cost > 1 ? 's' : ''} (You have {creditBalance || 0}).
+                  {!canAfford && " Please buy more credits."}
+                </div>
+              )
+            }
+            return null;
+          })()}
         </form>
       </div>
 
@@ -113,7 +137,7 @@ export function QrClient({ organizationId, orgLogo, locations, qrCodes, baseUrl 
           const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(fullUrl)}&color=${hexColor}`
 
           return (
-            <div key={qr.id} className="relative group border-2 border-zinc-800 rounded-2xl p-6 bg-gradient-to-b from-zinc-900/80 to-zinc-950 flex flex-col items-center print:border print:border-zinc-300 print:bg-white print:rounded-lg print:p-8 print:break-inside-avoid shadow-2xl transition-all hover:border-zinc-600 overflow-hidden">
+            <div key={qr.id} className="relative group border-2 rounded-2xl p-6 bg-gradient-to-b from-zinc-900/80 to-zinc-950 flex flex-col items-center print:border print:border-zinc-300 print:bg-white print:rounded-lg print:p-8 print:break-inside-avoid shadow-2xl transition-all hover:border-zinc-600 overflow-hidden" style={{ borderColor: themeColor }}>
               
               {/* Brand Accent Bar */}
               <div className="absolute top-0 left-0 right-0 h-2 print:h-3" style={{ backgroundColor: `#${hexColor}` }} />
@@ -136,9 +160,8 @@ export function QrClient({ organizationId, orgLogo, locations, qrCodes, baseUrl 
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
               </button>
 
-              <div className="bg-white p-3 rounded-xl mb-4 print:p-0 shadow-[0_0_15px_rgba(255,255,255,0.1)] print:shadow-none w-full max-w-[200px]">
-                { }
-                <Image src={qrImageUrl} alt="QR Code" width={300} height={300} className="w-full aspect-square" crossOrigin="anonymous" />
+              <div className="bg-white p-3 rounded-xl mb-4 print:p-0 shadow-[0_0_15px_rgba(255,255,255,0.1)] print:shadow-none w-full max-w-[200px] aspect-square flex items-center justify-center">
+                <DynamicQR value={fullUrl} color={themeColor} size={180} />
               </div>
               
               <div className="text-center w-full mb-4 print:mb-6 flex flex-col items-center">
@@ -166,16 +189,8 @@ export function QrClient({ organizationId, orgLogo, locations, qrCodes, baseUrl 
                   Scan to Rate & Tip<br/>
                   <span className="text-[8px] tracking-normal font-medium">(Requires 4-digit PIN from receipt)</span>
                 </p>
-                <div className="bg-white p-1.5 rounded-lg print:p-0 w-20 h-20 shadow-inner">
-                  { }
-                  <Image 
-                    src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`${baseUrl}/api/feedback-entry?qr_id=${qr.id}`)}&color=000000`}
-                    alt="Feedback QR" 
-                    width={150}
-                    height={150}
-                    className="w-full h-full" 
-                    crossOrigin="anonymous" 
-                  />
+                <div className="bg-white p-1.5 rounded-lg print:p-0 w-20 h-20 shadow-inner flex items-center justify-center">
+                  <DynamicQR value={`${baseUrl}/api/feedback-entry?qr_id=${qr.id}`} color="#000000" size={80} />
                 </div>
               </div>
               

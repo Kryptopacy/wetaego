@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
   
 import { MoreHorizontal, ShieldAlert, Search, ChevronLeft, ChevronRight } from 'lucide-react'
 import { overrideTenantPlan } from './actions'
-import { useRouter } from 'next/navigation'
+
 
 export interface OrgTenant {
   id: string
@@ -26,7 +26,6 @@ export function TenantDirectory({ organizations: initialOrgs }: { organizations:
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [loading, setLoading] = useState(false)
-  const router = useRouter()
 
   const fetchTenants = useCallback(async (searchQuery: string, pageNum: number) => {
     setLoading(true)

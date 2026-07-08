@@ -43,6 +43,7 @@ export async function POST(req: Request) {
           return NextResponse.json({ status: 'already_processed' }, { status: 200 })
         }
         // Strict Idempotency: Throw if we cannot acquire the lock to prevent double-processing on retries
+         
         console.error('Webhook Idempotency Insert Error:', insertError)
         return NextResponse.json({ error: 'Failed to acquire idempotency lock' }, { status: 500 })
       }
@@ -51,6 +52,7 @@ export async function POST(req: Request) {
 
       // ── Admin Tester Mode ───────────────────────────────────────────────────
       if (event.data.metadata?.is_test_mode === true) {
+        // eslint-disable-next-line no-console
         console.log('✅ Admin test payment processed successfully:', rawReference)
         return NextResponse.json({ status: 'test_mode_success' }, { status: 200 })
       }
@@ -77,6 +79,7 @@ export async function POST(req: Request) {
         try {
           await processQuoteMilestonePayment(supabase, rawReference, amountPaidMinor)
         } catch (e: unknown) {
+           
           console.error('Failed to process quote payment', e)
           const errorMessage = e instanceof Error ? e.message : String(e)
           await supabase
@@ -149,6 +152,7 @@ export async function POST(req: Request) {
           })
           
           if (rpcError) {
+             
             console.error('IOU Repayment RPC Error:', rpcError)
             await supabase
               .from('webhook_events')
@@ -189,6 +193,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ status: 'ignored' }, { status: 200 })
 
   } catch (error: unknown) {
+     
     console.error('Webhook Error:', (error as Error).message)
     Sentry.captureException(error)
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })

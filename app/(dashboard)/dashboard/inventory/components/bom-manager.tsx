@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
-import { Plus, X, Loader2, Save, Link as LinkIcon, Trash } from 'lucide-react'
+import { Plus, Save, Link as LinkIcon, Trash, Loader2 } from 'lucide-react'
 
 type CatalogueItem = {
   id: string
@@ -35,13 +35,11 @@ export function BomManager({
   const [catalogue, setCatalogue] = useState<CatalogueItem[]>([])
   const [selectedProduct, setSelectedProduct] = useState<string>('')
   const [bomItems, setBomItems] = useState<BomEntry[]>([])
-  const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const supabase = createClient()
 
   useEffect(() => {
     async function fetchCatalogue() {
-      setIsLoading(true)
       
       const { data: menuData } = await supabase
         .from('menu_items')
@@ -55,14 +53,13 @@ export function BomManager({
       }))
 
       setCatalogue(catalog)
-      setIsLoading(false)
     }
     fetchCatalogue()
   }, [organizationId, supabase])
 
   useEffect(() => {
     if (!selectedProduct) {
-      setBomItems([])
+      queueMicrotask(() => setBomItems([]))
       return
     }
     

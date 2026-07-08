@@ -1,14 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { format } from 'date-fns'
 import { CalendarView } from './calendar-view'
 import { Calendar, List } from 'lucide-react'
 
 // Dummy action wrapper for client component since we can't easily pass Server Actions 
 // if they are complex, but the existing code uses a form wrapper. We'll just copy the UI and use regular HTML forms since Next.js server actions work natively in forms.
 
-export function BookingsClient({ bookings, children }: { bookings: any[], children: React.ReactNode }) {
+export function BookingsClient({ bookings, children }: { bookings: Record<string, unknown>[], children: React.ReactNode }) {
   const [view, setView] = useState<'list' | 'calendar'>('list')
 
   return (

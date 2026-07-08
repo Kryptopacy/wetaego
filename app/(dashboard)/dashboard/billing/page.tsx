@@ -34,7 +34,7 @@ export default async function BillingPage(props: { searchParams: Promise<{ curre
     .single()
 
   if (memberOrg?.organizations) {
-    org = memberOrg.organizations as typeof org
+    org = memberOrg.organizations as any
   } else {
     const { data: creatorOrg } = await supabase
       .from('organizations')

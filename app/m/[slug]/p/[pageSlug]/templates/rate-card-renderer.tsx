@@ -53,6 +53,7 @@ interface RateCardRendererProps {
     billing_enabled?: boolean
     payment_mode?: string
     deposit_percentage?: number
+    background_color?: string
   }
   items: PageItem[]
   locationSlug: string
@@ -152,7 +153,7 @@ export function RateCardRenderer({ location, page, items, locationSlug, paymentI
   ]
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white font-sans" style={{ backgroundColor: (page as any).background_color || undefined }}>
+    <div className="min-h-screen bg-zinc-950 text-white font-sans" style={{ backgroundColor: page.background_color || undefined }}>
       {/* Hero */}
       <div className="relative w-full h-[40vh] min-h-[260px] max-h-[420px] overflow-hidden">
         {location.cover_image_url ? (

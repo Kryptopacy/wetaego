@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { searchDirectory } from '../actions'
-import { Search, Loader2 } from 'lucide-react'
+import { Search } from 'lucide-react'
 import { GemstoneSpinner } from '@/components/ui/gemstone-spinner'
 import { toast } from 'sonner'
 

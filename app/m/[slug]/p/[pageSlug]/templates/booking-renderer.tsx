@@ -6,7 +6,7 @@ import { InfoStrip } from '../../../components/info-strip'
 import Link from 'next/link'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Lock } from 'lucide-react'
+
 import { formatCurrency } from '@/lib/utils/currency'
 import { DatePicker } from '@/app/components/date-picker'
 
@@ -132,7 +132,7 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white font-sans" style={{ backgroundColor: (page as any).background_color || undefined }}>
+    <div className="min-h-screen bg-zinc-950 text-white font-sans" style={{ backgroundColor: (page as { background_color?: string }).background_color || undefined }}>
       {/* Hero */}
       <div className="relative w-full h-[40vh] min-h-[260px] max-h-[380px] overflow-hidden">
         {location.cover_image_url ? (
@@ -157,7 +157,7 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
 
       <div className="max-w-2xl mx-auto px-4 py-8">
         {/* Back link */}
-        <BackButton className="inline-flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-300 mb-6 transition-colors">
+        <BackButton href={`/m/${locationSlug}`} className="inline-flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-300 mb-6 transition-colors">
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>

@@ -2,10 +2,6 @@ import { ReactNode } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import ClientLayout, { InitialDashboardData, NavItem } from './client-layout'
 import { cookies } from 'next/headers'
-import {
-  LayoutDashboard, ClipboardList, BarChart3, BookOpen,
-  FileText, Settings, Users, QrCode, TrendingUp, MessageSquare, Package
-} from 'lucide-react'
 import { isAdminEmail } from '@/lib/utils/admin'
 import { IntercomWidget } from '@/components/intercom/intercom-widget'
 import { AICopilotWidget } from './dashboard/components/ai-copilot-widget'
@@ -20,7 +16,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   let isOwnerOrManager = true
   const userEmail = userData?.user?.email || ''
   let credits: number | null = null
-  let locations: any[] = []
+  let locations: Record<string, unknown>[] = []
   let activeLocationId = ''
   let locationSlug = ''
   let plan = 'lite'
@@ -39,10 +35,10 @@ export default async function DashboardLayout({ children }: { children: ReactNod
       .eq('user_id', userData.user.id)
       .single()
 
-    if (member && (member.organizations as any)?.name) {
-      orgName = (member.organizations as any).name
+    if (member && (member.organizations as Record<string, unknown>)?.name) {
+      orgName = (member.organizations as Record<string, unknown>).name as string
       isOwnerOrManager = ['owner', 'manager'].includes(member.role)
-      const orgData = member.organizations as any
+      const orgData = member.organizations as Record<string, unknown>
       const planLimits: Record<string, number> = { lite: 10, pro: 50, enterprise: 200 }
       const availableFree = (planLimits[orgData.subscription_tier] || 0) - (orgData.monthly_free_credits_used || 0)
       const cb = Math.max(0, availableFree) + (orgData.purchased_credits || 0)
@@ -63,7 +59,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
           locations = locs
           
           const savedId = cookieStore.get('ourmenu_active_location_id')?.value
-          const activeLoc = locs.find((l: any) => l.id === savedId) || locs[0]
+          const activeLoc = locs.find((l: Record<string, unknown>) => l.id === savedId) || locs[0]
           
           activeLocationId = activeLoc.id
           locationSlug = activeLoc.slug

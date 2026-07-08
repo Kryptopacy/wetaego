@@ -22,24 +22,7 @@ export function ShareButton({ url, title, description, className }: ShareButtonP
   }, [url])
 
   const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: title,
-          text: description || `Check out ${title} on OurMenu`,
-          url: currentUrl,
-        })
-        return // Successfully shared via native OS
-      } catch (err) {
-        // User cancelled or native share failed. Fallback to our modal if it's a real error (not AbortError)
-        if ((err as Error).name !== 'AbortError') {
-          setIsOpen(true)
-        }
-      }
-    } else {
-      // Native share not supported, open our custom modal
-      setIsOpen(true)
-    }
+    setIsOpen(true)
   }
 
   return (

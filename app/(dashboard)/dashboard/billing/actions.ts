@@ -89,7 +89,7 @@ export const cancelSubscription = authActionClient
   .schema(zfd.formData(z.object({
     organization_id: z.string()
   })))
-  .action(async ({ parsedInput: { organization_id }, ctx: { user } }) => {
+  .action(async ({ parsedInput: { organization_id } }) => {
     const supabase = await createClient()
 
     await supabase

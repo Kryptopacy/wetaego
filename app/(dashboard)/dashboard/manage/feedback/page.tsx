@@ -80,6 +80,7 @@ export default async function FeedbackManagementPage() {
     .order('created_at', { ascending: false })
   const reviews = reviewsRaw || []
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const mappedReviews = reviews.map((r: any) => ({
     id: r.id,
     orderId: r.order_id,

@@ -2,7 +2,7 @@
 
 
 
-import { useState, useEffect, useOptimistic } from 'react'
+import { useState, useEffect, useOptimistic, useCallback } from 'react'
 import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
@@ -71,6 +71,47 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
   }
 
   const { executeOrQueue } = useOfflineSync(onSyncAction)
+
+  const handleClaimOrderFast = useCallback(async (orderId: string) => {
+    // Fast path for hotkey
+    await executeOrQueue(
+      { type: 'claimOrder', payload: { orderId, minutes: 15 } },
+      () => {},
+      async () => {
+        const { data, error } = await supabase.rpc('claim_order', {
+          p_order_id: orderId,
+          p_prep_time_minutes: 15
+        })
+        if (error) return false
+        if (data !== false) toast.success('Order claimed successfully!')
+        return true
+      }
+    )
+  }, [executeOrQueue, supabase])
+
+  const handleCompleteOrder = useCallback(async (orderId: string) => {
+    await executeOrQueue(
+      { type: 'completeOrder', payload: { orderId } },
+      () => {}, // Handled optimistically inside ActiveOrdersGrid
+      async () => {
+        const res = await completeOrderAction({ orderId })
+        if (res?.serverError || res?.validationErrors) {
+          toast.error('Failed to complete order')
+          return false
+        }
+        toast.success('Order completed! Feedback email sent.')
+        
+        // Auto-print receipt if hardware is configured
+        if (autoPrintReceipts) {
+          const order = orders.find(o => o.id === orderId)
+          if (order) {
+            printOrder(order, { mode, ipAddress, businessName: 'OurMenu OS' })
+          }
+        }
+        return true
+      }
+    )
+  }, [executeOrQueue, autoPrintReceipts, orders, mode, ipAddress])
 
   useEffect(() => {
     // Subscribe to Orders
@@ -198,24 +239,7 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [templateType, orders, currentUserId, mode, ipAddress])
-
-  const handleClaimOrderFast = async (orderId: string) => {
-    // Fast path for hotkey
-    await executeOrQueue(
-      { type: 'claimOrder', payload: { orderId, minutes: 15 } },
-      () => {},
-      async () => {
-        const { data, error } = await supabase.rpc('claim_order', {
-          p_order_id: orderId,
-          p_prep_time_minutes: 15
-        })
-        if (error) return false
-        if (data !== false) toast.success('Order claimed successfully!')
-        return true
-      }
-    )
-  }
+  }, [templateType, orders, currentUserId, mode, ipAddress, handleClaimOrderFast, handleCompleteOrder])
 
   const urgencyWeight: Record<string, number> = { 'critical': 3, 'standard': 2, 'low': 1 }
   const basePendingRequests = serviceRequests
@@ -323,34 +347,10 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
           }
           toast.success('Payment link sent to customer!', { id: `link-${orderId}` })
           return true
-        } catch (e: any) {
-          toast.error(e.message || 'Error sending link', { id: `link-${orderId}` })
+        } catch (e: unknown) {
+          toast.error((e as Error).message || 'Error sending link', { id: `link-${orderId}` })
           return false
         }
-      }
-    )
-  }
-
-  const handleCompleteOrder = async (orderId: string) => {
-    await executeOrQueue(
-      { type: 'completeOrder', payload: { orderId } },
-      () => {}, // Handled optimistically inside ActiveOrdersGrid
-      async () => {
-        const res = await completeOrderAction({ orderId })
-        if (res?.serverError || res?.validationErrors) {
-          toast.error('Failed to complete order')
-          return false
-        }
-        toast.success('Order completed! Feedback email sent.')
-        
-        // Auto-print receipt if hardware is configured
-        if (autoPrintReceipts) {
-          const order = activeOrders.find(o => o.id === orderId)
-          if (order) {
-            printOrder(order, { mode, ipAddress, businessName: 'OurMenu OS' })
-          }
-        }
-        return true
       }
     )
   }
@@ -379,8 +379,8 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
       }
       toast.success('Order voided successfully.')
       return { success: true }
-    } catch (e: any) {
-      return { success: false, error: e.message || 'Error voiding order' }
+    } catch (e: unknown) {
+      return { success: false, error: (e as Error).message || 'Error voiding order' }
     }
   }
 
@@ -394,9 +394,9 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
       }
       toast.success('Order refunded successfully.', { id: `refund-${orderId}` })
       return { success: true }
-    } catch (e: any) {
-      toast.error(e.message || 'Error processing refund', { id: `refund-${orderId}` })
-      return { success: false, error: e.message || 'Error processing refund' }
+    } catch (e: unknown) {
+      toast.error((e as Error).message || 'Error processing refund', { id: `refund-${orderId}` })
+      return { success: false, error: (e as Error).message || 'Error processing refund' }
     }
   }
 

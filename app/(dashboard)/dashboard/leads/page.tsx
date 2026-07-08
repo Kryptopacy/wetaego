@@ -56,7 +56,7 @@ export default async function LeadsPage() {
         </div>
       </div>
 
-      <LeadsClient initialInquiries={safeInquiries as any} />
+      <LeadsClient initialInquiries={safeInquiries as unknown as Record<string, unknown>[]} />
     </div>
   )
 }

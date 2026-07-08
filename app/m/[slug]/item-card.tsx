@@ -6,13 +6,17 @@ import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { Tables } from '@/types'
-import { Plus, Minus, ShoppingBag, X } from 'lucide-react'
+import { Plus, Minus, ShoppingBag, X, ChevronLeft, ChevronRight, Play } from 'lucide-react'
 import { AnimatedDialog, AnimatedDialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import { ShareButton } from '@/app/components/share-button'
 
 interface ItemCardProps {
   item: Tables<'menu_items'>
+}
+
+interface ExtendedMenuItem extends Tables<'menu_items'> {
+  original_price_minor?: number
 }
 
 export function ItemCard({ item }: ItemCardProps) {
@@ -22,16 +26,18 @@ export function ItemCard({ item }: ItemCardProps) {
   const [showModifierModal, setShowModifierModal] = useState(false)
   const [showDetailsModal, setShowDetailsModal] = useState(false)
   const [modifiers, setModifiers] = useState('')
+  const [mediaIndex, setMediaIndex] = useState(0)
 
   const searchParams = useSearchParams()
   const pathname = usePathname()
   const router = useRouter()
 
+  const itemIdFromUrl = searchParams.get('item')
   useEffect(() => {
-    if (searchParams.get('item') === item.id) {
-      setShowDetailsModal(true)
+    if (itemIdFromUrl === item.id) {
+      queueMicrotask(() => setShowDetailsModal(true))
     }
-  }, [searchParams.get('item'), item.id])
+  }, [itemIdFromUrl, item.id])
 
   const handleOpenDetails = () => {
     router.replace(`${pathname}?item=${item.id}`, { scroll: false })
@@ -67,6 +73,32 @@ export function ItemCard({ item }: ItemCardProps) {
   const isAvailable = item.availability_status === 'available'
   const isHidden = item.availability_status === 'hidden'
 
+  const mediaArray = item.images?.length ? item.images : (item.image_url ? [item.image_url] : [])
+
+  const renderMedia = (url: string) => {
+    if (url.startsWith('video:') || url.endsWith('.mp4') || url.endsWith('.webm')) {
+      const videoUrl = url.startsWith('video:') ? url.substring(6) : url
+      return <video src={videoUrl} autoPlay muted loop playsInline className="w-full h-full object-cover" />
+    }
+    if (url.startsWith('vr:')) {
+      return <iframe src={url.substring(3)} allow="xr-spatial-tracking; gyroscope; accelerometer" allowFullScreen className="w-full h-full border-0" />
+    }
+    if (url.startsWith('youtube:')) {
+      const ytId = url.substring(8)
+      return <iframe src={`https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&loop=1&playlist=${ytId}&controls=0&showinfo=0&rel=0`} className="w-full h-full object-cover pointer-events-none border-0" allow="autoplay; encrypted-media" />
+    }
+    return (
+      <Image 
+        src={url} 
+        alt={item.name}
+        fill
+        className="object-cover"
+        sizes="(max-width: 768px) 100vw, 500px"
+        priority={mediaIndex === 0}
+      />
+    )
+  }
+
   if (isHidden) return null
 
   return (
@@ -93,83 +125,87 @@ export function ItemCard({ item }: ItemCardProps) {
         )}
 
         {/* Product Details */}
-        <div className="flex-1 flex flex-col justify-between py-0.5 min-w-0">
-          <div>
-            <div className="flex justify-between items-start gap-2">
-              <h4 className={`font-bold text-[16px] tracking-tight text-zinc-900 dark:text-white leading-tight truncate ${!isAvailable ? 'line-through opacity-70' : ''}`}>
-                {item.name}
-              </h4>
-              {isAvailable ? (
-                <div className="flex flex-col items-end shrink-0">
-                  <div className="flex items-center gap-2">
+        <div className="flex-1 flex flex-col min-w-0">
+          <div className="flex justify-between items-start gap-2">
+            <h4 className={`font-bold text-[16px] tracking-tight text-zinc-900 dark:text-white leading-tight line-clamp-2 ${!isAvailable ? 'line-through opacity-70' : ''}`}>
+              {item.name}
+            </h4>
+            {!isAvailable && (
+              <span className="text-[11px] px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-500/10 text-red-600 dark:text-red-400 font-bold shrink-0">Sold Out</span>
+            )}
+          </div>
+
+          {item.description && (
+            <p className="text-[13.5px] text-zinc-500 dark:text-zinc-400 line-clamp-2 leading-relaxed mt-1">
+              {item.description}
+            </p>
+          )}
+          
+          {(item.dietary_tags?.length > 0 || item.allergen_tags?.length > 0) && (
+            <div className="flex flex-wrap gap-1.5 mt-2">
+              {item.dietary_tags?.map(tag => (
+                <span key={tag} className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 uppercase tracking-wider border border-emerald-100 dark:border-emerald-500/20">{tag}</span>
+              ))}
+              {item.allergen_tags?.map(tag => (
+                <span key={tag} className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400 uppercase tracking-wider border border-amber-100 dark:border-amber-500/20">{tag}</span>
+              ))}
+            </div>
+          )}
+          
+          <div className="mt-auto pt-3 flex items-end justify-between gap-2" onClick={e => e.stopPropagation()}>
+            <div className="flex flex-col min-w-0">
+              {isAvailable && (
+                <>
+                  <div className="flex items-center gap-1.5 flex-wrap">
                     <span className="font-bold text-[15px] text-zinc-900 dark:text-white">
-                      {formatCurrency(item.price_minor )}
+                      {formatCurrency(item.price_minor)}
                     </span>
-                    {(item as any).original_price_minor && (item as any).original_price_minor > item.price_minor && (
-                      <span className="bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-full">
-                        {Math.round((((item as any).original_price_minor - item.price_minor) / (item as any).original_price_minor) * 100)}% OFF
+                    {(item as ExtendedMenuItem).original_price_minor && ((item as ExtendedMenuItem).original_price_minor as number) > item.price_minor && (
+                      <span className="bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-full whitespace-nowrap">
+                        {Math.round(((((item as ExtendedMenuItem).original_price_minor as number) - item.price_minor) / ((item as ExtendedMenuItem).original_price_minor as number)) * 100)}% OFF
                       </span>
                     )}
                   </div>
-                  {(item as any).original_price_minor && (item as any).original_price_minor > item.price_minor && (
+                  {(item as ExtendedMenuItem).original_price_minor && ((item as ExtendedMenuItem).original_price_minor as number) > item.price_minor && (
                     <span className="text-[12px] text-zinc-500 line-through mt-0.5">
-                      {formatCurrency((item as any).original_price_minor)}
+                      {formatCurrency(((item as ExtendedMenuItem).original_price_minor as number))}
                     </span>
                   )}
-                </div>
-              ) : (
-                <span className="text-[11px] px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-500/10 text-red-600 dark:text-red-400 font-bold shrink-0">Sold Out</span>
+                </>
               )}
             </div>
 
-            {item.description && (
-              <p className="text-[13.5px] text-zinc-500 dark:text-zinc-400 line-clamp-2 leading-relaxed mt-1.5 pr-8">
-                {item.description}
-              </p>
-            )}
-            
-            {(item.dietary_tags?.length > 0 || item.allergen_tags?.length > 0) && (
-              <div className="flex flex-wrap gap-1.5 mt-2.5">
-                {item.dietary_tags?.map(tag => (
-                  <span key={tag} className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 uppercase tracking-wider border border-emerald-100 dark:border-emerald-500/20">{tag}</span>
-                ))}
-                {item.allergen_tags?.map(tag => (
-                  <span key={tag} className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400 uppercase tracking-wider border border-amber-100 dark:border-amber-500/20">{tag}</span>
-                ))}
-              </div>
-            )}
-          </div>
-          
-          <div className="flex items-center justify-end mt-3 gap-2" onClick={e => e.stopPropagation()}>
-            {isAvailable && (
-              cartItem ? (
-                <div className="flex items-center gap-3 bg-emerald-50 dark:bg-zinc-800 rounded-full p-1 border border-emerald-100 dark:border-zinc-700 shadow-sm">
+            <div className="shrink-0">
+              {isAvailable && (
+                cartItem ? (
+                  <div className="flex items-center gap-3 bg-emerald-50 dark:bg-zinc-800 rounded-full p-1 border border-emerald-100 dark:border-zinc-700 shadow-sm">
+                    <button 
+                      onClick={() => updateQuantity(cartItem.cartKey, -1)}
+                      className="w-7 h-7 flex items-center justify-center rounded-full bg-white dark:bg-zinc-700 text-emerald-600 dark:text-emerald-400 shadow-sm hover:scale-105 transition-transform"
+                      aria-label="Decrease quantity"
+                    >
+                      <Minus className="w-4 h-4" />
+                    </button>
+                    <span className="text-emerald-700 dark:text-white font-bold text-sm min-w-[16px] text-center">{cartItem.quantity}</span>
+                    <button 
+                      onClick={() => updateQuantity(cartItem.cartKey, 1)}
+                      className="w-7 h-7 flex items-center justify-center rounded-full bg-emerald-500 text-white shadow-sm hover:bg-emerald-600 hover:scale-105 transition-all"
+                      aria-label="Increase quantity"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
                   <button 
-                    onClick={() => updateQuantity(cartItem.cartKey, -1)}
-                    className="w-7 h-7 flex items-center justify-center rounded-full bg-white dark:bg-zinc-700 text-emerald-600 dark:text-emerald-400 shadow-sm hover:scale-105 transition-transform"
-                    aria-label="Decrease quantity"
+                    onClick={() => setShowModifierModal(true)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-zinc-900 font-bold text-[13px] shadow-sm transition-all active:scale-95"
                   >
-                    <Minus className="w-4 h-4" />
+                    <span>Add</span>
+                    <Plus className="w-3.5 h-3.5" />
                   </button>
-                  <span className="text-emerald-700 dark:text-white font-bold text-sm min-w-[16px] text-center">{cartItem.quantity}</span>
-                  <button 
-                    onClick={() => updateQuantity(cartItem.cartKey, 1)}
-                    className="w-7 h-7 flex items-center justify-center rounded-full bg-emerald-500 text-white shadow-sm hover:bg-emerald-600 hover:scale-105 transition-all"
-                    aria-label="Increase quantity"
-                  >
-                    <Plus className="w-4 h-4" />
-                  </button>
-                </div>
-              ) : (
-                <button 
-                  onClick={() => setShowModifierModal(true)}
-                  className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-zinc-900 font-bold text-sm shadow-sm transition-all active:scale-95"
-                >
-                  <span>Add</span>
-                  <Plus className="w-4 h-4" />
-                </button>
-              )
-            )}
+                )
+              )}
+            </div>
           </div>
         </div>
       </motion.div>
@@ -237,16 +273,50 @@ export function ItemCard({ item }: ItemCardProps) {
           </div>
 
           <div className="flex flex-col h-full max-h-[85vh] overflow-y-auto scrollbar-hide -mx-6 px-6">
-            {item.image_url ? (
-              <div className="relative w-full aspect-square -mt-6 mb-6 rounded-b-3xl overflow-hidden bg-zinc-100 dark:bg-zinc-800">
-                <Image 
-                  src={item.image_url} 
-                  alt={item.name}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 100vw, 500px"
-                  priority
-                />
+            {mediaArray.length > 0 ? (
+              <div className="relative w-full aspect-square -mt-6 mb-6 rounded-b-3xl overflow-hidden bg-zinc-100 dark:bg-zinc-900 group">
+                <AnimatePresence mode="wait">
+                  <motion.div 
+                    key={mediaIndex}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute inset-0"
+                  >
+                    {renderMedia(mediaArray[mediaIndex])}
+                  </motion.div>
+                </AnimatePresence>
+
+                {mediaArray.length > 1 && (
+                  <>
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); setMediaIndex(i => i === 0 ? mediaArray.length - 1 : i - 1) }}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-20"
+                      aria-label="Previous image"
+                    >
+                      <ChevronLeft className="w-5 h-5" />
+                    </button>
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); setMediaIndex(i => i === mediaArray.length - 1 ? 0 : i + 1) }}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-20"
+                      aria-label="Next image"
+                    >
+                      <ChevronRight className="w-5 h-5" />
+                    </button>
+                    
+                    <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 z-20">
+                      {mediaArray.map((_, i) => (
+                        <button 
+                          key={i} 
+                          onClick={(e) => { e.stopPropagation(); setMediaIndex(i) }}
+                          className={`h-1.5 rounded-full transition-all ${i === mediaIndex ? 'w-4 bg-white shadow-sm' : 'w-1.5 bg-white/50 hover:bg-white/80'}`}
+                          aria-label={`Go to slide ${i + 1}`}
+                        />
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
             ) : (
               <div className="mt-8 mb-6" />
@@ -258,13 +328,13 @@ export function ItemCard({ item }: ItemCardProps) {
                 <span className="text-xl font-bold text-emerald-600 dark:text-emerald-400">
                   {formatCurrency(item.price_minor)}
                 </span>
-                {(item as any).original_price_minor && (item as any).original_price_minor > item.price_minor && (
+                {(item as ExtendedMenuItem).original_price_minor && ((item as ExtendedMenuItem).original_price_minor as number) > item.price_minor && (
                   <>
                     <span className="text-[14px] text-zinc-500 line-through">
-                      {formatCurrency((item as any).original_price_minor)}
+                      {formatCurrency(((item as ExtendedMenuItem).original_price_minor as number))}
                     </span>
                     <span className="bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[11px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full">
-                      {Math.round((((item as any).original_price_minor - item.price_minor) / (item as any).original_price_minor) * 100)}% OFF
+                      {Math.round(((((item as ExtendedMenuItem).original_price_minor as number) - item.price_minor) / ((item as ExtendedMenuItem).original_price_minor as number)) * 100)}% OFF
                     </span>
                   </>
                 )}

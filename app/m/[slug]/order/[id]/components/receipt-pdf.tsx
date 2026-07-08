@@ -141,14 +141,14 @@ const emptySubscribe = () => () => {}
 const getClientSnapshot = () => true
 const getServerSnapshot = () => false
 
-export function DownloadReceiptButton({ order, orgName, currencyCode }: { order: any, orgName: string, currencyCode: string }) {
+export function DownloadReceiptButton({ order, orgName, currencyCode }: { order: { id: string, created_at?: string, total_amount_minor: number, order_items?: { item_name?: string, quantity?: number, price_minor?: number }[] }, orgName: string, currencyCode: string }) {
   // Client-side only rendering for PDFDownloadLink to avoid hydration mismatch
   const isClient = React.useSyncExternalStore(emptySubscribe, getClientSnapshot, getServerSnapshot)
 
   if (!isClient) return <div className="w-full h-14 bg-zinc-800 rounded-xl animate-pulse"></div>
 
   // Mock items if none exist on the order payload just for safety
-  const items = order.order_items?.map((item: any) => ({
+  const items = order.order_items?.map((item: { item_name?: string, quantity?: number, price_minor?: number }) => ({
     name: item.item_name || 'Item',
     quantity: item.quantity || 1,
     price: item.price_minor || 0

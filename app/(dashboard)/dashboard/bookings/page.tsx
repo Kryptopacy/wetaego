@@ -4,7 +4,6 @@ import { ActionForm } from '@/components/ActionForm'
 import { updateBookingStatus } from './actions'
 import { BookingsClient } from './bookings-client'
   
-import Link from 'next/link'
 import { format } from 'date-fns'
 
 export default async function BookingsDashboard() {

@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { useRouter } from 'next/navigation'
+
 import Image from 'next/image'
 import { formatCurrency } from '@/lib/utils/currency'
 import { initiateIouPayment } from './actions'
@@ -16,7 +16,6 @@ interface Props {
   balanceMinor: number
   currency: string
   minPercentage: number
-  slug: string
 }
 
 export default function IouPaymentClient({
@@ -28,9 +27,7 @@ export default function IouPaymentClient({
   balanceMinor,
   currency,
   minPercentage,
-  slug
 }: Props) {
-  const router = useRouter()
   const [loading, setLoading] = useState(false)
   
   // They can input the value they want to pay.
@@ -69,7 +66,7 @@ export default function IouPaymentClient({
       if (result.authorizationUrl) {
         window.location.href = result.authorizationUrl
       }
-    } catch (err) {
+    } catch {
       toast.error('An unexpected error occurred')
       setLoading(false)
     }

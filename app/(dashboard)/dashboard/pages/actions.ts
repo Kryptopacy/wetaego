@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient, createAdminClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import type { Json } from '@/lib/supabase/types'
@@ -287,7 +287,7 @@ export const addPageItem = authActionClient
       inventory_count: inventory_count ?? null,
       department: department || null,
       images
-    } as any)
+    })
 
     if (error) throw new Error((error as Error).message)
 
@@ -371,7 +371,7 @@ export const updatePageItem = authActionClient
 
     const { error } = await supabase
       .from('page_items')
-      .update(updatePayload as any)
+      .update(updatePayload)
       .eq('id', itemId)
 
     if (error) throw new Error((error as Error).message)

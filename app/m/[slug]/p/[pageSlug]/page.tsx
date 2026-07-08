@@ -88,7 +88,7 @@ export default async function PublicPageView({
   searchParams: Promise<{ qr_id?: string; ref?: string; preview?: string; resource?: string }>
 }) {
   const { slug, pageSlug } = await params
-  const { ref, preview, qr_id, resource: resourceId } = await searchParams
+  const { ref, preview, resource: resourceId } = await searchParams
 
   const supabase = await createClient()
 
@@ -135,7 +135,7 @@ export default async function PublicPageView({
   }
 
   // Check KYC status
-  const org = loc.organizations as any;
+  const org = loc.organizations as { status?: string } | null | undefined;
   const orgStatus = org?.status || 'approved';
   
   if (!isPreview && orgStatus !== 'approved') {
@@ -242,20 +242,16 @@ export default async function PublicPageView({
         { revalidate: 60, tags: [`page_items_${page.id}`] }
       )()
 
-  const [items, { data: paymentSettings }, globalManualPayment, resource] = await Promise.all([
+  const [items, { data: paymentSettings }, globalManualPayment, _resource] = await Promise.all([
     itemsPromise,
     paymentSettingsPromise,
     getGlobalManualPayment(),
     resourceId ? supabase.from('resources').select('id, name, type').eq('id', resourceId).single().then(r => r.data) : Promise.resolve(null)
   ])
 
-  const pageThemeColor = (page as any).theme_color || loc.theme_color || '#10b981'
+  const pageThemeColor = page.theme_color || loc.theme_color || '#10b981'
   
-  // Resolve tableIdentifier from QR or Resource
-  let resolvedTableIdentifier = undefined
-  if (resource) {
-    resolvedTableIdentifier = resource.name
-  }
+  // Resource already checked earlier
 
   const sharedProps = {
      
@@ -268,7 +264,7 @@ export default async function PublicPageView({
     referralSource: ref,
     resourceId: resourceId || undefined,
     paymentIsLive: paymentSettings?.is_active ?? false,
-    globalManualPaymentOverride: (globalManualPayment as any)?.global_manual_payment_override === true,
+    globalManualPaymentOverride: (globalManualPayment as { global_manual_payment_override?: boolean })?.global_manual_payment_override === true,
   }
 
   // Route to the right renderer

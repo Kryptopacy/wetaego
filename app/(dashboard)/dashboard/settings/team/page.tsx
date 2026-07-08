@@ -66,7 +66,8 @@ export default async function TeamPage() {
 
   const userIds = (membersRaw || []).map(m => m.user_id as string)
     
-    const { data: profiles } = await (supabase as any)
+    // @ts-expect-error - user_profiles might not be in the generated types yet
+    const { data: profiles } = await supabase
       .from('user_profiles')
       .select('id, full_name, bank_name, account_number, account_name')
       .in('id', userIds)

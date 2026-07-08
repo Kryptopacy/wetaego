@@ -1,14 +1,12 @@
 'use client'
 
-
-
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   X, Copy, CheckCircle2, 
-
-  MessageCircle
+  MessageCircle, QrCode, ArrowLeft, Download
 } from 'lucide-react'
+import { DynamicQR } from '@/components/qr/DynamicQR'
 
 const TwitterIcon = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
@@ -51,6 +49,10 @@ interface ShareModalProps {
 
 export function ShareModal({ isOpen, onClose, url, title, description }: ShareModalProps) {
   const [copied, setCopied] = useState(false)
+  const [showQr, setShowQr] = useState(false)
+
+  // Reset state when modal opens
+  if (!isOpen && showQr) setShowQr(false)
 
   const copyToClipboard = async () => {
     try {
@@ -59,6 +61,19 @@ export function ShareModal({ isOpen, onClose, url, title, description }: ShareMo
       setTimeout(() => setCopied(false), 2000)
     } catch (err) {
       console.error('Failed to copy', err)
+    }
+  }
+
+  const downloadQr = async () => {
+    try {
+      const qrcode = (await import('qrcode')).default
+      const dataUrl = await qrcode.toDataURL(url, { width: 800, margin: 2, color: { dark: '#000000', light: '#ffffff' } })
+      const link = document.createElement('a')
+      link.download = `QR-${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.png`
+      link.href = dataUrl
+      link.click()
+    } catch (err) {
+      console.error(err)
     }
   }
 
@@ -109,6 +124,13 @@ export function ShareModal({ isOpen, onClose, url, title, description }: ShareMo
       color: 'bg-emerald-500 text-white',
       href: `sms:?&body=${encodedTitle}%20${encodedUrl}`,
     },
+    {
+      id: 'qr',
+      name: 'QR Code',
+      icon: QrCode,
+      color: 'bg-zinc-800 text-white',
+      onClick: () => setShowQr(true),
+    },
   ]
 
   return (
@@ -123,66 +145,117 @@ export function ShareModal({ isOpen, onClose, url, title, description }: ShareMo
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
           />
 
-          <motion.div
-            initial={{ scale: 0.95, opacity: 0, y: 20 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.95, opacity: 0, y: 20 }}
-            className="relative w-full max-w-sm bg-zinc-950 border border-zinc-800 rounded-3xl shadow-2xl overflow-hidden p-6"
-          >
-            <button
-              onClick={onClose}
-              className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-zinc-900 text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+          {!showQr && (
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
+              className="relative w-full max-w-sm bg-zinc-950 border border-zinc-800 rounded-3xl shadow-2xl overflow-hidden p-6"
             >
-              <X className="w-5 h-5" />
-            </button>
+              <button
+                onClick={onClose}
+                className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-zinc-900 text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
 
-            <div className="mb-6">
-              <h3 className="text-xl font-bold text-white mb-1">Share this page</h3>
-  { }
-  
-              <p className="text-sm text-zinc-400">Share "{title}" with your friends or community.</p>
-            </div>
-
-            <div className="grid grid-cols-3 gap-4 mb-8">
-              {shareLinks.map((link) => {
-                const Icon = link.icon
-                return (
-                  <a
-                    key={link.id}
-                    href={link.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex flex-col items-center gap-2 group"
-                  >
-                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg transition-transform group-hover:scale-110 ${link.color}`}>
-                      <Icon className="w-6 h-6" />
-                    </div>
-                    <span className="text-[11px] font-medium text-zinc-400 group-hover:text-zinc-300">{link.name}</span>
-                  </a>
-                )
-              })}
-            </div>
-
-            <div className="relative">
-              <div className="flex items-center gap-2 p-2 bg-zinc-900 border border-zinc-800 rounded-xl">
-                <input
-                  type="text"
-                  readOnly
-                  value={url}
-                  className="flex-1 bg-transparent border-none text-sm text-zinc-300 px-2 outline-none w-full"
-                />
-                <button
-                  onClick={copyToClipboard}
-                  className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                    copied ? 'bg-emerald-500/20 text-emerald-400' : 'bg-zinc-800 text-white hover:bg-zinc-700'
-                  }`}
-                >
-                  {copied ? <CheckCircle2 className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                  {copied ? 'Copied' : 'Copy'}
-                </button>
+              <div className="mb-6">
+                <h3 className="text-xl font-bold text-white mb-1">Share this page</h3>
+                <p className="text-sm text-zinc-400">Share "{title}" with your friends or community.</p>
               </div>
-            </div>
-          </motion.div>
+
+              <div className="grid grid-cols-3 gap-4 mb-8">
+                {shareLinks.map((link) => {
+                  const Icon = link.icon
+                  const content = (
+                    <>
+                      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg transition-transform group-hover:scale-110 ${link.color}`}>
+                        <Icon className="w-6 h-6" />
+                      </div>
+                      <span className="text-[11px] font-medium text-zinc-400 group-hover:text-zinc-300">{link.name}</span>
+                    </>
+                  )
+                  
+                  if (link.onClick) {
+                    return (
+                      <button key={link.id} onClick={link.onClick} className="flex flex-col items-center gap-2 group">
+                        {content}
+                      </button>
+                    )
+                  }
+
+                  return (
+                    <a
+                      key={link.id}
+                      href={link.href!}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex flex-col items-center gap-2 group"
+                    >
+                      {content}
+                    </a>
+                  )
+                })}
+              </div>
+
+              <div className="relative">
+                <div className="flex items-center gap-2 p-2 bg-zinc-900 border border-zinc-800 rounded-xl">
+                  <input
+                    type="text"
+                    readOnly
+                    value={url}
+                    className="flex-1 bg-transparent border-none text-sm text-zinc-300 px-2 outline-none w-full"
+                  />
+                  <button
+                    onClick={copyToClipboard}
+                    className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                      copied ? 'bg-emerald-500/20 text-emerald-400' : 'bg-zinc-800 text-white hover:bg-zinc-700'
+                    }`}
+                  >
+                    {copied ? <CheckCircle2 className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                    {copied ? 'Copied' : 'Copy'}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {showQr && (
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
+              className="absolute z-10 w-full max-w-sm bg-zinc-950 border border-zinc-800 rounded-3xl shadow-2xl overflow-hidden p-6 flex flex-col items-center"
+            >
+              <button
+                onClick={() => setShowQr(false)}
+                className="absolute top-4 left-4 w-8 h-8 flex items-center justify-center rounded-full bg-zinc-900 text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+              <button
+                onClick={onClose}
+                className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-zinc-900 text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+              <h3 className="text-xl font-bold text-white mb-6">Scan QR Code</h3>
+              
+              <div className="bg-white p-4 rounded-2xl mb-6 shadow-xl">
+                <DynamicQR value={url} size={200} />
+              </div>
+              
+              <p className="text-sm text-zinc-400 text-center mb-6 line-clamp-2 px-4">{title}</p>
+              
+              <button
+                onClick={downloadQr}
+                className="flex items-center gap-2 px-6 py-3 bg-zinc-100 hover:bg-white text-zinc-900 font-bold rounded-xl transition-all"
+              >
+                <Download className="w-5 h-5" />
+                Save Image
+              </button>
+            </motion.div>
+          )}
         </div>
       )}
     </AnimatePresence>

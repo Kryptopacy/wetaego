@@ -96,22 +96,12 @@ export async function POST(req: Request) {
       
       Item Name: ${itemName}
       Category: ${categoryName || 'General'}
-      
-      Ensure the description highlights its value, appeals to customers, and sounds professional.`
+      `
     })
 
     return NextResponse.json(object)
-  } catch (error: any) {
+  } catch (error) {
     console.error('Copywriter Error:', error)
-    
-    // Catch AI Provider Timeouts & Overloads
-    const isTimeout = error?.name === 'TimeoutError' || error?.message?.includes('timeout')
-    const isOverloaded = error?.message?.includes('503') || error?.message?.includes('overloaded')
-    
-    if (isTimeout || isOverloaded) {
-      return NextResponse.json({ error: 'AI service is temporarily overloaded or timed out. Please try again in a moment.' }, { status: 503 })
-    }
-    
     return NextResponse.json({ error: 'Failed to generate copy' }, { status: 500 })
   }
 }

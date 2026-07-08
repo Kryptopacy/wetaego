@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { QrClient } from './qr-client'
 import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
+import { getFreeQrLimit } from '@/lib/utils/billing'
 
 export default async function QRCodeBatchPage() {
   const supabase = await createClient()
@@ -49,10 +50,13 @@ export default async function QRCodeBatchPage() {
 
     const { data: orgData } = await supabase
       .from('organizations')
-      .select('logo_url')
+      .select('logo_url, subscription_plan, purchased_credits')
       .eq('id', org.id)
       .single()
     orgLogo = orgData?.logo_url || null
+    
+    const planLimit = await getFreeQrLimit((orgData?.subscription_plan as any) || 'lite')
+    const creditBalance = orgData?.purchased_credits || 0
 
     const { data: locs } = await supabase
       .from('locations')
@@ -90,7 +94,9 @@ export default async function QRCodeBatchPage() {
         orgLogo={orgLogo}
         locations={locations} 
         qrCodes={qrCodes || []} 
-        baseUrl={baseUrl} 
+        baseUrl={baseUrl}
+        planLimit={planLimit}
+        creditBalance={creditBalance}
       />
     </div>
   )

@@ -28,7 +28,7 @@ export const updateBookingStatus = authActionClient
     if (!bookingData) throw new Error('Booking not found')
     
     
-    const orgId = (bookingData.location_pages as any)?.locations?.organization_id
+    const orgId = (bookingData.location_pages as { locations: { organization_id: string } })?.locations?.organization_id
 
     const { data: member } = await supabase
       .from('organization_members')

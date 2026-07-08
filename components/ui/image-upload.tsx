@@ -49,7 +49,7 @@ export function ImageUpload({ name, defaultValue, className = '' }: ImageUploadP
       } else if (res.url) {
         setPreview(res.url)
       }
-    } catch (err) {
+    } catch {
       setError('An unexpected error occurred during upload.')
       setPreview(defaultValue || null)
     } finally {

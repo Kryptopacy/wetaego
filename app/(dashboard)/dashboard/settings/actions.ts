@@ -61,7 +61,7 @@ export const updateOrganization = authActionClient
       }
 
       const trialSettings = await getTrialSettings()
-      const trialDays = (trialSettings as any).default_trial_days ?? 15
+      const trialDays = (trialSettings as Record<string, unknown>).default_trial_days as number ?? 15
       const trialEndsAt = trialDays > 0 ? new Date(Date.now() + trialDays * 24 * 60 * 60 * 1000).toISOString() : undefined
 
       const { data: newOrg, error } = await supabase
@@ -181,7 +181,7 @@ export const saveLocationAiSettings = authActionClient
     let parsedFaqs = []
     try {
       if (aiFaqs) parsedFaqs = JSON.parse(aiFaqs)
-    } catch (e) {
+    } catch (_e) {
       // Ignore parse error
     }
 
@@ -224,7 +224,8 @@ export const saveLocationAiSettings = authActionClient
     if (!isAuthorized) throw new Error('Unauthorized')
 
     // Update settings on the page
-    const { error: updateError } = await (supabase as any)
+    // @ts-expect-error - location_pages might not be in the generated types yet
+    const { error: updateError } = await supabase
       .from('location_pages')
       .update({
         ai_enabled: aiEnabled,
@@ -464,7 +465,8 @@ export const updateProfile = authActionClient
     const { full_name, bank_name, account_number, account_name } = parsedInput
 
     
-    const { data: existingProfile } = await (supabase as any)
+    // @ts-expect-error - user_profiles might not be in the generated types yet
+    const { data: existingProfile } = await supabase
       .from('user_profiles')
       .select('paystack_subaccount_code, bank_name, account_number, account_name')
       .eq('id', user.id)
@@ -496,7 +498,8 @@ export const updateProfile = authActionClient
     if (updateError) throw new Error('Failed to update auth metadata')
 
     
-    const { error: profileError } = await (supabase as any)
+    // @ts-expect-error - user_profiles might not be in the generated types yet
+    const { error: profileError } = await supabase
       .from('user_profiles')
       .upsert({
         id: user.id,

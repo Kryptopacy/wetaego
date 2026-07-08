@@ -32,7 +32,7 @@ export function DeliveryClient({ initialOrders, organizationId, locationId, curr
   const supabase = createClient()
   
   const availableDepartments = Array.from(new Set(
-    orders.flatMap(o => o.order_items.map(i => ((i as any).metadata as any)?.department)).filter(Boolean)
+    orders.flatMap(o => o.order_items.map(i => ((i as Record<string, unknown>).metadata as Record<string, unknown>)?.department)).filter(Boolean)
   )).sort() as string[]
 
   useEffect(() => {
@@ -44,9 +44,9 @@ export function DeliveryClient({ initialOrders, organizationId, locationId, curr
         table: 'orders',
         filter: `organization_id=eq.${organizationId}`
       }, async (payload) => {
-        if (payload.new && (payload.new as any).location_id === locationId) {
+        if (payload.new && (payload.new as Record<string, unknown>).location_id === locationId) {
            // Refetch this order to get items
-           const { data } = await supabase.from('orders').select('*, order_items(*)').eq('id', (payload.new as any).id).single()
+           const { data } = await supabase.from('orders').select('*, order_items(*)').eq('id', (payload.new as Record<string, unknown>).id as string).single()
            if (data) {
              setOrders(prev => {
                const exists = prev.find(o => o.id === data.id)
@@ -61,7 +61,7 @@ export function DeliveryClient({ initialOrders, organizationId, locationId, curr
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [organizationId, supabase])
+  }, [organizationId, locationId, supabase])
 
   const handleDragStart = (e: React.DragEvent, orderId: string) => {
     e.dataTransfer.setData('orderId', orderId)
@@ -135,7 +135,7 @@ export function DeliveryClient({ initialOrders, organizationId, locationId, curr
           const columnOrders = orders.filter(o => {
             // Filter by department routing first
             if (selectedDepartment !== 'All') {
-              const hasDepartmentItems = o.order_items.some(i => ((i as any).metadata as any)?.department === selectedDepartment)
+              const hasDepartmentItems = o.order_items.some(i => ((i as Record<string, unknown>).metadata as Record<string, unknown>)?.department === selectedDepartment)
               if (!hasDepartmentItems) return false
             }
 
@@ -207,7 +207,7 @@ export function DeliveryClient({ initialOrders, organizationId, locationId, curr
 
                     <div className="bg-zinc-900/50 rounded-lg p-2.5 space-y-1.5 mb-4">
                       {order.order_items
-                        .filter(item => selectedDepartment === 'All' || ((item as any).metadata as any)?.department === selectedDepartment)
+                        .filter(item => selectedDepartment === 'All' || ((item as Record<string, unknown>).metadata as Record<string, unknown>)?.department === selectedDepartment)
                         .map(item => (
                           <div key={item.id} className="flex justify-between text-xs">
                             <span className="text-zinc-300"><span className="text-zinc-500 font-bold mr-1">{item.quantity}x</span> {item.item_name}</span>

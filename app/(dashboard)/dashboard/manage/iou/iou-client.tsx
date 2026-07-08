@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Search, Mail, MessageSquare, CreditCard, Clock, ChevronRight, Wallet } from 'lucide-react'
+import { Search, Mail, MessageSquare, CreditCard, Clock, Wallet } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 
 interface Customer {

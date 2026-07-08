@@ -51,7 +51,7 @@ export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, tem
     try {
       await navigator.clipboard.writeText(link)
       alert('Dispatch link copied to clipboard!')
-    } catch (err) {
+    } catch (_err) {
       alert(`Failed to copy. Share this link: ${link}`)
     }
   }
@@ -302,7 +302,7 @@ export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, tem
                       </div>
                       {item.metadata && typeof item.metadata === 'object' && Object.keys(item.metadata as object).length > 0 && (
                         <div className="pl-6 mt-1 flex flex-col gap-0.5">
-                          {Object.entries(item.metadata as Record<string, any>).map(([key, value]) => (
+                          {Object.entries(item.metadata as Record<string, unknown>).map(([key, value]) => (
                             <span key={key} className="text-xs text-zinc-500 bg-zinc-800/30 px-1.5 py-0.5 rounded w-fit capitalize">
                               {key.replace(/_/g, ' ')}: {String(value)}
                             </span>

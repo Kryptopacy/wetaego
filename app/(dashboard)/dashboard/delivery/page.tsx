@@ -3,9 +3,9 @@ import { redirect } from 'next/navigation'
 import { Truck } from 'lucide-react'
 import { DeliveryClient } from './delivery-client'
 
-import { Database } from '@/lib/supabase/types'
 
-type Order = Database['public']['Tables']['orders']['Row']
+
+
 
 export default async function DeliveryPage() {
   const supabase = await createClient()

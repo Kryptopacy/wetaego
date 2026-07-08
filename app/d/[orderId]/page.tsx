@@ -126,7 +126,7 @@ export default async function DispatchViewPage({
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-zinc-100">
           <h2 className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-4">Order Items</h2>
           <div className="space-y-3">
-            {order.order_items?.map((item: any) => (
+            {order.order_items?.map((item: { id: string; quantity: number; item_name: string; metadata?: unknown }) => (
               <div key={item.id} className="flex justify-between items-start gap-3 border-b border-zinc-50 pb-3 last:border-0 last:pb-0">
                 <div className="flex gap-3">
                   <span className="bg-zinc-100 text-zinc-600 font-black h-7 w-7 rounded-lg flex items-center justify-center text-sm shrink-0">
@@ -136,7 +136,7 @@ export default async function DispatchViewPage({
                     <span className="font-bold text-zinc-900">{item.item_name}</span>
                     {item.metadata && typeof item.metadata === 'object' && Object.keys(item.metadata).length > 0 && (
                       <div className="text-xs text-zinc-500 mt-1 space-y-0.5">
-                        {Object.entries(item.metadata as Record<string, any>).map(([k, v]) => (
+                        {Object.entries(item.metadata as Record<string, unknown>).map(([k, v]) => (
                           <div key={k} className="capitalize">{k.replace(/_/g, ' ')}: {String(v)}</div>
                         ))}
                       </div>
@@ -151,8 +151,8 @@ export default async function DispatchViewPage({
         {/* Restaurant Contact */}
         <div className="text-center pt-4">
           <p className="text-sm text-zinc-500 mb-2">Need help? Contact the restaurant</p>
-          <a href={`tel:${(order.locations as any)?.phone_number}`} className="text-emerald-600 font-bold">
-            Call {(order.locations as any)?.name}
+          <a href={`tel:${(order.locations as { phone_number?: string; name?: string } | null)?.phone_number}`} className="text-emerald-600 font-bold">
+            Call {(order.locations as { phone_number?: string; name?: string } | null)?.name}
           </a>
         </div>
       </div>

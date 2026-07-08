@@ -23,18 +23,7 @@ interface VenueHeaderProps {
 }
 
 export function VenueHeader({ location, slug, tableIdentifier }: VenueHeaderProps) {
-  const isDemo = slug === 'demo-venue'
-  const hours = location.operating_hours || (isDemo ? 'Mon-Sun, 11am-11pm' : null)
-  const wifiName = location.wifi_network || (isDemo ? 'ArtisanGrill_Guest' : null)
-  const wifiPass = location.wifi_password || (isDemo ? 'artisangrill' : null)
-  const ig = location.instagram_handle || (isDemo ? 'theartisangrill' : null)
-  const tw = location.twitter_handle || null
-  const fb = location.facebook_handle || null
-  const wa = location.whatsapp_number || null
-  const phone = location.phone_number || null
-  const mapUrl = location.google_maps_url || null
-
-  const hasInfo = hours || wifiName || ig || tw || fb || wa || phone || mapUrl
+  const _isDemo = slug === 'demo-venue'
 
   return (
     <header className="relative w-full min-h-[35vh] md:max-h-[400px] flex flex-col justify-end overflow-hidden">

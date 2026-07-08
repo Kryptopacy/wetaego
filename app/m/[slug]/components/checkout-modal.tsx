@@ -166,7 +166,12 @@ export function CheckoutModal({
   const showPickupOption = pageFulfillmentOptions ? pageFulfillmentOptions.pickup : true
   const showDeliveryOption = pageFulfillmentOptions ? pageFulfillmentOptions.delivery : !!deliveryEnabled
 
-  const defaultFulfillment = tableIdentifier ? 'table' : (showTableOption ? 'table' : (showPickupOption ? 'pickup' : 'delivery'))
+  const defaultFulfillment = tableIdentifier 
+    ? 'table' 
+    : (pageFulfillmentOptions 
+        ? (pageFulfillmentOptions.pickup ? 'pickup' : (pageFulfillmentOptions.delivery ? 'delivery' : 'table'))
+        : (deliveryEnabled ? 'delivery' : (showPickupOption ? 'pickup' : 'table')))
+  
   const [fulfillmentType, setFulfillmentType] = useState<'table' | 'pickup' | 'delivery'>(defaultFulfillment)
   
   const [customerName, setCustomerName] = useState('')

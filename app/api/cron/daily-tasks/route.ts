@@ -32,14 +32,17 @@ export async function GET(req: Request) {
       }),
     })
 
+    // eslint-disable-next-line no-console
     console.log('Running daily-report cron task...')
     await runDailyReports(reqForReports)
 
+    // eslint-disable-next-line no-console
     console.log('Running iou-reminders cron task...')
     await runIouReminders(reqForIou)
 
     return NextResponse.json({ status: 'success', message: 'Daily tasks completed' })
   } catch (error) {
+     
     console.error('Error in daily tasks cron:', error)
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
   }

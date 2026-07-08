@@ -179,7 +179,8 @@ export default async function PageEditDashboard({
           pageId={page.id} 
           templateType={page.template_type} 
           
-          initialItems={(items as any[]) || []} 
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          initialItems={(items as any[]) || []}
           orgId={page.locations.organization_id}
         />
       </div>

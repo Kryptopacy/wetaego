@@ -29,7 +29,7 @@ export default async function PublicQuotePage({
 
   if (!quote) notFound()
 
-  const location = (quote.location_pages as any).locations as {
+  const location = (quote.location_pages as unknown as { locations: unknown }).locations as {
     id: string; name: string; slug: string; theme_color?: string;
     cover_image_url?: string; currency?: string; organization_id: string;
     organizations?: { logo_url?: string } | null
@@ -40,7 +40,7 @@ export default async function PublicQuotePage({
   const themeColor = location.theme_color || '#7c3aed'
   const currency = location.currency || 'NGN'
   const logoUrl = location.organizations?.logo_url
-  const page = quote.location_pages as any
+  const page = quote.location_pages as unknown as { id: string, title: string, billing_enabled?: boolean, template_data?: { refund_policy?: string } }
 
   let parsedNotes: {
     lineItems?: { title: string; qty: number; unit_price_minor?: number }[]
@@ -159,10 +159,10 @@ export default async function PublicQuotePage({
         )}
 
         {/* Cancellation Policy */}
-        {(page.template_data as any)?.refund_policy && (
+        {page.template_data?.refund_policy && (
           <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20">
             <h4 className="text-xs font-bold text-red-400 mb-1 uppercase tracking-wider">Cancellation Policy</h4>
-            <p className="text-sm text-red-200/80 leading-relaxed">{(page.template_data as any).refund_policy}</p>
+            <p className="text-sm text-red-200/80 leading-relaxed">{page.template_data.refund_policy}</p>
           </div>
         )}
 

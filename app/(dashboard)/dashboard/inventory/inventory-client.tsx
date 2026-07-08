@@ -370,8 +370,8 @@ function AddItemDialog({
 export function InventoryClient({
   organizationId,
   locationId,
-  locationName,
-  currencyCode,
+  locationName: _locationName,
+  currencyCode: _currencyCode,
   initialItems,
   initialMovements,
   isEditor,
@@ -385,7 +385,7 @@ export function InventoryClient({
   const [addDialogOpen, setAddDialogOpen] = useState(false)
   const [editItem, setEditItem] = useState<InventoryItem | null>(null)
   const [activeTab, setActiveTab] = useState<'items' | 'log' | 'bom'>('items')
-  const [isPending, startTransition] = useTransition()
+  const [_isPending, startTransition] = useTransition()
   const [expandedItem, setExpandedItem] = useState<string | null>(null)
 
   const categories = useMemo(() => {

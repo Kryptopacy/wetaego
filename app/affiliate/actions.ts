@@ -1,7 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { createSubaccount } from '@/lib/payments/paystack'
+import { createTransferRecipient } from '@/lib/payments/paystack'
 import { redirect } from 'next/navigation'
 
 export async function registerAffiliate(formData: FormData) {
@@ -21,14 +21,12 @@ export async function registerAffiliate(formData: FormData) {
     throw new Error('All fields are required')
   }
 
-  // 1. Create Paystack Subaccount
-  let subaccountCode = ''
+  // 1. Create Paystack Transfer Recipient
+  let recipientCode = ''
   try {
-    const { getPlatformFees } = await import('@/lib/utils/settings')
-    const platformFees = await getPlatformFees() as { affiliate_subaccount: number }
-    subaccountCode = await createSubaccount(bankCode, accountNumber, accountName, platformFees.affiliate_subaccount ?? 5)
+    recipientCode = await createTransferRecipient(accountName, accountNumber, bankCode)
   } catch (error) {
-    console.error('Failed to create subaccount', error)
+    console.error('Failed to create transfer recipient', error)
     throw new Error('Failed to verify bank details with Paystack. Please check your account number and bank code.')
   }
 
@@ -38,7 +36,7 @@ export async function registerAffiliate(formData: FormData) {
     .insert({
       user_id: userData.user.id,
       referral_code: referralCode,
-      paystack_subaccount_code: subaccountCode,
+      paystack_recipient_code: recipientCode,
       status: 'active'
     })
 

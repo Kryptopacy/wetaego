@@ -4,8 +4,6 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import {
   BUSINESS_TYPE_GROUPS,
-  
-  BUSINESS_TYPE_PRESETS,
   getPresetsByGroup,
 } from '@/lib/templates/presets'
 import { setBusinessTypeAction } from '../actions'

@@ -94,8 +94,8 @@ export async function POST(req: Request) {
         get_business_structure: tool({
           description: 'Fetch the locations and pages (menus, booking pages) belonging to this organization.',
           parameters: z.object({}),
-          // @ts-ignore - TS inference struggles with Vercel AI SDK tool execute signatures
-          execute: async (): Promise<any> => {
+          // @ts-expect-error - TS inference struggles with Vercel AI SDK tool execute signatures
+          execute: async (): Promise<Record<string, unknown>[]> => {
             const { data: locations } = await supabase
               .from('locations')
               .select('id, name, slug, location_pages(id, title, template_type, is_published)')
@@ -108,8 +108,8 @@ export async function POST(req: Request) {
           parameters: z.object({
             locationId: z.string().uuid('The ID of the location to check inventory for.')
           }),
-          // @ts-ignore
-          execute: async ({ locationId }: { locationId: string }): Promise<any> => {
+          // @ts-expect-error - TS inference struggles
+          execute: async ({ locationId }: { locationId: string }): Promise<Record<string, unknown>[]> => {
             // Fetch all non-archived for the location and filter here
             const { data: allItems } = await supabase
               .from('inventory_items')
@@ -127,8 +127,8 @@ export async function POST(req: Request) {
             itemId: z.string().uuid(),
             newQuantity: z.number()
           }),
-          // @ts-ignore
-          execute: async ({ itemId, newQuantity }: { itemId: string; newQuantity: number }): Promise<any> => {
+          // @ts-expect-error - TS inference struggles
+          execute: async ({ itemId, newQuantity }: { itemId: string; newQuantity: number }): Promise<Record<string, unknown>> => {
             const { error } = await supabase
               .from('inventory_items')
               .update({ current_quantity: newQuantity, updated_at: new Date().toISOString() })
@@ -144,14 +144,14 @@ export async function POST(req: Request) {
             locationId: z.string().uuid(),
             timeframe: z.enum(['today', 'this_week', 'this_month'])
           }),
-          // @ts-ignore
-          execute: async ({ locationId, timeframe }: { locationId: string; timeframe: 'today' | 'this_week' | 'this_month' }): Promise<any> => {
+          // @ts-expect-error - TS inference struggles
+          execute: async ({ locationId, timeframe }: { locationId: string; timeframe: 'today' | 'this_week' | 'this_month' }): Promise<Record<string, unknown>> => {
             if (userRole !== 'owner' && userRole !== 'manager') {
               return { error: 'Unauthorized: Only owners and managers can view sales summaries.' }
             }
             
             const now = new Date()
-            let startDate = new Date()
+            const startDate = new Date()
             if (timeframe === 'today') {
               startDate.setHours(0, 0, 0, 0)
             } else if (timeframe === 'this_week') {
@@ -187,8 +187,8 @@ export async function POST(req: Request) {
             menuId: z.string().uuid(),
             categoryName: z.string()
           }),
-          // @ts-ignore
-          execute: async ({ locationId, menuId, categoryName }: { locationId: string; menuId: string; categoryName: string }): Promise<any> => {
+          // @ts-expect-error - TS inference struggles
+          execute: async ({ locationId, menuId, categoryName }: { locationId: string; menuId: string; categoryName: string }): Promise<Record<string, unknown>> => {
             if (userRole !== 'owner' && userRole !== 'manager') {
               return { error: 'Unauthorized: Only owners and managers can create categories.' }
             }
@@ -200,7 +200,7 @@ export async function POST(req: Request) {
                 location_id: locationId,
                 menu_id: menuId,
                 name: categoryName
-              } as any)
+              } as Record<string, unknown>)
               .select('id')
               .single()
               
@@ -217,8 +217,8 @@ export async function POST(req: Request) {
             description: z.string().optional(),
             priceMinor: z.number().describe('The price in minor units (e.g., kobo, cents). 1000 NGN = 100000 minor units.')
           }),
-          // @ts-ignore
-          execute: async ({ locationId, categoryId, name, description, priceMinor }: { locationId: string; categoryId: string; name: string; description?: string; priceMinor: number }): Promise<any> => {
+          // @ts-expect-error - TS inference struggles
+          execute: async ({ locationId, categoryId, name, description, priceMinor }: { locationId: string; categoryId: string; name: string; description?: string; priceMinor: number }): Promise<Record<string, unknown>> => {
             if (userRole !== 'owner' && userRole !== 'manager') {
               return { error: 'Unauthorized: Only owners and managers can add menu items.' }
             }
@@ -237,7 +237,7 @@ export async function POST(req: Request) {
                 description: description || null,
                 price_minor: priceMinor,
                 is_available: true
-              } as any)
+              } as Record<string, unknown>)
               .select('id')
               .single()
               
@@ -249,7 +249,7 @@ export async function POST(req: Request) {
     })
 
     // Fallback to toTextStreamResponse or toDataStreamResponse depending on ai sdk version
-    return (result as any).toDataStreamResponse ? (result as any).toDataStreamResponse() : (result as any).toTextStreamResponse()
+    return (result as Record<string, unknown>).toDataStreamResponse ? (result as { toDataStreamResponse: () => Response }).toDataStreamResponse() : (result as { toTextStreamResponse: () => Response }).toTextStreamResponse()
     
   } catch (error) {
     console.error('Co-Pilot Error:', error)

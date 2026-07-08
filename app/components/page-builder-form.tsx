@@ -188,11 +188,11 @@ export function PageBuilderForm({ pageId, templateType, initialItems, orgId }: P
               </div>
               <div>
                 <label className="block text-xs font-medium text-zinc-400 mb-1">Department / Workstation</label>
-                <input name="department" defaultValue={(item as any)?.department || ''} className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white" placeholder="e.g. Grill, Tailoring, Studio" />
+                <input name="department" defaultValue={(item as unknown as Record<string, unknown>)?.department as string || ''} className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white" placeholder="e.g. Grill, Tailoring, Studio" />
               </div>
             </div>
             <VariantBuilderField
-              initialVariants={(item?.item_data as any)?.variants || []}
+              initialVariants={(item?.item_data as Record<string, unknown>)?.variants as VariantGroup[] || []}
               onChange={setPendingVariants}
             />
           </>

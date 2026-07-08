@@ -1,4 +1,4 @@
-import { notFound, redirect } from 'next/navigation'
+import { notFound } from 'next/navigation'
 import { createAdminClient } from '@/lib/supabase/server'
 import IouPaymentClient from './iou-payment-client'
 
@@ -71,7 +71,6 @@ export default async function IouPaymentPage({ params }: PageProps) {
       balanceMinor={customer.credit_balance_minor || 0}
       currency={currency}
       minPercentage={minPercentage}
-      slug={slug}
     />
   )
 }

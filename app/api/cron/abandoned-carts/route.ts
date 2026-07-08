@@ -61,7 +61,7 @@ export async function GET(req: Request) {
               <div style="background-color: #f9f9f9; padding: 15px; border-radius: 8px; margin: 20px 0;">
                 <h3 style="margin-top: 0; color: #333;">Your Cart:</h3>
                 <ul style="padding-left: 20px; color: #555;">
-                  ${order.order_items.map((item: any) => `<li>${item.quantity}x ${item.item_name}</li>`).join('')}
+                  ${order.order_items.map((item: Record<string, unknown>) => `<li>${item.quantity}x ${item.item_name}</li>`).join('')}
                 </ul>
                 <p style="font-weight: bold; margin-bottom: 0;">Total: ${formatCurrency(order.total_amount_minor, currency)}</p>
               </div>
@@ -93,8 +93,9 @@ export async function GET(req: Request) {
       recovered_orders: emailsSent 
     })
 
-  } catch (error: any) {
+  } catch (error) {
     Sentry.captureException(error)
-    return NextResponse.json({ status: 'error', message: error.message }, { status: 500 })
+    const message = error instanceof Error ? error.message : 'Unknown error'
+    return NextResponse.json({ status: 'error', message }, { status: 500 })
   }
 }

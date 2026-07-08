@@ -1,8 +1,21 @@
 'use client'
 
 import { format } from 'date-fns'
+import { useAction } from 'next-safe-action/hooks'
+import { payAffiliateEarnings } from './actions'
+import { toast } from 'sonner'
+import { useState } from 'react'
 
-export function AffiliatesRegistry({ affiliates }: { affiliates: any[] }) {
+interface Affiliate {
+  id: string
+  referral_code: string
+  status: string
+  created_at: string
+  paystack_recipient_code: string | null
+  affiliate_earnings?: { amount_minor: number; status: string }[]
+}
+
+export function AffiliatesRegistry({ affiliates }: { affiliates: Affiliate[] }) {
   return (
     <div className="space-y-6">
       <section className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-xl w-full">
@@ -19,7 +32,9 @@ export function AffiliatesRegistry({ affiliates }: { affiliates: any[] }) {
                 <th className="px-6 py-4 font-medium">Referral Code</th>
                 <th className="px-6 py-4 font-medium">Status</th>
                 <th className="px-6 py-4 font-medium">Joined</th>
-                <th className="px-6 py-4 font-medium">Subaccount Code</th>
+                <th className="px-6 py-4 font-medium">Recipient Code</th>
+                <th className="px-6 py-4 font-medium text-right">Pending Payout</th>
+                <th className="px-6 py-4 font-medium text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-800">
@@ -37,7 +52,17 @@ export function AffiliatesRegistry({ affiliates }: { affiliates: any[] }) {
                     {format(new Date(a.created_at), 'MMM d, yyyy')}
                   </td>
                   <td className="px-6 py-4 text-zinc-400">
-                    {a.paystack_subaccount_code || 'Pending Setup'}
+                    {a.paystack_recipient_code || 'Pending Setup'}
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    <span className="font-medium text-white">
+                      {new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(
+                        (a.affiliate_earnings?.filter(e => e.status === 'pending').reduce((sum, e) => sum + e.amount_minor, 0) || 0) / 100
+                      )}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    <PayoutButton affiliateId={a.id} disabled={!a.paystack_recipient_code || (a.affiliate_earnings?.filter(e => e.status === 'pending').length || 0) === 0} />
                   </td>
                 </tr>
               )) : (
@@ -52,5 +77,26 @@ export function AffiliatesRegistry({ affiliates }: { affiliates: any[] }) {
         </div>
       </section>
     </div>
+  )
+}
+
+function PayoutButton({ affiliateId, disabled }: { affiliateId: string, disabled: boolean }) {
+  const { execute, isExecuting } = useAction(payAffiliateEarnings, {
+    onSuccess: (res) => {
+      if (res.data?.success) toast.success(res.data.message)
+    },
+    onError: (err) => {
+      toast.error(err.error.serverError || 'Failed to process payout')
+    }
+  })
+
+  return (
+    <button
+      onClick={() => execute({ affiliate_id: affiliateId })}
+      disabled={disabled || isExecuting}
+      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${disabled ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed' : 'bg-emerald-600/20 text-emerald-500 hover:bg-emerald-500 hover:text-white'}`}
+    >
+      {isExecuting ? 'Processing...' : 'Pay Out'}
+    </button>
   )
 }

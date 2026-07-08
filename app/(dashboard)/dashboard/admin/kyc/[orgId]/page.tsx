@@ -2,10 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { notFound, redirect } from 'next/navigation'
 import { isAdminEmail } from '@/lib/utils/admin'
 import { ActionForm } from '@/components/ActionForm'
-import { authActionClient } from '@/lib/safe-action'
-import { z } from 'zod'
-import { zfd } from 'zod-form-data'
-import { revalidatePath } from 'next/cache'
+
 import Link from 'next/link'
 import { ChevronLeft, CheckCircle2, XCircle } from 'lucide-react'
 
@@ -20,6 +17,7 @@ export default async function KycReviewPage({ params }: { params: Promise<{ orgI
     redirect('/dashboard')
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: org } = await (supabase as any)
     .from('organizations')
     .select('*, organization_kyc(*)')
@@ -28,7 +26,13 @@ export default async function KycReviewPage({ params }: { params: Promise<{ orgI
 
   if (!org) notFound()
 
-  const kyc = org.organization_kyc?.[0] as any
+  const kyc = org.organization_kyc?.[0] as {
+    business_type: string
+    legal_name: string
+    registration_number: string
+    status: string
+    admin_notes?: string
+  } | undefined
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 pb-20">

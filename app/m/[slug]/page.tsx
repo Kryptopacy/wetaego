@@ -132,7 +132,7 @@ export default async function PublicMenuPage({
   }
 
   // Check KYC status
-  const org = location.organizations as any;
+  const org = location.organizations as { status?: string } | null;
   const orgStatus = org?.status || 'approved';
   
   if (!isPreview && orgStatus !== 'approved') {

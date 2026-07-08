@@ -81,8 +81,10 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ items: structuredData })
 
-  } catch (err: any) {
+  } catch (err) {
+     
     console.error('OCR Error:', err)
-    return new NextResponse(err.message || 'Internal Server Error', { status: 500 })
+    const message = err instanceof Error ? err.message : 'Internal Server Error'
+    return new NextResponse(message, { status: 500 })
   }
 }
