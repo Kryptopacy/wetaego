@@ -16,7 +16,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   let isOwnerOrManager = true
   const userEmail = userData?.user?.email || ''
   let credits: number | null = null
-  let locations: Record<string, unknown>[] = []
+  let locations: { id: string; name: string; slug?: string }[] = []
   let activeLocationId = ''
   let locationSlug = ''
   let plan = 'lite'
