@@ -35,7 +35,7 @@ export default async function IOUsPage() {
   const currencyCode = loc?.currency_code || 'NGN'
 
   const { data: orgData } = await supabase.from('organizations').select('metadata').eq('id', orgId).single()
-  const settings = (orgData?.metadata as Record<string, unknown>) || {}
+  const settings = (orgData?.metadata as { iou_reminder_frequency?: string; iou_min_installment_pct?: number }) || {}
 
   // Fetch paginated customer profiles WITH ACTIVE TABS (Limit 50)
   const { data: customers } = await supabase
