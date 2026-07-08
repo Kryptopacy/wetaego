@@ -134,7 +134,7 @@ export default async function DispatchViewPage({
                   </span>
                   <div>
                     <span className="font-bold text-zinc-900">{item.item_name}</span>
-                    {item.metadata && typeof item.metadata === 'object' && Object.keys(item.metadata).length > 0 && (
+                    {typeof item.metadata === 'object' && item.metadata !== null && Object.keys(item.metadata).length > 0 && (
                       <div className="text-xs text-zinc-500 mt-1 space-y-0.5">
                         {Object.entries(item.metadata as Record<string, unknown>).map(([k, v]) => (
                           <div key={k} className="capitalize">{k.replace(/_/g, ' ')}: {String(v)}</div>

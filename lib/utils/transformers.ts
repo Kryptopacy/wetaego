@@ -10,6 +10,8 @@ type RawOrderPayload = Partial<SupabaseOrder> & {
   id: string;
   order_items?: Partial<SupabaseOrderItem>[];
   organizations?: Partial<SupabaseOrg> | null;
+  order_milestones?: any[];
+  tracking_code?: string | null;
   [key: string]: unknown;
 }
 
@@ -52,6 +54,8 @@ export function mapSupabaseOrderToUI(rawOrder: RawOrderPayload): UIOrder {
     assigned_staff_id: (rawOrder.assigned_staff_id as string) || null,
     created_at: rawOrder.created_at || new Date().toISOString(),
     order_items: items,
-    organizations: org
+    organizations: org,
+    tracking_code: (rawOrder.tracking_code as string) || null,
+    order_milestones: rawOrder.order_milestones || undefined
   }
 }

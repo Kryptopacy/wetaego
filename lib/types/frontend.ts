@@ -45,4 +45,13 @@ export interface UIOrder {
   currency_code?: string;
   order_items: UIOrderItem[];
   organizations?: UIOrganization | null;
+  tracking_code?: string | null;
+  order_milestones?: Array<{
+    id: string;
+    title: string;
+    description: string | null;
+    is_completed: boolean;
+    created_at: string;
+    completed_at: string | null;
+  }>;
 }

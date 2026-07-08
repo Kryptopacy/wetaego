@@ -22,7 +22,7 @@ export default function SharingHubPage({
   const slug = searchParams.get('slug')
   
   const [origin, setOrigin] = useState('')
-  const [order, setOrder] = useState<{ id?: string, total_amount_minor: number, amount_paid_minor: number, locations?: { currency_code: string } } | null>(null)
+  const [order, setOrder] = useState<{ id?: string, total_amount_minor: number, amount_paid_minor: number | null, locations?: { currency_code: string } } | null>(null)
   const supabase = createClient()
 
   useEffect(() => {

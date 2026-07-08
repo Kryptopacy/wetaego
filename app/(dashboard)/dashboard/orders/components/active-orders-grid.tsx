@@ -3,10 +3,11 @@
 import { useOptimistic, startTransition, useState, useMemo, useEffect } from 'react'
 import { formatCurrency } from '@/lib/utils/currency'
 import { UIOrder } from '@/lib/types/frontend'
-import { Printer } from 'lucide-react'
+import { Printer, MapPin } from 'lucide-react'
 import { usePrinterStore } from '@/lib/stores/printer-store'
 import { printOrder } from '@/lib/utils/printer'
 import { PINPromptModal } from './pin-prompt-modal'
+import { MilestonesManager } from './milestones-manager'
 
 interface ActiveOrdersGridProps {
   activeOrders: UIOrder[]
@@ -43,6 +44,7 @@ export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, tem
   // States for Void/Refund
   const [voidState, setVoidState] = useState<{ orderId: string } | null>(null)
   const [refundState, setRefundState] = useState<{ orderId: string } | null>(null)
+  const [milestonesOrder, setMilestonesOrder] = useState<UIOrder | null>(null)
   const [isProcessingAction, setIsProcessingAction] = useState(false)
   const [actionError, setActionError] = useState<string | null>(null)
 
@@ -226,6 +228,15 @@ export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, tem
           </div>
         )}
         
+        {/* Milestones Manager Modal */}
+        {milestonesOrder && (
+          <MilestonesManager 
+            order={milestonesOrder}
+            isOpen={true}
+            onClose={() => setMilestonesOrder(null)}
+          />
+        )}
+        
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {filteredOrders.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-zinc-500">
@@ -353,6 +364,15 @@ export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, tem
                     )}
                   </div>
                   <div className={`flex items-center gap-3 ${templateType === 'restaurant' ? 'w-full sm:w-auto flex-col sm:flex-row' : ''}`}>
+                    {templateType === 'services' && order.status !== 'cancelled' && (
+                      <button
+                        onClick={() => setMilestonesOrder(order)}
+                        className="px-4 py-2 rounded-lg bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 font-medium transition-colors text-sm border border-blue-500/20 hover:border-blue-500/40 flex items-center gap-2"
+                      >
+                        <MapPin className="w-4 h-4" />
+                        Manage Progress
+                      </button>
+                    )}
                     {(!order.assigned_staff_id && (order.status === 'paid' || (order.status === 'pending' && billingMode === 'table_service'))) && (
                       <button 
                         onClick={() => {
@@ -460,6 +480,15 @@ export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, tem
                     className="w-full px-4 py-3 rounded-xl bg-red-500/10 text-red-400 border border-red-500/20 font-bold active:bg-red-500/20"
                   >
                     Refund Order
+                  </button>
+                )}
+
+                {templateType === 'services' && (
+                  <button
+                    onClick={() => setMilestonesOrder(order)}
+                    className="w-full px-4 py-3 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 font-bold active:bg-blue-500/20"
+                  >
+                    Manage Progress
                   </button>
                 )}
 

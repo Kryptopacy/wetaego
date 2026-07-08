@@ -7,7 +7,25 @@ import { VoiceRecorder } from './voice-recorder'
 import { format } from 'date-fns'
 import { motion, AnimatePresence } from 'framer-motion'
 
-
+const WalkieTalkieIcon = ({ className }: { className?: string }) => (
+  <svg 
+    xmlns="http://www.w3.org/2000/svg" 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round" 
+    className={className}
+  >
+    <path d="M8 22h8a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2z"/>
+    <path d="M9 8V3"/>
+    <path d="M14 8V5"/>
+    <circle cx="12" cy="14" r="1"/>
+    <path d="M9 18h6"/>
+    <path d="M9 15h6"/>
+  </svg>
+)
 
 interface IntercomChannel {
   id: string
@@ -266,7 +284,7 @@ export function IntercomWidget({ userId, organizationId }: { userId: string, org
             onClick={() => setIsOpen(true)}
             className="fixed bottom-20 md:bottom-6 left-4 md:left-6 z-50 h-12 px-5 rounded-full bg-blue-600 hover:bg-blue-500 text-white shadow-lg cursor-grab active:cursor-grabbing flex items-center gap-2"
           >
-            <RadioReceiver className="w-5 h-5 pointer-events-none" />
+            <WalkieTalkieIcon className="w-5 h-5 pointer-events-none" />
             <span className="font-semibold text-sm pointer-events-none">Staff Intercom</span>
           </motion.button>
         )}

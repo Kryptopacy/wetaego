@@ -1,4 +1,4 @@
-export type Json =
+﻿export type Json =
   | string
   | number
   | boolean
@@ -11,31 +11,6 @@ export type Database = {
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "14.5"
-  }
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
   }
   public: {
     Tables: {
@@ -1308,6 +1283,7 @@ export type Database = {
           sort_order: number
           stock_count: number | null
           updated_at: string
+          vr_url: string | null
         }
         Insert: {
           allergen_tags?: string[]
@@ -1330,6 +1306,7 @@ export type Database = {
           sort_order?: number
           stock_count?: number | null
           updated_at?: string
+          vr_url?: string | null
         }
         Update: {
           allergen_tags?: string[]
@@ -1352,6 +1329,7 @@ export type Database = {
           sort_order?: number
           stock_count?: number | null
           updated_at?: string
+          vr_url?: string | null
         }
         Relationships: [
           {
@@ -1478,6 +1456,44 @@ export type Database = {
           },
         ]
       }
+      order_milestones: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          description: string | null
+          id: string
+          is_completed: boolean | null
+          order_id: string
+          title: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_completed?: boolean | null
+          order_id: string
+          title: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_completed?: boolean | null
+          order_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_milestones_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_payments: {
         Row: {
           amount_minor: number
@@ -1567,47 +1583,6 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      order_milestones: {
-        Row: {
-          completed_at: string | null
-          created_at: string
-          description: string | null
-          id: string
-          is_completed: boolean
-          order_id: string
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          completed_at?: string | null
-          created_at?: string
-          description?: string | null
-          id?: string
-          is_completed?: boolean
-          order_id: string
-          title: string
-          updated_at?: string
-        }
-        Update: {
-          completed_at?: string | null
-          created_at?: string
-          description?: string | null
-          id?: string
-          is_completed?: boolean
-          order_id?: string
-          title?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "order_milestones_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "orders"
             referencedColumns: ["id"]
           },
         ]
@@ -2149,6 +2124,7 @@ export type Database = {
           subtitle: string | null
           title: string
           updated_at: string
+          vr_url: string | null
         }
         Insert: {
           availability_status?: string
@@ -2171,6 +2147,7 @@ export type Database = {
           subtitle?: string | null
           title: string
           updated_at?: string
+          vr_url?: string | null
         }
         Update: {
           availability_status?: string
@@ -2193,6 +2170,7 @@ export type Database = {
           subtitle?: string | null
           title?: string
           updated_at?: string
+          vr_url?: string | null
         }
         Relationships: [
           {
@@ -2517,6 +2495,44 @@ export type Database = {
           },
         ]
       }
+      staff_notifications: {
+        Row: {
+          action_url: string | null
+          body: string
+          created_at: string
+          id: string
+          is_read: boolean | null
+          organization_id: string
+          title: string
+        }
+        Insert: {
+          action_url?: string | null
+          body: string
+          created_at?: string
+          id?: string
+          is_read?: boolean | null
+          organization_id: string
+          title: string
+        }
+        Update: {
+          action_url?: string | null
+          body?: string
+          created_at?: string
+          id?: string
+          is_read?: boolean | null
+          organization_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_notifications_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       staff_shifts: {
         Row: {
           clock_in_time: string
@@ -2833,7 +2849,7 @@ export type Database = {
       payment_provider: "paystack" | "stripe"
       publication_status: "draft" | "published" | "archived"
       service_request_status: "pending" | "acknowledged" | "resolved"
-      service_request_type: "waiter" | "bill" | "cleanup" | "custom"
+      service_request_type: "waiter" | "bill" | "cleanup"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2959,9 +2975,6 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {
       availability_status: ["available", "low", "sold_out", "hidden"],

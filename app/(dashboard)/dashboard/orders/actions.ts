@@ -413,3 +413,133 @@ export const refundOrderAction = authActionClient
 
     return { success: true }
   })
+
+export const addMilestoneAction = authActionClient
+  .schema(z.object({
+    orderId: z.string(),
+    title: z.string(),
+    description: z.string().optional()
+  }))
+  .action(async ({ parsedInput: { orderId, title, description }, ctx: { user } }) => {
+    const { supabase, order } = await requireOrderAuth(orderId, user)
+
+    const { data: orderDetails } = await supabase.from('orders').select('tracking_code').eq('id', orderId).single()
+    let trackingCode = orderDetails?.tracking_code
+    
+    if (!trackingCode) {
+      trackingCode = `REP-${Math.random().toString(36).substring(2, 7).toUpperCase()}`
+      await supabase.from('orders').update({ tracking_code: trackingCode }).eq('id', orderId)
+    }
+
+    const { error } = await supabase.from('order_milestones').insert({
+      order_id: orderId,
+      title,
+      description: description || null,
+      is_completed: false
+    })
+
+    if (error) throw new Error('Failed to add milestone')
+    return { success: true, trackingCode }
+  })
+
+export const completeMilestoneAction = authActionClient
+  .schema(z.object({
+    orderId: z.string(),
+    milestoneId: z.string()
+  }))
+  .action(async ({ parsedInput: { orderId, milestoneId }, ctx: { user } }) => {
+    const { supabase, order } = await requireOrderAuth(orderId, user)
+
+    const { error } = await supabase.from('order_milestones').update({
+      is_completed: true,
+      completed_at: new Date().toISOString()
+    }).eq('id', milestoneId).eq('order_id', orderId)
+
+    if (error) throw new Error('Failed to complete milestone')
+
+    return { success: true }
+  })
+
+export const addAdHocItemAction = authActionClient
+  .schema(z.object({
+    orderId: z.string(),
+    itemName: z.string(),
+    priceMinor: z.number(),
+    quantity: z.number().default(1)
+  }))
+  .action(async ({ parsedInput: { orderId, itemName, priceMinor, quantity }, ctx: { user } }) => {
+    const { supabase } = await requireOrderAuth(orderId, user)
+
+    const { data: order, error: orderError } = await supabase
+      .from('orders')
+      .select('total_amount_minor')
+      .eq('id', orderId)
+      .single()
+
+    if (orderError || !order) throw new Error('Order not found')
+
+    const newTotal = order.total_amount_minor + (priceMinor * quantity)
+
+    const { error: insertError } = await supabase.from('order_items').insert({
+      order_id: orderId,
+      item_name: itemName,
+      price_minor: priceMinor,
+      quantity,
+      item_id: null 
+    })
+    
+    if (insertError) throw new Error('Failed to add part/cost')
+
+    const { error: updateError } = await supabase
+      .from('orders')
+      .update({ total_amount_minor: newTotal })
+      .eq('id', orderId)
+
+    if (updateError) throw new Error('Failed to update order total')
+
+    return { success: true }
+  })
+
+export const logManualPaymentAction = authActionClient
+  .schema(z.object({
+    orderId: z.string(),
+    amountMinor: z.number()
+  }))
+  .action(async ({ parsedInput: { orderId, amountMinor }, ctx: { user } }) => {
+    const { supabase } = await requireOrderAuth(orderId, user)
+
+    const { data: order, error: orderError } = await supabase
+      .from('orders')
+      .select('amount_paid_minor, total_amount_minor, status')
+      .eq('id', orderId)
+      .single()
+
+    if (orderError || !order) throw new Error('Order not found')
+
+    const newPaid = (order.amount_paid_minor || 0) + amountMinor
+    let newStatus = order.status
+
+    if (newPaid >= order.total_amount_minor && order.status !== 'completed') {
+      newStatus = 'paid'
+    }
+
+    const { error: insertError } = await supabase.from('order_payments').insert({
+      order_id: orderId,
+      amount_minor: amountMinor,
+      provider_reference: `manual_${Date.now()}`
+    })
+
+    if (insertError) throw new Error('Failed to log payment')
+
+    const { error: updateError } = await supabase
+      .from('orders')
+      .update({ 
+        amount_paid_minor: newPaid,
+        status: newStatus
+      })
+      .eq('id', orderId)
+
+    if (updateError) throw new Error('Failed to update order payment status')
+
+    return { success: true }
+  })

@@ -4,7 +4,7 @@ import { useCartStore } from '@/lib/store/cart'
 import { formatCurrency } from '@/lib/utils/currency'
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Tables } from '@/types'
 import { Plus, Minus, ShoppingBag, X, ChevronLeft, ChevronRight, Play } from 'lucide-react'
 import { AnimatedDialog, AnimatedDialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
@@ -16,7 +16,7 @@ interface ItemCardProps {
 }
 
 interface ExtendedMenuItem extends Tables<'menu_items'> {
-  original_price_minor?: number
+  original_price_minor: number | null
 }
 
 export function ItemCard({ item }: ItemCardProps) {
@@ -27,6 +27,7 @@ export function ItemCard({ item }: ItemCardProps) {
   const [showDetailsModal, setShowDetailsModal] = useState(false)
   const [modifiers, setModifiers] = useState('')
   const [mediaIndex, setMediaIndex] = useState(0)
+  const [showVR, setShowVR] = useState(false)
 
   const searchParams = useSearchParams()
   const pathname = usePathname()
@@ -46,6 +47,7 @@ export function ItemCard({ item }: ItemCardProps) {
 
   const handleCloseDetails = () => {
     setShowDetailsModal(false)
+    setShowVR(false)
     const newParams = new URLSearchParams(searchParams.toString())
     newParams.delete('item')
     router.replace(`${pathname}?${newParams.toString()}`, { scroll: false })
@@ -142,12 +144,12 @@ export function ItemCard({ item }: ItemCardProps) {
           )}
           
           {(item.dietary_tags?.length > 0 || item.allergen_tags?.length > 0) && (
-            <div className="flex flex-wrap gap-1.5 mt-2">
+            <div className="flex flex-wrap gap-1.5 mt-2 max-w-full">
               {item.dietary_tags?.map(tag => (
-                <span key={tag} className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 uppercase tracking-wider border border-emerald-100 dark:border-emerald-500/20">{tag}</span>
+                <span key={tag} className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 uppercase tracking-wider border border-emerald-100 dark:border-emerald-500/20 whitespace-nowrap">{tag}</span>
               ))}
               {item.allergen_tags?.map(tag => (
-                <span key={tag} className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400 uppercase tracking-wider border border-amber-100 dark:border-amber-500/20">{tag}</span>
+                <span key={tag} className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400 uppercase tracking-wider border border-amber-100 dark:border-amber-500/20 whitespace-nowrap">{tag}</span>
               ))}
             </div>
           )}
@@ -277,14 +279,18 @@ export function ItemCard({ item }: ItemCardProps) {
               <div className="relative w-full aspect-square -mt-6 mb-6 rounded-b-3xl overflow-hidden bg-zinc-100 dark:bg-zinc-900 group">
                 <AnimatePresence mode="wait">
                   <motion.div 
-                    key={mediaIndex}
+                    key={showVR ? 'vr' : mediaIndex}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.2 }}
                     className="absolute inset-0"
                   >
-                    {renderMedia(mediaArray[mediaIndex])}
+                    {showVR ? (
+                      <iframe src={(item as any).vr_url} allow="xr-spatial-tracking; gyroscope; accelerometer" allowFullScreen className="w-full h-full border-0" />
+                    ) : (
+                      renderMedia(mediaArray[mediaIndex])
+                    )}
                   </motion.div>
                 </AnimatePresence>
 
@@ -319,7 +325,23 @@ export function ItemCard({ item }: ItemCardProps) {
                 )}
               </div>
             ) : (
-              <div className="mt-8 mb-6" />
+              (item as any).vr_url ? (
+                <div className="relative w-full aspect-square -mt-6 mb-6 rounded-b-3xl overflow-hidden bg-zinc-100 dark:bg-zinc-900 group">
+                  <iframe src={(item as any).vr_url} allow="xr-spatial-tracking; gyroscope; accelerometer" allowFullScreen className="w-full h-full border-0" />
+                </div>
+              ) : <div className="mt-8 mb-6" />
+            )}
+
+            {(item as any).vr_url && mediaArray.length > 0 && (
+              <div className="mb-6 flex justify-center">
+                <button
+                  onClick={() => setShowVR(!showVR)}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-500/10 text-blue-500 dark:bg-blue-500/20 dark:text-blue-400 rounded-full font-bold text-sm hover:bg-blue-500/20 dark:hover:bg-blue-500/30 transition-colors"
+                >
+                  <Play className="w-4 h-4" />
+                  {showVR ? 'Hide VR Tour' : 'View 360° / VR Tour'}
+                </button>
+              </div>
             )}
 
             <div className="mb-6">
