@@ -306,6 +306,17 @@ export async function startInteractiveDemo() {
     },
     {
       location_id: loc.id,
+      slug: 'pacy-repairs',
+      title: 'Pacy Gadget Repairs',
+      template_type: 'repair_shop',
+      business_type_preset: 'retail',
+      billing_enabled: true,
+      billing_mode: 'standard_checkout',
+      payment_mode: 'full',
+      is_published: true,
+    },
+    {
+      location_id: loc.id,
       slug: 'pacy-gadgets',
       title: 'Pacy Gadgets',
       template_type: 'catalog',

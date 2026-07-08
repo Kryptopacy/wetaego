@@ -66,13 +66,12 @@ export default async function TeamPage() {
 
   const userIds = (membersRaw || []).map(m => m.user_id as string)
     
-    // @ts-expect-error - user_profiles might not be in the generated types yet
     const { data: profiles } = await supabase
       .from('user_profiles')
       .select('id, full_name, bank_name, account_number, account_name')
       .in('id', userIds)
 
-    const profilesMap = new Map(profiles?.map((p: { id: string, full_name?: string, bank_name?: string, account_number?: string, account_name?: string }) => [p.id, p]) || [])
+    const profilesMap = new Map(profiles?.map((p: { id: string, full_name?: string | null, bank_name?: string | null, account_number?: string | null, account_name?: string | null }) => [p.id, p]) || [])
 
     members = (membersRaw || []).map(m => {
       

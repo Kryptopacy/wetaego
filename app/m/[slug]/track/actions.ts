@@ -25,7 +25,7 @@ export async function getTrackingDetailsAction(locationId: string, trackingCode:
         completed_at
       ),
       order_items (
-        menu_item_name,
+        item_name,
         quantity
       )
     `)

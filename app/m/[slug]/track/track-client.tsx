@@ -28,7 +28,7 @@ type OrderDetails = {
     completed_at: string | null
   }>
   items: Array<{
-    menu_item_name: string
+    item_name: string
     quantity: number
   }>
 }
@@ -243,9 +243,9 @@ export function TrackOrderClient({ location }: TrackOrderClientProps) {
               <h3 className="font-bold text-sm text-zinc-500 uppercase tracking-wider mb-3">Service Items</h3>
               <ul className="space-y-2">
                 {order.items.map((item, idx) => (
-                  <li key={idx} className="flex justify-between text-sm font-medium text-zinc-800 dark:text-zinc-300">
-                    <span>{item.quantity}x {item.menu_item_name}</span>
-                  </li>
+                  <div key={idx} className="flex justify-between items-center text-sm py-2 border-b border-zinc-100 last:border-0 text-zinc-700 dark:text-zinc-300">
+                    <span>{item.quantity}x {item.item_name}</span>
+                  </div>
                 ))}
               </ul>
             </div>

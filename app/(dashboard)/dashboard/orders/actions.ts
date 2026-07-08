@@ -11,6 +11,7 @@ import { getPlatformFees } from '@/lib/utils/settings'
 import { PaymentLinkEmail } from '@/emails/payment-link-email'
 import { OrderCancellationEmail } from '@/emails/order-cancellation-email'
 import { OrderRefundEmail } from '@/emails/order-refund-email'
+import { notifyCustomer } from '@/lib/notifications/dispatcher'
 
 const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy')
 
@@ -450,12 +451,20 @@ export const completeMilestoneAction = authActionClient
   .action(async ({ parsedInput: { orderId, milestoneId }, ctx: { user } }) => {
     const { supabase, order } = await requireOrderAuth(orderId, user)
 
-    const { error } = await supabase.from('order_milestones').update({
+    const { data: milestone, error } = await supabase.from('order_milestones').update({
       is_completed: true,
       completed_at: new Date().toISOString()
-    }).eq('id', milestoneId).eq('order_id', orderId)
+    }).eq('id', milestoneId).eq('order_id', orderId).select('title, description').single()
 
     if (error) throw new Error('Failed to complete milestone')
+
+    // Notify customer in the background
+    if (milestone) {
+      notifyCustomer(orderId, {
+        title: `Update: ${milestone.title}`,
+        body: milestone.description || `Your order milestone "${milestone.title}" has been completed.`
+      })
+    }
 
     return { success: true }
   })
@@ -470,32 +479,37 @@ export const addAdHocItemAction = authActionClient
   .action(async ({ parsedInput: { orderId, itemName, priceMinor, quantity }, ctx: { user } }) => {
     const { supabase } = await requireOrderAuth(orderId, user)
 
-    const { data: order, error: orderError } = await supabase
-      .from('orders')
-      .select('total_amount_minor')
-      .eq('id', orderId)
-      .single()
-
-    if (orderError || !order) throw new Error('Order not found')
-
-    const newTotal = order.total_amount_minor + (priceMinor * quantity)
-
-    const { error: insertError } = await supabase.from('order_items').insert({
-      order_id: orderId,
-      item_name: itemName,
-      price_minor: priceMinor,
-      quantity,
-      item_id: null 
+    const { error: rpcError } = await supabase.rpc('add_ad_hoc_item_rpc', {
+      p_order_id: orderId,
+      p_item_name: itemName,
+      p_price_minor: priceMinor,
+      p_quantity: quantity
     })
-    
-    if (insertError) throw new Error('Failed to add part/cost')
 
-    const { error: updateError } = await supabase
-      .from('orders')
-      .update({ total_amount_minor: newTotal })
-      .eq('id', orderId)
+    if (rpcError) {
+      console.error('RPC Error:', rpcError)
+      throw new Error('Failed to add part/cost atomically')
+    }
 
-    if (updateError) throw new Error('Failed to update order total')
+    return { success: true }
+  })
+
+export const deleteAdHocItemAction = authActionClient
+  .schema(z.object({
+    orderId: z.string(),
+    orderItemId: z.string()
+  }))
+  .action(async ({ parsedInput: { orderId, orderItemId }, ctx: { user } }) => {
+    const { supabase } = await requireOrderAuth(orderId, user)
+
+    const { error: rpcError } = await supabase.rpc('delete_ad_hoc_item_rpc', {
+      p_order_item_id: orderItemId
+    })
+
+    if (rpcError) {
+      console.error('RPC Error:', rpcError)
+      throw new Error('Failed to delete part/cost atomically')
+    }
 
     return { success: true }
   })
@@ -508,38 +522,36 @@ export const logManualPaymentAction = authActionClient
   .action(async ({ parsedInput: { orderId, amountMinor }, ctx: { user } }) => {
     const { supabase } = await requireOrderAuth(orderId, user)
 
-    const { data: order, error: orderError } = await supabase
-      .from('orders')
-      .select('amount_paid_minor, total_amount_minor, status')
-      .eq('id', orderId)
-      .single()
-
-    if (orderError || !order) throw new Error('Order not found')
-
-    const newPaid = (order.amount_paid_minor || 0) + amountMinor
-    let newStatus = order.status
-
-    if (newPaid >= order.total_amount_minor && order.status !== 'completed') {
-      newStatus = 'paid'
-    }
-
-    const { error: insertError } = await supabase.from('order_payments').insert({
-      order_id: orderId,
-      amount_minor: amountMinor,
-      provider_reference: `manual_${Date.now()}`
+    const { error: rpcError } = await supabase.rpc('log_manual_payment_rpc', {
+      p_order_id: orderId,
+      p_amount_minor: amountMinor,
+      p_reference: `manual_${Date.now()}`
     })
 
-    if (insertError) throw new Error('Failed to log payment')
+    if (rpcError) {
+      console.error('RPC Error:', rpcError)
+      throw new Error('Failed to log payment atomically')
+    }
 
-    const { error: updateError } = await supabase
-      .from('orders')
-      .update({ 
-        amount_paid_minor: newPaid,
-        status: newStatus
-      })
-      .eq('id', orderId)
+    return { success: true }
+  })
 
-    if (updateError) throw new Error('Failed to update order payment status')
+export const deleteManualPaymentAction = authActionClient
+  .schema(z.object({
+    orderId: z.string(),
+    paymentId: z.string()
+  }))
+  .action(async ({ parsedInput: { orderId, paymentId }, ctx: { user } }) => {
+    const { supabase } = await requireOrderAuth(orderId, user)
+
+    const { error: rpcError } = await supabase.rpc('delete_manual_payment_rpc', {
+      p_payment_id: paymentId
+    })
+
+    if (rpcError) {
+      console.error('RPC Error:', rpcError)
+      throw new Error('Failed to delete payment atomically')
+    }
 
     return { success: true }
   })

@@ -54,4 +54,10 @@ export interface UIOrder {
     created_at: string;
     completed_at: string | null;
   }>;
+  order_payments?: Array<{
+    id: string;
+    amount_minor: number;
+    provider_reference: string;
+    created_at: string;
+  }>;
 }

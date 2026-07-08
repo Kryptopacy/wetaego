@@ -128,7 +128,7 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
         if (orderPayload.eventType === 'INSERT') {
           supabase
             .from('orders')
-            .select('*, order_items(*), order_milestones(*)')
+            .select('*, order_items(*), order_milestones(*), order_payments(*)')
             .eq('id', orderPayload.new.id)
             .single()
             .then(({ data }: { data: unknown }) => {

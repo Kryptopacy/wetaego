@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import { UIOrder } from '@/lib/types/frontend'
-import { Plus, Check, Link as LinkIcon, RefreshCcw, Wrench, CreditCard, Clock } from 'lucide-react'
-import { addMilestoneAction, completeMilestoneAction, addAdHocItemAction, logManualPaymentAction } from './actions'
+import { Plus, Check, Link as LinkIcon, RefreshCcw, Wrench, CreditCard, Clock, Trash2 } from 'lucide-react'
+import { addMilestoneAction, completeMilestoneAction, addAdHocItemAction, logManualPaymentAction, deleteAdHocItemAction, deleteManualPaymentAction } from '../actions'
 import { toast } from 'sonner'
 import { AnimatedDialog, AnimatedDialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { formatCurrency } from '@/lib/utils/currency'
@@ -134,6 +134,40 @@ export function MilestonesManager({ order, isOpen, onClose }: MilestonesManagerP
     }
   }
 
+  const handleDeletePart = async (itemId: string) => {
+    if (!confirm('Are you sure you want to delete this part/cost?')) return
+    setIsLoading(true)
+    try {
+      const res = await deleteAdHocItemAction({ orderId: order.id, orderItemId: itemId })
+      if (res?.serverError || res?.validationErrors) {
+        toast.error(res.serverError || 'Failed to delete part')
+      } else {
+        toast.success('Part deleted')
+      }
+    } catch (e: any) {
+      toast.error(e.message || 'Error deleting part')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleDeletePayment = async (paymentId: string) => {
+    if (!confirm('Are you sure you want to delete this payment?')) return
+    setIsLoading(true)
+    try {
+      const res = await deleteManualPaymentAction({ orderId: order.id, paymentId })
+      if (res?.serverError || res?.validationErrors) {
+        toast.error(res.serverError || 'Failed to delete payment')
+      } else {
+        toast.success('Payment deleted')
+      }
+    } catch (e: any) {
+      toast.error(e.message || 'Error deleting payment')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   const copyTrackingLink = () => {
     if (!order.tracking_code) {
       toast.error('Add a milestone first to generate a tracking code.')
@@ -145,7 +179,7 @@ export function MilestonesManager({ order, isOpen, onClose }: MilestonesManagerP
   }
 
   return (
-    <AnimatedDialog isOpen={isOpen} onClose={onClose}>
+    <AnimatedDialog open={isOpen} onOpenChange={(open) => { if (!open) onClose() }}>
       <AnimatedDialogContent className="max-w-md bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-0 rounded-2xl overflow-hidden flex flex-col max-h-[85vh]">
         <div className="p-6 pb-0">
           <DialogTitle className="text-xl font-bold text-zinc-900 dark:text-white">Manage Service Order</DialogTitle>
@@ -269,7 +303,16 @@ export function MilestonesManager({ order, isOpen, onClose }: MilestonesManagerP
                         <p className="text-sm font-medium text-zinc-900 dark:text-white">{item.item_name}</p>
                         <p className="text-xs text-zinc-500">Qty: {item.quantity}</p>
                       </div>
-                      <p className="text-sm font-bold text-zinc-900 dark:text-white">{formatCurrency(item.price_minor * item.quantity)}</p>
+                      <div className="flex items-center gap-3">
+                        <p className="text-sm font-bold text-zinc-900 dark:text-white">{formatCurrency(item.price_minor * item.quantity)}</p>
+                        <button
+                          onClick={() => handleDeletePart(item.id)}
+                          className="p-1.5 text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors"
+                          title="Delete part"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
                   ))
                 )}
@@ -330,6 +373,34 @@ export function MilestonesManager({ order, isOpen, onClose }: MilestonesManagerP
                 <span className="font-bold text-blue-700 dark:text-blue-300">Balance</span>
                 <span className="text-xl font-bold text-blue-700 dark:text-blue-300">{formatCurrency(Math.max(0, balance))}</span>
               </div>
+
+              {order.order_payments && order.order_payments.length > 0 && (
+                <div className="space-y-2 mt-6">
+                  <h4 className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Payment History</h4>
+                  {order.order_payments.map(payment => (
+                    <div key={payment.id} className="flex justify-between items-center p-3 rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/30">
+                      <div>
+                        <p className="text-sm font-medium text-zinc-900 dark:text-white">
+                          {payment.provider_reference?.startsWith('manual_') ? 'Manual Deposit' : 'Online Payment'}
+                        </p>
+                        <p className="text-xs text-zinc-500">{new Date(payment.created_at).toLocaleDateString()}</p>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <p className="text-sm font-bold text-zinc-900 dark:text-white">{formatCurrency(payment.amount_minor)}</p>
+                        {payment.provider_reference?.startsWith('manual_') && (
+                          <button
+                            onClick={() => handleDeletePayment(payment.id)}
+                            className="p-1.5 text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors"
+                            title="Delete manual payment"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
 
               {balance > 0 && (
                 isAddingPayment ? (

@@ -56,7 +56,7 @@ export default async function OrdersPage() {
         ] = await Promise.all([
           supabase
             .from('orders')
-            .select('*, order_items(*), order_milestones(*)')
+            .select('*, order_items(*), order_milestones(*), order_payments(*)')
             .eq('organization_id', org.id)
             .eq('location_id', activeLocationId)
             .order('created_at', { ascending: false })

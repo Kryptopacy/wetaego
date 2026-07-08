@@ -2734,6 +2734,22 @@ export type Database = {
         Args: { lookup_token: string }
         Returns: boolean
       }
+      add_ad_hoc_item_rpc: {
+        Args: { p_order_id: string; p_item_name: string; p_price_minor: number; p_quantity: number }
+        Returns: undefined
+      }
+      delete_ad_hoc_item_rpc: {
+        Args: { p_order_item_id: string }
+        Returns: undefined
+      }
+      log_manual_payment_rpc: {
+        Args: { p_order_id: string; p_amount_minor: number; p_reference: string }
+        Returns: undefined
+      }
+      delete_manual_payment_rpc: {
+        Args: { p_payment_id: string }
+        Returns: undefined
+      }
       auto_checkout_stale_shifts: { Args: never; Returns: undefined }
       charge_credits_atomic: {
         Args: {
