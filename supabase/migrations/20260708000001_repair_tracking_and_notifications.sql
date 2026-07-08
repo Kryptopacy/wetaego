@@ -1,6 +1,6 @@
 -- 1. Add tracking_code to orders
 ALTER TABLE public.orders 
-ADD COLUMN tracking_code text UNIQUE;
+ADD COLUMN IF NOT EXISTS tracking_code text UNIQUE;
 
 -- Create an index for quick lookup by tracking code
 CREATE INDEX IF NOT EXISTS idx_orders_tracking_code ON public.orders(tracking_code);

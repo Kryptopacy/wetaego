@@ -23,7 +23,7 @@ type OrderDetails = {
     id: string
     title: string
     description: string | null
-    is_completed: boolean
+    is_completed: boolean | null
     created_at: string
     completed_at: string | null
   }>

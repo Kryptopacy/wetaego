@@ -9,9 +9,11 @@ import {
   Globe, AlertTriangle
 } from 'lucide-react'
 import { OnboardingChecklist } from './components/onboarding-checklist'
-import { RevenueChart, RevenueDataPoint } from './components/revenue-chart'
+import { RevenueDataPoint } from './components/revenue-chart'
 import { BUSINESS_TYPE_PRESETS } from '@/lib/templates/presets'
 import { format, subDays, startOfDay } from 'date-fns'
+import { DashboardStats } from './components/dashboard-stats'
+import { Suspense } from 'react'
 
 export default async function DashboardOverviewPage() {
   const supabase = await createClient()
@@ -70,99 +72,7 @@ export default async function DashboardOverviewPage() {
     locationSlug = loc?.slug || ''
   }
 
-  // Fetch real stats or use mock stats
-  // Use 0 as default so onboarding works correctly for new users
-  let menuCount = 0
-  let qrCount = 0
-  let orderCount = 0
-  let requestCount = 0
-
-  if (orgId) {
-    const [menuItemsRes, qrScansRes, ordersRes, requestsRes] = await Promise.all([
-      supabase.from('menu_items').select('id', { count: 'exact', head: true }).eq('organization_id', orgId),
-      supabase.from('qr_codes').select('id', { count: 'exact', head: true }).eq('organization_id', orgId),
-      supabase.from('orders').select('id', { count: 'exact', head: true }).eq('organization_id', orgId)
-        .gte('created_at', new Date(new Date().setHours(0, 0, 0, 0)).toISOString()),
-      supabase.from('service_requests').select('id', { count: 'exact', head: true })
-        .eq('organization_id', orgId).eq('status', 'pending'),
-    ])
-    
-    menuCount = menuItemsRes.count ?? 0
-    qrCount = qrScansRes.count ?? 0
-    orderCount = ordersRes.count ?? 0
-    requestCount = requestsRes.count ?? 0
-  }
-
-  // Fetch chart data for last 7 days
-  let chartData: RevenueDataPoint[] = []
-  if (orgId) {
-    const sevenDaysAgo = startOfDay(subDays(new Date(), 6)).toISOString()
-    const { data: recentOrders } = await supabase
-      .from('orders')
-      .select('created_at, total_amount_minor, status')
-      .eq('organization_id', orgId)
-      .eq('status', 'paid')
-      .gte('created_at', sevenDaysAgo)
-
-    // Build default 7 days structure with zero values
-    const daysMap = new Map<string, RevenueDataPoint>()
-    for (let i = 6; i >= 0; i--) {
-      const d = subDays(new Date(), i)
-      daysMap.set(format(d, 'yyyy-MM-dd'), { date: format(d, 'EEE'), revenue: 0, orders: 0 })
-    }
-
-    if (recentOrders) {
-      recentOrders.forEach(order => {
-        const dateKey = format(new Date(order.created_at), 'yyyy-MM-dd')
-        if (daysMap.has(dateKey)) {
-          const entry = daysMap.get(dateKey)!
-          entry.revenue += order.total_amount_minor || 0
-          entry.orders += 1
-        }
-      })
-    }
-
-    chartData = Array.from(daysMap.values())
-  }
-
-  const stats = [
-    {
-      label: templateType === 'catalog' ? 'Menu Items' : templateType === 'booking' ? 'Services' : templateType === 'listing' ? 'Listings' : 'Offerings',
-      value: menuCount,
-      icon: BookOpen,
-      color: 'from-emerald-600 to-teal-600',
-      glow: 'shadow-emerald-900/40',
-      change: menuCount > 0 ? `${menuCount} active` : 'None yet',
-      trend: 'neutral',
-    },
-    {
-      label: templateType === 'catalog' ? "Today's Orders" : templateType === 'booking' ? "Today's Bookings" : templateType === 'listing' ? "Today's Inquiries" : "Today's Requests",
-      value: orderCount,
-      icon: TrendingUp,
-      color: 'from-emerald-600 to-teal-600',
-      glow: 'shadow-emerald-900/40',
-      change: 'Live count',
-      trend: 'up',
-    },
-    {
-      label: templateType === 'listing' ? 'Printed Signs' : 'Active QR Codes',
-      value: qrCount,
-      icon: QrCode,
-      color: 'from-blue-600 to-cyan-600',
-      glow: 'shadow-blue-900/40',
-      change: 'All locations',
-      trend: 'neutral',
-    },
-    {
-      label: 'Service Requests',
-      value: requestCount,
-      icon: AlertTriangle,
-      color: requestCount ? 'from-orange-600 to-red-600' : 'from-zinc-600 to-zinc-700',
-      glow: requestCount ? 'shadow-orange-900/40' : 'shadow-none',
-      change: requestCount ? 'Needs attention' : 'All clear',
-      trend: requestCount ? 'alert' : 'neutral',
-    },
-  ]
+  // Heavy fetches moved to DashboardStats component for streaming
 
   const aiModules = [
     {
@@ -238,77 +148,20 @@ export default async function DashboardOverviewPage() {
       <OnboardingChecklist 
         hasOrg={!!orgId} 
         hasLocation={!!locationSlug} 
-        hasMenu={menuCount > 0} 
-        hasQR={qrCount > 0} 
+        hasMenu={true} 
+        hasQR={true} 
         templateType={templateType}
       />
 
       {!!orgId && (
         <>
-          {/* === REVENUE CHART === */}
-          <div className="w-full">
-            <RevenueChart data={chartData} currencyCode={currencyCode} />
-          </div>
-
-      {/* === QUICK ACTIONS === */}
-      <div className="rounded-2xl border border-white/[0.06] bg-zinc-900/60 backdrop-blur p-6">
-        <h2 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
-          <Users className="w-4 h-4 text-zinc-400" />
-          Quick Actions
-        </h2>
-        <div className="flex flex-wrap gap-3">
-          <Link
-            href="/dashboard/orders"
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white text-sm font-bold hover:from-violet-500 hover:to-fuchsia-500 transition-all shadow-md shadow-violet-900/30"
-          >
-            <Sparkles className="w-4 h-4" />
-            {templateType === 'catalog' ? 'Live Fulfillment' : templateType === 'booking' ? 'Live Bookings' : templateType === 'listing' ? 'Live Inquiries' : 'Live Requests'}
-          </Link>
-          <Link
-            href="/dashboard/menu"
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm font-semibold hover:bg-white/10 transition-all"
-          >
-            <BookOpen className="w-4 h-4" />
-            {templateType === 'catalog' ? 'Catalog Manager' : templateType === 'booking' ? 'Services Manager' : templateType === 'listing' ? 'Listings Manager' : 'Offerings Manager'}
-          </Link>
-          <Link
-            href="/dashboard/forecast"
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm font-semibold hover:bg-white/10 transition-all"
-          >
-            <BarChart3 className="w-4 h-4" />
-            Run Forecast
-          </Link>
-          <Link
-            href="/dashboard/pages"
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm font-semibold hover:bg-white/10 transition-all"
-          >
-            <FileText className="w-4 h-4" />
-            Custom Pages
-          </Link>
-        </div>
-      </div>
-
-      {/* === STATS BENTO GRID === */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map(({ label, value, icon: Icon, color, glow, change, trend }) => (
-          <div
-            key={label}
-            className={`relative rounded-2xl border border-white/[0.06] bg-zinc-900/60 backdrop-blur p-5 overflow-hidden group hover:border-white/10 transition-all duration-300`}
-          >
-            {/* Subtle gradient orb */}
-            <div className={`absolute -top-6 -right-6 w-24 h-24 rounded-full bg-gradient-to-br ${color} opacity-20 blur-2xl group-hover:opacity-30 transition-opacity`} />
-            
-            <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center mb-4 shadow-lg ${glow}`}>
-              <Icon className="w-5 h-5 text-white" />
+          <Suspense fallback={
+            <div className="w-full flex items-center justify-center p-12 bg-zinc-900/40 rounded-2xl border border-white/[0.06] animate-pulse h-[400px]">
+              <p className="text-zinc-500 font-medium">Loading metrics...</p>
             </div>
-            <p className="text-[11px] text-zinc-500 font-medium uppercase tracking-widest mb-1">{label}</p>
-            <p className="text-4xl font-bold text-white tabular-nums">{value}</p>
-            <p className={`text-xs mt-1.5 font-medium ${trend === 'alert' ? 'text-orange-400' : trend === 'up' ? 'text-emerald-400' : 'text-zinc-500'}`}>
-              {change}
-            </p>
-          </div>
-        ))}
-      </div>
+          }>
+            <DashboardStats orgId={orgId} templateType={templateType} />
+          </Suspense>
 
       {/* === AI MODULES GRID === */}
       <div>

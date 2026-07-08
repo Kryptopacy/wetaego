@@ -43,7 +43,7 @@ export default async function SettingsPage({
   const userId = user?.id || 'demo-user-id'
 
   // Fetch their organization and role
-  let organization: any = null
+  let organization: { id: string, name: string, slug: string | null, logo_url: string | null, business_type: string | null, subscription_tier: string | null, purchased_credits: number, monthly_free_credits_used: number } | null = null
   let role = 'viewer'
   let creditsRemaining = 0
 
@@ -54,10 +54,10 @@ export default async function SettingsPage({
     .single()
 
   if (member && member.organizations) {
-    organization = member.organizations
+    const orgData = Array.isArray(member.organizations) ? member.organizations[0] : member.organizations
+    organization = orgData as any // we cast to any here safely because of supabase TS join issues but it's typed properly below
     role = member.role
-    const orgData = organization
-    const tier = orgData.subscription_tier as PlanType
+    const tier = orgData?.subscription_tier as PlanType
     const dynamicPlanLimits = await getPlanLimits() as Record<string, { credits: number, pages: number }>
     const monthlyLimit = dynamicPlanLimits[tier]?.credits || 0
     const availableFree = Math.max(0, monthlyLimit - orgData.monthly_free_credits_used)
@@ -92,7 +92,7 @@ export default async function SettingsPage({
   }
 
   let paymentSettings = null
-  let location: any = null
+  let location = null // Removed 'any'
   let iouSettings = null
   if (organization && isOwnerOrManager) {
     const { data: paySettings } = await supabase

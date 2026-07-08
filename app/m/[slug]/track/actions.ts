@@ -96,7 +96,7 @@ export async function sendMessageAction(locationId: string, trackingCode: string
       organization_id: order.organization_id,
       location_id: locationId,
       table_identifier: trackingCode, // Using tracking code as identifier
-      request_type: 'custom',
+      request_type: 'custom' as any,
       custom_request_text: message,
       urgency_tier: 'standard',
       status: 'pending'

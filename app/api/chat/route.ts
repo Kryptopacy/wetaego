@@ -7,22 +7,9 @@ import { formatCurrency } from '@/lib/utils/currency'
 import { getAiModels } from '@/lib/utils/settings'
 // cleaned up unused type
 
-import { Ratelimit } from '@upstash/ratelimit'
-import { redis } from '@/lib/upstash'
+import { checkRateLimit } from '@/lib/upstash'
 
 export const maxDuration = 30
-
-const ratelimit = redis ? new Ratelimit({
-  redis,
-  limiter: Ratelimit.slidingWindow(50, '1 h'),
-  analytics: true,
-}) : null
-
-function getIp(req: Request) {
-  const forwarded = req.headers.get('x-forwarded-for')
-  if (forwarded) return forwarded.split(',')[0].trim()
-  return req.headers.get('x-real-ip') || 'unknown_ip'
-}
 
 const chatSchema = z.object({
   messages: z.array(z.any()),
@@ -47,14 +34,9 @@ export async function POST(req: Request) {
     const mode = getBusinessMode(templateType, billingMode, businessTypePreset)
 
     // 1. Strict IP-Based Rate Limiting (Prevent abuse) using Upstash
-    const ip = getIp(req)
-    if (ip !== 'unknown_ip') {
-      if (ratelimit) {
-        const { success } = await ratelimit.limit(ip)
-        if (!success) {
-          return new Response('Too many requests from this IP. Please try again later.', { status: 429 })
-        }
-      }
+    const { success } = await checkRateLimit('public_ai_chat')
+    if (!success) {
+      return new Response('Too many requests from this IP. Please try again later.', { status: 429 })
     }
 
     // 2. Session-based rate limit (Max 20 messages per session)

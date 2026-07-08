@@ -25,12 +25,24 @@ export const webhookRateLimiter = redis
     })
   : null;
 
+// Public AI limiter (e.g. Chat) to prevent abuse
+export const publicAiRateLimiter = redis
+  ? new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(50, '1 h'), // 50 requests per hour
+      analytics: true,
+    })
+  : null;
+
 /**
  * Validates request rate limit based on IP.
  * @returns { success: boolean, limit: number, remaining: number, reset: number }
  */
 export async function checkRateLimit(actionName: string, customIdentifier?: string) {
-  const limiter = actionName.includes('webhook') ? webhookRateLimiter : globalRateLimiter;
+  let limiter = globalRateLimiter;
+  if (actionName.includes('webhook')) limiter = webhookRateLimiter;
+  if (actionName.includes('public_ai')) limiter = publicAiRateLimiter;
+  
   if (!limiter) return { success: true };
   
   const reqHeaders = await headers();

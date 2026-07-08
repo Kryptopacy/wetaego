@@ -35,21 +35,29 @@ export default async function DashboardLayout({ children }: { children: ReactNod
       .eq('user_id', userData.user.id)
       .single()
 
-    if (member && (member.organizations as Record<string, unknown>)?.name) {
-      orgName = (member.organizations as Record<string, unknown>).name as string
-      isOwnerOrManager = ['owner', 'manager'].includes(member.role)
-      const orgData = member.organizations as { id: string; subscription_tier?: string; monthly_free_credits_used?: number; purchased_credits?: number; subscription_plan?: string; subscription_status?: string; trial_ends_at?: string; }
-      const planLimits: Record<string, number> = { lite: 10, pro: 50, enterprise: 200 }
-      const availableFree = (planLimits[orgData.subscription_tier || 'lite'] || 0) - (orgData.monthly_free_credits_used || 0)
-      const cb = Math.max(0, availableFree) + (orgData.purchased_credits || 0)
-      if (!isNaN(cb)) credits = cb
+    if (member && member.organizations) {
+      // Supabase infers joined single relations as either an object or an array.
+      // We safely cast it to the expected structure.
+      const orgData = Array.isArray(member.organizations) ? member.organizations[0] : member.organizations
+      
+      if (orgData && orgData.name) {
+        orgName = orgData.name
+        isOwnerOrManager = ['owner', 'manager'].includes(member.role)
+        
+        const planLimits: Record<string, number> = { lite: 10, pro: 50, enterprise: 200 }
+        const availableFree = (planLimits[orgData.subscription_tier || 'lite'] || 0) - (orgData.monthly_free_credits_used || 0)
+        const cb = Math.max(0, availableFree) + (orgData.purchased_credits || 0)
+        if (!isNaN(cb)) credits = cb
 
-      plan = orgData.subscription_plan || orgData.subscription_tier || 'lite'
-      planStatus = orgData.subscription_status || 'trial'
-      trialEndsAt = orgData.trial_ends_at || null
+        plan = orgData.subscription_plan || orgData.subscription_tier || 'lite'
+        planStatus = orgData.subscription_status || 'trial'
+        trialEndsAt = orgData.trial_ends_at || null
 
-      orgId = orgData.id
-      if (orgId) {
+        orgId = orgData.id
+      }
+    }
+
+    if (orgId) {
         const { data: locs } = await supabase
           .from('locations')
           .select('*')
@@ -93,7 +101,6 @@ export default async function DashboardLayout({ children }: { children: ReactNod
           dynamicNavItems.push({ href: '/dashboard/analytics', label: 'Deep Analytics', icon: 'TrendingUp' })
           dynamicNavItems.push({ href: '/dashboard/forecast', label: 'Demand Forecast', icon: 'BarChart3' })
         }
-      }
     }
   }
 
