@@ -11,10 +11,17 @@ interface AutoImportButtonProps {
   menuId: string
 }
 
+interface PreviewItem {
+  category_name?: string
+  name?: string
+  description?: string
+  price?: number
+}
+
 export function AutoImportButton({ orgId, menuId }: AutoImportButtonProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [previewItems, setPreviewItems] = useState<Record<string, unknown>[]>([])
+  const [previewItems, setPreviewItems] = useState<PreviewItem[]>([])
   const [showPreview, setShowPreview] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
