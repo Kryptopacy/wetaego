@@ -43,7 +43,7 @@ export default async function SettingsPage({
   const userId = user?.id || 'demo-user-id'
 
   // Fetch their organization and role
-  let organization: Record<string, unknown> | null = null
+  let organization: any = null
   let role = 'viewer'
   let creditsRemaining = 0
 
@@ -92,7 +92,7 @@ export default async function SettingsPage({
   }
 
   let paymentSettings = null
-  let location: Record<string, unknown> | null = null
+  let location: any = null
   let iouSettings = null
   if (organization && isOwnerOrManager) {
     const { data: paySettings } = await supabase
@@ -775,7 +775,7 @@ export default async function SettingsPage({
               <div>
                 <label className="mb-2 block text-sm font-medium text-zinc-300">Frequently Asked Questions (FAQs)</label>
                 <p className="text-xs text-zinc-500 mb-3">Add specific questions and answers the AI should strictly adhere to.</p>
-                <AiFaqBuilder initialFaqs={(location.ai_faqs as Record<string, unknown>[]) || []} />
+                <AiFaqBuilder initialFaqs={(location.ai_faqs as any) || []} />
               </div>
 
               <div>

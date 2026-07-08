@@ -25,7 +25,7 @@ export const saveLocationPromotions = authActionClient
       global_discount_banner_text,
     } = parsedInput
 
-    // @ts-expect-error - location_pages might not be in the generated types yet
+
     const { error } = await supabase
       .from('location_pages')
       .update({

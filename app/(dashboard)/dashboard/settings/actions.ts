@@ -224,7 +224,6 @@ export const saveLocationAiSettings = authActionClient
     if (!isAuthorized) throw new Error('Unauthorized')
 
     // Update settings on the page
-    // @ts-expect-error - location_pages might not be in the generated types yet
     const { error: updateError } = await supabase
       .from('location_pages')
       .update({
@@ -465,12 +464,11 @@ export const updateProfile = authActionClient
     const { full_name, bank_name, account_number, account_name } = parsedInput
 
     
-    // @ts-expect-error - user_profiles might not be in the generated types yet
-    const { data: existingProfile } = await supabase
+    const { data: existingProfile } = (await supabase
       .from('user_profiles')
-      .select('paystack_subaccount_code, bank_name, account_number, account_name')
+      .select('*')
       .eq('id', user.id)
-      .single()
+      .single()) as { data: any }
 
     let subaccountCode = existingProfile?.paystack_subaccount_code || null
 
@@ -498,7 +496,6 @@ export const updateProfile = authActionClient
     if (updateError) throw new Error('Failed to update auth metadata')
 
     
-    // @ts-expect-error - user_profiles might not be in the generated types yet
     const { error: profileError } = await supabase
       .from('user_profiles')
       .upsert({
@@ -508,7 +505,7 @@ export const updateProfile = authActionClient
         account_number: account_number || null,
         account_name: account_name || null,
         paystack_subaccount_code: subaccountCode
-      })
+      } as any)
 
     if (profileError) {
       console.error('Error updating user_profiles:', profileError)

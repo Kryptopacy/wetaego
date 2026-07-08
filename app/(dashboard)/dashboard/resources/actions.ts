@@ -20,7 +20,7 @@ export async function addResource({
 }) {
   const supabase = await createClient()
 
-  const payload: Record<string, unknown> = {
+  const payload: any = {
     organization_id,
     location_id,
     name,
@@ -52,7 +52,7 @@ export async function updateResource({
 }) {
   const supabase = await createClient()
 
-  const payload: Record<string, unknown> = {
+  const payload: any = {
     name,
     type,
     zone_name: zone_name || null,
