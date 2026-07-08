@@ -28,6 +28,21 @@ interface CartState {
 
 const CART_TTL_MS = 24 * 60 * 60 * 1000 // 24 hours
 
+import { createJSONStorage, StateStorage } from 'zustand/middleware'
+import { get, set as idbSet, del } from 'idb-keyval'
+
+const idbStorage: StateStorage = {
+  getItem: async (name: string): Promise<string | null> => {
+    return (await get(name)) || null
+  },
+  setItem: async (name: string, value: string): Promise<void> => {
+    await idbSet(name, value)
+  },
+  removeItem: async (name: string): Promise<void> => {
+    await del(name)
+  },
+}
+
 export const useCartStore = create<CartState>()(
   persist(
     (set, get) => ({
@@ -75,6 +90,7 @@ export const useCartStore = create<CartState>()(
     }),
     {
       name: 'ourmenu-cart-storage',
+      storage: createJSONStorage(() => idbStorage),
       skipHydration: true,
     }
   )

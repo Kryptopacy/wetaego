@@ -1630,6 +1630,7 @@ export type Database = {
           feedback_pin: string
           fulfillment_type: string | null
           id: string
+          idempotency_key: string | null
           location_id: string
           metadata: Json | null
           organization_id: string
@@ -1662,6 +1663,7 @@ export type Database = {
           feedback_pin?: string
           fulfillment_type?: string | null
           id?: string
+          idempotency_key?: string | null
           location_id: string
           metadata?: Json | null
           organization_id: string
@@ -1694,6 +1696,7 @@ export type Database = {
           feedback_pin?: string
           fulfillment_type?: string | null
           id?: string
+          idempotency_key?: string | null
           location_id?: string
           metadata?: Json | null
           organization_id?: string

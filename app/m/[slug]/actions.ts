@@ -210,6 +210,7 @@ export async function processCheckout(params: {
       tax_total_minor: taxTotalMinor || 0,
       tax_breakdown: taxBreakdown || [],
       resource_id: resourceId || null,
+      idempotency_key: idempotencyKey || null,
     } as never).select('id').single()
 
   if (orderError || !order) throw new Error('Failed to create order')

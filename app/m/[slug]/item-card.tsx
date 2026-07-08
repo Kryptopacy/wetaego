@@ -68,6 +68,15 @@ export function ItemCard({ item }: ItemCardProps) {
       pageId: ''
     })
     
+    // Telemetry
+    import('posthog-js').then((posthog) => {
+      posthog.default.capture('add_to_cart', { 
+        item_id: item.id, 
+        item_name: item.name, 
+        price_minor: item.price_minor 
+      })
+    })
+    
     setShowModifierModal(false)
     setModifiers('')
   }

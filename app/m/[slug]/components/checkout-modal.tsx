@@ -326,7 +326,11 @@ export function CheckoutModal({
 
     setIsCheckingOut(true)
     if (!navigator.onLine) {
-      toast.error("You're offline. Please reconnect to place your order.", { id: 'offline-checkout' })
+      toast.error("You're currently offline. Your cart is safe! Please reconnect to finalize your order.", { 
+        id: 'offline-checkout',
+        duration: 5000,
+        icon: '📡'
+      })
       setIsCheckingOut(false)
       return
     }
@@ -354,7 +358,7 @@ export function CheckoutModal({
         tableIdentifier: tableNumber, customerNote, customerEmail, paymentFractionMinor,
         paymentMethod, discountAmountMinor, customerName, customerPhone,
         fulfillmentType, deliveryInstructions, staffId: undefined, staffSubaccountOverride: undefined,
-        pageId, idempotencyKey: undefined, subtotalMinor: discountedSubtotalMinor, taxTotalMinor, taxBreakdown,
+        pageId, idempotencyKey: crypto.randomUUID(), subtotalMinor: discountedSubtotalMinor, taxTotalMinor, taxBreakdown,
         isUnevenSplit,
         resourceId
       })
