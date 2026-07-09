@@ -4,14 +4,11 @@ import { redirect } from 'next/navigation'
 
 import Link from 'next/link'
 import {
-  BarChart3, BookOpen, ClipboardList, FileText,
-  QrCode, Sparkles, TrendingUp, Users, ArrowRight,
-  Globe, AlertTriangle
+  BarChart3, ClipboardList, Sparkles, ArrowRight,
+  Globe
 } from 'lucide-react'
 import { OnboardingChecklist } from './components/onboarding-checklist'
-import { RevenueDataPoint } from './components/revenue-chart'
 import { BUSINESS_TYPE_PRESETS } from '@/lib/templates/presets'
-import { format, subDays, startOfDay } from 'date-fns'
 import { DashboardStats } from './components/dashboard-stats'
 import { Suspense } from 'react'
 
@@ -114,7 +111,7 @@ export default async function DashboardOverviewPage() {
   ]
 
   // Use the template's default currency if none is found on the org (defaults to NGN)
-  const currencyCode = 'NGN' // Note: In a real multi-currency setup, this would come from the org settings
+  // const currencyCode = 'NGN' // Note: In a real multi-currency setup, this would come from the org settings
 
   return (
     <div className="max-w-6xl mx-auto space-y-8">

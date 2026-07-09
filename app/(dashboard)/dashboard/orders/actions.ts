@@ -422,7 +422,7 @@ export const addMilestoneAction = authActionClient
     description: z.string().optional()
   }))
   .action(async ({ parsedInput: { orderId, title, description }, ctx: { user } }) => {
-    const { supabase, order } = await requireOrderAuth(orderId, user)
+    const { supabase } = await requireOrderAuth(orderId, user)
 
     const { data: orderDetails } = await supabase.from('orders').select('tracking_code').eq('id', orderId).single()
     let trackingCode = orderDetails?.tracking_code
@@ -449,7 +449,7 @@ export const completeMilestoneAction = authActionClient
     milestoneId: z.string()
   }))
   .action(async ({ parsedInput: { orderId, milestoneId }, ctx: { user } }) => {
-    const { supabase, order } = await requireOrderAuth(orderId, user)
+    const { supabase } = await requireOrderAuth(orderId, user)
 
     const { data: milestone, error } = await supabase.from('order_milestones').update({
       is_completed: true,

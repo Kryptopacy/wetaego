@@ -33,7 +33,7 @@ export async function notifyBusiness(
     const orgId = location.organization_id
 
     // 1.5 Save to In-App Notifications
-    const { error: staffNotifError } = await (supabaseAdmin as any)
+    const { error: staffNotifError } = await (supabaseAdmin as never)
       .from('staff_notifications')
       .insert({
         organization_id: orgId,
@@ -122,7 +122,7 @@ export async function notifyCustomer(
 
     // @ts-expect-error - Postgrest relations typing can be tricky
     const locationName = order.locations?.name || 'Our Store'
-    // @ts-expect-error
+    // @ts-expect-error - Postgrest relations typing can be tricky for organizations
     const orgSlug = order.organizations?.slug
     
     const trackUrl = payload.url || (orgSlug && order.tracking_code ? `${process.env.NEXT_PUBLIC_SITE_URL}/m/${orgSlug}/track?code=${order.tracking_code}` : undefined)
@@ -148,6 +148,7 @@ export async function notifyCustomer(
     // 3. Intercom Sync
     // Without an active Intercom API key, we log the intent. 
     // Usually this requires pushing an event to Intercom's REST API: POST https://api.intercom.io/events
+    // eslint-disable-next-line no-console
     console.log(`[Intercom Sync] Pushing milestone event '${payload.title}' to customer: ${order.customer_email || order.customer_phone}`)
 
   } catch (error) {

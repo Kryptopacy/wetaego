@@ -292,7 +292,7 @@ export default async function AdminPage() {
                   id="global_manual_payment_override"
                   name="global_manual_payment_override" 
                   value="true"
-                  defaultChecked={(globalPayment as any).global_manual_payment_override === true} 
+                  defaultChecked={(globalPayment as Record<string, unknown>).global_manual_payment_override === true} 
                   className="mt-1 w-4 h-4 rounded bg-zinc-800 border-zinc-700 text-red-500 focus:ring-red-500 shrink-0" 
                 />
                 <label htmlFor="global_manual_payment_override" className="text-xs font-bold text-red-400 leading-tight">

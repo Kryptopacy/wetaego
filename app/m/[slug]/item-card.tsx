@@ -5,7 +5,8 @@ import { formatCurrency } from '@/lib/utils/currency'
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Tables } from '@/types'
+import { Database } from '@/lib/supabase/types'
+type Tables<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Row']
 import { Plus, Minus, ShoppingBag, X, ChevronLeft, ChevronRight, Play } from 'lucide-react'
 import { AnimatedDialog, AnimatedDialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
@@ -154,10 +155,10 @@ export function ItemCard({ item }: ItemCardProps) {
           
           {(item.dietary_tags?.length > 0 || item.allergen_tags?.length > 0) && (
             <div className="flex flex-wrap gap-1.5 mt-2 max-w-full">
-              {item.dietary_tags?.map(tag => (
+              {item.dietary_tags?.map((tag: string) => (
                 <span key={tag} className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 uppercase tracking-wider border border-emerald-100 dark:border-emerald-500/20 whitespace-nowrap">{tag}</span>
               ))}
-              {item.allergen_tags?.map(tag => (
+              {item.allergen_tags?.map((tag: string) => (
                 <span key={tag} className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400 uppercase tracking-wider border border-amber-100 dark:border-amber-500/20 whitespace-nowrap">{tag}</span>
               ))}
             </div>
@@ -296,7 +297,7 @@ export function ItemCard({ item }: ItemCardProps) {
                     className="absolute inset-0"
                   >
                     {showVR ? (
-                      <iframe src={(item as any).vr_url} allow="xr-spatial-tracking; gyroscope; accelerometer" allowFullScreen className="w-full h-full border-0" />
+                      <iframe src={(item as { vr_url?: string }).vr_url} allow="xr-spatial-tracking; gyroscope; accelerometer" allowFullScreen className="w-full h-full border-0" />
                     ) : (
                       renderMedia(mediaArray[mediaIndex])
                     )}
@@ -321,7 +322,7 @@ export function ItemCard({ item }: ItemCardProps) {
                     </button>
                     
                     <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 z-20">
-                      {mediaArray.map((_, i) => (
+                      {mediaArray.map((_: unknown, i: number) => (
                         <button 
                           key={i} 
                           onClick={(e) => { e.stopPropagation(); setMediaIndex(i) }}
@@ -334,14 +335,14 @@ export function ItemCard({ item }: ItemCardProps) {
                 )}
               </div>
             ) : (
-              (item as any).vr_url ? (
+              (item as { vr_url?: string }).vr_url ? (
                 <div className="relative w-full aspect-square -mt-6 mb-6 rounded-b-3xl overflow-hidden bg-zinc-100 dark:bg-zinc-900 group">
-                  <iframe src={(item as any).vr_url} allow="xr-spatial-tracking; gyroscope; accelerometer" allowFullScreen className="w-full h-full border-0" />
+                  <iframe src={(item as { vr_url?: string }).vr_url} allow="xr-spatial-tracking; gyroscope; accelerometer" allowFullScreen className="w-full h-full border-0" />
                 </div>
               ) : <div className="mt-8 mb-6" />
             )}
 
-            {(item as any).vr_url && mediaArray.length > 0 && (
+            {(item as { vr_url?: string }).vr_url && mediaArray.length > 0 && (
               <div className="mb-6 flex justify-center">
                 <button
                   onClick={() => setShowVR(!showVR)}
@@ -385,12 +386,12 @@ export function ItemCard({ item }: ItemCardProps) {
               <div className="mb-8 space-y-3">
                 <h4 className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Tags</h4>
                 <div className="flex flex-wrap gap-2">
-                  {item.dietary_tags?.map(tag => (
+                  {item.dietary_tags?.map((tag: string) => (
                     <span key={tag} className="text-xs font-bold px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 uppercase tracking-wider border border-emerald-100 dark:border-emerald-500/20">
                       {tag}
                     </span>
                   ))}
-                  {item.allergen_tags?.map(tag => (
+                  {item.allergen_tags?.map((tag: string) => (
                     <span key={tag} className="text-xs font-bold px-3 py-1 rounded-full bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400 uppercase tracking-wider border border-amber-100 dark:border-amber-500/20">
                       {tag}
                     </span>

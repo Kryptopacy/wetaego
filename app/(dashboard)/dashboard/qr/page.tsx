@@ -55,7 +55,7 @@ export default async function QRCodeBatchPage() {
       .single()
     orgLogo = orgData?.logo_url || null
     
-    const planLimit = await getFreeQrLimit((orgData?.subscription_plan as any) || 'lite')
+    const planLimit = await getFreeQrLimit((orgData?.subscription_plan as string) || 'lite')
     const creditBalance = orgData?.purchased_credits || 0
 
     const { data: locs } = await supabase

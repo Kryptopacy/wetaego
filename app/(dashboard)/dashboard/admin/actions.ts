@@ -76,9 +76,9 @@ export const payAffiliateEarnings = authActionClient
 
     try {
       await initiateTransfer(totalMinor, affiliate.paystack_recipient_code, "Affiliate Payout")
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Transfer failed:', error)
-      throw new Error('Transfer failed: ' + error.message)
+      throw new Error('Transfer failed: ' + (error instanceof Error ? error.message : String(error)))
     }
 
     const ids = earnings.map((e: { id: string }) => e.id)

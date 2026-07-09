@@ -200,7 +200,7 @@ export async function POST(req: Request) {
                 location_id: locationId,
                 menu_id: menuId,
                 name: categoryName
-              } as any)
+              } as never)
               .select('id')
               .single()
               
@@ -237,7 +237,7 @@ export async function POST(req: Request) {
                 description: description || null,
                 price_minor: priceMinor,
                 is_available: true
-              } as any)
+              } as never)
               .select('id')
               .single()
               
@@ -249,7 +249,8 @@ export async function POST(req: Request) {
     })
 
     // Fallback to toTextStreamResponse or toDataStreamResponse depending on ai sdk version
-    return (result as any).toDataStreamResponse ? (result as any).toDataStreamResponse() : (result as any).toTextStreamResponse()
+    type AIResult = { toDataStreamResponse?: () => Response, toTextStreamResponse?: () => Response }
+    return (result as AIResult).toDataStreamResponse ? (result as AIResult).toDataStreamResponse!() : (result as AIResult).toTextStreamResponse!()
     
   } catch (error) {
     console.error('Co-Pilot Error:', error)

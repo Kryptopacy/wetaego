@@ -23,7 +23,7 @@ export default async function BillingPage(props: { searchParams: Promise<{ curre
   // Fetch the user's organization — check membership first, then creator fallback
   // This allows invited managers to access billing (not just the account creator)
   
-  let org: any = null
+  let org: Record<string, unknown> | null = null
 
   const { data: memberOrg } = await supabase
     .from('organization_members')
@@ -34,7 +34,7 @@ export default async function BillingPage(props: { searchParams: Promise<{ curre
     .single()
 
   if (memberOrg?.organizations) {
-    org = memberOrg.organizations as any
+    org = memberOrg.organizations as Record<string, unknown>
   } else {
     const { data: creatorOrg } = await supabase
       .from('organizations')

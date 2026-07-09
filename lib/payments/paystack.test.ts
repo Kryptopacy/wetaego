@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { paystackProvider } from './paystack'
+import crypto from 'crypto'
 
 // Mock global fetch
 global.fetch = vi.fn()
@@ -12,7 +13,7 @@ describe('paystackProvider', () => {
   })
 
   it('initiates payment successfully', async () => {
-    (fetch as any).mockResolvedValueOnce({
+    (fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
       ok: true,
       json: async () => ({
         data: {
@@ -44,7 +45,7 @@ describe('paystackProvider', () => {
   })
 
   it('uses test keys when useTestKeys is true', async () => {
-    (fetch as any).mockResolvedValueOnce({
+    (fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
       ok: true,
       json: async () => ({ data: { authorization_url: 'url', reference: 'ref' } })
     })
@@ -71,7 +72,6 @@ describe('paystackProvider', () => {
     
     const payload = JSON.stringify({ event: 'charge.success' })
     // Paystack signature uses HMAC SHA512
-    const crypto = require('crypto')
     const validSignature = crypto.createHmac('sha512', 'my_secret').update(payload).digest('hex')
 
     expect(paystackProvider.validateWebhookSignature(payload, validSignature)).toBe(true)

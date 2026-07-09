@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { UIOrder } from '@/lib/types/frontend'
-import { Plus, Check, Link as LinkIcon, RefreshCcw, Wrench, CreditCard, Clock, Trash2 } from 'lucide-react'
+import { Plus, Check, Link as LinkIcon, Wrench, CreditCard, Clock, Trash2 } from 'lucide-react'
 import { addMilestoneAction, completeMilestoneAction, addAdHocItemAction, logManualPaymentAction, deleteAdHocItemAction, deleteManualPaymentAction } from '../actions'
 import { toast } from 'sonner'
 import { AnimatedDialog, AnimatedDialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
@@ -61,8 +61,8 @@ export function MilestonesManager({ order, isOpen, onClose }: MilestonesManagerP
         setMTitle('')
         setMDesc('')
       }
-    } catch (e: any) {
-      toast.error(e.message || 'Error adding milestone')
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : 'Error adding milestone')
     } finally {
       setIsLoading(false)
     }
@@ -76,8 +76,8 @@ export function MilestonesManager({ order, isOpen, onClose }: MilestonesManagerP
       } else {
         toast.success('Milestone completed')
       }
-    } catch (e: any) {
-      toast.error(e.message || 'Error completing milestone')
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : 'Error completing milestone')
     }
   }
 
@@ -102,8 +102,8 @@ export function MilestonesManager({ order, isOpen, onClose }: MilestonesManagerP
         setPName('')
         setPPrice('')
       }
-    } catch (e: any) {
-      toast.error(e.message || 'Error adding part')
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : 'Error adding part')
     } finally {
       setIsLoading(false)
     }
@@ -127,8 +127,8 @@ export function MilestonesManager({ order, isOpen, onClose }: MilestonesManagerP
         setIsAddingPayment(false)
         setPayAmount('')
       }
-    } catch (e: any) {
-      toast.error(e.message || 'Error logging payment')
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : 'Error logging payment')
     } finally {
       setIsLoading(false)
     }
@@ -144,8 +144,8 @@ export function MilestonesManager({ order, isOpen, onClose }: MilestonesManagerP
       } else {
         toast.success('Part deleted')
       }
-    } catch (e: any) {
-      toast.error(e.message || 'Error deleting part')
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : 'Error deleting part')
     } finally {
       setIsLoading(false)
     }
@@ -161,8 +161,8 @@ export function MilestonesManager({ order, isOpen, onClose }: MilestonesManagerP
       } else {
         toast.success('Payment deleted')
       }
-    } catch (e: any) {
-      toast.error(e.message || 'Error deleting payment')
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : 'Error deleting payment')
     } finally {
       setIsLoading(false)
     }

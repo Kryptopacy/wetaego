@@ -49,12 +49,15 @@ export default async function TrackOrderPage(props: TrackPageProps) {
           Back to Store
         </Link>
         {location.logo_url && (
-          <img src={location.logo_url} alt={location.name} className="h-8 w-auto object-contain" />
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={location.logo_url} alt={location.name} className="h-8 w-auto object-contain" />
+          </>
         )}
       </div>
       
       <main className="max-w-3xl mx-auto px-4 py-8 md:py-12">
-        <TrackOrderClient location={location as any} />
+        <TrackOrderClient location={location as never} />
       </main>
     </div>
   )

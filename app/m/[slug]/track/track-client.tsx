@@ -1,14 +1,14 @@
 'use client'
 
 import { useState } from 'react'
-import { Search, Package, Clock, CheckCircle2, ChevronRight, Settings, MessageSquare } from 'lucide-react'
+import { Search, CheckCircle2, Settings, MessageSquare } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/currency'
 import { getTrackingDetailsAction, sendMessageAction, generateBalancePaymentLinkAction } from './actions'
 import { AnimatedDialog, AnimatedDialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Building2 } from 'lucide-react'
 
 type TrackOrderClientProps = {
-  location: any
+  location: { id: string; currency_code: string; [key: string]: unknown }
 }
 
 type OrderDetails = {
@@ -44,7 +44,7 @@ export function TrackOrderClient({ location }: TrackOrderClientProps) {
   const [messageSent, setMessageSent] = useState(false)
 
   const [isPaying, setIsPaying] = useState(false)
-  const [manualDetails, setManualDetails] = useState<any>(null)
+  const [manualDetails, setManualDetails] = useState<{ bankName?: string; accountName?: string; accountNumber?: string; instructions?: string } | null>(null)
 
   const balance = order ? Math.max(0, order.total_amount_minor - (order.amount_paid_minor || 0)) : 0
 
@@ -63,8 +63,8 @@ export function TrackOrderClient({ location }: TrackOrderClientProps) {
       } else {
         setOrder(res.data)
       }
-    } catch (err: any) {
-      setError(err.message || 'Something went wrong.')
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Something went wrong.')
     } finally {
       setIsLoading(false)
     }
@@ -84,7 +84,7 @@ export function TrackOrderClient({ location }: TrackOrderClientProps) {
       } else {
         setError(res.error || 'Failed to send message.')
       }
-    } catch (err: any) {
+    } catch (_err: unknown) {
       setError('Something went wrong sending your message.')
     } finally {
       setIsSendingMessage(false)
@@ -106,8 +106,8 @@ export function TrackOrderClient({ location }: TrackOrderClientProps) {
       } else if (res.data.manualDetails) {
         setManualDetails(res.data.manualDetails)
       }
-    } catch (err: any) {
-      setError(err.message || 'Payment initiation failed')
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Payment initiation failed')
     } finally {
       setIsPaying(false)
     }
@@ -216,7 +216,7 @@ export function TrackOrderClient({ location }: TrackOrderClientProps) {
                   </div>
                 </div>
 
-                {order.milestones.map((m, i) => (
+                {order.milestones.map((m) => (
                   <div key={m.id} className="relative">
                     <div className={`absolute -left-[30px] top-1 w-6 h-6 rounded-full border-4 border-white dark:border-zinc-900 flex items-center justify-center z-10 transition-colors duration-500 ${m.is_completed ? 'bg-blue-500' : 'bg-zinc-200 dark:bg-zinc-800'}`}>
                       {m.is_completed ? <CheckCircle2 className="w-3 h-3 text-white" /> : <div className="w-2 h-2 rounded-full bg-zinc-400 dark:bg-zinc-600" />}

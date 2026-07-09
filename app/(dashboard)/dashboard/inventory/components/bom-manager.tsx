@@ -103,7 +103,7 @@ export function BomManager({
       const validItems = bomItems.filter(b => b.inventory_item_id && b.quantity_required > 0)
       if (validItems.length > 0) {
         const inserts = validItems.map(b => {
-          const payload: any = {
+          const payload: Record<string, unknown> = {
             organization_id: organizationId,
             inventory_item_id: b.inventory_item_id,
             quantity_required: b.quantity_required

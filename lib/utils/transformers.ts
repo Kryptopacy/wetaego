@@ -10,7 +10,7 @@ type RawOrderPayload = Partial<SupabaseOrder> & {
   id: string;
   order_items?: Partial<SupabaseOrderItem>[];
   organizations?: Partial<SupabaseOrg> | null;
-  order_milestones?: any[];
+  order_milestones?: Record<string, unknown>[];
   tracking_code?: string | null;
   [key: string]: unknown;
 }

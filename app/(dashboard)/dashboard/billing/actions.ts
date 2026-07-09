@@ -204,7 +204,7 @@ export const redeemCoupon = authActionClient
     if (!org) throw new Error('Organization not found')
 
     // 6. Apply discount
-    const updates: any = {}
+    const updates: Record<string, unknown> = {}
     
     if (coupon.discount_type === 'free_credits') {
       updates.purchased_credits = (org.purchased_credits || 0) + coupon.discount_value

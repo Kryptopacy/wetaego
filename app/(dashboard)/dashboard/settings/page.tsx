@@ -55,7 +55,7 @@ export default async function SettingsPage({
 
   if (member && member.organizations) {
     const orgData = Array.isArray(member.organizations) ? member.organizations[0] : member.organizations
-    organization = orgData as any // we cast to any here safely because of supabase TS join issues but it's typed properly below
+    organization = orgData as never // we cast here safely because of supabase TS join issues but it's typed properly below
     role = member.role
     const tier = orgData?.subscription_tier as PlanType
     const dynamicPlanLimits = await getPlanLimits() as Record<string, { credits: number, pages: number }>
@@ -775,7 +775,7 @@ export default async function SettingsPage({
               <div>
                 <label className="mb-2 block text-sm font-medium text-zinc-300">Frequently Asked Questions (FAQs)</label>
                 <p className="text-xs text-zinc-500 mb-3">Add specific questions and answers the AI should strictly adhere to.</p>
-                <AiFaqBuilder initialFaqs={(location.ai_faqs as any) || []} />
+                <AiFaqBuilder initialFaqs={(location.ai_faqs as { question: string, answer: string }[]) || []} />
               </div>
 
               <div>

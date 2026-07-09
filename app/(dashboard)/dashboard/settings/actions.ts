@@ -468,7 +468,7 @@ export const updateProfile = authActionClient
       .from('user_profiles')
       .select('*')
       .eq('id', user.id)
-      .single()) as { data: any }
+      .single()) as { data: Record<string, unknown> | null }
 
     let subaccountCode = existingProfile?.paystack_subaccount_code || null
 
@@ -505,7 +505,7 @@ export const updateProfile = authActionClient
         account_number: account_number || null,
         account_name: account_name || null,
         paystack_subaccount_code: subaccountCode
-      } as any)
+      } as never)
 
     if (profileError) {
       console.error('Error updating user_profiles:', profileError)

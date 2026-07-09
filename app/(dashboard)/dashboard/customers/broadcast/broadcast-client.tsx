@@ -12,7 +12,7 @@ type BroadcastClientProps = {
   locations: { id: string; name: string }[]
 }
 
-export function BroadcastClient({ organizationId, optInCount, locations }: BroadcastClientProps) {
+export function BroadcastClient({ organizationId, optInCount, locations: _locations }: BroadcastClientProps) {
   const router = useRouter()
   const [isSending, setIsSending] = useState(false)
   const [channels, setChannels] = useState<string[]>(['email'])
@@ -45,8 +45,8 @@ export function BroadcastClient({ organizationId, optInCount, locations }: Broad
         toast.success(`Broadcast sent successfully to ${res.sentCount} customers!`)
         router.push('/dashboard/customers')
       }
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to send broadcast')
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Failed to send broadcast')
     } finally {
       setIsSending(false)
     }

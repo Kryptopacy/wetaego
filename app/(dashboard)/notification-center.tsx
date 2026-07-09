@@ -48,8 +48,7 @@ export function NotificationCenter() {
 
   // ── Initial data fetch ───────────────────────────────────────────────────────
   const fetchAll = useCallback(async (id: string) => {
-    // We cast to any to bypass the type error in case types.ts isn't fully updated on IDE side
-    const { data } = await (supabase as any)
+    const { data } = await (supabase as ReturnType<typeof supabase.from> extends never ? never : typeof supabase)
       .from('staff_notifications')
       .select('*')
       .eq('organization_id', id)
@@ -77,7 +76,7 @@ export function NotificationCenter() {
     
     const channel = supabase
       .channel(channelName)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'staff_notifications', filter: `organization_id=eq.${orgId}` }, (payload: any) => {
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'staff_notifications', filter: `organization_id=eq.${orgId}` }, (payload: { eventType: string, new: Record<string, unknown>, old?: Record<string, unknown> }) => {
         if (payload.eventType === 'INSERT') {
           if (!payload.new.is_read) {
             playChime()
@@ -106,22 +105,22 @@ export function NotificationCenter() {
   useEffect(() => {
     if ('setAppBadge' in navigator) {
       if (items.length > 0) {
-        (navigator as any).setAppBadge(items.length).catch(console.error)
+        (navigator as Navigator & { setAppBadge?: (count: number) => Promise<void> }).setAppBadge?.(items.length).catch(console.error)
       } else {
-        (navigator as any).clearAppBadge().catch(console.error)
+        (navigator as Navigator & { clearAppBadge?: () => Promise<void> }).clearAppBadge?.().catch(console.error)
       }
     }
   }, [items.length])
 
   const markAsRead = async (id: string) => {
     setItems(prev => prev.filter(i => i.id !== id))
-    await (supabase as any).from('staff_notifications').update({ is_read: true }).eq('id', id)
+    await (supabase as ReturnType<typeof supabase.from> extends never ? never : typeof supabase).from('staff_notifications').update({ is_read: true }).eq('id', id)
   }
 
   const markAllAsRead = async () => {
     if (!orgId || items.length === 0) return
     setItems([])
-    await (supabase as any).from('staff_notifications').update({ is_read: true }).eq('organization_id', orgId).eq('is_read', false)
+    await (supabase as ReturnType<typeof supabase.from> extends never ? never : typeof supabase).from('staff_notifications').update({ is_read: true }).eq('organization_id', orgId).eq('is_read', false)
   }
 
   return (

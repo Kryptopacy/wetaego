@@ -4,7 +4,6 @@ import { format } from 'date-fns'
 import { useAction } from 'next-safe-action/hooks'
 import { payAffiliateEarnings } from './actions'
 import { toast } from 'sonner'
-import { useState } from 'react'
 
 interface Affiliate {
   id: string

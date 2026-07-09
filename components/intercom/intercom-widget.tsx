@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { X, Send, Mic, Paperclip, Loader2, RadioReceiver } from 'lucide-react'
+import { X, Send, Mic, Paperclip, Loader2 } from 'lucide-react'
 import { VoiceRecorder } from './voice-recorder'
 import { format } from 'date-fns'
 import { motion, AnimatePresence } from 'framer-motion'

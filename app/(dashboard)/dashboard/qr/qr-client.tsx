@@ -134,7 +134,7 @@ export function QrClient({ organizationId, orgLogo, locations, qrCodes, baseUrl,
           // Using qrserver API with color. (color format must be hex without hash)
           const fullUrl = `${baseUrl}${qr.destination_path}?qr_id=${qr.id}`
           const displayUrl = `${baseUrl}${qr.destination_path}`.replace(/^https?:\/\//, '')
-          const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(fullUrl)}&color=${hexColor}`
+          // const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(fullUrl)}&color=${hexColor}`
 
           return (
             <div key={qr.id} className="relative group border-2 rounded-2xl p-6 bg-gradient-to-b from-zinc-900/80 to-zinc-950 flex flex-col items-center print:border print:border-zinc-300 print:bg-white print:rounded-lg print:p-8 print:break-inside-avoid shadow-2xl transition-all hover:border-zinc-600 overflow-hidden" style={{ borderColor: themeColor }}>
