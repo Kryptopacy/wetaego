@@ -165,7 +165,6 @@ export async function processCheckout(params: {
     const dealPriceMap = new Map<string, number>()
     if (dealItemIds.length > 0) {
       const { data: dealItemsDb } = await (supabase as ReturnType<typeof supabase.from> extends never ? never : typeof supabase)
-        // @ts-expect-error deals table types may lag behind generation
         .from('deal_items')
         .select('id, deal_price_minor, quantity_limit, quantity_sold, deals(is_active)')
         .in('id', dealItemIds)
