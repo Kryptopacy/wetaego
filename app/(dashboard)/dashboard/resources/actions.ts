@@ -20,7 +20,7 @@ export async function addResource({
 }) {
   const supabase = await createClient()
 
-  const payload: Record<string, unknown> = {
+  const payload: import('@/lib/supabase/types').Database['public']['Tables']['resources']['Insert'] = {
     organization_id,
     location_id,
     name,
@@ -52,7 +52,7 @@ export async function updateResource({
 }) {
   const supabase = await createClient()
 
-  const payload: Record<string, unknown> = {
+  const payload: import('@/lib/supabase/types').Database['public']['Tables']['resources']['Update'] = {
     name,
     type,
     zone_name: zone_name || null,

@@ -16,9 +16,11 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   let isOwnerOrManager = true
   const userEmail = userData?.user?.email || ''
   let credits: number | null = null
-  let locations: { id: string; name: string; slug?: string }[] = []
+  let locations: { id: string; name: string; slug?: string; portal_display_name?: string | null }[] = []
   let activeLocationId = ''
   let locationSlug = ''
+  let pagesList: { id: string, title: string, template_type: string, is_published: boolean }[] = []
+  let activePageId = cookieStore.get('ourmenu_active_page_id')?.value || ''
   let plan = 'lite'
   let planStatus = 'trial'
   let trialEndsAt: string | null = null
@@ -60,7 +62,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
     if (orgId) {
         const { data: locs } = await supabase
           .from('locations')
-          .select('*')
+          .select('id, name, slug, portal_display_name')
           .eq('organization_id', orgId)
 
         if (locs && locs.length > 0) {
@@ -75,13 +77,19 @@ export default async function DashboardLayout({ children }: { children: ReactNod
           // Fetch templates
           const { data: pages } = await supabase
             .from('location_pages')
-            .select('template_type')
+            .select('id, title, template_type, is_published')
             .eq('location_id', activeLoc.id)
-            .eq('is_published', true)
+            .order('sort_order')
 
           const templates = new Set<string>()
           if (pages) {
-            pages.forEach(p => templates.add(p.template_type))
+            pagesList = pages
+            if (activePageId) {
+              const activePage = pages.find(p => p.id === activePageId)
+              if (activePage) templates.add(activePage.template_type)
+            } else {
+              pages.filter(p => p.is_published).forEach(p => templates.add(p.template_type))
+            }
             if (pages.length > 0) firstTemplate = pages[0].template_type
           }
 
@@ -111,6 +119,8 @@ export default async function DashboardLayout({ children }: { children: ReactNod
     locations,
     activeLocationId,
     locationSlug,
+    pages: pagesList,
+    activePageId,
     isOwnerOrManager,
     userEmail,
     isAdmin,

@@ -23,7 +23,7 @@ export default async function BillingPage(props: { searchParams: Promise<{ curre
   // Fetch the user's organization — check membership first, then creator fallback
   // This allows invited managers to access billing (not just the account creator)
   
-  let org: Record<string, unknown> | null = null
+  let org: import('@/lib/supabase/types').Database['public']['Tables']['organizations']['Row'] | null = null
 
   const { data: memberOrg } = await supabase
     .from('organization_members')
@@ -34,7 +34,7 @@ export default async function BillingPage(props: { searchParams: Promise<{ curre
     .single()
 
   if (memberOrg?.organizations) {
-    org = memberOrg.organizations as Record<string, unknown>
+    org = memberOrg.organizations
   } else {
     const { data: creatorOrg } = await supabase
       .from('organizations')
@@ -50,8 +50,7 @@ export default async function BillingPage(props: { searchParams: Promise<{ curre
 
   const rate = await getUsdToNgnRate()
 
-  // Determine trial status
-  const trialEnds = new Date(org.trial_ends_at)
+  const trialEnds = new Date((org.trial_ends_at as string) || new Date())
   const isTrialActive = trialEnds > new Date()
   const trialDaysLeft = Math.ceil((trialEnds.getTime() - new Date().getTime()) / (1000 * 3600 * 24))
 

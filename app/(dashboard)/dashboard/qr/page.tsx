@@ -20,7 +20,8 @@ export default async function QRCodeBatchPage() {
 
   let org: { id: string } | null = null
   let role = 'viewer'
-  let locations: Database['public']['Tables']['locations']['Row'][] = []
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let locations: any[] = []
   let qrCodes: Database['public']['Tables']['qr_codes']['Row'][] = []
   let orgLogo: string | null = null
 
@@ -60,7 +61,7 @@ export default async function QRCodeBatchPage() {
 
     const { data: locs } = await supabase
       .from('locations')
-      .select('*')
+      .select('*, location_pages(*)')
       .eq('organization_id', org.id)
     
     locations = locs || []

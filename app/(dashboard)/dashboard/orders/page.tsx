@@ -45,8 +45,30 @@ export default async function OrdersPage() {
         locationId = loc?.id
       }
       activeLocationId = locationId || ''
+      const activePageId = cookieStore.get('ourmenu_active_page_id')?.value || ''
 
       if (activeLocationId) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let ordersQuery: any = supabase
+          .from('orders')
+          .select('*, order_items(*), order_milestones(*), order_payments(*)')
+          .eq('organization_id', org.id)
+          .eq('location_id', activeLocationId)
+          .order('created_at', { ascending: false })
+          .limit(50)
+        
+        if (activePageId) ordersQuery = ordersQuery.eq('page_id', activePageId)
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let pageQuery: any = supabase
+          .from('location_pages')
+          .select('billing_mode, template_type')
+          .eq('location_id', activeLocationId)
+          .eq('is_published', true)
+          
+        if (activePageId) pageQuery = pageQuery.eq('id', activePageId)
+        pageQuery = pageQuery.limit(1).single()
+
         // Run independent queries concurrently
         const [
           ordersResult,
@@ -54,26 +76,14 @@ export default async function OrdersPage() {
           pageResult,
           itemsResult
         ] = await Promise.all([
-          supabase
-            .from('orders')
-            .select('*, order_items(*), order_milestones(*), order_payments(*)')
-            .eq('organization_id', org.id)
-            .eq('location_id', activeLocationId)
-            .order('created_at', { ascending: false })
-            .limit(50),
+          ordersQuery,
           supabase
             .from('service_requests')
             .select('*')
             .eq('organization_id', org.id)
             .eq('location_id', activeLocationId)
             .order('created_at', { ascending: true }),
-          supabase
-            .from('location_pages')
-            .select('billing_mode, template_type')
-            .eq('location_id', activeLocationId)
-            .eq('is_published', true)
-            .limit(1)
-            .single(),
+          pageQuery,
           supabase
             .from('menu_items')
             .select('*')

@@ -8,10 +8,11 @@ import { authActionClient } from '@/lib/safe-action'
 export const generateQrBatch = authActionClient
   .schema(zfd.formData({
     organization_id: zfd.text(z.string().min(1)),
-    location_id: zfd.text(z.string().uuid()),
+    location_id: zfd.text(z.string().min(1)),
     quantity: zfd.numeric(z.number().min(1).max(100)),
   }))
-  .action(async ({ parsedInput: { organization_id: orgId, location_id: locationId, quantity }, ctx: { supabase, user } }) => {
+  .action(async ({ parsedInput: { organization_id: orgId, location_id: rawLocationId, quantity }, ctx: { supabase, user } }) => {
+    const [locationId, destinationPath] = rawLocationId.split('|')
     const { cookies } = await import('next/headers')
     const cookieStore = await cookies()
     const isDemo = cookieStore.get('demo_mode')?.value === '1'
@@ -79,7 +80,7 @@ export const generateQrBatch = authActionClient
         organization_id: orgId,
         location_id: locationId,
         label: `Generic QR`,
-        destination_path: `/m/${loc.slug}`,
+        destination_path: destinationPath || `/m/${loc.slug}`,
         table_identifier: null,
         is_active: true
       }

@@ -25,6 +25,7 @@ export interface NavItem {
   icon: React.ElementType | string
   badge?: string
   exact?: boolean
+  tooltip?: string
 }
 
 const ICON_MAP: Record<string, React.ElementType> = {
@@ -49,8 +50,8 @@ const ICON_MAP: Record<string, React.ElementType> = {
 
 // managerItems are now built dynamically inside ClientLayout
 
-function NavLink({ href, label, icon: iconProp, badge, exact, onClick }: {
-  href: string; label: string; icon: React.ElementType | string; badge?: string; exact?: boolean; onClick?: () => void
+function NavLink({ href, label, icon: iconProp, badge, exact, tooltip, onClick }: {
+  href: string; label: string; icon: React.ElementType | string; badge?: string; exact?: boolean; tooltip?: string; onClick?: () => void
 }) {
   const pathname = usePathname()
   const isActive = exact ? pathname === href : pathname.startsWith(href)
@@ -84,15 +85,29 @@ function NavLink({ href, label, icon: iconProp, badge, exact, onClick }: {
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
         />
       )}
-      <div className="relative flex items-center gap-3 w-full z-10">
-        <Icon className={`w-4 h-4 shrink-0 transition-colors ${isActive ? 'text-emerald-400' : 'text-zinc-500 group-hover:text-zinc-300'}`} />
-        <span className="flex-1">{label}</span>
-        {badge && (
-          <span className="px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 animate-pulse">
-            {badge}
-          </span>
-        )}
+      <div className="relative flex items-start gap-3 w-full z-10 py-0.5">
+        <Icon className={`w-4 h-4 shrink-0 transition-colors mt-0.5 ${isActive ? 'text-emerald-400' : 'text-zinc-500 group-hover:text-zinc-300'}`} />
+        <div className="flex flex-col flex-1">
+          <div className="flex items-center gap-2">
+            <span className="truncate leading-tight">{label}</span>
+            {badge && (
+              <span className="px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 animate-pulse">
+                {badge}
+              </span>
+            )}
+          </div>
+          {tooltip && (
+            <span className="text-[10px] text-zinc-500 mt-0.5 md:hidden whitespace-normal leading-tight">
+              {tooltip}
+            </span>
+          )}
+        </div>
       </div>
+      {tooltip && (
+        <div className="hidden md:block absolute left-full ml-4 px-2 py-1 bg-zinc-800 text-zinc-200 text-xs rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 shadow-lg border border-zinc-700 pointer-events-none">
+          {tooltip}
+        </div>
+      )}
     </Link>
   )
 }
@@ -135,9 +150,11 @@ function BottomNavItem({ href, label, icon: iconProp, badge, exact, onClick }: {
 
 export interface InitialDashboardData {
   orgName: string;
-  locations: { id: string, name: string }[];
+  locations: { id: string, name: string, portal_display_name?: string | null }[];
   activeLocationId: string;
   locationSlug: string;
+  pages: { id: string, title: string, template_type: string, is_published: boolean }[];
+  activePageId: string;
   isOwnerOrManager: boolean;
   userEmail: string;
   isAdmin: boolean;
@@ -152,8 +169,10 @@ export interface InitialDashboardData {
 
 export default function ClientLayout({ children, initialData }: { children: ReactNode, initialData: InitialDashboardData }) {
   const [orgName] = useState(initialData.orgName)
-  const [locations] = useState<{ id: string, name: string }[]>(initialData.locations)
+  const [locations] = useState<{ id: string, name: string, portal_display_name?: string | null }[]>(initialData.locations)
   const [activeLocationId, setActiveLocationId] = useState(initialData.activeLocationId)
+  const [activePageId, setActivePageId] = useState(initialData.activePageId)
+  const [pages] = useState(initialData.pages)
   const [locationSlug] = useState(initialData.locationSlug)
   const [isOwnerOrManager] = useState(initialData.isOwnerOrManager)
   const [time, setTime] = useState('')
@@ -181,23 +200,28 @@ export default function ClientLayout({ children, initialData }: { children: Reac
     trialDaysLeft = Math.max(0, Math.ceil(diff / (1000 * 3600 * 24)))
   }
 
+  const activePage = pages.find(p => p.id === activePageId)
+  const activeTemplate = activePage ? activePage.template_type : initialData.templateType
+
   const managerItems: NavItem[] = [
-    { href: '/dashboard/inventory', label: 'Inventory (BOM)', icon: Package },
-    { href: '/dashboard/resources', label: 'Visual Resources', icon: MapPin },
-    { href: '/dashboard/customers', label: 'CRM & Loyalty', icon: Users },
-    { href: '/dashboard/team-performance', label: 'Team Performance', icon: BarChart3 },
-    { href: '/dashboard/manage/feedback', label: 'Feedback Inbox', icon: MessageSquare },
-    { href: '/dashboard/qr', label: 'QR Generator', icon: QrCode },
+    { href: '/dashboard/inventory', label: 'Inventory (BOM)', icon: Package, tooltip: 'Bill of Materials - Track ingredients and items used per service' },
+    { href: '/dashboard/resources', label: 'Visual Resources', icon: MapPin, tooltip: 'Manage tables, rooms, or physical spaces' },
+    { href: '/dashboard/customers', label: 'CRM & Loyalty', icon: Users, tooltip: 'Manage customer profiles and loyalty points' },
+    { href: '/dashboard/team-performance', label: 'Team Performance', icon: BarChart3, tooltip: 'Track staff metrics and service quality' },
+    { href: '/dashboard/manage/feedback', label: 'Feedback Inbox', icon: MessageSquare, tooltip: 'Review customer reviews and ratings' },
+    { href: '/dashboard/qr', label: 'QR Generator', icon: QrCode, tooltip: 'Generate QR codes for tables or links' },
     { 
-      href: '/dashboard/menu', 
-      label: initialData.templateType === 'booking' ? 'Services Manager' : 
-             initialData.templateType === 'listing' ? 'Listings Manager' : 
-             initialData.templateType === 'rate_card' ? 'Offerings Manager' : 'Catalog Manager', 
-      icon: BookOpen 
+      href: activePageId ? `/dashboard/pages/${activePageId}/edit` : '/dashboard/menu', 
+      label: activeTemplate === 'booking' ? 'Services Manager' : 
+             activeTemplate === 'listing' ? 'Listings Manager' : 
+             activeTemplate === 'rate_card' ? 'Offerings Manager' : 'Catalog Manager', 
+      icon: BookOpen,
+      tooltip: 'Manage your offerings, categories, and items'
     },
-    { href: '/dashboard/pages', label: 'Your Pages', icon: FileText },
-    { href: '/dashboard/settings', label: 'Settings & Team', icon: Settings },
-    { href: '/dashboard/billing', label: 'Billing & Plan', icon: CreditCard },
+    { href: '/dashboard/pages', label: 'Your Pages', icon: FileText, tooltip: 'Manage your business pages and branding' },
+    { href: '/dashboard/settings', label: 'Settings & Team', icon: Settings, tooltip: 'Configure business settings and team access' },
+    { href: '/dashboard/billing', label: 'Billing & Plan', icon: CreditCard, tooltip: 'Manage your subscription and credits' },
+    { href: '/dashboard/support', label: 'Help & Support', icon: MessageSquare, tooltip: 'Get help and contact OurMenuOS support' },
   ]
 
   useEffect(() => {
@@ -233,16 +257,35 @@ export default function ClientLayout({ children, initialData }: { children: Reac
             <div className="relative">
               <select
                 className="w-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-sm rounded-lg px-3 py-2 appearance-none focus:outline-none focus:border-emerald-500 transition-colors"
-                value={activeLocationId}
+                value={activePageId ? `page:${activePageId}` : `loc:${activeLocationId}`}
                 onChange={async (e) => {
-                  const newId = e.target.value
-                  setActiveLocationId(newId)
-                  await setActiveLocationCookie(newId)
+                  const val = e.target.value
+                  if (val.startsWith('loc:')) {
+                    const newId = val.split(':')[1]
+                    setActiveLocationId(newId)
+                    setActivePageId('')
+                    await setActiveLocationCookie(newId, '')
+                  } else if (val.startsWith('page:')) {
+                    const newId = val.split(':')[1]
+                    setActivePageId(newId)
+                    await setActiveLocationCookie(activeLocationId, newId)
+                  }
                   window.location.reload()
                 }}
               >
                 {locations.map((loc) => (
-                  <option key={loc.id} value={loc.id}>{loc.name}</option>
+                  <optgroup key={loc.id} label="Portals">
+                    <option value={`loc:${loc.id}`}>🏢 {loc.portal_display_name || loc.name} (General)</option>
+                    {loc.id === activeLocationId && pages.length > 0 && (
+                      <optgroup label="Businesses (Pages)">
+                        {pages.map(page => (
+                          <option key={page.id} value={`page:${page.id}`}>
+                            {page.title}
+                          </option>
+                        ))}
+                      </optgroup>
+                    )}
+                  </optgroup>
                 ))}
               </select>
               <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-500">

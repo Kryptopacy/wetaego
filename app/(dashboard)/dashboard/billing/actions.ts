@@ -203,8 +203,7 @@ export const redeemCoupon = authActionClient
 
     if (!org) throw new Error('Organization not found')
 
-    // 6. Apply discount
-    const updates: Record<string, unknown> = {}
+    const updates: import('@/lib/supabase/types').Database['public']['Tables']['organizations']['Update'] = {}
     
     if (coupon.discount_type === 'free_credits') {
       updates.purchased_credits = (org.purchased_credits || 0) + coupon.discount_value
@@ -223,7 +222,8 @@ export const redeemCoupon = authActionClient
 
     const { error: updateError } = await supabase
       .from('organizations')
-      .update(updates)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .update(updates as any)
       .eq('id', organization_id)
 
     if (updateError) throw new Error('Failed to apply promo code benefits')

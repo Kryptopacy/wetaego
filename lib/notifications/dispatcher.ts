@@ -33,7 +33,8 @@ export async function notifyBusiness(
     const orgId = location.organization_id
 
     // 1.5 Save to In-App Notifications
-    const { error: staffNotifError } = await (supabaseAdmin as never)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error: staffNotifError } = await (supabaseAdmin as any)
       .from('staff_notifications')
       .insert({
         organization_id: orgId,

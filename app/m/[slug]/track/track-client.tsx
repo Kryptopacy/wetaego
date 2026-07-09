@@ -44,7 +44,7 @@ export function TrackOrderClient({ location }: TrackOrderClientProps) {
   const [messageSent, setMessageSent] = useState(false)
 
   const [isPaying, setIsPaying] = useState(false)
-  const [manualDetails, setManualDetails] = useState<{ bankName?: string; accountName?: string; accountNumber?: string; instructions?: string } | null>(null)
+  const [manualDetails, setManualDetails] = useState<{ bankName?: string | null; accountName?: string | null; accountNumber?: string | null; instructions?: string | null } | null>(null)
 
   const balance = order ? Math.max(0, order.total_amount_minor - (order.amount_paid_minor || 0)) : 0
 

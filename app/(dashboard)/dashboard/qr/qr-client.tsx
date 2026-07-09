@@ -10,7 +10,8 @@ import { DynamicQR } from '@/components/qr/DynamicQR'
 export function QrClient({ organizationId, orgLogo, locations, qrCodes, baseUrl, planLimit, creditBalance }: {
   organizationId: string
   orgLogo?: string | null
-  locations: Database['public']['Tables']['locations']['Row'][]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  locations: any[]
   qrCodes: Database['public']['Tables']['qr_codes']['Row'][]
   baseUrl: string
   planLimit?: number
@@ -68,9 +69,25 @@ export function QrClient({ organizationId, orgLogo, locations, qrCodes, baseUrl,
             <input type="hidden" name="organization_id" value={organizationId} />
           
           <select name="location_id" className="bg-zinc-950 border border-zinc-800 text-white rounded-lg px-4 py-2 focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-all" required>
-            {locations.map((loc) => (
-              <option key={loc.id} value={loc.id}>{loc.name}</option>
-            ))}
+            {locations.map((loc) => {
+              const pages = loc.location_pages || []
+              return (
+                <optgroup key={loc.id} label={loc.name}>
+                  {pages.length > 0 && (
+                    <option value={`${loc.id}|/m/${loc.slug}`}>{loc.name} - Portal</option>
+                  )}
+                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                  {pages.map((p: any) => (
+                    <option key={p.id} value={`${loc.id}|/m/${loc.slug}/p/${p.slug}`}>
+                      {loc.name} - {p.title}
+                    </option>
+                  ))}
+                  {pages.length === 0 && (
+                    <option value={`${loc.id}|/m/${loc.slug}`}>{loc.name}</option>
+                  )}
+                </optgroup>
+              )
+            })}
           </select>
 
           <input 

@@ -54,12 +54,13 @@ export const createCustomPage = authActionClient
     billing_mode: zfd.text(z.string().default('standard_checkout')),
     payment_mode: zfd.text(z.string().default('full')),
     deposit_percentage: zfd.numeric(z.number().optional()),
-    business_type_preset: zfd.text(z.string().optional())
+    business_type_preset: zfd.text(z.string().optional()),
+    randomizer_enabled: zfd.checkbox().optional()
   }))
   .action(async ({ parsedInput, ctx: { supabase, user } }) => {
     const {
       title, slug, content, location_id, template_type, is_primary,
-      billing_enabled, billing_mode, payment_mode, deposit_percentage, business_type_preset
+      billing_enabled, billing_mode, payment_mode, deposit_percentage, business_type_preset, randomizer_enabled
     } = parsedInput
 
     if (location_id === 'demo-loc') {
@@ -132,6 +133,7 @@ export const createCustomPage = authActionClient
       payment_mode,
       deposit_percentage: deposit_percentage || null,
       business_type_preset: business_type_preset || null,
+      randomizer_enabled: randomizer_enabled || false,
       is_published: true,
     })
 

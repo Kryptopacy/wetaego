@@ -1742,6 +1742,7 @@ export type Database = {
           location_id: string
           metadata: Json | null
           organization_id: string
+          page_id: string | null
           payment_reference: string | null
           resource_id: string | null
           status: Database["public"]["Enums"]["order_status"]
@@ -1775,6 +1776,7 @@ export type Database = {
           location_id: string
           metadata?: Json | null
           organization_id: string
+          page_id?: string | null
           payment_reference?: string | null
           resource_id?: string | null
           status?: Database["public"]["Enums"]["order_status"]
@@ -1808,6 +1810,7 @@ export type Database = {
           location_id?: string
           metadata?: Json | null
           organization_id?: string
+          page_id?: string | null
           payment_reference?: string | null
           resource_id?: string | null
           status?: Database["public"]["Enums"]["order_status"]
@@ -1833,6 +1836,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "location_pages"
             referencedColumns: ["id"]
           },
           {

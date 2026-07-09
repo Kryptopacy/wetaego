@@ -34,6 +34,10 @@ export interface BusinessTypePreset {
   ai_cover_hint: string
   /** AI content hint for the first item description */
   ai_item_hint: string
+  /** Whether the payment roulette is enabled by default */
+  randomizer_enabled?: boolean
+  /** Whether real-time chat is enabled by default */
+  chat_enabled?: boolean
   /** Category group for the picker UI */
   group: 'food_drink' | 'hospitality' | 'services' | 'retail' | 'property' | 'creative' | 'quote_based'
 }
@@ -52,6 +56,7 @@ export const BUSINESS_TYPE_PRESETS: Record<string, BusinessTypePreset> = {
     default_page_title: "{businessName}'s Menu",
     ai_cover_hint: 'upscale restaurant interior, warm candlelight, elegant food presentation, diners',
     ai_item_hint: 'a dish description for a restaurant menu, sensory and appetizing',
+    randomizer_enabled: true,
     group: 'food_drink',
   },
   bar_lounge: {
@@ -66,6 +71,7 @@ export const BUSINESS_TYPE_PRESETS: Record<string, BusinessTypePreset> = {
     default_page_title: "{businessName} — Drinks & Menu",
     ai_cover_hint: 'vibrant nightclub bar with neon lights, cocktails, stylish crowd',
     ai_item_hint: 'a cocktail or drink description for a bar menu, exciting and evocative',
+    randomizer_enabled: true,
     group: 'food_drink',
   },
   food_truck: {
@@ -210,6 +216,21 @@ export const BUSINESS_TYPE_PRESETS: Record<string, BusinessTypePreset> = {
     default_page_title: "Book a Session with {businessName}",
     ai_cover_hint: 'professional consultant in a meeting setting, whiteboard, confident and approachable',
     ai_item_hint: 'a coaching or tutoring session description, inspiring and clear',
+    group: 'services',
+  },
+  repair_services: {
+    label: 'Repair / Maintenance Services',
+    description: 'Service quotes and milestone-based progress tracking',
+    icon: '🔧',
+    template_type: 'quote',
+    billing_enabled: false,
+    billing_mode: 'standard_checkout',
+    payment_mode: 'deposit',
+    deposit_percentage: 50,
+    default_page_title: "{businessName} — Repair Services",
+    ai_cover_hint: 'professional repair technician working on electronics or machinery, tools, clean workshop',
+    ai_item_hint: 'a repair service or diagnostic description, professional and trustworthy',
+    chat_enabled: true,
     group: 'services',
   },
 

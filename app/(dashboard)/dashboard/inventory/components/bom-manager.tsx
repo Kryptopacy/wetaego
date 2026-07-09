@@ -103,7 +103,7 @@ export function BomManager({
       const validItems = bomItems.filter(b => b.inventory_item_id && b.quantity_required > 0)
       if (validItems.length > 0) {
         const inserts = validItems.map(b => {
-          const payload: Record<string, unknown> = {
+          const payload: import('@/lib/supabase/types').Database['public']['Tables']['item_ingredients']['Insert'] = {
             organization_id: organizationId,
             inventory_item_id: b.inventory_item_id,
             quantity_required: b.quantity_required
@@ -130,8 +130,11 @@ export function BomManager({
     <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
       <div className="flex items-center gap-2 mb-6">
         <LinkIcon className="w-5 h-5 text-indigo-400" />
-        <h2 className="text-lg font-bold text-white">Component Breakdown (BOM)</h2>
+        <h2 className="text-lg font-bold text-white">Component Breakdown (Bill of Materials)</h2>
       </div>
+      <p className="text-zinc-400 text-sm mb-6 max-w-3xl">
+        A Bill of Materials (BOM) lets you link physical inventory items (like "Flour" or "Sugar") to the final products you sell (like "Cake"). When a customer buys a Cake, the system will automatically deduct the correct amounts of Flour and Sugar from your stock, keeping your inventory perfectly synced.
+      </p>
 
       <div className="space-y-6">
         <div>

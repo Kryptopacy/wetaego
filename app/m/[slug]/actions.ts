@@ -220,6 +220,7 @@ export async function processCheckout(params: {
     .insert({
       organization_id: organizationId,
       location_id: locationId,
+      page_id: pageId || null,
       customer_name: customerName || 'Guest',
       customer_phone: customerPhone || null,
       table_identifier: tableIdentifier || null,

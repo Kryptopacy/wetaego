@@ -56,6 +56,7 @@ export function mapSupabaseOrderToUI(rawOrder: RawOrderPayload): UIOrder {
     order_items: items,
     organizations: org,
     tracking_code: (rawOrder.tracking_code as string) || null,
-    order_milestones: rawOrder.order_milestones || undefined
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    order_milestones: (rawOrder.order_milestones as any) || undefined
   }
 }
