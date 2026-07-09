@@ -56,12 +56,25 @@ const styles = StyleSheet.create({
     color: '#111111',
   },
   totalSection: {
-    marginTop: 20,
+    marginTop: 10,
     paddingTop: 10,
     borderTopWidth: 2,
     borderTopColor: '#DDDDDD',
     flexDirection: 'row',
     justifyContent: 'space-between',
+  },
+  subTotalSection: {
+    marginTop: 10,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#EEEEEE',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  taxRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 4,
   },
   totalText: {
     fontSize: 16,
@@ -87,11 +100,26 @@ interface ReceiptPDFProps {
   orgName: string
   date: string
   totalAmountMinor: number
+  subtotalMinor?: number
+  taxTotalMinor?: number
+  tipAmountMinor?: number
+  discountAmountMinor?: number
   currencyCode: string
   items?: { name: string; quantity: number; price: number }[]
 }
 
-export const ReceiptDocument = ({ orderId, orgName, date, totalAmountMinor, currencyCode, items = [] }: ReceiptPDFProps) => (
+export const ReceiptDocument = ({ 
+  orderId, 
+  orgName, 
+  date, 
+  totalAmountMinor, 
+  subtotalMinor, 
+  taxTotalMinor, 
+  tipAmountMinor, 
+  discountAmountMinor, 
+  currencyCode, 
+  items = [] 
+}: ReceiptPDFProps) => (
   <Document>
     <Page size="A5" style={styles.page}>
       <View style={styles.header}>
@@ -124,6 +152,32 @@ export const ReceiptDocument = ({ orderId, orgName, date, totalAmountMinor, curr
         ))}
       </View>
 
+      <View style={styles.subTotalSection}>
+        <Text style={styles.textBold}>Subtotal:</Text>
+        <Text style={styles.textBold}>{formatCurrency(subtotalMinor || (totalAmountMinor - (taxTotalMinor || 0) - (tipAmountMinor || 0) + (discountAmountMinor || 0)), currencyCode)}</Text>
+      </View>
+
+      {!!discountAmountMinor && discountAmountMinor > 0 && (
+        <View style={styles.taxRow}>
+          <Text style={styles.text}>Discount:</Text>
+          <Text style={styles.text}>-{formatCurrency(discountAmountMinor, currencyCode)}</Text>
+        </View>
+      )}
+
+      {!!taxTotalMinor && taxTotalMinor > 0 && (
+        <View style={styles.taxRow}>
+          <Text style={styles.text}>Tax:</Text>
+          <Text style={styles.text}>{formatCurrency(taxTotalMinor, currencyCode)}</Text>
+        </View>
+      )}
+
+      {!!tipAmountMinor && tipAmountMinor > 0 && (
+        <View style={styles.taxRow}>
+          <Text style={styles.text}>Tip:</Text>
+          <Text style={styles.text}>{formatCurrency(tipAmountMinor, currencyCode)}</Text>
+        </View>
+      )}
+
       <View style={styles.totalSection}>
         <Text style={styles.totalText}>Total Paid:</Text>
         <Text style={styles.totalText}>{formatCurrency(totalAmountMinor, currencyCode)}</Text>
@@ -141,7 +195,7 @@ const emptySubscribe = () => () => {}
 const getClientSnapshot = () => true
 const getServerSnapshot = () => false
 
-export function DownloadReceiptButton({ order, orgName, currencyCode }: { order: { id: string, created_at?: string, total_amount_minor: number, order_items?: { item_name?: string, quantity?: number, price_minor?: number }[] }, orgName: string, currencyCode: string }) {
+export function DownloadReceiptButton({ order, orgName, currencyCode }: { order: { id: string, created_at?: string | null, total_amount_minor: number, subtotal_minor?: number | null, tax_total_minor?: number | null, tip_amount_minor?: number | null, discount_amount_minor?: number | null, order_items?: { item_name?: string, quantity?: number, price_minor?: number }[] }, orgName: string, currencyCode: string }) {
   // Client-side only rendering for PDFDownloadLink to avoid hydration mismatch
   const isClient = React.useSyncExternalStore(emptySubscribe, getClientSnapshot, getServerSnapshot)
 
@@ -160,7 +214,11 @@ export function DownloadReceiptButton({ order, orgName, currencyCode }: { order:
         orderId={order.id} 
         orgName={orgName} 
         date={order.created_at || new Date().toISOString()} 
-        totalAmountMinor={order.total_amount_minor} 
+        totalAmountMinor={order.total_amount_minor}
+        subtotalMinor={order.subtotal_minor || undefined}
+        taxTotalMinor={order.tax_total_minor || undefined}
+        tipAmountMinor={order.tip_amount_minor || undefined}
+        discountAmountMinor={order.discount_amount_minor || undefined}
         currencyCode={currencyCode} 
         items={items}
       />}

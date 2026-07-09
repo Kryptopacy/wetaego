@@ -71,8 +71,12 @@ export function NotificationCenter() {
   useEffect(() => {
     if (!orgId) return
 
+    // Ensure a completely unique channel name to prevent React 18 Strict Mode 
+    // from reusing a channel that has already been subscribed to.
+    const channelName = `staff-notifications-${orgId}-${Math.random().toString(36).substring(2, 9)}`
+    
     const channel = supabase
-      .channel(`staff-notifications-${orgId}`)
+      .channel(channelName)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'staff_notifications', filter: `organization_id=eq.${orgId}` }, (payload: any) => {
         if (payload.eventType === 'INSERT') {
           if (!payload.new.is_read) {
@@ -92,7 +96,8 @@ export function NotificationCenter() {
           }
         }
       })
-      .subscribe()
+      
+    channel.subscribe()
 
     return () => { supabase.removeChannel(channel) }
   }, [orgId, supabase, playChime]) 

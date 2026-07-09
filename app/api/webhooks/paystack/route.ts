@@ -43,8 +43,8 @@ export async function POST(req: Request) {
           return NextResponse.json({ status: 'already_processed' }, { status: 200 })
         }
         // Strict Idempotency: Throw if we cannot acquire the lock to prevent double-processing on retries
-         
         console.error('Webhook Idempotency Insert Error:', insertError)
+        // If we cannot acquire the lock, we must return 500 to let Paystack retry later (it might be a transient DB error)
         return NextResponse.json({ error: 'Failed to acquire idempotency lock' }, { status: 500 })
       }
 
@@ -64,31 +64,31 @@ export async function POST(req: Request) {
         try {
           await processBookingPayment(supabase, bookingId, amountPaidMinor, rawReference)
         } catch (e: unknown) {
-          if (e instanceof Error && e.message === 'Booking not found') {
-            return NextResponse.json({ error: 'Booking not found' }, { status: 404 })
-          }
           const errorMessage = e instanceof Error ? e.message : String(e)
           await supabase
             .from('webhook_events')
             .update({ status: 'failed', error_message: errorMessage })
             .eq('provider_reference', event.data.reference)
-          throw e
+            
+          if (e instanceof Error && e.message === 'Booking not found') {
+            return NextResponse.json({ error: 'Booking not found, logged to DLQ' }, { status: 200 })
+          }
+          // Return 200 so Paystack doesn't retry an unrecoverable logic error
+          return NextResponse.json({ error: 'Booking processing failed, logged to DLQ' }, { status: 200 })
         }
       } else if (rawReference.startsWith('QUOTE_')) {
         // Quote Milestone References: QUOTE_<quoteId>_<milestoneId>_<hash>
         try {
           await processQuoteMilestonePayment(supabase, rawReference, amountPaidMinor)
         } catch (e: unknown) {
-           
           console.error('Failed to process quote payment', e)
           const errorMessage = e instanceof Error ? e.message : String(e)
           await supabase
             .from('webhook_events')
             .update({ status: 'failed', error_message: errorMessage })
             .eq('provider_reference', event.data.reference)
-          // We still return 200 so Paystack stops retrying if it's a structural error, 
-          // or we can let it throw. For now, we'll just throw so it's logged.
-          throw e
+          
+          return NextResponse.json({ error: 'Quote processing failed, logged to DLQ' }, { status: 200 })
         }
 
         return NextResponse.json({ status: 'quote_milestone_confirmed' }, { status: 200 })
@@ -109,7 +109,7 @@ export async function POST(req: Request) {
               .from('webhook_events')
               .update({ status: 'failed', error_message: errorMessage })
               .eq('provider_reference', event.data.reference)
-            throw e
+            return NextResponse.json({ error: 'Subscription processing failed, logged to DLQ' }, { status: 200 })
           }
         }
         return NextResponse.json({ status: 'subscription_confirmed' }, { status: 200 })
@@ -130,7 +130,7 @@ export async function POST(req: Request) {
               .from('webhook_events')
               .update({ status: 'failed', error_message: errorMessage })
               .eq('provider_reference', event.data.reference)
-            throw e
+            return NextResponse.json({ error: 'Credit pack processing failed, logged to DLQ' }, { status: 200 })
           }
         }
         return NextResponse.json({ status: 'credit_pack_confirmed' }, { status: 200 })
@@ -152,13 +152,12 @@ export async function POST(req: Request) {
           })
           
           if (rpcError) {
-             
             console.error('IOU Repayment RPC Error:', rpcError)
             await supabase
               .from('webhook_events')
               .update({ status: 'failed', error_message: rpcError.message })
               .eq('provider_reference', event.data.reference)
-            return NextResponse.json({ error: 'Failed to process IOU repayment' }, { status: 500 })
+            return NextResponse.json({ error: 'Failed to process IOU repayment, logged to DLQ' }, { status: 200 })
           }
         }
         return NextResponse.json({ status: 'iou_installment_paid' }, { status: 200 })
@@ -173,18 +172,18 @@ export async function POST(req: Request) {
           return NextResponse.json({ status: 'already_processed' }, { status: 200 })
         }
       } catch (e: unknown) {
-        if (e instanceof Error && e.message === 'Order not found') {
-          return NextResponse.json({ error: 'Order not found' }, { status: 404 })
-        }
-        
-        // DLQ Logic: Log the error to the webhook_events table
         const errorMessage = e instanceof Error ? e.message : String(e)
         await supabase
           .from('webhook_events')
           .update({ status: 'failed', error_message: errorMessage })
           .eq('provider_reference', event.data.reference)
           
-        return NextResponse.json({ error: 'Failed to record payment, logged to DLQ' }, { status: 500 })
+        if (e instanceof Error && e.message === 'Order not found') {
+          return NextResponse.json({ error: 'Order not found, logged to DLQ' }, { status: 200 })
+        }
+        
+        // Return 200 OK after logging to DLQ to prevent Paystack from retrying permanently broken edge-cases
+        return NextResponse.json({ error: 'Failed to record payment, logged to DLQ' }, { status: 200 })
       }
 
       return NextResponse.json({ status: 'success' }, { status: 200 })
