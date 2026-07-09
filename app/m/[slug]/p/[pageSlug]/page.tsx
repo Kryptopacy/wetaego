@@ -251,7 +251,6 @@ export default async function PublicPageView({
   const dealsPromise = (page.deals_enabled !== false) ? (async () => {
     const anonSupabase = createAnonClient()
     const now = new Date().toISOString()
-    // @ts-expect-error deals table type may need refresh
     const { data } = await anonSupabase
       .from('deals')
       .select(`
