@@ -45,17 +45,23 @@ export default function DealsManager({ deals, menuItems, orgId, locationId }: {
 
   const handleCreateDeal = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    const fd = new FormData(e.currentTarget)
-    fd.append('organization_id', orgId)
-    fd.append('location_id', locationId)
-    fd.append('type', newDealType)
-    fd.set('is_active', 'false')
+    const form = e.currentTarget
+    const fd = new FormData(form)
 
-    const res = await createDeal(fd)
+    const res = await createDeal({
+      organization_id: orgId,
+      location_id: locationId,
+      name: fd.get('name') as string,
+      description: (fd.get('description') as string) || undefined,
+      type: newDealType,
+      is_active: false,
+      start_time: (fd.get('start_time') as string) || null,
+      end_time: (fd.get('end_time') as string) || null,
+    })
     if (res?.serverError) toast.error(res.serverError)
     else {
       toast.success('Deal created!')
-      ;(e.target as HTMLFormElement).reset()
+      form.reset()
     }
   }
 

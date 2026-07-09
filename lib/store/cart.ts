@@ -3,12 +3,13 @@ import { persist } from 'zustand/middleware'
 import { useState, useEffect } from 'react'
 
 export interface CartItem {
-  id: string          // page_items.id
+  id: string          // menu_items.id (or page_items.id for catalog)
   cartKey: string     // id + variant combo, used for deduplication
   pageId: string      // which page this item belongs to (for cross-page scoping)
   name: string
   price_minor: number
   quantity: number
+  dealItemId?: string  // if from a deal, references deal_items.id for server-side price verification
   variantSelections?: Record<string, string> // e.g. { Size: "M", Color: "Blue" }
   variantLabel?: string // e.g. "M / Blue" for display
 }

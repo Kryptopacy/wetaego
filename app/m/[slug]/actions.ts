@@ -96,7 +96,7 @@ export async function submitServiceRequest(formData: FormData): Promise<SafeResu
 export async function processCheckout(params: {
   organizationId: string,
   locationId: string,
-  items: { id: string, name: string, quantity: number, price_minor: number }[],
+  items: { id: string, name: string, quantity: number, price_minor: number, dealItemId?: string }[],
   totalAmountMinor: number,
   tipAmountMinor?: number,
   tableIdentifier?: string,
@@ -160,9 +160,35 @@ export async function processCheckout(params: {
 
     const priceMap = new Map(dbItems.map(i => [i.id, i.price_minor]))
 
-    // Recalculate authoritative subtotal from DB prices
+    // Deal price verification: if any item has a dealItemId, fetch the authoritative deal price
+    const dealItemIds = items.filter(i => i.dealItemId).map(i => i.dealItemId as string)
+    const dealPriceMap = new Map<string, number>()
+    if (dealItemIds.length > 0) {
+      const { data: dealItemsDb } = await (supabase as ReturnType<typeof supabase.from> extends never ? never : typeof supabase)
+        // @ts-expect-error deals table types may lag behind generation
+        .from('deal_items')
+        .select('id, deal_price_minor, quantity_limit, quantity_sold, deals(is_active)')
+        .in('id', dealItemIds)
+      
+      if (dealItemsDb) {
+        for (const di of dealItemsDb as { id: string; deal_price_minor: number; quantity_limit: number | null; quantity_sold: number; deals: { is_active: boolean } | null }[]) {
+          // Validate the deal is still active and not sold out
+          if (!di.deals?.is_active) continue
+          if (di.quantity_limit !== null && di.quantity_sold >= di.quantity_limit) continue
+          dealPriceMap.set(di.id, di.deal_price_minor)
+        }
+      }
+    }
+
+    // Build effective price map (deal price overrides regular price when valid)
+    const effectivePriceFor = (item: { id: string; dealItemId?: string }) => {
+      if (item.dealItemId && dealPriceMap.has(item.dealItemId)) {
+        return dealPriceMap.get(item.dealItemId)!
+      }
+      return priceMap.get(item.id) || 0
+    }
     const serverSubtotalMinor = items.reduce((sum, item) => {
-      return sum + ((priceMap.get(item.id) || 0) * item.quantity)
+      return sum + (effectivePriceFor(item) * item.quantity)
     }, 0)
 
     // Apply discount server-side, capped at subtotal to prevent negative totals
