@@ -5,6 +5,7 @@ import Image from 'next/image'
 interface VenueHeaderProps {
   location: {
     name: string
+    portal_display_name?: string | null
     cover_image_url?: string | null
     theme_color?: string | null
     organizations?: { logo_url?: string | null } | null
@@ -69,7 +70,7 @@ export function VenueHeader({ location, slug, tableIdentifier }: VenueHeaderProp
 
         <div className="flex items-center flex-wrap gap-3 mb-2">
           <h1 className="text-4xl font-black text-white tracking-tight leading-none drop-shadow-lg">
-            {location.name}
+            {location.portal_display_name || location.name}
           </h1>
           {tableIdentifier && (
             <span className="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-white font-bold text-sm shadow-sm border border-white/30 drop-shadow-md">

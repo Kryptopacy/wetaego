@@ -330,7 +330,7 @@ export default async function PublicPageView({
   const ldJson = loc.is_search_visible ? {
     "@context": "https://schema.org",
     "@type": "ItemList",
-    "name": `${page.title} - ${loc.name}`,
+    "name": `${page.title} - ${loc.portal_display_name || loc.name}`,
     "url": `https://ourmenuos.online/m/${slug}/p/${pageSlug}`,
     "itemListElement": (items as { title: string, description?: string | null, image_url?: string | null, price_minor?: number | null }[]).map((item, index) => ({
       "@type": "ListItem",
