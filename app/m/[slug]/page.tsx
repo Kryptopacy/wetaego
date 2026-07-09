@@ -1,6 +1,7 @@
 import { createClient, createAnonClient } from '@/lib/supabase/server'
 import { notFound, redirect } from 'next/navigation'
 import { Metadata } from 'next'
+import { cookies } from 'next/headers'
 
 import { PortalRenderer } from './portal-renderer'
 import { InvalidQrMessage } from './components/qr-state-messages'
@@ -83,6 +84,8 @@ export default async function PublicMenuPage({
   const resource = resolvedSearchParams.resource
 
   const supabase = await createClient()
+  const cookieStore = await cookies()
+  const isDemoMode = cookieStore.get('demo_mode')?.value === '1'
 
   const locationFetcher = async () => {
     const anonSupabase = createAnonClient()
@@ -106,8 +109,9 @@ export default async function PublicMenuPage({
 
   const location = locationData;
 
-  let isPreview = false
-  if (preview === 'true') {
+  // Demo mode acts like preview — bypasses KYC and shows all pages
+  let isPreview = isDemoMode
+  if (!isPreview && preview === 'true') {
     const { data: userData } = await supabase.auth.getUser()
     if (userData?.user) {
       const { data: member } = await supabase
@@ -131,11 +135,11 @@ export default async function PublicMenuPage({
     }
   }
 
-  // Check KYC status
+  // Check KYC status — demo mode always bypasses this
   const org = location.organizations as { status?: string } | null;
   const orgStatus = org?.status || 'approved';
   
-  if (!isPreview && orgStatus !== 'approved') {
+  if (!isPreview && !isDemoMode && orgStatus !== 'approved') {
     const { getKycSettings } = await import('@/lib/utils/settings')
     const kycSettings = await getKycSettings() as { require_kyc_to_publish?: boolean }
     if (kycSettings?.require_kyc_to_publish) {

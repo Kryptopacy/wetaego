@@ -3,6 +3,7 @@ export const revalidate = 60;
 import { createClient, createAnonClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
+import { cookies } from 'next/headers'
 import { BookingRenderer } from './templates/booking-renderer'
 import { CatalogPageRenderer } from './templates/catalog-page-renderer'
 import { ListingRenderer } from './templates/listing-renderer'
@@ -91,6 +92,8 @@ export default async function PublicPageView({
   const { ref, preview, resource: resourceId } = await searchParams
 
   const supabase = await createClient()
+  const cookieStore = await cookies()
+  const isDemoMode = cookieStore.get('demo_mode')?.value === '1'
 
   const fetchLocation = async () => {
     const anonSupabase = createAnonClient()
@@ -109,8 +112,9 @@ export default async function PublicPageView({
 
   if (!loc) notFound()
 
-  let isPreview = false
-  if (preview === 'true') {
+  // Demo mode acts like preview — bypasses KYC and shows unpublished pages
+  let isPreview = isDemoMode
+  if (!isPreview && preview === 'true') {
     const { data: userData } = await supabase.auth.getUser()
     if (userData?.user) {
       const { data: member } = await supabase
@@ -134,11 +138,11 @@ export default async function PublicPageView({
     }
   }
 
-  // Check KYC status
+  // Check KYC status — demo mode always bypasses this
   const org = loc.organizations as { status?: string } | null | undefined;
   const orgStatus = org?.status || 'approved';
   
-  if (!isPreview && orgStatus !== 'approved') {
+  if (!isPreview && !isDemoMode && orgStatus !== 'approved') {
     const { getKycSettings } = await import('@/lib/utils/settings')
     const kycSettings = await getKycSettings() as { require_kyc_to_publish?: boolean }
     if (kycSettings?.require_kyc_to_publish) {
