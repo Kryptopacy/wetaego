@@ -4,6 +4,8 @@ import { GoogleGenAI, Type } from '@google/genai'
 import { chargeCredits } from '@/lib/payments/credits'
 import { getAiModels, getCreditCosts } from '@/lib/utils/settings'
 
+export const maxDuration = 60
+
 export async function POST(req: Request) {
   try {
     const supabase = await createClient()
@@ -34,42 +36,66 @@ export async function POST(req: Request) {
     }
 
     const buffer = Buffer.from(await file.arrayBuffer())
-    const base64Image = buffer.toString('base64')
+    const mimeType = file.type || 'image/jpeg'
+    const isTextFile = mimeType === 'text/plain' || file.name.endsWith('.txt') || file.name.endsWith('.csv')
 
-    // 1. Flawless Direct Multimodal structuring using Gemini Vision
     const aiModels = await getAiModels() as Record<string, string>
-    const modelToUse = aiModels.text_generation || 'gemini-3.5-flash' // Vision is natively supported in 3.5 Flash
+    const modelToUse = aiModels.text_generation || 'gemini-2.0-flash'
 
-    const genai = new GoogleGenAI({})
-    
+    const genai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY })
+
+    const responseSchema = {
+      type: Type.ARRAY,
+      items: {
+        type: Type.OBJECT,
+        properties: {
+          category_name: { type: Type.STRING, description: 'The section/category of the menu (e.g. Appetizers, Mains)' },
+          name: { type: Type.STRING, description: 'The name of the menu item' },
+          description: { type: Type.STRING, description: 'Description or ingredients. Leave empty if none.' },
+          price: { type: Type.NUMBER, description: 'The price as a number in the local currency.' },
+        },
+        required: ['category_name', 'name']
+      }
+    }
+
+    let contents
+
+    if (isTextFile) {
+      const textContent = buffer.toString('utf-8')
+      contents = [
+        {
+          role: 'user' as const,
+          parts: [
+            { text: `Parse this menu text into the requested JSON format. Extract categories, item names, descriptions, and prices.\n\nMenu text:\n${textContent}` }
+          ]
+        }
+      ]
+    } else {
+      // Image or PDF
+      const base64Data = buffer.toString('base64')
+      const validMime = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'application/pdf'].includes(mimeType)
+        ? mimeType
+        : 'image/jpeg'
+
+      contents = [
+        {
+          role: 'user' as const,
+          parts: [
+            { text: 'Please parse this menu image into the requested JSON format. Extract all categories, items, descriptions, and prices visible.' },
+            { inlineData: { data: base64Data, mimeType: validMime } }
+          ]
+        }
+      ]
+    }
+
     const interaction = await genai.models.generateContent({
       model: modelToUse,
       config: {
         responseMimeType: 'application/json',
-        responseSchema: {
-          type: Type.ARRAY,
-          items: {
-            type: Type.OBJECT,
-            properties: {
-              category_name: { type: Type.STRING, description: "The section/category of the menu (e.g. Appetizers, Mains)" },
-              name: { type: Type.STRING, description: "The name of the menu item" },
-              description: { type: Type.STRING, description: "Description or ingredients of the item. Leave empty if none." },
-              price: { type: Type.NUMBER, description: "The price of the item. Parse into a number." },
-            },
-            required: ["category_name", "name", "price"]
-          }
-        },
-        systemInstruction: "You are an expert OCR AI that structures raw restaurant menu images into a precise JSON array of items. Extract the category, item name, description, and price perfectly. Respect spatial layouts (e.g. prices aligned on the right)."
+        responseSchema,
+        systemInstruction: 'You are an expert menu parser. Extract all menu items precisely from the provided menu — whether it is an image, PDF, or text file. Return only valid structured JSON matching the schema. Prices should be numeric values in the local currency unit shown.'
       },
-      contents: [
-        {
-          role: 'user',
-          parts: [
-            { text: "Please parse this menu image into the requested JSON format." },
-            { inlineData: { data: base64Image, mimeType: file.type || 'image/jpeg' } }
-          ]
-        }
-      ]
+      contents
     })
 
     const resultText = interaction.text
@@ -77,13 +103,22 @@ export async function POST(req: Request) {
       return new NextResponse('Failed to generate structured data', { status: 500 })
     }
 
-    const structuredData = JSON.parse(resultText)
+    let structuredData
+    try {
+      const cleaned = resultText.trim().replace(/^```(?:json)?\n?/i, '').replace(/\n?```$/i, '')
+      structuredData = JSON.parse(cleaned)
+    } catch {
+      return new NextResponse('AI returned invalid data. Please try a clearer file.', { status: 422 })
+    }
+
+    if (!Array.isArray(structuredData) || structuredData.length === 0) {
+      return new NextResponse('No menu items found in the uploaded file.', { status: 422 })
+    }
 
     return NextResponse.json({ items: structuredData })
 
   } catch (err) {
-     
-    console.error('OCR Error:', err)
+    console.error('Menu Import Error:', err)
     const message = err instanceof Error ? err.message : 'Internal Server Error'
     return new NextResponse(message, { status: 500 })
   }

@@ -20,6 +20,7 @@ import { PortalNav } from '../../components/portal-nav'
 import { unstable_cache } from 'next/cache'
 import { PreviewBanner } from '@/components/preview-banner'
 import { getGlobalManualPayment } from '@/lib/utils/settings'
+import { DealsFAB } from '../../components/deals-fab'
 
 export async function generateMetadata({
   params,
@@ -171,7 +172,7 @@ export default async function PublicPageView({
     const anonSupabase = createAnonClient()
     let query = anonSupabase
       .from('location_pages')
-      .select('id, title, slug, content, template_type, billing_enabled, billing_mode, payment_mode, deposit_percentage, business_type_preset, randomizer_enabled, template_data, is_published, theme_color, background_color')
+      .select('id, title, slug, content, template_type, billing_enabled, billing_mode, payment_mode, deposit_percentage, business_type_preset, randomizer_enabled, deals_enabled, template_data, is_published, theme_color, background_color')
       .eq('location_id', loc.id)
       .eq('slug', pageSlug)
 
@@ -246,11 +247,36 @@ export default async function PublicPageView({
         { revalidate: 60, tags: [`page_items_${page.id}`] }
       )()
 
-  const [items, { data: paymentSettings }, globalManualPayment, _resource] = await Promise.all([
+  // Fetch active deals for this location (if page has deals enabled)
+  const dealsPromise = (page.deals_enabled !== false) ? (async () => {
+    const anonSupabase = createAnonClient()
+    const now = new Date().toISOString()
+    // @ts-expect-error deals table type may need refresh
+    const { data } = await anonSupabase
+      .from('deals')
+      .select(`
+        id, name, description, type,
+        deal_items (
+          id, deal_price_minor, quantity_limit, quantity_sold,
+          menu_items ( id, name, price_minor, image_url, description )
+        )
+      `)
+      .eq('location_id', loc.id)
+      .eq('is_active', true)
+      .or(`type.eq.manual,and(type.eq.time_based,start_time.lte.${now},end_time.gte.${now}),type.eq.quantity_based`)
+    return (data || []).filter((d: { type: string; deal_items: { quantity_limit: number | null; quantity_sold: number }[] }) =>
+      // For quantity_based: only show if at least one item has remaining stock
+      d.type !== 'quantity_based' ||
+      d.deal_items.some((di) => di.quantity_limit === null || di.quantity_sold < di.quantity_limit)
+    )
+  })() : Promise.resolve([])
+
+  const [items, { data: paymentSettings }, globalManualPayment, _resource, activeDeals] = await Promise.all([
     itemsPromise,
     paymentSettingsPromise,
     getGlobalManualPayment(),
-    resourceId ? supabase.from('resources').select('id, name, type').eq('id', resourceId).single().then(r => r.data) : Promise.resolve(null)
+    resourceId ? supabase.from('resources').select('id, name, type').eq('id', resourceId).single().then(r => r.data) : Promise.resolve(null),
+    dealsPromise
   ])
 
   const pageThemeColor = page.theme_color || loc.theme_color || '#10b981'
@@ -356,6 +382,9 @@ export default async function PublicPageView({
         <CallStaffFAB organizationId={loc.organization_id} locationId={loc.id} tableIdentifier="QR Scan" />
         {page.randomizer_enabled && (
           <RouletteFAB />
+        )}
+        {(activeDeals as unknown[]).length > 0 && (
+          <DealsFAB deals={activeDeals as Parameters<typeof DealsFAB>[0]['deals']} locationId={loc.id} pageId={page.id} />
         )}
       </FabGroup>
     </>

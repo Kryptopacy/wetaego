@@ -137,10 +137,68 @@ export function AutoImportButton({ orgId, menuId }: AutoImportButtonProps) {
                     <tbody className="divide-y divide-zinc-800/50">
                       {previewItems.map((item, idx) => (
                         <tr key={idx} className="hover:bg-zinc-900/50">
-                          <td className="px-4 py-3 font-medium text-blue-400">{item.category_name}</td>
-                          <td className="px-4 py-3 font-medium text-white">{item.name}</td>
-                          <td className="px-4 py-3 text-zinc-400 text-xs truncate max-w-[200px]">{item.description}</td>
-                          <td className="px-4 py-3 text-right text-emerald-400 font-medium">${item.price?.toFixed(2)}</td>
+                          <td className="px-4 py-3">
+                            <input 
+                              type="text" 
+                              value={item.category_name || ''} 
+                              onChange={(e) => {
+                                const newItems = [...previewItems]
+                                newItems[idx].category_name = e.target.value
+                                setPreviewItems(newItems)
+                              }}
+                              className="w-full bg-transparent border-b border-transparent hover:border-zinc-700 focus:border-blue-500 outline-none text-blue-400 font-medium px-1 py-0.5 transition-colors"
+                            />
+                          </td>
+                          <td className="px-4 py-3">
+                            <input 
+                              type="text" 
+                              value={item.name || ''} 
+                              onChange={(e) => {
+                                const newItems = [...previewItems]
+                                newItems[idx].name = e.target.value
+                                setPreviewItems(newItems)
+                              }}
+                              className="w-full bg-transparent border-b border-transparent hover:border-zinc-700 focus:border-blue-500 outline-none text-white font-medium px-1 py-0.5 transition-colors"
+                            />
+                          </td>
+                          <td className="px-4 py-3">
+                            <input 
+                              type="text" 
+                              value={item.description || ''} 
+                              onChange={(e) => {
+                                const newItems = [...previewItems]
+                                newItems[idx].description = e.target.value
+                                setPreviewItems(newItems)
+                              }}
+                              className="w-full bg-transparent border-b border-transparent hover:border-zinc-700 focus:border-blue-500 outline-none text-zinc-400 text-xs px-1 py-0.5 transition-colors"
+                              placeholder="Optional description"
+                            />
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="flex items-center justify-end gap-1">
+                              <span className="text-zinc-500">$</span>
+                              <input 
+                                type="number" 
+                                value={item.price || 0} 
+                                onChange={(e) => {
+                                  const newItems = [...previewItems]
+                                  newItems[idx].price = parseFloat(e.target.value) || 0
+                                  setPreviewItems(newItems)
+                                }}
+                                className="w-20 bg-transparent border-b border-transparent hover:border-zinc-700 focus:border-blue-500 outline-none text-emerald-400 font-medium px-1 py-0.5 transition-colors text-right text-sm"
+                                step="0.01"
+                                min="0"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setPreviewItems(previewItems.filter((_, i) => i !== idx))}
+                                className="ml-2 p-1 text-zinc-500 hover:text-rose-400 hover:bg-rose-500/10 rounded transition-colors"
+                                title="Remove item"
+                              >
+                                <X className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
