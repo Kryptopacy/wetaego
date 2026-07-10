@@ -7,6 +7,7 @@ import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { formatCurrency } from '@/lib/utils/currency'
 import { Plus, Minus, Check, ArrowRight, ArrowLeft } from 'lucide-react'
+import { submitQuoteRequest } from '@/app/m/[slug]/actions'
 
 interface PageItem {
   id: string
@@ -124,8 +125,6 @@ export function QuoteRenderer({ location, page, items, locationSlug }: QuoteRend
       
       formData.append('quote_data', JSON.stringify(payload))
       
-      // We will create this action next
-      const { submitQuoteRequest } = await import('@/app/m/[slug]/actions')
       const res = await submitQuoteRequest(formData)
       
       if (res?.data?.success && res?.data?.referenceNumber) {

@@ -59,14 +59,31 @@ export default async function DashboardOverviewPage() {
   const hour = new Date().getHours()
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
 
+  let hasMenu = false
+  let hasQR = false
+
   if (orgId) {
-    const { data: loc } = await supabase
-      .from('locations')
-      .select('slug')
-      .eq('organization_id', orgId)
-      .single()
-  
-    locationSlug = loc?.slug || ''
+    const [locResult, menuResult, qrResult] = await Promise.all([
+      supabase
+        .from('locations')
+        .select('slug')
+        .eq('organization_id', orgId)
+        .single(),
+      supabase
+        .from('menu_items')
+        .select('id', { count: 'exact', head: true })
+        .eq('organization_id', orgId)
+        .limit(1),
+      supabase
+        .from('qr_codes')
+        .select('id', { count: 'exact', head: true })
+        .eq('organization_id', orgId)
+        .limit(1),
+    ])
+
+    locationSlug = locResult.data?.slug || ''
+    hasMenu = (menuResult.count ?? 0) > 0
+    hasQR = (qrResult.count ?? 0) > 0
   }
 
   // Heavy fetches moved to DashboardStats component for streaming
@@ -145,8 +162,8 @@ export default async function DashboardOverviewPage() {
       <OnboardingChecklist 
         hasOrg={!!orgId} 
         hasLocation={!!locationSlug} 
-        hasMenu={true} 
-        hasQR={true} 
+        hasMenu={hasMenu} 
+        hasQR={hasQR} 
         templateType={templateType}
       />
 
