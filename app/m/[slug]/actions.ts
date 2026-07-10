@@ -626,7 +626,7 @@ const quoteSchema = z.object({
   })
 })
 
-export async function submitQuoteRequest(formData: FormData): Promise<SafeResult<{ success: boolean, referenceNumber?: string }>> {
+export async function submitQuoteRequest(formData: FormData): Promise<SafeResult<{ success: boolean, referenceNumber?: string, accessPin?: string }>> {
   try {
     const { checkRateLimit } = await import('@/lib/upstash');
     const cookieStore = await cookies();
@@ -654,13 +654,14 @@ export async function submitQuoteRequest(formData: FormData): Promise<SafeResult
     const { page_id, quote_data } = parsed.data
     
     const referenceNumber = `QUO-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`
+    const accessPin = Math.floor(100000 + Math.random() * 900000).toString()
 
     const { error } = await supabase
       .from('page_bookings')
       .insert({
         page_id,
         status: 'pending',
-        booking_notes: JSON.stringify({ ...quote_data, referenceNumber }),
+        booking_notes: JSON.stringify({ ...quote_data, referenceNumber, accessPin }),
         customer_name: quote_data.customerName,
         customer_email: quote_data.customerEmail,
         customer_phone: quote_data.customerPhone,
@@ -668,7 +669,7 @@ export async function submitQuoteRequest(formData: FormData): Promise<SafeResult
 
     if (error) throw error
 
-    return { data: { success: true, referenceNumber } }
+    return { data: { success: true, referenceNumber, accessPin } }
   } catch (err: unknown) {
     Sentry.captureException(err)
     return { serverError: err instanceof Error ? err.message : 'Failed to submit quote request' }
