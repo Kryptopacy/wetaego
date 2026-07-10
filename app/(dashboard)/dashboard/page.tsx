@@ -151,7 +151,7 @@ export default async function DashboardOverviewPage() {
         {orgId && (
           <Link
             href="/dashboard/menu"
-            className="hidden md:flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white text-sm font-bold hover:from-violet-500 hover:to-fuchsia-500 transition-all shadow-lg shadow-violet-900/30"
+            className="hidden md:flex items-center gap-2 px-4 py-2.5 rounded-xl bg-linear-to-r from-violet-600 to-fuchsia-600 text-white text-sm font-bold hover:from-violet-500 hover:to-fuchsia-500 transition-all shadow-lg shadow-violet-900/30"
           >
             <Sparkles className="w-4 h-4" />
             Open AI Studio
@@ -170,7 +170,7 @@ export default async function DashboardOverviewPage() {
       {!!orgId && (
         <>
           <Suspense fallback={
-            <div className="w-full flex items-center justify-center p-12 bg-zinc-900/40 rounded-2xl border border-white/[0.06] animate-pulse h-[400px]">
+            <div className="w-full flex items-center justify-center p-12 bg-zinc-900/40 rounded-2xl border border-white/6 animate-pulse h-[400px]">
               <p className="text-zinc-500 font-medium">Loading metrics...</p>
             </div>
           }>
@@ -180,7 +180,7 @@ export default async function DashboardOverviewPage() {
       {/* === AI MODULES GRID === */}
       <div>
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-violet-600 to-fuchsia-600 flex items-center justify-center">
+          <div className="w-6 h-6 rounded-lg bg-linear-to-br from-violet-600 to-fuchsia-600 flex items-center justify-center">
             <Sparkles className="w-3.5 h-3.5 text-white" />
           </div>
           <h2 className="text-base font-bold text-white">AI Engine Modules</h2>
@@ -191,7 +191,7 @@ export default async function DashboardOverviewPage() {
             <Link
               key={href}
               href={href}
-              className={`group relative rounded-2xl border ${border} bg-gradient-to-br ${color} p-5 overflow-hidden hover:scale-[1.02] transition-all duration-300`}
+              className={`group relative rounded-2xl border ${border} bg-linear-to-br ${color} p-5 overflow-hidden hover:scale-[1.02] transition-all duration-300`}
             >
               <Icon className={`w-8 h-8 ${iconColor} mb-4`} />
               <h3 className="font-bold text-white text-sm mb-1.5">{label}</h3>

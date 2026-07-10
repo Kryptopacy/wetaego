@@ -184,12 +184,12 @@ export function QuoteRenderer({ location, page, items, locationSlug }: QuoteRend
         {location.cover_image_url ? (
           <>
             <div className="absolute inset-0 bg-cover bg-top" style={{ backgroundImage: `url(${location.cover_image_url})` }} />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-transparent" />
+            <div className="absolute inset-0 bg-linear-to-b from-black/30 via-transparent to-transparent" />
           </>
         ) : (
           <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${themeColor}40 0%, #0a0a0f 100%)` }} />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-black/40 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-t from-zinc-950 via-black/40 to-transparent" />
         <div className="absolute bottom-0 left-0 right-0 p-6 max-w-2xl mx-auto">
           {location.organizations?.logo_url && (
             <Image src={location.organizations.logo_url} alt="Logo" width={100} height={48} className="h-12 w-auto object-contain mb-3 drop-shadow-lg" />
@@ -455,7 +455,7 @@ export function QuoteRenderer({ location, page, items, locationSlug }: QuoteRend
       </div>
 
       {/* Floating Action Bar */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black via-black/80 to-transparent z-50 pointer-events-none">
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-linear-to-t from-black via-black/80 to-transparent z-50 pointer-events-none">
         <div className="max-w-2xl mx-auto flex gap-4 pointer-events-auto">
           {step === 1 && (
             <button
