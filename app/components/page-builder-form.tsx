@@ -45,23 +45,27 @@ export function PageBuilderForm({ pageId, templateType, initialItems, orgId }: P
     const formData = new FormData(e.currentTarget)
     formData.append('page_id', pageId)
     
+    const category = formData.get('category') as string
+    const categoryObj = category ? { category } : {}
+
     // Depending on templateType, format item_data properly if needed.
     if (templateType === 'catalog') {
-      const category = formData.get('category') as string
       formData.set('item_data', JSON.stringify({
-        category: category || undefined,
+        ...categoryObj,
         variants: pendingVariants.length > 0 ? pendingVariants : undefined,
       }))
     } else if (templateType === 'quote') {
       const unit = formData.get('unit') as string
       const price_range = formData.get('price_range') as string
       const turnaround = formData.get('turnaround') as string
-      formData.set('item_data', JSON.stringify({ unit, price_range, turnaround }))
+      formData.set('item_data', JSON.stringify({ ...categoryObj, unit, price_range, turnaround }))
     } else if (templateType === 'portfolio') {
       const github_url = formData.get('github_url') as string
       const live_url = formData.get('live_url') as string
       const skills = formData.get('skills') as string
-      formData.set('item_data', JSON.stringify({ github_url, live_url, skills }))
+      formData.set('item_data', JSON.stringify({ ...categoryObj, github_url, live_url, skills }))
+    } else if (Object.keys(categoryObj).length > 0) {
+      formData.set('item_data', JSON.stringify(categoryObj))
     }
 
     try {
@@ -84,22 +88,26 @@ export function PageBuilderForm({ pageId, templateType, initialItems, orgId }: P
     const formData = new FormData(e.currentTarget)
     formData.append('itemId', itemId)
 
+    const category = formData.get('category') as string
+    const categoryObj = category ? { category } : {}
+
     if (templateType === 'catalog') {
-      const category = formData.get('category') as string
       formData.set('item_data', JSON.stringify({
-        category: category || undefined,
+        ...categoryObj,
         variants: pendingVariants.length > 0 ? pendingVariants : undefined,
       }))
     } else if (templateType === 'quote') {
       const unit = formData.get('unit') as string
       const price_range = formData.get('price_range') as string
       const turnaround = formData.get('turnaround') as string
-      formData.set('item_data', JSON.stringify({ unit, price_range, turnaround }))
+      formData.set('item_data', JSON.stringify({ ...categoryObj, unit, price_range, turnaround }))
     } else if (templateType === 'portfolio') {
       const github_url = formData.get('github_url') as string
       const live_url = formData.get('live_url') as string
       const skills = formData.get('skills') as string
-      formData.set('item_data', JSON.stringify({ github_url, live_url, skills }))
+      formData.set('item_data', JSON.stringify({ ...categoryObj, github_url, live_url, skills }))
+    } else if (Object.keys(categoryObj).length > 0) {
+      formData.set('item_data', JSON.stringify(categoryObj))
     }
 
     try {
@@ -179,17 +187,16 @@ export function PageBuilderForm({ pageId, templateType, initialItems, orgId }: P
           <input required name="title" defaultValue={item?.title || ''} className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white" placeholder="e.g. VIP Consultation" />
         </div>
 
+        <div>
+          <label className="block text-xs font-medium text-zinc-400 mb-1">Category (Optional)</label>
+          <input name="category" defaultValue={category} className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white" placeholder="e.g. Services, Starters, Phones" />
+        </div>
+
         {templateType === 'catalog' && (
           <>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-medium text-zinc-400 mb-1">Category</label>
-                <input name="category" defaultValue={category} className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white" placeholder="e.g. Services" />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-zinc-400 mb-1">Department / Workstation</label>
-                <input name="department" defaultValue={(item as unknown as Record<string, unknown>)?.department as string || ''} className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white" placeholder="e.g. Grill, Tailoring, Studio" />
-              </div>
+            <div>
+              <label className="block text-xs font-medium text-zinc-400 mb-1">Department / Workstation (Optional)</label>
+              <input name="department" defaultValue={(item as unknown as Record<string, unknown>)?.department as string || ''} className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white" placeholder="e.g. Grill, Tailoring, Studio" />
             </div>
             <VariantBuilderField
               initialVariants={(item?.item_data as Record<string, unknown>)?.variants as VariantGroup[] || []}

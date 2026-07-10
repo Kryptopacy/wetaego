@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 
 import { formatCurrency } from '@/lib/utils/currency'
 import { DatePicker } from '@/app/components/date-picker'
+import { Search, X } from 'lucide-react'
 
 interface PageItem {
   id: string
@@ -28,6 +29,7 @@ interface BookingRendererProps {
     id: string
     name: string
     organization_id: string
+    portal_display_name?: string
     theme_color?: string
     cover_image_url?: string
     ai_name?: string
@@ -76,6 +78,17 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
   const [showBookingForm, setShowBookingForm] = useState(false)
   const [formSuccess, setFormSuccess] = useState(false)
   const [isPending, startTransition] = useTransition()
+  const [searchQuery, setSearchQuery] = useState('')
+
+  const filteredItems = items.filter(item => {
+    if (!searchQuery) return true;
+    const query = searchQuery.toLowerCase();
+    // @ts-expect-error item_data is loosely typed from JSON column
+    const category = item.item_data?.category?.toLowerCase() || 'services';
+    return item.title.toLowerCase().includes(query) || 
+           item.description?.toLowerCase().includes(query) || 
+           category.includes(query);
+  });
 
   const [form, setForm] = useState({
     customer_name: '',
@@ -161,8 +174,32 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-          {location.name}
+          {location.portal_display_name || location.name}
         </BackButton>
+
+        {/* Search Bar */}
+        {!showBookingForm && !formSuccess && (
+          <div className="mb-8 relative group">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <Search className="w-5 h-5 text-zinc-500 group-focus-within:text-emerald-500 transition-colors" />
+            </div>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search services, categories..."
+              className="w-full pl-12 pr-12 py-3.5 bg-zinc-900/50 border border-zinc-800 rounded-2xl text-[15px] outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/50 transition-all text-white placeholder:text-zinc-500"
+            />
+            {searchQuery && (
+              <button 
+                onClick={() => setSearchQuery('')}
+                className="absolute inset-y-0 right-0 pr-4 flex items-center text-zinc-500 hover:text-zinc-300 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            )}
+          </div>
+        )}
 
         {/* Booking form overlay */}
         <AnimatePresence>
@@ -451,7 +488,7 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
         {!showBookingForm && (
           <div className="space-y-8">
             {Object.entries(
-              items.reduce((acc, item) => {
+              filteredItems.reduce((acc, item) => {
                 // @ts-expect-error item_data is loosely typed from JSON column
                 const cat = item.item_data?.category?.trim() || 'Services'
                 if (!acc[cat]) acc[cat] = []
@@ -460,7 +497,7 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
               }, {} as Record<string, PageItem[]>)
             ).map(([categoryName, categoryItems]) => (
               <div key={categoryName} className="space-y-4">
-                <h2 className="text-base font-bold text-zinc-400 uppercase tracking-wider text-xs">
+                <h2 className="text-xs font-bold text-zinc-500 tracking-widest mb-4">
                   {categoryName}
                 </h2>
 
@@ -533,9 +570,11 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
             </div>
             ))}
 
-            {items.length === 0 && (
+            {filteredItems.length === 0 && (
               <div className="text-center py-12 text-zinc-600">
-                <p className="text-sm">No services listed yet.</p>
+                <p className="text-sm">
+                  {searchQuery ? `No services found matching "${searchQuery}"` : 'No services listed yet.'}
+                </p>
               </div>
             )}
           </div>

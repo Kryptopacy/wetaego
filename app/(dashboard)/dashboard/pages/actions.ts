@@ -21,7 +21,7 @@ export const setBusinessTypeAction = authActionClient
   }))
   .action(async ({ parsedInput: { businessType, orgId, mode }, ctx: { supabase } }) => {
     if (orgId === 'demo-org') {
-      redirect(`/dashboard/pages/build/${businessType}?mode=${mode}`)
+      redirect(`/dashboard/pages/builder/${businessType}?mode=${mode}`)
     }
 
     const { cookies } = await import('next/headers')
@@ -37,7 +37,7 @@ export const setBusinessTypeAction = authActionClient
         .eq('id', orgId)
     }
 
-    redirect(`/dashboard/pages/build/${businessType}?mode=${mode}`)
+    redirect(`/dashboard/pages/builder/${businessType}?mode=${mode}`)
   })
 
 // ─── Page Creation ─────────────────────────────────────────────────────────────

@@ -244,7 +244,7 @@ export function QuoteRenderer({ location, page, items, locationSlug }: QuoteRend
                 }, {} as Record<string, PageItem[]>)
               ).map(([categoryName, categoryItems]) => (
                 <div key={categoryName} className="space-y-4">
-                  <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-wider">{categoryName}</h3>
+                  <h3 className="text-xs font-bold text-zinc-500 tracking-widest mb-4">{categoryName}</h3>
                   {categoryItems.map(item => {
                     const isSelected = selectedItems.find(i => i.item.id === item.id)
                     return (

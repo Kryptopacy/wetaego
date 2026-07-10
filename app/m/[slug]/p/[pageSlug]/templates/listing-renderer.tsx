@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 import { formatCurrency } from '@/lib/utils/currency'
 import { DatePicker } from '@/app/components/date-picker'
+import { Search, X } from 'lucide-react'
 
 interface PageItem {
   id: string
@@ -25,6 +26,7 @@ interface PageItem {
 interface ListingRendererProps {
   location: {
     name: string
+    portal_display_name?: string
     theme_color?: string
     cover_image_url?: string
     organizations?: { logo_url?: string }
@@ -64,15 +66,24 @@ export function ListingRenderer({ location, page, items, locationSlug }: Listing
   }, [items])
 
   const [activeFilters, setActiveFilters] = useState<Record<string, string>>({})
+  const [searchQuery, setSearchQuery] = useState('')
 
   const filteredItems = useMemo(() => {
     return items.filter(item => {
-      return Object.entries(activeFilters).every(([key, value]) => {
+      const passesFilters = Object.entries(activeFilters).every(([key, value]) => {
         if (!value) return true // no filter selected for this key
         return item.item_data?.[key] === value
       })
+      if (!passesFilters) return false;
+
+      if (!searchQuery) return true;
+      const query = searchQuery.toLowerCase();
+      const category = item.item_data?.category?.toLowerCase() || '';
+      return item.title.toLowerCase().includes(query) || 
+             item.description?.toLowerCase().includes(query) || 
+             category.includes(query);
     })
-  }, [items, activeFilters])
+  }, [items, activeFilters, searchQuery])
 
   const available = filteredItems.filter(i => i.availability_status === 'available')
   const unavailable = filteredItems.filter(i => i.availability_status !== 'available')
@@ -184,7 +195,7 @@ export function ListingRenderer({ location, page, items, locationSlug }: Listing
         ) : (
           <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${themeColor}30 0%, #0a0a0f 100%)` }} />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-black/30 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-t from-zinc-950 via-black/30 to-transparent" />
         <div className="absolute bottom-0 left-0 right-0 p-6 max-w-5xl mx-auto">
           {location.organizations?.logo_url && (
             <div className="relative h-10 w-24 mb-3 drop-shadow-lg">
@@ -202,8 +213,30 @@ export function ListingRenderer({ location, page, items, locationSlug }: Listing
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-          {location.name}
+          {location.portal_display_name || location.name}
         </BackButton>
+
+        {/* Search Bar */}
+        <div className="mb-6 relative group">
+          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+            <Search className="w-5 h-5 text-zinc-500 group-focus-within:text-emerald-500 transition-colors" />
+          </div>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search listings, categories..."
+            className="w-full pl-12 pr-12 py-3.5 bg-zinc-900/50 border border-zinc-800 rounded-2xl text-[15px] outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/50 transition-all text-white placeholder:text-zinc-500"
+          />
+          {searchQuery && (
+            <button 
+              onClick={() => setSearchQuery('')}
+              className="absolute inset-y-0 right-0 pr-4 flex items-center text-zinc-500 hover:text-zinc-300 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          )}
+        </div>
 
         {/* Stats bar */}
         <div className="flex gap-4 mb-6 text-xs text-zinc-500 font-medium">
@@ -510,7 +543,9 @@ export function ListingRenderer({ location, page, items, locationSlug }: Listing
         </motion.div>
 
         {filteredItems.length === 0 && (
-          <div className="text-center py-16 text-zinc-600 text-sm">No listings found matching your criteria.</div>
+          <div className="text-center py-16 text-zinc-600 text-sm">
+            {searchQuery ? `No listings found matching "${searchQuery}".` : 'No listings found matching your criteria.'}
+          </div>
         )}
 
         <div className="mt-12 text-center">

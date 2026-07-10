@@ -245,7 +245,8 @@ export async function startInteractiveDemo() {
       title: 'Pacy Grills & Lounge',
       template_type: 'catalog',
       is_published: true,
-      billing_enabled: true
+      billing_enabled: true,
+      randomizer_enabled: true
     },
     {
       location_id: loc.id,
@@ -308,7 +309,7 @@ export async function startInteractiveDemo() {
       location_id: loc.id,
       slug: 'pacy-repairs',
       title: 'Pacy Gadget Repairs',
-      template_type: 'custom',
+      template_type: 'quote',
       business_type_preset: 'repair_services',
       billing_enabled: false,
       billing_mode: 'standard_checkout',
@@ -421,6 +422,15 @@ export async function startInteractiveDemo() {
       pageItems.push(
         { page_id: hotelsPage.id, title: 'Ocean View Suite', subtitle: 'King Bed / Balcony', description: 'Luxury suite with panoramic ocean views and complementary breakfast.', price_minor: 12000000, price_display: '120,000 / night', sort_order: 0, availability_status: 'available', item_data: { beds: 1, occupancy: 2 }, images: ['https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&w=800&q=80'] },
         { page_id: hotelsPage.id, title: 'Standard Double', subtitle: 'Queen Bed', description: 'Comfortable room perfect for business travelers.', price_minor: 4500000, price_display: '45,000 / night', sort_order: 1, availability_status: 'available', item_data: { beds: 1, occupancy: 2 }, images: ['https://images.unsplash.com/photo-1566665797739-1674de7a421a?auto=format&fit=crop&w=800&q=80'] }
+      )
+    }
+
+    const repairsPage = pages.find((p: { id: string, slug: string }) => p.slug === 'pacy-repairs')
+    if (repairsPage) {
+      pageItems.push(
+        { page_id: repairsPage.id, title: 'Screen Replacement', description: 'Original OEM display replacement. TrueTone restored.', price_minor: 4500000, price_display: 'From 45,000', sort_order: 0, availability_status: 'available', item_data: { turnaround: '2-4 hours', category: 'Screen Repairs' }, images: ['https://images.unsplash.com/photo-1597848212624-a19eb35e2651?auto=format&fit=crop&w=800&q=80'] },
+        { page_id: repairsPage.id, title: 'Battery Replacement', description: 'High-capacity battery replacement with 6 months warranty.', price_minor: 2500000, price_display: 'From 25,000', sort_order: 1, availability_status: 'available', item_data: { turnaround: '1-2 hours', category: 'Battery Services' }, images: ['https://images.unsplash.com/photo-1628126235206-5260b9ea6441?auto=format&fit=crop&w=800&q=80'] },
+        { page_id: repairsPage.id, title: 'Water Damage Diagnostic', description: 'Comprehensive ultrasonic cleaning and diagnostic test.', price_minor: 1000000, sort_order: 2, availability_status: 'available', item_data: { turnaround: '24-48 hours', category: 'Diagnostics' }, images: ['https://images.unsplash.com/photo-1590487988256-9ed24133863e?auto=format&fit=crop&w=800&q=80'] }
       )
     }
 

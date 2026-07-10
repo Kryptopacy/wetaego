@@ -201,7 +201,7 @@ export default async function PagesManager() {
 
                   {/* Primary Action */}
                   <Link
-                    href={`/dashboard/pages/build/${page.template_type === 'custom' || page.template_type === 'info' ? 'hotel' : presetKey}?mode=edit&pageId=${page.id}`}
+                    href={`/dashboard/pages/builder/${page.template_type === 'custom' || page.template_type === 'info' ? 'hotel' : presetKey}?mode=edit&pageId=${page.id}`}
                     className="px-4 py-2 bg-white text-black text-sm font-semibold rounded-lg hover:bg-zinc-200 transition-colors shrink-0"
                   >
                     Edit

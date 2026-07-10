@@ -79,7 +79,8 @@ export default async function DashboardLayout({ children }: { children: ReactNod
             .from('location_pages')
             .select('id, title, template_type, is_published')
             .eq('location_id', activeLoc.id)
-            .order('sort_order')
+            .order('is_primary', { ascending: false })
+            .order('created_at', { ascending: false })
 
           const templates = new Set<string>()
           if (pages) {

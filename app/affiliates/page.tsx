@@ -38,10 +38,7 @@ export default function AffiliatesLandingPage() {
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-900/20 via-black to-black"></div>
           
           <div className="max-w-5xl mx-auto px-6 relative z-10 text-center">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-sm font-medium mb-8">
-              <span className="flex w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              Partnership Program
-            </div>
+
             
             <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6">
               Earn <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400">Recurring</span> Revenue

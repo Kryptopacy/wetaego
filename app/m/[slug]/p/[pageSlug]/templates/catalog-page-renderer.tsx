@@ -9,6 +9,7 @@ import { motion } from 'framer-motion'
 import { CartFAB } from '../../../cart-fab'
 import { VariantSelector } from '@/components/variant-selector'
 import { formatCurrency } from '@/lib/utils/currency'
+import { Search, X } from 'lucide-react'
 
 // The catalog page renderer is a light version for pages created via the pages builder
 // (NOT the main /m/[slug] menu — that stays as is).
@@ -35,6 +36,7 @@ interface CatalogPageRendererProps {
     id: string
     organization_id: string
     name: string
+    portal_display_name?: string
     theme_color?: string
     cover_image_url?: string
     organizations?: { logo_url?: string }
@@ -79,6 +81,7 @@ export function CatalogPageRenderer({ location, page, items, locationSlug, payme
   const themeColor = location.theme_color || '#7c3aed'
   const { addItem } = useCartStore()
   const [variantItem, setVariantItem] = useState<PageItem | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
 
   function handleAddToCart(item: PageItem) {
     const variants = item.item_data?.variants
@@ -103,15 +106,24 @@ export function CatalogPageRenderer({ location, page, items, locationSlug, payme
     setVariantItem(null)
   }
 
+  // Filter items based on search query
+  const filteredItems = items.filter(item => {
+    if (!searchQuery) return true;
+    const query = searchQuery.toLowerCase();
+    return item.title.toLowerCase().includes(query) || 
+           item.description?.toLowerCase().includes(query) || 
+           item.item_data?.category?.toLowerCase().includes(query);
+  });
+
   // Group by category if any items have one
-  const categories = [...new Set(items.map(i => i.item_data?.category).filter(Boolean) as string[])]
+  const categories = [...new Set(filteredItems.map(i => i.item_data?.category).filter(Boolean) as string[])]
   const hasCategories = categories.length > 0
 
   const groupedItems = hasCategories
-    ? Object.fromEntries(categories.map(cat => [cat, items.filter(i => i.item_data?.category === cat)]))
-    : { all: items }
+    ? Object.fromEntries(categories.map(cat => [cat, filteredItems.filter(i => i.item_data?.category === cat)]))
+    : { all: filteredItems }
 
-  const uncategorized = hasCategories ? items.filter(i => !i.item_data?.category) : []
+  const uncategorized = hasCategories ? filteredItems.filter(i => !i.item_data?.category) : []
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white font-sans" style={{ backgroundColor: (page as { background_color?: string }).background_color || undefined }}>
@@ -143,8 +155,30 @@ export function CatalogPageRenderer({ location, page, items, locationSlug, payme
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-          {location.name}
+          {location.portal_display_name || location.name}
         </BackButton>
+
+        {/* Search Bar */}
+        <div className="mb-6 relative group">
+          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+            <Search className="w-5 h-5 text-zinc-500 group-focus-within:text-emerald-500 transition-colors" />
+          </div>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search items, categories..."
+            className="w-full pl-12 pr-12 py-3.5 bg-zinc-900/50 border border-zinc-800 rounded-2xl text-[15px] outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/50 transition-all text-white placeholder:text-zinc-500"
+          />
+          {searchQuery && (
+            <button 
+              onClick={() => setSearchQuery('')}
+              className="absolute inset-y-0 right-0 pr-4 flex items-center text-zinc-500 hover:text-zinc-300 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          )}
+        </div>
 
         {/* Category tabs if grouped */}
         {hasCategories && (
@@ -162,7 +196,7 @@ export function CatalogPageRenderer({ location, page, items, locationSlug, payme
           {Object.entries(groupedItems).map(([cat, catItems]) => (
             <div key={cat} id={cat}>
               {hasCategories && cat !== 'all' && (
-                <h2 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-4 capitalize">{cat}</h2>
+                <h2 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-4">{cat}</h2>
               )}
               <motion.div 
                 initial="hidden" animate="show"
@@ -257,8 +291,10 @@ export function CatalogPageRenderer({ location, page, items, locationSlug, payme
           )}
         </div>
 
-        {items.length === 0 && (
-          <div className="text-center py-16 text-zinc-600 text-sm">No items yet.</div>
+        {filteredItems.length === 0 && (
+          <div className="text-center py-16 text-zinc-600 text-sm">
+            {searchQuery ? `No items found matching "${searchQuery}"` : 'No items yet.'}
+          </div>
         )}
 
         <div className="mt-12 text-center">
