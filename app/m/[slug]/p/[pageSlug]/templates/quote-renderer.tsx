@@ -126,10 +126,11 @@ export function QuoteRenderer({ location, page, items, locationSlug }: QuoteRend
       formData.append('quote_data', JSON.stringify(payload))
       
       const res = await submitQuoteRequest(formData)
+      const resData = res.data
       
-      if (res?.data?.success && res?.data?.referenceNumber) {
-        setReferenceNumber(res.data.referenceNumber)
-        if (res.data.accessPin) setAccessPin(res.data.accessPin)
+      if (resData?.success && resData?.referenceNumber) {
+        setReferenceNumber(resData.referenceNumber)
+        if (resData.accessPin) setAccessPin(resData.accessPin)
         setFormSuccess(true)
         window.scrollTo({ top: 0, behavior: 'smooth' })
       }
