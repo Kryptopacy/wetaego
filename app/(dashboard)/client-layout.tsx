@@ -274,16 +274,14 @@ export default function ClientLayout({ children, initialData }: { children: Reac
                 }}
               >
                 {locations.map((loc) => (
-                  <optgroup key={loc.id} label="Portals">
-                    <option value={`loc:${loc.id}`}>🏢 {loc.portal_display_name || loc.name} (General)</option>
+                  <optgroup key={loc.id} label={loc.portal_display_name || loc.name}>
+                    <option value={`loc:${loc.id}`}>🏢 Overview (General)</option>
                     {loc.id === activeLocationId && pages.length > 0 && (
-                      <optgroup label="Businesses (Pages)">
-                        {pages.map(page => (
-                          <option key={page.id} value={`page:${page.id}`}>
-                            {page.title}
-                          </option>
-                        ))}
-                      </optgroup>
+                      pages.map(page => (
+                        <option key={page.id} value={`page:${page.id}`}>
+                          &nbsp;&nbsp;↳ {page.title}
+                        </option>
+                      ))
                     )}
                   </optgroup>
                 ))}
@@ -295,7 +293,7 @@ export default function ClientLayout({ children, initialData }: { children: Reac
           )}
         </div>
 
-        <div className="flex-1 overflow-y-auto px-4 py-6 space-y-8 scrollbar-hide">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 py-6 space-y-8">
           <div className="space-y-1">
             <h3 className="px-3 text-xs font-bold text-zinc-500 uppercase tracking-wider mb-3">Daily Operations</h3>
             {dynamicNavItems.map((item) => (
@@ -367,7 +365,7 @@ export default function ClientLayout({ children, initialData }: { children: Reac
           )}
           {locationSlug && (
             <a 
-              href={`/m/${locationSlug}`} 
+              href={`/m/${locationSlug}?preview=true`} 
               target="_blank" 
               rel="noreferrer"
               className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 text-white text-sm font-medium rounded-xl transition-all mb-4 group"

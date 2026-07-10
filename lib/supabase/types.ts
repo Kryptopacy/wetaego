@@ -2137,7 +2137,9 @@ export type Database = {
           status: string
           total_amount_minor: number | null
           updated_at: string
-        }
+        
+            quote_metadata: Json | null
+            access_pin: string | null}
         Insert: {
           amount_paid_minor?: number
           booking_date?: string | null
@@ -2158,7 +2160,9 @@ export type Database = {
           status?: string
           total_amount_minor?: number | null
           updated_at?: string
-        }
+        
+            quote_metadata?: Json | null
+            access_pin?: string | null}
         Update: {
           amount_paid_minor?: number
           booking_date?: string | null
@@ -2179,7 +2183,9 @@ export type Database = {
           status?: string
           total_amount_minor?: number | null
           updated_at?: string
-        }
+        
+            quote_metadata?: Json | null
+            access_pin?: string | null}
         Relationships: [
           {
             foreignKeyName: "page_bookings_item_id_fkey"

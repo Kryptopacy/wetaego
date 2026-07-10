@@ -308,7 +308,7 @@ export async function startInteractiveDemo() {
       location_id: loc.id,
       slug: 'pacy-repairs',
       title: 'Pacy Gadget Repairs',
-      template_type: 'quote',
+      template_type: 'custom',
       business_type_preset: 'repair_services',
       billing_enabled: false,
       billing_mode: 'standard_checkout',

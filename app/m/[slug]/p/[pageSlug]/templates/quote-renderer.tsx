@@ -74,6 +74,7 @@ export function QuoteRenderer({ location, page, items, locationSlug }: QuoteRend
   const [isPending, startTransition] = useTransition()
   const [formSuccess, setFormSuccess] = useState(false)
   const [referenceNumber, setReferenceNumber] = useState('')
+  const [accessPin, setAccessPin] = useState('')
 
   function handleToggleItem(item: PageItem) {
     setSelectedItems(prev => {
@@ -129,6 +130,7 @@ export function QuoteRenderer({ location, page, items, locationSlug }: QuoteRend
       
       if (res?.data?.success && res?.data?.referenceNumber) {
         setReferenceNumber(res.data.referenceNumber)
+        if (res.data.accessPin) setAccessPin(res.data.accessPin)
         setFormSuccess(true)
         window.scrollTo({ top: 0, behavior: 'smooth' })
       }
@@ -148,8 +150,23 @@ export function QuoteRenderer({ location, page, items, locationSlug }: QuoteRend
           </p>
           <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-8">
             <p className="text-sm text-zinc-500 mb-1">Your Reference Number</p>
-            <p className="text-2xl font-mono text-white tracking-widest">{referenceNumber}</p>
+            <p className="text-xl font-mono text-white mb-6">{referenceNumber}</p>
+            
+            <p className="text-sm text-zinc-500 mb-1">Secure Access PIN</p>
+            <p className="text-xl font-mono text-emerald-400 mb-6 tracking-widest">{accessPin}</p>
+
+            <p className="text-sm text-zinc-400 leading-relaxed">
+              Please save these details. You will need both your Reference Number and Access PIN to track your request and negotiate with us.
+            </p>
           </div>
+          
+          <button 
+            onClick={() => window.location.href = `/m/${page.id}/track?ref=${referenceNumber}`}
+            className="w-full py-4 bg-white text-zinc-950 font-bold rounded-xl hover:bg-zinc-200 transition-colors mb-4"
+          >
+            Track Quote Now
+          </button>
+          
           <div className="p-6">
             <BackButton href={`/m/${locationSlug}`} className="inline-flex w-full justify-center px-6 py-4 rounded-xl font-bold text-white transition-colors" style={{ backgroundColor: themeColor }}>
               Return to Catalog
