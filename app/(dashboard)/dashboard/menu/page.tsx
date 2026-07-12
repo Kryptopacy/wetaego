@@ -89,8 +89,19 @@ export default async function MenuManagerPage() {
     return (
       <div className="max-w-5xl">
         <h1 className="text-2xl font-bold text-white mb-6">Primary Catalog</h1>
-        <div className="rounded-xl border border-yellow-800 bg-yellow-900/20 p-6">
-          <p className="text-yellow-400">Please complete your Business Settings to create your first menu.</p>
+        <div className="rounded-xl border border-zinc-700 bg-zinc-900/50 p-8 text-center space-y-4">
+          <div className="w-12 h-12 rounded-xl bg-zinc-800 flex items-center justify-center mx-auto">
+            <svg className="w-6 h-6 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+            </svg>
+          </div>
+          <div>
+            <p className="text-white font-semibold mb-1">No catalog set up yet</p>
+            <p className="text-zinc-400 text-sm">
+              Your primary catalog (for items, services, or products you sell) hasn&apos;t been created yet.
+              Complete your <a href="/dashboard/settings" className="text-emerald-400 hover:underline">Business Settings</a> to get started.
+            </p>
+          </div>
         </div>
       </div>
     )
