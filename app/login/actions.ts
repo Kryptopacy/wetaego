@@ -492,6 +492,8 @@ export async function startInteractiveDemo() {
   // We are fully logged in and provisioned!
   const cookieStore = await import('next/headers').then(m => m.cookies())
   ;(await cookieStore).set('demo_mode', '1', { path: '/', maxAge: 60 * 60 * 2 }) // Expires in 2 hours
+  // Persist the active location so all dashboard pages (Catalog Manager, etc.) resolve it immediately
+  ;(await cookieStore).set('ourmenu_active_location_id', loc.id, { path: '/', maxAge: 60 * 60 * 2 })
 
   revalidatePath('/', 'layout')
   revalidateTag(`location_${loc.slug}`, 'default')

@@ -16,7 +16,7 @@ export default async function ResourcesPage() {
   if (!orgId) return <div className="p-8 text-zinc-100">No organization found.</div>
 
   const { cookies } = await import('next/headers')
-  const locationId = (await cookies()).get('active_location_id')?.value
+  const locationId = (await cookies()).get('ourmenu_active_location_id')?.value
 
   if (!locationId) {
     return <div className="p-8 text-zinc-100">Please select a location from the sidebar.</div>

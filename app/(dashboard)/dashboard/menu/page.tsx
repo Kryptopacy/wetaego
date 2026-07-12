@@ -19,7 +19,6 @@ export default async function MenuManagerPage() {
 
   let org: { id: string } | null = null
 
-  let menu: { id: string } | null = null
   let categories: (Database['public']['Tables']['menu_categories']['Row'] & { menu_items?: Database['public']['Tables']['menu_items']['Row'][] })[] = []
 
   const { data: member } = await supabase
@@ -29,7 +28,7 @@ export default async function MenuManagerPage() {
     .single()
 
   if (member && member.organizations) {
-    org = member.organizations
+    org = member.organizations as { id: string }
 
   } else {
     const { data } = await supabase
@@ -37,7 +36,6 @@ export default async function MenuManagerPage() {
       .select('id')
       .eq('created_by', userId)
       .single()
-    org = data
     org = data
   }
 
@@ -53,6 +51,7 @@ export default async function MenuManagerPage() {
   }
   const activeLocationId = locationId || ''
 
+  // Find the menu for the active location, or fall back to any menu in the org
   let menuQuery = supabase
     .from('menus')
     .select('id')
@@ -62,9 +61,19 @@ export default async function MenuManagerPage() {
     menuQuery = menuQuery.eq('location_id', activeLocationId)
   }
 
-  const { data: menuData } = await menuQuery.single()
+  const { data: menuData } = await menuQuery.maybeSingle()
   
-  menu = menuData
+  // If no menu for active location, try any menu in the org
+  let menu: { id: string } | null = menuData
+  if (!menu && org?.id) {
+    const { data: fallbackMenu } = await supabase
+      .from('menus')
+      .select('id')
+      .eq('organization_id', org.id)
+      .limit(1)
+      .maybeSingle()
+    menu = fallbackMenu
+  }
 
   if (menu) {
     const { data: catData } = await supabase

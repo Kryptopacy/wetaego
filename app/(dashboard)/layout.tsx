@@ -1,5 +1,5 @@
 import { ReactNode } from 'react'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import ClientLayout, { InitialDashboardData, NavItem } from './client-layout'
 import { cookies } from 'next/headers'
 import { isAdminEmail } from '@/lib/utils/admin'
@@ -74,13 +74,16 @@ export default async function DashboardLayout({ children }: { children: ReactNod
           activeLocationId = activeLoc.id
           locationSlug = activeLoc.slug
 
-          // Fetch templates
-          const { data: pages } = await supabase
+          // Fetch templates — use adminClient to bypass RLS so the sidebar dropdown
+          // is always populated regardless of policy configuration.
+          const adminClient = await createAdminClient()
+          const { data: pages, error: pagesErr } = await adminClient
             .from('location_pages')
             .select('id, title, template_type, is_published')
             .eq('location_id', activeLoc.id)
             .order('is_primary', { ascending: false })
             .order('created_at', { ascending: false })
+          if (pagesErr) console.error('[layout] location_pages fetch error:', pagesErr)
 
           const templates = new Set<string>()
           if (pages) {
