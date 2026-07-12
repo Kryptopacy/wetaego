@@ -167,8 +167,8 @@ export async function startInteractiveDemo() {
 
   // 2. Provision the 'Pacy Grills' Org
   const { data: org, error: orgError } = await adminClient.from('organizations').insert({
-    name: 'Pacy Grills',
-    slug: `pacy-grills-${uid}`,
+    name: 'Pacy Group',
+    slug: `pacy-group-${uid}`,
     created_by: userId,
     is_demo: true,
   } as never).select('id').single()
@@ -191,7 +191,7 @@ export async function startInteractiveDemo() {
     organization_id: org.id,
     name: 'Pacy Grills & Lounge',
     portal_display_name: 'Pacy Group',
-    slug: `pacy-grills-${uid}`,
+    slug: `pacy-group-${uid}`,
     address: '42 Victoria Island, Lagos',
     currency_code: 'NGN',
     theme_color: '#0f7b55',
@@ -214,7 +214,7 @@ export async function startInteractiveDemo() {
       { question: 'What are your operating hours?', answer: 'We are generally open from 11:00 AM to 11:00 PM, but please check the specific service availability.' },
       { question: 'What payment methods do you accept?', answer: 'We accept all major credit cards and bank transfers.' }
     ],
-    brand_knowledge: 'Pacy Grills is known for its legendary 24-hour marinated Suya steak and craft cocktails.',
+    brand_knowledge: 'Pacy Group is a multi-concept hospitality brand in Lagos — spanning a restaurant (Pacy Grills), a wellness spa, short-stay apartments, a fashion boutique, a gadget store, a media/creator studio, a hotel, and a gadget repair service. The restaurant is known for its legendary 24-hour marinated Suya steak and craft cocktails.',
     publication_status: 'published',
     manual_payment_enabled: true,
     manual_payment_bank_name: 'OurMenu Demo Bank',
