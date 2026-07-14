@@ -95,7 +95,7 @@ export function PaymentRouletteModal({ isOpen, onClose }: PaymentRouletteModalPr
         particleCount: 100,
         spread: 70,
         origin: { y: 0.6 },
-        colors: ['#a855f7', '#d946ef', '#ffffff']
+        colors: ['#10b981', '#34d399', '#ffffff']
       })
     }
     
@@ -169,7 +169,7 @@ export function PaymentRouletteModal({ isOpen, onClose }: PaymentRouletteModalPr
         particleCount: 150,
         spread: 120,
         origin: { y: 0.5 },
-        colors: ['#a855f7', '#ec4899', '#eab308', '#3b82f6', '#22c55e'] // Chaos colors
+        colors: ['#10b981', '#34d399', '#eab308', '#3b82f6', '#22c55e'] // Chaos colors
       })
     }
   }
@@ -282,7 +282,7 @@ export function PaymentRouletteModal({ isOpen, onClose }: PaymentRouletteModalPr
                     whileTap={{ scale: 0.98 }}
                     onClick={handleSpin}
                     disabled={namesList.length < 2 || (mode === 'squad' && squadSize >= namesList.length)}
-                    className="w-full relative overflow-hidden bg-gradient-to-r from-emerald-600 to-fuchsia-600 text-white font-black py-4 rounded-xl shadow-[0_0_30px_rgba(168,85,247,0.4)] transition-all disabled:opacity-50 mt-2 group"
+                    className="w-full relative overflow-hidden bg-gradient-to-r from-emerald-600 to-green-600 text-white font-black py-4 rounded-xl shadow-[0_0_30px_rgba(16,185,129,0.4)] transition-all disabled:opacity-50 mt-2 group"
                   >
                     <div className="absolute inset-0 bg-white/20 translate-y-[-100%] group-hover:translate-y-[100%] transition-transform duration-500 ease-in-out" />
                     <span className="relative z-10 flex items-center justify-center gap-2">
@@ -296,13 +296,13 @@ export function PaymentRouletteModal({ isOpen, onClose }: PaymentRouletteModalPr
                   {/* The Spinner Screen */}
                   {mode !== 'chaos' || !isFinished ? (
                     <div className="w-full h-32 bg-zinc-950 border-2 border-zinc-800 rounded-2xl flex items-center justify-center p-4 relative overflow-hidden">
-                      {spinning && <div className="absolute inset-0 border-4 border-emerald-500 rounded-2xl animate-pulse shadow-[inset_0_0_30px_rgba(168,85,247,0.4)]" />}
+                      {spinning && <div className="absolute inset-0 border-4 border-emerald-500 rounded-2xl animate-pulse shadow-[inset_0_0_30px_rgba(16,185,129,0.4)]" />}
                       <motion.div 
                         key={currentDisplay}
                         initial={{ y: 30, opacity: 0, filter: 'blur(5px)' }}
                         animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
                         transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                        className={`text-3xl md:text-4xl font-black text-center ${(isFinished && mode !== 'survivor') ? 'text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-fuchsia-400 drop-shadow-[0_0_15px_rgba(168,85,247,0.5)]' : 'text-white drop-shadow-lg'}`}
+                        className={`text-3xl md:text-4xl font-black text-center ${(isFinished && mode !== 'survivor') ? 'text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-green-400 drop-shadow-[0_0_15px_rgba(16,185,129,0.5)]' : 'text-white drop-shadow-lg'}`}
                       >
                         {currentDisplay}
                       </motion.div>
