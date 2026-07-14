@@ -184,7 +184,7 @@ export function PaymentRouletteModal({ isOpen, onClose }: PaymentRouletteModalPr
             initial={{ opacity: 0, y: 20, scale: 0.9, x: '-50%', left: '50%' }}
             animate={{ opacity: 1, y: 0, scale: 1, x: '-50%', left: '50%' }}
             exit={{ opacity: 0, y: 20, scale: 0.9, x: '-50%', left: '50%' }}
-            className="fixed inset-4 md:inset-auto md:top-24 md:w-96 bg-zinc-900 border border-zinc-800 rounded-3xl shadow-2xl p-6 overflow-y-auto max-h-[80vh] flex flex-col z-[70] custom-scrollbar"
+            className="fixed top-24 w-[calc(100%-2rem)] md:w-96 bg-zinc-900 border border-zinc-800 rounded-3xl shadow-2xl p-6 overflow-y-auto max-h-[80vh] flex flex-col z-[70] custom-scrollbar"
           >
             {/* Glow effect */}
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-32 bg-emerald-500/20 blur-3xl rounded-full" />
@@ -226,18 +226,18 @@ export function PaymentRouletteModal({ isOpen, onClose }: PaymentRouletteModalPr
                     {mode === 'chaos' && "Everyone pays a completely random percentage."}
                   </div>
 
-                  <div className="flex bg-zinc-950 rounded-lg p-1 w-max mx-auto mb-2">
+                  <div className="flex bg-zinc-950 rounded-lg p-1 w-full max-w-[280px] mx-auto mb-2">
                     <button
                       onClick={() => setUseNames(false)}
-                      className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors ${!useNames ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
+                      className={`flex-1 px-2 py-1.5 text-xs font-bold rounded-md transition-colors ${!useNames ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
                     >
-                      Use Numbers (Quick)
+                      Numbers (Quick)
                     </button>
                     <button
                       onClick={() => setUseNames(true)}
-                      className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors ${useNames ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
+                      className={`flex-1 px-2 py-1.5 text-xs font-bold rounded-md transition-colors ${useNames ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
                     >
-                      Use Names
+                      Names
                     </button>
                   </div>
 
