@@ -117,7 +117,9 @@ export async function processCheckout(params: {
   taxTotalMinor?: number,
   taxBreakdown?: unknown[],
   isUnevenSplit?: boolean,
-  resourceId?: string
+  resourceId?: string,
+  deliveryLat?: number | null,
+  deliveryLng?: number | null
 }): Promise<SafeResult<{ checkoutUrl?: string, orderId: string, paymentMethod: string }>> {
   const {
     organizationId, locationId, items, totalAmountMinor, tipAmountMinor = 0,
@@ -204,12 +206,14 @@ export async function processCheckout(params: {
 
   // ----------------------------------------
 
-  // 2. Fetch Payment Settings
-  const { data: paySettings } = await supabase
-    .from('organization_payment_settings')
-    .select('provider_account_id, is_active')
-    .eq('organization_id', organizationId)
-    .single()
+  // 2. Fetch Payment Settings and Location Data
+  const [
+    { data: paySettings },
+    { data: location }
+  ] = await Promise.all([
+    supabase.from('organization_payment_settings').select('provider_account_id, is_active').eq('organization_id', organizationId).single(),
+    supabase.from('locations').select('custom_milestones').eq('id', locationId).single()
+  ])
 
 
   const subaccountCode = staffSubaccountOverride || (paySettings?.is_active ? paySettings.provider_account_id : null)
@@ -237,6 +241,7 @@ export async function processCheckout(params: {
       tax_breakdown: taxBreakdown || [],
       resource_id: resourceId || null,
       idempotency_key: idempotencyKey || null,
+      metadata: params.deliveryLat && params.deliveryLng ? { delivery_lat: params.deliveryLat, delivery_lng: params.deliveryLng } : null
     } as never).select('id').single()
 
   if (orderError || !order) throw new Error('Failed to create order')
@@ -285,6 +290,19 @@ export async function processCheckout(params: {
     // Roll back the order to prevent a paid order with no items
     await supabase.from('orders').delete().eq('id', order.id)
     throw new Error('Failed to save order items. Please try again.')
+  }
+
+  // 4b. Seed Custom Milestones (if configured for this fulfillment type)
+  const cMilestones = (location as any)?.custom_milestones as Record<string, string[]> | null
+  const flowKey = fulfillmentType || 'table'
+  const flowMilestones = cMilestones?.[flowKey]
+  if (flowMilestones && Array.isArray(flowMilestones) && flowMilestones.length > 0) {
+    const milestonesToInsert = flowMilestones.map((title) => ({
+      order_id: order.id,
+      title,
+      is_completed: false
+    }))
+    await supabase.from('order_milestones').insert(milestonesToInsert)
   }
 
   // 4b. Decrement Inventory Stock (Atomically)

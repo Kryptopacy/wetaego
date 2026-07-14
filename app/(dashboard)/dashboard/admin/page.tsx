@@ -120,6 +120,17 @@ export default async function AdminPage() {
                     <input type="number" name="enterprise_monthly_ngn" defaultValue={(pricing as Record<string, number>).enterprise_monthly_ngn || 150000} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white text-sm outline-none focus:border-emerald-500" />
                   </div>
                   <div className="col-span-1 sm:col-span-2 pt-2 border-t border-zinc-800">
+                    <h3 className="text-xs font-bold text-zinc-500 uppercase mb-3">Annual Plans (Total — 20% off monthly × 12)</h3>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-zinc-400 mb-1">Lite (Annual total)</label>
+                    <input type="number" name="lite_annual_ngn" defaultValue={(pricing as Record<string, number>).lite_annual_ngn || 191990} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white text-sm outline-none focus:border-emerald-500" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-zinc-400 mb-1">Pro (Annual total)</label>
+                    <input type="number" name="pro_annual_ngn" defaultValue={(pricing as Record<string, number>).pro_annual_ngn || 662400} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white text-sm outline-none focus:border-emerald-500" />
+                  </div>
+                  <div className="col-span-1 sm:col-span-2 pt-2 border-t border-zinc-800">
                     <h3 className="text-xs font-bold text-zinc-500 uppercase mb-3">Credit Packs</h3>
                   </div>
                   <div>
@@ -134,6 +145,7 @@ export default async function AdminPage() {
                     <label className="block text-xs font-medium text-zinc-400 mb-1">50 Credits</label>
                     <input type="number" name="credits_50_ngn" defaultValue={(pricing as Record<string, number>).credits_50_ngn || 60000} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white text-sm outline-none focus:border-emerald-500" />
                   </div>
+
                 </div>
                 <button type="submit" className="w-full px-4 py-2 bg-emerald-600/20 text-emerald-500 border border-emerald-500/50 rounded-lg text-sm font-medium hover:bg-emerald-500 hover:text-white transition">Save Pricing</button>
               </ActionForm>

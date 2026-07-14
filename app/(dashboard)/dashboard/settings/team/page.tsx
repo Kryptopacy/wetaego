@@ -4,6 +4,7 @@ import Link from 'next/link'
 
 import TeamManager from './team-manager'
 import DangerZone from './danger-zone'
+import { StaffShifts } from './staff-shifts'
 
 export default async function TeamPage() {
   const supabase = await createClient()
@@ -110,6 +111,29 @@ export default async function TeamPage() {
     redirect('/dashboard')
   }
 
+  // Fetch shifts for the organization's locations
+  const { data: shiftsRaw } = await supabase
+    .from('staff_shifts')
+    .select(`
+      id,
+      clock_in_time,
+      clock_out_time,
+      status,
+      profiles:user_id ( full_name, email ),
+      locations:location_id ( name )
+    `)
+    .order('clock_in_time', { ascending: false })
+    .limit(100)
+
+  const { data: orgLocations } = await supabase
+    .from('locations')
+    .select('id')
+    .eq('organization_id', organization.id)
+
+  const orgLocationIds = orgLocations?.map(l => l.id) || []
+  // @ts-expect-error - Supabase join typing
+  const shifts = (shiftsRaw || []).filter(shift => orgLocationIds.includes(shift.locations?.id || shift.location_id))
+
   return (
     <div className="max-w-4xl">
       <div className="flex items-center gap-4 mb-2">
@@ -135,6 +159,7 @@ export default async function TeamPage() {
           members={members}
           invites={invites}
         />
+        <StaffShifts shifts={shifts as any} />
         <DangerZone orgId={organization.id} isOwner={role === 'owner'} />
       </div>
     </div>

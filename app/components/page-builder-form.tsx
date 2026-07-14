@@ -308,7 +308,7 @@ export function PageBuilderForm({ pageId, templateType, initialItems, orgId }: P
                   toast.error((e as Error).message || 'AI generation failed.')
                 }
               }}
-              className="px-3 py-1.5 bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-400 hover:to-emerald-500 text-white rounded-lg text-xs font-bold transition-all whitespace-nowrap"
+              className="px-3 py-1.5 bg-linear-to-r from-teal-500 to-emerald-600 hover:from-teal-400 hover:to-emerald-500 text-white rounded-lg text-xs font-bold transition-all whitespace-nowrap"
             >
               ✨ AI Image Studio
             </button>

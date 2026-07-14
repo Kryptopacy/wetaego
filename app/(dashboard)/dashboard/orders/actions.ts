@@ -21,7 +21,7 @@ async function requireOrderAuth(orderId: string, user: { id: string }) {
   // Fetch order details
   const { data: order, error: fetchError } = await supabase
     .from('orders')
-    .select('organization_id, customer_email, organizations(name, slug)')
+    .select('organization_id, customer_email, page_id, organizations(name, slug)')
     .eq('id', orderId)
     .single()
 
@@ -32,7 +32,7 @@ async function requireOrderAuth(orderId: string, user: { id: string }) {
   // Check organization membership
   const { data: member } = await supabase
     .from('organization_members')
-    .select('id')
+    .select('page_id')
     .eq('organization_id', order.organization_id)
     .eq('user_id', user.id)
     .single()
@@ -47,6 +47,11 @@ async function requireOrderAuth(orderId: string, user: { id: string }) {
       .single()
     if (!org) {
       throw new Error('Unauthorized')
+    }
+  } else {
+    // Enforce page-level RBAC if the member is restricted to a specific page
+    if (member.page_id && member.page_id !== order.page_id) {
+      throw new Error('Unauthorized: You do not have access to this page\'s orders.')
     }
   }
 

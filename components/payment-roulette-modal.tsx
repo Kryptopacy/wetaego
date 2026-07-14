@@ -177,14 +177,14 @@ export function PaymentRouletteModal({ isOpen, onClose }: PaymentRouletteModalPr
   if (!isMounted) return null
 
   return (
-    <div className="pointer-events-auto relative z-[65]">
+    <div className="pointer-events-auto relative z-65">
       <AnimatePresence>
         {isOpen && (
           <motion.div 
             initial={{ opacity: 0, y: 20, scale: 0.9, x: '-50%', left: '50%' }}
             animate={{ opacity: 1, y: 0, scale: 1, x: '-50%', left: '50%' }}
             exit={{ opacity: 0, y: 20, scale: 0.9, x: '-50%', left: '50%' }}
-            className="fixed top-24 w-[calc(100%-2rem)] md:w-96 bg-zinc-900 border border-zinc-800 rounded-3xl shadow-2xl p-6 overflow-y-auto max-h-[80vh] flex flex-col z-[70] custom-scrollbar"
+            className="fixed top-24 w-[calc(100%-2rem)] md:w-96 bg-zinc-900 border border-zinc-800 rounded-3xl shadow-2xl p-6 overflow-y-auto max-h-[80vh] flex flex-col z-70 custom-scrollbar"
           >
             {/* Glow effect */}
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-32 bg-emerald-500/20 blur-3xl rounded-full" />
@@ -282,9 +282,9 @@ export function PaymentRouletteModal({ isOpen, onClose }: PaymentRouletteModalPr
                     whileTap={{ scale: 0.98 }}
                     onClick={handleSpin}
                     disabled={namesList.length < 2 || (mode === 'squad' && squadSize >= namesList.length)}
-                    className="w-full relative overflow-hidden bg-gradient-to-r from-emerald-600 to-green-600 text-white font-black py-4 rounded-xl shadow-[0_0_30px_rgba(16,185,129,0.4)] transition-all disabled:opacity-50 mt-2 group"
+                    className="w-full relative overflow-hidden bg-linear-to-r from-emerald-600 to-green-600 text-white font-black py-4 rounded-xl shadow-[0_0_30px_rgba(16,185,129,0.4)] transition-all disabled:opacity-50 mt-2 group"
                   >
-                    <div className="absolute inset-0 bg-white/20 translate-y-[-100%] group-hover:translate-y-[100%] transition-transform duration-500 ease-in-out" />
+                    <div className="absolute inset-0 bg-white/20 -translate-y-full group-hover:translate-y-full transition-transform duration-500 ease-in-out" />
                     <span className="relative z-10 flex items-center justify-center gap-2">
                       SPIN THE WHEEL 🎰
                     </span>
@@ -302,7 +302,7 @@ export function PaymentRouletteModal({ isOpen, onClose }: PaymentRouletteModalPr
                         initial={{ y: 30, opacity: 0, filter: 'blur(5px)' }}
                         animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
                         transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                        className={`text-3xl md:text-4xl font-black text-center ${(isFinished && mode !== 'survivor') ? 'text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-green-400 drop-shadow-[0_0_15px_rgba(16,185,129,0.5)]' : 'text-white drop-shadow-lg'}`}
+                        className={`text-3xl md:text-4xl font-black text-center ${(isFinished && mode !== 'survivor') ? 'text-transparent bg-clip-text bg-linear-to-r from-emerald-400 to-green-400 drop-shadow-[0_0_15px_rgba(16,185,129,0.5)]' : 'text-white drop-shadow-lg'}`}
                       >
                         {currentDisplay}
                       </motion.div>
@@ -378,7 +378,7 @@ export function PaymentRouletteModal({ isOpen, onClose }: PaymentRouletteModalPr
         {isOpen && (
           <motion.div 
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60]" 
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-60" 
             onClick={onClose} 
           />
         )}

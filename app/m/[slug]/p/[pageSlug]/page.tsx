@@ -100,7 +100,7 @@ export default async function PublicPageView({
     const anonSupabase = createAnonClient()
     const { data } = await anonSupabase
       .from('locations')
-      .select('id, name, organization_id, is_search_visible, theme_color, cover_image_url, ai_enabled, ai_name, instagram_handle, x_handle, tiktok_handle, whatsapp_number, phone_number, organizations(logo_url, status, refund_policy), manual_payment_enabled, manual_payment_bank_name, manual_payment_account_name, manual_payment_account_number, manual_payment_instructions, delivery_enabled, delivery_fee_minor, delivery_minimum_order_minor, delivery_note, fulfillment_location_label, currency_code, portal_display_name, location_taxes(*)')
+      .select('id, name, organization_id, is_search_visible, theme_color, cover_image_url, ai_enabled, ai_name, instagram_handle, x_handle, tiktok_handle, facebook_handle, whatsapp_number, phone_number, google_maps_url, operating_hours, wifi_network, wifi_password, organizations(logo_url, status, refund_policy), manual_payment_enabled, manual_payment_bank_name, manual_payment_account_name, manual_payment_account_number, manual_payment_instructions, delivery_enabled, delivery_fee_minor, delivery_minimum_order_minor, delivery_note, fulfillment_location_label, currency_code, portal_display_name, location_taxes(*)')
       .eq('slug', slug)
       .single()
     return data
@@ -172,7 +172,7 @@ export default async function PublicPageView({
     const anonSupabase = createAnonClient()
     let query = anonSupabase
       .from('location_pages')
-      .select('id, title, slug, content, template_type, billing_enabled, billing_mode, payment_mode, deposit_percentage, business_type_preset, randomizer_enabled, deals_enabled, template_data, is_published, theme_color, background_color')
+      .select('id, title, slug, content, template_type, billing_enabled, billing_mode, payment_mode, deposit_percentage, business_type_preset, randomizer_enabled, deals_enabled, template_data, is_published, theme_color, background_color, operating_hours, contact_email, contact_phone, wifi_network, wifi_password, address')
       .eq('location_id', loc.id)
       .eq('slug', pageSlug)
 
@@ -180,7 +180,8 @@ export default async function PublicPageView({
       query = query.eq('is_published', true)
     }
 
-    const { data } = await query.single()
+    const { data: rawData } = await query.single()
+    const data = rawData as any
     return data
   }
   const page = isPreview 
@@ -283,9 +284,17 @@ export default async function PublicPageView({
   // Resource already checked earlier
 
   const sharedProps = {
-     
-    location: { ...loc, cover_image_url: loc.cover_image_url ?? undefined, currency: loc.currency_code, theme_color: pageThemeColor } as never,
-     
+    location: { 
+      ...loc, 
+      cover_image_url: loc.cover_image_url ?? undefined, 
+      currency: loc.currency_code, 
+      theme_color: pageThemeColor,
+      operating_hours: page.operating_hours !== null && page.operating_hours !== undefined ? (typeof page.operating_hours === 'string' ? page.operating_hours : (page.operating_hours as any)) : loc.operating_hours,
+      wifi_network: page.wifi_network || loc.wifi_network,
+      wifi_password: page.wifi_password || loc.wifi_password,
+      phone_number: page.contact_phone || loc.phone_number,
+      address: page.address || undefined
+    } as never,
     page: page as never,
      
     items: items as never[],

@@ -248,7 +248,42 @@ export async function POST(req: Request) {
             if (error) throw new Error(error.message)
             return { success: true, itemId: data.id, name }
           }
-        })
+        }),
+        create_location_page: tool({
+          description: 'Create a new location page (e.g. a menu, booking page, or catalog) for a location.',
+          parameters: z.object({
+            locationId: z.string().uuid(),
+            title: z.string().describe('The title of the new page, e.g. "Main Menu", "Spa Bookings"'),
+            templateType: z.enum(['catalog', 'booking', 'rate_card', 'quote', 'listing', 'info', 'custom']),
+            businessTypePreset: z.string().optional().describe('The preset to use, e.g. "restaurant", "spa_wellness". Helps set default aesthetics.')
+          }),
+          // @ts-expect-error - TS inference struggles
+          execute: async ({ locationId, title, templateType, businessTypePreset }: { locationId: string; title: string; templateType: string; businessTypePreset?: string }): Promise<Record<string, unknown>> => {
+            if (userRole !== 'owner' && userRole !== 'manager') {
+              return { error: 'Unauthorized: Only owners and managers can create pages.' }
+            }
+            
+            // Generate a slug
+            const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '') + '-' + Date.now().toString().slice(-4)
+            
+            const { data, error } = await supabase
+              .from('location_pages')
+              .insert({
+                location_id: locationId,
+                title: title,
+                slug: slug,
+                template_type: templateType,
+                business_type_preset: businessTypePreset || null,
+                is_published: true,
+                billing_enabled: templateType !== 'info' && templateType !== 'custom'
+              } as never)
+              .select('id')
+              .single()
+              
+            if (error) throw new Error(error.message)
+            return { success: true, pageId: data.id, title, slug, url: `/dashboard/pages/${data.id}/edit` }
+          }
+        }),
       }
     })
 

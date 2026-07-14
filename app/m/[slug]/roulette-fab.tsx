@@ -25,7 +25,7 @@ export function RouletteFAB() {
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         onClick={() => setIsOpen(!isOpen)}
-        className="relative z-[45] h-14 w-14 rounded-full bg-zinc-900 border border-zinc-700 shadow-xl flex items-center justify-center text-emerald-400 transition-colors group"
+        className="relative z-45 h-14 w-14 rounded-full bg-zinc-900 border border-zinc-700 shadow-xl flex items-center justify-center text-emerald-400 transition-colors group"
         aria-label={isOpen ? "Close roulette" : "Open roulette"}
         aria-expanded={isOpen}
         aria-controls="payment-roulette-modal"

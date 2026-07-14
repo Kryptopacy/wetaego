@@ -52,7 +52,21 @@ export function TimeclockWidget({ locationId }: { locationId: string }) {
         }
         setActiveShiftId(null)
       } else {
-        const res = await clockIn({ locationId })
+        let lat, lng;
+        if ('geolocation' in navigator) {
+          try {
+            const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
+              navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000 })
+            })
+            lat = pos.coords.latitude;
+            lng = pos.coords.longitude;
+          } catch (err) {
+            console.warn('Geolocation failed:', err)
+            toast.error('Could not determine your location. Clock-in might be rejected if a geofence is required.')
+          }
+        }
+        
+        const res = await clockIn({ locationId, latitude: lat, longitude: lng })
         if (res?.serverError || res?.validationErrors) {
           toast.error(res?.serverError || 'Failed to clock in')
           return

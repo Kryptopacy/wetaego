@@ -364,7 +364,7 @@ export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, tem
                     )}
                   </div>
                   <div className={`flex items-center gap-3 ${templateType === 'restaurant' ? 'w-full sm:w-auto flex-col sm:flex-row' : ''}`}>
-                    {templateType === 'services' && order.status !== 'cancelled' && (
+                    {(templateType === 'services' || order.fulfillment_type === 'delivery' || order.fulfillment_type === 'pickup') && order.status !== 'cancelled' && (
                       <button
                         onClick={() => setMilestonesOrder(order)}
                         className="px-4 py-2 rounded-lg bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 font-medium transition-colors text-sm border border-blue-500/20 hover:border-blue-500/40 flex items-center gap-2"
@@ -483,7 +483,7 @@ export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, tem
                   </button>
                 )}
 
-                {templateType === 'services' && (
+                {(templateType === 'services' || order.fulfillment_type === 'delivery' || order.fulfillment_type === 'pickup') && (
                   <button
                     onClick={() => setMilestonesOrder(order)}
                     className="w-full px-4 py-3 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 font-bold active:bg-blue-500/20"

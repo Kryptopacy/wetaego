@@ -24,7 +24,7 @@ export default async function OrdersPage() {
 
   if (userId) {
     // Check if user is a member of an organization
-    const { data: memberData } = await supabase.from('organization_members').select('organization_id').eq('user_id', userId).limit(1).single()
+    const { data: memberData } = await supabase.from('organization_members').select('organization_id, page_id').eq('user_id', userId).limit(1).single()
     
     if (memberData) {
       org = { id: memberData.organization_id }
@@ -45,17 +45,25 @@ export default async function OrdersPage() {
         locationId = loc?.id
       }
       activeLocationId = locationId || ''
-      const activePageId = cookieStore.get('ourmenu_active_page_id')?.value || ''
+      let activePageId = cookieStore.get('ourmenu_active_page_id')?.value || ''
+      
+      // RBAC: Force active page if restricted
+      if (memberData?.page_id) {
+        activePageId = memberData.page_id
+      }
 
-      if (activeLocationId) {
+      if (activeLocationId || activePageId) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let ordersQuery: any = supabase
           .from('orders')
           .select('*, order_items(*), order_milestones(*), order_payments(*)')
           .eq('organization_id', org.id)
-          .eq('location_id', activeLocationId)
           .order('created_at', { ascending: false })
           .limit(50)
+          
+        if (activeLocationId && !memberData?.page_id) {
+          ordersQuery = ordersQuery.eq('location_id', activeLocationId)
+        }
         
         if (activePageId) ordersQuery = ordersQuery.eq('page_id', activePageId)
 
@@ -63,8 +71,11 @@ export default async function OrdersPage() {
         let pageQuery: any = supabase
           .from('location_pages')
           .select('billing_mode, template_type')
-          .eq('location_id', activeLocationId)
           .eq('is_published', true)
+          
+        if (activeLocationId && !memberData?.page_id) {
+          pageQuery = pageQuery.eq('location_id', activeLocationId)
+        }
           
         if (activePageId) pageQuery = pageQuery.eq('id', activePageId)
         pageQuery = pageQuery.limit(1).single()
@@ -102,7 +113,7 @@ export default async function OrdersPage() {
 
   return (
     <div className="max-w-6xl h-[calc(100vh-8rem)] flex flex-col">
-      <div className="flex items-center justify-between mb-8 flex-shrink-0">
+      <div className="flex items-center justify-between mb-8 shrink-0">
         <h1 className="text-2xl font-bold text-white">{t('liveOperations')}</h1>
         <div className="flex gap-2">
           <span className="flex items-center gap-2 px-3 py-1 rounded-full bg-green-500/10 text-green-400 text-sm font-medium border border-green-500/20">

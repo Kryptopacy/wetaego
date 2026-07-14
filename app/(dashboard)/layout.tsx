@@ -33,7 +33,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   if (userData?.user) {
     const { data: member } = await supabase
       .from('organization_members')
-      .select('role, organizations(id, name, subscription_tier, subscription_status, subscription_plan, trial_ends_at, purchased_credits, monthly_free_credits_used)')
+      .select('role, page_id, organizations(id, name, subscription_tier, subscription_status, subscription_plan, trial_ends_at, purchased_credits, monthly_free_credits_used)')
       .eq('user_id', userData.user.id)
       .single()
 
@@ -68,22 +68,38 @@ export default async function DashboardLayout({ children }: { children: ReactNod
         if (locs && locs.length > 0) {
           locations = locs
           
-          const savedId = cookieStore.get('ourmenu_active_location_id')?.value
-          const activeLoc = locs.find((l: Record<string, unknown>) => l.id === savedId) || locs[0]
+          let savedId = cookieStore.get('ourmenu_active_location_id')?.value
+          let activeLoc = locs.find((l: Record<string, unknown>) => l.id === savedId) || locs[0]
           
-          activeLocationId = activeLoc.id
-          locationSlug = activeLoc.slug
-
           // Fetch templates — use adminClient to bypass RLS so the sidebar dropdown
           // is always populated regardless of policy configuration.
           const adminClient = await createAdminClient()
-          const { data: pages, error: pagesErr } = await adminClient
+          
+          let pagesQuery = adminClient
             .from('location_pages')
-            .select('id, title, template_type, is_published')
-            .eq('location_id', activeLoc.id)
+            .select('id, title, template_type, is_published, location_id')
+            
+          if (member?.page_id) {
+            pagesQuery = pagesQuery.eq('id', member.page_id)
+          } else {
+            pagesQuery = pagesQuery.eq('location_id', activeLoc.id)
+          }
+            
+          const { data: pages, error: pagesErr } = await pagesQuery
             .order('is_primary', { ascending: false })
             .order('created_at', { ascending: false })
+            
           if (pagesErr) console.error('[layout] location_pages fetch error:', pagesErr)
+
+          if (member?.page_id && pages && pages.length > 0) {
+            // RBAC: Lock location to the one owning this page
+            activeLoc = locs.find((l: any) => l.id === pages[0].location_id) || activeLoc
+            locations = [activeLoc] // UI restriction: only show this location
+            activePageId = member.page_id // UI restriction: force active page
+          }
+
+          activeLocationId = activeLoc.id
+          locationSlug = activeLoc.slug
 
           const templates = new Set<string>()
           if (pages) {

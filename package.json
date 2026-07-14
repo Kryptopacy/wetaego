@@ -14,7 +14,10 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "paystack:listen": "paystack webhook listen localhost:3000/api/webhooks/paystack",
-    "plan": "echo \"See docs/PRODUCT_PLAN.md\""
+    "plan": "echo \"See docs/PRODUCT_PLAN.md\"",
+    "db:push": "node scripts/db.js push",
+    "db:types": "node scripts/db.js types",
+    "db:migrate": "node scripts/db.js migrate"
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.80",
@@ -33,6 +36,7 @@
     "@upstash/ratelimit": "^1.0.0",
     "@upstash/redis": "^1.30.0",
     "@vercel/functions": "^3.6.2",
+    "@vis.gl/react-google-maps": "^1.9.0",
     "ai": "^6.0.197",
     "canvas-confetti": "^1.9.4",
     "clsx": "^2.1.1",

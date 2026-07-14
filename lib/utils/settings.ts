@@ -4,7 +4,10 @@ import { unstable_cache } from 'next/cache'
 // Default fallbacks in case the DB is unreachable or row is missing
 const DEFAULT_PRICING = { 
   lite_monthly_ngn: 19999, 
-  pro_monthly_ngn: 69000, 
+  pro_monthly_ngn: 69000,
+  // Annual = 9.6 months (20% off). Stored as the total annual amount.
+  lite_annual_ngn: 191990,
+  pro_annual_ngn: 662400,
   credits_10_ngn: 6000,
   credits_25_ngn: 12000,
   credits_50_ngn: 20000 

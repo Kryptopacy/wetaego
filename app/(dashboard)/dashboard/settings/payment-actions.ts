@@ -73,22 +73,35 @@ export const savePaymentSettings = authActionClient
 export const saveManualPaymentSettings = authActionClient
   .schema(zfd.formData({
     locationId: zfd.text(z.string().uuid()),
+    pageId: zfd.text(z.string().uuid().optional()),
     manualPaymentEnabled: zfd.checkbox(),
     manualBankName: zfd.text(z.string().optional()),
     manualAccountNumber: zfd.text(z.string().optional()),
     manualAccountName: zfd.text(z.string().optional()),
     manualInstructions: zfd.text(z.string().optional()),
   }))
-  .action(async ({ parsedInput: { locationId, manualPaymentEnabled, manualBankName, manualAccountNumber, manualAccountName, manualInstructions }, ctx: { supabase, user } }) => {
+  .action(async ({ parsedInput: { locationId, pageId, manualPaymentEnabled, manualBankName, manualAccountNumber, manualAccountName, manualInstructions }, ctx: { supabase, user } }) => {
     const { cookies } = await import('next/headers')
     if ((await cookies()).get('demo_mode')?.value === '1') {
       return { success: true }
     }
 
+    let activeLocationId = locationId
+    
+    if (pageId) {
+      const { data: page } = await supabase
+        .from('location_pages')
+        .select('location_id')
+        .eq('id', pageId)
+        .single()
+      if (!page) throw new Error('Page not found')
+      activeLocationId = page.location_id
+    }
+
     const { data: loc } = await supabase
       .from('locations')
       .select('organization_id')
-      .eq('id', locationId)
+      .eq('id', activeLocationId)
       .single()
 
     if (!loc) throw new Error('Location not found')
@@ -121,16 +134,31 @@ export const saveManualPaymentSettings = authActionClient
       throw new Error('Manual payment details cannot be modified in demo workspaces to protect end customers.')
     }
 
-    const { error } = await supabase
-      .from('locations')
-      .update({
-        manual_payment_enabled: manualPaymentEnabled,
-        manual_payment_bank_name: manualBankName || null,
-        manual_payment_account_number: manualAccountNumber || null,
-        manual_payment_account_name: manualAccountName || null,
-        manual_payment_instructions: manualInstructions || null
-      })
-      .eq('id', locationId)
+    if (pageId) {
+      const { error } = await supabase
+        .from('location_pages')
+        .update({
+          manual_payment_enabled: manualPaymentEnabled,
+          manual_payment_bank_name: manualBankName || null,
+          manual_payment_account_number: manualAccountNumber || null,
+          manual_payment_account_name: manualAccountName || null,
+          manual_payment_instructions: manualInstructions || null
+        })
+        .eq('id', pageId)
+      if (error) throw new Error('Failed to update page manual payment settings')
+    } else {
+      const { error } = await supabase
+        .from('locations')
+        .update({
+          manual_payment_enabled: manualPaymentEnabled,
+          manual_payment_bank_name: manualBankName || null,
+          manual_payment_account_number: manualAccountNumber || null,
+          manual_payment_account_name: manualAccountName || null,
+          manual_payment_instructions: manualInstructions || null
+        })
+        .eq('id', activeLocationId)
+      if (error) throw new Error('Failed to update manual payment settings')
+    }
 
     if (error) throw new Error('Failed to update manual payment settings')
 

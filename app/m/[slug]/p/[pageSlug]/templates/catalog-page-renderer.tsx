@@ -132,12 +132,12 @@ export function CatalogPageRenderer({ location, page, items, locationSlug, payme
         {location.cover_image_url ? (
           <>
             <div className="absolute inset-0 bg-cover bg-top" style={{ backgroundImage: `url(${location.cover_image_url})` }} />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-transparent" />
+            <div className="absolute inset-0 bg-linear-to-b from-black/30 via-transparent to-transparent" />
           </>
         ) : (
           <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${themeColor}30, #0a0a0f)` }} />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-black/40 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-t from-zinc-950 via-black/40 to-transparent" />
         <div className="relative z-10 w-full p-5 pt-[calc(env(safe-area-inset-top,24px)+40px)] max-w-4xl mx-auto flex flex-col justify-end mt-auto">
           {location.organizations?.logo_url && (
             <div className="relative h-10 w-24 mb-3 drop-shadow-lg">

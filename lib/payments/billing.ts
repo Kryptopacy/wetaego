@@ -2,14 +2,24 @@ const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY
 
 import { createClient } from '@/lib/supabase/server'
 
-export async function getOrCreateBillingPlan(organizationId: string, orgName: string, planType: string, amountMinor: number, currency: string = 'NGN'): Promise<string> {
+export async function getOrCreateBillingPlan(
+  organizationId: string, 
+  orgName: string, 
+  planType: string, 
+  amountMinor: number, 
+  currency: string = 'NGN',
+  billingCycle: 'monthly' | 'annually' = 'monthly'
+): Promise<string> {
   const planDisplayName = planType === 'lite' ? 'OurMenu OS Lite' : 'OurMenu OS Pro'
   const supabase = await createClient()
+
+  // For annual plans, use a separate column so monthly and annual plans coexist
+  const planCodeColumn = billingCycle === 'annually' ? 'billing_plan_code_annual' : 'billing_plan_code'
 
   // Check DB to see if this org already has a plan_code.
   const { data: org, error: orgError } = await supabase
     .from('organizations')
-    .select('billing_plan_code')
+    .select('billing_plan_code, billing_plan_code_annual')
     .eq('id', organizationId)
     .single()
 
@@ -17,8 +27,12 @@ export async function getOrCreateBillingPlan(organizationId: string, orgName: st
     throw new Error(`Failed to fetch organization: ${orgError.message}`)
   }
 
-  if (org.billing_plan_code) {
-    return org.billing_plan_code
+  const existingCode = billingCycle === 'annually' 
+    ? (org as Record<string, string | null>).billing_plan_code_annual 
+    : org.billing_plan_code
+
+  if (existingCode) {
+    return existingCode
   }
 
   // Create a dedicated plan for the organization on Paystack.
@@ -29,8 +43,8 @@ export async function getOrCreateBillingPlan(organizationId: string, orgName: st
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      name: `${planDisplayName} - ${orgName} (${currency})`,
-      interval: 'monthly',
+      name: `${planDisplayName} - ${orgName} (${currency}) - ${billingCycle}`,
+      interval: billingCycle,
       amount: amountMinor,
       currency: currency
     }),
@@ -47,7 +61,7 @@ export async function getOrCreateBillingPlan(organizationId: string, orgName: st
   // Save the new plan code back to the DB
   const { error: updateError } = await supabase
     .from('organizations')
-    .update({ billing_plan_code: newPlanCode })
+    .update({ [planCodeColumn]: newPlanCode } as any)
     .eq('id', organizationId)
 
   if (updateError) {

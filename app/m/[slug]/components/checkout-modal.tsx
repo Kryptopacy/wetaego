@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { X, MapPin, Sparkles, Plus, Minus, ShoppingBag, ChevronDown } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/currency'
 import { CheckoutPaymentForm } from './checkout-payment-form'
+import { DeliveryAddressAutocompleteWrapper } from './delivery-address-autocomplete'
 import { toast } from 'sonner'
 import { processCheckout, checkIouStatus } from '../actions'
 
@@ -179,6 +180,8 @@ export function CheckoutModal({
   const [customerPhone, setCustomerPhone] = useState('')
   const [customerNote, setCustomerNote] = useState('')
   const [deliveryInstructions, setDeliveryInstructions] = useState('')
+  const [deliveryLat, setDeliveryLat] = useState<number | null>(null)
+  const [deliveryLng, setDeliveryLng] = useState<number | null>(null)
   
   const [splitCount, setSplitCount] = useState(1)
   const [splitType, setSplitType] = useState<'even' | 'uneven'>('even')
@@ -351,17 +354,26 @@ export function CheckoutModal({
         paymentFractionMinor = Math.ceil(finalTotalMinor / splitCount)
       }
 
-      const isUnevenSplit = splitCount > 1 && splitType === 'uneven'
-
-      const result = await processCheckout({
+      const payload: any = {
         organizationId, locationId, items, totalAmountMinor: finalTotalMinor, tipAmountMinor: 0,
         tableIdentifier: tableNumber, customerNote, customerEmail, paymentFractionMinor,
         paymentMethod, discountAmountMinor, customerName, customerPhone,
         fulfillmentType, deliveryInstructions, staffId: undefined, staffSubaccountOverride: undefined,
         pageId, idempotencyKey: crypto.randomUUID(), subtotalMinor: discountedSubtotalMinor, taxTotalMinor, taxBreakdown,
-        isUnevenSplit,
+        isUnevenSplit: splitType === 'uneven',
         resourceId
-      })
+      }
+
+      if (splitCount > 1) {
+        payload.splitCount = splitCount
+        payload.splitType = splitType
+      }
+      if (fulfillmentType === 'delivery') {
+        payload.deliveryLat = deliveryLat
+        payload.deliveryLng = deliveryLng
+      }
+
+      const result = await processCheckout(payload)
 
       if (result?.serverError || result?.validationErrors) {
         toast.error(result?.serverError || 'Checkout failed')
@@ -453,7 +465,7 @@ export function CheckoutModal({
             onSubmit={handleCheckout}
             initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="w-full max-w-md bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-t-[2rem] sm:rounded-[2rem] p-6 shadow-2xl relative z-10 max-h-[90vh] flex flex-col"
+            className="w-full max-w-md bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-t-4xl sm:rounded-4xl p-6 shadow-2xl relative z-10 max-h-[90vh] flex flex-col"
           >
             <div className="flex justify-between items-center mb-6 shrink-0">
               <h2 id="checkout-modal-title" className="text-2xl font-black text-zinc-900 dark:text-white tracking-tight">Checkout</h2>
@@ -560,18 +572,26 @@ export function CheckoutModal({
                       <span>{fulfillmentLocationLabel} {tableIdentifier}</span>
                       <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
                     </div>
+                  ) : fulfillmentType === 'delivery' ? (
+                    <DeliveryAddressAutocompleteWrapper 
+                      address={tableNumber}
+                      setAddress={setTableNumber}
+                      setCoordinates={(lat, lng) => {
+                        setDeliveryLat(lat)
+                        setDeliveryLng(lng)
+                      }}
+                    />
                   ) : (
                     <textarea 
                       aria-label="Location or Delivery Address"
                       value={tableNumber}
                       onChange={(e) => setTableNumber(e.target.value)}
                       placeholder={
-                        fulfillmentType === 'delivery' ? "123 Main St, Apt 4B..." : 
                         fulfillmentType === 'pickup' ? "e.g. 'Pickup at 5pm' or 'Car details'" :
                         `Enter your ${fulfillmentLocationLabel} (e.g. 12 or 'VIP 1')`
                       }
                       className="w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-3 text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 resize-none placeholder:text-zinc-400 text-[15px] transition-all"
-                      rows={fulfillmentType === 'delivery' ? 2 : 1}
+                      rows={1}
                     />
                   )}
                 </div>
@@ -609,7 +629,7 @@ export function CheckoutModal({
                     initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
                     className="overflow-hidden"
                   >
-                    <div className="bg-gradient-to-br from-teal-50 to-emerald-50 dark:from-teal-950/30 dark:to-emerald-950/30 border border-teal-100 dark:border-teal-500/20 rounded-2xl p-4 flex items-center justify-between gap-4 mt-2 mb-2">
+                    <div className="bg-linear-to-br from-teal-50 to-emerald-50 dark:from-teal-950/30 dark:to-emerald-950/30 border border-teal-100 dark:border-teal-500/20 rounded-2xl p-4 flex items-center justify-between gap-4 mt-2 mb-2">
                       <div>
                         <div className="flex items-center gap-1.5 mb-1.5">
                           <Sparkles className="w-3.5 h-3.5 text-teal-500" />

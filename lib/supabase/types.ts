@@ -1,4 +1,4 @@
-﻿export type Json =
+export type Json =
   | string
   | number
   | boolean
@@ -11,31 +11,6 @@ export type Database = {
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "14.5"
-  }
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
   }
   public: {
     Tables: {
@@ -933,6 +908,7 @@ export type Database = {
       }
       location_pages: {
         Row: {
+          address: string | null
           ai_base_personality: string | null
           ai_enabled: boolean | null
           ai_escalation_contact: string | null
@@ -943,6 +919,8 @@ export type Database = {
           billing_enabled: boolean
           billing_mode: string | null
           business_type_preset: string | null
+          contact_email: string | null
+          contact_phone: string | null
           content: string | null
           cover_image_url: string | null
           created_at: string
@@ -959,6 +937,12 @@ export type Database = {
           is_primary: boolean
           is_published: boolean
           location_id: string
+          manual_payment_account_name: string | null
+          manual_payment_account_number: string | null
+          manual_payment_bank_name: string | null
+          manual_payment_enabled: boolean
+          manual_payment_instructions: string | null
+          operating_hours: Json | null
           page_images: string[] | null
           payment_mode: string | null
           randomizer_enabled: boolean | null
@@ -970,8 +954,11 @@ export type Database = {
           theme_color: string | null
           title: string
           updated_at: string
+          wifi_network: string | null
+          wifi_password: string | null
         }
         Insert: {
+          address?: string | null
           ai_base_personality?: string | null
           ai_enabled?: boolean | null
           ai_escalation_contact?: string | null
@@ -982,6 +969,8 @@ export type Database = {
           billing_enabled?: boolean
           billing_mode?: string | null
           business_type_preset?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
           content?: string | null
           cover_image_url?: string | null
           created_at?: string
@@ -998,6 +987,12 @@ export type Database = {
           is_primary?: boolean
           is_published?: boolean
           location_id: string
+          manual_payment_account_name?: string | null
+          manual_payment_account_number?: string | null
+          manual_payment_bank_name?: string | null
+          manual_payment_enabled?: boolean
+          manual_payment_instructions?: string | null
+          operating_hours?: Json | null
           page_images?: string[] | null
           payment_mode?: string | null
           randomizer_enabled?: boolean | null
@@ -1009,8 +1004,11 @@ export type Database = {
           theme_color?: string | null
           title: string
           updated_at?: string
+          wifi_network?: string | null
+          wifi_password?: string | null
         }
         Update: {
+          address?: string | null
           ai_base_personality?: string | null
           ai_enabled?: boolean | null
           ai_escalation_contact?: string | null
@@ -1021,6 +1019,8 @@ export type Database = {
           billing_enabled?: boolean
           billing_mode?: string | null
           business_type_preset?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
           content?: string | null
           cover_image_url?: string | null
           created_at?: string
@@ -1037,6 +1037,12 @@ export type Database = {
           is_primary?: boolean
           is_published?: boolean
           location_id?: string
+          manual_payment_account_name?: string | null
+          manual_payment_account_number?: string | null
+          manual_payment_bank_name?: string | null
+          manual_payment_enabled?: boolean
+          manual_payment_instructions?: string | null
+          operating_hours?: Json | null
           page_images?: string[] | null
           payment_mode?: string | null
           randomizer_enabled?: boolean | null
@@ -1048,6 +1054,8 @@ export type Database = {
           theme_color?: string | null
           title?: string
           updated_at?: string
+          wifi_network?: string | null
+          wifi_password?: string | null
         }
         Relationships: [
           {
@@ -1113,6 +1121,7 @@ export type Database = {
           delivery_note: string | null
           facebook_handle: string | null
           fulfillment_location_label: string | null
+          geofence_radius_meters: number | null
           global_discount_banner_text: string | null
           global_discount_enabled: boolean | null
           global_discount_percentage: number | null
@@ -1120,7 +1129,9 @@ export type Database = {
           id: string
           instagram_handle: string | null
           is_search_visible: boolean | null
+          latitude: number | null
           logo_url: string | null
+          longitude: number | null
           manager_pin: string | null
           manual_payment_account_name: string | null
           manual_payment_account_number: string | null
@@ -1132,6 +1143,7 @@ export type Database = {
           organization_id: string
           phone: string | null
           phone_number: string | null
+          place_id: string | null
           portal_display_name: string | null
           publication_status: Database["public"]["Enums"]["publication_status"]
           qr_color: string | null
@@ -1168,6 +1180,7 @@ export type Database = {
           delivery_note?: string | null
           facebook_handle?: string | null
           fulfillment_location_label?: string | null
+          geofence_radius_meters?: number | null
           global_discount_banner_text?: string | null
           global_discount_enabled?: boolean | null
           global_discount_percentage?: number | null
@@ -1175,7 +1188,9 @@ export type Database = {
           id?: string
           instagram_handle?: string | null
           is_search_visible?: boolean | null
+          latitude?: number | null
           logo_url?: string | null
+          longitude?: number | null
           manager_pin?: string | null
           manual_payment_account_name?: string | null
           manual_payment_account_number?: string | null
@@ -1187,6 +1202,7 @@ export type Database = {
           organization_id: string
           phone?: string | null
           phone_number?: string | null
+          place_id?: string | null
           portal_display_name?: string | null
           publication_status?: Database["public"]["Enums"]["publication_status"]
           qr_color?: string | null
@@ -1223,6 +1239,7 @@ export type Database = {
           delivery_note?: string | null
           facebook_handle?: string | null
           fulfillment_location_label?: string | null
+          geofence_radius_meters?: number | null
           global_discount_banner_text?: string | null
           global_discount_enabled?: boolean | null
           global_discount_percentage?: number | null
@@ -1230,7 +1247,9 @@ export type Database = {
           id?: string
           instagram_handle?: string | null
           is_search_visible?: boolean | null
+          latitude?: number | null
           logo_url?: string | null
+          longitude?: number | null
           manager_pin?: string | null
           manual_payment_account_name?: string | null
           manual_payment_account_number?: string | null
@@ -1242,6 +1261,7 @@ export type Database = {
           organization_id?: string
           phone?: string | null
           phone_number?: string | null
+          place_id?: string | null
           portal_display_name?: string | null
           publication_status?: Database["public"]["Enums"]["publication_status"]
           qr_color?: string | null
@@ -1728,10 +1748,13 @@ export type Database = {
           cancellation_reason: string | null
           created_at: string
           customer_email: string | null
+          customer_eta_minutes: number | null
           customer_name: string | null
           customer_note: string | null
           customer_phone: string | null
           delivery_instructions: string | null
+          delivery_latitude: number | null
+          delivery_longitude: number | null
           discount_amount_minor: number | null
           estimated_prep_time_minutes: number | null
           estimated_ready_at: string | null
@@ -1762,10 +1785,13 @@ export type Database = {
           cancellation_reason?: string | null
           created_at?: string
           customer_email?: string | null
+          customer_eta_minutes?: number | null
           customer_name?: string | null
           customer_note?: string | null
           customer_phone?: string | null
           delivery_instructions?: string | null
+          delivery_latitude?: number | null
+          delivery_longitude?: number | null
           discount_amount_minor?: number | null
           estimated_prep_time_minutes?: number | null
           estimated_ready_at?: string | null
@@ -1796,10 +1822,13 @@ export type Database = {
           cancellation_reason?: string | null
           created_at?: string
           customer_email?: string | null
+          customer_eta_minutes?: number | null
           customer_name?: string | null
           customer_note?: string | null
           customer_phone?: string | null
           delivery_instructions?: string | null
+          delivery_latitude?: number | null
+          delivery_longitude?: number | null
           discount_amount_minor?: number | null
           estimated_prep_time_minutes?: number | null
           estimated_ready_at?: string | null
@@ -1952,6 +1981,7 @@ export type Database = {
           invited_by: string | null
           manager_pin: string | null
           organization_id: string
+          page_id: string | null
           role: Database["public"]["Enums"]["member_role"]
           user_id: string
         }
@@ -1961,6 +1991,7 @@ export type Database = {
           invited_by?: string | null
           manager_pin?: string | null
           organization_id: string
+          page_id?: string | null
           role?: Database["public"]["Enums"]["member_role"]
           user_id: string
         }
@@ -1970,6 +2001,7 @@ export type Database = {
           invited_by?: string | null
           manager_pin?: string | null
           organization_id?: string
+          page_id?: string | null
           role?: Database["public"]["Enums"]["member_role"]
           user_id?: string
         }
@@ -2021,6 +2053,7 @@ export type Database = {
       organizations: {
         Row: {
           billing_plan_code: string | null
+          billing_plan_code_annual: string | null
           business_type: string | null
           created_at: string
           created_by: string
@@ -2050,6 +2083,7 @@ export type Database = {
         }
         Insert: {
           billing_plan_code?: string | null
+          billing_plan_code_annual?: string | null
           business_type?: string | null
           created_at?: string
           created_by: string
@@ -2079,6 +2113,7 @@ export type Database = {
         }
         Update: {
           billing_plan_code?: string | null
+          billing_plan_code_annual?: string | null
           business_type?: string | null
           created_at?: string
           created_by?: string
@@ -2118,6 +2153,7 @@ export type Database = {
       }
       page_bookings: {
         Row: {
+          access_pin: string | null
           amount_paid_minor: number
           booking_date: string | null
           booking_end_date: string | null
@@ -2134,13 +2170,13 @@ export type Database = {
           page_id: string
           payment_reference: string | null
           payment_status: string
+          quote_metadata: Json | null
           status: string
           total_amount_minor: number | null
           updated_at: string
-        
-            quote_metadata: Json | null
-            access_pin: string | null}
+        }
         Insert: {
+          access_pin?: string | null
           amount_paid_minor?: number
           booking_date?: string | null
           booking_end_date?: string | null
@@ -2157,13 +2193,13 @@ export type Database = {
           page_id: string
           payment_reference?: string | null
           payment_status?: string
+          quote_metadata?: Json | null
           status?: string
           total_amount_minor?: number | null
           updated_at?: string
-        
-            quote_metadata?: Json | null
-            access_pin?: string | null}
+        }
         Update: {
+          access_pin?: string | null
           amount_paid_minor?: number
           booking_date?: string | null
           booking_end_date?: string | null
@@ -2180,12 +2216,11 @@ export type Database = {
           page_id?: string
           payment_reference?: string | null
           payment_status?: string
+          quote_metadata?: Json | null
           status?: string
           total_amount_minor?: number | null
           updated_at?: string
-        
-            quote_metadata?: Json | null
-            access_pin?: string | null}
+        }
         Relationships: [
           {
             foreignKeyName: "page_bookings_item_id_fkey"
@@ -2687,7 +2722,11 @@ export type Database = {
       }
       staff_shifts: {
         Row: {
+          clock_in_latitude: number | null
+          clock_in_longitude: number | null
           clock_in_time: string
+          clock_out_latitude: number | null
+          clock_out_longitude: number | null
           clock_out_time: string | null
           created_at: string
           id: string
@@ -2698,7 +2737,11 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          clock_in_latitude?: number | null
+          clock_in_longitude?: number | null
           clock_in_time?: string
+          clock_out_latitude?: number | null
+          clock_out_longitude?: number | null
           clock_out_time?: string | null
           created_at?: string
           id?: string
@@ -2709,7 +2752,11 @@ export type Database = {
           user_id: string
         }
         Update: {
+          clock_in_latitude?: number | null
+          clock_in_longitude?: number | null
           clock_in_time?: string
+          clock_out_latitude?: number | null
+          clock_out_longitude?: number | null
           clock_out_time?: string | null
           created_at?: string
           id?: string
@@ -3153,9 +3200,6 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {
       availability_status: ["available", "low", "sold_out", "hidden"],

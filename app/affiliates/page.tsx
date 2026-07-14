@@ -35,13 +35,13 @@ export default function AffiliatesLandingPage() {
       <main>
         {/* Hero Section */}
         <section className="relative pt-32 pb-20 overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-900/20 via-black to-black"></div>
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,var(--tw-gradient-stops))] from-emerald-900/20 via-black to-black"></div>
           
           <div className="max-w-5xl mx-auto px-6 relative z-10 text-center">
 
             
             <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6">
-              Earn <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400">Recurring</span> Revenue
+              Earn <span className="text-transparent bg-clip-text bg-linear-to-r from-emerald-400 to-teal-400">Recurring</span> Revenue
             </h1>
             
             <p className="text-xl text-zinc-400 mb-10 max-w-2xl mx-auto leading-relaxed">
@@ -131,7 +131,7 @@ export default function AffiliatesLandingPage() {
 
         {/* Final CTA */}
         <section className="py-24 border-t border-zinc-900 relative overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,_var(--tw-gradient-stops))] from-teal-900/20 via-black to-black"></div>
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,var(--tw-gradient-stops))] from-teal-900/20 via-black to-black"></div>
           <div className="max-w-3xl mx-auto px-6 text-center relative z-10">
             <h2 className="text-4xl font-bold mb-6">Ready to start earning?</h2>
             <p className="text-xl text-zinc-400 mb-10">
@@ -139,7 +139,7 @@ export default function AffiliatesLandingPage() {
             </p>
             <Link 
               href="/affiliate/register"
-              className="inline-block px-10 py-5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold rounded-full hover:from-emerald-500 hover:to-teal-500 transition-all shadow-xl shadow-emerald-900/20 transform hover:-translate-y-1"
+              className="inline-block px-10 py-5 bg-linear-to-r from-emerald-600 to-teal-600 text-white font-bold rounded-full hover:from-emerald-500 hover:to-teal-500 transition-all shadow-xl shadow-emerald-900/20 transform hover:-translate-y-1"
             >
               Join Affiliate Program
             </Link>

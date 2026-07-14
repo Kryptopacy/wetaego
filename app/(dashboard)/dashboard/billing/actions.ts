@@ -14,9 +14,10 @@ import { zfd } from 'zod-form-data'
 export const subscribeToLite = authActionClient
   .schema(zfd.formData(z.object({
     organization_id: z.string(),
-    currency: z.string().optional().default('NGN')
+    currency: z.string().optional().default('NGN'),
+    billing_cycle: z.enum(['monthly', 'annually']).optional().default('monthly')
   })))
-  .action(async ({ parsedInput: { organization_id, currency }, ctx: { user } }) => {
+  .action(async ({ parsedInput: { organization_id, currency, billing_cycle }, ctx: { user } }) => {
     const supabase = await createClient()
     
     const { cookies } = await import('next/headers')
@@ -36,7 +37,10 @@ export const subscribeToLite = authActionClient
     const rate = await getUsdToNgnRate()
     const pricing = await getPricingSettings()
     
-    const baseNgn = pricing.lite_monthly_ngn || 19999
+    const isAnnual = billing_cycle === 'annually'
+    const baseNgn = isAnnual 
+      ? ((pricing as Record<string, number>).lite_annual_ngn || 191990)
+      : (pricing.lite_monthly_ngn || 19999)
     let amountMinor = 0
     if (currency === 'USD') {
       const amountUsd = baseNgn / rate
@@ -45,7 +49,7 @@ export const subscribeToLite = authActionClient
       amountMinor = baseNgn * 100 // kobo
     }
 
-    const planCode = await getOrCreateBillingPlan(organization_id, org.name, 'lite', amountMinor, currency)
+    const planCode = await getOrCreateBillingPlan(organization_id, org.name, 'lite', amountMinor, currency, billing_cycle)
     const authUrl = await initializeSubscription(user.email!, planCode, organization_id, 'lite', currency)
 
     redirect(authUrl)
@@ -54,9 +58,10 @@ export const subscribeToLite = authActionClient
 export const subscribeToPro = authActionClient
   .schema(zfd.formData(z.object({
     organization_id: z.string(),
-    currency: z.string().optional().default('NGN')
+    currency: z.string().optional().default('NGN'),
+    billing_cycle: z.enum(['monthly', 'annually']).optional().default('monthly')
   })))
-  .action(async ({ parsedInput: { organization_id, currency }, ctx: { user } }) => {
+  .action(async ({ parsedInput: { organization_id, currency, billing_cycle }, ctx: { user } }) => {
     const supabase = await createClient()
 
     const { data: org } = await supabase
@@ -70,7 +75,10 @@ export const subscribeToPro = authActionClient
     const rate = await getUsdToNgnRate()
     const pricing = await getPricingSettings()
     
-    const baseNgn = pricing.pro_monthly_ngn || 69000
+    const isAnnual = billing_cycle === 'annually'
+    const baseNgn = isAnnual 
+      ? ((pricing as Record<string, number>).pro_annual_ngn || 662400)
+      : (pricing.pro_monthly_ngn || 69000)
     let amountMinor = 0
     if (currency === 'USD') {
       const amountUsd = baseNgn / rate
@@ -79,7 +87,7 @@ export const subscribeToPro = authActionClient
       amountMinor = baseNgn * 100 // kobo
     }
 
-    const planCode = await getOrCreateBillingPlan(organization_id, org.name, 'pro', amountMinor, currency)
+    const planCode = await getOrCreateBillingPlan(organization_id, org.name, 'pro', amountMinor, currency, billing_cycle)
     const authUrl = await initializeSubscription(user.email!, planCode, organization_id, 'pro', currency)
 
     redirect(authUrl)

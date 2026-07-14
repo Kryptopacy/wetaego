@@ -4,7 +4,7 @@ import { formatCurrency } from '@/lib/utils/currency'
 import { MapPin, Phone, CheckCircle2, Navigation } from 'lucide-react'
 
 export const metadata = {
-  title: 'Dispatch Details | OurMenu OS',
+  title: 'Order Tracker | OurMenu OS',
   robots: { index: false, follow: false }
 }
 
@@ -29,12 +29,15 @@ export default async function DispatchViewPage({
       order_items (
         id, item_name, quantity, metadata
       ),
+      order_milestones (
+        id, title, is_completed, created_at, updated_at
+      ),
       locations(name, phone_number, address)
     `)
     .eq('id', orderId)
     .single()
 
-  if (error || !order || order.fulfillment_type !== 'delivery') {
+  if (error || !order || (order.fulfillment_type !== 'delivery' && order.fulfillment_type !== 'pickup')) {
     return notFound()
   }
 
@@ -46,13 +49,13 @@ export default async function DispatchViewPage({
     <div className="min-h-screen bg-zinc-50 pb-20">
       {/* Header */}
       <div className="bg-emerald-600 text-white p-6 rounded-b-3xl shadow-md">
-        <h1 className="text-xl font-black tracking-tight mb-1">Dispatch Details</h1>
+        <h1 className="text-xl font-black tracking-tight mb-1">Order Tracker</h1>
         <p className="text-emerald-100 text-sm">Order #{order.id.split('-')[0].toUpperCase()}</p>
         
         <div className="mt-4 flex flex-wrap gap-2">
           {isDelivered && (
             <span className="bg-white/20 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 backdrop-blur-sm">
-              <CheckCircle2 className="w-3.5 h-3.5" /> Delivered
+              <CheckCircle2 className="w-3.5 h-3.5" /> Completed
             </span>
           )}
           {isCancelled && (
@@ -62,18 +65,45 @@ export default async function DispatchViewPage({
           )}
           {!isPaid && !isCancelled && !isDelivered && (
             <span className="bg-amber-500/80 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 backdrop-blur-sm">
-              Collect Cash on Delivery: {formatCurrency(order.total_amount_minor)}
+              Payment Pending: {formatCurrency(order.total_amount_minor)}
             </span>
           )}
           {isPaid && !isDelivered && (
             <span className="bg-emerald-800/50 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 backdrop-blur-sm">
-              Paid Online - Handover Only
+              Paid Online
             </span>
           )}
         </div>
       </div>
 
       <div className="p-4 space-y-4 max-w-lg mx-auto mt-2">
+        {/* Premium Milestones Progress Bar */}
+        {order.order_milestones && order.order_milestones.length > 0 && !isCancelled && (
+          <div className="bg-white rounded-2xl p-5 shadow-sm border border-zinc-100">
+            <h2 className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-4">Order Progress</h2>
+            <div className="relative">
+              {/* Vertical line connecting milestones */}
+              <div className="absolute left-4 top-2 bottom-6 w-0.5 bg-zinc-100"></div>
+              <div className="space-y-6 relative">
+                {order.order_milestones.sort((a: any, b: any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()).map((milestone: any, idx: number) => (
+                  <div key={milestone.id} className="flex gap-4 items-start relative z-10">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 border-2 bg-white transition-colors duration-500 ${milestone.is_completed ? 'border-emerald-500 text-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.3)]' : 'border-zinc-200 text-zinc-300'}`}>
+                      <CheckCircle2 className="w-4 h-4" />
+                    </div>
+                    <div className="pt-1.5 flex-1">
+                      <p className={`font-bold leading-none ${milestone.is_completed ? 'text-zinc-900' : 'text-zinc-400'}`}>
+                        {milestone.title}
+                      </p>
+                      {milestone.is_completed && (
+                        <p className="text-xs text-zinc-400 mt-1">{new Date(milestone.updated_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
         {/* Customer Details */}
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-zinc-100">
           <h2 className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-4">Customer Info</h2>

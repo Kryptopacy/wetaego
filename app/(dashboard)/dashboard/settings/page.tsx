@@ -12,6 +12,7 @@ import { AICoverStudio } from './ai-cover-studio'
 import { PlanType } from '@/lib/payments/credits'
 import { getPlanLimits } from '@/lib/utils/settings'
 import { savePaymentSettings, saveManualPaymentSettings } from './payment-actions'
+import { cookies } from 'next/headers'
 
 import AiFaqBuilder from './ai-faq-builder'
 import { BusinessTypePicker } from './business-type-picker'
@@ -19,6 +20,8 @@ import { ThemeColorPicker } from './theme-color-picker'
 import { ImageUpload } from '@/components/ui/image-upload'
 import { SettingsNavigation } from '@/components/settings/settings-navigation'
 import { WheelBuilder } from '@/components/ui/wheel-builder'
+import { LocationAutocomplete } from './location-autocomplete'
+import { CustomMilestonesSettings } from './custom-milestones-settings'
 
 
 
@@ -34,11 +37,13 @@ export default async function SettingsPage({
   const { data: userData } = await supabase.auth.getUser()
   const user = userData?.user
   
-  
-
   if (!user) {
     redirect('/login')
   }
+
+  const cookieStore = await cookies()
+  const activeLocationId = cookieStore.get('ourmenu_active_location_id')?.value
+  const activePageId = cookieStore.get('ourmenu_active_page_id')?.value
 
   const userId = user?.id || 'demo-user-id'
 
@@ -109,13 +114,27 @@ export default async function SettingsPage({
       .maybeSingle()
     iouSettings = iouData
 
-    const { data: loc } = await supabase
+    let locQuery = supabase
       .from('locations')
       .select('*, location_taxes(*)')
       .eq('organization_id', organization.id)
-      .limit(1)
-      .single()
+    
+    if (activeLocationId) {
+      locQuery = locQuery.eq('id', activeLocationId)
+    }
+    
+    const { data: loc } = await locQuery.limit(1).single()
     location = loc
+  }
+
+  let activePage = null
+  if (activePageId && location) {
+    const { data: pageData } = await supabase
+      .from('location_pages')
+      .select('*')
+      .eq('id', activePageId)
+      .single()
+    activePage = pageData
   }
 
   // Fetch their profile details for the inputs
@@ -129,7 +148,14 @@ export default async function SettingsPage({
   return (
     <div className="max-w-3xl pb-20">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <h1 className="text-2xl font-bold text-white">Business Settings</h1>
+        <div>
+          <h1 className="text-2xl font-bold text-white">Business Settings</h1>
+          {activePage ? (
+            <p className="text-sm text-emerald-400 mt-1">Editing context: <strong>{activePage.title}</strong> (Page Level)</p>
+          ) : location ? (
+            <p className="text-sm text-zinc-400 mt-1">Editing context: <strong>{location.portal_display_name || location.name}</strong> (Location Level)</p>
+          ) : null}
+        </div>
         {isOwnerOrManager && (
           <Link 
             href="/dashboard/settings/team" 
@@ -290,7 +316,7 @@ export default async function SettingsPage({
               <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
                 <h2 className="text-lg font-semibold text-white mb-2 flex items-center gap-2">
                   Manual Transfer Fallback
-                  {location.manual_payment_enabled && (
+                  {(activePage?.manual_payment_bank_name ? activePage.manual_payment_enabled : location.manual_payment_enabled) && (
                     <span className="text-xs px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400">Enabled</span>
                   )}
                 </h2>
@@ -301,10 +327,11 @@ export default async function SettingsPage({
                 
                 <ActionForm action={saveManualPaymentSettings} className="flex flex-col gap-4">
                   <input type="hidden" name="locationId" value={location.id} />
+                  {activePage && <input type="hidden" name="pageId" value={activePage.id} />}
                   
                   <div>
                   <label className="mb-2 block text-sm font-medium text-zinc-300">Status</label>
-                  <select name="manualPaymentEnabled" defaultValue={location.manual_payment_enabled ? 'true' : 'false'} className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                  <select name="manualPaymentEnabled" defaultValue={(activePage?.manual_payment_bank_name ? activePage.manual_payment_enabled : location.manual_payment_enabled) ? 'true' : 'false'} className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
                     <option value="false">Disabled</option>
                     <option value="true">Enabled (Use as Fallback)</option>
                   </select>
@@ -316,7 +343,7 @@ export default async function SettingsPage({
                     <input
                       type="text"
                       name="manualBankName"
-                      defaultValue={location.manual_payment_bank_name || ''}
+                      defaultValue={activePage?.manual_payment_bank_name ?? location.manual_payment_bank_name ?? ''}
                       className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                       placeholder="e.g. Zenith Bank"
                       maxLength={100}
@@ -327,7 +354,7 @@ export default async function SettingsPage({
                     <input
                       type="text"
                       name="manualAccountNumber"
-                      defaultValue={location.manual_payment_account_number || ''}
+                      defaultValue={activePage?.manual_payment_account_number ?? location.manual_payment_account_number ?? ''}
                       className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                       placeholder="0123456789"
                       maxLength={50}
@@ -340,21 +367,21 @@ export default async function SettingsPage({
                   <input
                     type="text"
                     name="manualAccountName"
-                    defaultValue={location.manual_payment_account_name || ''}
+                    defaultValue={activePage?.manual_payment_account_name ?? location.manual_payment_account_name ?? ''}
                     className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                    placeholder="e.g. My Lounge Limited"
+                    placeholder="e.g. Acme Corp"
                     maxLength={100}
                   />
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-zinc-300">Transfer Instructions</label>
+                  <label className="mb-2 block text-sm font-medium text-zinc-300">Payment Instructions <span className="text-zinc-500 text-xs ml-1">(Optional)</span></label>
                   <textarea
                     name="manualInstructions"
-                    rows={2}
-                    defaultValue={location.manual_payment_instructions || ''}
-                    className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm"
-                    placeholder="e.g. Please use your Order Number as the transfer remark and send a receipt on WhatsApp."
+                    defaultValue={activePage?.manual_payment_instructions ?? location.manual_payment_instructions ?? ''}
+                    className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    placeholder="e.g. Please use your booking reference as the payment description."
+                    rows={3}
                     maxLength={500}
                   />
                 </div>
@@ -420,6 +447,7 @@ export default async function SettingsPage({
 
             <ActionForm action={saveLocationInfoSettings} className="flex flex-col gap-4">
               <input type="hidden" name="locationId" value={location.id} />
+              {activePage && <input type="hidden" name="pageId" value={activePage.id} />}
               {/* Ensure existing checkboxes state is passed if they aren't in this form */}
               <input type="hidden" name="isSearchVisible" value={location.is_search_visible ? 'on' : 'off'} />
               
@@ -429,9 +457,9 @@ export default async function SettingsPage({
                   <input
                     type="text"
                     name="wifiNetwork"
-                    defaultValue={location.wifi_network || ''}
+                    defaultValue={(activePage?.wifi_network !== null ? activePage?.wifi_network : location.wifi_network) || ''}
                     className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                    placeholder="Guest Wi-Fi"
+                    placeholder={activePage ? `Inherited: ${location.wifi_network || 'None'}` : "Guest Wi-Fi"}
                     maxLength={100}
                   />
                 </div>
@@ -440,186 +468,225 @@ export default async function SettingsPage({
                   <input
                     type="text"
                     name="wifiPassword"
-                    defaultValue={location.wifi_password || ''}
+                    defaultValue={(activePage?.wifi_password !== null ? activePage?.wifi_password : location.wifi_password) || ''}
                     className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                    placeholder="Leave blank if open"
+                    placeholder={activePage ? `Inherited: ${location.wifi_password || 'Leave blank if open'}` : "Leave blank if open"}
                     maxLength={100}
                   />
                 </div>
               </div>
+              
+              <LocationAutocomplete 
+                initialAddress={(activePage?.address !== null ? activePage?.address : location.address) || ''}
+                initialLat={(location as any).latitude || null}
+                initialLng={(location as any).longitude || null}
+                initialGeofenceRadius={(location as any).geofence_radius_meters || 100}
+                mapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ''}
+              />
 
-              <div>
-                <label className="mb-2 block text-sm font-medium text-amber-400">Manager PIN (Refunds & Voids)</label>
-                <input
-                  type="password"
-                  name="managerPin"
-                  defaultValue={(location as Record<string, unknown>).manager_pin as string || ''}
-                  className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                  placeholder="4-6 digits"
-                  maxLength={6}
-                  pattern="\d{4,6}"
-                />
-                <p className="mt-2 text-xs text-zinc-500">This shared PIN is used by floor managers to authorize order refunds and voids.</p>
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-medium text-zinc-300">Instagram Handle</label>
-                <div className="flex items-center rounded-lg border border-zinc-700 bg-zinc-800/50 overflow-hidden focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500">
-                  <span className="px-4 text-zinc-500">@</span>
+              {!activePage && (
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-amber-400">Manager PIN (Refunds & Voids)</label>
                   <input
-                    type="text"
-                    name="instagramHandle"
-                    defaultValue={location.instagram_handle || ''}
-                    className="w-full bg-transparent py-2.5 text-white outline-none"
-                    placeholder="yourvenue"
-                    maxLength={50}
+                    type="password"
+                    name="managerPin"
+                    defaultValue={(location as Record<string, unknown>).manager_pin as string || ''}
+                    className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    placeholder="4-6 digits"
+                    maxLength={6}
+                    pattern="\d{4,6}"
                   />
+                  <p className="mt-2 text-xs text-zinc-500">This shared PIN is used by floor managers to authorize order refunds and voids.</p>
                 </div>
-              </div>
+              )}
+
+              {!activePage && (
+                <>
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-zinc-300">Instagram Handle</label>
+                    <div className="flex items-center rounded-lg border border-zinc-700 bg-zinc-800/50 overflow-hidden focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500">
+                      <span className="px-4 text-zinc-500">@</span>
+                      <input
+                        type="text"
+                        name="instagramHandle"
+                        defaultValue={location.instagram_handle || ''}
+                        className="w-full bg-transparent py-2.5 text-white outline-none"
+                        placeholder="yourvenue"
+                        maxLength={50}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-zinc-300">Twitter (X) Handle</label>
+                      <div className="flex items-center rounded-lg border border-zinc-700 bg-zinc-800/50 overflow-hidden focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500">
+                        <span className="px-4 text-zinc-500">@</span>
+                        <input
+                          type="text"
+                          name="twitterHandle"
+                          defaultValue={location.twitter_handle || ''}
+                          className="w-full bg-transparent py-2.5 text-white outline-none"
+                          placeholder="yourvenue"
+                          maxLength={50}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-zinc-300">Facebook Handle</label>
+                      <div className="flex items-center rounded-lg border border-zinc-700 bg-zinc-800/50 overflow-hidden focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500">
+                        <span className="px-4 text-zinc-500">/</span>
+                        <input
+                          type="text"
+                          name="facebookHandle"
+                          defaultValue={location.facebook_handle || ''}
+                          className="w-full bg-transparent py-2.5 text-white outline-none"
+                          placeholder="yourvenue"
+                          maxLength={50}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-zinc-300">TikTok Handle</label>
+                      <div className="flex items-center rounded-lg border border-zinc-700 bg-zinc-800/50 overflow-hidden focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500">
+                        <span className="px-4 text-zinc-500">@</span>
+                        <input
+                          type="text"
+                          name="tiktokHandle"
+                          defaultValue={location.tiktok_handle || ''}
+                          className="w-full bg-transparent py-2.5 text-white outline-none"
+                          placeholder="yourvenue"
+                          maxLength={50}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-zinc-300">New X Handle</label>
+                      <div className="flex items-center rounded-lg border border-zinc-700 bg-zinc-800/50 overflow-hidden focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500">
+                        <span className="px-4 text-zinc-500">@</span>
+                        <input
+                          type="text"
+                          name="xHandle"
+                          defaultValue={location.x_handle || ''}
+                          className="w-full bg-transparent py-2.5 text-white outline-none"
+                          placeholder="yourvenue"
+                          maxLength={50}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-zinc-300">Twitter (X) Handle</label>
-                  <div className="flex items-center rounded-lg border border-zinc-700 bg-zinc-800/50 overflow-hidden focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500">
-                    <span className="px-4 text-zinc-500">@</span>
+                {!activePage && (
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-zinc-300">WhatsApp Number</label>
                     <input
                       type="text"
-                      name="twitterHandle"
-                      defaultValue={location.twitter_handle || ''}
-                      className="w-full bg-transparent py-2.5 text-white outline-none"
-                      placeholder="yourvenue"
-                      maxLength={50}
+                      name="whatsappNumber"
+                      defaultValue={location.whatsapp_number || ''}
+                      className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm"
+                      placeholder="+1234567890"
+                      maxLength={30}
                     />
                   </div>
-                </div>
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-zinc-300">Facebook Handle</label>
-                  <div className="flex items-center rounded-lg border border-zinc-700 bg-zinc-800/50 overflow-hidden focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500">
-                    <span className="px-4 text-zinc-500">/</span>
-                    <input
-                      type="text"
-                      name="facebookHandle"
-                      defaultValue={location.facebook_handle || ''}
-                      className="w-full bg-transparent py-2.5 text-white outline-none"
-                      placeholder="yourvenue"
-                      maxLength={50}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-zinc-300">TikTok Handle</label>
-                  <div className="flex items-center rounded-lg border border-zinc-700 bg-zinc-800/50 overflow-hidden focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500">
-                    <span className="px-4 text-zinc-500">@</span>
-                    <input
-                      type="text"
-                      name="tiktokHandle"
-                      defaultValue={location.tiktok_handle || ''}
-                      className="w-full bg-transparent py-2.5 text-white outline-none"
-                      placeholder="yourvenue"
-                      maxLength={50}
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-zinc-300">New X Handle</label>
-                  <div className="flex items-center rounded-lg border border-zinc-700 bg-zinc-800/50 overflow-hidden focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500">
-                    <span className="px-4 text-zinc-500">@</span>
-                    <input
-                      type="text"
-                      name="xHandle"
-                      defaultValue={location.x_handle || ''}
-                      className="w-full bg-transparent py-2.5 text-white outline-none"
-                      placeholder="yourvenue"
-                      maxLength={50}
-                    />
-                  </div>
-                </div>
-              </div>
-
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-zinc-300">WhatsApp Number</label>
-                  <input
-                    type="text"
-                    name="whatsappNumber"
-                    defaultValue={location.whatsapp_number || ''}
-                    className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm"
-                    placeholder="+1234567890"
-                    maxLength={30}
-                  />
-                </div>
+                )}
                 <div>
                   <label className="mb-2 block text-sm font-medium text-zinc-300">Phone Number</label>
                   <input
                     type="text"
                     name="phoneNumber"
-                    defaultValue={location.phone_number || ''}
+                    defaultValue={(activePage?.contact_phone !== null ? activePage?.contact_phone : location.phone_number) || ''}
                     className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm"
-                    placeholder="(555) 123-4567"
+                    placeholder={activePage ? `Inherited: ${location.phone_number || '(555) 123-4567'}` : "(555) 123-4567"}
                     maxLength={30}
                   />
                 </div>
               </div>
 
-              <div>
-                <label className="mb-2 block text-sm font-medium text-zinc-300">Google Maps URL</label>
-                <input
-                  type="url"
-                  name="googleMapsUrl"
-                  defaultValue={location.google_maps_url || ''}
-                  className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm"
-                  placeholder="https://maps.google.com/..."
-                  maxLength={300}
-                />
-              </div>
+              {!activePage && (
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-zinc-300">Google Maps URL</label>
+                  <input
+                    type="url"
+                    name="googleMapsUrl"
+                    defaultValue={location.google_maps_url || ''}
+                    className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm"
+                    placeholder="https://maps.google.com/..."
+                    maxLength={300}
+                  />
+                </div>
+              )}
 
               <div>
                 <label className="mb-2 block text-sm font-medium text-zinc-300">Operating Hours</label>
                 <input
                   type="text"
                   name="operatingHours"
-                  defaultValue={location.operating_hours || ''}
+                  defaultValue={((activePage?.operating_hours !== null ? activePage?.operating_hours : location.operating_hours) || '') as string}
                   className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm"
-                  placeholder="e.g. Mon-Sun, 11:00 AM - 11:00 PM"
+                  placeholder={activePage ? `Inherited: ${location.operating_hours || 'e.g. Mon-Sun, 11:00 AM - 11:00 PM'}` : "e.g. Mon-Sun, 11:00 AM - 11:00 PM"}
                   maxLength={200}
                 />
               </div>
 
-              <div>
-                <label className="mb-2 block text-sm font-medium text-zinc-300">Location Identifier Label (Table, Room, Seat)</label>
-                <input
-                  type="text"
-                  name="fulfillmentLocationLabel"
-                  defaultValue={location.fulfillment_location_label || 'Table'}
-                  className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm"
-                  placeholder="e.g. Table, Room, Cabana, Seat"
-                  maxLength={50}
-                />
-              </div>
+              {!activePage && (
+                <>
+                  <div>
+                    <label className="mb-2 flex items-center justify-between text-sm font-medium text-zinc-300">
+                      <span>Portal Display Name</span>
+                      <span className="rounded bg-zinc-800 px-1.5 py-0.5 text-[10px] text-zinc-400">Optional</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="portalDisplayName"
+                      defaultValue={location.portal_display_name || ''}
+                      className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm"
+                      placeholder="e.g. The Pacy Group"
+                      maxLength={100}
+                    />
+                    <p className="mt-1 text-xs text-zinc-500">Overrides the location name shown on the customer-facing portal.</p>
+                  </div>
 
-              <div>
-                <label className="mb-2 flex items-center justify-between text-sm font-medium text-zinc-300">
-                  <span>Portal Display Name</span>
-                  <span className="rounded bg-zinc-800 px-1.5 py-0.5 text-[10px] text-zinc-400">Optional</span>
-                </label>
-                <input
-                  type="text"
-                  name="portalDisplayName"
-                  defaultValue={location.portal_display_name || ''}
-                  className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm"
-                  placeholder="e.g. The Pacy Group"
-                  maxLength={100}
-                />
-                <p className="mt-1 text-xs text-zinc-500">Overrides the location name shown on the customer-facing portal.</p>
-              </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-zinc-300">Location Identifier Label (Table, Room, Seat)</label>
+                    <input
+                      type="text"
+                      name="fulfillmentLocationLabel"
+                      defaultValue={location.fulfillment_location_label || ''}
+                      className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm"
+                      placeholder="e.g. Table Number, Room Number"
+                      maxLength={100}
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-zinc-300">Geofence Radius (meters)</label>
+                    <input
+                      type="number"
+                      name="geofenceRadiusMeters"
+                      defaultValue={location.geofence_radius_meters || 100}
+                      className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm"
+                      placeholder="e.g. 100"
+                      min={10}
+                      max={10000}
+                    />
+                    <p className="mt-1 text-xs text-zinc-500">
+                      Staff must be within this distance to clock in/out (min 10m). Location GPS coordinates are required.
+                    </p>
+                  </div>
+                </>
+              )}
 
-              <div className="mt-6">
-                <button type="submit" className="px-6 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium transition-colors">
-                  Save Venue Info
+              <div className="pt-4 flex items-center justify-end">
+                <button
+                  type="submit"
+                  className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+                >
+                  {activePage ? 'Save Page Info' : 'Save Venue Info'}
                 </button>
               </div>
             </ActionForm>
@@ -628,6 +695,8 @@ export default async function SettingsPage({
           <div className="mt-8">
             <ThemeColorPicker locationId={location.id} initialColor={location.theme_color || '#10b981'} />
           </div>
+
+          <CustomMilestonesSettings locationId={location.id} initialMilestones={(location as any).custom_milestones} />
           </>
         )}
 
@@ -702,7 +771,7 @@ export default async function SettingsPage({
           <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
             <h2 className="text-lg font-semibold text-white mb-2 flex items-center gap-2">
               AI Chat Assistant Configuration
-              {location.ai_enabled && (
+              {(activePage?.ai_enabled ?? location.ai_enabled) && (
                 <span className="text-xs px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400">Active</span>
               )}
             </h2>
@@ -712,10 +781,11 @@ export default async function SettingsPage({
 
             <ActionForm action={saveLocationAiSettings} className="flex flex-col gap-4">
               <input type="hidden" name="locationId" value={location.id} />
+              {activePage && <input type="hidden" name="pageId" value={activePage.id} />}
               
               <div>
                 <label className="mb-2 block text-sm font-medium text-zinc-300">Status</label>
-                <select name="aiEnabled" defaultValue={location.ai_enabled ? 'true' : 'false'} className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                <select name="aiEnabled" defaultValue={(activePage?.ai_enabled ?? location.ai_enabled) ? 'true' : 'false'} className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
                   <option value="false">Disabled</option>
                   <option value="true">Enabled</option>
                 </select>
@@ -727,7 +797,7 @@ export default async function SettingsPage({
                   type="text"
                   name="aiName"
                   required
-                  defaultValue={location.ai_name || 'AI Assistant'}
+                  defaultValue={activePage?.ai_name ?? location.ai_name ?? 'AI Assistant'}
                   className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                   placeholder="e.g. Pierre the Bistro Bot"
                   maxLength={30}
@@ -738,7 +808,7 @@ export default async function SettingsPage({
                 <label className="mb-2 block text-sm font-medium text-zinc-300">Base Personality</label>
                 <select 
                   name="aiBasePersonality" 
-                  defaultValue={location.ai_base_personality || 'professional'} 
+                  defaultValue={activePage?.ai_base_personality ?? location.ai_base_personality ?? 'professional'} 
                   className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                 >
                   <option value="professional">Professional & Polite</option>
@@ -753,7 +823,7 @@ export default async function SettingsPage({
                 <input
                   type="text"
                   name="aiEscalationContact"
-                  defaultValue={location.ai_escalation_contact || ''}
+                  defaultValue={activePage?.ai_escalation_contact ?? location.ai_escalation_contact ?? ''}
                   className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                   placeholder="e.g. Call the front desk at 555-1234 or ask a staff member"
                   maxLength={200}
@@ -765,7 +835,7 @@ export default async function SettingsPage({
                 <textarea
                   name="aiInstructions"
                   rows={3}
-                  defaultValue={location.ai_instructions || ''}
+                  defaultValue={activePage?.ai_instructions ?? location.ai_instructions ?? ''}
                   className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm"
                   placeholder="e.g. Always recommend dessert. Emphasize that our steak is 24-hour marinated."
                   maxLength={2000}
@@ -775,7 +845,7 @@ export default async function SettingsPage({
               <div>
                 <label className="mb-2 block text-sm font-medium text-zinc-300">Frequently Asked Questions (FAQs)</label>
                 <p className="text-xs text-zinc-500 mb-3">Add specific questions and answers the AI should strictly adhere to.</p>
-                <AiFaqBuilder initialFaqs={(location.ai_faqs as { question: string, answer: string }[]) || []} />
+                <AiFaqBuilder initialFaqs={((activePage?.ai_faqs ?? location.ai_faqs) as { question: string, answer: string }[]) ?? []} />
               </div>
 
               <div>

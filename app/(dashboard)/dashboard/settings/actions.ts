@@ -151,7 +151,8 @@ export const updateOrganization = authActionClient
 
 export const saveLocationAiSettings = authActionClient
   .schema(zfd.formData({
-    pageId: zfd.text(z.string().uuid()),
+    locationId: zfd.text(z.string().uuid()),
+    pageId: zfd.text(z.string().uuid().optional()),
     aiEnabled: zfd.checkbox(),
     aiName: zfd.text(z.string().min(1, "AI Name is required").max(30, "Name must be 30 characters or less")),
     aiBasePersonality: zfd.text(z.string().optional()),
@@ -168,6 +169,7 @@ export const saveLocationAiSettings = authActionClient
     }
 
     const {
+      locationId,
       pageId,
       aiEnabled,
       aiName,
@@ -185,19 +187,38 @@ export const saveLocationAiSettings = authActionClient
       // Ignore parse error
     }
 
-    // Fetch the page to find its location and then organization
-    const { data: page, error: pageError } = await supabase
-      .from('location_pages')
-      .select('location_id')
-      .eq('id', pageId)
-      .single()
+    let activeLocationId = locationId
+    let targetPageId = pageId
 
-    if (pageError || !page) throw new Error('Page not found')
+    if (targetPageId) {
+      // Fetch the page to verify it belongs to the location
+      const { data: page, error: pageError } = await supabase
+        .from('location_pages')
+        .select('location_id')
+        .eq('id', targetPageId)
+        .single()
+
+      if (pageError || !page) throw new Error('Page not found')
+      activeLocationId = page.location_id
+    } else {
+      // If no pageId provided, we are editing the primary page of the location
+      const { data: primaryPage, error: primaryError } = await supabase
+        .from('location_pages')
+        .select('id')
+        .eq('location_id', locationId)
+        .eq('is_primary', true)
+        .limit(1)
+        .single()
+      
+      if (!primaryError && primaryPage) {
+        targetPageId = primaryPage.id
+      }
+    }
 
     const { data: loc, error: locError } = await supabase
       .from('locations')
       .select('organization_id')
-      .eq('id', page.location_id)
+      .eq('id', activeLocationId)
       .single()
 
     if (locError || !loc) throw new Error('Location not found')
@@ -224,25 +245,27 @@ export const saveLocationAiSettings = authActionClient
     if (!isAuthorized) throw new Error('Unauthorized')
 
     // Update settings on the page
-    const { error: updateError } = await supabase
-      .from('location_pages')
-      .update({
-        ai_enabled: aiEnabled,
-        ai_name: aiName,
-        ai_base_personality: aiBasePersonality || 'professional',
-        ai_escalation_contact: aiEscalationContact || null,
-        ai_instructions: aiInstructions || null,
-        ai_faqs: parsedFaqs,
-      })
-      .eq('id', pageId)
+    if (targetPageId) {
+      const { error: updateError } = await supabase
+        .from('location_pages')
+        .update({
+          ai_enabled: aiEnabled,
+          ai_name: aiName,
+          ai_base_personality: aiBasePersonality || 'professional',
+          ai_escalation_contact: aiEscalationContact || null,
+          ai_instructions: aiInstructions || null,
+          ai_faqs: parsedFaqs,
+        })
+        .eq('id', targetPageId)
+      
+      if (updateError) throw new Error('Failed to update AI settings')
+    }
 
     // Also update brand_knowledge on the location since it's venue-wide
     await supabase
       .from('locations')
       .update({ brand_knowledge: brandKnowledge || null })
-      .eq('id', page.location_id)
-
-    if (updateError) throw new Error('Failed to update AI settings')
+      .eq('id', activeLocationId)
 
     revalidatePath('/dashboard/settings')
     return { success: true }
@@ -304,6 +327,7 @@ export const saveLocationTheme = authActionClient
 export const saveLocationInfoSettings = authActionClient
   .schema(zfd.formData({
     locationId: zfd.text(z.string().uuid()),
+    pageId: zfd.text(z.string().uuid().optional().or(z.literal(''))),
     currencyCode: zfd.text(z.string().min(3).max(3).optional()),
     wifiNetwork: zfd.text(z.string().max(100).optional()),
     wifiPassword: zfd.text(z.string().max(100).optional()),
@@ -321,6 +345,10 @@ export const saveLocationInfoSettings = authActionClient
     randomizerEnabled: zfd.checkbox(),
     isSearchVisible: zfd.checkbox(),
     managerPin: zfd.text(z.string().regex(/^\d{4,6}$/, "PIN must be 4-6 digits").optional().or(z.literal(''))),
+    address: zfd.text(z.string().max(300).optional()),
+    latitude: zfd.numeric(z.number().optional()),
+    longitude: zfd.numeric(z.number().optional()),
+    geofenceRadiusMeters: zfd.numeric(z.number().min(50).max(5000).optional()),
   }))
   .action(async ({ parsedInput, ctx: { supabase, user } }) => {
     const { cookies } = await import('next/headers')
@@ -329,7 +357,7 @@ export const saveLocationInfoSettings = authActionClient
       return { success: true }
     }
 
-    const { locationId } = parsedInput
+    const { locationId, pageId } = parsedInput
 
     // Fetch the location to verify auth
     const { data: loc, error: locError } = await supabase
@@ -360,31 +388,52 @@ export const saveLocationInfoSettings = authActionClient
 
     if (!isAuthorized) throw new Error('Unauthorized')
 
-    // Update settings
-    const { error: updateError } = await supabase
-      .from('locations')
-      .update({
-        currency_code: parsedInput.currencyCode || undefined,
-        wifi_network: parsedInput.wifiNetwork || null,
-        wifi_password: parsedInput.wifiPassword || null,
-        instagram_handle: parsedInput.instagramHandle || null,
-        twitter_handle: parsedInput.twitterHandle || null,
-        x_handle: parsedInput.xHandle || null,
-        tiktok_handle: parsedInput.tiktokHandle || null,
-        facebook_handle: parsedInput.facebookHandle || null,
-        whatsapp_number: parsedInput.whatsappNumber || null,
-        phone_number: parsedInput.phoneNumber || null,
-        google_maps_url: parsedInput.googleMapsUrl === '' ? null : (parsedInput.googleMapsUrl || null),
-        operating_hours: parsedInput.operatingHours || null,
-        fulfillment_location_label: parsedInput.fulfillmentLocationLabel || null,
-        portal_display_name: parsedInput.portalDisplayName || null,
-        randomizer_enabled: parsedInput.randomizerEnabled,
-        is_search_visible: parsedInput.isSearchVisible,
-        manager_pin: parsedInput.managerPin === '' ? null : (parsedInput.managerPin || null),
-      })
-      .eq('id', locationId)
+    if (pageId) {
+      // Update page settings (independent sub-business overrides)
+      const { error: updateError } = await supabase
+        .from('location_pages')
+        .update({
+          wifi_network: parsedInput.wifiNetwork || null,
+          wifi_password: parsedInput.wifiPassword || null,
+          contact_phone: parsedInput.phoneNumber || null,
+          operating_hours: parsedInput.operatingHours || null,
+          address: parsedInput.address || null,
+        })
+        .eq('id', pageId)
+        .eq('location_id', locationId)
 
-    if (updateError) throw new Error('Failed to update location info')
+      if (updateError) throw new Error('Failed to update page info')
+    } else {
+      // Update location settings
+      const { error: updateError } = await supabase
+        .from('locations')
+        .update({
+          currency_code: parsedInput.currencyCode || undefined,
+          wifi_network: parsedInput.wifiNetwork || null,
+          wifi_password: parsedInput.wifiPassword || null,
+          instagram_handle: parsedInput.instagramHandle || null,
+          twitter_handle: parsedInput.twitterHandle || null,
+          x_handle: parsedInput.xHandle || null,
+          tiktok_handle: parsedInput.tiktokHandle || null,
+          facebook_handle: parsedInput.facebookHandle || null,
+          whatsapp_number: parsedInput.whatsappNumber || null,
+          phone_number: parsedInput.phoneNumber || null,
+          google_maps_url: parsedInput.googleMapsUrl || null,
+          operating_hours: parsedInput.operatingHours || null,
+          fulfillment_location_label: parsedInput.fulfillmentLocationLabel || 'Table',
+          portal_display_name: parsedInput.portalDisplayName || null,
+          randomizer_enabled: parsedInput.randomizerEnabled,
+          is_search_visible: parsedInput.isSearchVisible,
+          manager_pin: parsedInput.managerPin || null,
+          address: parsedInput.address || null,
+          latitude: parsedInput.latitude || null,
+          longitude: parsedInput.longitude || null,
+          geofence_radius_meters: parsedInput.geofenceRadiusMeters || 100,
+        })
+        .eq('id', locationId)
+
+      if (updateError) throw new Error('Failed to update location info')
+    }
 
     revalidatePath('/dashboard/settings')
     return { success: true }

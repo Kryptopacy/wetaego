@@ -124,8 +124,10 @@ OurMenu OS feels indistinguishable from a native iOS/Android application:
 ### 4. Enterprise Fleet & Location Management
 Seamlessly scale operations across multiple venues, cities, or countries from a single organization:
 - **Dynamic Branch Switcher:** A unified dashboard allowing owners to instantly swap active branch contexts.
+- **Independent Sub-Businesses & Page-Level RBAC:** Organizations can isolate specific teams to manage individual sub-pages (e.g., locking a "Spa" team strictly to the Spa page while the "Restaurant" team manages the main dining page). Sub-businesses natively support independent overrides for Wi-Fi, operating hours, contact details, AI Chat Assistant configurations, and Manual Payment fallbacks.
+- **Geofenced Staff Clock-In:** Staff shift clock-ins are strictly validated against customizable geospatial radii around the business location using HTML5 Geolocation and the Haversine formula, preventing off-site clock-ins while maintaining fallback tracking logs in `staff_shifts`.
 - **Decoupled Hardware Provisioning & Smart Routing:** Print thousands of generic "dummy" QR codes in bulk, deploy them globally, and securely re-map them remotely. QR codes can be dynamically routed to specific location pages (e.g. routing directly to a "Room Service" sub-page or "Spa Bookings") from the dashboard without ever reprinting physical assets.
-- **Scoped Data Views:** Operations, Menu Managers, and Analytics dashboards automatically and securely filter down to the active location context via encrypted cookies.
+- **Scoped Data Views:** Operations, Menu Managers, and Analytics dashboards automatically and securely filter down to the active location context via encrypted cookies, and strictly adhere to Page-Level RBAC constraints if the user is assigned a specific `page_id`.
 
 ### 5. AI-Powered Operations (Copilot & Agents)
 - **Admin AI Copilot with RBAC:** A deeply integrated, conversational assistant built directly into the merchant dashboard. The Copilot possesses profound domain knowledge of OurMenuOS and enforces strict **Role-Based Access Control (RBAC)**. It can autonomously execute dashboard actions—like dynamically creating menu categories or adding items via AI SDK Tools—while blocking unauthorized staff from accessing financial reports.
@@ -145,7 +147,8 @@ A powerful, centralized control panel allowing platform owners to dictate global
 - **Tenant Directory & Hackathon Exports:** A bird's-eye view of all registered businesses with instant CSV generation for hackathon or investor metrics.
 
 ### 7. CRM, Loyalty & Gamification
-- **Customer Profiles & LTV:** Automatically builds rich CRM profiles at checkout, seamlessly syncing critical data like phone numbers across orders, and tracking Lifetime Value (LTV), order frequency, and marketing opt-ins.
+- **Customer Profiles & LTV:** Automatically builds rich CRM shadow profiles at checkout, seamlessly syncing critical data like phone numbers across orders, and tracking Lifetime Value (LTV), order frequency, and marketing opt-ins.
+- **B2C Identity Linking (Future Phase):** Customers will be able to effortlessly claim their shadow profiles via OTP (SMS/WhatsApp) or Email Magic Links on their order trackers, transitioning into a full B2C "My Orders" portal without data redundancy.
 - **Bespoke Loyalty Programs:** Organizations can launch custom point-based reward systems, configurable down to the fractional currency unit.
 - **Payment Roulette & Bill Splitting:** A gamified "spin to win" bill-splitting randomizer that transforms the friction of group payments into a highly engaging, viral experience. 
 - **PIN-Protected Post-Service Feedback:** Automated email receipts include a cryptographic 4-digit PIN ensuring only verified customers can rate staff performance, populating the gamified Team Performance Leaderboard and the centralized **Feedback Inbox** within the dashboard.
@@ -199,7 +202,7 @@ OurMenu OS is a true operating system, extending far beyond the customer-facing 
 
 OurMenu OS monetizes via three tiered subscription plans, driven by a unified credit system that seamlessly up-sells usage into Pro and Enterprise tiers.
 
-### 🟢 Lite Plan (₦19,999 / month)
+### 🟢 Lite Plan (₦19,999 / month or ₦199,990 / year)
 *Perfect for testing the system at a single venue.*
 - **Credits:** 10 Monthly Credits
 - **Locations:** 1 active location
@@ -207,7 +210,7 @@ OurMenu OS monetizes via three tiered subscription plans, driven by a unified cr
 - **AI Assistant:** Customizable, domain-specific AI Assistant (guest-facing chat)
 - **Edge Translator:** Real-time menu translation for 40+ languages
 
-### 🔵 Pro Plan (₦69,000 / month)
+### 🔵 Pro Plan (₦69,000 / month or ₦690,000 / year)
 *For serious operators who want every edge.*
 - **Credits:** 50 Monthly Credits (Refreshes every month)
 - **Locations:** 1 active location
@@ -232,6 +235,13 @@ OurMenu OS monetizes via three tiered subscription plans, driven by a unified cr
   - Order payloads now map directly to `resource_id` instead of raw strings.
   - Generates instant QR codes that point to `?resource=[UUID]` for airtight cart tracking.
   - Full mobile responsiveness utilizing modern flex/grid and micro-animations.
+
+### Phase 4: Independent Sub-Businesses & RBAC
+- **Status:** **In Progress**
+- **Core Additions:**
+  - `location_pages` now support fully independent sub-business data (custom WiFi, operating hours, contact email/phone, address) separate from the parent organization.
+  - Granular Role-Based Access Control (RBAC): Staff can be assigned to specific `page_id`s, restricting their dashboard access to only the orders, inventory, and settings of their assigned location page.
+  - Annual subscription toggles integrated natively into the Paystack billing flow and pricing pages.
 
 ---
 

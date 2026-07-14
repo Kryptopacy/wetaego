@@ -7,9 +7,11 @@ import { CancelButton } from './cancel-button'
 import { ActionForm } from '@/components/ActionForm'
 import { redeemCoupon } from './actions'
 
-export default async function BillingPage(props: { searchParams: Promise<{ currency?: string }> }) {
+export default async function BillingPage(props: { searchParams: Promise<{ currency?: string; cycle?: string }> }) {
   const searchParams = await props.searchParams
   const currency = searchParams?.currency === 'USD' ? 'USD' : 'NGN'
+  const cycle = searchParams?.cycle === 'annual' ? 'annual' : 'monthly'
+  const isAnnual = cycle === 'annual'
   
   const supabase = await createClient()
 
@@ -63,6 +65,8 @@ export default async function BillingPage(props: { searchParams: Promise<{ curre
   
   const liteBase = pricing.lite_monthly_ngn || 19999
   const proBase = pricing.pro_monthly_ngn || 69000
+  const liteAnnualBase = (pricing as Record<string, number>).lite_annual_ngn || 191990
+  const proAnnualBase = (pricing as Record<string, number>).pro_annual_ngn || 662400
   const c10Base = pricing.credits_10_ngn || 6000
   const c25Base = pricing.credits_25_ngn || 12000
   const c50Base = pricing.credits_50_ngn || 20000
@@ -70,22 +74,41 @@ export default async function BillingPage(props: { searchParams: Promise<{ curre
   const convertPrice = (base: number) => currency === 'USD' ? Math.round(base / rate) : base
   const formatPrice = (amount: number) => formatCurrency(amount * 100, currency)
 
-  const litePrice = convertPrice(liteBase)
-  const proPrice = convertPrice(proBase)
+  // Monthly prices shown for both cycles; annual shows per-month equivalent
+  const liteMonthlyPrice = convertPrice(liteBase)
+  const proMonthlyPrice = convertPrice(proBase)
+  const liteAnnualPerMonth = convertPrice(Math.round(liteAnnualBase / 12))
+  const proAnnualPerMonth = convertPrice(Math.round(proAnnualBase / 12))
+  const liteAnnualTotal = convertPrice(liteAnnualBase)
+  const proAnnualTotal = convertPrice(proAnnualBase)
+
+  const liteDisplayPrice = isAnnual ? liteAnnualPerMonth : liteMonthlyPrice
+  const proDisplayPrice = isAnnual ? proAnnualPerMonth : proMonthlyPrice
   const credits10Price = convertPrice(c10Base)
   const credits25Price = convertPrice(c25Base)
   const credits50Price = convertPrice(c50Base)
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-white mb-2">Billing & Subscription</h1>
           <p className="text-zinc-400">Manage your OurMenu OS subscription and payment methods.</p>
         </div>
-        <div className="flex bg-zinc-900 border border-zinc-800 rounded-lg p-1">
-          <Link href="/dashboard/billing?currency=NGN" className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${currency === 'NGN' ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}>NGN</Link>
-          <Link href="/dashboard/billing?currency=USD" className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${currency === 'USD' ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}>USD</Link>
+        <div className="flex flex-col gap-2 items-end">
+          {/* Billing Cycle Toggle */}
+          <div className="flex bg-zinc-900 border border-zinc-800 rounded-lg p-1">
+            <Link href={`/dashboard/billing?currency=${currency}&cycle=monthly`} className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${!isAnnual ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}>Monthly</Link>
+            <Link href={`/dashboard/billing?currency=${currency}&cycle=annual`} className={`relative px-4 py-2 text-sm font-medium rounded-md transition-colors ${isAnnual ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}>
+              Annual
+              <span className="ml-1.5 text-[10px] font-bold text-emerald-400">−20%</span>
+            </Link>
+          </div>
+          {/* Currency Toggle */}
+          <div className="flex bg-zinc-900 border border-zinc-800 rounded-lg p-1">
+            <Link href={`/dashboard/billing?currency=NGN&cycle=${cycle}`} className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${currency === 'NGN' ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}>NGN</Link>
+            <Link href={`/dashboard/billing?currency=USD&cycle=${cycle}`} className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${currency === 'USD' ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}>USD</Link>
+          </div>
         </div>
       </div>
 
@@ -142,12 +165,17 @@ export default async function BillingPage(props: { searchParams: Promise<{ curre
       <div className="grid md:grid-cols-3 gap-6 mt-8">
 
         {/* Lite Upgrade Card */}
-        <div className="bg-gradient-to-br from-zinc-900 to-zinc-950 border border-zinc-800 rounded-2xl p-6 relative overflow-hidden">
+        <div className="bg-linear-to-br from-zinc-900 to-zinc-950 border border-zinc-800 rounded-2xl p-6 relative overflow-hidden">
           <h2 className="text-2xl font-bold text-white mb-2 relative z-10">OurMenu OS Lite</h2>
-          <div className="flex items-baseline gap-2 mb-4 relative z-10">
-            <span className="text-4xl font-extrabold text-white">{formatPrice(litePrice)}</span>
+          <div className="flex items-baseline gap-2 mb-1 relative z-10">
+            <span className="text-4xl font-extrabold text-white">{formatPrice(liteDisplayPrice)}</span>
             <span className="text-zinc-500">/mo</span>
           </div>
+          {isAnnual && (
+            <p className="text-xs text-emerald-400 font-medium mb-3 relative z-10">
+              Billed {formatPrice(liteAnnualTotal)} annually · saves {formatPrice(convertPrice(liteBase * 12) - liteAnnualTotal)}
+            </p>
+          )}
           
           <p className="text-sm text-zinc-400 mb-6 relative z-10">
             Billed via Paystack securely.
@@ -156,7 +184,7 @@ export default async function BillingPage(props: { searchParams: Promise<{ curre
           <ul className="space-y-3 mb-8 relative z-10">
             {['Customizable AI Assistant', 'Edge Translator', 'Up to 2 QR codes', '1 active location'].map(feature => (
               <li key={feature} className="flex items-center gap-3 text-zinc-300 text-sm">
-                <svg className="w-5 h-5 text-emerald-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                <svg className="w-5 h-5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                 {feature}
               </li>
             ))}
@@ -165,6 +193,7 @@ export default async function BillingPage(props: { searchParams: Promise<{ curre
           <ActionForm action={subscribeToLite} className="relative z-10">
             <input type="hidden" name="organization_id" value={org.id} />
             <input type="hidden" name="currency" value={currency} />
+            <input type="hidden" name="billing_cycle" value={isAnnual ? 'annually' : 'monthly'} />
             <button 
               type="submit" 
               disabled={org.subscription_status === 'active' && org.subscription_plan === 'lite'}
@@ -176,16 +205,27 @@ export default async function BillingPage(props: { searchParams: Promise<{ curre
         </div>
 
         {/* Pro Upgrade Card */}
-        <div className="bg-gradient-to-br from-emerald-900/20 to-zinc-950 border border-emerald-500/30 rounded-2xl p-6 relative overflow-hidden">
+        <div className="bg-linear-to-br from-emerald-900/20 to-zinc-950 border border-emerald-500/30 rounded-2xl p-6 relative overflow-hidden">
           <div className="absolute top-0 right-0 p-4 opacity-10">
             <svg className="w-24 h-24 text-emerald-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 22h20L12 2zm0 4.5l6.5 13.5h-13L12 6.5z"/></svg>
           </div>
           
+          {isAnnual && (
+            <div className="absolute top-4 right-4 z-10 px-2 py-1 rounded-full bg-emerald-600/20 border border-emerald-500/40 text-emerald-400 text-[10px] font-bold uppercase tracking-wider">
+              20% off
+            </div>
+          )}
+
           <h2 className="text-2xl font-bold text-white mb-2 relative z-10">OurMenu OS Pro</h2>
-          <div className="flex items-baseline gap-2 mb-4 relative z-10">
-            <span className="text-4xl font-extrabold text-white">{formatPrice(proPrice)}</span>
+          <div className="flex items-baseline gap-2 mb-1 relative z-10">
+            <span className="text-4xl font-extrabold text-white">{formatPrice(proDisplayPrice)}</span>
             <span className="text-zinc-500">/mo</span>
           </div>
+          {isAnnual && (
+            <p className="text-xs text-emerald-400 font-medium mb-3 relative z-10">
+              Billed {formatPrice(proAnnualTotal)} annually · saves {formatPrice(convertPrice(proBase * 12) - proAnnualTotal)}
+            </p>
+          )}
           
           <p className="text-sm text-zinc-400 mb-6 relative z-10">
             Includes 50 Credits/mo.
@@ -194,7 +234,7 @@ export default async function BillingPage(props: { searchParams: Promise<{ curre
           <ul className="space-y-3 mb-8 relative z-10">
             {['Everything in Lite', 'Live Kitchen Display System', 'Demand Forecasting', 'Smart Triaging'].map(feature => (
               <li key={feature} className="flex items-center gap-3 text-zinc-300 text-sm">
-                <svg className="w-5 h-5 text-emerald-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                <svg className="w-5 h-5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                 {feature}
               </li>
             ))}
@@ -203,6 +243,7 @@ export default async function BillingPage(props: { searchParams: Promise<{ curre
           <ActionForm action={subscribeToPro} className="relative z-10">
             <input type="hidden" name="organization_id" value={org.id} />
             <input type="hidden" name="currency" value={currency} />
+            <input type="hidden" name="billing_cycle" value={isAnnual ? 'annually' : 'monthly'} />
             <button 
               type="submit" 
               disabled={org.subscription_status === 'active' && org.subscription_plan === 'pro'}
@@ -227,7 +268,7 @@ export default async function BillingPage(props: { searchParams: Promise<{ curre
           <ul className="space-y-3 mb-8 relative z-10 flex-1">
             {['Everything in Pro', 'Multi-location dashboard', 'API access for PMS integration', 'Dedicated account manager'].map(feature => (
               <li key={feature} className="flex items-center gap-3 text-zinc-300 text-sm">
-                <svg className="w-5 h-5 text-zinc-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                <svg className="w-5 h-5 text-zinc-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                 {feature}
               </li>
             ))}
@@ -282,7 +323,7 @@ export default async function BillingPage(props: { searchParams: Promise<{ curre
             <ActionForm action={buyCredits} className="relative z-10">
               <input type="hidden" name="organization_id" value={org.id} />
               <input type="hidden" name="credits" value="50" />
-              <button type="submit" className="px-4 py-2 bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-500 hover:to-teal-500 text-white rounded-lg text-sm font-bold transition-colors shadow-lg">
+              <button type="submit" className="px-4 py-2 bg-linear-to-r from-blue-600 to-teal-600 hover:from-blue-500 hover:to-teal-500 text-white rounded-lg text-sm font-bold transition-colors shadow-lg">
                 Buy 50
               </button>
             </ActionForm>
@@ -290,7 +331,7 @@ export default async function BillingPage(props: { searchParams: Promise<{ curre
 
           <div className="mt-4 p-4 bg-blue-900/20 border border-blue-800/50 rounded-xl">
             <p className="text-xs text-blue-200">
-              💡 <strong className="font-bold text-blue-400">Pro Tip:</strong> Upgrading to Pro gives you 50 Credits included every month for only {formatPrice(proPrice)}—a massive saving over buying standalone credits!
+              💡 <strong className="font-bold text-blue-400">Pro Tip:</strong> Upgrading to Pro gives you 50 Credits included every month for only {formatPrice(proDisplayPrice)}—a massive saving over buying standalone credits!
             </p>
           </div>
         </div>

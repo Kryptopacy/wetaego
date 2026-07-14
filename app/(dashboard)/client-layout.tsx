@@ -11,8 +11,9 @@ import { motion } from 'framer-motion'
 import { createClient } from '@/lib/supabase/client'
 import { setActiveLocationCookie } from './layout-actions'
 import {
-  LayoutDashboard, ClipboardList, BarChart3, BookOpen, CreditCard, Menu, MessageSquare, Package, QrCode, Settings, Users, Zap, X, User, FileText, LogOut, TrendingUp, Truck, MapPin
+  LayoutDashboard, ClipboardList, BarChart3, BookOpen, CreditCard, Menu, MessageSquare, Package, QrCode, Settings, Users, Zap, X, User, FileText, LogOut, TrendingUp, Truck, MapPin, ChevronDown, Check
 } from 'lucide-react'
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuGroup, DropdownMenuLabel } from '@/components/ui/dropdown-menu'
 import { GlobalRealtime } from './global-realtime'
 import { NotificationCenter } from './notification-center'
 import { ServiceWorkerRegistration } from '@/app/components/service-worker-registration'
@@ -255,40 +256,67 @@ export default function ClientLayout({ children, initialData }: { children: Reac
           </Link>
           {locations.length > 0 && (
             <div className="relative">
-              <select
-                className="w-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-sm rounded-lg px-3 py-2 appearance-none focus:outline-none focus:border-emerald-500 transition-colors"
-                value={activePageId ? `page:${activePageId}` : `loc:${activeLocationId}`}
-                onChange={async (e) => {
-                  const val = e.target.value
-                  if (val.startsWith('loc:')) {
-                    const newId = val.split(':')[1]
-                    setActiveLocationId(newId)
-                    setActivePageId('')
-                    await setActiveLocationCookie(newId, '')
-                  } else if (val.startsWith('page:')) {
-                    const newId = val.split(':')[1]
-                    setActivePageId(newId)
-                    await setActiveLocationCookie(activeLocationId, newId)
-                  }
-                  window.location.reload()
-                }}
-              >
-                {locations.map((loc) => (
-                  <optgroup key={loc.id} label={loc.portal_display_name || loc.name}>
-                    <option value={`loc:${loc.id}`}>🏢 Overview (General)</option>
-                    {loc.id === activeLocationId && pages.length > 0 && (
-                      pages.map(page => (
-                        <option key={page.id} value={`page:${page.id}`}>
-                          &nbsp;&nbsp;↳ {page.title}
-                        </option>
-                      ))
-                    )}
-                  </optgroup>
-                ))}
-              </select>
-              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-500">
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="w-full flex items-center justify-between bg-zinc-900 border border-zinc-800 text-zinc-300 text-sm rounded-lg px-3 py-2.5 hover:bg-zinc-800 transition-colors outline-none focus:ring-1 focus:ring-emerald-500">
+                    <span className="truncate">
+                      {activePageId 
+                        ? `↳ ${pages.find(p => p.id === activePageId)?.title || 'Page'}`
+                        : `🏢 ${locations.find(l => l.id === activeLocationId)?.portal_display_name || locations.find(l => l.id === activeLocationId)?.name || 'Overview'}`}
+                    </span>
+                    <ChevronDown className="w-4 h-4 opacity-50 shrink-0 ml-2" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-(--radix-dropdown-menu-trigger-width) max-h-[60vh] overflow-y-auto">
+                  {locations.map((loc) => (
+                    <DropdownMenuGroup key={loc.id}>
+                      <DropdownMenuLabel className="text-xs text-zinc-500 uppercase tracking-wider font-bold">
+                        {loc.portal_display_name || loc.name}
+                      </DropdownMenuLabel>
+                      
+                      <DropdownMenuItem
+                        className="cursor-pointer"
+                        onClick={async () => {
+                          setActiveLocationId(loc.id)
+                          setActivePageId('')
+                          await setActiveLocationCookie(loc.id, '')
+                          window.location.reload()
+                        }}
+                      >
+                        <div className="flex items-center w-full">
+                          <span className="mr-2">🏢</span>
+                          <span className="flex-1 truncate">Overview (General)</span>
+                          {!activePageId && activeLocationId === loc.id && <Check className="w-4 h-4 text-emerald-500" />}
+                        </div>
+                      </DropdownMenuItem>
+
+                      {loc.id === activeLocationId && pages.length > 0 && (
+                        <>
+                          {pages.map(page => (
+                            <DropdownMenuItem
+                              key={page.id}
+                              className="cursor-pointer pl-6"
+                              onClick={async () => {
+                                setActivePageId(page.id)
+                                await setActiveLocationCookie(activeLocationId, page.id)
+                                window.location.reload()
+                              }}
+                            >
+                              <div className="flex items-center w-full">
+                                <span className="mr-2 text-zinc-500">↳</span>
+                                <span className="flex-1 truncate">{page.title}</span>
+                                {activePageId === page.id && <Check className="w-4 h-4 text-emerald-500" />}
+                              </div>
+                            </DropdownMenuItem>
+                          ))}
+                        </>
+                      )}
+                      
+                      {locations.length > 1 && <DropdownMenuSeparator />}
+                    </DropdownMenuGroup>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           )}
         </div>
@@ -408,7 +436,7 @@ export default function ClientLayout({ children, initialData }: { children: Reac
   )
 
   return (
-    <div className="h-[100dvh] overflow-hidden bg-black flex selection:bg-emerald-500/30 print:bg-white print:h-auto print:overflow-visible">
+    <div className="h-dvh overflow-hidden bg-black flex selection:bg-emerald-500/30 print:bg-white print:h-auto print:overflow-visible">
       <GlobalRealtime />
       <ServiceWorkerRegistration />
       
@@ -423,7 +451,18 @@ export default function ClientLayout({ children, initialData }: { children: Reac
           <div className="w-8 h-8 flex items-center justify-center">
             <Image src="/ourmenu-qr-icon.svg" alt="OurMenu Logo" width={24} height={24} className="object-contain" />
           </div>
-          <span className="text-white font-bold tracking-tight">OurMenu OS</span>
+          <div className="flex flex-col">
+            <span className="text-white font-bold tracking-tight text-sm leading-tight">
+              {activePageId 
+                ? pages.find(p => p.id === activePageId)?.title || 'Page'
+                : locations.find(l => l.id === activeLocationId)?.portal_display_name || locations.find(l => l.id === activeLocationId)?.name || 'OurMenu OS'}
+            </span>
+            {activePageId && (
+              <span className="text-emerald-400 text-[10px] font-semibold uppercase tracking-wider">
+                {locations.find(l => l.id === activeLocationId)?.portal_display_name || locations.find(l => l.id === activeLocationId)?.name}
+              </span>
+            )}
+          </div>
         </div>
         <div className="flex items-center gap-4">
           <NotificationCenter />
@@ -434,7 +473,7 @@ export default function ClientLayout({ children, initialData }: { children: Reac
       </div>
 
       {mobileMenuOpen && (
-        <div className="md:hidden fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm print:hidden">
+        <div className="md:hidden fixed inset-0 z-60 bg-black/80 backdrop-blur-sm print:hidden">
           <div className="absolute right-0 top-0 bottom-0 w-80 bg-[#0a0a0a] border-l border-white/5 shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
             <div className="flex justify-end p-4">
               <button onClick={() => setMobileMenuOpen(false)} className="text-zinc-400 hover:text-white bg-zinc-900 p-2 rounded-full">
