@@ -125,7 +125,7 @@ export async function POST(req: Request) {
 
     // 3. Ask Gemini to produce a forecast for each item
     const aiModels = await getAiModels() as Record<string, string>
-    const modelName = aiModels.text_generation || 'gemini-3.5-flash'
+    const modelName = aiModels.text_generation || 'gemini-3-flash-preview'
 
     const { object } = await generateObject({
       model: google(modelName),

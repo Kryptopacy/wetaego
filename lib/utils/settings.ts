@@ -12,13 +12,13 @@ const DEFAULT_PRICING = {
   credits_25_ngn: 12000,
   credits_50_ngn: 20000 
 }
-const DEFAULT_CREDIT_COSTS = { ai_cover: 5, copywriter: 1, translation_per_category: 2, custom_page: 10, qr_code: 1 }
+const DEFAULT_CREDIT_COSTS = { ai_cover: 5, copywriter: 1, translation_per_category: 2, custom_page: 10, qr_code: 1, forecast: 3, auto_fill: 2, copilot: 1 }
 const DEFAULT_PLAN_LIMITS = {
   lite: { credits: 10, pages: 0, qr_codes: 2 },
   pro: { credits: 50, pages: 1, qr_codes: 9999 },
   enterprise: { credits: 200, pages: 5, qr_codes: 9999 }
 }
-const DEFAULT_AI_MODELS = { text_generation: "gemini-3.5-flash", image_generation: "gemini-3.1-flash-image" }
+const DEFAULT_AI_MODELS = { text_generation: "gemini-3-flash-preview", image_generation: "gemini-3.1-flash-image-preview", business_ai_model: "gemini-3-flash-preview", customer_ai_model: "gemini-3-flash-preview" }
 const DEFAULT_EXCHANGE_RATES = { usd_to_ngn: 1500 }
 const DEFAULT_AFFILIATE = { default_percentage: 10 }
 const DEFAULT_PLATFORM_FEES = { business_subaccount: 5, affiliate_subaccount: 5, staff_tip_subaccount: 0 }

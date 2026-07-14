@@ -43,7 +43,7 @@ Make it sound premium and appealing to customers.
 DO NOT wrap the response in quotes.`
 
     const aiModels = await getAiModels() as Record<string, string>
-    const modelName = aiModels.text_generation || 'gemini-3.5-flash'
+    const modelName = aiModels.business_ai_model || aiModels.text_generation || 'gemini-3-flash-preview'
 
     const { text } = await generateText({
       model: google(modelName),

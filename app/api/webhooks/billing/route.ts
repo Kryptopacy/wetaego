@@ -1,27 +1,20 @@
 import { NextResponse } from 'next/server'
 import * as Sentry from '@sentry/nextjs'
 import { createClient } from '@supabase/supabase-js'
-import crypto from 'crypto'
+import { paystackProvider } from '@/lib/payments/paystack'
 import { Database } from '@/lib/supabase/types'
 import { formatCurrency } from '@/lib/utils/currency'
 
 export async function POST(req: Request) {
-  const secret = process.env.PAYSTACK_SECRET_KEY
   const signature = req.headers.get('x-paystack-signature')
 
   const bodyString = await req.text()
-
-  if (!secret) return NextResponse.json({ error: 'Missing Paystack Secret Key' }, { status: 500 })
 
   if (!signature) {
     return NextResponse.json({ error: 'Missing signature' }, { status: 400 })
   }
 
-  const hash = crypto.createHmac('sha512', secret).update(bodyString).digest('hex')
-  if (
-    hash.length !== signature.length ||
-    !crypto.timingSafeEqual(Buffer.from(hash), Buffer.from(signature))
-  ) {
+  if (!paystackProvider.validateWebhookSignature(bodyString, signature)) {
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 })
   }
 

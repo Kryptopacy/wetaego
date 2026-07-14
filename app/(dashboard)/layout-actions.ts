@@ -1,8 +1,15 @@
 'use server'
 
 import { cookies } from 'next/headers'
+import { createClient } from '@/lib/supabase/server'
 
 export async function setActiveLocationCookie(locationId: string, pageId?: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    throw new Error('Unauthorized')
+  }
+
   const cookieStore = await cookies()
   cookieStore.set('ourmenu_active_location_id', locationId, {
     path: '/',

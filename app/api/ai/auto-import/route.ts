@@ -40,7 +40,7 @@ export async function POST(req: Request) {
     const isTextFile = mimeType === 'text/plain' || file.name.endsWith('.txt') || file.name.endsWith('.csv')
 
     const aiModels = await getAiModels() as Record<string, string>
-    const modelToUse = aiModels.text_generation || 'gemini-2.0-flash'
+    const modelToUse = aiModels.business_ai_model || aiModels.text_generation || 'gemini-2.5-flash'
 
     const genai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY })
 

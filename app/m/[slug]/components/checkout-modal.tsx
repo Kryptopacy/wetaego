@@ -360,7 +360,7 @@ export function CheckoutModal({
         paymentMethod, discountAmountMinor, customerName, customerPhone,
         fulfillmentType, deliveryInstructions, staffId: undefined, staffSubaccountOverride: undefined,
         pageId, idempotencyKey: crypto.randomUUID(), subtotalMinor: discountedSubtotalMinor, taxTotalMinor, taxBreakdown,
-        isUnevenSplit: splitType === 'uneven',
+        isSplitPayment: splitCount > 1,
         resourceId
       }
 

@@ -88,7 +88,7 @@ Rules:
         }
 
     const response = await genai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-2.5-flash',
       contents: typeof contents === 'string' 
         ? [{ role: 'user', parts: [{ text: contents }] }]
         : [{ role: 'user', parts: contents.parts }],

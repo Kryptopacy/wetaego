@@ -74,7 +74,7 @@ export async function POST(req: Request) {
     const creditCosts = await getCreditCosts() as Record<string, number>
     const aiModels = await getAiModels() as Record<string, string>
     const cost = creditCosts.copywriter || 1
-    const modelName = aiModels.text_generation || 'gemini-3.5-flash'
+    const modelName = aiModels.business_ai_model || aiModels.text_generation || 'gemini-3-flash-preview'
 
     // Charge dynamic credit cost
     const charge = await chargeCredits(organizationId, cost, 'AI Copywriter Generation', userData.user.id)

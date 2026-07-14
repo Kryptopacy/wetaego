@@ -1,5 +1,6 @@
 
-import { getPricingSettings, getCreditCosts, getPlanLimits, getAiModels, getPlatformFees, getTrialSettings, getGlobalManualPayment, getKycSettings } from '@/lib/utils/settings'
+import { getPricingSettings, getCreditCosts, getPlanLimits, getAiModels, getPlatformFees, getTrialSettings, getGlobalManualPayment, getKycSettings, getExchangeRates } from '@/lib/utils/settings'
+import { getUsdToNgnRate } from '@/lib/payments/exchange'
 import { updateSetting } from './actions'
 import { ActionForm } from '@/components/ActionForm'
 
@@ -20,6 +21,10 @@ export default async function AdminPage() {
   const trialSettings = await getTrialSettings()
   const globalPayment = await getGlobalManualPayment()
   const kycSettings = await getKycSettings() as { require_kyc_to_publish?: boolean }
+  const exchangeRates = await getExchangeRates()
+  
+  // Fetch live exchange rate for display purposes
+  const liveUsdRate = await getUsdToNgnRate()
 
   const supabase = await createClient()
   const { data: userData } = await supabase.auth.getUser()
@@ -196,6 +201,32 @@ export default async function AdminPage() {
                 <button type="submit" className="w-full px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg text-sm font-medium transition border border-zinc-700">Save Setting</button>
               </ActionForm>
             </section>
+
+            <section className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-xl w-full">
+              <h2 className="text-lg font-bold text-white mb-4">Exchange Rates</h2>
+              <ActionForm action={updateSetting} className="space-y-4">
+                <input type="hidden" name="key" value="exchange_rates" />
+                <input type="hidden" name="is_json" value="true" />
+                
+                <div className="bg-zinc-950 p-4 rounded-xl border border-zinc-800 flex justify-between items-center mb-4">
+                  <div>
+                    <span className="block text-xs font-bold text-zinc-500 uppercase mb-1">Live API Rate (incl. 2% buffer)</span>
+                    <span className="text-xl font-black text-emerald-400">₦{liveUsdRate.toFixed(2)}</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="block text-xs font-bold text-zinc-500 uppercase mb-1">Current Active Rate</span>
+                    <span className="text-sm font-medium text-white">Live API is prioritized</span>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-zinc-400 mb-1">USD to NGN (Manual Fallback)</label>
+                  <input type="number" step="0.01" name="usd_to_ngn" defaultValue={(exchangeRates as Record<string, number>).usd_to_ngn ?? 1500} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white text-sm outline-none focus:border-emerald-500" />
+                  <p className="text-xs text-zinc-500 mt-2">Used only if the live Exchange Rate API goes down.</p>
+                </div>
+                <button type="submit" className="w-full px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg text-sm font-medium transition border border-zinc-700">Save Rates</button>
+              </ActionForm>
+            </section>
           </div>
         </div>
 
@@ -216,20 +247,28 @@ export default async function AdminPage() {
                     <input type="number" name="auto_fill" defaultValue={(creditCosts as Record<string, number>).auto_fill ?? 2} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white text-sm outline-none focus:border-emerald-500" />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-zinc-400 mb-1">Copywriter</label>
+                    <label className="block text-xs font-medium text-zinc-400 mb-1">Copywriter / Text Gen</label>
                     <input type="number" name="text_generation" defaultValue={(creditCosts as Record<string, number>).text_generation ?? 1} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white text-sm outline-none focus:border-emerald-500" />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-zinc-400 mb-1">Image Gen</label>
+                    <label className="block text-xs font-medium text-zinc-400 mb-1">Image Gen / AI Cover</label>
                     <input type="number" name="image_generation" defaultValue={(creditCosts as Record<string, number>).image_generation ?? 2} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white text-sm outline-none focus:border-emerald-500" />
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-zinc-400 mb-1">QR Generation</label>
                     <input type="number" name="qr_code" defaultValue={(creditCosts as Record<string, number>).qr_code ?? 1} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white text-sm outline-none focus:border-emerald-500" />
                   </div>
-                  <div className="col-span-2">
+                  <div>
                     <label className="block text-xs font-medium text-zinc-400 mb-1">Admin AI Co-Pilot</label>
                     <input type="number" name="copilot" defaultValue={(creditCosts as Record<string, number>).copilot ?? 1} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white text-sm outline-none focus:border-emerald-500" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-zinc-400 mb-1">Translate (Per Category)</label>
+                    <input type="number" name="translation_per_category" defaultValue={(creditCosts as Record<string, number>).translation_per_category ?? 2} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white text-sm outline-none focus:border-emerald-500" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-zinc-400 mb-1">Custom Page Gen</label>
+                    <input type="number" name="custom_page" defaultValue={(creditCosts as Record<string, number>).custom_page ?? 10} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white text-sm outline-none focus:border-emerald-500" />
                   </div>
                 </div>
                 <button type="submit" className="w-full px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg text-sm font-medium transition border border-zinc-700">Save Credit Costs</button>
@@ -242,8 +281,16 @@ export default async function AdminPage() {
                 <input type="hidden" name="key" value="ai_models" />
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-xs font-medium text-zinc-400 mb-1">Text Generation Model</label>
+                    <label className="block text-xs font-medium text-zinc-400 mb-1">Text Generation Model (Legacy Fallback)</label>
                     <input type="text" name="text_generation" defaultValue={(aiModels as Record<string, string>).text_generation} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white text-sm outline-none focus:border-emerald-500" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-zinc-400 mb-1">Business AI Model (Copilot, Dashboard)</label>
+                    <input type="text" name="business_ai_model" defaultValue={(aiModels as Record<string, string>).business_ai_model} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white text-sm outline-none focus:border-emerald-500" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-zinc-400 mb-1">Customer AI Model (Chat, Triage, Personalize)</label>
+                    <input type="text" name="customer_ai_model" defaultValue={(aiModels as Record<string, string>).customer_ai_model} className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white text-sm outline-none focus:border-emerald-500" />
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-zinc-400 mb-1">Image Generation Model</label>

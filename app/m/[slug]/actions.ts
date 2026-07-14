@@ -116,7 +116,7 @@ export async function processCheckout(params: {
   subtotalMinor?: number,
   taxTotalMinor?: number,
   taxBreakdown?: unknown[],
-  isUnevenSplit?: boolean,
+  isSplitPayment?: boolean,
   resourceId?: string,
   deliveryLat?: number | null,
   deliveryLng?: number | null
@@ -126,7 +126,7 @@ export async function processCheckout(params: {
     tableIdentifier, customerNote, customerEmail, paymentFractionMinor,
     paymentMethod = 'card', discountAmountMinor = 0, customerName, customerPhone,
     fulfillmentType, deliveryInstructions, staffId: _staffId, staffSubaccountOverride,
-    pageId, idempotencyKey, subtotalMinor, taxTotalMinor, taxBreakdown, isUnevenSplit,
+    pageId, idempotencyKey, subtotalMinor, taxTotalMinor, taxBreakdown, isSplitPayment,
     resourceId
   } = params;
   const supabase = await createClient()
@@ -148,6 +148,15 @@ export async function processCheckout(params: {
     // 1. Server-side price verification — never trust client-supplied totals
     const itemIds = items.map(i => i.id as string).filter(Boolean)
     
+    // Fetch Payment Settings and Location Data upfront for delivery fee
+    const [
+      { data: paySettings },
+      { data: location }
+    ] = await Promise.all([
+      supabase.from('organization_payment_settings').select('provider_account_id, is_active').eq('organization_id', organizationId).single(),
+      supabase.from('locations').select('custom_milestones, delivery_fee_minor, delivery_minimum_order_minor').eq('id', locationId).single()
+    ])
+
     // If pageId is provided, items are from page_items, otherwise menu_items
     const tableToQuery = pageId ? 'page_items' : 'menu_items'
     
@@ -195,8 +204,15 @@ export async function processCheckout(params: {
     // Apply discount server-side, capped at subtotal to prevent negative totals
     const clampedDiscountMinor = Math.min(discountAmountMinor || 0, serverSubtotalMinor)
     
+    // Add delivery fee if applicable
+    const isDelivery = fulfillmentType === 'delivery'
+    if (isDelivery && location?.delivery_minimum_order_minor && serverSubtotalMinor < location.delivery_minimum_order_minor) {
+      throw new Error('Minimum order amount for delivery not met.')
+    }
+    const appliedDeliveryFee = (isDelivery && location?.delivery_fee_minor) ? location.delivery_fee_minor : 0
+    
     // Calculate final total (Taxes are included upfront, but Tips are handled post-service)
-    const verifiedTotalMinor = Math.max(0, serverSubtotalMinor - clampedDiscountMinor) + (taxTotalMinor || 0)
+    const verifiedTotalMinor = Math.max(0, serverSubtotalMinor - clampedDiscountMinor) + (taxTotalMinor || 0) + appliedDeliveryFee
 
     // Guard: reject if client total deviates >5% from server-computed total (fraud detection)
     const deviation = Math.abs(verifiedTotalMinor - totalAmountMinor) / Math.max(verifiedTotalMinor, 1)
@@ -205,16 +221,6 @@ export async function processCheckout(params: {
     }
 
   // ----------------------------------------
-
-  // 2. Fetch Payment Settings and Location Data
-  const [
-    { data: paySettings },
-    { data: location }
-  ] = await Promise.all([
-    supabase.from('organization_payment_settings').select('provider_account_id, is_active').eq('organization_id', organizationId).single(),
-    supabase.from('locations').select('custom_milestones').eq('id', locationId).single()
-  ])
-
 
   const subaccountCode = staffSubaccountOverride || (paySettings?.is_active ? paySettings.provider_account_id : null)
 
@@ -234,6 +240,7 @@ export async function processCheckout(params: {
       total_amount_minor: verifiedTotalMinor,
       tip_amount_minor: tipAmountMinor || 0,
       discount_amount_minor: clampedDiscountMinor,
+      delivery_fee_minor: appliedDeliveryFee || null,
       customer_note: customerNote ? customerNote.slice(0, 500) : null,
       customer_email: customerEmail || null,
       subtotal_minor: subtotalMinor || 0,
@@ -365,7 +372,7 @@ export async function processCheckout(params: {
   // 5. Initialize Paystack Transaction if Active and method is card
   const isPaystackLive = paySettings?.is_active && paySettings?.provider_account_id
   
-  if (isPaystackLive && paymentMethod === 'card' && !isUnevenSplit) {
+  if (isPaystackLive && paymentMethod === 'card' && !isSplitPayment) {
     // Use verified server total for Paystack — split payment uses fractional amount
     const email = customerEmail || `order_${order.id}@ourmenuos.online`
 
@@ -417,8 +424,8 @@ export async function processCheckout(params: {
     const { sendPushToOrg, newOrderNotification } = await import('@/lib/notifications/push')
     waitUntil(sendPushToOrg(organizationId, newOrderNotification(tableIdentifier || 'Takeaway', verifiedTotalMinor)))
     
-    // Record platform fee for offline payments that aren't uneven split shares
-    if (verifiedTotalMinor > 0 && !isUnevenSplit) {
+    // Record platform fee for offline payments that aren't split shares
+    if (verifiedTotalMinor > 0 && !isSplitPayment) {
       try {
         const platformFeesConfig = await getPlatformFees()
         const businessFeePercent = platformFeesConfig.business_subaccount || 5
