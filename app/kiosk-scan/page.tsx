@@ -69,7 +69,7 @@ export default function KioskScanPage() {
 
   return (
     <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-6">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(16,185,129,0.07)_0%,_transparent_70%)] pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(16,185,129,0.07)_0%,transparent_70%)] pointer-events-none" />
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}

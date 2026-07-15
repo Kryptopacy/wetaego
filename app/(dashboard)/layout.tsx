@@ -69,6 +69,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
           locations = locs
           
           let savedId = cookieStore.get('ourmenu_active_location_id')?.value
+          const isGlobalView = savedId === 'global' && locs.length > 1
           let activeLoc = locs.find((l: Record<string, unknown>) => l.id === savedId) || locs[0]
           
           // Fetch templates — use adminClient to bypass RLS so the sidebar dropdown
@@ -81,6 +82,8 @@ export default async function DashboardLayout({ children }: { children: ReactNod
             
           if (member?.page_id) {
             pagesQuery = pagesQuery.eq('id', member.page_id)
+          } else if (isGlobalView) {
+            pagesQuery = pagesQuery.in('location_id', locs.map((l: any) => l.id))
           } else {
             pagesQuery = pagesQuery.eq('location_id', activeLoc.id)
           }
@@ -98,8 +101,13 @@ export default async function DashboardLayout({ children }: { children: ReactNod
             activePageId = member.page_id // UI restriction: force active page
           }
 
-          activeLocationId = activeLoc.id
-          locationSlug = activeLoc.slug
+          if (isGlobalView && !member?.page_id) {
+            activeLocationId = 'global'
+            locationSlug = 'global'
+          } else {
+            activeLocationId = activeLoc.id
+            locationSlug = activeLoc.slug
+          }
 
           const templates = new Set<string>()
           if (pages) {

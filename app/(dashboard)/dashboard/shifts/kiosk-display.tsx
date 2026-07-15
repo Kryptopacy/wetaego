@@ -121,7 +121,7 @@ export function KioskDisplay({
   return (
     <div className="fixed inset-0 bg-zinc-950 flex flex-col items-center justify-center overflow-hidden select-none">
       {/* Background radial glow */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(16,185,129,0.08)_0%,_transparent_70%)] pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(16,185,129,0.08)_0%,transparent_70%)] pointer-events-none" />
 
       {/* Header */}
       <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-8 pt-8">

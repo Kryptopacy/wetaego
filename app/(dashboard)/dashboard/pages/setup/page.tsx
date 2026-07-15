@@ -164,7 +164,7 @@ export default async function BusinessTypeSetupPage({
         </div>
 
         {/* Advanced option */}
-        <div className="mt-16 pt-8 border-t border-white/[0.05] text-center">
+        <div className="mt-16 pt-8 border-t border-white/5 text-center">
           <p className="text-zinc-600 text-sm mb-4">
             Need something different? Build from scratch.
           </p>

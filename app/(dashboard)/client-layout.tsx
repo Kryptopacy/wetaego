@@ -263,12 +263,36 @@ export default function ClientLayout({ children, initialData }: { children: Reac
                     <span className="truncate">
                       {activePageId 
                         ? `↳ ${pages.find(p => p.id === activePageId)?.title || 'Page'}`
-                        : `🏢 ${locations.find(l => l.id === activeLocationId)?.portal_display_name || locations.find(l => l.id === activeLocationId)?.name || 'Overview'}`}
+                        : activeLocationId === 'global'
+                          ? '🌐 All Businesses (Global View)'
+                          : `🏢 ${locations.find(l => l.id === activeLocationId)?.portal_display_name || locations.find(l => l.id === activeLocationId)?.name || 'Overview'}`}
                     </span>
                     <ChevronDown className="w-4 h-4 opacity-50 shrink-0 ml-2" />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="w-(--radix-dropdown-menu-trigger-width) max-h-[60vh] overflow-y-auto">
+                  {locations.length > 1 && (
+                    <>
+                      <DropdownMenuGroup>
+                        <DropdownMenuItem
+                          className="cursor-pointer font-bold py-2.5"
+                          onClick={async () => {
+                            setActiveLocationId('global')
+                            setActivePageId('')
+                            await setActiveLocationCookie('global', '')
+                            window.location.reload()
+                          }}
+                        >
+                          <div className="flex items-center w-full">
+                            <span className="mr-2 text-base">🌐</span>
+                            <span className="flex-1 truncate text-white">All Businesses (Global View)</span>
+                            {!activePageId && activeLocationId === 'global' && <Check className="w-4 h-4 text-emerald-500" />}
+                          </div>
+                        </DropdownMenuItem>
+                      </DropdownMenuGroup>
+                      <DropdownMenuSeparator className="bg-zinc-800 my-1" />
+                    </>
+                  )}
                   {locations.map((loc) => (
                     <DropdownMenuGroup key={loc.id}>
                       <DropdownMenuLabel className="text-xs text-zinc-500 uppercase tracking-wider font-bold">

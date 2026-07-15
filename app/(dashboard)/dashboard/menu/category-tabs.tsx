@@ -1,7 +1,7 @@
 
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { AddItemForm } from './add-item-form'
 import { toggleItemStatus } from './actions'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -115,7 +115,7 @@ function OptimisticItem({ item, orgId, categoryName }: { item: NonNullable<Categ
                 type="button" 
                 onClick={handleMagicFill} 
                 disabled={isGenerating || !editName}
-                className="absolute right-1 bottom-1 px-3 py-1 bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-400 hover:to-emerald-500 text-white rounded-md text-xs font-bold transition-all disabled:opacity-50 shadow-lg"
+                className="absolute right-1 bottom-1 px-3 py-1 bg-linear-to-r from-teal-500 to-emerald-600 hover:from-teal-400 hover:to-emerald-500 text-white rounded-md text-xs font-bold transition-all disabled:opacity-50 shadow-lg"
               >
                 {isGenerating ? 'Wait...' : '✨ Magic Fill'}
               </button>
@@ -145,7 +145,7 @@ function OptimisticItem({ item, orgId, categoryName }: { item: NonNullable<Categ
                     type="button"
                     onClick={handleGenerateImage}
                     disabled={isGeneratingImg || !editName}
-                    className="w-full px-3 py-1.5 bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-400 hover:to-emerald-500 text-white rounded-lg text-xs font-bold transition-all disabled:opacity-50 flex items-center justify-center gap-1 shadow-lg mt-1"
+                    className="w-full px-3 py-1.5 bg-linear-to-r from-teal-500 to-emerald-600 hover:from-teal-400 hover:to-emerald-500 text-white rounded-lg text-xs font-bold transition-all disabled:opacity-50 flex items-center justify-center gap-1 shadow-lg mt-1"
                   >
                     {isGeneratingImg ? 'Generating...' : '✨ AI Image Studio'}
                   </button>
@@ -214,6 +214,14 @@ export function CategoryTabs({ categories, orgId, menuId }: { categories: Catego
     categories,
     (state, newCat: Category) => [...state, newCat]
   )
+
+  useEffect(() => {
+    if (categories.length > 0 && !categories.some(c => c.id === activeTab)) {
+      setActiveTab(categories[0]?.id || '')
+    } else if (categories.length === 0 && activeTab !== '') {
+      setActiveTab('')
+    }
+  }, [categories, activeTab])
 
   const activeCategory = optimisticCategories.find(c => c.id === activeTab) || optimisticCategories[0] || categories[0]
 
