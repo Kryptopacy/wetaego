@@ -3,12 +3,14 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import dynamic from 'next/dynamic'
+import { useCartStore } from '@/lib/store/cart'
+
 const PaymentRouletteModal = dynamic(() => import('@/components/payment-roulette-modal').then(mod => mod.PaymentRouletteModal), { ssr: false })
 
 export function RouletteFAB() {
   const [isOpen, setIsOpen] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
-  
+  const setSplit = useCartStore((state) => state.setSplit)
   
   useEffect(() => { Promise.resolve().then(() => setIsMounted(true)) }, [])
 
@@ -16,7 +18,13 @@ export function RouletteFAB() {
 
   return (
     <>
-      {isOpen && <PaymentRouletteModal isOpen={isOpen} onClose={() => setIsOpen(false)} />}
+      {isOpen && (
+        <PaymentRouletteModal 
+          isOpen={isOpen} 
+          onClose={() => setIsOpen(false)} 
+          onSpinComplete={(count, type) => setSplit(count, type)}
+        />
+      )}
       
       <motion.button 
         initial={{ scale: 0, opacity: 0 }}

@@ -24,6 +24,9 @@ interface CartState {
   totalAmountMinorForPage: (pageId: string) => number
   spinnerDiscount: number | null
   setSpinnerDiscount: (discount: number | null) => void
+  splitCount: number
+  splitType: 'even' | 'uneven'
+  setSplit: (count: number, type: 'even' | 'uneven') => void
   clearCart: () => void
 }
 
@@ -75,7 +78,7 @@ export const useCartStore = create<CartState>()(
           items: state.items.map(i => i.cartKey === cartKey ? { ...i, quantity: newQuantity } : i)
         }
       }),
-      clearCart: () => set({ items: [], spinnerDiscount: null, savedAt: null }),
+      clearCart: () => set({ items: [], spinnerDiscount: null, savedAt: null, splitCount: 1, splitType: 'even' }),
       totalAmountMinor: () => {
         const { items } = get()
         return items.reduce((total, item) => total + (item.price_minor * item.quantity), 0)
@@ -87,7 +90,10 @@ export const useCartStore = create<CartState>()(
           .reduce((total, item) => total + (item.price_minor * item.quantity), 0)
       },
       spinnerDiscount: null,
-      setSpinnerDiscount: (discount) => set({ spinnerDiscount: discount })
+      setSpinnerDiscount: (discount) => set({ spinnerDiscount: discount }),
+      splitCount: 1,
+      splitType: 'even',
+      setSplit: (count, type) => set({ splitCount: count, splitType: type })
     }),
     {
       name: 'ourmenu-cart-storage',

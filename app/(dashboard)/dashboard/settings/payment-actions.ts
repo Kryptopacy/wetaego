@@ -160,8 +160,6 @@ export const saveManualPaymentSettings = authActionClient
       if (error) throw new Error('Failed to update manual payment settings')
     }
 
-    if (error) throw new Error('Failed to update manual payment settings')
-
     revalidatePath('/dashboard/settings')
     return { success: true }
   })

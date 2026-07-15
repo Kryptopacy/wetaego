@@ -9,9 +9,10 @@ type GameMode = 'classic' | 'squad' | 'survivor' | 'chaos'
 interface PaymentRouletteModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onSpinComplete?: (count: number, type: 'even' | 'uneven') => void;
 }
 
-export function PaymentRouletteModal({ isOpen, onClose }: PaymentRouletteModalProps) {
+export function PaymentRouletteModal({ isOpen, onClose, onSpinComplete }: PaymentRouletteModalProps) {
   const [namesText, setNamesText] = useState('')
   const [mode, setMode] = useState<GameMode>('classic')
   const [squadSize, setSquadSize] = useState(2)
@@ -90,6 +91,8 @@ export function PaymentRouletteModal({ isOpen, onClose }: PaymentRouletteModalPr
       }
       setIsFinished(true)
       setSpinning(false)
+      
+      onSpinComplete?.(chosen.length > 0 ? chosen.length : 1, 'even')
       
       confetti({
         particleCount: 100,

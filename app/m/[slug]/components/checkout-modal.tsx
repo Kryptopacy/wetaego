@@ -8,6 +8,7 @@ import { CheckoutPaymentForm } from './checkout-payment-form'
 import { DeliveryAddressAutocompleteWrapper } from './delivery-address-autocomplete'
 import { toast } from 'sonner'
 import { processCheckout, checkIouStatus } from '../actions'
+import { useCartStore } from '@/lib/store/cart'
 
 // Extracted Floating Input
 export function FloatingInput({ 
@@ -183,10 +184,31 @@ export function CheckoutModal({
   const [deliveryLat, setDeliveryLat] = useState<number | null>(null)
   const [deliveryLng, setDeliveryLng] = useState<number | null>(null)
   
-  const [splitCount, setSplitCount] = useState(1)
-  const [splitType, setSplitType] = useState<'even' | 'uneven'>('even')
+  const storeSplitCount = useCartStore(state => state.splitCount)
+  const storeSplitType = useCartStore(state => state.splitType)
+  const setStoreSplit = useCartStore(state => state.setSplit)
+
+  const [splitCount, setLocalSplitCount] = useState(storeSplitCount || 1)
+  const [splitType, setLocalSplitType] = useState<'even' | 'uneven'>(storeSplitType || 'even')
+
+  const setSplitCount = (count: number) => {
+    setLocalSplitCount(count)
+    setStoreSplit(count, splitType)
+  }
+  
+  const setSplitType = (type: 'even' | 'uneven') => {
+    setLocalSplitType(type)
+    setStoreSplit(splitCount, type)
+  }
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'transfer' | 'iou' | 'pay_on_delivery_cash' | 'pay_on_delivery_link' | 'pay_after_service'>(paymentIsLive ? 'card' : 'transfer')
   const [isIouGloballyEnabled, setIsIouGloballyEnabled] = useState(iouPaymentEnabled)
+
+  useEffect(() => {
+    if (isOpen) {
+      setLocalSplitCount(useCartStore.getState().splitCount)
+      setLocalSplitType(useCartStore.getState().splitType)
+    }
+  }, [isOpen])
 
   useEffect(() => {
     if (isOpen && organizationId) {
