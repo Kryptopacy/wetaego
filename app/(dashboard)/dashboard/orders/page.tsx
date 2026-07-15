@@ -5,6 +5,7 @@ import { mapSupabaseOrderToUI } from '@/lib/utils/transformers'
 import { UIOrder } from '@/lib/types/frontend'
 import { cookies } from 'next/headers'
 import { getTranslations } from 'next-intl/server'
+import { getInfrastructureFlags } from '@/lib/utils/settings'
 
 export default async function OrdersPage() {
   const supabase = await createClient()
@@ -111,6 +112,8 @@ export default async function OrdersPage() {
     }
   }
 
+  const infraFlags = await getInfrastructureFlags() as Record<string, boolean>
+
   return (
     <div className="max-w-6xl h-[calc(100vh-8rem)] flex flex-col">
       <div className="flex items-center justify-between mb-8 shrink-0">
@@ -133,6 +136,7 @@ export default async function OrdersPage() {
           currentUserId={userId!}
           billingMode={billingMode}
           templateType={templateType}
+          realtimeKdsEnabled={infraFlags.realtime_kds_enabled !== false}
         />
       ) : (
         <p className="text-zinc-500">Please create an organization and location first.</p>

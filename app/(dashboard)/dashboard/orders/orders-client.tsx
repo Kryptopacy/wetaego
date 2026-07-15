@@ -36,9 +36,10 @@ interface OrdersClientProps {
   currentUserId: string
   billingMode?: string
   templateType?: string
+  realtimeKdsEnabled?: boolean
 }
 
-export function OrdersClient({ organizationId, locationId, initialOrders, initialServiceRequests, initialMenuItems = [], currentUserId, billingMode = 'standard_checkout', templateType = 'catalog' }: OrdersClientProps) {
+export function OrdersClient({ organizationId, locationId, initialOrders, initialServiceRequests, initialMenuItems = [], currentUserId, billingMode = 'standard_checkout', templateType = 'catalog', realtimeKdsEnabled = true }: OrdersClientProps) {
   const supabase = createClient()
   const [orders, setOrders] = useState(initialOrders)
   const [serviceRequests, setServiceRequests] = useState(initialServiceRequests)
@@ -114,6 +115,25 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
   }, [executeOrQueue, autoPrintReceipts, orders, mode, ipAddress])
 
   useEffect(() => {
+    if (!realtimeKdsEnabled) {
+      setSocketStatus('POLLING')
+      const interval = setInterval(() => {
+        // Fallback polling for orders and service requests to save Realtime connection limits
+        const fetchUpdates = async () => {
+          const { data: ordersData } = await supabase.from('orders').select('*, order_items(*), order_milestones(*), order_payments(*)').eq('location_id', locationId)
+          if (ordersData) {
+            setOrders(ordersData.map((d) => mapSupabaseOrderToUI(d as any)))
+          }
+          const { data: srData } = await supabase.from('service_requests').select('*').eq('location_id', locationId)
+          if (srData) {
+            setServiceRequests(srData as ServiceRequestRow[])
+          }
+        }
+        fetchUpdates()
+      }, 10000)
+      return () => clearInterval(interval)
+    }
+
     // Subscribe to Orders
     const ordersSubscription = supabase
       .channel('orders-channel')

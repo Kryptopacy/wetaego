@@ -114,6 +114,7 @@ interface CheckoutModalProps {
   locationTaxes?: CheckoutTax[]
   pagePaymentOptions?: string[]
   resourceId?: string
+  mapsIntegrationEnabled?: boolean
 }
 
 export function CheckoutModal({
@@ -148,11 +149,12 @@ export function CheckoutModal({
   fulfillmentLocationLabel = 'Table',
   pageId,
   refundPolicy,
-  pageFulfillmentOptions,
-  pageBillingMode: _pageBillingMode,
+  pageFulfillmentOptions = { pickup: true, delivery: true, table: false },
+  pageBillingMode = 'standard_checkout',
   locationTaxes = [],
   pagePaymentOptions = [],
-  resourceId
+  resourceId,
+  mapsIntegrationEnabled = true
 }: CheckoutModalProps) {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -608,6 +610,7 @@ export function CheckoutModal({
                         setDeliveryLat(lat)
                         setDeliveryLng(lng)
                       }}
+                      mapsIntegrationEnabled={mapsIntegrationEnabled}
                     />
                   ) : (
                     <textarea 

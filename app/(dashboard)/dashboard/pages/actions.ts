@@ -74,6 +74,15 @@ export const createCustomPage = authActionClient
       return { success: true }
     }
 
+    const { getTemplateFlags } = await import('@/lib/utils/settings')
+    const templateFlags = await getTemplateFlags() as Record<string, boolean>
+    const { isAdminEmail } = await import('@/lib/utils/admin')
+    const isSuperadmin = isAdminEmail(user.email)
+    
+    if (!isSuperadmin && templateFlags[template_type] === false) {
+      throw new Error(`The ${template_type} template is currently disabled.`)
+    }
+
     const { data: loc } = await supabase
       .from('locations')
       .select('organization_id')

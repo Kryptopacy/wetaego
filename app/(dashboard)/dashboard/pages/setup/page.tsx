@@ -8,6 +8,8 @@ import {
 } from '@/lib/templates/presets'
 import { setBusinessTypeAction } from '../actions'
 import { ActionForm } from '@/components/ActionForm'
+import { getTemplateFlags } from '@/lib/utils/settings'
+import { isAdminEmail } from '@/lib/utils/admin'
 
 export default async function BusinessTypeSetupPage({
   searchParams,
@@ -22,6 +24,9 @@ export default async function BusinessTypeSetupPage({
   if (!user) redirect('/login')
 
   const userId = user.id
+  
+  const templateFlags = await getTemplateFlags() as Record<string, boolean>
+  const isSuperadmin = isAdminEmail(user.email)
 
   let org: { id: string; name: string; business_type: string | null } | null = null
 
@@ -49,7 +54,7 @@ export default async function BusinessTypeSetupPage({
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Header */}
-      <div className="sticky top-0 z-20 flex items-center justify-between px-4 sm:px-6 md:px-12 h-16 bg-black/80 backdrop-blur-xl border-b border-white/[0.05]">
+      <div className="sticky top-0 z-20 flex items-center justify-between px-4 sm:px-6 md:px-12 h-16 bg-black/80 backdrop-blur-xl border-b border-white/5">
         <Link href="/dashboard/pages" className="flex items-center gap-1 sm:gap-2 text-zinc-400 hover:text-white transition-colors text-sm shrink-0">
           <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -67,7 +72,7 @@ export default async function BusinessTypeSetupPage({
             <>
               <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-4">
                 What kind of business<br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-br from-white to-zinc-500">
+                <span className="text-transparent bg-clip-text bg-linear-to-br from-white to-zinc-500">
                   are you running?
                 </span>
               </h1>
@@ -90,7 +95,10 @@ export default async function BusinessTypeSetupPage({
         {/* Business type groups */}
         <div className="space-y-12">
           {BUSINESS_TYPE_GROUPS.map((group) => {
-            const presets = getPresetsByGroup(group.id)
+            let presets = getPresetsByGroup(group.id)
+            if (!isSuperadmin) {
+              presets = presets.filter(p => templateFlags[p.preset.template_type] !== false)
+            }
             if (presets.length === 0) return null
 
             return (
@@ -98,9 +106,9 @@ export default async function BusinessTypeSetupPage({
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-5">
                   <div className="flex items-center gap-3">
                     <h2 className="text-base font-bold text-white shrink-0">{group.label}</h2>
-                    <div className="h-px bg-white/[0.06] flex-1 sm:hidden" />
+                    <div className="h-px bg-white/6 flex-1 sm:hidden" />
                   </div>
-                  <div className="hidden sm:block flex-1 h-px bg-white/[0.06]" />
+                  <div className="hidden sm:block flex-1 h-px bg-white/6" />
                   <span className="text-xs text-zinc-600 sm:text-right">{group.description}</span>
                 </div>
 
@@ -168,7 +176,7 @@ export default async function BusinessTypeSetupPage({
                 <input type="hidden" name="mode" value={mode} />
                 <button
                   type="submit"
-                  className="px-5 py-2.5 rounded-xl border border-white/[0.08] bg-white/[0.03] text-zinc-400 hover:text-white hover:border-white/20 hover:bg-white/[0.06] transition-all text-sm font-medium"
+                  className="px-6 py-2.5 rounded-xl border border-white/8 bg-white/3 text-white font-medium hover:bg-white/6 hover:border-white/10 transition-colors cursor-pointer"
                 >
                   {type === 'info' ? '📄 Info / Policy Page' : '✏️ Custom (Blank)'}
                 </button>

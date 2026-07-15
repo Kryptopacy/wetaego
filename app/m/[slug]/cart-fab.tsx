@@ -36,6 +36,7 @@ interface CartFABProps {
   locationTaxes?: { name: string; percentage: number }[]
   pagePaymentOptions?: string[]
   globalManualPaymentOverride?: boolean
+  mapsIntegrationEnabled?: boolean
 }
 
 export function CartFAB(props: CartFABProps) {
@@ -73,16 +74,15 @@ export function CartFAB(props: CartFABProps) {
       <AnimatePresence>
         {totalItems > 0 && !showCheckoutModal && (
           <motion.div
-            initial={{ opacity: 0, y: 100 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ y: 100 }}
+            animate={{ y: 0 }}
             exit={{ opacity: 0, y: 100 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-            className="fixed bottom-6 inset-x-0 flex justify-center z-40 pointer-events-none px-4"
+            className="fixed bottom-0 left-0 right-0 p-4 z-50 pointer-events-none flex justify-center pb-8"
           >
             <button
               aria-label="Checkout Cart"
               onClick={() => setShowCheckoutModal(true)}
-              className="pointer-events-auto group relative w-full max-w-sm overflow-hidden bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-bold h-16 rounded-[2rem] shadow-2xl flex items-center justify-between px-2 transition-all active:scale-95"
+              className="pointer-events-auto group relative w-full max-w-md overflow-hidden bg-zinc-900 dark:bg-emerald-600 text-white rounded-4xl h-16 shadow-2xl flex items-center justify-between px-2 transition-all active:scale-95 border border-zinc-800 dark:border-emerald-500"
             >
               <div className="absolute inset-0 bg-theme/20 opacity-0 group-hover:opacity-100 transition-opacity" />
               
@@ -133,6 +133,7 @@ export function CartFAB(props: CartFABProps) {
         {...props}
         manualPaymentEnabled={props.globalManualPaymentOverride || props.manualPaymentEnabled}
         resourceId={urlResourceId}
+        mapsIntegrationEnabled={props.mapsIntegrationEnabled}
       />
     </>
   )

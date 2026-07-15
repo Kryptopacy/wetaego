@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { authActionClient } from '@/lib/safe-action'
 import { z } from 'zod'
+import { getInfrastructureFlags } from '@/lib/utils/settings'
 
 function getDistanceInMeters(lat1: number, lon1: number, lat2: number, lon2: number) {
   const R = 6371e3;
@@ -27,9 +28,10 @@ export const clockIn = authActionClient
   }))
   .action(async ({ parsedInput: { locationId, latitude, longitude }, ctx: { user } }) => {
     const supabase = await createClient()
+    const infraFlags = await getInfrastructureFlags() as Record<string, boolean>
 
     // Geofence validation
-    if (latitude !== undefined && longitude !== undefined) {
+    if (infraFlags.maps_integration_enabled !== false && latitude !== undefined && longitude !== undefined) {
       const { data: location } = await supabase
         .from('locations')
         .select('latitude, longitude, geofence_radius_meters')

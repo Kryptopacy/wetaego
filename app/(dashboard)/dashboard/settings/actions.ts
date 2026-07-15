@@ -23,25 +23,48 @@ export const updateOrganization = authActionClient
       return { success: true }
     }
 
-    // Find existing org for this user
-    const { data: org } = await supabase
-      .from('organizations')
-      .select('id')
-      .eq('created_by', user.id)
+    const { createAdminClient } = await import('@/lib/supabase/server')
+    const adminClient = await createAdminClient()
+
+    // Find existing org for this user (first check membership, then fallback to created_by)
+    const { data: member } = await supabase
+      .from('organization_members')
+      .select('organization_id')
+      .eq('user_id', user.id)
+      .limit(1)
       .single()
 
-    let currentOrgId = org?.id || ''
+    let currentOrgId = member?.organization_id || ''
 
-    if (org) {
+    if (!currentOrgId) {
+      const { data: orgByCreator } = await supabase
+        .from('organizations')
+        .select('id')
+        .eq('created_by', user.id)
+        .limit(1)
+        .single()
+      if (orgByCreator) {
+        currentOrgId = orgByCreator.id
+      }
+    }
+
+    const existedBefore = !!currentOrgId
+
+    if (existedBefore) {
       // Update existing org
-      const { error } = await supabase
+      const { error } = await adminClient
         .from('organizations')
         .update({ name, slug, ...(business_type ? { business_type } : {}), ...(logo_url !== undefined ? { logo_url } : {}), refund_policy: refund_policy || null })
-        .eq('id', org.id)
+        .eq('id', currentOrgId)
       
-      if (error) throw new Error('Failed to update organization')
+      if (error) {
+        if (error.code === '23505' || error.message.toLowerCase().includes('unique constraint') || error.message.toLowerCase().includes('slug')) {
+          throw new Error('This public slug (URL) is already taken. Please choose another slug.')
+        }
+        throw new Error('Failed to update organization: ' + error.message)
+      }
     } else {
-      // Create new org
+      // Create new org atomized with adminClient so RLS ordering never blocks onboarding
       let referredByAffiliateId: string | null = null
       
       // Try to read the referral cookie
@@ -49,7 +72,7 @@ export const updateOrganization = authActionClient
       const refCode = cookieStore.get('ourmenu_ref')?.value
       
       if (refCode) {
-        const { data: affiliate } = await supabase
+        const { data: affiliate } = await adminClient
           .from('affiliates')
           .select('id')
           .eq('referral_code', refCode)
@@ -64,7 +87,7 @@ export const updateOrganization = authActionClient
       const trialDays = (trialSettings as Record<string, unknown>).default_trial_days as number ?? 15
       const trialEndsAt = trialDays > 0 ? new Date(Date.now() + trialDays * 24 * 60 * 60 * 1000).toISOString() : undefined
 
-      const { data: newOrg, error } = await supabase
+      const { data: newOrg, error } = await adminClient
         .from('organizations')
         .insert({
           name,
@@ -79,12 +102,17 @@ export const updateOrganization = authActionClient
         .select('id')
         .single()
       
-      if (error || !newOrg) throw new Error('Failed to create organization')
+      if (error || !newOrg) {
+        if (error && (error.code === '23505' || error.message.toLowerCase().includes('unique constraint') || error.message.toLowerCase().includes('slug'))) {
+          throw new Error('This public slug (URL) is already taken. Please choose another slug.')
+        }
+        throw new Error('Failed to create organization: ' + (error?.message || 'unknown error'))
+      }
       currentOrgId = newOrg.id
 
       // Add the creator to organization_members with the selected role (or default to owner)
       const selectedRole = role || 'owner'
-      await supabase.from('organization_members').insert({
+      await adminClient.from('organization_members').insert({
         organization_id: currentOrgId,
         user_id: user.id,
         role: selectedRole
@@ -92,14 +120,14 @@ export const updateOrganization = authActionClient
     }
 
     // Always ensure a default location exists
-    const { data: loc } = await supabase
+    const { data: loc } = await adminClient
       .from('locations')
       .select('id')
       .eq('organization_id', currentOrgId)
       .limit(1)
 
     if (!loc || loc.length === 0) {
-      const { data: newLoc } = await supabase
+      const { data: newLoc, error: locErr } = await adminClient
         .from('locations')
         .insert({
           organization_id: currentOrgId,
@@ -110,9 +138,29 @@ export const updateOrganization = authActionClient
         .select('id')
         .single()
       
-      // Create default menu
-      if (newLoc) {
-        await supabase.from('menus').insert({
+      if (locErr && (locErr.code === '23505' || locErr.message.toLowerCase().includes('unique constraint'))) {
+        // If location slug taken, try inserting with org id appended or handled
+        const fallbackSlug = `${slug}-${currentOrgId.slice(0, 6)}`
+        const { data: retryLoc } = await adminClient
+          .from('locations')
+          .insert({
+            organization_id: currentOrgId,
+            name: 'Main Location',
+            slug: fallbackSlug,
+            address: 'Update your address',
+          })
+          .select('id')
+          .single()
+          
+        if (retryLoc) {
+          await adminClient.from('menus').insert({
+            organization_id: currentOrgId,
+            location_id: retryLoc.id,
+            name: 'Main Menu',
+          })
+        }
+      } else if (newLoc) {
+        await adminClient.from('menus').insert({
           organization_id: currentOrgId,
           location_id: newLoc.id,
           name: 'Main Menu',
@@ -123,7 +171,7 @@ export const updateOrganization = authActionClient
           const { BUSINESS_TYPE_PRESETS, buildPageTitle } = await import('@/lib/templates/presets')
           const preset = BUSINESS_TYPE_PRESETS[business_type]
           if (preset) {
-            await supabase.from('location_pages').insert({
+            await adminClient.from('location_pages').insert({
               location_id: newLoc.id,
               title: buildPageTitle(preset, name),
               slug: 'home',
@@ -141,7 +189,7 @@ export const updateOrganization = authActionClient
       }
     }
 
-    if (!org) {
+    if (!existedBefore) {
       redirect('/dashboard')
     } else {
       revalidatePath('/dashboard/settings')

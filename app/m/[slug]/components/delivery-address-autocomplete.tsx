@@ -6,15 +6,17 @@ import { APIProvider, useMapsLibrary } from '@vis.gl/react-google-maps'
 export function DeliveryAddressAutocompleteWrapper({
   address,
   setAddress,
-  setCoordinates
+  setCoordinates,
+  mapsIntegrationEnabled
 }: {
   address: string
   setAddress: (addr: string) => void
   setCoordinates: (lat: number, lng: number) => void
+  mapsIntegrationEnabled?: boolean
 }) {
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ''
   
-  if (!apiKey) {
+  if (!apiKey || mapsIntegrationEnabled === false) {
     return (
       <textarea 
         aria-label="Delivery Address"

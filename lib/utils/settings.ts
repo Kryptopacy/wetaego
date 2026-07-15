@@ -23,6 +23,23 @@ const DEFAULT_EXCHANGE_RATES = { usd_to_ngn: 1500 }
 const DEFAULT_AFFILIATE = { default_percentage: 10 }
 const DEFAULT_PLATFORM_FEES = { business_subaccount: 5, affiliate_subaccount: 5, staff_tip_subaccount: 0 }
 const DEFAULT_KYC_SETTINGS = { require_kyc_to_publish: false }
+const DEFAULT_TEMPLATE_FLAGS = {
+  catalog: true,
+  booking: true,
+  listing: true,
+  rate_card: true,
+  info: true,
+  custom: true,
+  quote: true,
+  portfolio: true
+}
+
+const DEFAULT_INFRASTRUCTURE_FLAGS = {
+  ai_enabled: true,
+  realtime_kds_enabled: true,
+  maps_integration_enabled: true,
+  transactional_emails_enabled: true
+}
 
 async function fetchSystemSettingFromDB<T>(key: string, fallback: T): Promise<T> {
   try {
@@ -115,3 +132,14 @@ export const getKycSettings = unstable_cache(
   { revalidate: 86400, tags: ['kyc_settings'] }
 )
 
+export const getTemplateFlags = unstable_cache(
+  async () => fetchSystemSettingFromDB('template_flags', DEFAULT_TEMPLATE_FLAGS),
+  ['system_setting_template_flags'],
+  { revalidate: 86400, tags: ['template_flags'] }
+)
+
+export const getInfrastructureFlags = unstable_cache(
+  async () => fetchSystemSettingFromDB('infrastructure_flags', DEFAULT_INFRASTRUCTURE_FLAGS),
+  ['system_setting_infrastructure_flags'],
+  { revalidate: 86400, tags: ['infrastructure_flags'] }
+)

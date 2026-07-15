@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { getAiModels, getCreditCosts } from '@/lib/utils/settings'
+import { getAiModels, getCreditCosts, getInfrastructureFlags } from '@/lib/utils/settings'
 import { chargeCredits } from '@/lib/payments/credits'
 import { google } from '@ai-sdk/google'
 import { streamText, UIMessage, tool, convertToModelMessages } from 'ai'
@@ -13,6 +13,11 @@ export async function POST(req: Request) {
     const { success: rlSuccess } = await checkRateLimit('ai_copilot')
     if (!rlSuccess) {
       return new Response('Too many requests', { status: 429 })
+    }
+
+    const infraFlags = await getInfrastructureFlags() as Record<string, boolean>
+    if (infraFlags.ai_enabled === false) {
+      return new Response('AI services are currently undergoing maintenance.', { status: 503 })
     }
 
     const { messages, organizationId } = await req.json() as { messages: UIMessage[], organizationId: string }

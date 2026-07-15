@@ -1,5 +1,5 @@
 
-import { getPricingSettings, getCreditCosts, getPlanLimits, getAiModels, getPlatformFees, getTrialSettings, getGlobalManualPayment, getKycSettings, getExchangeRates, getAdsNetworkSettings } from '@/lib/utils/settings'
+import { getPricingSettings, getCreditCosts, getPlanLimits, getAiModels, getPlatformFees, getTrialSettings, getGlobalManualPayment, getKycSettings, getExchangeRates, getAdsNetworkSettings, getTemplateFlags, getInfrastructureFlags } from '@/lib/utils/settings'
 import { getUsdToNgnRate } from '@/lib/payments/exchange'
 import { updateSetting } from './actions'
 import { ActionForm } from '@/components/ActionForm'
@@ -23,6 +23,8 @@ export default async function AdminPage() {
   const kycSettings = await getKycSettings() as { require_kyc_to_publish?: boolean }
   const exchangeRates = await getExchangeRates()
   const adsNetwork = await getAdsNetworkSettings()
+  const templateFlags = await getTemplateFlags()
+  const infraFlags = await getInfrastructureFlags()
   
   // Fetch live exchange rate for display purposes
   const liveUsdRate = await getUsdToNgnRate()
@@ -90,7 +92,7 @@ export default async function AdminPage() {
       </div>
 
       {/* Grouped Tab Layout */}
-      <AdminTabs tabs={['Tenants & Coupons', 'Pricing & Fees', 'AI & Limits', 'Danger Zone', 'Affiliates', 'Ad Network']}>
+      <AdminTabs tabs={['Tenants & Coupons', 'Pricing & Fees', 'AI & Limits', 'Danger Zone', 'Affiliates', 'Ad Network', 'Modules & Templates', 'Infrastructure']}>
         {/* Tab 0: Tenants & Coupons */}
         <div className="space-y-8 min-w-0">
           <section className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-xl w-full">
@@ -412,6 +414,72 @@ export default async function AdminPage() {
               </div>
               
               <button type="submit" className="w-full px-4 py-2 bg-emerald-600/20 text-emerald-400 border border-emerald-500/50 rounded-lg text-sm font-medium hover:bg-emerald-600 hover:text-white transition">Save Ad Network State</button>
+            </ActionForm>
+          </section>
+        </div>
+
+        {/* Tab 6: Modules & Templates */}
+        <div className="space-y-6 max-w-2xl min-w-0">
+          <section className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-xl w-full">
+            <h2 className="text-lg font-bold text-white mb-2">Template Modules</h2>
+            <p className="text-zinc-400 text-sm mb-6">Globally toggle which templates are available to organizations. Disabling a template hides it from the creation wizard and degrades existing public pages to a maintenance screen.</p>
+            
+            <ActionForm action={updateSetting} className="space-y-6">
+              <input type="hidden" name="key" value="template_flags" />
+              <input type="hidden" name="is_json" value="true" />
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {Object.entries(templateFlags || {}).map(([key, value]) => (
+                  <div key={key} className="flex items-center gap-3 bg-zinc-800/50 p-4 rounded-xl border border-zinc-700/50">
+                    <input 
+                      type="checkbox" 
+                      id={`template_flag_${key}`}
+                      name={key} 
+                      value="true"
+                      defaultChecked={value === true} 
+                      className="w-4 h-4 rounded bg-zinc-800 border-zinc-700 text-emerald-500 focus:ring-emerald-500 shrink-0" 
+                    />
+                    <label htmlFor={`template_flag_${key}`} className="text-sm font-medium text-white cursor-pointer capitalize">
+                      {key.replace('_', ' ')}
+                    </label>
+                  </div>
+                ))}
+              </div>
+              
+              <button type="submit" className="w-full px-4 py-2 bg-emerald-600/20 text-emerald-400 border border-emerald-500/50 rounded-lg text-sm font-medium hover:bg-emerald-600 hover:text-white transition">Save Template Modules State</button>
+            </ActionForm>
+          </section>
+        </div>
+
+        {/* Tab 7: Infrastructure */}
+        <div className="space-y-6 max-w-2xl min-w-0">
+          <section className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-xl w-full">
+            <h2 className="text-lg font-bold text-white mb-2">Infrastructure Kill Switches</h2>
+            <p className="text-zinc-400 text-sm mb-6">Globally toggle external APIs and heavy infrastructure dependencies. Use these as safety nets during rate limits or API outages.</p>
+            
+            <ActionForm action={updateSetting} className="space-y-6">
+              <input type="hidden" name="key" value="infrastructure_flags" />
+              <input type="hidden" name="is_json" value="true" />
+              
+              <div className="grid grid-cols-1 gap-4">
+                {Object.entries(infraFlags || {}).map(([key, value]) => (
+                  <div key={key} className="flex items-center gap-3 bg-zinc-800/50 p-4 rounded-xl border border-zinc-700/50">
+                    <input 
+                      type="checkbox" 
+                      id={`infra_flag_${key}`}
+                      name={key} 
+                      value="true"
+                      defaultChecked={value === true} 
+                      className="w-4 h-4 rounded bg-zinc-800 border-zinc-700 text-emerald-500 focus:ring-emerald-500 shrink-0" 
+                    />
+                    <label htmlFor={`infra_flag_${key}`} className="text-sm font-medium text-white cursor-pointer capitalize">
+                      {key.replace(/_/g, ' ')}
+                    </label>
+                  </div>
+                ))}
+              </div>
+              
+              <button type="submit" className="w-full px-4 py-2 bg-emerald-600/20 text-emerald-400 border border-emerald-500/50 rounded-lg text-sm font-medium hover:bg-emerald-600 hover:text-white transition">Save Infrastructure State</button>
             </ActionForm>
           </section>
         </div>

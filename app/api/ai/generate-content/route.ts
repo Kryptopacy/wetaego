@@ -3,7 +3,7 @@ import { generateText } from 'ai'
 import { google } from '@ai-sdk/google'
 import { z } from 'zod'
 import { checkRateLimit } from '@/lib/upstash'
-import { getAiModels } from '@/lib/utils/settings'
+import { getAiModels, getInfrastructureFlags } from '@/lib/utils/settings'
 
 const generateContentSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -16,6 +16,11 @@ export async function POST(req: Request) {
     const { success } = await checkRateLimit('ai_generate');
     if (!success) {
       return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    }
+
+    const infraFlags = await getInfrastructureFlags() as Record<string, boolean>
+    if (infraFlags.ai_enabled === false) {
+      return NextResponse.json({ error: 'AI services are currently undergoing maintenance.' }, { status: 503 });
     }
 
     const body = await req.json()

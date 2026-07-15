@@ -8,14 +8,46 @@ export function LocationAutocomplete({
   initialLat, 
   initialLng,
   initialGeofenceRadius,
-  mapsApiKey
+  mapsApiKey,
+  mapsIntegrationEnabled = true
 }: { 
   initialAddress: string, 
   initialLat: number | null, 
   initialLng: number | null,
   initialGeofenceRadius: number,
-  mapsApiKey: string
+  mapsApiKey: string,
+  mapsIntegrationEnabled?: boolean
 }) {
+  if (!mapsApiKey || mapsIntegrationEnabled === false) {
+    return (
+      <div className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-white mb-1">Business Address</label>
+          <input 
+            type="text" 
+            name="address" 
+            defaultValue={initialAddress}
+            className="w-full bg-zinc-800/50 border border-zinc-700 rounded-lg px-4 py-2 text-white outline-none focus:border-emerald-500" 
+            placeholder="123 Main St..."
+          />
+        </div>
+        <input type="hidden" name="latitude" value={initialLat || ''} />
+        <input type="hidden" name="longitude" value={initialLng || ''} />
+        <div>
+          <label className="block text-sm font-medium text-white mb-1">Geofence Radius (meters)</label>
+          <input 
+            type="number" 
+            name="geofence_radius_meters" 
+            defaultValue={initialGeofenceRadius}
+            min="10"
+            max="5000"
+            className="w-full bg-zinc-800/50 border border-zinc-700 rounded-lg px-4 py-2 text-white outline-none focus:border-emerald-500" 
+          />
+        </div>
+      </div>
+    )
+  }
+
   return (
     <APIProvider apiKey={mapsApiKey}>
       <AutocompleteFields 

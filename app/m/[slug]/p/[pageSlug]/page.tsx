@@ -194,6 +194,35 @@ export default async function PublicPageView({
 
   if (!page) notFound()
 
+  // 2.2 Template Feature Flag Guard
+  const { getTemplateFlags, getInfrastructureFlags } = await import('@/lib/utils/settings')
+  const templateFlags = await getTemplateFlags() as Record<string, boolean>
+  if (templateFlags[page.template_type] === false) {
+    const { data: { user } } = await supabase.auth.getUser()
+    const { isAdminEmail } = await import('@/lib/utils/admin')
+    const isSuperadmin = isAdminEmail(user?.email)
+    
+    if (!isSuperadmin) {
+      return (
+        <main className="min-h-screen bg-[#f5f7f5] dark:bg-zinc-950 font-sans flex flex-col items-center justify-center p-6 text-center">
+          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl p-10 max-w-md w-full shadow-2xl border border-black/5 dark:border-white/10">
+            <div className="w-16 h-16 bg-amber-500/10 rounded-2xl mx-auto flex items-center justify-center mb-6">
+              <svg className="w-8 h-8 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <h1 className="text-2xl font-bold text-[#17201b] dark:text-white mb-3">
+              Template Maintenance
+            </h1>
+            <p className="text-zinc-500 dark:text-zinc-400">
+              The layout engine powering this page is currently undergoing upgrades. Please check back shortly.
+            </p>
+          </div>
+        </main>
+      )
+    }
+  }
+
   // 2.5 Fetch published pages count to determine if we show the PortalNav
   const fetchPublishedPagesCount = async () => {
     const anonSupabase = createAnonClient()
@@ -317,6 +346,8 @@ export default async function PublicPageView({
   
   // Resource already checked earlier
 
+  const infraFlags = await getInfrastructureFlags() as Record<string, boolean>
+
   const sharedProps = {
     location: { 
       ...loc, 
@@ -338,6 +369,7 @@ export default async function PublicPageView({
     resourceId: resourceId || undefined,
     paymentIsLive: paymentSettings?.is_active ?? false,
     globalManualPaymentOverride: (globalManualPayment as { global_manual_payment_override?: boolean })?.global_manual_payment_override === true,
+    mapsIntegrationEnabled: infraFlags.maps_integration_enabled !== false,
   }
 
   // Route to the right renderer

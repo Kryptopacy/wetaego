@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { getPlanLimits } from '@/lib/utils/settings'
 import * as Sentry from '@sentry/nextjs'
 
@@ -11,7 +11,7 @@ export type PlanType = 'lite' | 'pro' | 'enterprise' | string
  */
 export async function chargeCredits(organizationId: string, cost: number, reason: string, userId?: string) {
   try {
-    const supabase = await createClient()
+    const supabase = await createAdminClient()
 
     // Use the atomic RPC function (prevents race conditions via SELECT ... FOR UPDATE)
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -45,7 +45,7 @@ export async function chargeCredits(organizationId: string, cost: number, reason
  * @deprecated Use the atomic RPC once the migration is applied.
  */
 async function chargeCreditsFallback(organizationId: string, cost: number, reason: string, userId?: string) {
-  const supabase = await createClient()
+  const supabase = await createAdminClient()
 
   const { data: org, error: orgError } = await supabase
     .from('organizations')
@@ -100,7 +100,7 @@ async function chargeCreditsFallback(organizationId: string, cost: number, reaso
  */
 export async function refundCredits(organizationId: string, amountToRefund: number, reason: string, userId?: string) {
   try {
-    const supabase = await createClient()
+    const supabase = await createAdminClient()
 
     const { data: org, error: orgError } = await supabase
       .from('organizations')

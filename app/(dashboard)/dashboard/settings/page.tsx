@@ -22,6 +22,7 @@ import { SettingsNavigation } from '@/components/settings/settings-navigation'
 import { WheelBuilder } from '@/components/ui/wheel-builder'
 import { LocationAutocomplete } from './location-autocomplete'
 import { CustomMilestonesSettings } from './custom-milestones-settings'
+import { getInfrastructureFlags } from '@/lib/utils/settings'
 
 
 
@@ -32,6 +33,7 @@ export default async function SettingsPage({
 }) {
   const { tab = 'general' } = await searchParams;
   const supabase = await createClient()
+  const infraFlags = await getInfrastructureFlags() as Record<string, boolean>
 
   // Fetch current user
   const { data: userData } = await supabase.auth.getUser()
@@ -482,6 +484,7 @@ export default async function SettingsPage({
                 initialLng={(location as any).longitude || null}
                 initialGeofenceRadius={(location as any).geofence_radius_meters || 100}
                 mapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ''}
+                mapsIntegrationEnabled={infraFlags.maps_integration_enabled !== false}
               />
 
               {!activePage && (
@@ -497,6 +500,45 @@ export default async function SettingsPage({
                     pattern="\d{4,6}"
                   />
                   <p className="mt-2 text-xs text-zinc-500">This shared PIN is used by floor managers to authorize order refunds and voids.</p>
+                </div>
+              )}
+
+              {!activePage && (
+                <div className="space-y-4 pt-4 border-t border-zinc-800">
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-zinc-300">Staff Clock-In Mode</label>
+                    <select
+                      name="clockInMode"
+                      defaultValue={(location as Record<string, unknown>).clock_in_mode as string || 'geofence'}
+                      className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                    >
+                      <option value="geofence">GPS Geofence (default)</option>
+                      <option value="qr_kiosk">Dynamic QR Kiosk only</option>
+                      <option value="both">Both (QR preferred, GPS fallback)</option>
+                    </select>
+                    <p className="mt-2 text-xs text-zinc-500">
+                      <strong className="text-zinc-400">GPS Geofence:</strong> Staff must be within the location radius to clock in.
+                      <br />
+                      <strong className="text-zinc-400">QR Kiosk:</strong> Staff scan a time-limited QR code displayed on a company device — tamper-proof and GPS-independent.
+                      <br />
+                      <strong className="text-zinc-400">Both:</strong> Staff scan QR by default, but can fall back to GPS if needed.
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-emerald-400">Kiosk Exit PIN</label>
+                    <input
+                      type="password"
+                      name="kioskExitPin"
+                      defaultValue=""
+                      className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                      placeholder="4 digits (leave blank to keep existing)"
+                      maxLength={4}
+                      pattern="\d{4}"
+                      inputMode="numeric"
+                    />
+                    <p className="mt-2 text-xs text-zinc-500">Required to exit Kiosk Mode on a locked tablet. Default is <code className="text-zinc-400">1234</code>.</p>
+                  </div>
                 </div>
               )}
 

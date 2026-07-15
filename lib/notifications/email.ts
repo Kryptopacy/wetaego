@@ -11,7 +11,15 @@ function escapeHTML(str: string) {
     .replace(/'/g, '&#39;');
 }
 
+import { getInfrastructureFlags } from '@/lib/utils/settings';
+
+async function isEmailEnabled() {
+  const infraFlags = await getInfrastructureFlags() as Record<string, boolean>;
+  return infraFlags.transactional_emails_enabled !== false;
+}
+
 export async function sendEmailNotification(toEmail: string, subject: string, message: string) {
+  if (!(await isEmailEnabled())) return true;
   if (!process.env.RESEND_API_KEY) {
     if (process.env.NODE_ENV === 'production') {
       throw new Error('RESEND_API_KEY is missing in production environment');
@@ -48,6 +56,7 @@ export async function sendEmailNotification(toEmail: string, subject: string, me
 }
 
 export async function sendWelcomeEmail(toEmail: string, name?: string) {
+  if (!(await isEmailEnabled())) return true;
   if (!process.env.RESEND_API_KEY) {
     if (process.env.NODE_ENV === 'production') {
       throw new Error('RESEND_API_KEY is missing in production environment');
@@ -98,6 +107,7 @@ export async function sendWelcomeEmail(toEmail: string, name?: string) {
 }
 
 export async function sendSubscriptionActivated(toEmail: string, planName: string, name?: string) {
+  if (!(await isEmailEnabled())) return true;
   if (!process.env.RESEND_API_KEY) return true;
   try {
     const { error } = await resend.emails.send({
@@ -124,6 +134,7 @@ export async function sendSubscriptionActivated(toEmail: string, planName: strin
 }
 
 export async function sendInvoice(toEmail: string, amount: string, reference: string, planName: string) {
+  if (!(await isEmailEnabled())) return true;
   if (!process.env.RESEND_API_KEY) return true;
   try {
     const { error } = await resend.emails.send({
@@ -163,6 +174,7 @@ export async function sendInvoice(toEmail: string, amount: string, reference: st
 }
 
 export async function sendTrialExpirationReminder(toEmail: string, daysLeft: number, name?: string) {
+  if (!(await isEmailEnabled())) return true;
   if (!process.env.RESEND_API_KEY) return true;
   try {
     const { error } = await resend.emails.send({
