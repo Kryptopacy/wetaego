@@ -121,6 +121,11 @@ export const buyCredits = authActionClient
 
     if (!organization_id || credits <= 0) throw new Error('Invalid data')
 
+    // SECURITY PATCH: Strict validation of credit packages to prevent arbitrary injection
+    if (![10, 25, 50].includes(credits)) {
+      throw new Error('Invalid credit package selected')
+    }
+
     const { data: org } = await supabase
       .from('organizations')
       .select('name, purchased_credits')

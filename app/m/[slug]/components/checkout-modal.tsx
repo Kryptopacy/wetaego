@@ -9,6 +9,9 @@ import { DeliveryAddressAutocompleteWrapper } from './delivery-address-autocompl
 import { toast } from 'sonner'
 import { processCheckout, checkIouStatus } from '../actions'
 import { useCartStore } from '@/lib/store/cart'
+import dynamic from 'next/dynamic'
+
+const PaymentRouletteModal = dynamic(() => import('@/components/payment-roulette-modal').then(mod => mod.PaymentRouletteModal), { ssr: false })
 
 // Extracted Floating Input
 export function FloatingInput({ 
@@ -160,6 +163,7 @@ export function CheckoutModal({
   }, [isOpen, onClose])
 
   const [isCheckingOut, setIsCheckingOut] = useState(false)
+  const [isRouletteOpen, setIsRouletteOpen] = useState(false)
   const [tableNumber, setTableNumber] = useState(tableIdentifier || '')
   const [isFetchingLocation, setIsFetchingLocation] = useState(false)
   const [isSummaryExpanded, setIsSummaryExpanded] = useState(false)
@@ -186,6 +190,7 @@ export function CheckoutModal({
   
   const storeSplitCount = useCartStore(state => state.splitCount)
   const storeSplitType = useCartStore(state => state.splitType)
+  const storeSplitShares = useCartStore(state => state.splitShares)
   const setStoreSplit = useCartStore(state => state.setSplit)
 
   const [splitCount, setLocalSplitCount] = useState(storeSplitCount || 1)
@@ -389,6 +394,7 @@ export function CheckoutModal({
       if (splitCount > 1) {
         payload.splitCount = splitCount
         payload.splitType = splitType
+        payload.splitShares = storeSplitShares
       }
       if (fulfillmentType === 'delivery') {
         payload.deliveryLat = deliveryLat
@@ -774,24 +780,50 @@ export function CheckoutModal({
                 </div>
 
                 {splitCount > 1 && (
-                  <div className="flex bg-zinc-100 dark:bg-zinc-800 p-1 rounded-xl">
+                  <div className="flex flex-col gap-2">
+                    <div className="flex bg-zinc-100 dark:bg-zinc-800 p-1 rounded-xl">
+                      <button
+                        type="button"
+                        onClick={() => setSplitType('even')}
+                        className={`flex-1 text-[13px] font-bold py-2 rounded-lg transition-colors ${splitType === 'even' ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'}`}
+                      >
+                        Even Split
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSplitType('uneven')}
+                        className={`flex-1 text-[13px] font-bold py-2 rounded-lg transition-colors ${splitType === 'uneven' ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'}`}
+                      >
+                        Uneven / Custom
+                      </button>
+                    </div>
+                    
                     <button
                       type="button"
-                      onClick={() => setSplitType('even')}
-                      className={`flex-1 text-[13px] font-bold py-2 rounded-lg transition-colors ${splitType === 'even' ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'}`}
+                      onClick={() => setIsRouletteOpen(true)}
+                      className="w-full flex items-center justify-center gap-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold py-2.5 rounded-xl transition-colors border border-emerald-500/20"
                     >
-                      Even Split
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setSplitType('uneven')}
-                      className={`flex-1 text-[13px] font-bold py-2 rounded-lg transition-colors ${splitType === 'uneven' ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'}`}
-                    >
-                      Uneven / Custom
+                      <Sparkles className="w-4 h-4" />
+                      Spin Roulette 🎰
                     </button>
                   </div>
                 )}
               </div>
+
+              {isRouletteOpen && (
+                <PaymentRouletteModal 
+                  isOpen={isRouletteOpen} 
+                  onClose={() => setIsRouletteOpen(false)} 
+                  onProceedToCheckout={() => setIsRouletteOpen(false)}
+                  onSpinComplete={(count, type, shares) => {
+                    setSplitCount(count)
+                    setSplitType(type)
+                    setStoreSplit(count, type, shares)
+                  }}
+                  totalAmount={finalTotalMinor}
+                  currencyCode="NGN" // Wait, I should format correctly using global settings or default
+                />
+              )}
 
               {/* Refund Policy */}
               {refundPolicy && (

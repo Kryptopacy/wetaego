@@ -115,6 +115,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
 
           if (templates.has('restaurant') || templates.has('catalog')) {
             dynamicNavItems.push({ href: '/dashboard/orders', label: 'Order Inbox', icon: 'ClipboardList', badge: 'LIVE' })
+            dynamicNavItems.push({ href: '/dashboard/pos', label: 'Point of Sale', icon: 'MonitorSmartphone' })
           }
           if (templates.has('booking')) {
             dynamicNavItems.push({ href: '/dashboard/bookings', label: 'Bookings (BMS)', icon: 'BookOpen' })

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Fragment } from 'react'
 import { BackButton } from '../../../components/back-button'
 import { InfoStrip } from '../../../components/info-strip'
 import Image from 'next/image'
@@ -10,6 +10,8 @@ import { CartFAB } from '../../../cart-fab'
 import { VariantSelector } from '@/components/variant-selector'
 import { formatCurrency } from '@/lib/utils/currency'
 import { Search, X } from 'lucide-react'
+import { getConditionBadgeStyles } from '@/lib/utils/condition-badges'
+import { PartnerShowcaseCard } from '@/components/native-ad-card'
 
 // The catalog page renderer is a light version for pages created via the pages builder
 // (NOT the main /m/[slug] menu — that stays as is).
@@ -61,6 +63,7 @@ interface CatalogPageRendererProps {
   items: PageItem[]
   locationSlug: string
   referralSource?: string
+  sponsoredAds?: any[]
 }
 
 const AVAILABILITY_STYLES: Record<string, string> = {
@@ -77,11 +80,12 @@ const AVAILABILITY_LABELS: Record<string, string> = {
   unavailable: 'Unavailable',
 }
 
-export function CatalogPageRenderer({ location, page, items, locationSlug, paymentIsLive }: CatalogPageRendererProps) {
+export function CatalogPageRenderer({ location, page, items, locationSlug, paymentIsLive, sponsoredAds }: CatalogPageRendererProps) {
   const themeColor = location.theme_color || '#7c3aed'
   const { addItem } = useCartStore()
   const [variantItem, setVariantItem] = useState<PageItem | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
+  const [selectedCondition, setSelectedCondition] = useState<string | null>(null)
 
   function handleAddToCart(item: PageItem) {
     const variants = item.item_data?.variants
@@ -106,13 +110,22 @@ export function CatalogPageRenderer({ location, page, items, locationSlug, payme
     setVariantItem(null)
   }
 
-  // Filter items based on search query
-  const filteredItems = items.filter(item => {
+  const searchedItems = items.filter(item => {
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
     return item.title.toLowerCase().includes(query) || 
            item.description?.toLowerCase().includes(query) || 
            item.item_data?.category?.toLowerCase().includes(query);
+  });
+
+  const allConditions = [...new Set(searchedItems
+    .map(i => i.item_data?.variants?.find(v => v.name.toLowerCase() === 'condition')?.options[0])
+    .filter(Boolean) as string[])]
+    
+  const filteredItems = searchedItems.filter(item => {
+    if (!selectedCondition) return true;
+    const condition = item.item_data?.variants?.find(v => v.name.toLowerCase() === 'condition')?.options[0];
+    return condition === selectedCondition;
   });
 
   // Group by category if any items have one
@@ -181,9 +194,28 @@ export function CatalogPageRenderer({ location, page, items, locationSlug, payme
         </div>
 
         {/* Category tabs if grouped */}
-        {hasCategories && (
+        {(hasCategories || allConditions.length > 0) && (
           <div className="flex gap-2 overflow-x-auto pb-2 mb-6 scrollbar-hide">
-            {categories.map(cat => (
+            {allConditions.length > 0 && (
+              <div className="flex gap-2 pr-4 border-r border-zinc-800 mr-2 shrink-0">
+                <button
+                  onClick={() => setSelectedCondition(null)}
+                  className={`shrink-0 px-4 py-1.5 rounded-full text-xs font-bold transition-colors ${!selectedCondition ? 'bg-zinc-200 text-zinc-900' : 'bg-zinc-800/80 text-zinc-400 border border-zinc-700 hover:border-zinc-500'}`}
+                >
+                  Any Condition
+                </button>
+                {allConditions.map(cond => (
+                  <button
+                    key={cond}
+                    onClick={() => setSelectedCondition(cond)}
+                    className={`shrink-0 px-4 py-1.5 rounded-full text-xs font-bold transition-colors capitalize ${selectedCondition === cond ? 'bg-zinc-200 text-zinc-900' : 'bg-zinc-800/80 text-zinc-400 border border-zinc-700 hover:border-zinc-500'}`}
+                  >
+                    {cond}
+                  </button>
+                ))}
+              </div>
+            )}
+            {hasCategories && categories.map(cat => (
               <a key={cat} href={`#${cat}`} className="shrink-0 px-4 py-1.5 rounded-full text-xs font-bold bg-zinc-800/80 text-zinc-300 border border-zinc-700 hover:border-zinc-500 transition-colors capitalize">
                 {cat}
               </a>
@@ -203,13 +235,19 @@ export function CatalogPageRenderer({ location, page, items, locationSlug, payme
                 variants={{ hidden: {}, show: { transition: { staggerChildren: 0.05 } } }}
                 className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"
               >
-                {catItems.map(item => {
+                {catItems.map((item, idx) => {
                   const isAvail = item.availability_status === 'available'
+                  
+                  // Inject an ad every 4 items if we have active ads
+                  const adToInject = sponsoredAds && sponsoredAds.length > 0 && (idx + 1) % 4 === 0 
+                    ? sponsoredAds[((idx + 1) / 4 - 1) % sponsoredAds.length] 
+                    : null;
+
                   return (
+                    <Fragment key={item.id}>
                     <motion.div 
                       variants={{ hidden: { opacity: 0, scale: 0.95 }, show: { opacity: 1, scale: 1 } }}
                       whileHover={isAvail ? { scale: 1.02, boxShadow: "0 10px 30px -10px rgba(0,0,0,0.5)" } : {}}
-                      key={item.id} 
                       className={`rounded-2xl border p-4 transition-all ${isAvail ? 'border-zinc-800 bg-zinc-900/50 hover:border-zinc-700 backdrop-blur-sm' : 'border-zinc-800/40 bg-zinc-900/20 opacity-60'}`}
                     >
                       <div className="flex items-start justify-between gap-3">
@@ -219,7 +257,14 @@ export function CatalogPageRenderer({ location, page, items, locationSlug, payme
                           </div>
                         )}
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-bold text-white text-sm">{item.title}</h3>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h3 className="font-bold text-white text-sm">{item.title}</h3>
+                            {item.item_data?.variants?.find(v => v.name.toLowerCase() === 'condition') && (
+                              <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full border ${getConditionBadgeStyles(item.item_data.variants.find(v => v.name.toLowerCase() === 'condition')!.options[0] || '')}`}>
+                                {item.item_data.variants.find(v => v.name.toLowerCase() === 'condition')!.options[0]}
+                              </span>
+                            )}
+                          </div>
                           {item.subtitle && <p className="text-xs text-zinc-500 mt-0.5">{item.subtitle}</p>}
                           {item.description && <p className="text-xs text-zinc-400 mt-1.5 leading-relaxed line-clamp-2">{item.description}</p>}
                           <span className={`text-xs font-bold mt-2 block ${AVAILABILITY_STYLES[item.availability_status] || 'text-zinc-500'}`}>
@@ -264,10 +309,20 @@ export function CatalogPageRenderer({ location, page, items, locationSlug, payme
                           rel="noopener noreferrer"
                           className="mt-3 flex items-center justify-center gap-2 w-full py-2 rounded-xl text-xs font-bold text-white/90 bg-zinc-800 hover:bg-zinc-700 transition-colors"
                         >
-                          Enquire
+                          Send Message
                         </a>
                       ) : null}
                     </motion.div>
+
+                    {adToInject && (
+                      <motion.div 
+                        variants={{ hidden: { opacity: 0, scale: 0.95 }, show: { opacity: 1, scale: 1 } }}
+                        className="col-span-1"
+                      >
+                        <PartnerShowcaseCard partner={adToInject} />
+                      </motion.div>
+                    )}
+                    </Fragment>
                   )
                 })}
               </motion.div>

@@ -86,8 +86,8 @@ graph TD
 OurMenu OS is fundamentally decoupled from the concept of a "restaurant." It is a true multi-business platform, dynamically rendering the correct UI based on the active **Template Builder**:
 
 1. **Hospitality (The Core):** Live restaurant menus, bar bottle service, dynamic cafe sell-out tracking, and food trucks.
-2. **Retail & Boutiques (Catalog Template):** Tech gadget shops, fashion boutiques, pharmacies, and local stores requiring a highly visual storefront, inventory management, and instant checkout.
-3. **Services (Booking Template):** Salons, spas, therapists, and tutors who need to showcase services, handle complex appointment slots, and collect upfront deposits.
+2. **Retail & Boutiques (Catalog Template):** Tech gadget shops, fashion boutiques, pharmacies, and local stores requiring a highly visual storefront, inventory management, instant checkout, and detailed **Product Condition Badges** (e.g., New, Refurbished).
+3. **Services (Booking Template):** Salons, spas, therapists, and tutors who need to showcase services, handle complex appointment slots, collect upfront deposits, and utilize **Custom Fulfillment Milestones** (e.g., Draft -> Fitting -> Final Cut).
 4. **Consultants & Agencies (Rate Card & Quote Templates):** Freelancers, marketing agencies, and consultants deploying polished, interactive digital rate cards for standardized B2B pricing, alongside dynamic Quote Generator templates.
 5. **Real Estate & Automotive (Listings Template):** Property rentals, car dealerships, and equipment rentals requiring image-heavy, location-based galleries.
 6. **Portal Mode:** A dynamic macro-landing page that seamlessly routes customers to multiple specialized sub-pages (e.g., A massive Hotel routing guests to a Restaurant menu, a Spa booking page, and a Room Service catalog from a single QR scan).
@@ -100,12 +100,13 @@ OurMenu OS is fundamentally decoupled from the concept of a "restaurant." It is 
 ### 1. The Omnichannel Checkout & Monetization Engine
 A resilient, globally aware checkout engine powers the entire ecosystem:
 - **Paystack Native Integration:** Seamlessly handles split payments, automated service charges, and real-time reconciliation via cryptographic Webhooks.
+- **First-Party Native Ad Network:** Bypasses ad-blockers by natively injecting "Bring Your Own" (BYO) sponsors or platform-wide advertisements directly into the storefront catalog loop, generating purely passive MRR. Features zero layout shift and highly accurate `IntersectionObserver` impression tracking.
 - **Automated SaaS Ledger (Platform Fees):** A transparent, built-in ledger system that extracts a configurable SaaS platform fee (e.g., 2%) on every transaction, driving pure MRR beyond monthly subscriptions.
 - **SaaS Lifecycle & Automated Billing Emails:** Integrated automated email sequences (powered by Resend and Vercel Cron) to handle Trial Expirations, Subscription Activations, and precise Invoicing without requiring external CRM orchestration.
 - **Enterprise Tax & Compliance Engine:** Dynamically calculates localized taxes (e.g., VAT, State Taxes) and applies them accurately before reaching the payment gateway, providing transparent itemized receipts for strict global compliance.
 - **Coupon & Discounts Manager:** A robust system allowing admins to distribute customizable coupons for free trials, free plans, credit extensions, or plan extensions to aggressively drive B2B acquisition and retention.
 - **Global Manual Fallback:** If API keys are pending or the payment provider experiences regional downtime, the system automatically degrades to a localized "Manual Bank Transfer" workflow, ensuring conversions are never blocked.
-- **Omnichannel Logistics & Per-Page Routing:** Full, robust support for Dine-in (Table-specific QR mapping), Pickup, and Delivery (with interactive delivery zones, SMS phone verification, and dynamic fees). Fulfillment logic is highly granular, allowing **per-page configuration** (e.g., a "Room Service" page forces table delivery, while a "Lobby Cafe" page allows pickup).
+- **Omnichannel Logistics & Per-Page Routing:** Full, robust support for Dine-in (Table-specific QR mapping), Pickup, and Delivery (with interactive delivery zones, SMS phone verification, dynamic fees, and **Google Maps API Autocomplete**). Fulfillment logic is highly granular, allowing **per-page configuration** (e.g., a "Room Service" page forces table delivery, while a "Lobby Cafe" page allows pickup).
 
 ### 2. Live Fulfillment Dashboard & Workstation Routing
 Re-architected to serve any industry, the operations center is a real-time, WebSocket-powered hub:
@@ -237,11 +238,23 @@ OurMenu OS monetizes via three tiered subscription plans, driven by a unified cr
   - Full mobile responsiveness utilizing modern flex/grid and micro-animations.
 
 ### Phase 4: Independent Sub-Businesses & RBAC
-- **Status:** **In Progress**
+- **Status:** **Completed**
 - **Core Additions:**
   - `location_pages` now support fully independent sub-business data (custom WiFi, operating hours, contact email/phone, address) separate from the parent organization.
-  - Granular Role-Based Access Control (RBAC): Staff can be assigned to specific `page_id`s, restricting their dashboard access to only the orders, inventory, and settings of their assigned location page.
-  - Annual subscription toggles integrated natively into the Paystack billing flow and pricing pages.
+  - Granular Role-Based Access Control (RBAC): Staff can be assigned to specific `page_id`s, restricting their dashboard access.
+
+### Phase 5: Chaos Roulette & Product Conditions
+- **Status:** **Completed**
+- **Core Additions:**
+  - **Chaos Roulette:** A gamified "spin to win" bill-splitting randomizer that converts the friction of group payments into a viral experience. Seamlessly integrates with the POS and checkout engines to calculate exact fractional splits in real-time.
+  - **Condition Variants:** Intelligent catalog system that detects standard "Condition" variants (New, Used, Refurbished) and automatically renders premium color-coded badges and dedicated filter bars for retail layouts.
+
+### Phase 6: Dedicated Point of Sale (POS)
+- **Status:** **In Progress**
+- **Core Additions:**
+  - Dedicated dashboard module (`/dashboard/pos`) optimized for rapid cash-register-style entry.
+  - Frictionless walk-in order management with cash handling and change calculation.
+  - Native integration with the existing `orders` table, eliminating redundancy.
 
 ---
 

@@ -119,7 +119,10 @@ export async function processCheckout(params: {
   isSplitPayment?: boolean,
   resourceId?: string,
   deliveryLat?: number | null,
-  deliveryLng?: number | null
+  deliveryLng?: number | null,
+  splitCount?: number,
+  splitType?: string,
+  splitShares?: number[]
 }): Promise<SafeResult<{ checkoutUrl?: string, orderId: string, paymentMethod: string }>> {
   const {
     organizationId, locationId, items, totalAmountMinor, tipAmountMinor = 0,
@@ -127,7 +130,7 @@ export async function processCheckout(params: {
     paymentMethod = 'card', discountAmountMinor = 0, customerName, customerPhone,
     fulfillmentType, deliveryInstructions, staffId: _staffId, staffSubaccountOverride,
     pageId, idempotencyKey, subtotalMinor, taxTotalMinor, taxBreakdown, isSplitPayment,
-    resourceId
+    resourceId, splitCount, splitType, splitShares
   } = params;
   const supabase = await createClient()
 
@@ -154,7 +157,7 @@ export async function processCheckout(params: {
       { data: location }
     ] = await Promise.all([
       supabase.from('organization_payment_settings').select('provider_account_id, is_active').eq('organization_id', organizationId).single(),
-      supabase.from('locations').select('custom_milestones, delivery_fee_minor, delivery_minimum_order_minor').eq('id', locationId).single()
+      supabase.from('locations').select('delivery_fee_minor, delivery_minimum_order_minor').eq('id', locationId).single()
     ])
 
     // If pageId is provided, items are from page_items, otherwise menu_items
@@ -248,7 +251,11 @@ export async function processCheckout(params: {
       tax_breakdown: taxBreakdown || [],
       resource_id: resourceId || null,
       idempotency_key: idempotencyKey || null,
-      metadata: params.deliveryLat && params.deliveryLng ? { delivery_lat: params.deliveryLat, delivery_lng: params.deliveryLng } : null
+      delivery_latitude: params.deliveryLat || null,
+      delivery_longitude: params.deliveryLng || null,
+      metadata: {
+        ...(splitCount ? { split_count: splitCount, split_type: splitType, split_shares: splitShares } : {})
+      }
     } as never).select('id').single()
 
   if (orderError || !order) throw new Error('Failed to create order')

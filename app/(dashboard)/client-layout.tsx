@@ -220,6 +220,7 @@ export default function ClientLayout({ children, initialData }: { children: Reac
       tooltip: 'Manage your offerings, categories, and items'
     },
     { href: '/dashboard/pages', label: 'Your Pages', icon: FileText, tooltip: 'Manage your business pages and branding' },
+    { href: '/dashboard/ads', label: 'Ad Manager', icon: Zap, tooltip: 'Manage sponsored ads and view analytics' },
     { href: '/dashboard/settings', label: 'Settings & Team', icon: Settings, tooltip: 'Configure business settings and team access' },
     { href: '/dashboard/billing', label: 'Billing & Plan', icon: CreditCard, tooltip: 'Manage your subscription and credits' },
     { href: '/dashboard/support', label: 'Help & Support', icon: MessageSquare, tooltip: 'Get help and contact OurMenuOS support' },

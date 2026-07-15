@@ -142,7 +142,11 @@ export default async function DispatchViewPage({
           
           <div className="flex gap-3 mt-4">
             <a 
-              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(order.table_identifier || '')}`}
+              href={
+                order.delivery_latitude && order.delivery_longitude
+                  ? `https://www.google.com/maps/dir/?api=1&destination=${order.delivery_latitude},${order.delivery_longitude}`
+                  : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(order.table_identifier || '')}`
+              }
               target="_blank" rel="noopener noreferrer"
               className="flex-1 flex items-center justify-center gap-2 bg-blue-50 text-blue-700 py-3 rounded-xl font-bold transition-colors active:bg-blue-100"
             >

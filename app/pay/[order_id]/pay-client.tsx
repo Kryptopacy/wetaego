@@ -10,10 +10,14 @@ import { UIOrder } from '@/lib/types/frontend'
 export default function PayClient({
   order: initialOrder,
   splitCount,
+  splitType,
+  splitShares,
   currencyCode
 }: {
   order: UIOrder
   splitCount: number
+  splitType?: string
+  splitShares?: number[]
   currencyCode: string
 }) {
   const [order, setOrder] = useState(initialOrder)
@@ -102,7 +106,7 @@ export default function PayClient({
   return (
     <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black via-black/90 to-transparent z-50">
       <div className="max-w-md mx-auto space-y-3">
-        {splitCount > 1 && defaultPayAmount < remainingMinor && (
+        {splitCount > 1 && splitType === 'even' && defaultPayAmount < remainingMinor && (
           <button 
             onClick={() => handlePay(defaultPayAmount)}
             disabled={isProcessing}
@@ -110,6 +114,29 @@ export default function PayClient({
           >
             {isProcessing ? 'Processing...' : `Pay My Share (${formatCurrency(defaultPayAmount, currencyCode)})`}
           </button>
+        )}
+
+        {splitType === 'uneven' && splitShares && splitShares.length > 0 && (
+          <div className="grid grid-cols-2 gap-2 mb-2">
+            {splitShares.map((percentage, idx) => {
+              // Calculate exact naira amount rounding to nearest whole number, like in checkout
+              const exactAmountMinor = Math.ceil((order.total_amount_minor * (percentage / 100)) / 100) * 100
+              const cappedAmountMinor = Math.min(exactAmountMinor, remainingMinor)
+              const isPaid = cappedAmountMinor === 0 && remainingMinor > 0 // Roughly, if it's over remaining
+
+              return (
+                <button
+                  key={idx}
+                  onClick={() => handlePay(cappedAmountMinor)}
+                  disabled={isProcessing || isPaid}
+                  className="w-full bg-blue-600/20 border border-blue-500/50 text-blue-400 font-bold py-3 rounded-xl hover:bg-blue-600/30 transition-colors disabled:opacity-30 disabled:border-zinc-800 flex flex-col items-center"
+                >
+                  <span className="text-sm">{percentage}% Share</span>
+                  <span className="text-white text-lg">{formatCurrency(exactAmountMinor, currencyCode)}</span>
+                </button>
+              )
+            })}
+          </div>
         )}
 
         <button 

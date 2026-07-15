@@ -146,7 +146,7 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
             if (oldOrder && oldOrder.status !== 'paid' && orderPayload.new.status === 'paid') {
               toast.success(`Payment Confirmed! Table: ${orderPayload.new.table_identifier}`)
             }
-            return prev.map(o => o.id === orderPayload.new.id ? { ...o, ...orderPayload.new } : o)
+            return prev.map(o => o.id === orderPayload.new.id ? { ...o, ...(orderPayload.new as unknown as Partial<UIOrder>) } : o)
           })
         }
       })

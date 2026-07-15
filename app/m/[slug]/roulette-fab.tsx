@@ -22,7 +22,7 @@ export function RouletteFAB() {
         <PaymentRouletteModal 
           isOpen={isOpen} 
           onClose={() => setIsOpen(false)} 
-          onSpinComplete={(count, type) => setSplit(count, type)}
+          onSpinComplete={(count, type, shares) => setSplit(count, type, shares)}
         />
       )}
       

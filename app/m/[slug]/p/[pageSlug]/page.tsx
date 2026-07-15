@@ -100,7 +100,7 @@ export default async function PublicPageView({
     const anonSupabase = createAnonClient()
     const { data } = await anonSupabase
       .from('locations')
-      .select('id, name, organization_id, is_search_visible, theme_color, cover_image_url, ai_enabled, ai_name, instagram_handle, x_handle, tiktok_handle, facebook_handle, whatsapp_number, phone_number, google_maps_url, operating_hours, wifi_network, wifi_password, organizations(logo_url, status, refund_policy), manual_payment_enabled, manual_payment_bank_name, manual_payment_account_name, manual_payment_account_number, manual_payment_instructions, delivery_enabled, delivery_fee_minor, delivery_minimum_order_minor, delivery_note, fulfillment_location_label, currency_code, portal_display_name, location_taxes(*)')
+      .select('id, name, organization_id, is_search_visible, theme_color, cover_image_url, ai_enabled, ai_name, instagram_handle, x_handle, tiktok_handle, facebook_handle, whatsapp_number, phone_number, google_maps_url, operating_hours, wifi_network, wifi_password, organizations(logo_url, status, refund_policy, subscription_plan), manual_payment_enabled, manual_payment_bank_name, manual_payment_account_name, manual_payment_account_number, manual_payment_instructions, delivery_enabled, delivery_fee_minor, delivery_minimum_order_minor, delivery_note, fulfillment_location_label, currency_code, portal_display_name, location_taxes(*)')
       .eq('slug', slug)
       .single()
     return data
@@ -248,6 +248,39 @@ export default async function PublicPageView({
         { revalidate: 60, tags: [`page_items_${page.id}`] }
       )()
 
+  const fetchAds = async () => {
+    const { getAdsNetworkSettings } = await import('@/lib/utils/settings')
+    const adsNetwork = await getAdsNetworkSettings()
+    
+    const subPlan = (loc.organizations as any)?.subscription_plan || 'lite'
+    const isPro = ['pro', 'enterprise'].includes(subPlan)
+    
+    if (isPro && !adsNetwork.enable_byo_ads) return []
+    if (!isPro && !adsNetwork.enable_platform_ads) return []
+
+    const anonSupabase = createAnonClient()
+    let query = anonSupabase
+      .from('sponsored_ads' as any)
+      .select('id, title, category, image_url, target_link')
+      .eq('is_active', true)
+      .eq('approval_status', 'approved')
+      
+    if (isPro) {
+      query = query.eq('location_id', loc.id)
+    } else {
+      query = query.eq('is_platform_ad', true)
+    }
+    
+    const { data } = await query.limit(5)
+    return data || []
+  }
+
+  const adsPromise = unstable_cache(
+    fetchAds,
+    [`sponsored_ads_${loc.id}`],
+    { revalidate: 300, tags: [`sponsored_ads_${loc.id}`] }
+  )()
+
   // Fetch active deals for this location (if page has deals enabled)
   const dealsPromise = (page.deals_enabled !== false) ? (async () => {
     const anonSupabase = createAnonClient()
@@ -271,12 +304,13 @@ export default async function PublicPageView({
     )
   })() : Promise.resolve([])
 
-  const [items, { data: paymentSettings }, globalManualPayment, _resource, activeDeals] = await Promise.all([
+  const [items, { data: paymentSettings }, globalManualPayment, _resource, activeDeals, sponsoredAds] = await Promise.all([
     itemsPromise,
     paymentSettingsPromise,
     getGlobalManualPayment(),
     resourceId ? supabase.from('resources').select('id, name, type').eq('id', resourceId).single().then(r => r.data) : Promise.resolve(null),
-    dealsPromise
+    dealsPromise,
+    adsPromise
   ])
 
   const pageThemeColor = page.theme_color || loc.theme_color || '#10b981'
@@ -298,6 +332,7 @@ export default async function PublicPageView({
     page: page as never,
      
     items: items as never[],
+    sponsoredAds,
     locationSlug: slug,
     referralSource: ref,
     resourceId: resourceId || undefined,

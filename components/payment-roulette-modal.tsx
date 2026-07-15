@@ -3,16 +3,20 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import confetti from 'canvas-confetti'
+import { formatCurrency } from '@/lib/utils/currency'
 
 type GameMode = 'classic' | 'squad' | 'survivor' | 'chaos'
 
 interface PaymentRouletteModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSpinComplete?: (count: number, type: 'even' | 'uneven') => void;
+  onSpinComplete?: (count: number, type: 'even' | 'uneven', shares?: number[]) => void;
+  onProceedToCheckout?: () => void;
+  totalAmount?: number; // In major units (e.g. NGN 1500)
+  currencyCode?: string;
 }
 
-export function PaymentRouletteModal({ isOpen, onClose, onSpinComplete }: PaymentRouletteModalProps) {
+export function PaymentRouletteModal({ isOpen, onClose, onSpinComplete, onProceedToCheckout, totalAmount, currencyCode = 'NGN' }: PaymentRouletteModalProps) {
   const [namesText, setNamesText] = useState('')
   const [mode, setMode] = useState<GameMode>('classic')
   const [squadSize, setSquadSize] = useState(2)
@@ -73,15 +77,15 @@ export function PaymentRouletteModal({ isOpen, onClose, onSpinComplete }: Paymen
         const maxIter = 20
         while (iterations < maxIter) {
           const r = available[Math.floor(Math.random() * available.length)]
-          setCurrentDisplay(r)
+          setCurrentDisplay(r.toString())
           await sleep(50 + (iterations * 5)) // slows down
           iterations++
         }
         
         // Pick one
         const winner = available[Math.floor(Math.random() * available.length)]
-        chosen.push(winner)
-        setCurrentDisplay(winner)
+        chosen.push(winner.toString())
+        setCurrentDisplay(winner.toString())
         setWinners([...chosen])
         available = available.filter(n => n !== winner)
         
@@ -98,7 +102,10 @@ export function PaymentRouletteModal({ isOpen, onClose, onSpinComplete }: Paymen
         particleCount: 100,
         spread: 70,
         origin: { y: 0.6 },
-        colors: ['#10b981', '#34d399', '#ffffff']
+        colors: ['#10b981', '#34d399', '#ffffff'],
+        zIndex: 9999,
+        // @ts-ignore: useWorker exists in the actual confetti library but might be missing in older type definitions
+        useWorker: true
       })
     }
     
@@ -111,14 +118,14 @@ export function PaymentRouletteModal({ isOpen, onClose, onSpinComplete }: Paymen
         let iterations = 0
         while (iterations < 15) {
           const r = available[Math.floor(Math.random() * available.length)]
-          setCurrentDisplay(r)
+          setCurrentDisplay(r.toString())
           await sleep(80)
           iterations++
         }
         
         // Cross off one
         const saved = available[Math.floor(Math.random() * available.length)]
-        safe.push(saved)
+        safe.push(saved.toString())
         setSafeNames([...safe])
         setCurrentDisplay(`${saved} is SAFE!`)
         available = available.filter(n => n !== saved)
@@ -127,8 +134,8 @@ export function PaymentRouletteModal({ isOpen, onClose, onSpinComplete }: Paymen
       }
       
       // Last one standing pays
-      setWinners([available[0]])
-      setCurrentDisplay(available[0])
+      setWinners([available[0].toString()])
+      setCurrentDisplay(available[0].toString())
       setIsFinished(true)
       setSpinning(false)
       
@@ -136,7 +143,10 @@ export function PaymentRouletteModal({ isOpen, onClose, onSpinComplete }: Paymen
         particleCount: 100,
         spread: 90,
         origin: { y: 0.6 },
-        colors: ['#ef4444', '#f87171', '#ffffff'] // Red theme for survivor
+        colors: ['#ef4444', '#f87171', '#ffffff'], // Red theme for survivor
+        zIndex: 9999,
+        // @ts-ignore
+        useWorker: true
       })
     }
 
@@ -152,12 +162,12 @@ export function PaymentRouletteModal({ isOpen, onClose, onSpinComplete }: Paymen
       // Generate percentages that equal 100
       let remaining = 100
       const results = namesList.map((name, i) => {
-        if (i === namesList.length - 1) return { name, percentage: remaining }
+        if (i === namesList.length - 1) return { name: name.toString(), percentage: remaining }
         // Give a random chunk of the remaining (ensuring at least 1% for everyone)
         const maxShare = remaining - (namesList.length - 1 - i)
         const p = Math.floor(Math.random() * maxShare) + 1
         remaining -= p
-        return { name, percentage: p }
+        return { name: name.toString(), percentage: p }
       })
       
       // Shuffle the results so the last person doesn't predictably get the smallest/largest
@@ -167,12 +177,17 @@ export function PaymentRouletteModal({ isOpen, onClose, onSpinComplete }: Paymen
       setCurrentDisplay('CHAOS!')
       setIsFinished(true)
       setSpinning(false)
+
+      onSpinComplete?.(results.length, 'uneven', results.map(r => r.percentage))
       
       confetti({
         particleCount: 150,
         spread: 120,
         origin: { y: 0.5 },
-        colors: ['#10b981', '#34d399', '#eab308', '#3b82f6', '#22c55e'] // Chaos colors
+        colors: ['#10b981', '#34d399', '#eab308', '#3b82f6', '#22c55e'], // Chaos colors
+        zIndex: 9999,
+        // @ts-ignore
+        useWorker: true
       })
     }
   }
@@ -258,15 +273,20 @@ export function PaymentRouletteModal({ isOpen, onClose, onSpinComplete }: Paymen
                           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
                         </button>
                       </div>
-                      <p className="text-xs text-emerald-400 font-medium">Pick a number amongst yourselves!</p>
+                      <p className="text-xs text-emerald-400 font-medium text-center px-4 leading-relaxed">
+                        Pick a number from <span className="text-white font-bold">1</span> to <span className="text-white font-bold">{playerCount}</span> among yourselves (e.g., randomly or by seating order)!
+                      </p>
                     </div>
                   ) : (
-                    <textarea 
-                      value={namesText}
-                      onChange={(e) => setNamesText(e.target.value)}
-                      placeholder="John, Sarah, Mike, Lisa..."
-                      className="w-full h-24 bg-zinc-950 border border-zinc-800 rounded-xl p-4 text-white resize-none focus:outline-none focus:border-emerald-500 text-center text-lg leading-tight"
-                    />
+                    <div className="flex flex-col items-center justify-center space-y-2 py-2">
+                      <textarea 
+                        value={namesText}
+                        onChange={(e) => setNamesText(e.target.value)}
+                        placeholder="John, Sarah, Mike, Lisa..."
+                        className="w-full h-24 bg-zinc-950 border border-zinc-800 rounded-xl p-4 text-white resize-none focus:outline-none focus:border-emerald-500 text-center text-lg leading-tight"
+                      />
+                      <p className="text-xs text-emerald-400 font-medium text-center">Enter the names of everyone playing, separated by commas.</p>
+                    </div>
                   )}
 
                   {mode === 'squad' && (
@@ -336,7 +356,11 @@ export function PaymentRouletteModal({ isOpen, onClose, onSpinComplete }: Paymen
                               <span key={w} className="text-white text-lg font-medium bg-zinc-900 px-3 py-1 rounded-lg border border-emerald-500/50">{w}</span>
                             ))}
                           </div>
-                          <p className="text-zinc-400 text-sm mt-3 font-medium">Split it {mode === 'classic' ? 'all' : winners.length + ' ways'} via checkout!</p>
+                          {totalAmount ? (
+                            <p className="text-emerald-300 text-lg font-black mt-3">{formatCurrency(Math.ceil((totalAmount / winners.length) / 100) * 100, currencyCode)} <span className="text-sm font-medium text-zinc-400">each</span></p>
+                          ) : (
+                            <p className="text-zinc-400 text-sm mt-3 font-medium">Split it {mode === 'classic' ? 'all' : winners.length + ' ways'} via checkout!</p>
+                          )}
                         </div>
                       )}
 
@@ -344,6 +368,9 @@ export function PaymentRouletteModal({ isOpen, onClose, onSpinComplete }: Paymen
                         <div className="bg-red-500/10 border border-red-500/30 p-6 rounded-xl text-center shadow-[0_0_30px_rgba(239,68,68,0.2)]">
                           <span className="block text-red-400 text-xs font-bold uppercase tracking-widest mb-1">Last One Standing</span>
                           <span className="text-white text-2xl font-black drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]">{winners[0]} pays it all! 💀</span>
+                          {totalAmount && (
+                            <p className="text-red-400 text-xl font-black mt-2">{formatCurrency(totalAmount, currencyCode)}</p>
+                          )}
                         </div>
                       )}
 
@@ -353,20 +380,50 @@ export function PaymentRouletteModal({ isOpen, onClose, onSpinComplete }: Paymen
                           {chaosResults.map((r, i) => (
                             <div key={i} className="flex items-center justify-between bg-zinc-950 p-3 rounded-lg border border-zinc-800">
                               <span className="text-white font-medium">{r.name}</span>
-                              <span className="text-emerald-400 font-bold">{r.percentage}%</span>
+                              <div className="text-right">
+                                <span className="text-emerald-400 font-bold block">{r.percentage}%</span>
+                                {totalAmount && (
+                                  <span className="text-zinc-400 text-xs font-medium block">
+                                    {formatCurrency(Math.ceil((totalAmount * (r.percentage / 100)) / 100) * 100, currencyCode)}
+                                  </span>
+                                )}
+                              </div>
                             </div>
                           ))}
-                          <p className="text-zinc-400 text-sm mt-4">
-                  Use the &quot;Custom Amount&quot; box at checkout.
-                </p>        </div>
+                          {!totalAmount && (
+                            <p className="text-zinc-400 text-sm mt-4 text-center">
+                              Use the &quot;Custom Amount&quot; box at checkout.
+                            </p>
+                          )}
+                        </div>
                       )}
 
-                      <button 
-                        onClick={handleSpin}
-                        className="w-full py-3 text-zinc-400 text-sm font-bold hover:text-white transition-colors mt-2"
-                      >
-                        Play Again
-                      </button>
+                      {onProceedToCheckout ? (
+                        <div className="flex flex-col gap-2 mt-4">
+                          <button 
+                            onClick={() => {
+                              onProceedToCheckout()
+                              onClose()
+                            }}
+                            className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 rounded-xl transition-colors shadow-lg"
+                          >
+                            Proceed to Checkout
+                          </button>
+                          <button 
+                            onClick={handleSpin}
+                            className="w-full py-3 text-zinc-400 text-sm font-bold hover:text-white transition-colors"
+                          >
+                            Spin Again
+                          </button>
+                        </div>
+                      ) : (
+                        <button 
+                          onClick={handleSpin}
+                          className="w-full py-3 text-zinc-400 text-sm font-bold hover:text-white transition-colors mt-2"
+                        >
+                          Play Again
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>

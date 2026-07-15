@@ -17,12 +17,13 @@ export default function SharingHubPage({
 }) {
   const { order_id } = use(params)
   const searchParams = useSearchParams()
-  const splitCount = parseInt(searchParams.get('split') || '1')
-  const splitType = searchParams.get('type') || 'even'
   const slug = searchParams.get('slug')
   
   const [origin, setOrigin] = useState('')
-  const [order, setOrder] = useState<{ id?: string, total_amount_minor: number, amount_paid_minor: number | null, locations?: { currency_code: string } } | null>(null)
+  const [order, setOrder] = useState<{ id?: string, total_amount_minor: number, amount_paid_minor: number | null, locations?: { currency_code: string }, metadata?: any } | null>(null)
+  
+  const splitCount = order?.metadata?.split_count || parseInt(searchParams.get('split') || '1')
+  const splitType = order?.metadata?.split_type || searchParams.get('type') || 'even'
   const supabase = createClient()
 
   useEffect(() => {

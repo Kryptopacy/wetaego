@@ -60,4 +60,5 @@ export interface UIOrder {
     provider_reference: string;
     created_at: string;
   }>;
+  metadata?: Record<string, unknown> | null;
 }

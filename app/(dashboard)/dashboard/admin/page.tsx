@@ -1,5 +1,5 @@
 
-import { getPricingSettings, getCreditCosts, getPlanLimits, getAiModels, getPlatformFees, getTrialSettings, getGlobalManualPayment, getKycSettings, getExchangeRates } from '@/lib/utils/settings'
+import { getPricingSettings, getCreditCosts, getPlanLimits, getAiModels, getPlatformFees, getTrialSettings, getGlobalManualPayment, getKycSettings, getExchangeRates, getAdsNetworkSettings } from '@/lib/utils/settings'
 import { getUsdToNgnRate } from '@/lib/payments/exchange'
 import { updateSetting } from './actions'
 import { ActionForm } from '@/components/ActionForm'
@@ -22,6 +22,7 @@ export default async function AdminPage() {
   const globalPayment = await getGlobalManualPayment()
   const kycSettings = await getKycSettings() as { require_kyc_to_publish?: boolean }
   const exchangeRates = await getExchangeRates()
+  const adsNetwork = await getAdsNetworkSettings()
   
   // Fetch live exchange rate for display purposes
   const liveUsdRate = await getUsdToNgnRate()
@@ -89,7 +90,7 @@ export default async function AdminPage() {
       </div>
 
       {/* Grouped Tab Layout */}
-      <AdminTabs tabs={['Tenants & Coupons', 'Pricing & Fees', 'AI & Limits', 'Danger Zone', 'Affiliates']}>
+      <AdminTabs tabs={['Tenants & Coupons', 'Pricing & Fees', 'AI & Limits', 'Danger Zone', 'Affiliates', 'Ad Network']}>
         {/* Tab 0: Tenants & Coupons */}
         <div className="space-y-8 min-w-0">
           <section className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-xl w-full">
@@ -366,6 +367,53 @@ export default async function AdminPage() {
         {/* Tab 4: Affiliates */}
         <div className="space-y-8 min-w-0">
           <AffiliatesRegistry affiliates={affiliates || []} />
+        </div>
+
+        {/* Tab 5: Ad Network */}
+        <div className="space-y-6 max-w-2xl min-w-0">
+          <section className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-xl w-full">
+            <h2 className="text-lg font-bold text-white mb-2">Native Ad Network</h2>
+            <p className="text-zinc-400 text-sm mb-6">Control the global state of the hybrid ad network.</p>
+            
+            <ActionForm action={updateSetting} className="space-y-6">
+              <input type="hidden" name="key" value="ads_network" />
+              <input type="hidden" name="is_json" value="true" />
+              
+              <div className="flex flex-col gap-4">
+                <div className="flex items-start gap-3 bg-zinc-800/50 p-4 rounded-xl border border-zinc-700/50">
+                  <input 
+                    type="checkbox" 
+                    id="enable_platform_ads"
+                    name="enable_platform_ads" 
+                    value="true"
+                    defaultChecked={adsNetwork?.enable_platform_ads === true} 
+                    className="mt-1 w-4 h-4 rounded bg-zinc-800 border-zinc-700 text-emerald-500 focus:ring-emerald-500 shrink-0" 
+                  />
+                  <label htmlFor="enable_platform_ads" className="text-sm font-medium text-white leading-tight cursor-pointer">
+                    Enable Platform Ads (Lite Tier)
+                    <span className="block text-xs text-zinc-400 font-normal mt-1">Injects OurMenu OS brokered ads into free accounts.</span>
+                  </label>
+                </div>
+
+                <div className="flex items-start gap-3 bg-zinc-800/50 p-4 rounded-xl border border-zinc-700/50">
+                  <input 
+                    type="checkbox" 
+                    id="enable_byo_ads"
+                    name="enable_byo_ads" 
+                    value="true"
+                    defaultChecked={adsNetwork?.enable_byo_ads === true} 
+                    className="mt-1 w-4 h-4 rounded bg-zinc-800 border-zinc-700 text-emerald-500 focus:ring-emerald-500 shrink-0" 
+                  />
+                  <label htmlFor="enable_byo_ads" className="text-sm font-medium text-white leading-tight cursor-pointer">
+                    Enable BYO Sponsor Ads (Pro/Enterprise)
+                    <span className="block text-xs text-zinc-400 font-normal mt-1">Unlocks the Ads Manager dashboard for premium users.</span>
+                  </label>
+                </div>
+              </div>
+              
+              <button type="submit" className="w-full px-4 py-2 bg-emerald-600/20 text-emerald-400 border border-emerald-500/50 rounded-lg text-sm font-medium hover:bg-emerald-600 hover:text-white transition">Save Ad Network State</button>
+            </ActionForm>
+          </section>
         </div>
       </AdminTabs>
     </div>

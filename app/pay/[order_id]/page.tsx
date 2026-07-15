@@ -27,6 +27,7 @@ export default async function SharedPaymentPage({
       created_at,
       organization_id,
       location_id,
+      metadata,
       organizations(name, slug)
     `)
     .eq('id', order_id)
@@ -42,7 +43,9 @@ export default async function SharedPaymentPage({
     )
   }
 
-  const splitCount = parseInt(split || '1')
+  const splitCount = (order.metadata?.split_count as number) || parseInt(split || '1')
+  const splitType = (order.metadata?.split_type as string) || 'even'
+  const splitShares = (order.metadata?.split_shares as number[]) || []
   
   // handle array or single object for organizations
   const org = Array.isArray(order.organizations) ? order.organizations[0] : order.organizations
@@ -135,6 +138,8 @@ export default async function SharedPaymentPage({
         <PayClient 
           order={order}
           splitCount={splitCount}
+          splitType={splitType}
+          splitShares={splitShares}
           currencyCode={currencyCode}
         />
       </div>

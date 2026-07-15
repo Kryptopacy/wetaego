@@ -99,6 +99,16 @@ export const getGlobalManualPayment = unstable_cache(
   { revalidate: 86400, tags: ['global_payment'] }
 )
 
+const DEFAULT_ADS_NETWORK = {
+  enable_platform_ads: false, // Disables OurMenu ads on Lite tiers globally
+  enable_byo_ads: false       // Disables the Ads Manager in the dashboard globally
+}
+export const getAdsNetworkSettings = unstable_cache(
+  async () => fetchSystemSettingFromDB('ads_network', DEFAULT_ADS_NETWORK),
+  ['system_setting_ads_network'],
+  { revalidate: 86400, tags: ['ads_network'] }
+)
+
 export const getKycSettings = unstable_cache(
   async () => fetchSystemSettingFromDB('kyc_settings', DEFAULT_KYC_SETTINGS),
   ['system_setting_kyc_settings'],
