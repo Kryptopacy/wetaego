@@ -71,7 +71,8 @@ export function IntercomWidget({ userId, organizationId }: { userId: string, org
         .select('role')
         .eq('organization_id', organizationId)
         .eq('user_id', userId)
-        .single()
+        .limit(1)
+        .maybeSingle()
 
       const isManager = memberRow?.role === 'owner' || memberRow?.role === 'manager'
 
@@ -173,7 +174,8 @@ export function IntercomWidget({ userId, organizationId }: { userId: string, org
             .from('user_profiles')
             .select('full_name')
             .eq('id', payload.new.user_id)
-            .single()
+            .limit(1)
+            .maybeSingle()
 
           const newMsg = {
             ...payload.new,

@@ -35,7 +35,8 @@ export default async function DashboardLayout({ children }: { children: ReactNod
       .from('organization_members')
       .select('role, page_id, organizations(id, name, subscription_tier, subscription_status, subscription_plan, trial_ends_at, purchased_credits, monthly_free_credits_used)')
       .eq('user_id', userData.user.id)
-      .single()
+      .limit(1)
+      .maybeSingle()
 
     if (member && member.organizations) {
       // Supabase infers joined single relations as either an object or an array.

@@ -78,7 +78,7 @@ export default async function QRCodeBatchPage() {
       .select('*')
       .eq('organization_id', org.id)
       
-    if (activeLocationId) {
+    if (activeLocationId && activeLocationId !== 'global') {
       query = query.eq('location_id', activeLocationId)
     }
 

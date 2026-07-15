@@ -45,12 +45,15 @@ export function GlobalRealtime() {
   const [orgId, setOrgId] = useState<string | null>(null)
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
+    supabase.auth.getUser().then(async ({ data }) => {
       if (data?.user?.id) {
-        supabase.from('organizations').select('id').eq('created_by', data.user.id).single()
-          .then(({ data: orgData }) => {
-            if (orgData?.id) setOrgId(orgData.id)
-          })
+        const { data: member } = await supabase.from('organization_members').select('organization_id').eq('user_id', data.user.id).limit(1).maybeSingle()
+        if (member?.organization_id) {
+          setOrgId(member.organization_id)
+          return
+        }
+        const { data: orgData } = await supabase.from('organizations').select('id').eq('created_by', data.user.id).limit(1).maybeSingle()
+        if (orgData?.id) setOrgId(orgData.id)
       }
     })
   }, [supabase])

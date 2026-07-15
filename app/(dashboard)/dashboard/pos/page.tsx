@@ -31,9 +31,12 @@ export default async function POSPage() {
   let pagesQuery = supabase
     .from('location_pages')
     .select('*')
-    .eq('location_id', activeLocationId)
     .in('template_type', ['restaurant', 'catalog'])
     .eq('is_published', true)
+    
+  if (activeLocationId && activeLocationId !== 'global') {
+    pagesQuery = pagesQuery.eq('location_id', activeLocationId)
+  }
     
   if (activePageId) {
     pagesQuery = pagesQuery.eq('id', activePageId)
@@ -57,11 +60,12 @@ export default async function POSPage() {
   const items = rawItems || []
 
   // Fetch location details for currency
-  const { data: loc } = await supabase
-    .from('locations')
-    .select('currency_code, organization_id')
-    .eq('id', activeLocationId)
-    .single()
+  let locQuery = supabase.from('locations').select('id, currency_code, organization_id')
+  if (activeLocationId && activeLocationId !== 'global') {
+    locQuery = locQuery.eq('id', activeLocationId)
+  }
+  const { data: loc } = await locQuery.limit(1).maybeSingle()
+  const resolvedLocationId = activeLocationId === 'global' ? (loc?.id || '') : activeLocationId
 
   return (
     <div className="flex h-[calc(100vh-(--spacing(16)))] w-full flex-col p-4 md:p-6 overflow-hidden">
@@ -77,7 +81,7 @@ export default async function POSPage() {
           items={items as any[]} 
           pages={pages} 
           currency={loc?.currency_code || 'NGN'} 
-          locationId={activeLocationId}
+          locationId={resolvedLocationId}
           organizationId={loc?.organization_id as string}
           staffId={userData.user.id}
         />

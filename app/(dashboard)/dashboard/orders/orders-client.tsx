@@ -120,11 +120,19 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
       const interval = setInterval(() => {
         // Fallback polling for orders and service requests to save Realtime connection limits
         const fetchUpdates = async () => {
-          const { data: ordersData } = await supabase.from('orders').select('*, order_items(*), order_milestones(*), order_payments(*)').eq('location_id', locationId)
+          let ordersQ = supabase.from('orders').select('*, order_items(*), order_milestones(*), order_payments(*)')
+          if (locationId && locationId !== 'global') ordersQ = ordersQ.eq('location_id', locationId)
+          else ordersQ = ordersQ.eq('organization_id', organizationId)
+          const { data: ordersData } = await ordersQ
+
           if (ordersData) {
             setOrders(ordersData.map((d) => mapSupabaseOrderToUI(d as any)))
           }
-          const { data: srData } = await supabase.from('service_requests').select('*').eq('location_id', locationId)
+          let srQ = supabase.from('service_requests').select('*')
+          if (locationId && locationId !== 'global') srQ = srQ.eq('location_id', locationId)
+          else srQ = srQ.eq('organization_id', organizationId)
+          const { data: srData } = await srQ
+
           if (srData) {
             setServiceRequests(srData as ServiceRequestRow[])
           }
@@ -141,7 +149,7 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
         event: '*', 
         schema: 'public', 
         table: 'orders',
-        filter: `location_id=eq.${locationId}`
+        filter: locationId === 'global' ? `organization_id=eq.${organizationId}` : `location_id=eq.${locationId}`
       }, (payload: unknown) => {
         const orderPayload = payload as OrderPayload
         // Fetch full order with items if INSERT
@@ -181,7 +189,7 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
         event: '*', 
         schema: 'public', 
         table: 'service_requests',
-        filter: `location_id=eq.${locationId}`
+        filter: locationId === 'global' ? `organization_id=eq.${organizationId}` : `location_id=eq.${locationId}`
       }, (payload: unknown) => {
         const srPayload = payload as ServiceRequestPayload
         if (srPayload.eventType === 'INSERT') {

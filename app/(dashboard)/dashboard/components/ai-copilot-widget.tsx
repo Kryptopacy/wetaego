@@ -123,7 +123,6 @@ export function AICopilotWidget({ organizationId }: { organizationId: string }) 
                 </div>
                 <div>
                   <h3 className="font-semibold text-white text-sm">Unem - Admin Co-Pilot</h3>
-                  <p className="text-[11px] text-zinc-400">Powered by AI</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">

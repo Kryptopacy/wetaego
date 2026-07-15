@@ -59,7 +59,7 @@ async function chargeCreditsFallback(organizationId: string, cost: number, reaso
 
   const tier = (org.subscription_tier || 'lite') as string
   const dynamicPlanLimits = await getPlanLimits() as Record<string, { credits: number, pages: number }>
-  const monthlyLimit = dynamicPlanLimits[tier]?.credits || 0
+  const monthlyLimit = dynamicPlanLimits[tier]?.credits ?? (tier === 'trial' || tier === 'pro' ? 50 : 10)
   const availableFree = Math.max(0, monthlyLimit - org.monthly_free_credits_used)
   const totalAvailable = availableFree + org.purchased_credits
 

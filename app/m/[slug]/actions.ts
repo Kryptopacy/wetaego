@@ -522,12 +522,19 @@ export async function callStaffFromAi(params: {
     .from('locations')
     .select('whatsapp_number')
     .eq('id', locationId)
-    .single()
+    .limit(1)
+    .maybeSingle()
 
   const whatsappNumber = location?.whatsapp_number || '08000000000'
 
-  // Fire WhatsApp Notification in the background without blocking the UI
+  // Fire WhatsApp & Business Push/Sound/Email Notifications in the background without blocking the UI
   waitUntil(sendWhatsAppMessage(whatsappNumber, `Table ${tableIdentifier} needs a ${requestType}!`))
+  waitUntil(notifyBusiness(locationId, {
+    title: `[AI REQUEST] Staff Needed — Table ${tableIdentifier}`,
+    body: `Requested: ${requestType}`,
+    url: '/dashboard/orders',
+    tag: `service_request_${locationId}`,
+  }))
 
   return { data: { success: true } }
 }

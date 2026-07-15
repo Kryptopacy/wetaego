@@ -32,7 +32,8 @@ export default async function DashboardOverviewPage() {
     .from('organization_members')
     .select('role, organizations(id, name, business_type)')
     .eq('user_id', user!.id)
-    .single()
+    .limit(1)
+    .maybeSingle()
 
   if (member?.organizations) {
     const org = member.organizations as unknown as { id: string, name: string, business_type: string | null }
@@ -44,7 +45,8 @@ export default async function DashboardOverviewPage() {
       .from('organizations')
       .select('id, name, business_type')
       .eq('created_by', user!.id)
-      .single()
+      .limit(1)
+      .maybeSingle()
     orgId = org?.id || ''
     orgName = org?.name || 'Your Venue'
     orgBusinessType = org?.business_type || null
@@ -68,7 +70,8 @@ export default async function DashboardOverviewPage() {
         .from('locations')
         .select('slug')
         .eq('organization_id', orgId)
-        .single(),
+        .limit(1)
+        .maybeSingle(),
       supabase
         .from('menu_items')
         .select('id', { count: 'exact', head: true })

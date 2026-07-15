@@ -14,6 +14,8 @@ const DEFAULT_PRICING = {
 }
 const DEFAULT_CREDIT_COSTS = { ai_cover: 5, copywriter: 1, translation_per_category: 2, custom_page: 10, qr_code: 1, forecast: 3, auto_fill: 2, copilot: 1 }
 const DEFAULT_PLAN_LIMITS = {
+  trial: { credits: 50, pages: 1, qr_codes: 10 },
+  starter: { credits: 10, pages: 0, qr_codes: 2 },
   lite: { credits: 10, pages: 0, qr_codes: 2 },
   pro: { credits: 50, pages: 1, qr_codes: 9999 },
   enterprise: { credits: 200, pages: 5, qr_codes: 9999 }

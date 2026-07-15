@@ -59,9 +59,10 @@ export async function POST(req: Request) {
     // 3. Fetch location AI configuration
     const { data: location, error: locError } = await supabase
       .from('locations')
-      .select('id, name, ai_enabled, ai_name, ai_instructions, brand_knowledge, currency_code, ai_base_personality, ai_escalation_contact, ai_faqs')
+      .select('id, organization_id, name, ai_enabled, ai_name, ai_instructions, brand_knowledge, currency_code, ai_base_personality, ai_escalation_contact, ai_faqs')
       .eq('id', locationId)
-      .single()
+      .limit(1)
+      .maybeSingle()
 
     if (locError || !location) {
       return new Response('Location not found', { status: 404 })
@@ -76,7 +77,7 @@ export async function POST(req: Request) {
     // 4. Fetch custom pages (Knowledge Graph)
     const { data: customPages } = await supabase
       .from('location_pages')
-      .select('title, content')
+      .select('id, title, content')
       .eq('location_id', locationId)
       .eq('is_published', true)
 
@@ -86,16 +87,18 @@ export async function POST(req: Request) {
         customPages.map(p => `--- ${p.title} ---\n${p.content}`).join('\n\n')
     }
 
-    // 5. Fetch live menu catalog (Instant awareness)
+    // 5. Fetch live menu catalog (Instant awareness across menus, menu_items, and page_items)
     const { data: menu } = await supabase
       .from('menus')
       .select('id')
       .eq('location_id', locationId)
-      .single()
+      .limit(1)
+      .maybeSingle()
 
     let catalogText = 'No menu items are currently available.'
     let itemsJson = '[]'
-    
+    let allItemsList: { id: string, name: string, price: number, description?: string, availability_status?: string, category?: string }[] = []
+
     if (menu) {
       const { data: categories } = await supabase
         .from('menu_categories')
@@ -104,31 +107,87 @@ export async function POST(req: Request) {
         .order('sort_order')
 
       if (categories && categories.length > 0) {
-        // Build readable text catalog for LLM reasoning
-        catalogText = categories
-          .map(cat => {
-            const itemsList = (cat.menu_items || [])
-              .filter(item => item.availability_status !== 'hidden')
-              .map(item => 
-                `- [ID: ${item.id}] ${item.name}: ${formatCurrency(item.price_minor, locationCurrency)} | Availability: ${item.availability_status} | Description: ${item.description || 'No description'}`
-              )
-              .join('\n')
-            return `### ${cat.name}\n${itemsList}`
-          })
-          .join('\n\n')
-
-        // Build flat array of items with IDs for tool matching
-        const allItems = categories.flatMap(cat => 
+        categories.forEach(cat => {
           (cat.menu_items || [])
             .filter(item => item.availability_status !== 'hidden')
-            .map(item => ({
-              id: item.id,
-              name: item.name,
-              price: item.price_minor / 100
-            }))
-        )
-        itemsJson = JSON.stringify(allItems)
+            .forEach(item => {
+              allItemsList.push({
+                id: item.id,
+                name: item.name,
+                price: item.price_minor / 100,
+                description: item.description || undefined,
+                availability_status: item.availability_status || 'available',
+                category: cat.name
+              })
+            })
+        })
       }
+    }
+
+    // Fallback/Supplement: if no categories found from menu_categories, check page_items and menu_items directly
+    if (allItemsList.length === 0) {
+      const pageIds = (customPages || []).map(p => p.id)
+      if (pageIds.length > 0) {
+        const { data: pageItemsData } = await supabase
+          .from('page_items')
+          .select('*')
+          .in('page_id', pageIds)
+
+        if (pageItemsData && pageItemsData.length > 0) {
+          pageItemsData
+            .filter(item => item.availability_status !== 'hidden')
+            .forEach(item => {
+              allItemsList.push({
+                id: item.id,
+                name: item.title || 'Untitled Item',
+                price: (item.price_minor || 0) / 100,
+                description: item.description || undefined,
+                availability_status: item.availability_status || 'available',
+                category: 'Menu'
+              })
+            })
+        }
+      }
+
+      // If still empty, check flat menu_items for this organization
+      if (allItemsList.length === 0 && location.organization_id) {
+        const { data: flatItemsData } = await supabase
+          .from('menu_items')
+          .select('*')
+          .eq('organization_id', location.organization_id)
+
+        if (flatItemsData && flatItemsData.length > 0) {
+          flatItemsData
+            .filter(item => item.availability_status !== 'hidden')
+            .forEach(item => {
+              allItemsList.push({
+                id: item.id,
+                name: item.name,
+                price: item.price_minor / 100,
+                description: item.description || undefined,
+                availability_status: item.availability_status || 'available',
+                category: 'Menu'
+              })
+            })
+        }
+      }
+    }
+
+    if (allItemsList.length > 0) {
+      // Group by category for LLM reading
+      const grouped: Record<string, typeof allItemsList> = {}
+      allItemsList.forEach(item => {
+        const cat = item.category || 'Menu'
+        if (!grouped[cat]) grouped[cat] = []
+        grouped[cat].push(item)
+      })
+
+      catalogText = Object.entries(grouped).map(([catName, items]) => {
+        const lines = items.map(i => `- [ID: ${i.id}] ${i.name}: ${formatCurrency(Math.round(i.price * 100), locationCurrency)} | Availability: ${i.availability_status} | Description: ${i.description || 'No description'}`)
+        return `### ${catName}\n${lines.join('\n')}`
+      }).join('\n\n')
+
+      itemsJson = JSON.stringify(allItemsList.map(i => ({ id: i.id, name: i.name, price: i.price })))
     }
 
     const persona = resolvePersona(mode, location.ai_name)

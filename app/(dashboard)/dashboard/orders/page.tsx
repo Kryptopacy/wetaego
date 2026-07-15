@@ -62,7 +62,7 @@ export default async function OrdersPage() {
           .order('created_at', { ascending: false })
           .limit(50)
           
-        if (activeLocationId && !memberData?.page_id) {
+        if (activeLocationId && !memberData?.page_id && activeLocationId !== 'global') {
           ordersQuery = ordersQuery.eq('location_id', activeLocationId)
         }
         
@@ -74,12 +74,23 @@ export default async function OrdersPage() {
           .select('billing_mode, template_type')
           .eq('is_published', true)
           
-        if (activeLocationId && !memberData?.page_id) {
+        if (activeLocationId && !memberData?.page_id && activeLocationId !== 'global') {
           pageQuery = pageQuery.eq('location_id', activeLocationId)
         }
           
         if (activePageId) pageQuery = pageQuery.eq('id', activePageId)
-        pageQuery = pageQuery.limit(1).single()
+        pageQuery = pageQuery.limit(1).maybeSingle()
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let requestsQuery: any = supabase
+          .from('service_requests')
+          .select('*')
+          .eq('organization_id', org.id)
+          .order('created_at', { ascending: true })
+
+        if (activeLocationId && !memberData?.page_id && activeLocationId !== 'global') {
+          requestsQuery = requestsQuery.eq('location_id', activeLocationId)
+        }
 
         // Run independent queries concurrently
         const [
@@ -89,12 +100,7 @@ export default async function OrdersPage() {
           itemsResult
         ] = await Promise.all([
           ordersQuery,
-          supabase
-            .from('service_requests')
-            .select('*')
-            .eq('organization_id', org.id)
-            .eq('location_id', activeLocationId)
-            .order('created_at', { ascending: true }),
+          requestsQuery,
           pageQuery,
           supabase
             .from('menu_items')
