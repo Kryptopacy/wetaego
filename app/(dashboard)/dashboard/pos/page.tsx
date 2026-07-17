@@ -78,7 +78,7 @@ export default async function POSPage() {
       
       <div className="flex-1 bg-zinc-950 border border-zinc-800 rounded-2xl overflow-hidden relative shadow-2xl">
         <POSClient 
-          items={items as any[]} 
+          items={items as Parameters<typeof POSClient>[0]['items']} 
           pages={pages} 
           currency={loc?.currency_code || 'NGN'} 
           locationId={resolvedLocationId}

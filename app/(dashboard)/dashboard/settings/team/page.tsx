@@ -131,8 +131,8 @@ export default async function TeamPage() {
     .eq('organization_id', organization.id)
 
   const orgLocationIds = orgLocations?.map(l => l.id) || []
-  // @ts-expect-error - Supabase join typing
-  const shifts = (shiftsRaw || []).filter(shift => orgLocationIds.includes(shift.locations?.id || shift.location_id))
+
+  const shifts = (shiftsRaw || []).filter(shift => orgLocationIds.includes((shift.locations as unknown as { id: string })?.id))
 
   return (
     <div className="max-w-4xl">
@@ -159,7 +159,7 @@ export default async function TeamPage() {
           members={members}
           invites={invites}
         />
-        <StaffShifts shifts={shifts as any} />
+        <StaffShifts shifts={shifts as unknown as Parameters<typeof StaffShifts>[0]['shifts']} />
         <DangerZone orgId={organization.id} isOwner={role === 'owner'} />
       </div>
     </div>

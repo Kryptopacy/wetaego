@@ -14,13 +14,14 @@ export default function KioskScanPage() {
   const router = useRouter()
   const [state, setState] = useState<State>('loading')
   const [errorMsg, setErrorMsg] = useState('')
-  const [activeShift, setActiveShift] = useState(false)
+
 
   useEffect(() => {
     const token = params.get('t')
     const locationId = params.get('l')
 
     if (!token || !locationId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setState('error')
       setErrorMsg('Invalid QR code. Please scan again.')
       return
@@ -48,7 +49,7 @@ export default function KioskScanPage() {
 
       if (existing) {
         setState('already_clocked_in')
-        setActiveShift(true)
+
         return
       }
 

@@ -181,7 +181,7 @@ export default async function PublicPageView({
     }
 
     const { data: rawData } = await query.single()
-    const data = rawData as any
+    const data = rawData as Record<string, unknown>
     return data
   }
   const page = isPreview 
@@ -197,7 +197,7 @@ export default async function PublicPageView({
   // 2.2 Template Feature Flag Guard
   const { getTemplateFlags, getInfrastructureFlags } = await import('@/lib/utils/settings')
   const templateFlags = await getTemplateFlags() as Record<string, boolean>
-  if (templateFlags[page.template_type] === false) {
+  if (templateFlags[page.template_type as string] === false) {
     const { data: { user } } = await supabase.auth.getUser()
     const { isAdminEmail } = await import('@/lib/utils/admin')
     const isSuperadmin = isAdminEmail(user?.email)
@@ -253,7 +253,7 @@ export default async function PublicPageView({
     let query = anonSupabase
       .from('page_items')
       .select('*')
-      .eq('page_id', page.id)
+      .eq('page_id', page.id as string)
       .order('sort_order')
 
     if (!isPreview) {
@@ -281,7 +281,7 @@ export default async function PublicPageView({
     const { getAdsNetworkSettings } = await import('@/lib/utils/settings')
     const adsNetwork = await getAdsNetworkSettings()
     
-    const subPlan = (loc.organizations as any)?.subscription_plan || 'lite'
+    const subPlan = (loc.organizations as { subscription_plan?: string })?.subscription_plan || 'lite'
     const isPro = ['pro', 'enterprise'].includes(subPlan)
     
     if (isPro && !adsNetwork.enable_byo_ads) return []
@@ -289,7 +289,7 @@ export default async function PublicPageView({
 
     const anonSupabase = createAnonClient()
     let query = anonSupabase
-      .from('sponsored_ads' as any)
+      .from('sponsored_ads' as never)
       .select('id, title, category, image_url, target_link')
       .eq('is_active', true)
       .eq('approval_status', 'approved')
@@ -354,7 +354,7 @@ export default async function PublicPageView({
       cover_image_url: loc.cover_image_url ?? undefined, 
       currency: loc.currency_code, 
       theme_color: pageThemeColor,
-      operating_hours: page.operating_hours !== null && page.operating_hours !== undefined ? (typeof page.operating_hours === 'string' ? page.operating_hours : (page.operating_hours as any)) : loc.operating_hours,
+      operating_hours: page.operating_hours !== null && page.operating_hours !== undefined ? (typeof page.operating_hours === 'string' ? page.operating_hours : (page.operating_hours as unknown)) : loc.operating_hours,
       wifi_network: page.wifi_network || loc.wifi_network,
       wifi_password: page.wifi_password || loc.wifi_password,
       phone_number: page.contact_phone || loc.phone_number,
@@ -449,17 +449,17 @@ export default async function PublicPageView({
             themeColor={loc.theme_color || '#7c3aed'}
             tableIdentifier="QR Scan" // Standard fallback for generic pages
             menuItems={((items as Record<string, unknown>[]) || []).map(i => ({ id: i.id as string, name: i.title as string, price_minor: (i.price_minor as number) || 0 }))}
-            templateType={page.template_type}
-            billingMode={page.billing_mode}
-            businessTypePreset={page.business_type_preset}
+            templateType={page.template_type as string}
+            billingMode={page.billing_mode as string}
+            businessTypePreset={page.business_type_preset as string}
           />
         )}
         <CallStaffFAB organizationId={loc.organization_id} locationId={loc.id} tableIdentifier="QR Scan" />
-        {page.randomizer_enabled && (
+        {Boolean(page.randomizer_enabled) && (
           <RouletteFAB />
         )}
         {(activeDeals as unknown[]).length > 0 && (
-          <DealsFAB deals={activeDeals as Parameters<typeof DealsFAB>[0]['deals']} locationId={loc.id} pageId={page.id} />
+          <DealsFAB deals={activeDeals as Parameters<typeof DealsFAB>[0]['deals']} locationId={loc.id} pageId={page.id as string} />
         )}
       </FabGroup>
     </>

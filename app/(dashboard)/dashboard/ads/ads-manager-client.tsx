@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Plus, BarChart3, Trash2, Edit, ExternalLink, Image as ImageIcon, Zap, Power } from 'lucide-react'
+import { Plus, Trash2, ExternalLink, Image as ImageIcon, Zap, Power } from 'lucide-react'
 import { createAd, toggleAdStatus, deleteAd, getAdStats } from './actions'
 import { toast } from 'sonner'
 import Image from 'next/image'
@@ -20,17 +20,17 @@ interface Ad {
 export function AdsManagerClient({ initialAds, locations }: { initialAds: Ad[], locations: {id: string, name: string}[] }) {
   const [ads, setAds] = useState<Ad[]>(initialAds)
   const [isCreating, setIsCreating] = useState(false)
-  const [loading, setLoading] = useState(false)
+
   const [stats, setStats] = useState<Record<string, { impressions: number, clicks: number, ctr: string }>>({})
 
   // Fetch stats for all ads on mount
   useEffect(() => {
     async function fetchAllStats() {
-      const newStats: Record<string, any> = {}
+      const newStats: Record<string, { impressions: number, clicks: number, ctr: string }> = {}
       for (const ad of ads) {
         const res = await getAdStats(ad.id)
         if (!res.error) {
-          newStats[ad.id] = res
+          newStats[ad.id] = res as { impressions: number, clicks: number, ctr: string }
         }
       }
       setStats(newStats)
@@ -165,7 +165,7 @@ export function AdsManagerClient({ initialAds, locations }: { initialAds: Ad[], 
   )
 }
 
-function CreateAdForm({ locations, onSuccess, onCancel }: { locations: {id: string, name: string}[], onSuccess: (ad: any) => void, onCancel: () => void }) {
+function CreateAdForm({ locations, onSuccess, onCancel }: { locations: {id: string, name: string}[], onSuccess: (ad: Ad) => void, onCancel: () => void }) {
   const [loading, setLoading] = useState(false)
   const [imageUrl, setImageUrl] = useState('')
 

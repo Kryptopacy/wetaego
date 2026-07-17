@@ -116,6 +116,7 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
 
   useEffect(() => {
     if (!realtimeKdsEnabled) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSocketStatus('POLLING')
       const interval = setInterval(() => {
         // Fallback polling for orders and service requests to save Realtime connection limits
@@ -126,7 +127,7 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
           const { data: ordersData } = await ordersQ
 
           if (ordersData) {
-            setOrders(ordersData.map((d) => mapSupabaseOrderToUI(d as any)))
+            setOrders(ordersData.map((d) => mapSupabaseOrderToUI(d as Parameters<typeof mapSupabaseOrderToUI>[0])))
           }
           let srQ = supabase.from('service_requests').select('*')
           if (locationId && locationId !== 'global') srQ = srQ.eq('location_id', locationId)
@@ -219,7 +220,7 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
       supabase.removeChannel(serviceRequestsSubscription)
       supabase.removeChannel(menuSubscription)
     }
-  }, [organizationId, locationId, supabase])  
+  }, [organizationId, locationId, supabase, realtimeKdsEnabled])  
 
   // Global KDS Hotkeys (Only for restaurant template)
   useEffect(() => {

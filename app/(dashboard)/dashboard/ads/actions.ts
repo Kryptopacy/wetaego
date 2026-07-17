@@ -11,7 +11,7 @@ export async function createAd(data: {
   target_link: string
 }) {
   const supabase = await createClient()
-  const { error } = await supabase.from('sponsored_ads' as any).insert([
+  const { error } = await supabase.from('sponsored_ads').insert([
     {
       ...data,
       is_platform_ad: false, // Merchants can only create BYO ads
@@ -32,7 +32,7 @@ export async function createAd(data: {
 export async function toggleAdStatus(adId: string, isActive: boolean) {
   const supabase = await createClient()
   const { error } = await supabase
-    .from('sponsored_ads' as any)
+    .from('sponsored_ads')
     .update({ is_active: isActive })
     .eq('id', adId)
 
@@ -48,7 +48,7 @@ export async function toggleAdStatus(adId: string, isActive: boolean) {
 export async function deleteAd(adId: string) {
   const supabase = await createClient()
   const { error } = await supabase
-    .from('sponsored_ads' as any)
+    .from('sponsored_ads')
     .delete()
     .eq('id', adId)
 
@@ -65,13 +65,13 @@ export async function getAdStats(adId: string) {
   const supabase = await createClient()
   
   const { count: impressions, error: impError } = await supabase
-    .from('ad_events' as any)
+    .from('ad_events')
     .select('id', { count: 'exact', head: true })
     .eq('ad_id', adId)
     .eq('event_type', 'impression')
 
   const { count: clicks, error: clickError } = await supabase
-    .from('ad_events' as any)
+    .from('ad_events')
     .select('id', { count: 'exact', head: true })
     .eq('ad_id', adId)
     .eq('event_type', 'click')

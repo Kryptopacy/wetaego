@@ -66,7 +66,7 @@ function AutocompleteFields({ initialAddress, initialLat, initialLng, initialGeo
   initialLng: number | null,
   initialGeofenceRadius: number
 }) {
-  const [place, setPlace] = useState<any | null>(null)
+  const [_place, setPlace] = useState<Record<string, unknown> | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const places = useMapsLibrary('places')
   const [address, setAddress] = useState(initialAddress || '')

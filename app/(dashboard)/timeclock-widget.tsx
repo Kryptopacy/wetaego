@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Clock, Play, Square, QrCode, Monitor, MapPin } from 'lucide-react'
 import { GemstoneSpinner } from '@/components/ui/gemstone-spinner'
@@ -34,6 +34,7 @@ export function TimeclockWidget({
   const supabase = createClient()
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true)
     const updateTime = () => setTime(new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }))
     updateTime()
@@ -41,9 +42,24 @@ export function TimeclockWidget({
     return () => clearInterval(interval)
   }, [])
 
+  const refreshShift = useCallback(async () => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    const { data } = await supabase
+      .from('staff_shifts')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('status', 'active')
+      .limit(1)
+      .maybeSingle()
+    if (data) setActiveShiftId(data.id)
+    else setActiveShiftId(null)
+  }, [supabase])
+
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     refreshShift()
-  }, [])
+  }, [refreshShift])
 
   useEffect(() => {
     let subscription: ReturnType<typeof supabase.channel> | null = null
@@ -60,11 +76,12 @@ export function TimeclockWidget({
             event: '*',
             schema: 'public',
             table: 'staff_shifts',
-            filter: `user_id=eq.${user.id}`,
           },
-          () => {
-            refreshShift()
-            router.refresh()
+          (payload) => {
+            const p = payload as unknown as { new?: { user_id: string } }
+            if (p.new && p.new.user_id === user.id) {
+              refreshShift()
+            }
           }
         )
         .subscribe()
@@ -77,7 +94,7 @@ export function TimeclockWidget({
         supabase.removeChannel(subscription)
       }
     }
-  }, [supabase, router])
+  }, [supabase, refreshShift, router])
 
   const handleGeofenceClockIn = async () => {
     setLoading(true)
@@ -171,19 +188,7 @@ export function TimeclockWidget({
     }
   }
 
-  const refreshShift = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
-    const { data } = await supabase
-      .from('staff_shifts')
-      .select('id')
-      .eq('user_id', user.id)
-      .eq('status', 'active')
-      .limit(1)
-      .maybeSingle()
-    if (data) setActiveShiftId(data.id)
-    else setActiveShiftId(null)
-  }
+
 
   if (!mounted) {
     if (fullWidth) {

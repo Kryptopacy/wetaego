@@ -45,7 +45,7 @@ export default async function AdsManagerPage() {
     redirect('/dashboard')
   }
 
-  const isProOrEnterprise = ['pro', 'enterprise'].includes((member.organizations as any)?.subscription_plan || 'lite')
+  const isProOrEnterprise = ['pro', 'enterprise'].includes((member.organizations as { subscription_plan?: string })?.subscription_plan || 'lite')
 
   if (!isProOrEnterprise) {
     return (
@@ -83,7 +83,7 @@ export default async function AdsManagerPage() {
   // Fetch Ads for these locations
   const locationIds = locations.map(l => l.id)
   const { data: ads } = await supabase
-    .from('sponsored_ads' as any)
+    .from('sponsored_ads')
     .select('*')
     .in('location_id', locationIds)
     .order('created_at', { ascending: false })
@@ -98,7 +98,7 @@ export default async function AdsManagerPage() {
         <p className="text-zinc-400">Bring your own sponsors. Seamlessly inject native partner banners into your portals.</p>
       </div>
 
-      <AdsManagerClient initialAds={(ads as any) || []} locations={locations} />
+      <AdsManagerClient initialAds={(ads as unknown as Parameters<typeof AdsManagerClient>[0]['initialAds']) || []} locations={locations} />
     </div>
   )
 }

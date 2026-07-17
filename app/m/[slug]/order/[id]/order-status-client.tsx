@@ -87,7 +87,7 @@ export function OrderStatusClient({
   }
 
   const payments = order.order_payments || []
-  const amountPaid = payments.reduce((sum, p) => sum + p.amount_minor, 0)
+  const amountPaid = payments.reduce((sum: number, p: { amount_minor: number }) => sum + p.amount_minor, 0)
   const totalAmount = order.total_amount_minor
   const amountRemaining = Math.max(0, totalAmount - amountPaid)
   const progressPercent = Math.min(100, (amountPaid / totalAmount) * 100)
@@ -131,7 +131,7 @@ export function OrderStatusClient({
                   <div className="mt-6 pt-6 border-t border-zinc-800 w-full text-left">
                     <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-3">Received Shares</p>
                     <div className="space-y-2">
-                      {payments.map((p, idx) => (
+                      {payments.map((p: { id?: string, amount_minor: number }, idx: number) => (
                         <div key={p.id || idx} className="flex justify-between items-center bg-zinc-800/30 p-2 px-3 rounded-lg border border-zinc-700/30">
                           <span className="text-zinc-300 text-sm">Share #{idx + 1}</span>
                           <span className="text-emerald-400 font-medium text-sm">+{formatCurrency(p.amount_minor, currencyCode)}</span>

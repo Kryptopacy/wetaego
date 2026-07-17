@@ -20,8 +20,7 @@ export default function SharingHubPage({
   const slug = searchParams.get('slug')
   
   const [origin, setOrigin] = useState('')
-  const [order, setOrder] = useState<{ id?: string, total_amount_minor: number, amount_paid_minor: number | null, locations?: { currency_code: string }, metadata?: any } | null>(null)
-  
+  const [order, setOrder] = useState<{ id?: string, total_amount_minor: number, amount_paid_minor: number | null, locations?: { currency_code: string }, metadata?: { split_count?: number, split_type?: string } } | null>(null)
   const splitCount = order?.metadata?.split_count || parseInt(searchParams.get('split') || '1')
   const splitType = order?.metadata?.split_type || searchParams.get('type') || 'even'
   const supabase = createClient()
@@ -37,7 +36,7 @@ export default function SharingHubPage({
       .eq('id', order_id)
       .single()
       .then(({ data }) => {
-        if (data) setOrder(data)
+        if (data) setOrder(data as Parameters<typeof setOrder>[0])
       })
 
     const channel = supabase

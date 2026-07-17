@@ -7,7 +7,8 @@ import { toggleItemStatus } from './actions'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Database } from '@/lib/supabase/types'
 
-type Category = Database['public']['Tables']['menu_categories']['Row'] & { menu_items?: Database['public']['Tables']['menu_items']['Row'][] }
+type Category = any // Temporary until we generate types
+type PageItem = any
 
 import { useOptimistic, startTransition } from 'react'
 
@@ -17,7 +18,7 @@ import { toast } from 'sonner'
 import Image from 'next/image'
 import { formatCurrency } from '@/lib/utils/currency'
 
-function OptimisticItem({ item, orgId, categoryName }: { item: NonNullable<Category['menu_items']>[0], orgId: string, categoryName: string }) {
+function OptimisticItem({ item, orgId, categoryName }: { item: PageItem, orgId: string, categoryName: string }) {
   const [optimisticStatus, addOptimisticStatus] = useOptimistic(
     item.availability_status,
     (state: string, newStatus: string) => newStatus
@@ -29,8 +30,8 @@ function OptimisticItem({ item, orgId, categoryName }: { item: NonNullable<Categ
 
   const [editName, setEditName] = useState(item.name)
   const [editDescription, setEditDescription] = useState(item.description || '')
-  const [editPrice, setEditPrice] = useState(item.price_minor)
-  const [editStock, setEditStock] = useState(item.stock_count?.toString() || '')
+  const [editPrice, setEditPrice] = useState(item.price || 0)
+  const [editStock, setEditStock] = useState(item.item_data?.stock_count?.toString() || '')
   const [isGenerating, setIsGenerating] = useState(false)
   const [isGeneratingImg, setIsGeneratingImg] = useState(false)
   const [aiImageUrl, setAiImageUrl] = useState<string | null>(null)
@@ -171,8 +172,8 @@ function OptimisticItem({ item, orgId, categoryName }: { item: NonNullable<Categ
     <div className="py-4 flex justify-between items-center first:pt-0 last:pb-0 group">
       <div>
         <h3 className="font-semibold text-white">
-          {item.name} 
-          <span className="text-zinc-400 font-normal ml-2">{formatCurrency(item.price_minor)}</span>
+          {item.title} 
+          <span className="text-zinc-400 font-normal ml-2">{formatCurrency(item.price * 100)}</span>
         </h3>
         {item.description && <p className="text-sm text-zinc-400 mt-1">{item.description}</p>}
         <div className="mt-2 flex gap-2">
@@ -208,7 +209,7 @@ function OptimisticItem({ item, orgId, categoryName }: { item: NonNullable<Categ
   )
 }
 
-export function CategoryTabs({ categories, orgId, menuId }: { categories: Category[], orgId: string, menuId: string }) {
+export function CategoryTabs({ categories, orgId, menuId, allCollections, pageId, templateType }: { categories: Category[], orgId: string, menuId: string, allCollections: any[], pageId: string, templateType?: string }) {
   const [activeTab, setActiveTab] = useState(categories[0]?.id || '')
   const [optimisticCategories, addOptimisticCategory] = useOptimistic(
     categories,
@@ -217,6 +218,7 @@ export function CategoryTabs({ categories, orgId, menuId }: { categories: Catego
 
   useEffect(() => {
     if (categories.length > 0 && !categories.some(c => c.id === activeTab)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setActiveTab(categories[0]?.id || '')
     } else if (categories.length === 0 && activeTab !== '') {
       setActiveTab('')
@@ -235,12 +237,13 @@ export function CategoryTabs({ categories, orgId, menuId }: { categories: Catego
           const newCat: Category = {
             id: tempId,
             organization_id: orgId,
-            menu_id: menuId,
+            page_id: pageId,
             name,
+            slug: name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+            parent_id: null,
             sort_order: optimisticCategories.length,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
-            description: null,
             menu_items: []
           };
           
@@ -255,7 +258,7 @@ export function CategoryTabs({ categories, orgId, menuId }: { categories: Catego
           <div className="flex-1">
             <label className="mb-2 block text-sm font-medium text-zinc-300">Category Name</label>
             <input type="text" name="name" required className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="e.g. Signature Cocktails" />
-            <input type="hidden" name="menu_id" value={menuId} />
+            <input type="hidden" name="page_id" value={pageId} />
             <input type="hidden" name="organization_id" value={orgId} />
           </div>
           <button type="submit" className="px-4 py-2.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white font-medium transition-colors border border-zinc-700">Add Category</button>
@@ -300,15 +303,18 @@ export function CategoryTabs({ categories, orgId, menuId }: { categories: Catego
             <h2 className="text-xl font-bold text-white">{activeCategory.name}</h2>
           </div>
           
-          <div className="p-6 border-b border-zinc-800/50">
-            <AddItemForm orgId={orgId} categoryId={activeCategory.id} categoryName={activeCategory.name} />
+          <div className="bg-zinc-800/30 p-6 border-b border-zinc-800">
+            <h3 className="text-sm font-semibold text-zinc-300 mb-4 flex items-center gap-2">
+              <span className="text-blue-500">＋</span> Add New Item to {activeCategory.name}
+            </h3>
+            <AddItemForm orgId={orgId} pageId={pageId} activeCollectionId={activeCategory.id} allCollections={allCollections} templateType={templateType} />
           </div>
 
           <div className="p-6 divide-y divide-zinc-800/50">
             {activeCategory.menu_items?.length === 0 ? (
               <p className="text-zinc-500 text-center py-8">No items yet in this category.</p>
             ) : (
-              activeCategory.menu_items?.map((item) => (
+              activeCategory.menu_items?.map((item: any) => (
                 <OptimisticItem key={item.id} item={item} orgId={orgId} categoryName={activeCategory.name} />
               ))
             )}

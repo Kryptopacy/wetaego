@@ -150,7 +150,6 @@ export function CheckoutModal({
   pageId,
   refundPolicy,
   pageFulfillmentOptions = { pickup: true, delivery: true, table: false },
-  pageBillingMode = 'standard_checkout',
   locationTaxes = [],
   pagePaymentOptions = [],
   resourceId,
@@ -212,7 +211,9 @@ export function CheckoutModal({
 
   useEffect(() => {
     if (isOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLocalSplitCount(useCartStore.getState().splitCount)
+
       setLocalSplitType(useCartStore.getState().splitType)
     }
   }, [isOpen])
@@ -383,24 +384,23 @@ export function CheckoutModal({
         paymentFractionMinor = Math.ceil(finalTotalMinor / splitCount)
       }
 
-      const payload: any = {
+      const payload: Parameters<typeof processCheckout>[0] = {
         organizationId, locationId, items, totalAmountMinor: finalTotalMinor, tipAmountMinor: 0,
         tableIdentifier: tableNumber, customerNote, customerEmail, paymentFractionMinor,
         paymentMethod, discountAmountMinor, customerName, customerPhone,
         fulfillmentType, deliveryInstructions, staffId: undefined, staffSubaccountOverride: undefined,
         pageId, idempotencyKey: crypto.randomUUID(), subtotalMinor: discountedSubtotalMinor, taxTotalMinor, taxBreakdown,
         isSplitPayment: splitCount > 1,
-        resourceId
-      }
-
-      if (splitCount > 1) {
-        payload.splitCount = splitCount
-        payload.splitType = splitType
-        payload.splitShares = storeSplitShares
-      }
-      if (fulfillmentType === 'delivery') {
-        payload.deliveryLat = deliveryLat
-        payload.deliveryLng = deliveryLng
+        resourceId,
+        ...(splitCount > 1 ? {
+          splitCount,
+          splitType,
+          splitShares: storeSplitShares
+        } : {}),
+        ...(fulfillmentType === 'delivery' ? {
+          deliveryLat,
+          deliveryLng
+        } : {})
       }
 
       const result = await processCheckout(payload)

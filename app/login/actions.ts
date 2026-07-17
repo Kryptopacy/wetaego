@@ -435,47 +435,64 @@ export async function startInteractiveDemo() {
     }
 
     if (pageItems.length > 0) {
-      const { error: piError } = await adminClient.from('page_items').insert(pageItems)
-      if (piError) console.error('Failed to insert page items', piError)
-    }
+      const { data: insertedItems, error: piError } = await adminClient.from('page_items').insert(pageItems).select()
+      if (piError) {
+        console.error('Failed to insert page items', piError)
+      } else if (insertedItems) {
+        // Build new page_collections from the 'category' key in item_data
+        const collectionsMap = new Map() // slug -> { name, page_id }
+        const itemCollectionLinks = [] // array of { item_id, category_slug }
 
-    // Insert legacy menu categories and items for the restaurant to fix the onboarding tracker
-    const { data: menu } = await adminClient.from('menus').insert({
-      organization_id: org.id,
-      location_id: loc.id,
-      name: 'Main Menu',
-      description: 'Default demo menu'
-    }).select('id').single()
-
-    if (menu) {
-      const { data: category } = await adminClient.from('menu_categories').insert({
-        organization_id: org.id,
-        menu_id: menu.id,
-        name: 'Starters & Bites',
-        sort_order: 0
-      }).select('id').single()
-
-      if (category) {
-        await adminClient.from('menu_items').insert([
-          {
-            organization_id: org.id,
-            category_id: category.id,
-            name: 'Spicy Asun Rolls',
-            description: 'Smoked goat meat wrapped in crispy pastry, served with pepper sauce.',
-            price_minor: 650000,
-            image_url: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80',
-            sort_order: 0
-          },
-          {
-            organization_id: org.id,
-            category_id: category.id,
-            name: 'Truffle Plantain Fries',
-            description: 'Crispy plantain tossed in truffle oil and parmesan.',
-            price_minor: 450000,
-            image_url: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=800&q=80',
-            sort_order: 1
+        for (const item of insertedItems) {
+          const itemData = item.item_data as Record<string, any>;
+          const catName = itemData?.category;
+          if (catName) {
+            const slug = catName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+            if (!collectionsMap.has(slug)) {
+              collectionsMap.set(slug, {
+                page_id: item.page_id,
+                name: catName,
+                slug: slug
+              })
+            }
+            itemCollectionLinks.push({ item_id: item.id, slug })
+            
+            // Remove 'category' from item_data
+            if (item.item_data && typeof item.item_data === 'object' && !Array.isArray(item.item_data)) {
+              delete (item.item_data as Record<string, any>).category;
+            }
           }
-        ])
+        }
+
+        if (collectionsMap.size > 0) {
+          const collectionsToInsert = Array.from(collectionsMap.values())
+          const { data: insertedCollections, error: colError } = await adminClient
+            .from('page_collections')
+            .insert(collectionsToInsert)
+            .select()
+
+          if (colError) {
+            console.error('Failed to insert page collections', colError)
+          } else if (insertedCollections) {
+            const slugToId = new Map(insertedCollections.map(c => [c.slug, c.id]))
+            const linksToInsert = itemCollectionLinks.map(link => ({
+              item_id: link.item_id,
+              collection_id: slugToId.get(link.slug)
+            })).filter((l): l is { item_id: string; collection_id: string } => Boolean(l.collection_id))
+
+            if (linksToInsert.length > 0) {
+              const { error: linkError } = await adminClient
+                .from('page_item_collections')
+                .insert(linksToInsert)
+              if (linkError) console.error('Failed to link items to collections', linkError)
+            }
+          }
+          
+          // Update the items to remove the category from item_data
+          for (const item of insertedItems) {
+            await adminClient.from('page_items').update({ item_data: item.item_data }).eq('id', item.id)
+          }
+        }
       }
     }
   }

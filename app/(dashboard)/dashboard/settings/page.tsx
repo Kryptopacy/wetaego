@@ -480,9 +480,9 @@ export default async function SettingsPage({
               
               <LocationAutocomplete 
                 initialAddress={(activePage?.address !== null ? activePage?.address : location.address) || ''}
-                initialLat={(location as any).latitude || null}
-                initialLng={(location as any).longitude || null}
-                initialGeofenceRadius={(location as any).geofence_radius_meters || 100}
+                initialLat={(location as { latitude?: number }).latitude || null}
+                initialLng={(location as { longitude?: number }).longitude || null}
+                initialGeofenceRadius={(location as { geofence_radius_meters?: number }).geofence_radius_meters || 100}
                 mapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ''}
                 mapsIntegrationEnabled={infraFlags.maps_integration_enabled !== false}
               />
@@ -738,7 +738,7 @@ export default async function SettingsPage({
             <ThemeColorPicker locationId={location.id} initialColor={location.theme_color || '#10b981'} />
           </div>
 
-          <CustomMilestonesSettings locationId={location.id} initialMilestones={(location as any).custom_milestones} />
+          <CustomMilestonesSettings locationId={location.id} initialMilestones={(location as { custom_milestones?: Record<string, string[]> }).custom_milestones || {}} />
           </>
         )}
 

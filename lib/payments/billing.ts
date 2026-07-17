@@ -61,7 +61,7 @@ export async function getOrCreateBillingPlan(
   // Save the new plan code back to the DB
   const { error: updateError } = await supabase
     .from('organizations')
-    .update({ [planCodeColumn]: newPlanCode } as any)
+    .update({ [planCodeColumn]: newPlanCode } as never)
     .eq('id', organizationId)
 
   if (updateError) {

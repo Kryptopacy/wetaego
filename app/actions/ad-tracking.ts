@@ -18,7 +18,7 @@ export async function trackAdEvent(adId: string, eventType: 'impression' | 'clic
   const sessionId = Buffer.from(`${ip}-${new Date().toISOString().split('T')[0]}`).toString('base64').slice(0, 16)
 
   // Non-blocking fire-and-forget insert
-  supabase.from('ad_events' as any).insert([{
+  supabase.from('ad_events').insert([{
     ad_id: adId,
     event_type: eventType,
     session_id: sessionId

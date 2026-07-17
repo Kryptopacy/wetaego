@@ -6,7 +6,7 @@ import { Plus, X } from 'lucide-react'
 
 interface CustomMilestonesSettingsProps {
   locationId: string
-  initialMilestones: any
+  initialMilestones: Record<string, string[]>
 }
 
 export function CustomMilestonesSettings({ locationId, initialMilestones }: CustomMilestonesSettingsProps) {
@@ -42,7 +42,8 @@ export function CustomMilestonesSettings({ locationId, initialMilestones }: Cust
     setSuccess(false)
     const { error } = await supabase
       .from('locations')
-      .update({ custom_milestones: milestones } as any)
+      // @ts-expect-error Custom milestones column is pending migration
+      .update({ custom_milestones: milestones })
       .eq('id', locationId)
 
     setLoading(false)

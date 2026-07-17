@@ -1,4 +1,4 @@
-import { createClient, createAdminClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import { getPlanLimits } from '@/lib/utils/settings'
 import * as Sentry from '@sentry/nextjs'
 

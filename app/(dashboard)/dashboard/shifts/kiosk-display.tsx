@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { DynamicQR } from '@/components/qr/DynamicQR'
 import { generateKioskToken } from './kiosk-actions'
@@ -25,7 +25,7 @@ export function KioskDisplay({
   exitPin
 }: KioskDisplayProps) {
   const [token, setToken] = useState<string | null>(null)
-  const [expiresAt, setExpiresAt] = useState<Date | null>(null)
+
   const [timeLeft, setTimeLeft] = useState(TOKEN_TTL)
   const [isLoading, setIsLoading] = useState(true)
   const [isOffline, setIsOffline] = useState(false)
@@ -34,7 +34,7 @@ export function KioskDisplay({
   const [pinError, setPinError] = useState(false)
   const [time, setTime] = useState('')
   const router = useRouter()
-  const refreshTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
 
   const fetchToken = useCallback(async () => {
     setIsLoading(true)
@@ -42,7 +42,7 @@ export function KioskDisplay({
       const res = await generateKioskToken({ locationId })
       if (res?.data?.token) {
         setToken(res.data.token)
-        setExpiresAt(new Date(res.data.expiresAt))
+
         setTimeLeft(TOKEN_TTL)
         setIsOffline(false)
       }
@@ -55,6 +55,7 @@ export function KioskDisplay({
 
   // Initial fetch
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchToken()
   }, [fetchToken])
 
@@ -127,7 +128,10 @@ export function KioskDisplay({
       <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-8 pt-8">
         <div className="flex items-center gap-3">
           {logoUrl ? (
-            <img src={logoUrl} alt={businessName} className="w-10 h-10 rounded-xl object-cover" />
+            <>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={logoUrl} alt={businessName} className="w-10 h-10 rounded-xl object-cover" />
+            </>
           ) : (
             <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center">
               <Shield className="w-5 h-5 text-emerald-400" />

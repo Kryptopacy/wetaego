@@ -212,7 +212,7 @@ export default function ClientLayout({ children, initialData }: { children: Reac
     { href: '/dashboard/manage/feedback', label: 'Feedback Inbox', icon: MessageSquare, tooltip: 'Review customer reviews and ratings' },
     { href: '/dashboard/qr', label: 'QR Generator', icon: QrCode, tooltip: 'Generate QR codes for tables or links' },
     { 
-      href: activePageId ? `/dashboard/pages/${activePageId}/edit` : '/dashboard/menu', 
+      href: activePageId ? `/dashboard/pages/${activePageId}/edit` : '/dashboard/taxonomy', 
       label: activeTemplate === 'booking' ? 'Services Manager' : 
              activeTemplate === 'listing' ? 'Listings Manager' : 
              activeTemplate === 'rate_card' ? 'Offerings Manager' : 'Catalog Manager', 

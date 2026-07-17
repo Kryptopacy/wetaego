@@ -8,7 +8,7 @@ export async function submitPosOrder(payload: {
   locationId: string
   pageId: string
   staffId: string
-  items: { id: string; name: string; price_minor: number; quantity: number; variants?: Record<string, string>; item_data?: any }[]
+  items: { id: string; name: string; price_minor: number; quantity: number; variants?: Record<string, string>; item_data?: Record<string, unknown> }[]
   totalMinor: number
   paymentMethod: string // 'cash', 'card', 'transfer'
   customerName?: string
@@ -31,12 +31,12 @@ export async function submitPosOrder(payload: {
       customer_phone: null,
       table_identifier: 'POS (Counter)',
       fulfillment_type: 'pickup',
-      payment_method: payload.paymentMethod,
       total_amount_minor: payload.totalMinor,
-      amount_paid_minor: payload.totalMinor, // Full payment assumed for POS
+      amount_paid_minor: payload.totalMinor,
       status: 'completed', // POS orders are instantly completed
       assigned_staff_id: payload.staffId,
-    } as any)
+      metadata: { payment_method: payload.paymentMethod }
+    })
     .select()
     .single()
 
@@ -64,7 +64,7 @@ export async function submitPosOrder(payload: {
   // Deduct inventory (atomic)
   for (const item of payload.items) {
     if (item.item_data?.track_inventory) {
-       await (supabase.rpc as any)('deduct_inventory', {
+       await (supabase.rpc as CallableFunction)('deduct_inventory', {
           p_item_id: item.id,
           p_quantity: item.quantity
        })

@@ -63,7 +63,7 @@ interface CatalogPageRendererProps {
   items: PageItem[]
   locationSlug: string
   referralSource?: string
-  sponsoredAds?: any[]
+  sponsoredAds?: { id: string; title: string; category: string; image_url: string; target_link: string }[]
 }
 
 const AVAILABILITY_STYLES: Record<string, string> = {

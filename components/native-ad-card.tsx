@@ -6,7 +6,7 @@ import { trackAdEvent } from '@/app/actions/ad-tracking'
 import { ExternalLink } from 'lucide-react'
 
 // Avoid 'ad' or 'sponsored' in DOM props to reduce ad-blocker false positives 
-export function PartnerShowcaseCard({ partner }: { partner: any }) {
+export function PartnerShowcaseCard({ partner }: { partner: { id: string, title: string, category: string, image_url: string, target_link: string } }) {
   const cardRef = useRef<HTMLAnchorElement>(null)
   const [hasTrackedImpression, setHasTrackedImpression] = useState(false)
 

@@ -69,7 +69,7 @@ export async function getTrackingDetailsAction(locationId: string, trackingCode:
       amount_paid_minor: order.amount_paid_minor,
       created_at: order.created_at,
       customer_name: order.customer_name,
-      milestones: order.order_milestones.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()),
+      milestones: order.order_milestones.sort((a: { created_at: string }, b: { created_at: string }) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()),
       items: order.order_items
     }
   }

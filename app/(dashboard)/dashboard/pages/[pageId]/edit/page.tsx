@@ -122,8 +122,8 @@ export default async function PageEditDashboard({
                 <p className="text-xs text-zinc-400 mt-0.5">Remove the delivery address input entirely from the checkout modal.</p>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
-                {/* @ts-expect-error - JSONB typing issues */}
-                <input type="checkbox" name="hide_delivery" value="true" defaultChecked={page.template_data?.hide_delivery || false} className="sr-only peer" />
+
+                <input type="checkbox" name="hide_delivery" value="true" defaultChecked={(page.template_data as Record<string, unknown>)?.hide_delivery as boolean || false} className="sr-only peer" />
                 <div className="w-11 h-6 bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
               </label>
             </div>
@@ -137,16 +137,16 @@ export default async function PageEditDashboard({
                 <p className="text-xs text-zinc-500 mt-0.5">Choose which payment methods your customers can use on this page. You can enable more than one.</p>
               </div>
               <BillingOptionsSelector
-                // @ts-expect-error JSONB typing
-                initialOptions={(page.template_data?.payment_options as string[]) || []}
+
+                initialOptions={((page.template_data as Record<string, unknown>)?.payment_options as string[]) || []}
                 initialDepositPercentage={page.deposit_percentage}
               />
             </div>
 
             <div>
               <label className="block text-xs font-medium text-zinc-400 mb-1">Cancellation & Refund Policy</label>
-              {/* @ts-expect-error JSONB typing */}
-              <textarea name="refund_policy" defaultValue={page.template_data?.refund_policy || ''} placeholder="e.g. Deposits are non-refundable if cancelled within 48 hours." className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white h-16 placeholder:text-zinc-600" />
+
+              <textarea name="refund_policy" defaultValue={(page.template_data as Record<string, unknown>)?.refund_policy as string || ''} placeholder="e.g. Deposits are non-refundable if cancelled within 48 hours." className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white h-16 placeholder:text-zinc-600" />
             </div>
           </div>
 
@@ -156,8 +156,8 @@ export default async function PageEditDashboard({
               <p className="text-xs text-zinc-400 mt-0.5">Allow splitting invoices into custom payment milestones (e.g., 30% upfront, 70% completion).</p>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
-              {/* @ts-expect-error JSONB typing */}
-              <input type="checkbox" name="milestones_enabled" value="true" defaultChecked={page.template_data?.milestones_enabled || false} className="sr-only peer" />
+
+              <input type="checkbox" name="milestones_enabled" value="true" defaultChecked={(page.template_data as Record<string, unknown>)?.milestones_enabled as boolean || false} className="sr-only peer" />
               <div className="w-11 h-6 bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
             </label>
           </div>

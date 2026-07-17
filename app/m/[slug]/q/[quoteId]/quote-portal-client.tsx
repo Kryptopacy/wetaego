@@ -5,11 +5,24 @@ import { verifyQuotePin, getQuoteDetails } from './actions'
 import { Lock, ArrowRight, Loader2 } from 'lucide-react'
 import { QuoteNegotiateClient } from './quote-negotiate-client'
 
-export function QuotePortalClient({ slug, quoteId }: { slug: string; quoteId: string }) {
+export function QuotePortalClient({ _slug, quoteId }: { _slug?: string; quoteId: string }) {
   const [pin, setPin] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [quoteData, setQuoteData] = useState<any>(null)
+  const [quoteData, setQuoteData] = useState<{
+    id: string;
+    page_id: string;
+    status: string;
+    booking_notes?: string;
+    location_pages?: {
+      billing_enabled?: boolean;
+      locations?: {
+        currency?: string;
+        theme_color?: string;
+        name?: string;
+      };
+    };
+  } | null>(null)
 
   async function handleVerify(e: React.FormEvent) {
     e.preventDefault()
@@ -29,12 +42,12 @@ export function QuotePortalClient({ slug, quoteId }: { slug: string; quoteId: st
       
       const res = await getQuoteDetails(verifyRes.quoteId, pin)
       if (res.success && res.data) {
-        setQuoteData(res.data)
+        setQuoteData(res.data as Parameters<typeof setQuoteData>[0])
       } else {
         setError(res.error || 'Failed to fetch quote details')
       }
-    } catch (err: any) {
-      setError(err.message || 'Something went wrong')
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Something went wrong')
     } finally {
       setLoading(false)
     }
@@ -42,12 +55,17 @@ export function QuotePortalClient({ slug, quoteId }: { slug: string; quoteId: st
 
   if (quoteData) {
     // Parse notes safely
-    let parsedNotes: any = {}
+    let parsedNotes: {
+      brief?: string;
+      budgetRange?: string;
+      deadline?: string;
+      lineItems?: { title: string; qty: number; unit_price_minor?: number }[];
+    } = {}
     try {
-      parsedNotes = JSON.parse(quoteData.booking_notes || '{}')
+      parsedNotes = JSON.parse((quoteData.booking_notes as string) || '{}')
     } catch {}
 
-    const lineItems = (parsedNotes.lineItems ?? []).map((item: any) => ({
+    const lineItems = (parsedNotes.lineItems ?? []).map((item) => ({
       title: item.title,
       qty: item.qty,
       unit_price_minor: item.unit_price_minor ?? 0,
@@ -82,11 +100,10 @@ export function QuotePortalClient({ slug, quoteId }: { slug: string; quoteId: st
             businessName={quoteData.location_pages?.locations?.name || 'Business'}
             isLocked={quoteData.status === 'confirmed'}
             isExpired={false}
-            paymentEnabled={quoteData.location_pages?.billing_enabled}
+            paymentEnabled={Boolean(quoteData.location_pages?.billing_enabled)}
             paymentIsLive={true}
-            onRequestChanges={async (msg) => {
+            onRequestChanges={async () => {
               // Stub for actual Request Changes API
-              console.log("Requested changes:", msg)
             }}
          />
       </div>

@@ -18,7 +18,7 @@ type RawOrderPayload = Partial<SupabaseOrder> & {
 export function mapSupabaseOrderToUI(rawOrder: RawOrderPayload): UIOrder {
   if (!rawOrder) throw new Error('Cannot map null order')
 
-  const items: UIOrderItem[] = (rawOrder.order_items || []).map((i) => ({
+  const items: UIOrderItem[] = (rawOrder.order_items || []).map((i: Partial<{ id: string, order_id: string, item_id: string | null, item_name: string, quantity: number, price_minor: number, created_at: string }>) => ({
     id: i.id || '',
     order_id: i.order_id || '',
     item_id: i.item_id || '',

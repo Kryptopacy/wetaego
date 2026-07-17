@@ -174,8 +174,8 @@ export default async function QuoteDetailsPage({
               quoteId={quote.id} 
               currentStatus={quote.status} 
               locationSlug={locationSlug} 
-              // @ts-expect-error JSONB
-              milestonesEnabled={quote.location_pages.template_data?.milestones_enabled}
+
+              milestonesEnabled={(quote.location_pages.template_data as Record<string, unknown>)?.milestones_enabled as boolean}
               bookingNotes={quote.booking_notes || ''}
             />
           </div>

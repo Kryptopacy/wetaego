@@ -104,7 +104,7 @@ export function PaymentRouletteModal({ isOpen, onClose, onSpinComplete, onProcee
         origin: { y: 0.6 },
         colors: ['#10b981', '#34d399', '#ffffff'],
         zIndex: 9999,
-        // @ts-ignore: useWorker exists in the actual confetti library but might be missing in older type definitions
+        // @ts-expect-error: useWorker exists in the actual confetti library but might be missing in older type definitions
         useWorker: true
       })
     }
@@ -145,7 +145,7 @@ export function PaymentRouletteModal({ isOpen, onClose, onSpinComplete, onProcee
         origin: { y: 0.6 },
         colors: ['#ef4444', '#f87171', '#ffffff'], // Red theme for survivor
         zIndex: 9999,
-        // @ts-ignore
+        // @ts-expect-error: useWorker property exists
         useWorker: true
       })
     }
@@ -186,7 +186,7 @@ export function PaymentRouletteModal({ isOpen, onClose, onSpinComplete, onProcee
         origin: { y: 0.5 },
         colors: ['#10b981', '#34d399', '#eab308', '#3b82f6', '#22c55e'], // Chaos colors
         zIndex: 9999,
-        // @ts-ignore
+        // @ts-expect-error: useWorker property exists
         useWorker: true
       })
     }

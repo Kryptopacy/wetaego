@@ -1,21 +1,38 @@
-
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
 import { createItem } from './actions'
 import { toast } from 'sonner'
 import { SubmitButton } from '@/components/submit-button'
 
-export function AddItemForm({ orgId, categoryId, categoryName }: { orgId: string, categoryId: string, categoryName: string }) {
+interface Collection {
+  id: string;
+  name: string;
+}
+
+export function AddItemForm({ orgId, pageId, activeCollectionId, allCollections, templateType }: { orgId: string, pageId: string, activeCollectionId: string, allCollections: Collection[], templateType?: string }) {
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [dietaryTags, setDietaryTags] = useState<string[]>([])
   const [allergens, setAllergens] = useState<string[]>([])
+  
+  const [selectedCollections, setSelectedCollections] = useState<string[]>([activeCollectionId])
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  
+  const [requiresBooking, setRequiresBooking] = useState(false)
+  
   const [isGenerating, setIsGenerating] = useState(false)
   const [isGeneratingImg, setIsGeneratingImg] = useState(false)
   const [aiImageUrl, setAiImageUrl] = useState<string | null>(null)
   const formRef = useRef<HTMLFormElement>(null)
+
+  // Ensure activeCollectionId is always selected by default if state gets reset
+  useEffect(() => {
+    if (!selectedCollections.includes(activeCollectionId) && activeCollectionId !== 'uncategorized') {
+      setSelectedCollections(prev => [...prev, activeCollectionId])
+    }
+  }, [activeCollectionId])
 
   async function handleMagicFill() {
     if (!name) {
@@ -25,9 +42,10 @@ export function AddItemForm({ orgId, categoryId, categoryName }: { orgId: string
 
     setIsGenerating(true)
     try {
+      const activeName = allCollections.find(c => c.id === activeCollectionId)?.name || 'General'
       const res = await fetch('/api/ai/copywriter', {
         method: 'POST',
-        body: JSON.stringify({ itemName: name, categoryName, organizationId: orgId }),
+        body: JSON.stringify({ itemName: name, categoryName: activeName, organizationId: orgId }),
         headers: { 'Content-Type': 'application/json' }
       })
 
@@ -79,6 +97,15 @@ export function AddItemForm({ orgId, categoryId, categoryName }: { orgId: string
   }
 
   async function handleSubmit(formData: FormData) {
+    if (selectedCollections.length === 0 && activeCollectionId !== 'uncategorized') {
+      toast.error('Please select at least one collection.')
+      return;
+    }
+    
+    // Convert boolean to string for FormData
+    formData.append('requires_booking', requiresBooking.toString())
+    formData.append('collection_ids', JSON.stringify(selectedCollections))
+
     const res = await createItem(formData)
     if (res?.serverError || res?.validationErrors) {
       toast.error(res?.serverError || 'Validation error');
@@ -88,46 +115,111 @@ export function AddItemForm({ orgId, categoryId, categoryName }: { orgId: string
       setDescription('')
       setDietaryTags([])
       setAllergens([])
+      setRequiresBooking(false)
+      setSelectedCollections([activeCollectionId])
       setAiImageUrl(null)
       formRef.current?.reset()
     }
   }
 
+  const toggleCollection = (id: string) => {
+    setSelectedCollections(prev => 
+      prev.includes(id) ? prev.filter(c => c !== id) : [...prev, id]
+    )
+  }
+
   return (
-    <form ref={formRef} action={handleSubmit} className="flex flex-col gap-4">
+    <form ref={formRef} action={handleSubmit} className="flex flex-col gap-5">
       <input type="hidden" name="organization_id" value={orgId} />
-      <input type="hidden" name="category_id" value={categoryId} />
+      <input type="hidden" name="page_id" value={pageId} />
       <input type="hidden" name="dietary_tags" value={JSON.stringify(dietaryTags)} />
       <input type="hidden" name="allergens" value={JSON.stringify(allergens)} />
       
-      <div className="flex gap-4 items-end flex-wrap">
-        <div className="flex-2 min-w-[200px]">
+      <div className="flex gap-4 items-start flex-wrap">
+        <div className="w-full sm:w-1/3 min-w-[200px] flex flex-col gap-3">
           <input type="text" name="name" value={name} onChange={(e) => setName(e.target.value)} required placeholder="Item Name (e.g. Spicy Jollof)" className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2 text-white outline-none focus:border-blue-500" />
+          
+          <div className="relative">
+            <button 
+              type="button" 
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className="w-full text-left rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2 text-sm text-zinc-300 outline-none focus:border-blue-500 flex justify-between items-center"
+            >
+              <span>{selectedCollections.length} Collection(s) Selected</span>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+            </button>
+            
+            {isDropdownOpen && (
+              <div className="absolute z-10 w-full mt-1 bg-zinc-800 border border-zinc-700 rounded-lg shadow-xl max-h-48 overflow-y-auto">
+                <div className="p-2 flex flex-col gap-1">
+                  {allCollections.map(col => (
+                    <label key={col.id} className="flex items-center gap-2 p-2 hover:bg-zinc-700/50 rounded cursor-pointer transition-colors">
+                      <input 
+                        type="checkbox" 
+                        checked={selectedCollections.includes(col.id)} 
+                        onChange={() => toggleCollection(col.id)}
+                        className="w-4 h-4 rounded border-zinc-600 text-blue-500 bg-zinc-900 focus:ring-blue-600 focus:ring-offset-zinc-800"
+                      />
+                      <span className="text-sm text-zinc-200">{col.name}</span>
+                    </label>
+                  ))}
+                  {allCollections.length === 0 && (
+                    <p className="text-sm text-zinc-500 p-2 text-center">No collections available</p>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+          
+          {/* Conditionally render Booking toggle based on template type */}
+          {(templateType === 'services' || templateType === 'hybrid' || templateType === 'events' || templateType === 'appointments') && (
+          <label className="flex items-center gap-3 p-3 rounded-lg border border-zinc-700/50 bg-zinc-800/30 cursor-pointer hover:bg-zinc-800/50 transition-colors mt-4">
+            <div className="relative flex items-center">
+              <input 
+                type="checkbox" 
+                checked={requiresBooking}
+                onChange={(e) => setRequiresBooking(e.target.checked)}
+                className="sr-only peer"
+              />
+              <div className="w-9 h-5 bg-zinc-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-500"></div>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-sm font-medium text-zinc-200">Requires Booking / Time Slot?</span>
+              <span className="text-xs text-zinc-500">Enable for services, reservations, etc.</span>
+            </div>
+          </label>
+          )}
         </div>
-        <div className="flex-1 min-w-[300px] relative">
-          <input type="text" name="description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Description" className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2 text-white outline-none focus:border-blue-500 pr-28" />
-          <button 
-            type="button" 
-            onClick={handleMagicFill} 
-            disabled={isGenerating || !name}
-            className="absolute right-1 top-1 bottom-1 px-3 bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-400 hover:to-emerald-500 text-white rounded-md text-xs font-bold transition-all disabled:opacity-50 disabled:grayscale flex items-center gap-1 shadow-lg"
-          >
-            {isGenerating ? 'Wait...' : '✨ Magic Fill'}
-          </button>
+
+        <div className="flex-1 min-w-[300px] flex flex-col gap-3">
+          <div className="relative">
+            <textarea name="description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Description" rows={4} className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2 text-white outline-none focus:border-blue-500 resize-none"></textarea>
+            <button 
+              type="button" 
+              onClick={handleMagicFill} 
+              disabled={isGenerating || !name}
+              className="absolute right-2 bottom-3 px-3 bg-linear-to-r from-teal-500 to-emerald-600 hover:from-teal-400 hover:to-emerald-500 text-white rounded-md text-xs font-bold py-1.5 transition-all disabled:opacity-50 disabled:grayscale flex items-center gap-1 shadow-lg"
+            >
+              {isGenerating ? 'Wait...' : '✨ Magic Fill'}
+            </button>
+          </div>
+          
+          <div className="flex gap-3">
+            <div className="w-1/3">
+              <input type="number" step="0.01" name="price" required placeholder="Price" className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2 text-white outline-none focus:border-blue-500" />
+            </div>
+            <div className="w-1/3">
+              <input type="number" step="1" name="stock_count" placeholder="Stock (opt)" min="0" className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2 text-white outline-none focus:border-blue-500" title="Leave blank for infinite supply" />
+            </div>
+            <div className="w-1/3">
+              <input type="text" name="department" placeholder="Dept (e.g. Tailor)" className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2 text-white outline-none focus:border-blue-500" title="Workstation Routing" />
+            </div>
+          </div>
         </div>
-        <div className="w-24">
-          <input type="number" step="0.01" name="price" required placeholder="Price" className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2 text-white outline-none focus:border-blue-500" />
-        </div>
-        <div className="w-32">
-          <input type="number" step="1" name="stock_count" placeholder="Stock (opt)" min="0" className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2 text-white outline-none focus:border-blue-500" title="Leave blank for infinite supply" />
-        </div>
-        <div className="w-40">
-          <input type="text" name="department" placeholder="Dept (e.g. Tailor)" className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2 text-white outline-none focus:border-blue-500" title="Workstation Routing" />
-        </div>
-        <div className="w-48 relative flex flex-col gap-2">
+
+        <div className="w-48 relative flex flex-col gap-2 shrink-0">
           {aiImageUrl ? (
             <div className="relative w-full aspect-square rounded-lg overflow-hidden border border-zinc-700">
-              { }
               <Image src={aiImageUrl} alt="AI Generated" width={300} height={300} className="object-cover w-full h-full" />
               <button 
                 type="button" 
@@ -144,17 +236,17 @@ export function AddItemForm({ orgId, categoryId, categoryName }: { orgId: string
                 type="button"
                 onClick={handleGenerateImage}
                 disabled={isGeneratingImg || !name}
-                className="w-full px-3 py-1.5 bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-400 hover:to-emerald-500 text-white rounded-lg text-xs font-bold transition-all disabled:opacity-50 disabled:grayscale flex items-center justify-center gap-1 shadow-lg"
+                className="w-full px-3 py-2 bg-linear-to-r from-teal-500 to-emerald-600 hover:from-teal-400 hover:to-emerald-500 text-white rounded-lg text-xs font-bold transition-all disabled:opacity-50 disabled:grayscale flex items-center justify-center gap-1 shadow-lg"
               >
                 {isGeneratingImg ? 'Generating...' : '✨ AI Image Studio'}
               </button>
             </>
           )}
           {aiImageUrl && <input type="hidden" name="ai_image_url" value={aiImageUrl} />}
+          <SubmitButton className="w-full px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium transition-colors mt-auto">
+            Add Item
+          </SubmitButton>
         </div>
-        <SubmitButton className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium transition-colors h-10 self-end">
-          Add Item
-        </SubmitButton>
       </div>
 
       {/* AI Tags Preview */}

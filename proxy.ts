@@ -100,6 +100,30 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(loginUrl)
   }
 
+  // --- 3. CUSTOM DOMAIN REWRITES ---
+  // If the request comes from a custom domain, rewrite it to /m/[slug]
+  const hostname = request.headers.get('host')
+  const protocol = request.headers.get('x-forwarded-proto') || 'https'
+  
+  // Define our primary domain to ignore rewrites
+  const isPrimaryDomain = 
+    hostname === 'localhost:3000' || 
+    hostname === process.env.NEXT_PUBLIC_PRIMARY_DOMAIN || 
+    hostname?.endsWith('.vercel.app')
+
+  // We only rewrite if it's NOT the primary domain, AND not an internal protected/api route
+  if (!isPrimaryDomain && !isProtectedPath && !isProtectedRoute && !isAffiliateDashboard) {
+    // We would ideally query Supabase here to get the slug for the custom domain.
+    // However, Edge Middleware cannot use the standard Supabase client to hit the DB without latency.
+    // Instead, we will rewrite the URL to a dynamic route like `/[domain]/...`
+    // OR we pass the hostname in the headers and let the server components handle it.
+    
+    // For Vercel Edge Middleware pattern: rewrite to `/_domain/[hostname]/[path]`
+    const rewriteUrl = request.nextUrl.clone()
+    rewriteUrl.pathname = `/_domain/${hostname}${request.nextUrl.pathname}`
+    return NextResponse.rewrite(rewriteUrl)
+  }
+
   return supabaseResponse
 }
 

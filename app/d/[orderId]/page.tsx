@@ -30,7 +30,7 @@ export default async function DispatchViewPage({
         id, item_name, quantity, metadata
       ),
       order_milestones (
-        id, title, is_completed, created_at, updated_at
+        id, title, is_completed, created_at
       ),
       locations(name, phone_number, address)
     `)
@@ -85,7 +85,7 @@ export default async function DispatchViewPage({
               {/* Vertical line connecting milestones */}
               <div className="absolute left-4 top-2 bottom-6 w-0.5 bg-zinc-100"></div>
               <div className="space-y-6 relative">
-                {order.order_milestones.sort((a: any, b: any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()).map((milestone: any, idx: number) => (
+                {order.order_milestones.sort((a: { created_at: string }, b: { created_at: string }) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()).map((milestone: { id: string, title: string, is_completed: boolean | null, created_at: string }) => (
                   <div key={milestone.id} className="flex gap-4 items-start relative z-10">
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 border-2 bg-white transition-colors duration-500 ${milestone.is_completed ? 'border-emerald-500 text-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.3)]' : 'border-zinc-200 text-zinc-300'}`}>
                       <CheckCircle2 className="w-4 h-4" />
@@ -95,7 +95,7 @@ export default async function DispatchViewPage({
                         {milestone.title}
                       </p>
                       {milestone.is_completed && (
-                        <p className="text-xs text-zinc-400 mt-1">{new Date(milestone.updated_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                        <p className="text-xs text-zinc-400 mt-1">{new Date(milestone.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                       )}
                     </div>
                   </div>

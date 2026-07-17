@@ -1,4 +1,4 @@
-﻿export type Json =
+export type Json =
   | string
   | number
   | boolean
@@ -11,31 +11,6 @@ export type Database = {
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "14.5"
-  }
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
   }
   public: {
     Tables: {
@@ -149,6 +124,50 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      api_keys: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          id: string
+          key_hash: string
+          last_used_at: string | null
+          name: string
+          organization_id: string
+          scopes: string[]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          key_hash: string
+          last_used_at?: string | null
+          name: string
+          organization_id: string
+          scopes?: string[]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          key_hash?: string
+          last_used_at?: string | null
+          name?: string
+          organization_id?: string
+          scopes?: string[]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_keys_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       audit_logs: {
         Row: {
@@ -344,6 +363,44 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      custom_domains: {
+        Row: {
+          created_at: string
+          hostname: string
+          id: string
+          location_id: string
+          ssl_status: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          hostname: string
+          id?: string
+          location_id: string
+          ssl_status?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          hostname?: string
+          id?: string
+          location_id?: string
+          ssl_status?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_domains_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
             referencedColumns: ["id"]
           },
         ]
@@ -1191,6 +1248,47 @@ export type Database = {
           },
         ]
       }
+      location_webhooks: {
+        Row: {
+          created_at: string
+          events_subscribed: string[]
+          id: string
+          is_active: boolean
+          location_id: string
+          secret: string | null
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          events_subscribed?: string[]
+          id?: string
+          is_active?: boolean
+          location_id: string
+          secret?: string | null
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          created_at?: string
+          events_subscribed?: string[]
+          id?: string
+          is_active?: boolean
+          location_id?: string
+          secret?: string | null
+          updated_at?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "location_webhooks_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       locations: {
         Row: {
           address: string | null
@@ -1650,6 +1748,50 @@ export type Database = {
           },
         ]
       }
+      operating_hours: {
+        Row: {
+          close_time: string
+          created_at: string
+          day_of_week: number
+          id: string
+          is_closed: boolean
+          location_id: string
+          open_time: string
+          timezone: string
+          updated_at: string
+        }
+        Insert: {
+          close_time: string
+          created_at?: string
+          day_of_week: number
+          id?: string
+          is_closed?: boolean
+          location_id: string
+          open_time: string
+          timezone?: string
+          updated_at?: string
+        }
+        Update: {
+          close_time?: string
+          created_at?: string
+          day_of_week?: number
+          id?: string
+          is_closed?: boolean
+          location_id?: string
+          open_time?: string
+          timezone?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "operating_hours_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_items: {
         Row: {
           cogs_minor: number | null
@@ -1659,6 +1801,7 @@ export type Database = {
           item_name: string
           metadata: Json | null
           order_id: string
+          page_item_id: string | null
           price_minor: number
           quantity: number
         }
@@ -1670,6 +1813,7 @@ export type Database = {
           item_name: string
           metadata?: Json | null
           order_id: string
+          page_item_id?: string | null
           price_minor?: number
           quantity?: number
         }
@@ -1681,6 +1825,7 @@ export type Database = {
           item_name?: string
           metadata?: Json | null
           order_id?: string
+          page_item_id?: string | null
           price_minor?: number
           quantity?: number
         }
@@ -1697,6 +1842,13 @@ export type Database = {
             columns: ["order_id"]
             isOneToOne: false
             referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_page_item_id_fkey"
+            columns: ["page_item_id"]
+            isOneToOne: false
+            referencedRelation: "page_items"
             referencedColumns: ["id"]
           },
         ]
@@ -2243,6 +2395,56 @@ export type Database = {
           },
         ]
       }
+      outbound_webhook_deliveries: {
+        Row: {
+          attempt_count: number
+          created_at: string
+          error_message: string | null
+          event_type: string
+          id: string
+          next_retry_at: string | null
+          payload: Json
+          response_status: number | null
+          status: string
+          updated_at: string
+          webhook_id: string
+        }
+        Insert: {
+          attempt_count?: number
+          created_at?: string
+          error_message?: string | null
+          event_type: string
+          id?: string
+          next_retry_at?: string | null
+          payload: Json
+          response_status?: number | null
+          status?: string
+          updated_at?: string
+          webhook_id: string
+        }
+        Update: {
+          attempt_count?: number
+          created_at?: string
+          error_message?: string | null
+          event_type?: string
+          id?: string
+          next_retry_at?: string | null
+          payload?: Json
+          response_status?: number | null
+          status?: string
+          updated_at?: string
+          webhook_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outbound_webhook_deliveries_webhook_id_fkey"
+            columns: ["webhook_id"]
+            isOneToOne: false
+            referencedRelation: "location_webhooks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       page_bookings: {
         Row: {
           access_pin: string | null
@@ -2330,6 +2532,54 @@ export type Database = {
           },
         ]
       }
+      page_collections: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          page_id: string
+          parent_id: string | null
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          page_id: string
+          parent_id?: string | null
+          slug: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          page_id?: string
+          parent_id?: string | null
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "page_collections_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "location_pages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "page_collections_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "page_collections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       page_inquiries: {
         Row: {
           created_at: string
@@ -2381,6 +2631,36 @@ export type Database = {
           },
         ]
       }
+      page_item_collections: {
+        Row: {
+          collection_id: string
+          item_id: string
+        }
+        Insert: {
+          collection_id: string
+          item_id: string
+        }
+        Update: {
+          collection_id?: string
+          item_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "page_item_collections_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "page_collections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "page_item_collections_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "page_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       page_items: {
         Row: {
           availability_status: string
@@ -2399,6 +2679,7 @@ export type Database = {
           payment_mode: string | null
           price_display: string | null
           price_minor: number | null
+          search_vector: unknown
           sort_order: number
           subtitle: string | null
           title: string
@@ -2422,6 +2703,7 @@ export type Database = {
           payment_mode?: string | null
           price_display?: string | null
           price_minor?: number | null
+          search_vector?: unknown
           sort_order?: number
           subtitle?: string | null
           title: string
@@ -2445,6 +2727,7 @@ export type Database = {
           payment_mode?: string | null
           price_display?: string | null
           price_minor?: number | null
+          search_vector?: unknown
           sort_order?: number
           subtitle?: string | null
           title?: string
@@ -2607,6 +2890,44 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      resource_blocks: {
+        Row: {
+          created_at: string
+          end_time: string
+          id: string
+          location_id: string
+          reason: string | null
+          start_time: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          end_time: string
+          id?: string
+          location_id: string
+          reason?: string | null
+          start_time: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          end_time?: string
+          id?: string
+          location_id?: string
+          reason?: string | null
+          start_time?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resource_blocks_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
             referencedColumns: ["id"]
           },
         ]
@@ -3346,9 +3667,6 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {
       availability_status: ["available", "low", "sold_out", "hidden"],

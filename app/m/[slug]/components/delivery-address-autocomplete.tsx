@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { APIProvider, useMapsLibrary } from '@vis.gl/react-google-maps'
 
 export function DeliveryAddressAutocompleteWrapper({
@@ -49,7 +49,7 @@ function DeliveryAddressAutocomplete({
   setAddress: (addr: string) => void
   setCoordinates: (lat: number, lng: number) => void
 }) {
-  const [place, setPlace] = useState<any | null>(null)
+
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const places = useMapsLibrary('places')
 
@@ -64,7 +64,7 @@ function DeliveryAddressAutocomplete({
     
     autocomplete.addListener('place_changed', () => {
       const selectedPlace = autocomplete.getPlace()
-      setPlace(selectedPlace)
+
       if (selectedPlace.formatted_address) {
         setAddress(selectedPlace.formatted_address)
       }

@@ -21,41 +21,55 @@ export async function RestaurantRenderer({
   slug: string
   tableIdentifier?: string
   paymentIsLive: boolean
-  page: { background_color?: string }
+  page: { id: string; background_color?: string }
 }) {
   const fetchMenuCategories = async () => {
     const anonSupabase = createAnonClient()
-    const { data: menuData } = await anonSupabase
-      .from('menus')
-      .select('id')
-      .eq('location_id', location.id)
-      .single()
-
-    if (!menuData) return []
-
-    const { data } = await anonSupabase
-      .from('menu_categories')
-      .select('*, menu_items(*)')
-      .eq('menu_id', menuData.id)
+    
+    // Fetch collections and their junction to items
+    const { data: collections } = await anonSupabase
+      .from('page_collections')
+      .select('*, page_item_collections(page_items(*))')
+      .eq('page_id', page.id)
       .order('sort_order')
     
-    return data || []
+    if (!collections) return []
+
+    // Map to the legacy structure expected by MenuRenderer
+    return collections.map((col: any) => {
+      // Filter out nulls just in case, and extract the actual page_items
+      const items = (col.page_item_collections || [])
+        .map((pic: any) => pic.page_items)
+        .filter(Boolean)
+        .sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0))
+        .map((item: any) => ({
+          id: item.id,
+          name: item.title,
+          description: item.description,
+          price_minor: item.price_minor,
+          image_url: Array.isArray(item.images) && item.images.length > 0 ? item.images[0] : null,
+          dietary_tags: item.item_data?.dietary_tags || [],
+          allergen_tags: item.item_data?.allergen_tags || [],
+          stock_count: item.item_data?.stock_count || null,
+          availability_status: item.availability_status
+        }))
+        
+      return {
+        id: col.id,
+        name: col.name,
+        menu_items: items
+      }
+    })
   }
 
   const categories = await unstable_cache(
     fetchMenuCategories,
-    [`menu_categories_${location.id}`],
-    { revalidate: 60, tags: [`menu_categories_${location.id}`] }
+    [`page_collections_with_items_${page.id}`],
+    { revalidate: 60, tags: [`page_collections_with_items_${page.id}`] }
   )()
 
-  
-  type Category = Database['public']['Tables']['menu_categories']['Row'] & {
-    menu_items: Database['public']['Tables']['menu_items']['Row'][]
-  }
-
-  const allMenuItems = categories.flatMap((cat: Category) => 
-    
-    (cat.menu_items || []).map((item: Database['public']['Tables']['menu_items']['Row']) => ({
+  const allMenuItems = categories.flatMap((cat: any) => 
+    (cat.menu_items || []).map((item: any) => ({
       id: item.id,
       name: item.name,
       price_minor: item.price_minor
@@ -79,7 +93,7 @@ export async function RestaurantRenderer({
         )}
         <LiveOrderTracker />
         
-        <MenuRenderer initialCategories={categories} />
+        <MenuRenderer initialCategories={categories as any} />
         
         <div className="mt-12 text-center pb-8">
           <a href="https://ourmenuos.online" className="text-xs text-zinc-400 dark:text-zinc-600 hover:text-zinc-600 dark:hover:text-zinc-400 transition-colors font-medium">

@@ -307,7 +307,7 @@ export async function processCheckout(params: {
   }
 
   // 4b. Seed Custom Milestones (if configured for this fulfillment type)
-  const cMilestones = (location as any)?.custom_milestones as Record<string, string[]> | null
+  const cMilestones = (location as { custom_milestones?: Record<string, string[]> | null })?.custom_milestones
   const flowKey = fulfillmentType || 'table'
   const flowMilestones = cMilestones?.[flowKey]
   if (flowMilestones && Array.isArray(flowMilestones) && flowMilestones.length > 0) {

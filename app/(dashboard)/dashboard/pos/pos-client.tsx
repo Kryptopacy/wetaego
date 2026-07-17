@@ -14,12 +14,12 @@ interface PageItem {
   price_minor: number
   availability_status: string
   images?: string[]
-  item_data?: any
+  item_data?: Record<string, unknown>
 }
 
 interface POSClientProps {
   items: PageItem[]
-  pages: any[]
+  pages: { id: string; title: string; [key: string]: unknown }[]
   currency: string
   locationId: string
   organizationId: string
@@ -115,7 +115,7 @@ export function POSClient({ items, pages, currency, locationId, organizationId, 
         toast.success('Order completed successfully!')
         setCart([])
         setAmountTendered('')
-      } catch (err) {
+      } catch (_err) {
         toast.error('Failed to complete order.')
       }
     })

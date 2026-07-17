@@ -69,7 +69,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
         if (locs && locs.length > 0) {
           locations = locs
           
-          let savedId = cookieStore.get('ourmenu_active_location_id')?.value
+          const savedId = cookieStore.get('ourmenu_active_location_id')?.value
           const isGlobalView = savedId === 'global' && locs.length > 1
           let activeLoc = locs.find((l: Record<string, unknown>) => l.id === savedId) || locs[0]
           
@@ -84,7 +84,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
           if (member?.page_id) {
             pagesQuery = pagesQuery.eq('id', member.page_id)
           } else if (isGlobalView) {
-            pagesQuery = pagesQuery.in('location_id', locs.map((l: any) => l.id))
+            pagesQuery = pagesQuery.in('location_id', locs.map((l: { id: string }) => l.id))
           } else {
             pagesQuery = pagesQuery.eq('location_id', activeLoc.id)
           }
@@ -97,7 +97,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
 
           if (member?.page_id && pages && pages.length > 0) {
             // RBAC: Lock location to the one owning this page
-            activeLoc = locs.find((l: any) => l.id === pages[0].location_id) || activeLoc
+            activeLoc = locs.find((l: { id: string }) => l.id === pages[0].location_id) || activeLoc
             locations = [activeLoc] // UI restriction: only show this location
             activePageId = member.page_id // UI restriction: force active page
           }
@@ -138,6 +138,10 @@ export default async function DashboardLayout({ children }: { children: ReactNod
           
           dynamicNavItems.push({ href: '/dashboard/analytics', label: 'Deep Analytics', icon: 'TrendingUp' })
           dynamicNavItems.push({ href: '/dashboard/forecast', label: 'Demand Forecast', icon: 'BarChart3' })
+
+          // Add Developer/Integration settings
+          dynamicNavItems.push({ href: '/dashboard/webhooks', label: 'Webhooks', icon: 'Zap' })
+          dynamicNavItems.push({ href: '/dashboard/api', label: 'API Keys', icon: 'QrCode' })
         }
     }
   }

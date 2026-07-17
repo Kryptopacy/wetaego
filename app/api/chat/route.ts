@@ -97,7 +97,7 @@ export async function POST(req: Request) {
 
     let catalogText = 'No menu items are currently available.'
     let itemsJson = '[]'
-    let allItemsList: { id: string, name: string, price: number, description?: string, availability_status?: string, category?: string }[] = []
+    const allItemsList: { id: string, name: string, price: number, description?: string, availability_status?: string, category?: string }[] = []
 
     if (menu) {
       const { data: categories } = await supabase
@@ -109,8 +109,8 @@ export async function POST(req: Request) {
       if (categories && categories.length > 0) {
         categories.forEach(cat => {
           (cat.menu_items || [])
-            .filter(item => item.availability_status !== 'hidden')
-            .forEach(item => {
+            .filter((item: { availability_status?: string | null }) => item.availability_status !== 'hidden')
+            .forEach((item: { id: string, name: string, price_minor: number, description: string | null, availability_status: string | null }) => {
               allItemsList.push({
                 id: item.id,
                 name: item.name,

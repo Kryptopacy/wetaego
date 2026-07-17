@@ -7,7 +7,7 @@ import { applyTranslations } from './actions'
 
 interface TranslateMenuButtonProps {
   orgId: string
-  categories: { id: string, name: string, menu_items?: { id: string, name: string, description: string | null }[] }[]
+  categories: { id: string, name: string, menu_items?: { id: string, title: string, description: string | null }[] }[]
 }
 
 const LANGUAGES = [
@@ -37,7 +37,7 @@ export function TranslateMenuButton({ orgId, categories }: TranslateMenuButtonPr
         name: cat.name,
         items: cat.menu_items?.map((item) => ({
           id: item.id,
-          name: item.name,
+          name: item.title,
           description: item.description || undefined
         })) || []
       }))
@@ -84,7 +84,7 @@ export function TranslateMenuButton({ orgId, categories }: TranslateMenuButtonPr
       <button 
         onClick={handleTranslate}
         disabled={isTranslating}
-        className="px-4 py-2 rounded-lg bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-400 hover:to-emerald-500 text-white text-sm font-bold transition-all disabled:opacity-50 flex items-center gap-2 shadow-lg"
+        className="px-4 py-2 rounded-lg bg-linear-to-r from-teal-500 to-emerald-600 hover:from-teal-400 hover:to-emerald-500 text-white text-sm font-bold transition-all disabled:opacity-50 flex items-center gap-2 shadow-lg"
       >
         {isTranslating ? 'Translating...' : 'ðŸŒ Translate Menu'}
       </button>
