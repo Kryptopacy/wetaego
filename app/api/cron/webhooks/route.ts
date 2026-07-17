@@ -95,7 +95,7 @@ export async function GET(request: Request) {
         .update({
           status: isSuccess ? 'delivered' : 'failed',
           response_status: response.status,
-          response_body: responseText ? responseText.substring(0, 1000) : null // cap length
+          error_message: responseText ? responseText.substring(0, 1000) : null // cap length
         })
         .eq('id', delivery.id)
 
