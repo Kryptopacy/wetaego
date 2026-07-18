@@ -10,8 +10,9 @@ export const generateQrBatch = authActionClient
     organization_id: zfd.text(z.string().min(1)),
     location_id: zfd.text(z.string().min(1)),
     quantity: zfd.numeric(z.number().min(1).max(100)),
+    zone_id: zfd.text(z.string().optional()),
   }))
-  .action(async ({ parsedInput: { organization_id: orgId, location_id: rawLocationId, quantity }, ctx: { supabase, user } }) => {
+  .action(async ({ parsedInput: { organization_id: orgId, location_id: rawLocationId, quantity, zone_id }, ctx: { supabase, user } }) => {
     const [locationId, destinationPath] = rawLocationId.split('|')
     const { cookies } = await import('next/headers')
     const cookieStore = await cookies()
@@ -82,6 +83,7 @@ export const generateQrBatch = authActionClient
         label: `Generic QR`,
         destination_path: destinationPath || `/m/${loc.slug}`,
         table_identifier: null,
+        zone_id: zone_id || null,
         is_active: true
       }
     })
@@ -130,6 +132,48 @@ export const assignQrTable = authActionClient
     const { error } = await supabase
       .from('qr_codes')
       .update({ table_identifier: tableIdentifier || null })
+      .eq('id', qrId)
+    
+    if (error) throw new Error((error as Error).message)
+    
+    revalidatePath('/dashboard/qr')
+    return { success: true }
+  })
+
+export const createQrZone = authActionClient
+  .schema(zfd.formData({
+    location_id: zfd.text(z.string().min(1)),
+    name: zfd.text(z.string().min(1)),
+    description: zfd.text(z.string().optional()),
+  }))
+  .action(async ({ parsedInput: { location_id, name, description }, ctx: { supabase } }) => {
+    const { cookies } = await import('next/headers')
+    const cookieStore = await cookies()
+    if (cookieStore.get('demo_mode')?.value === '1') {
+      return { success: true }
+    }
+
+    const { error } = await supabase.from('qr_zones').insert({
+      location_id,
+      name,
+      description: description || null
+    })
+
+    if (error) throw new Error((error as Error).message)
+    
+    revalidatePath('/dashboard/qr')
+    return { success: true }
+  })
+
+export const assignQrZone = authActionClient
+  .schema(z.object({
+    qrId: z.string().min(1),
+    zoneId: z.string().nullable().optional()
+  }))
+  .action(async ({ parsedInput: { qrId, zoneId }, ctx: { supabase } }) => {
+    const { error } = await supabase
+      .from('qr_codes')
+      .update({ zone_id: zoneId || null })
       .eq('id', qrId)
     
     if (error) throw new Error((error as Error).message)

@@ -1,11 +1,11 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { chargeCredits, refundCredits } from '../lib/payments/credits'
-import { createClient } from '../lib/supabase/server'
+import { createAdminClient } from '../lib/supabase/server'
 import { getPlanLimits } from '../lib/utils/settings'
 
 // Mock dependencies
 vi.mock('../lib/supabase/server', () => ({
-  createClient: vi.fn(),
+  createAdminClient: vi.fn(),
 }))
 
 vi.mock('../lib/utils/settings', () => ({
@@ -25,7 +25,7 @@ describe('Credit System', () => {
     
     // Setup Supabase mock
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ;(createClient as unknown as any).mockResolvedValue({
+    ;(createAdminClient as unknown as any).mockResolvedValue({
       rpc: mockRpc,
       from: mockFrom,
     })

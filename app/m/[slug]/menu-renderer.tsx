@@ -6,12 +6,14 @@ import { ItemCard } from './item-card'
 import { toast } from 'sonner'
 import { Tables } from '@/lib/supabase/types'
 import { Sparkles, Search, X, Globe, ChevronRight } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 export type CategoryWithItems = Tables<'menu_categories'> & {
   menu_items?: Tables<'menu_items'>[]
 }
 
 export function MenuRenderer({ initialCategories }: { initialCategories: CategoryWithItems[] }) {
+  const t = useTranslations('Guest')
   const [categories, setCategories] = useState(initialCategories)
   const [isTranslating, setIsTranslating] = useState(false)
   const [targetLang, setTargetLang] = useState<string | null>(null)
@@ -173,7 +175,7 @@ export function MenuRenderer({ initialCategories }: { initialCategories: Categor
             initial={{ opacity: 0, y: -20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -20, scale: 0.95 }}
-            className="fixed top-24 left-1/2 -translate-x-1/2 z-[60] w-[90%] max-w-sm"
+            className="fixed top-24 left-1/2 -translate-x-1/2 z-60 w-[90%] max-w-sm"
           >
             <div className="bg-zinc-900/95 dark:bg-white/95 backdrop-blur-xl text-white dark:text-zinc-900 p-4 rounded-2xl shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] border border-white/10 flex items-center justify-between gap-4">
               <div className="flex items-center gap-3">
@@ -181,8 +183,8 @@ export function MenuRenderer({ initialCategories }: { initialCategories: Categor
                   <Globe className="w-5 h-5 text-blue-400" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold">Translate Menu?</p>
-                  <p className="text-xs text-zinc-400 dark:text-zinc-500">Switch to {targetLang}</p>
+                  <p className="text-sm font-semibold">{t('translate_prompt_title')}</p>
+                  <p className="text-xs text-zinc-400 dark:text-zinc-500">{t('translate_prompt_desc', { targetLang: targetLang || '' })}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -196,7 +198,7 @@ export function MenuRenderer({ initialCategories }: { initialCategories: Categor
                   onClick={handleTranslate}
                   className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-lg shadow-blue-500/25 transition-all"
                 >
-                  Yes
+                  {t('yes')}
                 </button>
               </div>
             </div>
@@ -215,7 +217,7 @@ export function MenuRenderer({ initialCategories }: { initialCategories: Categor
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search dishes, ingredients..."
+              placeholder={t('search')}
               className="w-full pl-12 pr-12 py-3.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-[15px] outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500/50 transition-all text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 shadow-sm"
             />
             {searchQuery && (
@@ -286,7 +288,7 @@ export function MenuRenderer({ initialCategories }: { initialCategories: Categor
               {!searchQuery && (recommendedItems.length > 0 || isPersonalizing) && (
                 <section className="scroll-mt-40">
                   <div className="flex items-center gap-2 mb-6">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-teal-500 to-emerald-500 flex items-center justify-center shadow-lg shadow-teal-500/20">
+                    <div className="w-8 h-8 rounded-full bg-linear-to-br from-teal-500 to-emerald-500 flex items-center justify-center shadow-lg shadow-teal-500/20">
                       <Sparkles className="w-4 h-4 text-white" />
                     </div>
                     <h2 className="text-2xl font-black tracking-tight text-zinc-900 dark:text-white">

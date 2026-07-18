@@ -5,5 +5,23 @@
     "hardwareSettings": "Hardware Settings",
     "language": "Language",
     "languageDesc": "Fulfillment dashboard interface language"
+  },
+  "Guest": {
+    "add_to_order": "Add to Order",
+    "sold_out": "Sold Out",
+    "search": "Search...",
+    "translate_prompt_title": "Translate Page?",
+    "translate_prompt_desc": "Switch to {targetLang}",
+    "yes": "Yes",
+    "no": "No",
+    "checkout": "Checkout",
+    "subtotal": "Subtotal",
+    "total": "Total",
+    "delivery_fee": "Delivery Fee",
+    "place_order": "Place Order",
+    "order_received": "Order Received",
+    "preparing": "Preparing",
+    "ready": "Ready",
+    "completed": "Completed"
   }
 }

@@ -7,12 +7,14 @@ import { generateQrBatch, deleteQrCode, assignQrTable } from './actions'
 import { toast } from 'sonner'
 import { DynamicQR } from '@/components/qr/DynamicQR'
 
-export function QrClient({ organizationId, orgLogo, locations, qrCodes, baseUrl, planLimit, creditBalance }: {
+export function QrClient({ organizationId, orgLogo, locations, qrCodes, qrZones, baseUrl, planLimit, creditBalance }: {
   organizationId: string
   orgLogo?: string | null
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   locations: any[]
   qrCodes: Database['public']['Tables']['qr_codes']['Row'][]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  qrZones?: any[]
   baseUrl: string
   planLimit?: number
   creditBalance?: number
@@ -25,7 +27,17 @@ export function QrClient({ organizationId, orgLogo, locations, qrCodes, baseUrl,
   const [assigningQr, setAssigningQr] = useState<Database['public']['Tables']['qr_codes']['Row'] | null>(null)
   const [tableInput, setTableInput] = useState('')
 
+  // Zone states
+  const [createZoneModalOpen, setCreateZoneModalOpen] = useState(false)
+  const [zoneNameInput, setZoneNameInput] = useState('')
+  const [zoneLocInput, setZoneLocInput] = useState(locations[0]?.id || '')
+  const [isCreatingZone, setIsCreatingZone] = useState(false)
+
+  const [assignZoneModalOpen, setAssignZoneModalOpen] = useState(false)
+  const [zoneSelection, setZoneSelection] = useState('')
+
   const [localQrCodes, setLocalQrCodes] = useState(qrCodes)
+  const [localZones, setLocalZones] = useState(qrZones || [])
 
   async function handleGenerate(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -132,112 +144,188 @@ export function QrClient({ organizationId, orgLogo, locations, qrCodes, baseUrl,
 
       <div className="print:hidden flex justify-between items-center">
         <h3 className="text-lg font-medium text-white">Generated QR Codes ({localQrCodes.length})</h3>
-        <button 
-          onClick={() => window.print()}
-          className="bg-zinc-100 hover:bg-white text-zinc-900 font-bold px-4 py-2 rounded-lg shadow-lg transition-colors flex items-center gap-2"
-        >
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
-          Print All
-        </button>
+        <div className="flex gap-3">
+          {localQrCodes.length > 0 && localZones.length === 0 && (
+            <button 
+              onClick={() => setCreateZoneModalOpen(true)}
+              className="bg-zinc-800 border border-zinc-700 hover:bg-zinc-700 text-white font-semibold px-4 py-2 rounded-lg shadow-lg transition-colors flex items-center gap-2"
+            >
+              Organize into Zones
+            </button>
+          )}
+          {localZones.length > 0 && (
+            <button 
+              onClick={() => setCreateZoneModalOpen(true)}
+              className="bg-zinc-800 border border-zinc-700 hover:bg-zinc-700 text-white font-semibold px-4 py-2 rounded-lg shadow-lg transition-colors flex items-center gap-2"
+            >
+              Create New Zone
+            </button>
+          )}
+          <button 
+            onClick={() => window.print()}
+            className="bg-zinc-100 hover:bg-white text-zinc-900 font-bold px-4 py-2 rounded-lg shadow-lg transition-colors flex items-center gap-2"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
+            Print All
+          </button>
+        </div>
       </div>
 
-      {/* Grid of QR Codes */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6 print:grid-cols-4 print:gap-8 print:p-0">
-        {localQrCodes.map((qr) => {
-          const loc = locations.find((l) => l.id === qr.location_id)
-          const themeColor = loc?.theme_color || '#000000'
-          const hexColor = themeColor.replace('#', '')
-          
-          // Using qrserver API with color. (color format must be hex without hash)
-          const fullUrl = `${baseUrl}${qr.destination_path}?qr_id=${qr.id}`
-          const displayUrl = `${baseUrl}${qr.destination_path}`.replace(/^https?:\/\//, '')
-          // const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(fullUrl)}&color=${hexColor}`
-
+      {/* Render logic */}
+      {(() => {
+        if (localQrCodes.length === 0) {
           return (
-            <div key={qr.id} className="relative group border-2 rounded-2xl p-6 bg-gradient-to-b from-zinc-900/80 to-zinc-950 flex flex-col items-center print:border print:border-zinc-300 print:bg-white print:rounded-lg print:p-8 print:break-inside-avoid shadow-2xl transition-all hover:border-zinc-600 overflow-hidden" style={{ borderColor: themeColor }}>
-              
-              {/* Brand Accent Bar */}
-              <div className="absolute top-0 left-0 right-0 h-2 print:h-3" style={{ backgroundColor: `#${hexColor}` }} />
-
-              {orgLogo && (
-                <div className="mt-1 mb-3 print:mt-2">
-                  { }
-                  <Image src={orgLogo} alt="Venue Logo" width={120} height={48} className="h-8 md:h-10 w-auto object-contain print:h-12" crossOrigin="anonymous" />
-                </div>
-              )}
-
-              {/* Delete Button (Hidden during print) */}
-              <button 
-                onClick={async () => {
-                  const res = await deleteQrCode({ qrId: qr.id })
-                  if (res?.serverError) toast.error(res.serverError)
-                }}
-                className="absolute top-4 right-4 p-2 rounded-full bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white opacity-0 group-hover:opacity-100 transition-all print:hidden"
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-              </button>
-
-              <div className="bg-white p-3 rounded-xl mb-4 print:p-0 shadow-[0_0_15px_rgba(255,255,255,0.1)] print:shadow-none w-full max-w-[200px] aspect-square flex items-center justify-center">
-                <DynamicQR value={fullUrl} color={themeColor} size={180} />
-              </div>
-              
-              <div className="text-center w-full mb-4 print:mb-6 flex flex-col items-center">
-                <div className="print:flex hidden items-center gap-1.5 mb-3 text-zinc-800 bg-zinc-100 border border-zinc-300 rounded-full px-3 py-1">
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                  <span className="text-[10px] font-black uppercase tracking-widest leading-tight">Scan with Camera</span>
-                </div>
-                <h2 className="font-extrabold text-white print:text-black text-xl md:text-2xl tracking-tight leading-tight w-full" style={{ color: `#${hexColor}` }}>
-                  {loc?.name || 'Unknown'}
-                </h2>
-                <p className="text-zinc-400 print:text-zinc-600 text-sm md:text-base font-semibold mt-2 uppercase tracking-widest">
-                  {qr.table_identifier ? qr.table_identifier : 'Scan to Order'}
-                </p>
-                
-                {/* Fallback URL */}
-                <div className="mt-4 text-center w-full print:block hidden">
-                  <p className="text-[9px] uppercase tracking-widest text-zinc-400 mb-1">Or visit link:</p>
-                  <p className="text-xs font-mono font-bold text-black border-2 border-zinc-200 bg-zinc-50 rounded-lg px-3 py-1.5 inline-block mx-auto max-w-full break-all">{displayUrl}</p>
-                </div>
-              </div>
-
-              {/* Secondary Feedback QR */}
-              <div className="w-full border-t border-zinc-800/50 print:border-zinc-200 pt-4 flex flex-col items-center">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 print:text-zinc-500 mb-2 text-center leading-relaxed">
-                  Scan to Rate & Tip<br/>
-                  <span className="text-[8px] tracking-normal font-medium">(Requires 4-digit PIN from receipt)</span>
-                </p>
-                <div className="bg-white p-1.5 rounded-lg print:p-0 w-20 h-20 shadow-inner flex items-center justify-center">
-                  <DynamicQR value={`${baseUrl}/api/feedback-entry?qr_id=${qr.id}`} color="#000000" size={80} />
-                </div>
-              </div>
-              
-              <div className="w-full mt-6 pt-4 border-t border-zinc-800/30 print:border-zinc-100 flex justify-center print:block hidden">
-                 <p className="text-[8px] font-medium text-zinc-400 uppercase tracking-widest text-center">Powered by OurMenu OS</p>
-              </div>
-
-              <div className="text-center w-full mt-4 flex flex-col items-center">
-                <button
-                  onClick={() => {
-                    setAssigningQr(qr)
-                    setTableInput(qr.table_identifier || '')
-                    setAssignModalOpen(true)
-                  }}
-                  className="mt-2 text-[11px] font-medium bg-zinc-800 hover:bg-white hover:text-black text-zinc-300 px-4 py-1.5 rounded-full print:hidden transition-all shadow-md"
-                >
-                  {qr.table_identifier ? 'Change Table' : 'Assign Table'}
-                </button>
-                <p className="text-zinc-700 print:text-zinc-400 text-[9px] font-mono mt-3 truncate opacity-50">{qr.id.split('-')[0]}</p>
-              </div>
+            <div className="py-12 text-center text-zinc-500 print:hidden border border-dashed border-zinc-800 rounded-xl">
+              No QR codes generated yet. Use the form above to generate a batch.
             </div>
           )
-        })}
+        }
 
-        {qrCodes.length === 0 && (
-          <div className="col-span-full py-12 text-center text-zinc-500 print:hidden border border-dashed border-zinc-800 rounded-xl">
-            No QR codes generated yet. Use the form above to generate a batch.
+        const renderGrid = (qrs: typeof localQrCodes) => (
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6 print:grid-cols-4 print:gap-8 print:p-0">
+            {qrs.map((qr) => {
+              const loc = locations.find((l) => l.id === qr.location_id)
+              const themeColor = loc?.theme_color || '#000000'
+              const hexColor = themeColor.replace('#', '')
+              
+              const fullUrl = `${baseUrl}${qr.destination_path}?qr_id=${qr.id}`
+              const displayUrl = `${baseUrl}${qr.destination_path}`.replace(/^https?:\/\//, '')
+
+              return (
+                <div key={qr.id} className="relative group border-2 rounded-2xl p-6 bg-linear-to-b from-zinc-900/80 to-zinc-950 flex flex-col items-center print:border print:border-zinc-300 print:bg-white print:rounded-lg print:p-8 print:break-inside-avoid shadow-2xl transition-all hover:border-zinc-600 overflow-hidden" style={{ borderColor: themeColor }}>
+                  
+                  {/* Brand Accent Bar */}
+                  <div className="absolute top-0 left-0 right-0 h-2 print:h-3" style={{ backgroundColor: `#${hexColor}` }} />
+
+                  {orgLogo && (
+                    <div className="mt-1 mb-3 print:mt-2">
+                      <Image src={orgLogo} alt="Venue Logo" width={120} height={48} className="h-8 md:h-10 w-auto object-contain print:h-12" crossOrigin="anonymous" />
+                    </div>
+                  )}
+
+                  {/* Delete Button */}
+                  <button 
+                    onClick={async () => {
+                      const res = await deleteQrCode({ qrId: qr.id })
+                      if (res?.serverError) toast.error(res.serverError)
+                      else setLocalQrCodes(prev => prev.filter(q => q.id !== qr.id))
+                    }}
+                    className="absolute top-4 right-4 p-2 rounded-full bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white opacity-0 group-hover:opacity-100 transition-all print:hidden z-10"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                  </button>
+
+                  <div className="bg-white p-3 rounded-xl mb-4 print:p-0 shadow-[0_0_15px_rgba(255,255,255,0.1)] print:shadow-none w-full max-w-[200px] aspect-square flex items-center justify-center">
+                    <DynamicQR value={fullUrl} color={themeColor} size={180} />
+                  </div>
+                  
+                  <div className="text-center w-full mb-4 print:mb-6 flex flex-col items-center">
+                    <div className="print:flex hidden items-center gap-1.5 mb-3 text-zinc-800 bg-zinc-100 border border-zinc-300 rounded-full px-3 py-1">
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                      <span className="text-[10px] font-black uppercase tracking-widest leading-tight">Scan with Camera</span>
+                    </div>
+                    <h2 className="font-extrabold text-white print:text-black text-xl md:text-2xl tracking-tight leading-tight w-full" style={{ color: `#${hexColor}` }}>
+                      {loc?.name || 'Unknown'}
+                    </h2>
+                    <p className="text-zinc-400 print:text-zinc-600 text-sm md:text-base font-semibold mt-2 uppercase tracking-widest">
+                      {qr.table_identifier ? qr.table_identifier : 'Scan to Order'}
+                    </p>
+                    
+                    <div className="mt-4 text-center w-full print:block hidden">
+                      <p className="text-[9px] uppercase tracking-widest text-zinc-400 mb-1">Or visit link:</p>
+                      <p className="text-xs font-mono font-bold text-black border-2 border-zinc-200 bg-zinc-50 rounded-lg px-3 py-1.5 inline-block mx-auto max-w-full break-all">{displayUrl}</p>
+                    </div>
+                  </div>
+
+                  <div className="w-full border-t border-zinc-800/50 print:border-zinc-200 pt-4 flex flex-col items-center">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 print:text-zinc-500 mb-2 text-center leading-relaxed">
+                      Scan to Rate & Tip<br/>
+                      <span className="text-[8px] tracking-normal font-medium">(Requires 4-digit PIN from receipt)</span>
+                    </p>
+                    <div className="bg-white p-1.5 rounded-lg print:p-0 w-20 h-20 shadow-inner flex items-center justify-center">
+                      <DynamicQR value={`${baseUrl}/api/feedback-entry?qr_id=${qr.id}`} color="#000000" size={80} />
+                    </div>
+                  </div>
+                  
+                  <div className="w-full mt-6 pt-4 border-t border-zinc-800/30 print:border-zinc-100 hidden print:block">
+                     <p className="text-[8px] font-medium text-zinc-400 uppercase tracking-widest text-center">Powered by OurMenu OS</p>
+                  </div>
+
+                  <div className="text-center w-full mt-4 flex flex-col items-center">
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => {
+                          setAssigningQr(qr)
+                          setTableInput(qr.table_identifier || '')
+                          setAssignModalOpen(true)
+                        }}
+                        className="mt-2 text-[10px] font-medium bg-zinc-800 hover:bg-white hover:text-black text-zinc-300 px-3 py-1.5 rounded-full print:hidden transition-all shadow-md"
+                      >
+                        {qr.table_identifier ? 'Table' : '+ Table'}
+                      </button>
+                      {localZones.length > 0 && (
+                        <button
+                          onClick={() => {
+                            setAssigningQr(qr)
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                            setZoneSelection((qr as any).zone_id || '')
+                            setAssignZoneModalOpen(true)
+                          }}
+                          className="mt-2 text-[10px] font-medium bg-zinc-800 hover:bg-emerald-500 hover:text-white text-zinc-300 px-3 py-1.5 rounded-full print:hidden transition-all shadow-md"
+                        >
+                          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                          {(qr as any).zone_id ? 'Move Zone' : '+ Zone'}
+                        </button>
+                      )}
+                    </div>
+                    <p className="text-zinc-700 print:text-zinc-400 text-[9px] font-mono mt-3 truncate opacity-50">{qr.id.split('-')[0]}</p>
+                  </div>
+                </div>
+              )
+            })}
           </div>
-        )}
-      </div>
+        )
+
+        // If no zones, just render flat list
+        if (localZones.length === 0) {
+          return renderGrid(localQrCodes)
+        }
+
+        // Group by zones
+        const unassigned = localQrCodes.filter(q => !(q as any).zone_id)
+        return (
+          <div className="space-y-12">
+            {localZones.map(zone => {
+              const zoneQrs = localQrCodes.filter(q => (q as any).zone_id === zone.id)
+              if (zoneQrs.length === 0) return null
+              return (
+                <div key={zone.id}>
+                  <div className="mb-4 pb-2 border-b border-zinc-800 flex justify-between items-end print:hidden">
+                    <div>
+                      <h3 className="text-xl font-bold text-emerald-400">{zone.name}</h3>
+                      {zone.description && <p className="text-sm text-zinc-500">{zone.description}</p>}
+                    </div>
+                    <span className="text-sm text-zinc-500 font-medium">{zoneQrs.length} QR{zoneQrs.length > 1 ? 's' : ''}</span>
+                  </div>
+                  {renderGrid(zoneQrs)}
+                </div>
+              )
+            })}
+            
+            {unassigned.length > 0 && (
+              <div>
+                <div className="mb-4 pb-2 border-b border-zinc-800 flex justify-between items-end print:hidden">
+                  <div>
+                    <h3 className="text-xl font-bold text-zinc-400">General / Unassigned</h3>
+                  </div>
+                  <span className="text-sm text-zinc-500 font-medium">{unassigned.length} QR{unassigned.length > 1 ? 's' : ''}</span>
+                </div>
+                {renderGrid(unassigned)}
+              </div>
+            )}
+          </div>
+        )
+      })()}
 
       {/* Assign Table Modal */}
       {assignModalOpen && assigningQr && (
@@ -280,6 +368,128 @@ export function QrClient({ organizationId, orgLogo, locations, qrCodes, baseUrl,
                   className="bg-white hover:bg-zinc-200 text-black font-bold px-6 py-2 rounded-lg transition-colors shadow-lg"
                 >
                   Save
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Assign Zone Modal */}
+      {assignZoneModalOpen && assigningQr && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 print:hidden">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 max-w-sm w-full shadow-2xl animate-in fade-in zoom-in duration-200">
+            <h3 className="text-xl font-bold text-white mb-2">Assign to Zone</h3>
+            <p className="text-zinc-400 text-sm mb-4">
+              Move this QR to a specific organizational zone.
+            </p>
+            <form onSubmit={async (e) => {
+              e.preventDefault()
+              const qrId = assigningQr.id
+              const zId = zoneSelection === 'unassigned' ? null : zoneSelection
+              setAssignZoneModalOpen(false)
+              
+              const { assignQrZone } = await import('./actions')
+              const res = await assignQrZone({ qrId, zoneId: zId })
+              if (res?.serverError || res?.validationErrors) {
+                toast.error(res?.serverError || 'Failed to assign zone')
+              } else {
+                toast.success('Zone assigned!')
+                setLocalQrCodes(prev => prev.map(q => q.id === qrId ? { ...q, zone_id: zId } : q))
+              }
+            }}>
+              <select
+                value={zoneSelection}
+                onChange={(e) => setZoneSelection(e.target.value)}
+                className="w-full bg-zinc-950 border border-zinc-800 text-white rounded-lg px-4 py-3 mb-6 focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-all shadow-inner"
+              >
+                <option value="unassigned">None (Unassigned)</option>
+                {localZones.map(z => (
+                  <option key={z.id} value={z.id}>{z.name}</option>
+                ))}
+              </select>
+              <div className="flex gap-3 justify-end">
+                <button 
+                  type="button"
+                  onClick={() => setAssignZoneModalOpen(false)}
+                  className="px-4 py-2 text-zinc-400 hover:text-white font-medium transition-colors"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit"
+                  className="bg-emerald-500 hover:bg-emerald-400 text-black font-bold px-6 py-2 rounded-lg transition-colors shadow-lg"
+                >
+                  Save
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Create Zone Modal */}
+      {createZoneModalOpen && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 print:hidden">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 max-w-sm w-full shadow-2xl animate-in fade-in zoom-in duration-200">
+            <h3 className="text-xl font-bold text-white mb-2">Create New Zone</h3>
+            <p className="text-zinc-400 text-sm mb-4">
+              Group your tables into logical areas (e.g. "Main Floor", "Patio").
+            </p>
+            <form onSubmit={async (e) => {
+              e.preventDefault()
+              setIsCreatingZone(true)
+              const { createQrZone } = await import('./actions')
+              
+              const formData = new FormData()
+              formData.append('location_id', zoneLocInput)
+              formData.append('name', zoneNameInput)
+              
+              const res = await createQrZone(formData)
+              setIsCreatingZone(false)
+              setCreateZoneModalOpen(false)
+              setZoneNameInput('')
+              
+              if (res?.serverError || res?.validationErrors) {
+                toast.error(res?.serverError || 'Failed to create zone')
+              } else {
+                toast.success('Zone created! Refresh to see changes.')
+                // In a real app we'd fetch the new zones or optimistic update.
+                // For now, reload the page to get the updated db rows.
+                window.location.reload()
+              }
+            }}>
+              <select
+                value={zoneLocInput}
+                onChange={(e) => setZoneLocInput(e.target.value)}
+                className="w-full bg-zinc-950 border border-zinc-800 text-white rounded-lg px-4 py-3 mb-4 focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-all shadow-inner"
+              >
+                {locations.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
+              </select>
+
+              <input 
+                type="text" 
+                value={zoneNameInput}
+                onChange={(e) => setZoneNameInput(e.target.value)}
+                className="w-full bg-zinc-950 border border-zinc-800 text-white rounded-lg px-4 py-3 mb-6 focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-all shadow-inner"
+                placeholder="e.g. VIP Lounge"
+                autoFocus
+                required
+              />
+              <div className="flex gap-3 justify-end">
+                <button 
+                  type="button"
+                  onClick={() => setCreateZoneModalOpen(false)}
+                  className="px-4 py-2 text-zinc-400 hover:text-white font-medium transition-colors"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit"
+                  disabled={isCreatingZone || !zoneNameInput}
+                  className="bg-white disabled:opacity-50 hover:bg-zinc-200 text-black font-bold px-6 py-2 rounded-lg transition-colors shadow-lg"
+                >
+                  {isCreatingZone ? 'Creating...' : 'Create Zone'}
                 </button>
               </div>
             </form>

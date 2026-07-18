@@ -6,7 +6,7 @@ import { InfoStrip } from '../../../components/info-strip'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { formatCurrency } from '@/lib/utils/currency'
-import { Plus, Minus, Check, ArrowRight, ArrowLeft } from 'lucide-react'
+import { Plus, Minus, Check, ArrowRight, ArrowLeft, Search, X } from 'lucide-react'
 import { submitQuoteRequest } from '@/app/m/[slug]/actions'
 
 interface PageItem {
@@ -56,6 +56,16 @@ interface QuoteRendererProps {
 export function QuoteRenderer({ location, page, items, locationSlug }: QuoteRendererProps) {
   const themeColor = location.theme_color || '#3b82f6'
   const availableItems = items.filter(i => i.availability_status === 'available')
+  
+  const [searchQuery, setSearchQuery] = useState('')
+  
+  const searchedItems = availableItems.filter(item => {
+    if (!searchQuery) return true;
+    const query = searchQuery.toLowerCase();
+    return item.title.toLowerCase().includes(query) || 
+           item.description?.toLowerCase().includes(query) ||
+           item.item_data?.category?.toLowerCase().includes(query);
+  });
   
   const [step, setStep] = useState<1 | 2 | 3>(1)
   const [selectedItems, setSelectedItems] = useState<{item: PageItem, qty: number}[]>([])
@@ -234,9 +244,31 @@ export function QuoteRenderer({ location, page, items, locationSlug }: QuoteRend
               <p className="text-zinc-400 text-sm">Choose the services you need a quote for.</p>
             </div>
             
+            {/* Search Bar */}
+            <div className="mb-6 relative group">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <Search className="w-5 h-5 text-zinc-500 group-focus-within:text-emerald-500 transition-colors" />
+              </div>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search services..."
+                className="w-full pl-12 pr-12 py-3.5 bg-zinc-900/50 border border-zinc-800 rounded-2xl text-[15px] outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/50 transition-all text-white placeholder:text-zinc-500"
+              />
+              {searchQuery && (
+                <button 
+                  onClick={() => setSearchQuery('')}
+                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-zinc-500 hover:text-zinc-300 transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              )}
+            </div>
+            
             <div className="space-y-8">
               {Object.entries(
-                availableItems.reduce((acc, item) => {
+                searchedItems.reduce((acc, item) => {
                   const cat = item.item_data?.category?.trim() || 'Services'
                   if (!acc[cat]) acc[cat] = []
                   acc[cat].push(item)

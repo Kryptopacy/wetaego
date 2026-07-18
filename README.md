@@ -6,206 +6,63 @@
 
 ---
 
-OurMenu OS is a comprehensive, enterprise-grade SaaS platform engineered to power the customer-facing digital presence of dynamic businesses. It is a highly scalable, multi-tenant operating layer serving retail boutiques, service professionals, spas, consultants, and real estate agencies.
+OurMenu OS is a comprehensive, enterprise-grade **Business Operating System** engineered to power the customer-facing digital presence and deep backend workflows of dynamic businesses. Designed for massive scale, it serves high-traffic environments like sprawling hotel chains, bustling super-clubs and lounges, multi-location restaurants, and high-volume supermarkets, while remaining perfectly adaptable for independent boutiques, spas, food trucks, and consultants.
 
-By deploying dynamic, template-driven digital environments reachable via custom QR codes or direct links, businesses completely bypass the friction of native app downloads. OurMenu OS delivers real-time catalogs, interactive service bookings, intelligent digital rate cards, and a seamless omnichannel checkout experience—instantly, right in the browser.
-
----
-
-## 🎯 Product Thesis
-
-**Do not build another static site generator. Do not build another PDF QR menu.** 
-Build the live, intelligent, and deeply integrated operating layer for what customers can see, buy, request, book, and trust *right now*.
+By deploying dynamic, template-driven digital environments reachable instantly via a dedicated platform link (e.g., `ourmenuos.online/m/your-business`), custom QR codes, or upgraded custom domains, businesses completely bypass the friction of native app downloads. OurMenu OS delivers real-time catalogs, interactive service bookings, AI-driven operations, and a seamless omnichannel checkout experience—instantly, right in the browser.
 
 ---
 
-## 🏗️ World-Class Architecture & Enterprise Security
+## 🏆 Hackathon Judging Criteria & The OurMenu OS Thesis
 
-OurMenu OS is engineered for massive scale, zero downtime, and bank-grade security. It passes the strictest enterprise audits out-of-the-box:
+OurMenu OS was built from the ground up to redefine how commerce software scales. Here is how we address the core judging pillars:
 
-```mermaid
-graph TD
-    %% Client Tier
-    subgraph Client [Client / Frontend]
-        PWA[PWA / Mobile Browser]
-        SW[Service Workers<br>Offline & Web Push]
-    end
+### 1. Category Impact (Redefining Commerce)
+We didn't build another static storefront or PDF menu. We built a deeply relational, polymorphic engine capable of unifying physical retail carts and abstract service bookings into the exact same checkout flow. With a **Universal Taxonomy Engine**, a **Visual Resource Manager**, and **Custom Domain White-Labeling**, OurMenu OS fundamentally moves the needle on what a web-based POS and SaaS platform can achieve for businesses of any size.
 
-    %% Edge / Application Tier
-    subgraph AppServer [Next.js Application Layer]
-        RSC[React Server Components<br>SSR & Routing]
-        SA[Server Actions<br>Zod Validated Mutations]
-        API[API Routes<br>AI, Webhooks, Jobs]
-    end
+### 2. Business Viability (Real Users, Real Revenue)
+OurMenu OS is engineered for instant monetization and hyper-sustainability:
+- **Automated SaaS Ledger:** A built-in platform ledger automatically extracts a configurable SaaS fee (e.g., 2%) atomically on every transaction, driving pure Monthly Recurring Revenue (MRR).
+- **First-Party Ad Network:** Bypasses ad-blockers by natively injecting "Bring Your Own" (BYO) sponsors directly into the storefront catalog loop for passive B2B revenue.
+- **Chaos Roulette (4 Modes):** A gamified "spin to win" bill-splitting randomizer (Classic, Squad, Survivor, Chaos) that converts the friction of group payments into a viral user-acquisition funnel.
+- **Affiliate Rev-Share (B2B Growth):** Built-in B2B affiliate tracking. Partners register to generate unique referral codes. New tenants are cryptographically tied to their affiliate, generating automated 10% commission payouts on subscription renewals.
 
-    %% Database & Auth Tier
-    subgraph Supabase [Supabase Infrastructure]
-        Auth[Supabase Auth<br>JWT & RBAC]
-        DB[(PostgreSQL Database<br>RLS & Realtime)]
-        Storage[S3 Storage<br>Secure Uploads]
-    end
-
-    %% Third-Party Services
-    subgraph External [External Services & Integrations]
-        Paystack[Paystack<br>Payment Gateway]
-        Gemini[Google Gemini<br>AI SDK]
-        Termii[Termii<br>SMS/WhatsApp]
-        Upstash[(Upstash Redis<br>Cache & Rate Limit)]
-        Resend[Resend<br>Email Dispatch]
-    end
-
-    %% Connections
-    PWA <-->|HTTP/WS| AppServer
-    PWA --> SW
-    
-    RSC -->|Fetch| DB
-    SA -->|RPC / Mutate| DB
-    SA -->|Validate| Auth
-    
-    API -->|Prompt / Stream| Gemini
-    API -->|Dispatch| Resend
-    API -->|Dispatch| Termii
-    API <-->|Webhook / Verify| Paystack
-    
-    AppServer <-->|Cache / Limit| Upstash
-```
-
-- **Impenetrable API Boundaries (Zod):** Every single Server Action and API route is rigorously validated via strict `zod` schema typing. It is mathematically impossible for malformed payloads to reach the database layer.
-- **Absolute IDOR Protection:** Deep relational authorization matrices ensure that hardware provisioning (QR mapping), location configurations, and page builder tools are cryptographically isolated. A malicious actor cannot modify or access data belonging to another tenant or location.
-- **Flawless React SSR Hydration:** Utilizing advanced Zustand `skipHydration: true` middleware synchronized perfectly with React lifecycle hooks, the platform guarantees zero UI flashing, layout shifts, or Server-Side Rendering (SSR) mismatches between the Edge server and the client browser.
-- **XSS & HTML-Injection Hardened:** All user-generated content passing through email notifications, push payloads, and template rendering is aggressively escaped, sanitized, and type-checked.
-- **N+1 Query Elimination & Infinite Scale:** Core notification and dispatcher systems utilize highly parallelized `Promise.all` fetching strategies. Meanwhile, data-heavy dashboards (like CRM and Order History) employ strict **cursor-based pagination**, bypassing Vercel/Serverless timeout constraints and guaranteeing instant execution whether an organization has 5 records or 5,000,000.
-- **GDPR-Compliant Marketing Queues:** Enforced opt-in filtering for customer marketing communications, paired with background queues for bulk email dispatches to eliminate 504 timeouts at scale.
-- **Storage Protection & Secure Uploads (Denial of Wallet Defense):** Cloud storage buckets are exclusively mutated via secure server-side routes leveraging `createAdminClient`, entirely eliminating insecure public Row Level Security (RLS) policies. Furthermore, buckets are natively locked to strict file sizes (e.g. 5MB) and MIME-type whitelists (WebP, PNG, JPEG) to prevent malicious bulk uploads and SDK exploitation.
-- **WCAG 2.1 Accessibility Compliance:** The platform delivers premium mobile UI flows with fluid focus trapping, strict ARIA attribute integrations (`aria-expanded`, `aria-controls`, `role="dialog"`), and seamless screen-reader support.
+### 3. AI-Native Operations (AI in Production)
+OurMenu OS runs businesses through dual-sided AI architectures (Public & Business):
+- **Admin AI Copilot (Business):** A deeply integrated conversational assistant that autonomously executes key business decisions (tool calls) shielded by strict Role-Based Access Control (RBAC). It can generate marketing copy, spin up visual assets, triage support requests, and analyze performance.
+- **Voice Dictation & Smart Search (Public):** Customers speak naturally to the public-facing AI, which translates semantic intent ("Show me vegan options under $20") into precise PostgreSQL Full-Text Search parameters and adds matching items directly to the cart.
+- **AI Demand Forecasting:** Analyzes 30-day sales velocity and utilizes Gemini to predict 7-day demand trajectories, issuing smart inventory alerts.
 
 ---
 
-## 🏬 Multi-Business Universal Templates
+## 🏗️ Comprehensive Documentation Index
 
-OurMenu OS is fundamentally decoupled from the concept of a "restaurant." It is a true multi-business platform, dynamically rendering the correct UI based on the active **Template Builder**:
+We have broken down the absolute scale and flexibility of OurMenu OS into deep-dive technical documents. 
 
-1. **Hospitality (The Core):** Live restaurant menus, bar bottle service, dynamic cafe sell-out tracking, and food trucks.
-2. **Retail & Boutiques (Catalog Template):** Tech gadget shops, fashion boutiques, pharmacies, and local stores requiring a highly visual storefront, inventory management, instant checkout, and detailed **Product Condition Badges** (e.g., New, Refurbished).
-3. **Services (Booking Template):** Salons, spas, therapists, and tutors who need to showcase services, handle complex appointment slots, collect upfront deposits, and utilize **Custom Fulfillment Milestones** (e.g., Draft -> Fitting -> Final Cut).
-4. **Consultants & Agencies (Rate Card & Quote Templates):** Freelancers, marketing agencies, and consultants deploying polished, interactive digital rate cards for standardized B2B pricing, alongside dynamic Quote Generator templates.
-5. **Real Estate & Automotive (Listings Template):** Property rentals, car dealerships, and equipment rentals requiring image-heavy, location-based galleries.
-6. **Portal Mode:** A dynamic macro-landing page that seamlessly routes customers to multiple specialized sub-pages (e.g., A massive Hotel routing guests to a Restaurant menu, a Spa booking page, and a Room Service catalog from a single QR scan).
-7. **Custom Layout Builder & Per-Page Theming:** An advanced, block-based page builder allowing organizations to create completely bespoke digital environments. Features granular per-page aesthetic overrides, allowing unique background and accent colors that gracefully fall back to the brand default.
+### 1. Enterprise Architecture & Security
+- 🛡️ **[Data Layer & PostgreSQL Engine](./docs/architecture/data-layer.md)** (Universal Taxonomy, Full-Text Search, Automated SaaS Ledger)
+- 🔒 **[Security, Zod, and Scale](./docs/architecture/security-and-scale.md)** (RLS, Storage Protection, N+1 Mitigation)
+- 🔌 **[Outbound Webhooks & Integrations](./docs/architecture/integrations.md)** (Dead Letter Queues, API Gateways, Custom Domains)
+- 🏢 **[Enterprise Fleet & RBAC](./docs/architecture/fleet-and-rbac.md)** (Branch Switchers, Geofenced Clock-In, Independent Sub-Businesses)
+- 🧠 **[AI-Native Operations](./docs/architecture/ai-orchestration.md)** (Admin Copilot Tool Calls, Public Voice Dictation, Smart Upselling, Gemini Vision Importer)
+- ⚙️ **[Back-of-House Operations](./docs/architecture/back-of-house.md)** (Master Cron Orchestrator, Superadmin Developer Console, Demo Mode Bypass)
 
----
+### 2. Core Features & Workflows
+- 💳 **[Omnichannel Checkout & Payments](./docs/features/checkout-and-payments.md)** (Paystack Split Payments, B2B IOU Store Credit, Chaos Roulette [4 Modes], First-Party Ad Network, Extensive Custom Styling)
+- 📦 **[Inventory Manager & BOM Engine](./docs/features/inventory-and-bom.md)** (Live Ledger, Component Breakdown, Signed Movement Triggers, Smart Sell-Out)
+- 👥 **[CRM, Gamification & B2B Growth](./docs/features/crm-and-gamification.md)** (Shadow Profiles, Affiliate Rev-Share Tracking, PIN-Protected Feedback)
+- 💬 **[Enterprise Team & Intercom](./docs/features/team-and-intercom.md)** (Department Routing, WebSockets Realtime Chat, Managerial Audit Logs, Shifts Management)
+- ⚡ **[True Native PWA & Global SEO](./docs/features/pwa-and-seo.md)** (Service Workers, Web Push, SMS Fallback, Fluid Framer Motion, JSON-LD Schema, AEO)
+- 📊 **[Visual Resource Manager & POS](./docs/features/pos.md)** (Live Tables/Bays, Real-time Point of Sale, Cash Handling, QR tracking)
 
-## 🚀 Core Features & Engines
-
-### 1. The Omnichannel Checkout & Monetization Engine
-A resilient, globally aware checkout engine powers the entire ecosystem:
-- **Polymorphic Cart & Transactions:** A deeply unified backend capable of seamlessly merging multi-item physical retail carts (Catalogs) and calendar-based reservations (Bookings) into the exact same checkout flow.
-- **Paystack Native Integration:** Seamlessly handles split payments, automated service charges, and real-time reconciliation via cryptographic Webhooks.
-- **First-Party Native Ad Network:** Bypasses ad-blockers by natively injecting "Bring Your Own" (BYO) sponsors or platform-wide advertisements directly into the storefront catalog loop, generating purely passive MRR. Features zero layout shift and highly accurate `IntersectionObserver` impression tracking.
-- **Automated SaaS Ledger (Platform Fees):** A transparent, built-in ledger system that extracts a configurable SaaS platform fee (e.g., 2%) on every transaction, driving pure MRR beyond monthly subscriptions.
-- **SaaS Lifecycle & Automated Billing Emails:** Integrated automated email sequences (powered by Resend and Vercel Cron) to handle Trial Expirations, Subscription Activations, and precise Invoicing without requiring external CRM orchestration.
-- **Enterprise Tax & Compliance Engine:** Dynamically calculates localized taxes (e.g., VAT, State Taxes) and applies them accurately before reaching the payment gateway, providing transparent itemized receipts for strict global compliance.
-- **Coupon & Discounts Manager:** A robust system allowing admins to distribute customizable coupons for free trials, free plans, credit extensions, or plan extensions to aggressively drive B2B acquisition and retention.
-- **Global Manual Fallback:** If API keys are pending or the payment provider experiences regional downtime, the system automatically degrades to a localized "Manual Bank Transfer" workflow, ensuring conversions are never blocked.
-- **Omnichannel Logistics & Per-Page Routing:** Full, robust support for Dine-in (Table-specific QR mapping), Pickup, and Delivery (with interactive delivery zones, SMS phone verification, dynamic fees, and **Google Maps API Autocomplete**). Fulfillment logic is highly granular, allowing **per-page configuration** (e.g., a "Room Service" page forces table delivery, while a "Lobby Cafe" page allows pickup).
-
-### 2. Universal Data Layer & Enterprise Scale
-Engineered to confidently support tens of thousands of SKUs and parallel businesses via massive PostgreSQL optimization:
-- **Universal Taxonomy Engine:** Replaces brittle JSON structures with a strictly relational, infinite-depth `page_collections` category tree. Handles everything from "Appetizers" to complex fashion "Winter 2026 -> Coats" mapping dynamically.
-- **Universal Search Engine (FTS):** Harnesses native PostgreSQL Full-Text Search (`tsvector`) and GIN indexes across the unified `page_items` layer. Guarantees millisecond-latency global searches across thousands of products, properties, or services, perfectly integrated with the AI Copilot for deep disambiguation.
-- **Inbound API Gateway:** Empowers legacy POS systems and third-party CRMs to programmatically push inventory and orders *into* OurMenu OS via mathematically rate-limited, Bearer-token protected REST API endpoints.
-- **Outbound Webhooks & Integration DLQ:** Empowers businesses to instantly broadcast internal events (like `booking.created` or `order.created`) to external infrastructure (like Google Calendar, Zapier, or legacy POS systems) supported by an indestructible Dead Letter Queue (DLQ).
-- **Custom Domain Engine (White-Labeling):** True multi-tenant middleware intercepting requests to custom domains (e.g., `menu.luxuryhotel.com`) and transparently mapping them to the correct location storefront without redirects.
-- **Deep Availability Engine:** Computes complex, timezone-aware availability slots for service-based businesses (Salons, Spas, Tutors). Features an intelligent "Requires Booking" toggle per item, ensuring zero friction for standard retail/hospitality checkouts while enforcing rigid calendar blocks when necessary.
-
-### 3. Live Fulfillment Dashboard & Workstation Routing
-Re-architected to serve any industry, the operations center is a real-time, WebSocket-powered hub:
-- **Universal Tracking:** Tracks incoming restaurant orders, spa booking requests, and retail pickup orders simultaneously.
-- **Dynamic Workstation Routing:** Orders are intelligently fragmented and routed to specific departments (e.g., *Grill*, *Tailoring*, *Bar*). Workstations can filter the board to only see the partial tickets relevant to them, ensuring extreme operational efficiency.
-- **Fulfillment Kanban Hub:** A dedicated drag-and-drop Kanban dashboard specifically built to supervise dispatch operations, seamlessly moving orders through generic states (*To Do* ➔ *In Progress* ➔ *Completed*).
-- **Advanced Triaging & Deep Search:** Instantly filters active states, calculates prep times, and supports deep-searching globally by Table ID, Order ID, and specific item names.
-
-### 4. PWA & True Native App Experience
-OurMenu OS feels indistinguishable from a native iOS/Android application:
-- **Service Workers:** Caching assets for offline resilience and near-instant load times (via `next-pwa`).
-- **Web Push Notifications:** Deeply integrated Web Push API ensures businesses receive instant, native alerts (with sounds) on their devices the second a new order or booking is placed.
-- **Bulletproof International Messaging:** Integrated Termii API for automated fallback WhatsApp and SMS notifications, backed by aggressive Regex parsing to seamlessly handle global phone formats (e.g., `+1 (415)...` or `0803...`).
-- **Premium Fluid Aesthetics:** Global integration of `framer-motion` guarantees 60fps spring-physics animations, staggered layout reveals, and frosted-glass micro-interactions.
-
-### 5. Enterprise Fleet & Location Management
-Seamlessly scale operations across multiple venues, cities, or countries from a single organization:
-- **Dynamic Branch Switcher:** A unified dashboard allowing owners to instantly swap active branch contexts.
-- **Independent Sub-Businesses & Page-Level RBAC:** Organizations can isolate specific teams to manage individual sub-pages (e.g., locking a "Spa" team strictly to the Spa page while the "Restaurant" team manages the main dining page). Sub-businesses natively support independent overrides for Wi-Fi, operating hours, contact details, AI Chat Assistant configurations, and Manual Payment fallbacks.
-- **Geofenced Staff Clock-In:** Staff shift clock-ins are strictly validated against customizable geospatial radii around the business location using HTML5 Geolocation and the Haversine formula, preventing off-site clock-ins while maintaining fallback tracking logs in `staff_shifts`.
-- **Decoupled Hardware Provisioning & Smart Routing:** Print thousands of generic "dummy" QR codes in bulk, deploy them globally, and securely re-map them remotely. QR codes can be dynamically routed to specific location pages (e.g. routing directly to a "Room Service" sub-page or "Spa Bookings") from the dashboard without ever reprinting physical assets.
-- **Scoped Data Views:** Operations, Menu Managers, and Analytics dashboards automatically and securely filter down to the active location context via encrypted cookies, and strictly adhere to Page-Level RBAC constraints if the user is assigned a specific `page_id`.
-
-### 6. AI-Powered Operations (Copilot & Agents)
-- **Admin AI Copilot with RBAC:** A deeply integrated, conversational assistant built directly into the merchant dashboard. The Copilot possesses profound domain knowledge of OurMenuOS and enforces strict **Role-Based Access Control (RBAC)**. It can autonomously execute dashboard actions—like dynamically creating menu categories or adding items via AI SDK Tools—while blocking unauthorized staff from accessing financial reports.
-- **Fail-Safe AI Architecture:** All Vercel AI SDK integrations (`generateObject`, `generateText`, `streamText`) are wrapped in rigorous exception handlers. AI provider timeouts, overloads, or hallucinations are gracefully caught and mapped to `503 Service Unavailable`, guaranteeing the edge functions never silently crash.
-- **Voice Dictation & Hands-Free UI:** Customers can use natural voice dictation via the Web Speech API to interact with the AI, enabling a fully seamless two-way conversational back-and-forth. The AI autonomously manages their shopping cart (add/remove) and calls staff directly via AI tool execution.
-- **Multimodal Menu Importer:** Powered by Gemini 3.5 Vision, physical menus can be photographed and instantly parsed into structured digital catalogs with superior spatial understanding, replacing legacy OCR techniques.
-- **Structured AI Rules Engine:** Configure strict guardrails including Base Personalities (Professional, Casual, Witty), Escalation Contacts, and a dynamic JSON-based FAQ builder that seamlessly injects venue-specific context directly into the system prompt.
-- **AI Copywriter & Image Studio:** Generative AI deeply integrated into the Page Builder, assisting businesses in writing high-converting item descriptions and generating stunning, professional cover images on the fly.
-- **AI Demand Forecasting (`/api/ai/forecast`):** Analyzes 30-day sales velocity and utilizes Google Gemini to predict 7-day demand trajectories, issuing smart inventory alerts (Critical, Order Soon, Sufficient).
-- **Smart Upselling Engine (`/api/upsell`):** Intelligent checkout add-on engine dynamically analyzes cart contents to suggest highly relevant cross-sells, maximizing Average Order Value (AOV).
-
-### 7. Superadmin Developer Console
-A powerful, centralized control panel allowing platform owners to dictate global configurations without touching code or running SQL queries:
-- **Real-Time Global Configuration:** Instantly modify SaaS subscription pricing, platform fee percentages, and default trial periods dynamically.
-- **Customizable AI Credit Economics:** Dynamically adjust the exact credit cost (e.g., 1 credit, 3 credits) for individual AI actions across the platform, including Demand Forecasting, Auto-Fill, and Image Generation.
-- **Global Manual Fallback Overrides:** Instantly enforce a global bypass of the payment provider (Paystack) during regional downtimes, forcing all checkouts to use manual bank transfers.
-- **Tenant Directory & Hackathon Exports:** A bird's-eye view of all registered businesses with instant CSV generation for hackathon or investor metrics.
-
-### 8. CRM, Loyalty & Gamification
-- **Customer Profiles & LTV:** Automatically builds rich CRM shadow profiles at checkout, seamlessly syncing critical data like phone numbers across orders, and tracking Lifetime Value (LTV), order frequency, and marketing opt-ins.
-- **B2C Identity Linking (Future Phase):** Customers will be able to effortlessly claim their shadow profiles via OTP (SMS/WhatsApp) or Email Magic Links on their order trackers, transitioning into a full B2C "My Orders" portal without data redundancy.
-- **Bespoke Loyalty Programs:** Organizations can launch custom point-based reward systems, configurable down to the fractional currency unit.
-- **Payment Roulette & Bill Splitting:** A gamified "spin to win" bill-splitting randomizer that transforms the friction of group payments into a highly engaging, viral experience. 
-- **PIN-Protected Post-Service Feedback:** Automated email receipts include a cryptographic 4-digit PIN ensuring only verified customers can rate staff performance, populating the gamified Team Performance Leaderboard and the centralized **Feedback Inbox** within the dashboard.
-
-### 9. Global SEO, AEO & Privacy Compliance
-- **Dynamic Semantic JSON-LD:** Intelligent generation of `LocalBusiness`, `ItemList`, and `Product` schemas tailored for each specific business and catalog, boosting local SEO visibility.
-- **Answer Engine Optimization (AEO):** Screen-reader-only descriptive blocks feed AI tools (ChatGPT, Perplexity) context around business identities. 
-- **Privacy-First Indexing:** A strict opt-in framework controls web crawlers. All tenant directories default to `noindex, nofollow` to protect private menus, only enabling public indexing when the tenant explicitly grants consent via the compliance dashboard.
-
-### 10. Inventory Manager & Component Breakdown (BOM)
-A purpose-built, real-time stock management system designed for any physical business — roadside grills, cafes, retail stores, salons — that needs to track tangible assets without a complex ERP:
-- **Live Item Ledger:** Every item has a running quantity, category, unit, SKU, optional cost price, reorder threshold, and notes. Items are per-location, so multi-branch orgs stay fully isolated.
-- **Component Breakdown (BOM) Engine:** Dynamically map catalogue products to required raw materials (e.g. a "Burger" requires 1 "Bun" and 1 "Patty"). When a product is sold, the system atomically calculates historical **Cost of Goods Sold (COGS)** and deducts the exact ingredient quantities from the ledger.
-- **5 Movement Types:** `Restock`, `Use`, `Wastage/Loss`, `Sale`, and `Manual Adjustment` — each with an optional note for accountability.
-- **Signed Quantity Trigger:** A Postgres trigger (`sync_inventory_quantity`) atomically applies every movement to the item's `current_quantity`, making the ledger race-condition-safe.
-- **Stock Status Alerts:** Items automatically surface as *In Stock*, *Low Stock* (approaching the reorder threshold), or *Out of Stock* with distinct colour-coded visual states.
-- **Quick-Log Dialog:** Staff tap a single button on any item to open a fast-entry modal — select movement type, enter quantity, optionally add a note. Outbound movements block submission if stock would go negative.
-- **Movement Log Tab:** A full chronological audit log of every stock event across the location — filterable and reverse-sorted by time.
-- **Stats Row:** At-a-glance totals for Total Items, Low Stock count, and Out-of-Stock count with clickable filter shortcuts.
-
-### 11. Order Cancellation & Smart Sell-Out Engine
-- **Atomic Sell-Out Tracking:** Items can optionally track finite units via race-condition-free database RPCs, automatically switching to *Sold Out* when availability reaches zero.
-- **Order Cancellation Lifecycle:** Businesses can safely reject orders with a logged reason for analytics, with the option to instantly restock rejected inventory.
-- **Optimistic UI Validation:** Waitstaff can modify stock limits dynamically from the dashboard without page refreshes.
-
-### 12. Customer IOU & Store Credit System
-- **B2B & B2C Credit Management:** Organizations can manually approve trusted customers for a "Buy Now, Pay Later" (IOU) tab, complete with dynamic credit limits and auto-approval thresholds based on historical spend.
-- **Omnichannel Credit Checkout:** Integrated directly into the guest checkout flow, allowing approved customers to bypass card/cash payments and deduct instantly from their Store Credit balance.
-- **Automated IOU Reminder Engine:** Vercel Cron orchestrator intelligently identifies customers whose balance exceeds organization thresholds and automatically dispatches rich HTML emails with direct payment links, enforcing minimum repayment percentages.
-- **Storefront Payment Portal:** A frictionless, no-login portal (`/m/[slug]/iou/[customerId]`) where customers can seamlessly clear partial or full debt balances directly via Paystack, triggering real-time webhook reconciliation against their credit limit.
-
-### 13. Enterprise Team & Intercom Orchestration
-- **Department-Based Routing & Roles:** Organizations can group staff into bespoke departments (e.g., *Kitchen*, *Concierge*, *Housekeeping*). The platform natively provisions strict Row Level Security (RLS) to isolate staff members to their designated domains.
-- **Realtime Internal Chat:** A floating, globally accessible communication widget for staff to coordinate in real-time, featuring dedicated channels per department.
-- **Managerial Oversight:** Owners and Managers automatically inherit read/write bypasses allowing them to oversee and communicate across all departmental channels simultaneously.
-- **Rich Media & WebSocket Synchronization:** Powered by Supabase Realtime subscriptions, ensuring messages (text, voice notes, cloud-backed images) instantly propagate across all active staff dashboard sessions.
-
-### 14. Back-of-House Operations Engine
-OurMenu OS is a true operating system, extending far beyond the customer-facing frontend into deep backend workflows:
-- **Demo Mode Bypass:** A dedicated `?demo=1` architectural flow allowing prospective users to experience the full dashboard, analytics, and CRM mock data without creating an account.
-- **Master Cron Orchestrator:** Designed to bypass Vercel Hobby tier limitations by orchestrating multiple background jobs (Daily Reports, IOU Reminders, Abandoned Carts) within unified daily execution slots.
-- **Automated Daily Reports:** Nightly cron jobs that aggregate key business metrics (sales, velocity, feedback) and email summarized briefings directly to owners.
-- **Quotes Engine:** A dedicated pipeline for consultants, freelancers, and agencies to track, manage, and respond to custom B2B rate inquiries instantly.
-- **Properties & Shifts Management:** Dedicated infrastructure for scheduling staff shifts and managing complex real estate and lodging templates.
-- **Developer Console & Metrics Export:** Deep administrative tooling allowing platform owners to export cross-organizational analytics (e.g., Hackathon metrics, platform-wide sales volume) instantly.
-
+### 3. Industry Standard Templates & Use Cases
+OurMenu OS dynamically renders the correct UI based on the active **Template Builder**. Explore detailed data-flow diagrams for specific industries:
+- 🍽️ **[Hospitality (Restaurants, Cafes, Bars)](./docs/use-cases/hospitality.md)**
+- 🛎️ **[Hotels, Lounges, & Super-clubs](./docs/use-cases/hotels-lounges.md)**
+- 🛒 **[Supermarkets & Retail (Boutiques, Wholesalers)](./docs/use-cases/retail-and-b2b.md)**
+- ✂️ **[Services & Consulting (Spas, Salons)](./docs/use-cases/services.md)**
+- 💼 **[Consultants & Agencies (B2B Rates & Quotes Engine)](./docs/use-cases/consultants-and-agencies.md)**
+- 🏡 **[Real Estate & High-Ticket Inquiries](./docs/use-cases/real-estate.md)**
+- 🌐 **[Enterprise Portal Mode (Macro-Routing)](./docs/use-cases/portal-mode.md)**
 
 ---
 
@@ -214,126 +71,63 @@ OurMenu OS is a true operating system, extending far beyond the customer-facing 
 OurMenu OS monetizes via three tiered subscription plans, driven by a unified credit system that seamlessly up-sells usage into Pro and Enterprise tiers.
 
 ### 🟢 Lite Plan (₦19,999 / month or ₦199,990 / year)
-*Perfect for testing the system at a single venue.*
+*Perfect for testing the system at a single venue or food truck.*
 - **Credits:** 10 Monthly Credits
 - **Locations:** 1 active location
 - **QR Codes:** Up to 2 active QR codes/tables
-- **AI Assistant:** Customizable, domain-specific AI Assistant (guest-facing chat)
+- **AI Assistant:** Customizable, guest-facing AI Assistant
 - **Edge Translator:** Real-time menu translation for 40+ languages
 
 ### 🔵 Pro Plan (₦69,000 / month or ₦690,000 / year)
-*For serious operators who want every edge.*
+*For serious operators who want every edge (restaurants, salons, boutiques).*
 - **Credits:** 50 Monthly Credits (Refreshes every month)
 - **Locations:** 1 active location
 - **QR Codes:** Unlimited QR codes/tables
-- **Premium AI Tools:** AI Copywriter & AI Image Studio
-- **Operations:** Live Fulfillment Dashboard & Smart Request Triaging
+- **Premium AI Tools:** AI Copywriter & AI Image Studio Tool Calls
+- **Operations:** Live Fulfillment Dashboard, Smart Request Triaging, Visual Resource Manager
 - **Forecasting:** AI-driven inventory and sales forecasting engine
-- **Custom Pages:** 1 Page included (Additional pages cost 10 Credits each)
 
 ### 🟣 Enterprise Plan (Custom Pricing)
-*For massive chains and multi-location brands.*
+*For massive chains, super-clubs, hotels, and multi-location brands.*
 - **Credits:** 200 Monthly Credits
 - **Locations:** Multi-location dashboard (Manage multiple venues under one org)
-- **Features included:** All premium AI tools, unlimited hardware provisioning, custom portals.
-- **Integrations:** Direct API access for PMS (Property Management System) integration.
-
-### Phase 3: Visual Resource Manager
-- **Status:** **Completed**
-- **Core Additions:**
-  - `public.resources` table for defining tables, rooms, and bays.
-  - UI grid grouping resources by logical Zones (e.g., "Main Floor").
-  - Order payloads now map directly to `resource_id` instead of raw strings.
-  - Generates instant QR codes that point to `?resource=[UUID]` for airtight cart tracking.
-  - Full mobile responsiveness utilizing modern flex/grid and micro-animations.
-
-### Phase 4: Independent Sub-Businesses & RBAC
-- **Status:** **Completed**
-- **Core Additions:**
-  - `location_pages` now support fully independent sub-business data (custom WiFi, operating hours, contact email/phone, address) separate from the parent organization.
-  - Granular Role-Based Access Control (RBAC): Staff can be assigned to specific `page_id`s, restricting their dashboard access.
-
-### Phase 5: Chaos Roulette & Product Conditions
-- **Status:** **Completed**
-- **Core Additions:**
-  - **Chaos Roulette:** A gamified "spin to win" bill-splitting randomizer that converts the friction of group payments into a viral experience. Seamlessly integrates with the POS and checkout engines to calculate exact fractional splits in real-time.
-  - **Condition Variants:** Intelligent catalog system that detects standard "Condition" variants (New, Used, Refurbished) and automatically renders premium color-coded badges and dedicated filter bars for retail layouts.
-
-### Phase 6: Dedicated Point of Sale (POS)
-- **Status:** **Completed**
-- **Core Additions:**
-  - Dedicated dashboard module (`/dashboard/pos`) optimized for rapid cash-register-style entry.
-  - Frictionless walk-in order management with cash handling and change calculation.
-  - Native integration with the existing `orders` table, eliminating redundancy.
-
-### Phase 7: Enterprise Scale Upgrades (Taxonomy, Search, Polymorphism)
-- **Status:** **Completed**
-- **Core Additions:**
-  - Universal Taxonomy Engine (`page_collections`, `page_item_collections`) for infinite-depth categorisation.
-  - Universal Search Engine using PostgreSQL Full-Text Search and GIN indexes.
-  - Polymorphic Orders Engine adding `page_item_id` to order items for multi-item checkout.
-
-### Phase 8: Outbound Webhooks & Custom Domains
-- **Status:** **Completed (Backend), UI Pending**
-- **Core Additions:**
-  - Robust Webhook Delivery System (`location_webhooks`, `outbound_webhook_deliveries`) with DLQ cron retries.
-  - Custom Domain configuration layer (`custom_domains`) for white-labeling.
-  - Platform API Keys configuration.
-
-### Phase 9: Deep Availability Engine
-- **Status:** **Next Up**
-- **Core Additions:**
-  - Timezone-aware availability slots for service-based businesses.
+- **Features included:** All premium AI tools, independent sub-businesses, unlimited hardware provisioning, custom portals, custom domains.
+- **Integrations:** Direct API access via Webhooks for PMS (Property Management System) integration.
 
 ---
 
-### 🤝 Affiliate & Referral System (B2B Growth)
-OurMenu OS features a built-in Affiliate system designed for aggressive B2B scaling:
-- **Affiliate Dashboard:** Partners register to generate unique referral codes.
-- **Hard-Linked Organizations:** New tenants that register via referral links are permanently cryptographically tied to their affiliate.
-- **Automated Rev-Share:** Automated Webhooks calculate a 10% commission on every single subscription renewal and log it directly in `affiliate_earnings` for instant payout.
+## 💻 Running the Application 
+
+### Live Demo
+Experience the "marvel" of the platform instantly:
+**[https://ourmenuos.online](https://ourmenuos.online)**
+
+*(Use the `?demo=1` parameter on specific routes to bypass login and explore the dashboard capabilities).*
+
+### Running Locally (Next.js)
+```bash
+npm install
+npm run dev
+```
+Open `http://localhost:3000` to access the local environment.
+
+### Supabase Edge Functions (Local Testing)
+To test Webhooks or Push Notifications locally, install the Supabase CLI:
+```bash
+supabase start
+supabase functions serve
+```
+*Note: Ensure your `.env.local` is populated with the appropriate Supabase anon keys, service roles, and VAPID keys.*
 
 ---
 
-## 🛠️ Tech Stack & Repo Layout
+## 🛠️ Tech Stack 
 
 - **Framework:** Next.js 16 (App Router, Server Actions, async `params`)
 - **Database & Auth:** Supabase (PostgreSQL, Row Level Security, Edge Functions)
 - **State Management:** Zustand (with fully synchronized SSR hydration middleware)
 - **Validation & Security:** Zod (Strict, impenetrable API boundaries)
-- **AI Engine:** Google AI SDK (`@ai-sdk/google`) + Gemini 3.5 Flash (Vision & Text)
-- **Caching & Rate Limiting:** Upstash Redis (`@upstash/redis`, `@upstash/ratelimit`)
-- **Error Tracking & Observability:** Sentry (`@sentry/nextjs`)
-- **End-to-End Testing:** Playwright (`@playwright/test`)
+- **AI Engine:** Google AI SDK (`@ai-sdk/google`) + Gemini 3.5 Flash
+- **Caching & Rate Limiting:** Upstash Redis
+- **Error Tracking & Observability:** Sentry
 - **Styling & Animation:** Tailwind CSS v4 + Framer Motion
-- **Payments & Comms:** Paystack (Webhooks), Termii (WhatsApp/SMS), Web Push API
-
-### Repo Structure
-- `docs/PRODUCT_PLAN.md`: working product plan, viability audit, roadmap, and assumptions.
-- `app/`: Next.js 16 application containing the customer-facing SaaS dashboard and public progressive web app (PWA).
-- `components/`: shared UI components, Layouts, and standard views.
-- `lib/`: shared domain models, business logic, payments, and AI integrations.
-- `supabase/migrations/`: production database schema migrations.
-- `supabase/functions/`: edge functions (webhooks, push notifications, reconciliations).
-
----
-
-## 💻 Running the Application Locally
-
-### 1. Web Application (Next.js)
-```bash
-pnpm install
-pnpm dev
-```
-Open https://ourmenuos.online to access the dashboard.
-
-### 2. Supabase Edge Functions
-To test Webhooks or Push Notifications locally, install the Supabase CLI:
-```bash
-# Start the local supabase instance
-supabase start
-
-# Serve the edge functions locally
-supabase functions serve
-```
-*Note: Ensure your `.env.local` is populated with the appropriate Supabase anon keys, service roles, and VAPID keys for the web push system.*

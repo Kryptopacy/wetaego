@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { DynamicQR } from '@/components/qr/DynamicQR'
 import { generateKioskToken } from './kiosk-actions'
 import { X, Shield, RefreshCw, Wifi, WifiOff } from 'lucide-react'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 
 const TOKEN_TTL = 30 // seconds — must match server-side TOKEN_TTL_SECONDS
@@ -129,8 +130,7 @@ export function KioskDisplay({
         <div className="flex items-center gap-3">
           {logoUrl ? (
             <>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={logoUrl} alt={businessName} className="w-10 h-10 rounded-xl object-cover" />
+              <Image src={logoUrl} alt={businessName} width={40} height={40} className="w-10 h-10 rounded-xl object-cover" />
             </>
           ) : (
             <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center">

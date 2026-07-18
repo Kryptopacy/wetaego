@@ -85,6 +85,12 @@ export default async function QRCodeBatchPage() {
     const { data: qrs } = await query.order('created_at', { ascending: false })
     
     qrCodes = qrs || []
+
+    const { data: zones } = await supabase
+      .from('qr_zones')
+      .select('*')
+      .in('location_id', locations.map((l) => l.id))
+
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://ourmenuos.online'
 
   return (
@@ -95,6 +101,7 @@ export default async function QRCodeBatchPage() {
         orgLogo={orgLogo}
         locations={locations} 
         qrCodes={qrCodes || []} 
+        qrZones={zones || []}
         baseUrl={baseUrl}
         planLimit={planLimit}
         creditBalance={creditBalance}

@@ -2,11 +2,13 @@
 
 import { useCartStore } from '@/lib/store/cart'
 import { formatCurrency } from '@/lib/utils/currency'
+import { calculateEffectiveDiscount } from '@/lib/utils/pricing'
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ShoppingBag } from 'lucide-react'
 import { CheckoutModal } from './components/checkout-modal'
+import { useTranslations } from 'next-intl'
 
 interface CartFABProps {
   organizationId: string
@@ -40,7 +42,8 @@ interface CartFABProps {
 }
 
 export function CartFAB(props: CartFABProps) {
-  const { items, totalAmountMinorForPage, addItem, updateQuantity, clearCart, spinnerDiscount } = useCartStore()
+  const t = useTranslations('Guest')
+  const { items, totalAmountMinorForPage, addItem, updateQuantity, clearCart, spinnerDiscount, getDiscountAmountMinor } = useCartStore()
   const [isMounted, setIsMounted] = useState(false)
   const [showCheckoutModal, setShowCheckoutModal] = useState(false)
   const searchParams = useSearchParams()
@@ -57,11 +60,7 @@ export function CartFAB(props: CartFABProps) {
   const totalItems = pageItems.reduce((sum, item) => sum + item.quantity, 0)
   const subtotalMinor = totalAmountMinorForPage(props.pageId || '')
   
-  const effectiveGlobalPercent = (props.globalDiscountEnabled && props.globalDiscountPercentage) ? props.globalDiscountPercentage : 0
-  const effectivePercent = Math.max(effectiveGlobalPercent, spinnerDiscount || 0)
-  
-  const discountMultiplier = effectivePercent / 100
-  const discountAmountMinor = Math.floor(subtotalMinor * discountMultiplier)
+  const discountAmountMinor = getDiscountAmountMinor(subtotalMinor, props.globalDiscountEnabled ? props.globalDiscountPercentage : null)
   
   // NOTE: final total logic including delivery fee is managed inside the modal. 
   // We'll show the discounted subtotal on the FAB for simplicity before delivery fee is known.
@@ -98,7 +97,7 @@ export function CartFAB(props: CartFABProps) {
                   </motion.div>
                 </div>
                 <div className="flex flex-col items-start">
-                  <span className="text-[15px]">View Order</span>
+                  <span className="text-[15px]">{t('checkout')}</span>
                   {discountAmountMinor > 0 && (
                     <span className="text-[11px] text-zinc-400 dark:text-zinc-500 font-medium tracking-wide">
                       Saved {formatCurrency(discountAmountMinor)}!

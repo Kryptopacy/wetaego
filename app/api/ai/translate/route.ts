@@ -1,4 +1,5 @@
-import { checkRateLimit } from '@/lib/upstash'
+import { checkRateLimit, redis } from '@/lib/upstash'
+import crypto from 'crypto'
 
 import { google } from '@ai-sdk/google'
 import { generateObject } from 'ai'
@@ -51,6 +52,16 @@ export async function POST(req: Request) {
     }
 
     const { targetLanguage, menuData, organizationId } = parsed.data
+
+    const payloadHash = crypto.createHash('sha256').update(JSON.stringify({ targetLanguage, menuData })).digest('hex')
+    const cacheKey = `translation:${organizationId}:${payloadHash}`
+
+    if (redis) {
+      const cached = await redis.get(cacheKey)
+      if (cached) {
+        return NextResponse.json(cached)
+      }
+    }
 
     // Verify user belongs to org
     const { data: member } = await supabase
@@ -118,6 +129,9 @@ export async function POST(req: Request) {
       ${JSON.stringify(menuData)}
       `
     })
+    if (redis) {
+      await redis.set(cacheKey, JSON.stringify(object), { ex: 60 * 60 * 24 * 7 }) // Cache for 7 days
+    }
 
     return NextResponse.json(object)
   } catch (error: unknown) {

@@ -22,6 +22,8 @@ interface CartState {
   updateQuantity: (cartKey: string, delta: number) => void
   totalAmountMinor: () => number
   totalAmountMinorForPage: (pageId: string) => number
+  getDiscountAmountMinor: (subtotalMinor: number, globalDiscountPercentage?: number | null) => number
+  getDiscountedTotalAmountMinor: (subtotalMinor: number, globalDiscountPercentage?: number | null) => number
   spinnerDiscount: number | null
   setSpinnerDiscount: (discount: number | null) => void
   splitCount: number
@@ -89,6 +91,16 @@ export const useCartStore = create<CartState>()(
         return items
           .filter(i => i.pageId === pageId)
           .reduce((total, item) => total + (item.price_minor * item.quantity), 0)
+      },
+      getDiscountAmountMinor: (subtotalMinor: number, globalDiscountPercentage?: number | null) => {
+        const { spinnerDiscount } = get()
+        const effectivePercentage = Math.max(spinnerDiscount || 0, globalDiscountPercentage || 0)
+        if (effectivePercentage <= 0) return 0
+        return Math.floor(subtotalMinor * (effectivePercentage / 100))
+      },
+      getDiscountedTotalAmountMinor: (subtotalMinor: number, globalDiscountPercentage?: number | null) => {
+        const { getDiscountAmountMinor } = get()
+        return Math.max(0, subtotalMinor - getDiscountAmountMinor(subtotalMinor, globalDiscountPercentage))
       },
       spinnerDiscount: null,
       setSpinnerDiscount: (discount) => set({ spinnerDiscount: discount }),

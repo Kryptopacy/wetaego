@@ -8,11 +8,23 @@ vi.mock('next/headers', () => ({
   cookies: vi.fn(),
 }))
 
+vi.mock('@/lib/supabase/server', () => ({
+  createClient: vi.fn().mockResolvedValue({
+    auth: {
+      getUser: vi.fn().mockResolvedValue({ data: { user: { id: 'user_123' } } })
+    }
+  })
+}))
+
 describe('Layout Actions (Branch Switcher)', () => {
   it('should set the active location cookie securely', async () => {
     const mockSet = vi.fn()
     vi.mocked(cookiesModule.cookies).mockResolvedValue({
       set: mockSet,
+      get: vi.fn(),
+      getAll: vi.fn().mockReturnValue([]),
+      setAll: vi.fn(),
+      delete: vi.fn(),
     } as unknown as Awaited<ReturnType<typeof cookiesModule.cookies>>)
 
     await setActiveLocationCookie('loc_123')

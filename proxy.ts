@@ -124,6 +124,34 @@ export async function proxy(request: NextRequest) {
     return NextResponse.rewrite(rewriteUrl)
   }
 
+  // --- 4. LOCALE AUTO-DETECTION (Guest UI) ---
+  if (request.nextUrl.pathname.startsWith('/m/')) {
+    const hasLocaleCookie = request.cookies.has('NEXT_LOCALE')
+    if (!hasLocaleCookie) {
+      const acceptLang = request.headers.get('accept-language')
+      const SUPPORTED_LOCALES = ['en', 'es', 'fr', 'yo', 'ig', 'ha']
+      let bestLocale = 'en'
+      
+      if (acceptLang) {
+        const preferredLocales = acceptLang.split(',').map(lang => lang.split(';')[0].trim().toLowerCase())
+        for (const locale of preferredLocales) {
+          if (SUPPORTED_LOCALES.includes(locale)) {
+            bestLocale = locale
+            break
+          }
+          const base = locale.split('-')[0]
+          if (SUPPORTED_LOCALES.includes(base)) {
+            bestLocale = base
+            break
+          }
+        }
+      }
+      
+      // Set the cookie for future requests
+      supabaseResponse.cookies.set('NEXT_LOCALE', bestLocale, { path: '/' })
+    }
+  }
+
   return supabaseResponse
 }
 

@@ -2,6 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion'
 import { CreditCard, Building2, Banknote, QrCode, Clock, Wallet, Lock, Shield, CheckCircle2, Sparkles, ArrowRight } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { formatCurrency } from '@/lib/utils/currency'
 
 type PaymentMethodId = 'card' | 'transfer' | 'iou' | 'pay_on_delivery_cash' | 'pay_on_delivery_link' | 'pay_after_service'
@@ -94,6 +95,8 @@ function getVisibleOptions(
       if (opt.deliveryOnly && !isDelivery) return false
       if (opt.tableOnly && isDelivery) return false
       if (opt.id === 'iou' && !iouPaymentEnabled) return false
+      if (opt.id === 'transfer' && !manualPaymentEnabled && paymentIsLive) return false
+      if (opt.id === 'card' && !paymentIsLive) return false
       return true
     })
   }
@@ -104,7 +107,7 @@ function getVisibleOptions(
   return legacy.filter(Boolean)
 }
 
-function getCtaLabel(method: string, finalTotalMinor: number, isUnevenSplit?: boolean, splitCount?: number): string {
+function getCtaLabel(method: string, finalTotalMinor: number, t: any, isUnevenSplit?: boolean, splitCount?: number): string {
   if (isUnevenSplit) return `Share Bill — ${formatCurrency(finalTotalMinor)}`
   const amount = splitCount && splitCount > 1
     ? formatCurrency(Math.ceil(finalTotalMinor / splitCount))
@@ -112,9 +115,9 @@ function getCtaLabel(method: string, finalTotalMinor: number, isUnevenSplit?: bo
   switch (method) {
     case 'card':              return `Pay ${amount}`
     case 'transfer':          return `Confirm Order — ${amount}`
-    case 'pay_on_delivery_cash': return 'Place Order'
-    case 'pay_on_delivery_link': return 'Place Order'
-    case 'pay_after_service': return 'Place Order'
+    case 'pay_on_delivery_cash': return t('place_order')
+    case 'pay_on_delivery_link': return t('place_order')
+    case 'pay_after_service': return t('place_order')
     case 'iou':               return `Charge ${amount} from Credit`
     default:                  return `Pay ${amount}`
   }
@@ -160,6 +163,7 @@ export function CheckoutPaymentForm({
   pagePaymentOptions = [],
   fulfillmentType,
 }: CheckoutPaymentFormProps) {
+  const t = useTranslations('Guest')
   const visible = getVisibleOptions(pagePaymentOptions, fulfillmentType, paymentIsLive, manualPaymentEnabled, iouPaymentEnabled)
   const selected = OPTIONS.find(o => o.id === paymentMethod)
   const isOffline = ['pay_on_delivery_cash', 'pay_on_delivery_link', 'pay_after_service'].includes(paymentMethod)
@@ -209,7 +213,7 @@ export function CheckoutPaymentForm({
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className={`absolute inset-0 bg-gradient-to-r ${opt.gradient}`}
+                        className={`absolute inset-0 bg-linear-to-r ${opt.gradient}`}
                       />
                     )}
                   </AnimatePresence>
@@ -265,7 +269,7 @@ export function CheckoutPaymentForm({
         {/* Bank Transfer details */}
         {paymentMethod === 'transfer' && manualPaymentEnabled && (manualPaymentBankName || manualPaymentAccountNumber) && (
           <motion.div key="transfer-info" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden">
-            <div className="rounded-2xl border border-amber-200/80 dark:border-amber-500/25 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-500/10 dark:to-orange-500/5 p-4">
+            <div className="rounded-2xl border border-amber-200/80 dark:border-amber-500/25 bg-linear-to-br from-amber-50 to-orange-50 dark:from-amber-500/10 dark:to-orange-500/5 p-4">
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-6 h-6 rounded-lg bg-amber-100 dark:bg-amber-500/20 flex items-center justify-center">
                   <Building2 className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
@@ -287,7 +291,7 @@ export function CheckoutPaymentForm({
         {/* Pay-after-service info */}
         {paymentMethod === 'pay_after_service' && (
           <motion.div key="after-service" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden">
-            <div className="rounded-2xl border border-emerald-200/80 dark:border-emerald-500/25 bg-gradient-to-br from-emerald-50 to-fuchsia-50/50 dark:from-emerald-500/10 dark:to-fuchsia-500/5 p-4 flex items-start gap-3">
+            <div className="rounded-2xl border border-emerald-200/80 dark:border-emerald-500/25 bg-linear-to-br from-emerald-50 to-fuchsia-50/50 dark:from-emerald-500/10 dark:to-fuchsia-500/5 p-4 flex items-start gap-3">
               <div className="w-6 h-6 rounded-lg bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center shrink-0 mt-0.5">
                 <Clock className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
               </div>
@@ -301,7 +305,7 @@ export function CheckoutPaymentForm({
         {/* Pay-on-arrival info */}
         {paymentMethod === 'pay_on_delivery_link' && (
           <motion.div key="arrival-link" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden">
-            <div className="rounded-2xl border border-teal-200/80 dark:border-teal-500/25 bg-gradient-to-br from-teal-50 to-cyan-50/50 dark:from-teal-500/10 dark:to-cyan-500/5 p-4 flex items-start gap-3">
+            <div className="rounded-2xl border border-teal-200/80 dark:border-teal-500/25 bg-linear-to-br from-teal-50 to-cyan-50/50 dark:from-teal-500/10 dark:to-cyan-500/5 p-4 flex items-start gap-3">
               <div className="w-6 h-6 rounded-lg bg-teal-100 dark:bg-teal-500/20 flex items-center justify-center shrink-0 mt-0.5">
                 <QrCode className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
               </div>
@@ -326,11 +330,11 @@ export function CheckoutPaymentForm({
 
           {/* Gradient shimmer on hover */}
           {selected && (
-            <div className={`absolute inset-0 bg-gradient-to-r ${selected.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+            <div className={`absolute inset-0 bg-linear-to-r ${selected.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
           )}
 
           {/* Shine sweep */}
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/8 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+          <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/8 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
 
           <div className="relative z-10 flex items-center justify-between h-full px-5 text-white dark:text-zinc-900">
             {isCheckingOut ? (
@@ -340,8 +344,8 @@ export function CheckoutPaymentForm({
               </div>
             ) : (
               <>
-                <span className="font-black text-[16px] tracking-tight">
-                  {getCtaLabel(paymentMethod, finalTotalMinor, isUnevenSplit, splitCount)}
+                <span className="truncate pr-1 font-black text-[16px] tracking-tight">
+                  {getCtaLabel(paymentMethod, finalTotalMinor, t, isUnevenSplit, splitCount)}
                 </span>
                 <div className="flex items-center gap-1.5 bg-white/12 dark:bg-black/10 py-1.5 px-3 rounded-xl backdrop-blur-sm">
                   {isOffline

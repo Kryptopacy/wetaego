@@ -1,0 +1,27 @@
+{
+  "Dashboard": {
+    "liveOperations": "Opérations en Direct",
+    "receivingOrders": "Réception des Commandes",
+    "hardwareSettings": "Paramètres Matériels",
+    "language": "Langue",
+    "languageDesc": "Langue de l'interface du tableau de bord"
+  },
+  "Guest": {
+    "add_to_order": "Ajouter à la commande",
+    "sold_out": "Épuisé",
+    "search": "Rechercher...",
+    "translate_prompt_title": "Traduire la page ?",
+    "translate_prompt_desc": "Passer à {targetLang}",
+    "yes": "Oui",
+    "no": "Non",
+    "checkout": "Payer",
+    "subtotal": "Sous-total",
+    "total": "Total",
+    "delivery_fee": "Frais de livraison",
+    "place_order": "Passer la commande",
+    "order_received": "Commande reçue",
+    "preparing": "En préparation",
+    "ready": "Prêt",
+    "completed": "Terminé"
+  }
+}

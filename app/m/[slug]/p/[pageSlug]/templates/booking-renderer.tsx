@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useEffect } from 'react'
 import { BackButton } from '../../../components/back-button'
 import { InfoStrip } from '../../../components/info-strip'
 import Link from 'next/link'
@@ -101,6 +101,44 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
     number_of_guests: '1',
     booking_notes: '',
   })
+
+  const [availableSlots, setAvailableSlots] = useState<{ slotStart: string, available: number }[]>([])
+  const [isLoadingSlots, setIsLoadingSlots] = useState(false)
+
+  useEffect(() => {
+    if (!form.booking_date) {
+      setAvailableSlots([])
+      return
+    }
+
+    let isMounted = true
+    setIsLoadingSlots(true)
+
+    // Calculate requested capacity
+    const capacityNeeded = parseInt(form.number_of_guests) || 1
+
+    fetch(`/api/locations/${location.id}/availability?date=${form.booking_date}`)
+      .then(res => res.json())
+      .then(data => {
+        if (!isMounted) return
+        if (data.slots) {
+          // Filter out slots that do not have enough capacity
+          const validSlots = data.slots.filter((s: any) => s.available >= capacityNeeded)
+          setAvailableSlots(validSlots)
+        } else {
+          setAvailableSlots([])
+        }
+      })
+      .catch(err => {
+        console.error('Error fetching slots:', err)
+        if (isMounted) setAvailableSlots([])
+      })
+      .finally(() => {
+        if (isMounted) setIsLoadingSlots(false)
+      })
+
+    return () => { isMounted = false }
+  }, [form.booking_date, form.number_of_guests, location.id])
 
   function handleToggleItem(item: PageItem) {
     setSelectedItems(prev => {
@@ -290,15 +328,32 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
                       minDate={new Date()}
                     />
                   </div>
-                  <div>
-                    <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">Time *</label>
-                    <input
-                      value={form.booking_time}
-                      onChange={e => setForm(f => ({ ...f, booking_time: e.target.value }))}
-                      required
-                      type="time"
-                      className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-emerald-500 focus:outline-none"
-                    />
+                  <div className="col-span-2">
+                    <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">Available Times *</label>
+                    {isLoadingSlots ? (
+                      <div className="text-sm text-zinc-500 py-4 text-center border border-zinc-800 rounded-xl">Loading slots...</div>
+                    ) : !form.booking_date ? (
+                      <div className="text-sm text-zinc-500 py-4 text-center border border-zinc-800 rounded-xl">Select a date to view times</div>
+                    ) : availableSlots.length === 0 ? (
+                      <div className="text-sm text-red-400 py-4 text-center bg-red-500/10 border border-red-500/20 rounded-xl">No slots available</div>
+                    ) : (
+                      <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-48 overflow-y-auto pr-1">
+                        {availableSlots.map(slot => (
+                          <button
+                            key={slot.slotStart}
+                            type="button"
+                            onClick={() => setForm(f => ({ ...f, booking_time: slot.slotStart }))}
+                            className={`py-2 px-1 text-sm font-medium rounded-lg border transition-all ${
+                              form.booking_time === slot.slotStart
+                                ? 'bg-emerald-500 border-emerald-500 text-white'
+                                : 'bg-zinc-800 border-zinc-700 text-zinc-300 hover:border-emerald-500/50'
+                            }`}
+                          >
+                            {slot.slotStart}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -323,15 +378,36 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
                       />
                     </div>
                   </div>
+                  <div className="col-span-2">
+                    <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">Select Start Time</label>
+                    {isLoadingSlots ? (
+                      <div className="text-sm text-zinc-500 py-4 text-center border border-zinc-800 rounded-xl">Loading slots...</div>
+                    ) : !form.booking_date ? (
+                      <div className="text-sm text-zinc-500 py-4 text-center border border-zinc-800 rounded-xl">Select a date to view times</div>
+                    ) : availableSlots.length === 0 ? (
+                      <div className="text-sm text-red-400 py-4 text-center bg-red-500/10 border border-red-500/20 rounded-xl">No slots available</div>
+                    ) : (
+                      <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-48 overflow-y-auto pr-1">
+                        {availableSlots.map(slot => (
+                          <button
+                            key={slot.slotStart}
+                            type="button"
+                            onClick={() => setForm(f => ({ ...f, booking_time: slot.slotStart }))}
+                            className={`py-2 px-1 text-sm font-medium rounded-lg border transition-all ${
+                              form.booking_time === slot.slotStart
+                                ? 'bg-emerald-500 border-emerald-500 text-white'
+                                : 'bg-zinc-800 border-zinc-700 text-zinc-300 hover:border-emerald-500/50'
+                            }`}
+                          >
+                            {slot.slotStart}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">Start Time</label>
-                      <input
-                        value={form.booking_time}
-                        onChange={e => setForm(f => ({ ...f, booking_time: e.target.value }))}
-                        type="time"
-                        className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:border-emerald-500 focus:outline-none"
-                      />
+                      {/* Placeholder to keep layout consistent if needed */}
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">End Time (Optional)</label>

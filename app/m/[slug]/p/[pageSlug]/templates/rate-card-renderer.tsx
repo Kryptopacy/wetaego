@@ -7,6 +7,7 @@ import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 import { formatCurrency } from '@/lib/utils/currency'
+import { Search, X } from 'lucide-react'
 
 interface PageItem {
   id: string
@@ -72,6 +73,7 @@ const CATEGORY_LABELS: Record<string, { label: string; color: string; bg: string
 export function RateCardRenderer({ location, page, items, locationSlug, paymentIsLive }: RateCardRendererProps) {
   const themeColor = location.theme_color || '#7c3aed'
 
+  const [searchQuery, setSearchQuery] = useState('')
   const [selectedItems, setSelectedItems] = useState<PageItem[]>([])
   const [showCheckout, setShowCheckout] = useState(false)
   const [formSuccess, setFormSuccess] = useState(false)
@@ -128,11 +130,19 @@ export function RateCardRenderer({ location, page, items, locationSlug, paymentI
     .filter(Boolean)
     .join(' + ')
 
+  const searchedItems = items.filter(item => {
+    if (!searchQuery) return true;
+    const query = searchQuery.toLowerCase();
+    return item.title.toLowerCase().includes(query) || 
+           item.description?.toLowerCase().includes(query) ||
+           item.item_data?.category?.toLowerCase().includes(query);
+  });
+
   // Group items by category dynamically
   const grouped: Record<string, PageItem[]> = {}
   const uncategorized: PageItem[] = []
 
-  for (const item of items) {
+  for (const item of searchedItems) {
     const cat = item.item_data?.category?.trim()
     if (cat) {
       grouped[cat] = [...(grouped[cat] || []), item]
@@ -222,6 +232,30 @@ export function RateCardRenderer({ location, page, items, locationSlug, paymentI
           </div>
         )}
         <InfoStrip location={location} />
+
+        {/* Search Bar */}
+        {!formSuccess && (
+          <div className="mt-8 mb-6 relative group">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <Search className="w-5 h-5 text-zinc-500 group-focus-within:text-emerald-500 transition-colors" />
+            </div>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search services, add-ons..."
+              className="w-full pl-12 pr-12 py-3.5 bg-zinc-900/50 border border-zinc-800 rounded-2xl text-[15px] outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/50 transition-all text-white placeholder:text-zinc-500"
+            />
+            {searchQuery && (
+              <button 
+                onClick={() => setSearchQuery('')}
+                className="absolute inset-y-0 right-0 pr-4 flex items-center text-zinc-500 hover:text-zinc-300 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            )}
+          </div>
+        )}
 
         {/* Success state */}
         {formSuccess && (

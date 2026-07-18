@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Key, Trash2, Copy, Check, Plus, AlertCircle } from 'lucide-react'
 import { createApiKey, revokeApiKey } from './actions'
 import { formatDistanceToNow } from 'date-fns'
+import { toast } from 'sonner'
 
 interface ApiKey {
   id: string
@@ -68,16 +69,17 @@ export function ApiKeyManager({ initialKeys, organizationId }: { initialKeys: Ap
         if (res?.data?.success) {
           setKeys(keys.filter(k => k.id !== keyId))
         } else if (res?.serverError) {
-          alert(res.serverError)
+          toast.error(res.serverError)
         }
       } catch (err: any) {
-        alert(err.message)
+        toast.error(err.message)
       }
     })
   }
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text)
+    toast.success('Copied to clipboard!')
     setCopiedKey(true)
     setTimeout(() => setCopiedKey(false), 2000)
   }

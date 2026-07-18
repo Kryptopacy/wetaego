@@ -11,7 +11,7 @@ import { motion } from 'framer-motion'
 import { createClient } from '@/lib/supabase/client'
 import { setActiveLocationCookie } from './layout-actions'
 import {
-  LayoutDashboard, ClipboardList, BarChart3, BookOpen, CreditCard, Menu, MessageSquare, Package, QrCode, Settings, Users, Zap, X, User, FileText, LogOut, TrendingUp, Truck, MapPin, ChevronDown, Check
+  LayoutDashboard, ClipboardList, BarChart3, BookOpen, CreditCard, Menu, MessageSquare, Package, QrCode, Settings, Users, Zap, X, User, FileText, LogOut, TrendingUp, Truck, MapPin, ChevronDown, Check, Clock
 } from 'lucide-react'
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuGroup, DropdownMenuLabel } from '@/components/ui/dropdown-menu'
 import { GlobalRealtime } from './global-realtime'
@@ -45,7 +45,8 @@ const ICON_MAP: Record<string, React.ElementType> = {
   QrCode,
   TrendingUp,
   MessageSquare,
-  Package
+  Package,
+  Clock
 }
 
 
@@ -222,6 +223,8 @@ export default function ClientLayout({ children, initialData }: { children: Reac
     { href: '/dashboard/pages', label: 'Your Pages', icon: FileText, tooltip: 'Manage your business pages and branding' },
     { href: '/dashboard/ads', label: 'Ad Manager', icon: Zap, tooltip: 'Manage sponsored ads and view analytics' },
     { href: '/dashboard/settings', label: 'Settings & Team', icon: Settings, tooltip: 'Configure business settings and team access' },
+    { href: '/dashboard/availability', label: 'Availability Engine', icon: Clock, tooltip: 'Configure operational timezone and weekly schedule' },
+    { href: '/dashboard/webhooks', label: 'Outbound Webhooks', icon: Zap, tooltip: 'Configure real-time POST webhooks' },
     { href: '/dashboard/billing', label: 'Billing & Plan', icon: CreditCard, tooltip: 'Manage your subscription and credits' },
     { href: '/dashboard/support', label: 'Help & Support', icon: MessageSquare, tooltip: 'Get help and contact OurMenuOS support' },
   ]

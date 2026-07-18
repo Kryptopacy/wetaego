@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Plus, X } from 'lucide-react'
+import { toast } from 'sonner'
 
 interface CustomMilestonesSettingsProps {
   locationId: string
@@ -51,7 +52,7 @@ export function CustomMilestonesSettings({ locationId, initialMilestones }: Cust
       setSuccess(true)
       setTimeout(() => setSuccess(false), 3000)
     } else {
-      alert('Failed to save custom milestones.')
+      toast.error('Failed to save custom milestones.')
     }
   }
 

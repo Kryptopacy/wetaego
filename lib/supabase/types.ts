@@ -1052,6 +1052,44 @@ export type Database = {
           },
         ]
       }
+      location_availability: {
+        Row: {
+          created_at: string
+          id: string
+          location_id: string
+          schedule: Json
+          slot_interval: number
+          timezone: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          location_id: string
+          schedule?: Json
+          slot_interval?: number
+          timezone?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          location_id?: string
+          schedule?: Json
+          slot_interval?: number
+          timezone?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "location_availability_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: true
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       location_pages: {
         Row: {
           address: string | null
@@ -1303,6 +1341,7 @@ export type Database = {
           cover_image_url: string | null
           created_at: string
           currency_code: string
+          custom_order_milestones: Json | null
           delivery_enabled: boolean | null
           delivery_fee_minor: number | null
           delivery_minimum_order_minor: number | null
@@ -1363,6 +1402,7 @@ export type Database = {
           cover_image_url?: string | null
           created_at?: string
           currency_code?: string
+          custom_order_milestones?: Json | null
           delivery_enabled?: boolean | null
           delivery_fee_minor?: number | null
           delivery_minimum_order_minor?: number | null
@@ -1423,6 +1463,7 @@ export type Database = {
           cover_image_url?: string | null
           created_at?: string
           currency_code?: string
+          custom_order_milestones?: Json | null
           delivery_enabled?: boolean | null
           delivery_fee_minor?: number | null
           delivery_minimum_order_minor?: number | null
@@ -2854,6 +2895,7 @@ export type Database = {
           organization_id: string
           table_identifier: string | null
           updated_at: string
+          zone_id: string | null
         }
         Insert: {
           created_at?: string
@@ -2865,6 +2907,7 @@ export type Database = {
           organization_id: string
           table_identifier?: string | null
           updated_at?: string
+          zone_id?: string | null
         }
         Update: {
           created_at?: string
@@ -2876,6 +2919,7 @@ export type Database = {
           organization_id?: string
           table_identifier?: string | null
           updated_at?: string
+          zone_id?: string | null
         }
         Relationships: [
           {
@@ -2890,6 +2934,45 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "qr_codes_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "qr_zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      qr_zones: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          location_id: string | null
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          location_id?: string | null
+          name: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          location_id?: string | null
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "qr_zones_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
             referencedColumns: ["id"]
           },
         ]

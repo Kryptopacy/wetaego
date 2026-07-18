@@ -8,6 +8,7 @@ import { usePrinterStore } from '@/lib/stores/printer-store'
 import { printOrder } from '@/lib/utils/printer'
 import { PINPromptModal } from './pin-prompt-modal'
 import { MilestonesManager } from './milestones-manager'
+import { toast } from 'sonner'
 
 interface ActiveOrdersGridProps {
   activeOrders: UIOrder[]
@@ -52,9 +53,9 @@ export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, tem
     const link = `${window.location.origin}/d/${orderId}`
     try {
       await navigator.clipboard.writeText(link)
-      alert('Dispatch link copied to clipboard!')
+      toast.success('Dispatch link copied to clipboard!')
     } catch (_err) {
-      alert(`Failed to copy. Share this link: ${link}`)
+      toast.error(`Failed to copy. Share this link: ${link}`)
     }
   }
 

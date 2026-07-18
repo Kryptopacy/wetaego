@@ -56,7 +56,7 @@ const withPWA = withPWAInit({
         },
       },
       {
-        urlPattern: /\/api\/(?:bookings|orders|feedback-entry).*/i,
+        urlPattern: /\/api\/(?:bookings|orders|feedback-entry|service-request).*/i,
         handler: 'NetworkOnly',
         options: {
           backgroundSync: {

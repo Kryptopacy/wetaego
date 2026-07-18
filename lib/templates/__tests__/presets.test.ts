@@ -7,7 +7,7 @@ describe('Business Type Presets', () => {
       expect(preset).toBeDefined()
       expect(preset.label).toBeDefined()
       expect(preset.template_type).toBeDefined()
-      expect(['catalog', 'booking', 'listing', 'rate_card', 'info', 'custom', 'quote']).toContain(preset.template_type)
+      expect(['catalog', 'booking', 'listing', 'rate_card', 'info', 'custom', 'quote', 'portfolio']).toContain(preset.template_type)
       expect(['food_drink', 'hospitality', 'services', 'retail', 'property', 'creative', 'quote_based']).toContain(preset.group)
 
       if (preset.payment_mode === 'deposit') {

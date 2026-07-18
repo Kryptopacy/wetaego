@@ -91,7 +91,7 @@ export async function RestaurantRenderer({
             percentage={location.global_discount_percentage || 0} 
           />
         )}
-        <LiveOrderTracker />
+        <LiveOrderTracker customOrderMilestones={location.custom_order_milestones as any} />
         
         <MenuRenderer initialCategories={categories as any} />
         

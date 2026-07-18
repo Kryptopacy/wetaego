@@ -1,4 +1,5 @@
 import { createAnonClient } from '@/lib/supabase/server'
+import { GlobalFeedbackFAB } from './components/global-feedback-fab'
 
 export default async function LocationLayout({
   children,
@@ -11,20 +12,21 @@ export default async function LocationLayout({
   const supabase = createAnonClient()
   const { data: location } = await supabase
     .from('locations')
-    .select('theme_color')
+    .select('id, theme_color')
     .eq('slug', resolvedParams.slug)
     .single()
 
   if (!location) return <>{children}</>
 
   return (
-    <div 
-      style={{ 
-        "--theme-color": location.theme_color || "#10b981"
-      } as React.CSSProperties}
-      className="location-theme-wrapper contents"
-    >
-      {children}
-    </div>
+      <div 
+        style={{ 
+          "--theme-color": location.theme_color || "#10b981"
+        } as React.CSSProperties}
+        className="location-theme-wrapper contents"
+      >
+        {children}
+        <GlobalFeedbackFAB locationId={location.id} slug={resolvedParams.slug} />
+      </div>
   )
 }

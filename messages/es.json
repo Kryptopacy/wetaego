@@ -5,5 +5,23 @@
     "hardwareSettings": "Configuración de Hardware",
     "language": "Idioma",
     "languageDesc": "Idioma de la interfaz del panel de cumplimiento"
+  },
+  "Guest": {
+    "add_to_order": "Agregar al Pedido",
+    "sold_out": "Agotado",
+    "search": "Buscar...",
+    "translate_prompt_title": "¿Traducir página?",
+    "translate_prompt_desc": "Cambiar a {targetLang}",
+    "yes": "Sí",
+    "no": "No",
+    "checkout": "Pagar",
+    "subtotal": "Subtotal",
+    "total": "Total",
+    "delivery_fee": "Tarifa de Envío",
+    "place_order": "Realizar Pedido",
+    "order_received": "Pedido Recibido",
+    "preparing": "Preparando",
+    "ready": "Listo",
+    "completed": "Completado"
   }
 }

@@ -1,0 +1,27 @@
+{
+  "Dashboard": {
+    "liveOperations": "Awọn isẹ laaye",
+    "receivingOrders": "Gbigba Awọn aṣẹ",
+    "hardwareSettings": "Eto Hardware",
+    "language": "Ede",
+    "languageDesc": "Ede fun dasibodu asẹ"
+  },
+  "Guest": {
+    "add_to_order": "Fi kun ibere",
+    "sold_out": "Kò sí",
+    "search": "Wa...",
+    "translate_prompt_title": "Ṣe o fẹ ṣe Itumọ Oju-iwe?",
+    "translate_prompt_desc": "Yipada si {targetLang}",
+    "yes": "Bẹẹni",
+    "no": "Rara",
+    "checkout": "Sisanwo",
+    "subtotal": "Apapọ",
+    "total": "Iye Apapọ",
+    "delivery_fee": "Owo Ifijiṣẹ",
+    "place_order": "Pari ibere rẹ",
+    "order_received": "A ti gba ibere",
+    "preparing": "N ṣe igbaradi",
+    "ready": "O ti ṣetan",
+    "completed": "O ti pari"
+  }
+}

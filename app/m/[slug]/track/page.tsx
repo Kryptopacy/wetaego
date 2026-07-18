@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import { TrackOrderClient } from './track-client'
 import Link from 'next/link'
+import Image from 'next/image'
 import { ChevronLeft } from 'lucide-react'
 
 type TrackPageProps = {
@@ -50,8 +51,7 @@ export default async function TrackOrderPage(props: TrackPageProps) {
         </Link>
         {location.logo_url && (
           <>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={location.logo_url} alt={location.name} className="h-8 w-auto object-contain" />
+            <Image src={location.logo_url} alt={location.name} width={64} height={32} className="h-8 w-auto object-contain" />
           </>
         )}
       </div>

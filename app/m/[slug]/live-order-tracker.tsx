@@ -7,7 +7,13 @@ import { Tables } from '@/types'
 
  
 
-export function LiveOrderTracker() {
+export type CustomMilestone = {
+  status: string;
+  label: string;
+  message?: string;
+}
+
+export function LiveOrderTracker({ customOrderMilestones }: { customOrderMilestones?: CustomMilestone[] | null }) {
   const supabase = createClient()
   const [order, setOrder] = useState<Tables<'orders'> | null>(null)
   const [timeLeft, setTimeLeft] = useState<number>(0)
@@ -89,8 +95,12 @@ export function LiveOrderTracker() {
                 <span className="w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse" />
               </div>
               <div className="flex flex-col">
-                <span className="text-white font-bold text-sm leading-tight">Preparing Order #{order.id.split('-')[0]}</span>
-                <span className="text-zinc-400 text-xs font-medium">Your meal is on the way</span>
+                <span className="text-white font-bold text-sm leading-tight">
+                  {customOrderMilestones?.find(m => m.status === order.status)?.label || `Preparing Order #${order.id.split('-')[0]}`}
+                </span>
+                <span className="text-zinc-400 text-xs font-medium">
+                  {customOrderMilestones?.find(m => m.status === order.status)?.message || 'Your meal is on the way'}
+                </span>
               </div>
             </div>
             

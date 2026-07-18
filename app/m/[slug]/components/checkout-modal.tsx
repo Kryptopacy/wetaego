@@ -4,6 +4,8 @@ import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, MapPin, Sparkles, Plus, Minus, ShoppingBag, ChevronDown } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/currency'
+import { calculateEffectiveDiscount } from '@/lib/utils/pricing'
+import { useTranslations } from 'next-intl'
 import { CheckoutPaymentForm } from './checkout-payment-form'
 import { DeliveryAddressAutocompleteWrapper } from './delivery-address-autocomplete'
 import { toast } from 'sonner'
@@ -155,6 +157,9 @@ export function CheckoutModal({
   resourceId,
   mapsIntegrationEnabled = true
 }: CheckoutModalProps) {
+  const t = useTranslations('Guest')
+  const { getDiscountAmountMinor, getDiscountedTotalAmountMinor } = useCartStore()
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) onClose()
@@ -289,12 +294,8 @@ export function CheckoutModal({
   }
 
   const subtotalMinor = totalAmountMinor
-  const effectiveGlobalPercent = (globalDiscountEnabled && globalDiscountPercentage) ? globalDiscountPercentage : 0
-  const effectivePercent = Math.max(effectiveGlobalPercent, spinnerDiscount || 0)
-  
-  const discountMultiplier = effectivePercent / 100
-  const discountAmountMinor = Math.floor(subtotalMinor * discountMultiplier)
-  const discountedSubtotalMinor = subtotalMinor - discountAmountMinor
+  const discountAmountMinor = getDiscountAmountMinor(subtotalMinor, globalDiscountEnabled ? globalDiscountPercentage : null)
+  const discountedSubtotalMinor = getDiscountedTotalAmountMinor(subtotalMinor, globalDiscountEnabled ? globalDiscountPercentage : null)
   
   // Calculate Taxes based on discounted subtotal
   const taxBreakdown = locationTaxes.map(tax => {
@@ -751,14 +752,14 @@ export function CheckoutModal({
                         <span className="line-through">{formatCurrency(subtotalMinor )}</span>
                       </div>
                       <div className="flex justify-between items-center text-emerald-600 dark:text-emerald-400 font-medium text-[14px]">
-                        <span>Discount ({effectivePercent}%) {spinnerDiscount === effectivePercent && '🎲'}</span>
-                        <span>-{formatCurrency(discountAmountMinor )}</span>
+                        <span>Discount ({Math.max(globalDiscountEnabled && globalDiscountPercentage ? globalDiscountPercentage : 0, spinnerDiscount || 0)}%) {spinnerDiscount === Math.max(globalDiscountEnabled && globalDiscountPercentage ? globalDiscountPercentage : 0, spinnerDiscount || 0) && '🎲'}</span>
+                        <span>-{formatCurrency(discountAmountMinor)}</span>
                       </div>
                     </div>
                   </div>
                 )}
                 <div className="flex justify-between items-end p-5 bg-zinc-100/50 dark:bg-zinc-800/50">
-                  <span className="text-[15px] font-bold text-zinc-900 dark:text-white">Total</span>
+                  <span className="text-[15px] font-bold text-zinc-900 dark:text-white">{t('total')}</span>
                   <span className="text-2xl font-black text-zinc-900 dark:text-white tracking-tight">{formatCurrency(finalTotalMinor)}</span>
                 </div>
               </div>

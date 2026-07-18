@@ -1,0 +1,27 @@
+{
+  "Dashboard": {
+    "liveOperations": "Ọrụ Na-aga N'ihu",
+    "receivingOrders": "Ịnata Iwu",
+    "hardwareSettings": "Ntọala Ngwaike",
+    "language": "Asụsụ",
+    "languageDesc": "Asụsụ njikwa dashboard"
+  },
+  "Guest": {
+    "add_to_order": "Tụkwasị na Iwu",
+    "sold_out": "Agwụla",
+    "search": "Chọọ...",
+    "translate_prompt_title": "Tụgharịa asụsụ ibe a?",
+    "translate_prompt_desc": "Banye na {targetLang}",
+    "yes": "Ee",
+    "no": "Mba",
+    "checkout": "Kwụọ Ụgwọ",
+    "subtotal": "Nchịkọta Obere",
+    "total": "Nchịkọta Ọnụ",
+    "delivery_fee": "Ego Nbuga",
+    "place_order": "Tinye Iwu",
+    "order_received": "Anatawo Iwu",
+    "preparing": "Na-akwadebe",
+    "ready": "Dị Njikere",
+    "completed": "Emechara"
+  }
+}

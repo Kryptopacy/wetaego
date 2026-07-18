@@ -26,8 +26,10 @@ describe('Cart Store', () => {
     expect(state.items).toHaveLength(1)
     expect(state.items[0]).toEqual({
       id: 'item-1',
+      cartKey: 'item-1',
       name: 'Burger',
       price_minor: 150000,
+      pageId: 'test',
       quantity: 1
     })
   })

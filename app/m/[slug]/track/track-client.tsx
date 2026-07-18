@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Search, CheckCircle2, Settings, MessageSquare } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/currency'
+import { useTranslations } from 'next-intl'
 import { getTrackingDetailsAction, sendMessageAction, generateBalancePaymentLinkAction } from './actions'
 import { AnimatedDialog, AnimatedDialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Building2 } from 'lucide-react'
@@ -34,6 +35,7 @@ type OrderDetails = {
 }
 
 export function TrackOrderClient({ location }: TrackOrderClientProps) {
+  const t = useTranslations('Guest')
   const [code, setCode] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
@@ -163,9 +165,12 @@ export function TrackOrderClient({ location }: TrackOrderClientProps) {
             <div className="flex justify-between items-start mb-8">
               <div>
                 <p className="text-sm font-bold text-zinc-500 uppercase tracking-wider">Order Status</p>
-                <h2 className="text-2xl font-black text-zinc-900 dark:text-white mt-1 capitalize">
-                  {order.status === 'completed' ? 'Completed & Ready' : 'In Progress'}
-                </h2>
+                <div className="flex items-center gap-2">
+                  <div className={`w-2 h-2 rounded-full ${order.status === 'completed' ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse'}`} />
+                  <h2 className="text-2xl font-black text-zinc-900 dark:text-white capitalize">
+                    {order.status === 'completed' ? t('ready') : t('preparing')}
+                  </h2>
+                </div>
               </div>
             </div>
 
@@ -207,7 +212,7 @@ export function TrackOrderClient({ location }: TrackOrderClientProps) {
                 
                 {/* Intake step (auto-generated) */}
                 <div className="relative">
-                  <div className="absolute -left-[30px] top-1 w-6 h-6 rounded-full bg-blue-500 border-4 border-white dark:border-zinc-900 flex items-center justify-center shadow-sm z-10">
+                  <div className="absolute left-[-30px] top-1 w-6 h-6 rounded-full bg-blue-500 border-4 border-white dark:border-zinc-900 flex items-center justify-center shadow-sm z-10">
                     <CheckCircle2 className="w-3 h-3 text-white" />
                   </div>
                   <div>
@@ -218,7 +223,7 @@ export function TrackOrderClient({ location }: TrackOrderClientProps) {
 
                 {order.milestones.map((m) => (
                   <div key={m.id} className="relative">
-                    <div className={`absolute -left-[30px] top-1 w-6 h-6 rounded-full border-4 border-white dark:border-zinc-900 flex items-center justify-center z-10 transition-colors duration-500 ${m.is_completed ? 'bg-blue-500' : 'bg-zinc-200 dark:bg-zinc-800'}`}>
+                    <div className={`absolute left-[-30px] top-1 w-6 h-6 rounded-full border-4 border-white dark:border-zinc-900 flex items-center justify-center z-10 transition-colors duration-500 ${m.is_completed ? 'bg-blue-500' : 'bg-zinc-200 dark:bg-zinc-800'}`}>
                       {m.is_completed ? <CheckCircle2 className="w-3 h-3 text-white" /> : <div className="w-2 h-2 rounded-full bg-zinc-400 dark:bg-zinc-600" />}
                     </div>
                     <div>
@@ -295,7 +300,7 @@ export function TrackOrderClient({ location }: TrackOrderClientProps) {
             <DialogDescription className="text-zinc-500 dark:text-zinc-400 mt-1 mb-6">
               Please transfer the remaining balance to the following bank account.
             </DialogDescription>
-            <div className="rounded-2xl border border-amber-200/80 dark:border-amber-500/25 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-500/10 dark:to-orange-500/5 p-4">
+            <div className="rounded-2xl border border-amber-200/80 dark:border-amber-500/25 bg-linear-to-br from-amber-50 to-orange-50 dark:from-amber-500/10 dark:to-orange-500/5 p-4">
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-6 h-6 rounded-lg bg-amber-100 dark:bg-amber-500/20 flex items-center justify-center">
                   <Building2 className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />

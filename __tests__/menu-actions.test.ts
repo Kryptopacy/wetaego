@@ -22,7 +22,7 @@ vi.mock('@/lib/supabase/server', () => ({
       getUser: mockGetUser,
     },
     from: vi.fn((table) => {
-      if (table === 'menu_categories' || table === 'menu_items') {
+      if (table === 'page_collections' || table === 'page_items' || table === 'page_item_collections') {
         return { insert: mockInsert, update: vi.fn(), delete: vi.fn(), select: vi.fn() }
       }
       return {}
@@ -34,7 +34,23 @@ vi.mock('@/lib/supabase/server', () => ({
       })),
     },
   })),
+  createAdminClient: vi.fn(() => ({
+    from: vi.fn((table) => {
+      if (table === 'page_collections' || table === 'page_items' || table === 'page_item_collections') {
+        return { insert: mockInsert, update: vi.fn(), delete: vi.fn(), select: vi.fn() }
+      }
+      return {}
+    }),
+    storage: {
+      from: vi.fn(() => ({
+        upload: mockUpload,
+        getPublicUrl: mockGetPublicUrl,
+        remove: vi.fn(),
+      })),
+    },
+  })),
 }))
+
 
 describe('Menu Actions', () => {
   beforeEach(() => {
@@ -58,15 +74,16 @@ describe('Menu Actions', () => {
       const formData = new FormData()
       formData.append('organization_id', 'org_123')
       formData.append('menu_id', 'menu_123')
+      formData.append('page_id', 'page_123')
       formData.append('name', 'Appetizers')
       
       const res = await createCategory(formData)
       
       expect(res).toEqual({ data: { success: true } })
       expect(mockInsert).toHaveBeenCalledWith({
-        organization_id: 'org_123',
-        menu_id: 'menu_123',
-        name: 'Appetizers'
+        page_id: 'page_123',
+        name: 'Appetizers',
+        slug: 'appetizers'
       })
       expect(revalidatePath).toHaveBeenCalledWith('/dashboard/menu')
     })
@@ -79,16 +96,18 @@ describe('Menu Actions', () => {
       const formData = new FormData()
       formData.append('organization_id', 'org_123')
       formData.append('category_id', 'cat_123')
+      formData.append('page_id', 'page_123')
+      formData.append('collection_ids', '["col_1"]')
       formData.append('name', 'Burger')
       formData.append('price', '15.99')
       
-      // Mock a 10MB file
-      const largeFile = new File(['x'.repeat(10 * 1024 * 1024)], 'huge.jpg', { type: 'image/jpeg' })
+      // Mock a 31MB file
+      const largeFile = new File(['x'.repeat(31 * 1024 * 1024)], 'huge.jpg', { type: 'image/jpeg' })
       formData.append('image', largeFile)
       
       const res = await createItem(formData)
       
-      expect(res).toEqual({ serverError: 'Image must be less than 5MB' })
+      expect(res).toEqual({ serverError: 'File must be less than 30MB' })
     })
 
     it('rejects invalid mime types', async () => {
@@ -97,6 +116,8 @@ describe('Menu Actions', () => {
       const formData = new FormData()
       formData.append('organization_id', 'org_123')
       formData.append('category_id', 'cat_123')
+      formData.append('page_id', 'page_123')
+      formData.append('collection_ids', '["col_1"]')
       formData.append('name', 'Burger')
       formData.append('price', '15.99')
       
@@ -105,7 +126,7 @@ describe('Menu Actions', () => {
       
       const res = await createItem(formData)
       
-      expect(res).toEqual({ serverError: 'Invalid image format. Only JPEG, PNG, and WebP are accepted.' })
+      expect(res).toEqual({ serverError: 'Invalid file format. Only JPEG, PNG, WebP, MP4, WebM, and MOV are accepted.' })
     })
   })
 })

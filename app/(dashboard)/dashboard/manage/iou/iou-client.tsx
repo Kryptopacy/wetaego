@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Search, Mail, MessageSquare, CreditCard, Clock, Wallet } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
+import { toast } from 'sonner'
 
 interface Customer {
   id: string
@@ -23,11 +24,11 @@ export function IOUClient({ initialCustomers, currencyCode }: { initialCustomers
 
   const handleRemind = async (customerId: string, channel: 'email' | 'whatsapp') => {
     // In a real implementation, this would call a server action
-    alert(`Sending reminder via ${channel} to ${customerId}`)
+    toast.success(`Sending reminder via ${channel} to ${customerId}`)
   }
 
   const handleSettle = async (customerId: string) => {
-    alert(`Initiating settlement for ${customerId}`)
+    toast.success(`Initiating settlement for ${customerId}`)
   }
 
   return (

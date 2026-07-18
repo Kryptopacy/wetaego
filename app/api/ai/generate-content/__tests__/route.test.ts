@@ -10,6 +10,11 @@ vi.mock('@ai-sdk/google', () => ({
   google: vi.fn(),
 }))
 
+vi.mock('@/lib/utils/settings', () => ({
+  getInfrastructureFlags: vi.fn().mockResolvedValue({ ai_enabled: true }),
+  getAiModels: vi.fn().mockResolvedValue({ default_model: 'gemini-1.5-flash-002' })
+}))
+
 describe('Generate Content API', () => {
   it('returns 400 if title is missing', async () => {
     const req = new Request('http://localhost/api/ai/generate-content', {

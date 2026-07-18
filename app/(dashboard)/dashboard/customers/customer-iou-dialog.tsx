@@ -5,6 +5,7 @@ import { AnimatedDialog as Dialog, AnimatedDialogContent as DialogContent, Dialo
 import { formatCurrency } from '@/lib/utils/currency'
 import { createClient } from '@/lib/supabase/client'
 import { Database } from '@/lib/supabase/types'
+import { toast } from 'sonner'
 
 type CustomerProfile = Database['public']['Tables']['customer_profiles']['Row']
 
@@ -53,7 +54,7 @@ export function CustomerIouDialog({
       if (data) onUpdate(data)
     } catch (err) {
       console.error('Failed to update IOU settings:', err)
-      alert('Failed to update IOU settings')
+      toast.error('Failed to update IOU settings')
     } finally {
       setIsUpdating(false)
     }
@@ -61,7 +62,7 @@ export function CustomerIouDialog({
 
   const handleGeneratePaymentLink = async () => {
     if ((customer.credit_balance_minor || 0) <= 0) {
-      alert('No outstanding balance.')
+      toast.error('No outstanding balance.')
       return
     }
 
@@ -79,14 +80,14 @@ export function CustomerIouDialog({
 
       const data = await res.json()
       if (data.success) {
-        alert(`Payment link generated:\n${data.authorizationUrl}`)
+        toast.success(`Payment link generated:\n${data.authorizationUrl}`)
         // In a real app, this could be copied to clipboard or emailed directly
       } else {
         throw new Error(data.error)
       }
     } catch (err) {
       console.error(err)
-      alert('Failed to generate payment link')
+      toast.error('Failed to generate payment link')
     }
   }
 

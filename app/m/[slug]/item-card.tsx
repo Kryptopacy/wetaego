@@ -11,6 +11,7 @@ import { Plus, Minus, ShoppingBag, X, ChevronLeft, ChevronRight, Play } from 'lu
 import { AnimatedDialog, AnimatedDialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import { ShareButton } from '@/app/components/share-button'
+import { useTranslations } from 'next-intl'
 
 interface ItemCardProps {
   item: Tables<'menu_items'>
@@ -21,6 +22,7 @@ interface ExtendedMenuItem extends Tables<'menu_items'> {
 }
 
 export function ItemCard({ item }: ItemCardProps) {
+  const t = useTranslations('Guest')
   const { items, addItem, updateQuantity } = useCartStore()
   const cartItem = items.find(i => i.id === item.id)
   
@@ -143,7 +145,7 @@ export function ItemCard({ item }: ItemCardProps) {
               {item.name}
             </h4>
             {!isAvailable && (
-              <span className="text-[11px] px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-500/10 text-red-600 dark:text-red-400 font-bold shrink-0">Sold Out</span>
+              <span className="text-[11px] px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-500/10 text-red-600 dark:text-red-400 font-bold shrink-0">{t('sold_out')}</span>
             )}
           </div>
 
@@ -410,7 +412,7 @@ export function ItemCard({ item }: ItemCardProps) {
                 className="w-full py-4 rounded-xl font-bold text-white text-[15px] bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:bg-zinc-400 shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2 transition-all active:scale-95 focus:outline-none"
               >
                 <ShoppingBag className="w-5 h-5" />
-                {isAvailable ? 'Add to Order' : 'Sold Out'}
+                {isAvailable ? t('add_to_order') : t('sold_out')}
               </button>
             </div>
           </div>

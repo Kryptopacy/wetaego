@@ -1,0 +1,27 @@
+{
+  "Dashboard": {
+    "liveOperations": "Ayyukan Kai Tsaye",
+    "receivingOrders": "Karbar Oda",
+    "hardwareSettings": "Saitunan Na'ura",
+    "language": "Harshe",
+    "languageDesc": "Harshen tsarin aikin dashboard"
+  },
+  "Guest": {
+    "add_to_order": "Kara a Oda",
+    "sold_out": "Ya Kare",
+    "search": "Nemo...",
+    "translate_prompt_title": "A fassara shafin?",
+    "translate_prompt_desc": "Canza zuwa {targetLang}",
+    "yes": "Eh",
+    "no": "A'a",
+    "checkout": "Biya",
+    "subtotal": "Jimlar Farko",
+    "total": "Jimlar Karshe",
+    "delivery_fee": "Kudin Kawo",
+    "place_order": "Tura Oda",
+    "order_received": "An Karbi Oda",
+    "preparing": "Ana Shiryawa",
+    "ready": "Ya Shirya",
+    "completed": "An Kammala"
+  }
+}

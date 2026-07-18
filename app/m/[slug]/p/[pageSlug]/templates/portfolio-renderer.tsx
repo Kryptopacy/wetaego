@@ -6,7 +6,7 @@ import { InfoStrip } from '../../../components/info-strip'
 import Link from 'next/link'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ExternalLink, X, Mail, ArrowRight } from 'lucide-react'
+import { ExternalLink, X, Mail, ArrowRight, Search } from 'lucide-react'
 
 // Simple SVG Icons for Socials
 const Instagram = ({ className }: { className?: string }) => (
@@ -67,9 +67,20 @@ export function PortfolioRenderer({ location, page, items, locationSlug }: Portf
   const themeColor = location.theme_color || '#7c3aed'
   const [selectedItem, setSelectedItem] = useState<PageItem | null>(null)
   
+  const [searchQuery, setSearchQuery] = useState('')
+  
+  const searchedItems = items.filter(item => {
+    if (!searchQuery) return true;
+    const query = searchQuery.toLowerCase();
+    return item.title.toLowerCase().includes(query) || 
+           item.subtitle?.toLowerCase().includes(query) ||
+           item.description?.toLowerCase().includes(query) ||
+           item.item_data?.category?.toLowerCase().includes(query);
+  });
+
   // Separate projects (free/display) from services (paid)
-  const projects = items.filter(i => !i.price_minor || i.price_minor === 0)
-  const services = items.filter(i => i.price_minor && i.price_minor > 0)
+  const projects = searchedItems.filter(i => !i.price_minor || i.price_minor === 0)
+  const services = searchedItems.filter(i => i.price_minor && i.price_minor > 0)
 
   // Inquiries state
   const [isPending, startTransition] = useTransition()
@@ -166,6 +177,28 @@ export function PortfolioRenderer({ location, page, items, locationSlug }: Portf
       </header>
 
       <main className="max-w-6xl mx-auto px-6 md:px-12 pb-24">
+        
+        {/* Search Bar */}
+        <div className="mb-12 relative group max-w-2xl mx-auto">
+          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+            <Search className="w-5 h-5 text-zinc-400 group-focus-within:text-emerald-500 transition-colors" />
+          </div>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search projects, services..."
+            className="w-full pl-12 pr-12 py-3.5 bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-[15px] outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/50 transition-all text-zinc-900 dark:text-white placeholder:text-zinc-500 shadow-sm"
+          />
+          {searchQuery && (
+            <button 
+              onClick={() => setSearchQuery('')}
+              className="absolute inset-y-0 right-0 pr-4 flex items-center text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          )}
+        </div>
         
         {/* 2. PROJECTS (MASONRY GRID) */}
         {projects.length > 0 && (

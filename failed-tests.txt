@@ -1,0 +1,7 @@
+D:/pacy_labs/ourmenu/__tests__/cart-store.test.ts
+D:/pacy_labs/ourmenu/__tests__/credits.test.ts
+D:/pacy_labs/ourmenu/__tests__/menu-actions.test.ts
+D:/pacy_labs/ourmenu/app/(dashboard)/__tests__/layout-actions.test.ts
+D:/pacy_labs/ourmenu/lib/templates/__tests__/presets.test.ts
+D:/pacy_labs/ourmenu/app/api/chat/__tests__/route.test.ts
+D:/pacy_labs/ourmenu/app/api/ai/generate-content/__tests__/route.test.ts

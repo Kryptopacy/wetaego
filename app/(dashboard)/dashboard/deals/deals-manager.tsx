@@ -5,6 +5,7 @@ import { toast } from 'sonner'
 import { createDealAction, toggleDealAction, deleteDealAction, addDealItemAction, removeDealItemAction } from './actions'
 import { formatCurrency } from '@/lib/utils/currency'
 import { useAction } from 'next-safe-action/hooks'
+import Image from 'next/image'
 import { Database } from '@/lib/supabase/types'
 
 type DealType = Database['public']['Enums']['deal_type']
@@ -223,8 +224,7 @@ export default function DealsManager({ deals, menuItems, orgId, locationId }: {
                           <li key={item.id} className="flex items-center justify-between p-3 rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950">
                             <div className="flex items-center gap-3">
                               {item.menu_items?.image_url && (
-                                // eslint-disable-next-line @next/next/no-img-element
-                                <img src={item.menu_items.image_url} alt="" className="w-10 h-10 rounded-lg object-cover" />
+                                <Image src={item.menu_items.image_url} alt="" width={40} height={40} className="w-10 h-10 rounded-lg object-cover" />
                               )}
                               <div>
                                 <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{item.menu_items?.name}</p>

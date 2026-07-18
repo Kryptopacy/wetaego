@@ -6,6 +6,7 @@ import { X, Send, Mic, Paperclip, Loader2 } from 'lucide-react'
 import { VoiceRecorder } from './voice-recorder'
 import { format } from 'date-fns'
 import { motion, AnimatePresence } from 'framer-motion'
+import { toast } from 'sonner'
 
 const WalkieTalkieIcon = ({ className }: { className?: string }) => (
   <svg 
@@ -234,7 +235,7 @@ export function IntercomWidget({ userId, organizationId }: { userId: string, org
       })
     } catch (err) {
       console.error('Failed to upload image', err)
-      alert('Failed to upload image')
+      toast.error('Failed to upload image')
     } finally {
       setIsUploading(false)
       if (fileInputRef.current) fileInputRef.current.value = ''
@@ -265,7 +266,7 @@ export function IntercomWidget({ userId, organizationId }: { userId: string, org
       })
     } catch (err) {
       console.error('Failed to upload voice note', err)
-      alert('Failed to upload voice note')
+      toast.error('Failed to upload voice note')
     } finally {
       setIsUploading(false)
     }
@@ -361,7 +362,7 @@ export function IntercomWidget({ userId, organizationId }: { userId: string, org
                       : 'bg-zinc-800 text-zinc-200 rounded-bl-sm'
                   }`}
                 >
-                  {msg.content_text && <p className="text-sm break-words">{msg.content_text}</p>}
+                  {msg.content_text && <p className="text-sm wrap-break-word">{msg.content_text}</p>}
                   {!msg.audio_url && msg.media_url && (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={msg.media_url} alt="Shared image" className="rounded-lg max-h-48 object-cover mt-1" />
