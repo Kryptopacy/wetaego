@@ -8,7 +8,16 @@ import { useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { formatCurrency } from '@/lib/utils/currency'
+import { getOrderPaymentStatusAction } from '@/app/m/[slug]/actions'
 import { CheckCircle2 } from 'lucide-react'
+
+interface ShareOrder {
+  id?: string
+  total_amount_minor: number
+  amount_paid_minor: number | null
+  locations?: { currency_code: string }
+  metadata?: { split_count?: number; split_type?: string }
+}
 
 export default function SharingHubPage({
   params
@@ -20,7 +29,7 @@ export default function SharingHubPage({
   const slug = searchParams.get('slug')
   
   const [origin, setOrigin] = useState('')
-  const [order, setOrder] = useState<{ id?: string, total_amount_minor: number, amount_paid_minor: number | null, locations?: { currency_code: string }, metadata?: { split_count?: number, split_type?: string } } | null>(null)
+  const [order, setOrder] = useState<ShareOrder | null>(null)
   const splitCount = order?.metadata?.split_count || parseInt(searchParams.get('split') || '1')
   const splitType = order?.metadata?.split_type || searchParams.get('type') || 'even'
   const supabase = createClient()
@@ -30,25 +39,30 @@ export default function SharingHubPage({
   }, [])
 
   useEffect(() => {
-    supabase
-      .from('orders')
-      .select('*, locations(currency_code)')
-      .eq('id', order_id)
-      .single()
-      .then(({ data }) => {
-        if (data) setOrder(data as Parameters<typeof setOrder>[0])
-      })
+    getOrderPaymentStatusAction(order_id).then((data: unknown) => {
+      if (data) setOrder(data as ShareOrder)
+    })
 
     const channel = supabase
       .channel(`share-${order_id}`)
       .on(
         'postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'orders', filter: `id=eq.${order_id}` },
-        (payload) => setOrder((prev) => prev ? { ...prev, ...(payload.new as Partial<typeof prev>) } : null)
+        (payload) => setOrder((prev) => prev ? { ...prev, ...(payload.new as unknown as Partial<ShareOrder>) } : null)
       )
       .subscribe()
       
-    return () => { supabase.removeChannel(channel) }
+    const pollInterval = setInterval(async () => {
+      const latest = await getOrderPaymentStatusAction(order_id).catch(() => null)
+      if (latest) {
+        setOrder((prev) => prev ? { ...prev, ...(latest as unknown as Partial<ShareOrder>) } : (latest as unknown as ShareOrder))
+      }
+    }, 4000)
+
+    return () => {
+      supabase.removeChannel(channel)
+      clearInterval(pollInterval)
+    }
   }, [order_id, supabase])
 
   const shareLink = origin ? `${origin}/pay/${order_id}?split=${splitCount}&type=${splitType}` : ''

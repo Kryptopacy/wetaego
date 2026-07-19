@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 
 export async function GET(req: Request) {
   try {
@@ -10,7 +10,7 @@ export async function GET(req: Request) {
       return new NextResponse('Missing payment reference', { status: 400 })
     }
 
-    const supabase = await createClient()
+    const supabase = await createAdminClient()
 
     // The reference is like 'book_<uuid>_<timestamp>'
     let bookingId = ''

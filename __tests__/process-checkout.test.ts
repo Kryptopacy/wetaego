@@ -12,7 +12,7 @@ vi.mock('resend', () => {
   const mockSend = vi.fn().mockResolvedValue({})
   class Resend {
     emails = { send: mockSend }
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+     
     constructor(_key: string) {}
   }
   return { Resend }
@@ -61,7 +61,7 @@ function buildSupabaseMock(overrides: Record<string, unknown> = {}) {
     ...overrides,
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const mockSingle = vi.fn()
   const mockIn = vi.fn()
   const mockInsert = vi.fn()
@@ -72,7 +72,7 @@ function buildSupabaseMock(overrides: Record<string, unknown> = {}) {
   const mockFrom = vi.fn()
 
   // Promise.all([paySettings, location]) called first as a pair, then menuItems
-  let paySettingsCall = 0
+  const paySettingsCall = 0
   mockSingle
     .mockImplementationOnce(() => Promise.resolve(defaults.paySettings)) // paySettings
     .mockImplementationOnce(() => Promise.resolve(defaults.location))    // location

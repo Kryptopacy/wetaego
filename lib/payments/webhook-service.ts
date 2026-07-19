@@ -5,6 +5,7 @@ import { ReceiptEmail } from '../../emails/receipt-email'
 import { formatCurrency } from '@/lib/utils/currency'
 import { waitUntil } from '@vercel/functions'
 import { sendSubscriptionActivated, sendInvoice } from '../notifications/email'
+import { purgeStorefrontCache } from '@/lib/cache-purger'
 
 const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy')
 
@@ -242,7 +243,7 @@ export async function processOrderPayment(
 ) {
   const { data: order } = await supabase
     .from('orders')
-    .select('id, status, total_amount_minor, location_id, table_identifier, customer_email, customer_name, locations(organization_id, name), order_items(item_name, quantity, price_minor)')
+    .select('id, organization_id, status, total_amount_minor, location_id, table_identifier, customer_email, customer_name, locations(organization_id, name), order_items(item_name, quantity, price_minor)')
     .eq('id', orderId)
     .single()
 
@@ -300,6 +301,11 @@ export async function processOrderPayment(
     } catch (_e) {
       console.error('Failed to send order receipt email:', _e)
     }
+  }
+
+  // Purge the storefront cache so that out-of-stock items update immediately
+  if (order.organization_id) {
+    waitUntil(purgeStorefrontCache(order.organization_id))
   }
 
   return 'success'

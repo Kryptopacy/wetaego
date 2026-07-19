@@ -80,7 +80,7 @@ export const createItem = authActionClient
     const allergen_tags = allergensRaw ? JSON.parse(allergensRaw) : []
     const is_booking_required = requires_booking === 'true'
 
-    let images: string[] = []
+    const images: string[] = []
     if (aiImageUrl) {
       images.push(aiImageUrl)
     }

@@ -2,7 +2,7 @@
 import { Database } from '@/lib/supabase/types'
 type RequestType = NonNullable<Database['public']['Tables']['service_requests']['Row']['request_type']> | 'waiter' | 'bill' | 'cleanup'
 
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
   
 // import { revalidatePath } from 'next/cache'
@@ -45,7 +45,7 @@ export async function submitServiceRequest(formData: FormData): Promise<SafeResu
       throw new Error('Too many requests. Please wait before calling staff again.');
     }
 
-    const supabase = await createClient()
+    const supabase = await createAdminClient()
 
     const parsed = serviceRequestSchema.safeParse({
       organization_id: formData.get('organization_id'),
@@ -132,7 +132,7 @@ export async function processCheckout(params: {
     pageId, idempotencyKey, subtotalMinor, taxTotalMinor, taxBreakdown, isSplitPayment,
     resourceId, splitCount, splitType, splitShares
   } = params;
-  const supabase = await createClient()
+  const supabase = await createAdminClient()
 
   // --- Rate Limiting & Idempotency ---
   const { checkRateLimit, withIdempotency } = await import('@/lib/upstash');
@@ -228,7 +228,8 @@ export async function processCheckout(params: {
   const subaccountCode = staffSubaccountOverride || (paySettings?.is_active ? paySettings.provider_account_id : null)
 
   // 3. Create Order using server-verified total
-  const { data: order, error: orderError } = await supabase
+  const adminClient = await createAdminClient()
+  const { data: order, error: orderError } = await adminClient
     .from('orders')
     .insert({
       organization_id: organizationId,
@@ -299,10 +300,10 @@ export async function processCheckout(params: {
     }
   })
 
-  const { error: itemsError } = await supabase.from('order_items').insert(orderItemsData)
+  const { error: itemsError } = await adminClient.from('order_items').insert(orderItemsData)
   if (itemsError) {
     // Roll back the order to prevent a paid order with no items
-    await supabase.from('orders').delete().eq('id', order.id)
+    await adminClient.from('orders').delete().eq('id', order.id)
     throw new Error('Failed to save order items. Please try again.')
   }
 
@@ -316,17 +317,17 @@ export async function processCheckout(params: {
       title,
       is_completed: false
     }))
-    await supabase.from('order_milestones').insert(milestonesToInsert)
+    await adminClient.from('order_milestones').insert(milestonesToInsert)
   }
 
   // 4b. Decrement Inventory Stock (Atomically)
-  const { error: stockError } = await supabase.rpc('decrement_stock', {
+  const { error: stockError } = await adminClient.rpc('decrement_stock', {
     p_items: orderItemsData.map(item => ({ item_id: item.item_id, quantity: item.quantity }))
   })
   
   if (stockError) {
     // If stock decrement fails (e.g. someone bought the last item 1ms ago), rollback order!
-    await supabase.from('orders').delete().eq('id', order.id)
+    await adminClient.from('orders').delete().eq('id', order.id)
     throw new Error(stockError.message || 'One or more items in your cart just sold out. Please review your cart.')
   }
 
@@ -335,7 +336,7 @@ export async function processCheckout(params: {
   // 4c. IOU Payment Verification & Balance Update
   if (paymentMethod === 'iou') {
     if (!customerEmail) {
-      await supabase.from('orders').delete().eq('id', order.id)
+      await adminClient.from('orders').delete().eq('id', order.id)
       throw new Error('Email is required to use Pay Later (IOU).')
     }
 
@@ -348,7 +349,7 @@ export async function processCheckout(params: {
       .single()
 
     if (!customer || !customer.is_iou_approved) {
-      await supabase.from('orders').delete().eq('id', order.id)
+      await adminClient.from('orders').delete().eq('id', order.id)
       throw new Error('You are not approved for Pay Later purchases.')
     }
 
@@ -356,12 +357,12 @@ export async function processCheckout(params: {
     const limit = customer.credit_limit_minor || 0
     
     if (currentBalance + chargeAmountMinor > limit) {
-      await supabase.from('orders').delete().eq('id', order.id)
+      await adminClient.from('orders').delete().eq('id', order.id)
       throw new Error(`Insufficient IOU credit. Available: ${((limit - currentBalance)/100).toFixed(2)}`)
     }
 
     // Process checkout atomically
-    const { error: rpcError } = await supabase.rpc('process_iou_checkout', {
+    const { error: rpcError } = await adminClient.rpc('process_iou_checkout', {
       p_order_id: order.id,
       p_organization_id: organizationId,
       p_customer_id: customer.id,
@@ -369,7 +370,7 @@ export async function processCheckout(params: {
     })
 
     if (rpcError) {
-      await supabase.from('orders').delete().eq('id', order.id)
+      await adminClient.from('orders').delete().eq('id', order.id)
       throw new Error(rpcError.message || 'Failed to process IOU payment')
     }
 
@@ -508,7 +509,8 @@ export async function callStaffFromAi(params: {
     return { serverError: 'Missing required parameters' }
   }
 
-  const { error } = await supabase.from('service_requests').insert({
+  const adminClient = await createAdminClient()
+  const { error } = await adminClient.from('service_requests').insert({
     organization_id: orgId,
     location_id: locationId,
     table_identifier: tableIdentifier,
@@ -539,22 +541,65 @@ export async function callStaffFromAi(params: {
   return { data: { success: true } }
 }
 
+export async function getOrderPaymentStatusAction(orderId: string) {
+  if (!orderId) return null;
+  try {
+    const supabase = await createAdminClient();
+    const { data: order, error } = await supabase
+      .from('orders')
+      .select('id, status, total_amount_minor, amount_paid_minor, table_identifier, created_at, organization_id, location_id, metadata, locations(currency_code), organizations(id, name, slug)')
+      .eq('id', orderId)
+      .single();
+      
+    if (error || !order) return null;
+    return order;
+  } catch {
+    return null;
+  }
+}
+
+export async function getFullOrderDetailsAction(orderId: string, locationId: string) {
+  if (!orderId || !locationId) return null;
+  try {
+    const supabase = await createAdminClient();
+    const { data: order, error } = await supabase
+      .from('orders')
+      .select('*, order_items(*), order_payments(*)')
+      .eq('id', orderId)
+      .eq('location_id', locationId)
+      .single();
+      
+    if (error || !order) return null;
+    return order;
+  } catch {
+    return null;
+  }
+}
+
 export async function processExistingOrderPayment(params: {
   orderId: string,
   amountMinor: number
 }): Promise<SafeResult<{ checkoutUrl?: string }>> {
   const { orderId, amountMinor } = params;
   try {
-    const supabase = await createClient()
+    const supabase = await createAdminClient()
 
-    // Fetch the order to get org info
+    // Fetch the order to get org info and current payment balance
     const { data: order, error: orderError } = await supabase
       .from('orders')
-      .select('id, organization_id, total_amount_minor, customer_email, location_id')
+      .select('id, organization_id, total_amount_minor, amount_paid_minor, status, customer_email, location_id')
       .eq('id', orderId)
       .single()
 
     if (orderError || !order) return { serverError: 'Order not found' }
+
+    if (order.status === 'paid' || order.status === 'completed' || (order.amount_paid_minor || 0) >= order.total_amount_minor) {
+      return { serverError: 'Order is already fully paid.' }
+    }
+
+    if (amountMinor <= 0 || (order.amount_paid_minor || 0) + amountMinor > order.total_amount_minor) {
+      return { serverError: 'Payment amount exceeds remaining balance.' }
+    }
 
     // Fetch payment settings for split
     const { data: paySettings } = await supabase
@@ -603,7 +648,7 @@ export async function processExistingOrderPayment(params: {
 export async function optInMarketing(params: { orderId: string }): Promise<SafeResult<{ success: boolean }>> {
   const { orderId } = params;
   try {
-    const supabase = await createClient()
+    const supabase = await createAdminClient()
 
     const { data: order } = await supabase
       .from('orders')
@@ -636,7 +681,7 @@ export async function optInMarketing(params: { orderId: string }): Promise<SafeR
 export async function checkIouStatus(organizationId: string): Promise<boolean> {
   if (!organizationId) return false;
   try {
-    const supabase = await createClient()
+    const supabase = await createAdminClient()
     const { data } = await supabase
       .from('iou_settings')
       .select('is_enabled')
@@ -676,7 +721,7 @@ export async function submitQuoteRequest(formData: FormData): Promise<SafeResult
       throw new Error('Too many requests. Please wait a minute before submitting another quote.');
     }
 
-    const supabase = await createClient()
+    const supabase = await createAdminClient()
 
     const rawData = {
       page_id: formData.get('page_id'),

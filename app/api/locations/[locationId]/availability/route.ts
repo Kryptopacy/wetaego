@@ -17,19 +17,11 @@ export async function GET(
       )
     }
 
-    const targetDate = new Date(date)
-    if (isNaN(targetDate.getTime())) {
-      return NextResponse.json(
-        { error: 'Invalid date format' },
-        { status: 400 }
-      )
-    }
-
     // Support resource_ids if provided as comma-separated
     const resourcesParam = searchParams.get('resource_ids')
     const resourceIds = resourcesParam ? resourcesParam.split(',').map(s => s.trim()) : undefined
 
-    const slots = await getAvailableSlots(locationId, targetDate, resourceIds)
+    const slots = await getAvailableSlots(locationId, date, resourceIds)
 
     return NextResponse.json({ slots })
   } catch (error) {

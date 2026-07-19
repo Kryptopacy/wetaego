@@ -1,6 +1,6 @@
 
 export const revalidate = 60;
-import { createClient, createAnonClient } from '@/lib/supabase/server'
+import { createClient, createAnonClient, createAdminClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 import { cookies } from 'next/headers'
@@ -263,7 +263,8 @@ export default async function PublicPageView({
     const { data } = await query
     return data || []
   }
-  const paymentSettingsPromise = supabase
+  const adminSupabase = await createAdminClient()
+  const paymentSettingsPromise = adminSupabase
     .from('organization_payment_settings')
     .select('is_active')
     .eq('organization_id', loc.organization_id)
@@ -337,7 +338,7 @@ export default async function PublicPageView({
     itemsPromise,
     paymentSettingsPromise,
     getGlobalManualPayment(),
-    resourceId ? supabase.from('resources').select('id, name, type').eq('id', resourceId).single().then(r => r.data) : Promise.resolve(null),
+    resourceId ? adminSupabase.from('resources').select('id, name, type').eq('id', resourceId).single().then(r => r.data) : Promise.resolve(null),
     dealsPromise,
     adsPromise
   ])
@@ -367,6 +368,7 @@ export default async function PublicPageView({
     locationSlug: slug,
     referralSource: ref,
     resourceId: resourceId || undefined,
+    tableIdentifier: (_resource as { name?: string })?.name || undefined,
     paymentIsLive: paymentSettings?.is_active ?? false,
     globalManualPaymentOverride: (globalManualPayment as { global_manual_payment_override?: boolean })?.global_manual_payment_override === true,
     mapsIntegrationEnabled: infraFlags.maps_integration_enabled !== false,
@@ -376,7 +378,7 @@ export default async function PublicPageView({
   let RendererContent = null
   switch (page.template_type) {
     case 'restaurant':
-      RendererContent = <RestaurantRenderer {...sharedProps} slug={slug} />
+      RendererContent = <RestaurantRenderer {...sharedProps} slug={slug} tableIdentifier={(_resource as { name?: string })?.name || undefined} />
       break
     case 'booking':
       RendererContent = <BookingRenderer {...sharedProps} />

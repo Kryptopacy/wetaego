@@ -103,7 +103,7 @@ export const cancelSubscription = authActionClient
     await supabase
       .from('organizations')
       .update({ 
-        subscription_status: 'inactive',
+        subscription_status: 'canceled',
         subscription_plan: 'free'
       })
       .eq('id', organization_id)

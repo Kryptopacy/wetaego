@@ -1,4 +1,4 @@
-import { createClient, createAnonClient } from '@/lib/supabase/server'
+import { createClient, createAnonClient, createAdminClient } from '@/lib/supabase/server'
 import { notFound, redirect } from 'next/navigation'
 import { Metadata } from 'next'
 import { cookies } from 'next/headers'
@@ -164,13 +164,14 @@ export default async function PublicMenuPage({
   }
 
   // Fetch secondary data in parallel
-  const paymentSettingsPromise = supabase
+  const adminSupabase = await createAdminClient()
+  const paymentSettingsPromise = adminSupabase
     .from('organization_payment_settings')
     .select('is_active, provider_account_id')
     .eq('organization_id', location.organization_id)
     .single()
 
-  const qrCodePromise = qrId ? supabase
+  const qrCodePromise = qrId ? adminSupabase
     .from('qr_codes')
     .select('table_identifier, destination_path, is_active')
     .eq('id', qrId)

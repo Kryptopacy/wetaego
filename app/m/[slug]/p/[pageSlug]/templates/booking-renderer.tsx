@@ -107,7 +107,7 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
 
   useEffect(() => {
     if (!form.booking_date) {
-      setAvailableSlots([])
+      queueMicrotask(() => setAvailableSlots([]))
       return
     }
 
@@ -123,7 +123,7 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
         if (!isMounted) return
         if (data.slots) {
           // Filter out slots that do not have enough capacity
-          const validSlots = data.slots.filter((s: any) => s.available >= capacityNeeded)
+          const validSlots = data.slots.filter((s: { slotStart: string, available: number }) => s.available >= capacityNeeded)
           setAvailableSlots(validSlots)
         } else {
           setAvailableSlots([])

@@ -53,7 +53,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
         if (!isNaN(cb)) credits = cb
 
         plan = orgData.subscription_plan || orgData.subscription_tier || 'lite'
-        planStatus = orgData.subscription_status || 'trial'
+        planStatus = orgData.subscription_status || 'trialing'
         trialEndsAt = orgData.trial_ends_at || null
 
         orgId = orgData.id

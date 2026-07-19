@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { paystackProvider } from '@/lib/payments/paystack'
 import crypto from 'crypto'
 
@@ -25,9 +25,24 @@ export async function POST(req: Request) {
       .eq('user_id', user.id)
       .single()
 
+    let isAuthorized = !!membership
     if (!membership) {
+      // Fallback: Check if they are the creator of the organization
+      const { data: org } = await supabase
+        .from('organizations')
+        .select('id')
+        .eq('id', organizationId)
+        .eq('created_by', user.id)
+        .single()
+      
+      if (org) isAuthorized = true
+    }
+
+    if (!isAuthorized) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
+
+    const adminClient = await createAdminClient()
 
     if (action === 'generate_payment_link') {
       if (!amountDueMinor || amountDueMinor <= 0) {
@@ -35,7 +50,7 @@ export async function POST(req: Request) {
       }
 
       // 1. Get customer details
-      const { data: customer } = await supabase
+      const { data: customer } = await adminClient
         .from('customer_profiles')
         .select('email')
         .eq('id', customerId)
@@ -49,7 +64,7 @@ export async function POST(req: Request) {
       const reference = `iou_${organizationId.substring(0,8)}_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`
 
       // 4. Create an installment record BEFORE initiating payment so we have its ID
-      const { data: installment, error: insertError } = await supabase
+      const { data: installment, error: insertError } = await adminClient
         .from('iou_installments')
         .insert({
           organization_id: organizationId,
@@ -90,7 +105,7 @@ export async function POST(req: Request) {
       })
 
       // 6. Update the installment record with the generated payment link
-      await supabase
+      await adminClient
         .from('iou_installments')
         .update({ payment_link: authorizationUrl })
         .eq('id', installment.id)

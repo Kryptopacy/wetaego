@@ -84,11 +84,11 @@ export function PortfolioRenderer({ location, page, items, locationSlug }: Portf
 
   // Inquiries state
   const [isPending, startTransition] = useTransition()
-  const [form, setForm] = useState({ name: '', email: '', message: '' })
+  const [form, setForm] = useState({ name: '', email: '', phone: '', message: '' })
   
   function submitLead(e: React.FormEvent) {
     e.preventDefault()
-    if (!form.name || !form.email || !form.message) return
+    if (!form.name || !form.email || !form.phone || !form.message) return
 
     startTransition(async () => {
       const res = await fetch('/api/inquiries', {
@@ -99,6 +99,7 @@ export function PortfolioRenderer({ location, page, items, locationSlug }: Portf
           location_slug: locationSlug,
           customer_name: form.name,
           customer_email: form.email,
+          customer_phone: form.phone,
           message: form.message,
         })
       })
@@ -109,7 +110,7 @@ export function PortfolioRenderer({ location, page, items, locationSlug }: Portf
       }
 
       toast.success("Message sent! I'll get back to you soon.")
-      setForm({ name: '', email: '', message: '' })
+      setForm({ name: '', email: '', phone: '', message: '' })
     })
   }
 
@@ -220,7 +221,7 @@ export function PortfolioRenderer({ location, page, items, locationSlug }: Portf
                 >
                   <div className="relative rounded-3xl overflow-hidden bg-zinc-100 dark:bg-zinc-900 mb-4 ring-1 ring-black/5 dark:ring-white/10">
                     {item.images && item.images.length > 0 ? (
-                      <div className="relative aspect-[4/5] sm:aspect-[4/3] md:aspect-auto">
+                      <div className="relative aspect-4/5 sm:aspect-4/3 md:aspect-auto">
                         <Image 
                           src={item.images[0]} 
                           alt={item.title} 
@@ -274,7 +275,7 @@ export function PortfolioRenderer({ location, page, items, locationSlug }: Portf
                     </div>
                   )}
                   <h3 className="text-xl font-bold mb-2">{item.title}</h3>
-                  <p className="text-zinc-500 dark:text-zinc-400 text-sm flex-grow mb-6 line-clamp-3">
+                  <p className="text-zinc-500 dark:text-zinc-400 text-sm grow mb-6 line-clamp-3">
                     {item.description}
                   </p>
                   <div className="flex items-center justify-between pt-6 border-t border-zinc-100 dark:border-zinc-800">
@@ -306,7 +307,7 @@ export function PortfolioRenderer({ location, page, items, locationSlug }: Portf
           </p>
           
           <form onSubmit={submitLead} className="flex flex-col gap-4 text-left">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <input 
                 type="text" 
                 required
@@ -322,6 +323,14 @@ export function PortfolioRenderer({ location, page, items, locationSlug }: Portf
                 className="w-full px-4 py-3 rounded-xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:outline-none"
                 value={form.email}
                 onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
+              />
+              <input 
+                type="tel" 
+                required
+                placeholder="Your Phone Number" 
+                className="w-full px-4 py-3 rounded-xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:outline-none"
+                value={form.phone}
+                onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
               />
             </div>
             <textarea 
@@ -353,7 +362,7 @@ export function PortfolioRenderer({ location, page, items, locationSlug }: Portf
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100]"
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-100"
               onClick={() => setSelectedItem(null)}
             />
             <motion.div 
@@ -361,7 +370,7 @@ export function PortfolioRenderer({ location, page, items, locationSlug }: Portf
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 100, scale: 0.95 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="fixed inset-x-0 bottom-0 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 w-full md:max-w-4xl max-h-[90vh] bg-white dark:bg-zinc-900 md:rounded-3xl rounded-t-3xl z-[101] overflow-hidden shadow-2xl flex flex-col"
+              className="fixed inset-x-0 bottom-0 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 w-full md:max-w-4xl max-h-[90vh] bg-white dark:bg-zinc-900 md:rounded-3xl rounded-t-3xl z-101 overflow-hidden shadow-2xl flex flex-col"
             >
               {/* Header */}
               <div className="flex items-center justify-between p-6 border-b border-zinc-100 dark:border-zinc-800 sticky top-0 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md z-10">
@@ -378,7 +387,7 @@ export function PortfolioRenderer({ location, page, items, locationSlug }: Portf
               </div>
 
               {/* Content */}
-              <div className="overflow-y-auto p-6 md:p-8 flex-grow">
+              <div className="grow overflow-y-auto p-6 md:p-8">
                 {/* Images */}
                 {selectedItem.images && selectedItem.images.length > 0 && (
                   <div className="space-y-4 mb-8">

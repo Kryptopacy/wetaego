@@ -64,6 +64,7 @@ interface CatalogPageRendererProps {
   locationSlug: string
   referralSource?: string
   sponsoredAds?: { id: string; title: string; category: string; image_url: string; target_link: string }[]
+  tableIdentifier?: string
 }
 
 const AVAILABILITY_STYLES: Record<string, string> = {
@@ -80,7 +81,7 @@ const AVAILABILITY_LABELS: Record<string, string> = {
   unavailable: 'Unavailable',
 }
 
-export function CatalogPageRenderer({ location, page, items, locationSlug, paymentIsLive, sponsoredAds }: CatalogPageRendererProps) {
+export function CatalogPageRenderer({ location, page, items, locationSlug, paymentIsLive, sponsoredAds, tableIdentifier }: CatalogPageRendererProps) {
   const themeColor = location.theme_color || '#7c3aed'
   const { addItem } = useCartStore()
   const [variantItem, setVariantItem] = useState<PageItem | null>(null)
@@ -364,6 +365,7 @@ export function CatalogPageRenderer({ location, page, items, locationSlug, payme
           organizationId={location.organization_id}
           locationId={location.id}
           paymentIsLive={paymentIsLive}
+          tableIdentifier={tableIdentifier}
           templateType="catalog"
           menuItems={items.map(i => ({ id: i.id, name: i.title, price_minor: i.price_minor || 0 }))}
           hideAddressField={page.template_data?.hide_delivery === true}

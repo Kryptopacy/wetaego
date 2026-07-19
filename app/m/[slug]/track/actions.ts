@@ -1,9 +1,9 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 
 export async function getTrackingDetailsAction(locationId: string, trackingCode: string) {
-  const supabase = await createClient()
+  const supabase = await createAdminClient()
   
   // Find order by tracking code and location's organization
   const { data: order, error } = await supabase
@@ -76,7 +76,7 @@ export async function getTrackingDetailsAction(locationId: string, trackingCode:
 }
 
 export async function sendMessageAction(locationId: string, trackingCode: string, message: string) {
-  const supabase = await createClient()
+  const supabase = await createAdminClient()
 
   // Verify order exists and get org ID
   const { data: order, error } = await supabase
@@ -90,7 +90,8 @@ export async function sendMessageAction(locationId: string, trackingCode: string
   }
 
   // Create service request
-  const { error: insertError } = await supabase
+  const adminClient = await createAdminClient()
+  const { error: insertError } = await adminClient
     .from('service_requests')
     .insert({
       organization_id: order.organization_id,
@@ -110,7 +111,7 @@ export async function sendMessageAction(locationId: string, trackingCode: string
 }
 
 export async function generateBalancePaymentLinkAction(locationId: string, trackingCode: string) {
-  const supabase = await createClient()
+  const supabase = await createAdminClient()
 
   const { data: order, error } = await supabase
     .from('orders')

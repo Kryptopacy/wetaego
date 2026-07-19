@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createAdminClient } from '@/lib/supabase/server'
 import { sendTrialExpirationReminder } from '@/lib/notifications/email'
 
 export const maxDuration = 60; // Max execution time
@@ -11,9 +11,7 @@ export async function GET(req: Request) {
     return new NextResponse('Unauthorized', { status: 401 });
   }
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-  const supabase = createClient(supabaseUrl, supabaseKey)
+  const supabase = await createAdminClient()
 
   try {
     const today = new Date()
@@ -21,7 +19,7 @@ export async function GET(req: Request) {
     const { data: orgs, error } = await supabase
       .from('organizations')
       .select('id, name, created_by, trial_ends_at')
-      .eq('subscription_status', 'trial')
+      .eq('subscription_status', 'trialing')
       .not('trial_ends_at', 'is', null)
 
     if (error) throw error

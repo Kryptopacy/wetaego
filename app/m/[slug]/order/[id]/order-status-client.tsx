@@ -4,6 +4,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { getFullOrderDetailsAction } from '@/app/m/[slug]/actions'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 import { formatCurrency } from '@/lib/utils/currency'
@@ -73,11 +74,27 @@ export function OrderStatusClient({
       })
       .subscribe()
 
+    const pollInterval = setInterval(() => {
+      if (order.id && order.location_id) {
+        getFullOrderDetailsAction(order.id, order.location_id).then((fresh) => {
+          if (fresh) {
+            setOrder((prev) => {
+              if (fresh.status === 'paid' && prev.status === 'pending') {
+                toast.success('Payment completed! Your food is being prepared.')
+              }
+              return { ...prev, ...fresh } as OrderWithRelations
+            })
+          }
+        }).catch(() => null)
+      }
+    }, 4000)
+
     return () => {
       supabase.removeChannel(orderChannel)
       supabase.removeChannel(paymentsChannel)
+      clearInterval(pollInterval)
     }
-  }, [order.id, supabase, currencyCode])
+  }, [order.id, order.location_id, supabase, currencyCode])
 
   const copyToClipboard = () => {
     if (manualPaymentAccountNumber) {

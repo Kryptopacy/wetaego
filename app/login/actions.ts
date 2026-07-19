@@ -39,8 +39,17 @@ function sanitizeRedirect(target: string | null): string {
 export const login = actionClient
   .schema(loginSchema)
   .action(async ({ parsedInput: { email, password, redirectTo: rawRedirect } }) => {
-    const supabase = await createClient()
+    const { headers } = await import('next/headers')
+    const ip = (await headers()).get('x-forwarded-for') || 'anonymous'
+    const { success } = await ratelimit.limit(`login_${ip}`)
+    
     const redirectTo = sanitizeRedirect(rawRedirect || null)
+
+    if (!success) {
+      return { redirect: `/login?message=${encodeURIComponent('Too many login attempts. Please try again later.')}&redirectTo=${encodeURIComponent(redirectTo)}` }
+    }
+
+    const supabase = await createClient()
 
     // If a demo user is currently logged in, clear their session before proceeding
     const { data: { user } } = await supabase.auth.getUser()
@@ -61,8 +70,17 @@ export const login = actionClient
 export const signup = actionClient
   .schema(signupSchema)
   .action(async ({ parsedInput: { email, password, redirectTo: rawRedirect } }) => {
-    const supabase = await createClient()
+    const { headers } = await import('next/headers')
+    const ip = (await headers()).get('x-forwarded-for') || 'anonymous'
+    const { success } = await ratelimit.limit(`signup_${ip}`)
+    
     const redirectTo = sanitizeRedirect(rawRedirect || null)
+
+    if (!success) {
+      return { redirect: `/login?message=${encodeURIComponent('Too many signup attempts. Please try again later.')}&redirectTo=${encodeURIComponent(redirectTo)}` }
+    }
+
+    const supabase = await createClient()
 
     // If a demo user is currently logged in, clear their session before proceeding
     const { data: { user } } = await supabase.auth.getUser()
@@ -444,6 +462,7 @@ export async function startInteractiveDemo() {
         const itemCollectionLinks = [] // array of { item_id, category_slug }
 
         for (const item of insertedItems) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const itemData = item.item_data as Record<string, any>;
           const catName = itemData?.category;
           if (catName) {
@@ -490,7 +509,8 @@ export async function startInteractiveDemo() {
           
           // Update the items to remove the category from item_data
           for (const item of insertedItems) {
-            await adminClient.from('page_items').update({ item_data: item.item_data }).eq('id', item.id)
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            await adminClient.from('page_items').update({ item_data: item.item_data as Record<string, any> }).eq('id', item.id)
           }
         }
       }

@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { useOfflineQueueStore, QueuedAction } from '@/lib/stores/offline-queue-store'
 import { toast } from 'sonner'
 
@@ -29,15 +29,15 @@ export function useOfflineSync(onSyncAction: (action: QueuedAction) => Promise<b
     }
   }, [])
 
+  const isSyncing = useRef(false)
+
   // Background sync processor
   useEffect(() => {
     if (!isOnline || queue.length === 0) return
 
-    let isSyncing = false
-
     const processQueue = async () => {
-      if (isSyncing) return
-      isSyncing = true
+      if (isSyncing.current) return
+      isSyncing.current = true
 
       // Create a copy of the queue so we don't mutate during iteration
       const currentQueue = [...queue]
@@ -58,7 +58,7 @@ export function useOfflineSync(onSyncAction: (action: QueuedAction) => Promise<b
         }
       }
 
-      isSyncing = false
+      isSyncing.current = false
     }
 
     processQueue()

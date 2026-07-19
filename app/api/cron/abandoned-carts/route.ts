@@ -87,10 +87,43 @@ export async function GET(req: Request) {
       }
     }
 
+    // --- PHASE 2: INVENTORY GARBAGE COLLECTION ---
+    // Find orders older than 2 hours that are still pending and return their items to inventory
+    const { data: expiredOrders, error: expiredError } = await supabase
+      .from('orders')
+      .select('id, order_items(item_id, quantity)')
+      .eq('status', 'pending')
+      .lt('created_at', new Date(Date.now() - 2 * 60 * 60000).toISOString()) // older than 2 hours
+
+    if (!expiredError && expiredOrders && expiredOrders.length > 0) {
+      for (const order of expiredOrders) {
+        // Only attempt to restock items that have actual item_ids
+        const validItems = order.order_items?.filter((item: any) => item.item_id) || []
+        
+        if (validItems.length > 0) {
+          const { error: stockError } = await supabase.rpc('increment_stock', { p_items: validItems })
+          if (stockError) {
+            console.error(`Failed to restock items for expired order ${order.id}:`, stockError)
+            continue // skip cancellation if restocking failed so we don't lose the data
+          }
+        }
+
+        // Void the order to free up dashboard and definitively release inventory
+        await supabase
+          .from('orders')
+          .update({ 
+            status: 'cancelled', 
+            cancellation_reason: 'Abandoned Cart Auto-Expiry' 
+          })
+          .eq('id', order.id)
+      }
+    }
+
     return NextResponse.json({ 
       status: 'success', 
       count: emailsSent.length, 
-      recovered_orders: emailsSent 
+      recovered_orders: emailsSent,
+      expired_count: expiredOrders?.length || 0
     })
 
   } catch (error) {

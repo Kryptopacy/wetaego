@@ -1,13 +1,13 @@
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import { OrderStatusClient } from './order-status-client'
 
 export default async function OrderStatusPage(props: { params: Promise<{ slug: string, id: string }> }) {
   const { slug, id } = await props.params
-  const supabase = await createClient()
+  const adminSupabase = await createAdminClient()
 
   // 1. Resolve Location via slug
-  const { data: locationPage } = await supabase
+  const { data: locationPage } = await adminSupabase
     .from('location_pages')
     .select('location_id, locations(*)')
     .eq('slug', slug)
@@ -28,7 +28,7 @@ export default async function OrderStatusPage(props: { params: Promise<{ slug: s
   }
 
   // 2. Fetch Order — scope to the resolved location to prevent IDOR
-  const { data: order } = await supabase
+  const { data: order } = await adminSupabase
     .from('orders')
     .select('*, order_items(*), order_payments(*)')
     .eq('id', id)

@@ -1,5 +1,5 @@
 import { format, parseISO, isBefore, isAfter, parse, addMinutes } from 'date-fns'
-import { createAnonClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 
 export interface AvailabilitySchedule {
   [day: string]: { start: string; end: string }[]
@@ -15,6 +15,7 @@ export interface BookingInterval {
   booking_date: string // YYYY-MM-DD
   booking_time: string | null // HH:mm
   booking_end_time: string | null // HH:mm
+  item_id?: string | null
 }
 
 export interface TimeSlot {
@@ -53,7 +54,8 @@ export function getCurrentTimeInTimezone(timezone: string) {
 export function generateAvailabilitySlots(
   targetDate: string, // YYYY-MM-DD
   availability: LocationAvailability,
-  existingBookings: BookingInterval[]
+  existingBookings: BookingInterval[],
+  resourceIds?: string[]
 ): TimeSlot[] {
   // Determine day of week (0 = Sunday, 1 = Monday, etc.)
   // We parse the target date as local to avoid UTC shift
@@ -98,6 +100,9 @@ export function generateAvailabilitySlots(
       // A simple conflict is if the slot overlaps with any booking
       const isConflict = existingBookings.some(booking => {
         if (booking.booking_date !== targetDate) return false
+        if (resourceIds && resourceIds.length > 0 && booking.item_id && !resourceIds.includes(booking.item_id)) {
+          return false // Booking is for a different resource/item, no conflict
+        }
         if (!booking.booking_time) return true // Daily booking blocks entire day
         
         const bookingStart = booking.booking_time
@@ -122,55 +127,63 @@ export function generateAvailabilitySlots(
 
 export async function getAvailableSlots(
   locationId: string,
-  targetDate: Date,
+  targetDate: Date | string,
   resourceIds?: string[]
 ): Promise<TimeSlot[]> {
-  const supabase = createAnonClient()
+  try {
+    const supabase = await createAdminClient()
 
-  // 1. Fetch location availability configuration
-  const { data: avail } = await supabase
-    .from('location_availability')
-    .select('timezone, slot_interval, schedule')
-    .eq('location_id', locationId)
-    .single()
+    // 1. Fetch location availability configuration
+    const { data: avail } = await supabase
+      .from('location_availability')
+      .select('timezone, slot_interval, schedule')
+      .eq('location_id', locationId)
+      .single()
 
-  if (!avail) return []
+    if (!avail) return []
 
-  const availability: LocationAvailability = {
-    timezone: avail.timezone,
-    slot_interval: avail.slot_interval,
-    schedule: avail.schedule as any
-  }
-
-  // 2. Format the target date (YYYY-MM-DD)
-  const targetDateStr = format(targetDate, 'yyyy-MM-dd')
-
-  // 3. Fetch existing bookings for this location and date
-  // Since page_bookings are tied to pages, we need to find pages for the location
-  const { data: pages } = await supabase
-    .from('location_pages')
-    .select('id')
-    .eq('location_id', locationId)
-
-  let existingBookings: BookingInterval[] = []
-
-  if (pages && pages.length > 0) {
-    const pageIds = pages.map(p => p.id)
-    const { data: bookings } = await supabase
-      .from('page_bookings')
-      .select('booking_date, booking_time, booking_end_time')
-      .in('page_id', pageIds)
-      .eq('booking_date', targetDateStr)
-
-    if (bookings) {
-      existingBookings = bookings.map(b => ({
-        booking_date: b.booking_date!,
-        booking_time: b.booking_time,
-        booking_end_time: b.booking_end_time
-      }))
+    const availability: LocationAvailability = {
+      timezone: avail.timezone,
+      slot_interval: avail.slot_interval,
+      schedule: avail.schedule as any
     }
-  }
 
-  // 4. Generate availability slots
-  return generateAvailabilitySlots(targetDateStr, availability, existingBookings)
+    // 2. Format the target date (YYYY-MM-DD) reliably without timezone shifting if string is passed
+    const targetDateStr = typeof targetDate === 'string' ? targetDate : format(targetDate, 'yyyy-MM-dd')
+
+    // 3. Fetch existing bookings for this location and date
+    // Since page_bookings are tied to pages, we need to find pages for the location
+    const { data: pages } = await supabase
+      .from('location_pages')
+      .select('id')
+      .eq('location_id', locationId)
+
+    let existingBookings: BookingInterval[] = []
+
+    if (pages && pages.length > 0) {
+      const pageIds = pages.map(p => p.id)
+      const { data: bookings } = await supabase
+        .from('page_bookings')
+        .select('booking_date, booking_time, booking_end_time, item_id')
+        .in('page_id', pageIds)
+        .eq('booking_date', targetDateStr)
+        .neq('status', 'cancelled')
+        .neq('status', 'voided')
+
+      if (bookings) {
+        existingBookings = bookings.map(b => ({
+          booking_date: b.booking_date!,
+          booking_time: b.booking_time,
+          booking_end_time: b.booking_end_time,
+          item_id: b.item_id
+        }))
+      }
+    }
+
+    // 4. Generate availability slots
+    return generateAvailabilitySlots(targetDateStr, availability, existingBookings, resourceIds)
+  } catch (error) {
+    console.error('Error in getAvailableSlots:', error)
+    return []
+  }
 }

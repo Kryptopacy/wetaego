@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { processExistingOrderPayment, optInMarketing } from '../../m/[slug]/actions'
+import { processExistingOrderPayment, optInMarketing, getOrderPaymentStatusAction } from '@/app/m/[slug]/actions'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import { formatCurrency } from '@/lib/utils/currency'
@@ -20,7 +20,7 @@ export default function PayClient({
   splitShares?: number[]
   currencyCode: string
 }) {
-  const [order, setOrder] = useState(initialOrder)
+  const [order, setOrder] = useState<UIOrder>(initialOrder)
   const [isProcessing, setIsProcessing] = useState(false)
   const [customAmount, setCustomAmount] = useState('')
   const [optIn, setOptIn] = useState(false)
@@ -38,15 +38,25 @@ export default function PayClient({
           filter: `id=eq.${order.id}`
         },
         (payload) => {
-          setOrder((prev: UIOrder) => ({ ...prev, ...payload.new } as UIOrder))
+          setOrder((prev: UIOrder) => ({ ...prev, ...(payload.new as unknown as Partial<UIOrder>) } as UIOrder))
         }
       )
       .subscribe()
 
+    const pollInterval = setInterval(async () => {
+      if (order.status !== 'paid' && order.status !== 'completed') {
+        const latest = await getOrderPaymentStatusAction(order.id).catch(() => null)
+        if (latest) {
+          setOrder((prev: UIOrder) => ({ ...prev, ...(latest as unknown as Partial<UIOrder>) } as UIOrder))
+        }
+      }
+    }, 4000)
+
     return () => {
       supabase.removeChannel(channel)
+      clearInterval(pollInterval)
     }
-  }, [order.id, supabase])
+  }, [order.id, order.status, supabase])
 
   const remainingMinor = Math.max(0, order.total_amount_minor - (order.amount_paid_minor || 0))
   const suggestedShareMinor = splitCount > 1 ? Math.ceil(order.total_amount_minor / splitCount) : remainingMinor

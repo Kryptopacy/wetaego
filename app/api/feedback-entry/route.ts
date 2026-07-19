@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 
@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
   }
   const qrId = parsed.data.qr_id
 
-  const supabase = await createClient()
+  const supabase = await createAdminClient()
 
   // 1. Fetch QR Code info
   const { data: qrData, error: qrError } = await supabase

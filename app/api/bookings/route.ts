@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { notifyBusiness } from '@/lib/notifications/dispatcher'
 import { checkRateLimit } from '@/lib/upstash'
 import { z } from 'zod'
@@ -55,9 +55,10 @@ export async function POST(req: Request) {
     } = parsed.data
 
     const supabase = await createClient()
+    const adminClient = await createAdminClient()
 
     // Get page + location + org
-    const { data: page } = await supabase
+    const { data: page } = await adminClient
       .from('location_pages')
       .select('id, title, billing_enabled, billing_mode, payment_mode, deposit_percentage, locations(id, organization_id, name)')
       .eq('id', page_id)
@@ -82,7 +83,7 @@ export async function POST(req: Request) {
     let firstItem = null
 
     if (targetItemIds.length > 0) {
-      const { data: items } = await supabase
+      const { data: items } = await adminClient
         .from('page_items')
         .select('id, title, price_minor, payment_mode, deposit_percentage, inventory_count')
         .in('id', targetItemIds)
@@ -129,7 +130,7 @@ export async function POST(req: Request) {
     // Check availability if tied to items and has dates
     if (targetItemIds.length > 0 && booking_date) {
       for (const id of targetItemIds) {
-        const { data: isAvailable, error: rpcError } = await supabase.rpc('check_item_availability', {
+        const { data: isAvailable, error: rpcError } = await adminClient.rpc('check_item_availability', {
           p_item_id: id,
           p_start_date: booking_date,
           p_end_date: booking_end_date || booking_date,
@@ -144,7 +145,7 @@ export async function POST(req: Request) {
     }
 
     // Create the booking record (initially pending)
-    const { data: booking, error: bookingError } = await supabase
+    const { data: booking, error: bookingError } = await adminClient
       .from('page_bookings')
       .insert({
         page_id,
@@ -160,7 +161,7 @@ export async function POST(req: Request) {
         booking_notes: (targetItemIds.length > 1 ? `Multi-item Booking: ${targetItemIds.length} items.\n\n` : '') + (booking_notes || ''),
         total_amount_minor: basePrice,
         status: 'pending',
-        payment_status: chargeAmount > 0 && page.billing_enabled ? 'awaiting_payment' : 'not_required',
+        payment_status: 'unpaid',
       })
       .select('id')
       .single()
@@ -186,9 +187,9 @@ export async function POST(req: Request) {
         booking_notes: `[SYSTEM_CHILD_OF:${booking.id}]`,
         total_amount_minor: 0,
         status: 'pending',
-        payment_status: 'not_required',
+        payment_status: 'unpaid',
       }))
-      const { error: childError } = await supabase.from('page_bookings').insert(childBookings)
+      const { error: childError } = await adminClient.from('page_bookings').insert(childBookings)
       if (childError) {
         console.error('Child bookings insert error:', childError)
       }
@@ -203,7 +204,7 @@ export async function POST(req: Request) {
         quantity: guests
       }))
 
-      const { error: stockError } = await supabase.rpc('decrement_stock', {
+      const { error: stockError } = await adminClient.rpc('decrement_stock', {
         p_items: payload
       })
 
@@ -214,7 +215,7 @@ export async function POST(req: Request) {
     }
 
     // Check if org has active Paystack integration
-    const { data: paymentSettings } = await supabase
+    const { data: paymentSettings } = await adminClient
       .from('organization_payment_settings')
       .select('is_active, provider_account_id')
       .eq('organization_id', location.organization_id)
@@ -268,7 +269,7 @@ export async function POST(req: Request) {
     })
 
     // Update booking status to confirmed
-    await supabase
+    await adminClient
       .from('page_bookings')
       .update({ status: 'confirmed' })
       .eq('id', booking.id)

@@ -36,22 +36,26 @@ export async function RestaurantRenderer({
     if (!collections) return []
 
     // Map to the legacy structure expected by MenuRenderer
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return collections.map((col: any) => {
       // Filter out nulls just in case, and extract the actual page_items
       const items = (col.page_item_collections || [])
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .map((pic: any) => pic.page_items)
         .filter(Boolean)
-        .sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0))
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .sort((a: any, b: any) => ((a?.sort_order || 0) - (b?.sort_order || 0)))
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .map((item: any) => ({
-          id: item.id,
-          name: item.title,
-          description: item.description,
-          price_minor: item.price_minor,
-          image_url: Array.isArray(item.images) && item.images.length > 0 ? item.images[0] : null,
-          dietary_tags: item.item_data?.dietary_tags || [],
-          allergen_tags: item.item_data?.allergen_tags || [],
-          stock_count: item.item_data?.stock_count || null,
-          availability_status: item.availability_status
+          id: item?.id,
+          name: item?.title,
+          description: item?.description,
+          price_minor: item?.price_minor,
+          image_url: Array.isArray(item?.images) && item?.images.length > 0 ? item?.images[0] : null,
+          dietary_tags: item?.item_data?.dietary_tags || [],
+          allergen_tags: item?.item_data?.allergen_tags || [],
+          stock_count: item?.item_data?.stock_count || null,
+          availability_status: item?.availability_status
         }))
         
       return {
@@ -68,7 +72,9 @@ export async function RestaurantRenderer({
     { revalidate: 60, tags: [`page_collections_with_items_${page.id}`] }
   )()
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const allMenuItems = categories.flatMap((cat: any) => 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (cat.menu_items || []).map((item: any) => ({
       id: item.id,
       name: item.name,

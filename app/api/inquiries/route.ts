@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { checkRateLimit } from '@/lib/upstash'
 import { notifyBusiness } from '@/lib/notifications/dispatcher'
 import { z } from 'zod'
@@ -34,6 +34,7 @@ export async function POST(req: Request) {
 
     const { page_id, item_id, customer_name, customer_email, customer_phone, message } = parsed.data
     const supabase = await createClient()
+    const adminClient = await createAdminClient()
 
     // Validate page belongs to a real published page
     const { data: page } = await supabase
@@ -53,7 +54,7 @@ export async function POST(req: Request) {
     }
 
     // Insert into page_inquiries - the right table for listings
-    const { data: inquiry, error: inquiryError } = await supabase
+    const { data: inquiry, error: inquiryError } = await adminClient
       .from('page_inquiries')
       .insert({
         page_id,

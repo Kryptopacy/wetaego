@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { formatCurrency } from '@/lib/utils/currency'
 import PayClient from './pay-client'
@@ -13,7 +13,7 @@ export default async function SharedPaymentPage({
 }) {
   const { order_id } = await params
   const { split } = await searchParams
-  const supabase = await createClient()
+  const supabase = await createAdminClient()
 
   // Fetch the order
   const { data: orderRaw } = await supabase

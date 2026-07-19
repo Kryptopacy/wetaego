@@ -2,7 +2,7 @@
 
 
 
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 
 export async function verifyFeedbackPin(orgSlug: string, pin: string) {
@@ -13,7 +13,7 @@ export async function verifyFeedbackPin(orgSlug: string, pin: string) {
     return { error: 'Too many failed attempts. Please try again later.' }
   }
 
-  const supabase = await createClient()
+  const supabase = await createAdminClient()
 
   // Find the organization
   const { data: org } = await supabase

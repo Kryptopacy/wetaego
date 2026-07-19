@@ -428,7 +428,7 @@ export function CheckoutModal({
       
       if ((paymentMethod === 'transfer' || paymentMethod === 'pay_on_delivery_cash') && manualPaymentEnabled) {
         const currentSlug = window.location.pathname.split('/')[2]
-        window.location.href = `/m/${currentSlug}/order/${orderId}`
+        window.location.assign(`/m/${currentSlug}/order/${orderId}`)
       } else if (paymentMethod === 'pay_on_delivery_cash' || paymentMethod === 'pay_after_service' || paymentMethod === 'pay_on_delivery_link') {
         // No gateway — show confirmation toast
         toast.success(
@@ -439,9 +439,9 @@ export function CheckoutModal({
         onClose()
       } else if (splitCount > 1) {
         const currentSlug = window.location.pathname.split('/')[2]
-        window.location.href = `/pay/${orderId}/share?split=${splitCount}&type=${splitType}&slug=${currentSlug}`
+        window.location.assign(`/pay/${orderId}/share?split=${splitCount}&type=${splitType}&slug=${currentSlug}`)
       } else if (checkoutUrl) {
-        window.location.href = checkoutUrl
+        window.location.assign(checkoutUrl)
       } else {
         toast.success('Order placed!')
         onClose()

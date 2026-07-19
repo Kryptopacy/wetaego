@@ -2,7 +2,7 @@
 
 
 
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import { processCheckout } from '../../actions'
 import { z } from 'zod'
 import { cookies } from 'next/headers'
@@ -49,7 +49,7 @@ export async function submitFeedbackAndTip(
       return { error: 'Invalid feedback payload' }
     }
 
-    const supabase = await createClient()
+    const supabase = await createAdminClient()
 
   let organizationId = ''
   let locationId = locationIdOverride || ''

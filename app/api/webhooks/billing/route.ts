@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server'
 import * as Sentry from '@sentry/nextjs'
-import { createClient } from '@supabase/supabase-js'
+import { createAdminClient } from '@/lib/supabase/server'
 import { paystackProvider } from '@/lib/payments/paystack'
-import { Database } from '@/lib/supabase/types'
 import { formatCurrency } from '@/lib/utils/currency'
 
 export async function POST(req: Request) {
@@ -23,14 +22,11 @@ export async function POST(req: Request) {
   // Only process subscription-related events
   // Paystack fires: subscription.create, subscription.disable, charge.success (for recurring)
   
-  const supabase = createClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
+  const supabase = await createAdminClient()
 
   try {
-    // Idempotency Check
-    const providerRef = event.data?.reference || event.data?.subscription_code || event.event + Date.now().toString()
+    // Idempotency Check using the exact cryptographic signature for bulletproof retries
+    const providerRef = event.data?.reference || event.data?.subscription_code || signature
     if (providerRef) {
       const { data: existingEvent } = await supabase
         .from('webhook_events')

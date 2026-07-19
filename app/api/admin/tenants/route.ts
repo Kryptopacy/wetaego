@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { isAdminEmail } from '@/lib/utils/admin'
 import { NextResponse } from 'next/server'
 
@@ -12,6 +12,8 @@ export async function GET(req: Request) {
       return new NextResponse('Unauthorized', { status: 401 })
     }
 
+    const adminClient = await createAdminClient()
+
     const { searchParams } = new URL(req.url)
     const search = searchParams.get('search') || ''
     const page = parseInt(searchParams.get('page') || '1', 10)
@@ -19,7 +21,7 @@ export async function GET(req: Request) {
     const from = (page - 1) * pageSize
     const to = from + pageSize - 1
 
-    let query = supabase
+    let query = adminClient
       .from('organizations')
       .select('id, name, subscription_plan, subscription_status, purchased_credits, created_at, slug, status', { count: 'exact' })
       

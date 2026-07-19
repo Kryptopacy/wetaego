@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { format } from 'date-fns'
 
 export async function GET(req: Request) {
@@ -12,11 +12,12 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const adminClient = await createAdminClient()
     const url = new URL(req.url)
     const organizationId = url.searchParams.get('orgId')
 
-    let query = supabase.from('orders').select('created_at, total_amount_minor').eq('status', 'paid')
-    let countQuery = supabase.from('orders').select('*', { count: 'exact', head: true })
+    let query = adminClient.from('orders').select('created_at, total_amount_minor').eq('status', 'paid')
+    let countQuery = adminClient.from('orders').select('*', { count: 'exact', head: true })
 
     // If orgId is provided, run for specific org, else run for ENTIRE platform (Hackathon Total)
     if (organizationId) {

@@ -1,9 +1,9 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 
 export async function verifyQuotePin(reference: string, pin: string) {
-  const supabase = await createClient()
+  const supabase = await createAdminClient()
   
   const { data: quote, error } = await supabase
     .from('page_bookings')
@@ -28,7 +28,7 @@ export async function verifyQuotePin(reference: string, pin: string) {
 }
 
 export async function getQuoteDetails(quoteId: string, pin: string) {
-  const supabase = await createClient()
+  const supabase = await createAdminClient()
   
   const { data: quote, error } = await supabase
     .from('page_bookings')

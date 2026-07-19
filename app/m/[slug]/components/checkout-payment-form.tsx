@@ -107,7 +107,7 @@ function getVisibleOptions(
   return legacy.filter(Boolean)
 }
 
-function getCtaLabel(method: string, finalTotalMinor: number, t: any, isUnevenSplit?: boolean, splitCount?: number): string {
+function getCtaLabel(method: string, finalTotalMinor: number, t: (key: string) => string, isUnevenSplit?: boolean, splitCount?: number): string {
   if (isUnevenSplit) return `Share Bill — ${formatCurrency(finalTotalMinor)}`
   const amount = splitCount && splitCount > 1
     ? formatCurrency(Math.ceil(finalTotalMinor / splitCount))
