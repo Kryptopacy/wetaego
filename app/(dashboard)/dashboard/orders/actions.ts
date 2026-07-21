@@ -522,15 +522,16 @@ export const deleteAdHocItemAction = authActionClient
 export const logManualPaymentAction = authActionClient
   .schema(z.object({
     orderId: z.string(),
-    amountMinor: z.number()
+    amountMinor: z.number(),
+    paymentMethod: z.enum(['cash', 'pos_terminal', 'bank_transfer', 'deposit']).default('cash')
   }))
-  .action(async ({ parsedInput: { orderId, amountMinor }, ctx: { user } }) => {
+  .action(async ({ parsedInput: { orderId, amountMinor, paymentMethod }, ctx: { user } }) => {
     const { supabase } = await requireOrderAuth(orderId, user)
 
     const { error: rpcError } = await supabase.rpc('log_manual_payment_rpc', {
       p_order_id: orderId,
       p_amount_minor: amountMinor,
-      p_reference: `manual_${Date.now()}`
+      p_reference: `manual_${paymentMethod}_${Date.now()}`
     })
 
     if (rpcError) {

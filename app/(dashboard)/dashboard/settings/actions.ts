@@ -494,6 +494,7 @@ export const saveLoyaltySettings = authActionClient
     pointsPerMajorUnit: zfd.numeric(z.number().min(1).max(1000000).default(1)),
     rewardThreshold: zfd.numeric(z.number().min(1).max(1000000).default(100)),
     rewardDiscountMinor: zfd.numeric(z.number().min(0).default(0)),
+    advancedRules: zfd.text(z.string().optional()),
   }))
   .action(async ({ parsedInput, ctx: { supabase, user } }) => {
     const { cookies } = await import('next/headers')
@@ -502,7 +503,7 @@ export const saveLoyaltySettings = authActionClient
       return { success: true }
     }
 
-    const { organizationId, isEnabled, pointsPerMajorUnit, rewardThreshold, rewardDiscountMinor } = parsedInput
+    const { organizationId, isEnabled, pointsPerMajorUnit, rewardThreshold, rewardDiscountMinor, advancedRules } = parsedInput
 
     // Verify auth
     const { data: member } = await supabase
@@ -534,6 +535,7 @@ export const saveLoyaltySettings = authActionClient
         points_per_major_unit: pointsPerMajorUnit,
         reward_threshold: rewardThreshold,
         reward_discount_minor: rewardDiscountMinor,
+        advanced_rules: advancedRules ? JSON.parse(advancedRules) : [],
         updated_at: new Date().toISOString()
       }, { onConflict: 'organization_id' })
 

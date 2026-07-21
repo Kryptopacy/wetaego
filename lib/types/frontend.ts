@@ -37,6 +37,7 @@ export interface UIOrder {
   amount_paid_minor: number | null;
   status: 'pending' | 'paid' | 'preparing' | 'out_for_delivery' | 'ready' | 'completed' | 'cancelled' | 'refunded' | 'voided';
   payment_method: string | null;
+  wallet_balance_applied_minor?: number | null;
   fulfillment_type?: string | null;
   customer_note: string | null;
   assigned_staff_id: string | null;

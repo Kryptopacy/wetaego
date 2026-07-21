@@ -1,11 +1,13 @@
 'use client'
 
-import { useState, useMemo, useTransition } from 'react'
+import { useState, useMemo, useTransition, useEffect } from 'react'
 import Image from 'next/image'
 import { formatCurrency } from '@/lib/utils/currency'
-import { Search, ShoppingCart, Plus, Minus, X, CreditCard, Banknote, Landmark, CheckCircle2 } from 'lucide-react'
-import { submitPosOrder } from './actions'
+import { Search, ShoppingCart, Plus, Minus, X, CreditCard, Banknote, Landmark, Smartphone, CheckCircle2, MonitorSmartphone } from 'lucide-react'
+import { DynamicQR } from '@/components/qr/DynamicQR'
+import { submitPosOrder, unlinkResourceOrder } from './actions'
 import { toast } from 'sonner'
+import { createClient } from '@/lib/supabase/client'
 
 interface PageItem {
   id: string
@@ -17,6 +19,13 @@ interface PageItem {
   item_data?: Record<string, unknown>
 }
 
+interface Register {
+  id: string
+  name: string
+  type: string
+  current_order_id: string | null
+}
+
 interface POSClientProps {
   items: PageItem[]
   pages: { id: string; title: string; [key: string]: unknown }[]
@@ -24,6 +33,8 @@ interface POSClientProps {
   locationId: string
   organizationId: string
   staffId: string
+  slug: string
+  registers: Register[]
 }
 
 interface CartItem extends PageItem {
@@ -33,15 +44,61 @@ interface CartItem extends PageItem {
   variantLabel?: string
 }
 
-export function POSClient({ items, pages, currency, locationId, organizationId, staffId }: POSClientProps) {
+export function POSClient({ items, pages, currency, locationId, organizationId, staffId, slug, registers }: POSClientProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const [activePageId, setActivePageId] = useState<string>('all')
   
   const [cart, setCart] = useState<CartItem[]>([])
   const [isPending, startTransition] = useTransition()
-  const [paymentMethod, setPaymentMethod] = useState<'cash' | 'card' | 'transfer'>('cash')
+  const [paymentMethod, setPaymentMethod] = useState<'cash' | 'card' | 'transfer' | 'online'>('cash')
   const [amountTendered, setAmountTendered] = useState<string>('')
   
+  // Terminal binding state
+  const [activeRegisterId, setActiveRegisterId] = useState<string>('')
+  const [pushedOrderId, setPushedOrderId] = useState<string | null>(null)
+  
+  const supabase = createClient()
+
+  // Initialize register from local storage
+  useEffect(() => {
+    const saved = localStorage.getItem('pos_active_register')
+    if (saved && registers.some(r => r.id === saved)) {
+      setActiveRegisterId(saved)
+    } else if (registers.length > 0) {
+      setActiveRegisterId(registers[0].id)
+    }
+  }, [registers])
+
+  const handleRegisterChange = (id: string) => {
+    setActiveRegisterId(id)
+    localStorage.setItem('pos_active_register', id)
+  }
+
+  // Real-time subscription to listen for online payment success
+  useEffect(() => {
+    if (!pushedOrderId) return
+
+    const channel = supabase
+      .channel(`order-${pushedOrderId}`)
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'orders',
+        filter: `id=eq.${pushedOrderId}`
+      }, (payload) => {
+        if (payload.new.status === 'paid' || payload.new.status === 'completed') {
+          toast.success('Payment completed successfully!')
+          setPushedOrderId(null)
+          setCart([])
+        }
+      })
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [pushedOrderId, supabase])
+
   // Filter items
   const filteredItems = useMemo(() => {
     return items.filter(item => {
@@ -51,12 +108,8 @@ export function POSClient({ items, pages, currency, locationId, organizationId, 
     })
   }, [items, searchQuery, activePageId])
 
-  // Cart logic
   const addToCart = (item: PageItem) => {
-    // Basic variant handling: if it has variants, we ideally show a modal.
-    // For MVP POS, we just add it directly or pick defaults. 
-    // Real POS would pop up a variant selector. Let's assume standard items for now.
-    
+    if (pushedOrderId) return // Locked
     setCart(prev => {
       const existing = prev.find(c => c.id === item.id)
       if (existing) {
@@ -67,10 +120,11 @@ export function POSClient({ items, pages, currency, locationId, organizationId, 
   }
 
   const updateQuantity = (cartKey: string, delta: number) => {
+    if (pushedOrderId) return
     setCart(prev => prev.map(c => {
       if (c.cartKey === cartKey) {
         const newQ = c.quantity + delta
-        if (newQ <= 0) return c // will filter out below
+        if (newQ <= 0) return c
         return { ...c, quantity: newQ }
       }
       return c
@@ -78,30 +132,34 @@ export function POSClient({ items, pages, currency, locationId, organizationId, 
   }
 
   const removeFromCart = (cartKey: string) => {
+    if (pushedOrderId) return
     setCart(prev => prev.filter(c => c.cartKey !== cartKey))
   }
 
   const cartTotalMinor = cart.reduce((sum, item) => sum + ((item.price_minor || 0) * item.quantity), 0)
   
-  // Cash change logic
   const tenderedMinor = parseFloat(amountTendered || '0') * 100
   const changeMinor = Math.max(0, tenderedMinor - cartTotalMinor)
 
   const handleCheckout = () => {
     if (cart.length === 0) return
+    if (paymentMethod === 'online' && !activeRegisterId) {
+      toast.error('Please select an active Terminal/Register to use Desk Pay.')
+      return
+    }
     
-    // In POS, if multiple pages are mixed, we use the first item's page ID as the order's page.
     const orderPageId = cart[0].page_id
 
     startTransition(async () => {
       try {
-        await submitPosOrder({
+        const res = await submitPosOrder({
           organizationId,
           locationId,
           pageId: orderPageId,
           staffId,
           paymentMethod,
           totalMinor: cartTotalMinor,
+          resourceId: paymentMethod === 'online' ? activeRegisterId : undefined,
           items: cart.map(c => ({
             id: c.id,
             name: c.title,
@@ -112,32 +170,97 @@ export function POSClient({ items, pages, currency, locationId, organizationId, 
           }))
         })
         
+        if (paymentMethod === 'online' && res?.orderId) {
+          setPushedOrderId(res.orderId)
+          toast.success('Pushed to terminal! Waiting for customer to pay.')
+          return
+        }
+        
         toast.success('Order completed successfully!')
         setCart([])
         setAmountTendered('')
-      } catch (_err) {
-        toast.error('Failed to complete order.')
+      } catch (err) {
+        toast.error((err as Error).message || 'Failed to complete order.')
       }
     })
   }
 
+  const handleRecall = async () => {
+    if (!activeRegisterId || !pushedOrderId) return
+    try {
+      await unlinkResourceOrder(activeRegisterId)
+      setPushedOrderId(null)
+      toast.info('Order recalled from terminal. You can now edit the cart.')
+    } catch {
+      toast.error('Failed to recall order.')
+    }
+  }
+
   return (
-    <div className="flex flex-col lg:flex-row h-full w-full overflow-hidden bg-zinc-950">
+    <div className="flex flex-col lg:flex-row h-full w-full overflow-hidden bg-zinc-950 relative">
       
+      {/* Waiting overlay for Desk Pay */}
+      {pushedOrderId && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4">
+          <div className="bg-zinc-900 border border-zinc-800 p-8 rounded-2xl max-w-sm w-full flex flex-col items-center shadow-2xl relative animate-in fade-in zoom-in duration-200">
+            <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-6 relative overflow-hidden">
+              <div className="absolute inset-0 bg-emerald-500/20 animate-pulse"></div>
+              <Smartphone className="w-8 h-8 text-emerald-500" />
+            </div>
+            
+            <h3 className="text-xl font-black text-white mb-2 text-center">Waiting for Customer</h3>
+            <p className="text-zinc-400 text-sm text-center mb-6">
+              The order has been pushed to the terminal. Ask the customer to scan the Desk QR to pay.
+            </p>
+            
+            <p className="text-white font-bold text-3xl mb-8">
+              {formatCurrency(cartTotalMinor, currency)}
+            </p>
+
+            <button
+              onClick={handleRecall}
+              className="w-full py-3 bg-red-500/10 hover:bg-red-500/20 text-red-500 font-bold rounded-xl transition-colors flex items-center justify-center gap-2"
+            >
+              <X className="w-5 h-5" /> Recall / Edit Order
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Left Panel: Items Grid */}
       <div className="flex-1 flex flex-col border-b lg:border-b-0 lg:border-r border-zinc-800 lg:overflow-hidden h-[60vh] lg:h-auto">
         
         {/* Header / Filters */}
         <div className="p-4 border-b border-zinc-800 bg-zinc-900/50 flex flex-col gap-4 shrink-0">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-            <input 
-              type="text" 
-              placeholder="Search items..." 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 bg-zinc-800/50 border border-zinc-700 rounded-lg text-sm text-white focus:outline-none focus:border-emerald-500 transition-colors"
-            />
+          <div className="flex justify-between items-center gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+              <input 
+                type="text" 
+                placeholder="Search items..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-4 py-2 bg-zinc-800/50 border border-zinc-700 rounded-lg text-sm text-white focus:outline-none focus:border-emerald-500 transition-colors"
+              />
+            </div>
+
+            {/* Terminal Selector */}
+            <div className="flex items-center gap-2 bg-zinc-800/50 px-3 py-2 rounded-lg border border-zinc-700">
+              <MonitorSmartphone className="w-4 h-4 text-emerald-400" />
+              <select
+                value={activeRegisterId}
+                onChange={(e) => handleRegisterChange(e.target.value)}
+                className="bg-transparent text-sm font-medium text-white focus:outline-none min-w-[120px] cursor-pointer"
+              >
+                {registers.length === 0 ? (
+                  <option value="">No Terminals Setup</option>
+                ) : (
+                  registers.map(r => (
+                    <option key={r.id} value={r.id} className="bg-zinc-900">{r.name}</option>
+                  ))
+                )}
+              </select>
+            </div>
           </div>
           
           <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
@@ -166,9 +289,9 @@ export function POSClient({ items, pages, currency, locationId, organizationId, 
               <button 
                 key={item.id}
                 onClick={() => addToCart(item)}
-                disabled={item.availability_status !== 'available'}
+                disabled={item.availability_status !== 'available' || !!pushedOrderId}
                 className={`text-left flex flex-col p-3 rounded-xl border transition-all active:scale-95 ${
-                  item.availability_status === 'available' 
+                  item.availability_status === 'available' && !pushedOrderId
                     ? 'bg-zinc-900 border-zinc-800 hover:border-emerald-500/50 hover:bg-zinc-800' 
                     : 'bg-zinc-900/40 border-zinc-800/50 opacity-50 cursor-not-allowed'
                 }`}
@@ -224,29 +347,33 @@ export function POSClient({ items, pages, currency, locationId, organizationId, 
                 </div>
                 
                 <div className="flex items-center justify-between mt-1">
-                  <div className="flex items-center gap-3 bg-zinc-900 rounded-lg p-1 border border-zinc-800">
+                  <div className={`flex items-center gap-3 bg-zinc-900 rounded-lg p-1 border border-zinc-800 ${pushedOrderId ? 'opacity-50' : ''}`}>
                     <button 
                       onClick={() => updateQuantity(item.cartKey, -1)}
-                      className="p-1 hover:bg-zinc-800 rounded-md text-zinc-400 hover:text-white transition-colors"
+                      disabled={!!pushedOrderId}
+                      className="p-1 hover:bg-zinc-800 rounded-md text-zinc-400 hover:text-white transition-colors disabled:cursor-not-allowed"
                     >
                       <Minus className="w-3.5 h-3.5" />
                     </button>
                     <span className="text-sm font-bold text-white w-4 text-center">{item.quantity}</span>
                     <button 
                       onClick={() => updateQuantity(item.cartKey, 1)}
-                      className="p-1 hover:bg-zinc-800 rounded-md text-zinc-400 hover:text-white transition-colors"
+                      disabled={!!pushedOrderId}
+                      className="p-1 hover:bg-zinc-800 rounded-md text-zinc-400 hover:text-white transition-colors disabled:cursor-not-allowed"
                     >
                       <Plus className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>
                 
-                <button 
-                  onClick={() => removeFromCart(item.cartKey)}
-                  className="absolute top-3 right-3 text-zinc-600 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
-                >
-                  <X className="w-4 h-4" />
-                </button>
+                {!pushedOrderId && (
+                  <button 
+                    onClick={() => removeFromCart(item.cartKey)}
+                    className="absolute top-3 right-3 text-zinc-600 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
               </div>
             ))
           )}
@@ -259,24 +386,34 @@ export function POSClient({ items, pages, currency, locationId, organizationId, 
             <span className="font-black text-white text-2xl">{formatCurrency(cartTotalMinor, currency)}</span>
           </div>
           
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-4 gap-2">
             <button 
               onClick={() => setPaymentMethod('cash')}
-              className={`flex flex-col items-center justify-center gap-1.5 p-2 rounded-xl border text-xs font-bold transition-all ${paymentMethod === 'cash' ? 'bg-emerald-500/10 border-emerald-500/50 text-emerald-400' : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:bg-zinc-800'}`}
+              disabled={!!pushedOrderId}
+              className={`flex flex-col items-center justify-center gap-1.5 p-2 rounded-xl border text-xs font-bold transition-all ${paymentMethod === 'cash' ? 'bg-emerald-500/10 border-emerald-500/50 text-emerald-400' : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:bg-zinc-800'} disabled:opacity-50`}
             >
               <Banknote className="w-4 h-4" /> Cash
             </button>
             <button 
               onClick={() => setPaymentMethod('card')}
-              className={`flex flex-col items-center justify-center gap-1.5 p-2 rounded-xl border text-xs font-bold transition-all ${paymentMethod === 'card' ? 'bg-blue-500/10 border-blue-500/50 text-blue-400' : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:bg-zinc-800'}`}
+              disabled={!!pushedOrderId}
+              className={`flex flex-col items-center justify-center gap-1.5 p-2 rounded-xl border text-xs font-bold transition-all ${paymentMethod === 'card' ? 'bg-blue-500/10 border-blue-500/50 text-blue-400' : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:bg-zinc-800'} disabled:opacity-50`}
             >
               <CreditCard className="w-4 h-4" /> Card
             </button>
             <button 
               onClick={() => setPaymentMethod('transfer')}
-              className={`flex flex-col items-center justify-center gap-1.5 p-2 rounded-xl border text-xs font-bold transition-all ${paymentMethod === 'transfer' ? 'bg-purple-500/10 border-purple-500/50 text-purple-400' : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:bg-zinc-800'}`}
+              disabled={!!pushedOrderId}
+              className={`flex flex-col items-center justify-center gap-1.5 p-2 rounded-xl border text-xs font-bold transition-all ${paymentMethod === 'transfer' ? 'bg-purple-500/10 border-purple-500/50 text-purple-400' : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:bg-zinc-800'} disabled:opacity-50`}
             >
               <Landmark className="w-4 h-4" /> Transfer
+            </button>
+            <button 
+              onClick={() => setPaymentMethod('online')}
+              disabled={!!pushedOrderId}
+              className={`flex flex-col items-center justify-center gap-1.5 p-2 rounded-xl border text-xs font-bold transition-all ${paymentMethod === 'online' ? 'bg-amber-500/10 border-amber-500/50 text-amber-400' : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:bg-zinc-800'} disabled:opacity-50`}
+            >
+              <Smartphone className="w-4 h-4" /> Desk Pay
             </button>
           </div>
 
@@ -287,7 +424,8 @@ export function POSClient({ items, pages, currency, locationId, organizationId, 
                 placeholder="Amount Tendered" 
                 value={amountTendered}
                 onChange={(e) => setAmountTendered(e.target.value)}
-                className="flex-1 bg-zinc-900 border border-zinc-800 rounded-xl px-3 text-sm text-white focus:outline-none focus:border-emerald-500"
+                disabled={!!pushedOrderId}
+                className="flex-1 bg-zinc-900 border border-zinc-800 rounded-xl px-3 text-sm text-white focus:outline-none focus:border-emerald-500 disabled:opacity-50"
               />
               <div className="flex items-center justify-center px-4 bg-zinc-900 border border-zinc-800 rounded-xl text-sm font-bold text-zinc-400 shrink-0 min-w-[100px]">
                 Change: {changeMinor > 0 ? formatCurrency(changeMinor, currency) : '0'}
@@ -296,11 +434,16 @@ export function POSClient({ items, pages, currency, locationId, organizationId, 
           )}
           
           <button 
-            disabled={cart.length === 0 || isPending}
+            disabled={cart.length === 0 || isPending || !!pushedOrderId}
             onClick={handleCheckout}
             className="w-full py-4 rounded-xl font-black text-white flex items-center justify-center gap-2 transition-all shadow-lg active:scale-95 disabled:opacity-50 disabled:active:scale-100 disabled:cursor-not-allowed bg-emerald-500 hover:bg-emerald-400"
           >
-            {isPending ? 'Processing...' : (
+            {isPending ? 'Processing...' : paymentMethod === 'online' ? (
+              <>
+                <MonitorSmartphone className="w-5 h-5" />
+                Push to Terminal
+              </>
+            ) : (
               <>
                 <CheckCircle2 className="w-5 h-5" />
                 Complete Payment

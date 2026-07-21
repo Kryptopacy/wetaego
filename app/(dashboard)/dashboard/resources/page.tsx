@@ -22,7 +22,12 @@ export default async function ResourcesPage() {
     return <div className="p-8 text-zinc-100">Please select a location from the sidebar.</div>
   }
 
-  const { data: locData } = await supabase.from('locations').select('slug').eq('id', locationId).single()
+  const { data: locData } = await supabase
+    .from('locations')
+    .select('slug, name, theme_color, location_pages(*)')
+    .eq('id', locationId)
+    .single()
+  
   const locationSlug = locData?.slug || ''
 
   const { data: resources } = await supabase
@@ -33,6 +38,31 @@ export default async function ResourcesPage() {
     .order('zone_name')
     .order('name')
 
+  const { data: qrCodes } = await supabase
+    .from('qr_codes')
+    .select('*')
+    .eq('organization_id', orgId)
+    .order('created_at', { ascending: false })
+
+  const { data: qrZones } = await supabase
+    .from('qr_zones')
+    .select('*')
+    .eq('location_id', locationId)
+
+  const { data: org } = await supabase
+    .from('organizations')
+    .select('subscription_tier, logo_url')
+    .eq('id', orgId)
+    .single()
+
+  const { getFreeQrLimit } = await import('@/lib/utils/billing')
+  const planLimit = await getFreeQrLimit(org?.subscription_tier || 'lite')
+
+  const { getCreditBalance } = await import('@/lib/payments/credits')
+  const creditBalance = await getCreditBalance(orgId)
+
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://ourmenuos.online'
+
   return (
     <main className="p-4 md:p-8 max-w-7xl mx-auto space-y-8">
       <header className="flex flex-col gap-2">
@@ -40,7 +70,7 @@ export default async function ResourcesPage() {
           <div className="bg-emerald-500/10 p-2 rounded-xl text-emerald-500">
             <MapPin className="w-8 h-8" />
           </div>
-          Visual Resource Manager
+          Resources & QR Codes
         </h1>
         <p className="text-zinc-400">Map your physical footprint and generate dynamic QR codes to track incoming orders by zone.</p>
       </header>
@@ -48,8 +78,15 @@ export default async function ResourcesPage() {
       <ResourcesClient 
         initialResources={resources || []}
         organizationId={orgId}
+        location={(locData as any) || undefined}
         locationId={locationId}
         slug={locationSlug}
+        qrCodes={qrCodes || []}
+        qrZones={qrZones || []}
+        baseUrl={baseUrl}
+        planLimit={planLimit}
+        creditBalance={creditBalance}
+        orgLogo={org?.logo_url || null}
       />
     </main>
   )

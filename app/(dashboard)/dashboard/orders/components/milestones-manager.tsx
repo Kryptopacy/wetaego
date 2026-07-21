@@ -32,6 +32,7 @@ export function MilestonesManager({ order, isOpen, onClose }: MilestonesManagerP
   // Payment State
   const [isAddingPayment, setIsAddingPayment] = useState(false)
   const [payAmount, setPayAmount] = useState('')
+  const [payMethod, setPayMethod] = useState<'cash' | 'pos_terminal' | 'bank_transfer'>('cash')
 
   const [isLoading, setIsLoading] = useState(false)
 
@@ -116,9 +117,10 @@ export function MilestonesManager({ order, isOpen, onClose }: MilestonesManagerP
 
     setIsLoading(true)
     try {
-      const res = await logManualPaymentAction({
-        orderId: order.id,
-        amountMinor: Math.round(amtNum * 100)
+      const res = await logManualPaymentAction({ 
+        orderId: order.id, 
+        amountMinor: Math.round(parseFloat(payAmount) * 100),
+        paymentMethod: payMethod 
       })
       if (res?.serverError || res?.validationErrors) {
         toast.error(res.serverError || 'Failed to log payment')
@@ -381,7 +383,10 @@ export function MilestonesManager({ order, isOpen, onClose }: MilestonesManagerP
                     <div key={payment.id} className="flex justify-between items-center p-3 rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/30">
                       <div>
                         <p className="text-sm font-medium text-zinc-900 dark:text-white">
-                          {payment.provider_reference?.startsWith('manual_') ? 'Manual Deposit' : 'Online Payment'}
+                          {payment.provider_reference?.startsWith('manual_cash') ? 'Cash Payment' :
+                           payment.provider_reference?.startsWith('manual_pos') ? 'POS Terminal Payment' :
+                           payment.provider_reference?.startsWith('manual_bank') ? 'Bank Transfer' :
+                           payment.provider_reference?.startsWith('manual_') ? 'Manual Deposit' : 'Online Payment'}
                         </p>
                         <p className="text-xs text-zinc-500">{new Date(payment.created_at).toLocaleDateString()}</p>
                       </div>
@@ -406,17 +411,28 @@ export function MilestonesManager({ order, isOpen, onClose }: MilestonesManagerP
                 isAddingPayment ? (
                   <form onSubmit={handleLogPayment} className="space-y-4 border-t border-zinc-100 dark:border-zinc-800 pt-4 mt-4">
                     <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Log Manual Deposit / Payment</p>
-                    <div className="relative">
-                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 text-sm font-medium">₦</span>
-                      <input
-                        type="number"
-                        step="0.01"
-                        placeholder="Amount Received"
-                        value={payAmount}
-                        onChange={e => setPayAmount(e.target.value)}
-                        className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl pl-8 pr-4 py-2.5 text-sm focus:outline-none focus:border-blue-500"
-                        required
-                      />
+                    <div className="space-y-3">
+                      <select
+                        value={payMethod}
+                        onChange={e => setPayMethod(e.target.value as any)}
+                        className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500"
+                      >
+                        <option value="cash">💵 Cash</option>
+                        <option value="pos_terminal">💳 POS Terminal (Card at Desk)</option>
+                        <option value="bank_transfer">🏦 Bank Transfer</option>
+                      </select>
+                      <div className="relative">
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 text-sm font-medium">₦</span>
+                        <input
+                          type="number"
+                          step="0.01"
+                          placeholder="Amount Received"
+                          value={payAmount}
+                          onChange={e => setPayAmount(e.target.value)}
+                          className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl pl-8 pr-4 py-2.5 text-sm focus:outline-none focus:border-blue-500"
+                          required
+                        />
+                      </div>
                     </div>
                     <div className="flex gap-2">
                       <button type="button" onClick={() => setIsAddingPayment(false)} className="flex-1 py-2 rounded-xl text-zinc-600 dark:text-zinc-400 font-medium hover:bg-zinc-100 dark:hover:bg-zinc-800 text-sm">Cancel</button>

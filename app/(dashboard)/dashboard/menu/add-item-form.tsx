@@ -21,6 +21,7 @@ export function AddItemForm({ orgId, pageId, activeCollectionId, allCollections,
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   
   const [requiresBooking, setRequiresBooking] = useState(false)
+  const [isUpsellEligible, setIsUpsellEligible] = useState(false)
   
   const [isGenerating, setIsGenerating] = useState(false)
   const [isGeneratingImg, setIsGeneratingImg] = useState(false)
@@ -104,6 +105,7 @@ export function AddItemForm({ orgId, pageId, activeCollectionId, allCollections,
     
     // Convert boolean to string for FormData
     formData.append('requires_booking', requiresBooking.toString())
+    formData.append('is_upsell_eligible', isUpsellEligible.toString())
     formData.append('collection_ids', JSON.stringify(selectedCollections))
 
     const res = await createItem(formData)
@@ -116,6 +118,7 @@ export function AddItemForm({ orgId, pageId, activeCollectionId, allCollections,
       setDietaryTags([])
       setAllergens([])
       setRequiresBooking(false)
+      setIsUpsellEligible(false)
       setSelectedCollections([activeCollectionId])
       setAiImageUrl(null)
       formRef.current?.reset()
@@ -189,6 +192,23 @@ export function AddItemForm({ orgId, pageId, activeCollectionId, allCollections,
             </div>
           </label>
           )}
+
+          {/* Upsell Toggle */}
+          <label className="flex items-center gap-3 p-3 rounded-lg border border-zinc-700/50 bg-zinc-800/30 cursor-pointer hover:bg-zinc-800/50 transition-colors mt-4">
+            <div className="relative flex items-center">
+              <input 
+                type="checkbox" 
+                checked={isUpsellEligible}
+                onChange={(e) => setIsUpsellEligible(e.target.checked)}
+                className="sr-only peer"
+              />
+              <div className="w-9 h-5 bg-zinc-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-sm font-medium text-zinc-200">Upsell Eligible?</span>
+              <span className="text-xs text-zinc-500">Allow AI to recommend this item at checkout.</span>
+            </div>
+          </label>
         </div>
 
         <div className="flex-1 min-w-[300px] flex flex-col gap-3">

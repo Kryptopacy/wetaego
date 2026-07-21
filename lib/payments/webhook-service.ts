@@ -1,5 +1,6 @@
 import { SupabaseClient } from '@supabase/supabase-js'
 import { notifyBusiness } from '@/lib/notifications/dispatcher'
+import { dispatchLocationWebhook } from '@/lib/webhooks/dispatch'
 import { Resend } from 'resend'
 import { ReceiptEmail } from '../../emails/receipt-email'
 import { formatCurrency } from '@/lib/utils/currency'
@@ -36,15 +37,15 @@ export async function processBookingPayment(
     .select('id, item_id, number_of_guests')
     .or(`id.eq.${bookingId},booking_notes.like.%[SYSTEM_CHILD_OF:${bookingId}]%`)
 
-  await supabase
-    .from('page_bookings')
-    .update({
-      payment_status: paidStatus,
-      status: 'confirmed',
-      amount_paid_minor: amountPaidMinor,
-      payment_reference: rawReference,
-    })
-    .or(`id.eq.${bookingId},booking_notes.like.%[SYSTEM_CHILD_OF:${bookingId}]%`)
+  if (relatedBookings && relatedBookings.length > 0) {
+    for (const b of relatedBookings) {
+      await supabase.rpc('increment_booking_payment', {
+        p_booking_id: b.id,
+        p_amount_minor: amountPaidMinor,
+        p_payment_reference: rawReference
+      })
+    }
+  }
 
   // ── Inventory was decremented atomically at booking creation ──
   // Check if any items became sold out so we can notify the business
@@ -243,7 +244,7 @@ export async function processOrderPayment(
 ) {
   const { data: order } = await supabase
     .from('orders')
-    .select('id, organization_id, status, total_amount_minor, location_id, table_identifier, customer_email, customer_name, locations(organization_id, name), order_items(item_name, quantity, price_minor)')
+    .select('id, organization_id, status, total_amount_minor, location_id, table_identifier, customer_email, customer_name, locations(organization_id, name), order_items(item_name, quantity, price_minor, page_item_id)')
     .eq('id', orderId)
     .single()
 
@@ -266,6 +267,71 @@ export async function processOrderPayment(
     throw new Error('Failed to record payment')
   }
 
+  // --- Loyalty Points Awarding ---
+  if (order.organization_id && order.customer_email) {
+    try {
+      const { data: loyaltySettings } = await supabase
+        .from('loyalty_settings')
+        .select('is_enabled, points_per_major_unit, advanced_rules')
+        .eq('organization_id', order.organization_id)
+        .single()
+
+      if (loyaltySettings?.is_enabled) {
+        // Find customer profile using email
+        const { data: customerProfile } = await supabase
+          .from('customer_profiles')
+          .select('id')
+          .eq('organization_id', order.organization_id)
+          .eq('email', order.customer_email)
+          .single()
+
+        if (customerProfile) {
+          // Calculate major units (amount_minor / 100)
+          const majorUnits = Math.floor(amountPaidMinor / 100)
+          let multiplier = 1
+
+          // Process advanced rules
+          if (loyaltySettings.advanced_rules && Array.isArray(loyaltySettings.advanced_rules)) {
+            for (const rule of loyaltySettings.advanced_rules) {
+              if (rule.type === 'multiplier' && rule.condition === 'weekend') {
+                const day = new Date().getDay()
+                if (day === 0 || day === 6) { // Sunday = 0, Saturday = 6
+                  multiplier = Math.max(multiplier, rule.value)
+                }
+              }
+              if (rule.type === 'multiplier' && rule.condition === 'high_margin') {
+                const pageItemIds = order.order_items.map((i: any) => i.page_item_id).filter(Boolean)
+                if (pageItemIds.length > 0) {
+                  const { data: upsellItems } = await supabase
+                    .from('page_items')
+                    .select('id')
+                    .in('id', pageItemIds)
+                    .eq('is_upsell_eligible', true)
+                  
+                  if (upsellItems && upsellItems.length > 0) {
+                    multiplier = Math.max(multiplier, rule.value)
+                  }
+                }
+              }
+            }
+          }
+
+          const pointsToAward = Math.floor(majorUnits * (loyaltySettings.points_per_major_unit || 1) * multiplier)
+
+          if (pointsToAward > 0) {
+            await supabase.rpc('increment_loyalty_points', {
+              profile_id: customerProfile.id,
+              points: pointsToAward
+            })
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Failed to award loyalty points:', err)
+      // Do not block payment processing if loyalty points fail
+    }
+  }
+
   // Push notification to business
   if (order.location_id) {
     await notifyBusiness(
@@ -277,6 +343,15 @@ export async function processOrderPayment(
         tag: 'payment-confirmed'
       }
     ).catch(console.error)
+
+    // Dispatch outbound webhook to merchant subscribers
+    dispatchLocationWebhook(order.location_id, 'order.updated', {
+      order_id: orderId,
+      status: 'paid',
+      amount_paid_minor: amountPaidMinor,
+      customer_email: order.customer_email,
+      customer_name: order.customer_name,
+    }).catch(console.error)
   }
 
   // Send customer email receipt using React Email template
@@ -338,16 +413,11 @@ export async function processQuoteMilestonePayment(
 
   if (!Array.isArray(parsedNotes.milestones)) {
     // If no milestones are explicitly defined, we assume this is a fallback "Full Payment"
-    // Update quote status
-    await supabase
-      .from('page_bookings')
-      .update({
-        payment_status: 'paid',
-        status: 'confirmed',
-        amount_paid_minor: (quote.amount_paid_minor || 0) + amountPaidMinor,
-        payment_reference: rawReference
-      })
-      .eq('id', quoteId)
+    await supabase.rpc('increment_booking_payment', {
+      p_booking_id: quoteId,
+      p_amount_minor: amountPaidMinor,
+      p_payment_reference: rawReference
+    })
   } else {
     // Update specific milestone status
     const milestoneIndex = parsedNotes.milestones.findIndex((m) => m.id === milestoneId)
@@ -355,19 +425,20 @@ export async function processQuoteMilestonePayment(
       parsedNotes.milestones[milestoneIndex].status = 'paid'
     }
 
-    // Check if all milestones are paid
-    const allPaid = parsedNotes.milestones.every((m) => m.status === 'paid')
-
+    // Update the JSON notes
     await supabase
       .from('page_bookings')
       .update({
-        booking_notes: JSON.stringify(parsedNotes),
-        payment_status: allPaid ? 'paid' : 'deposit_paid',
-        status: 'confirmed',
-        amount_paid_minor: (quote.amount_paid_minor || 0) + amountPaidMinor,
-        payment_reference: rawReference
+        booking_notes: JSON.stringify(parsedNotes)
       })
       .eq('id', quoteId)
+
+    // Increment payment atomically
+    await supabase.rpc('increment_booking_payment', {
+      p_booking_id: quoteId,
+      p_amount_minor: amountPaidMinor,
+      p_payment_reference: rawReference
+    })
   }
 
   // Push notification to business

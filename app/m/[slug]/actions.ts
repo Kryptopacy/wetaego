@@ -15,6 +15,7 @@ import { z } from 'zod'
 import * as Sentry from '@sentry/nextjs'
 import { Resend } from 'resend'
 import { ReceiptEmail } from '@/emails/receipt-email'
+import { dispatchLocationWebhook } from '@/lib/webhooks/dispatch'
 
 const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy')
 
@@ -122,7 +123,11 @@ export async function processCheckout(params: {
   deliveryLng?: number | null,
   splitCount?: number,
   splitType?: string,
-  splitShares?: number[]
+  splitShares?: number[],
+  useWalletBalance?: boolean,
+  walletAmountAppliedMinor?: number,
+  promoCode?: string,
+  useLoyaltyPoints?: boolean
 }): Promise<SafeResult<{ checkoutUrl?: string, orderId: string, paymentMethod: string }>> {
   const {
     organizationId, locationId, items, totalAmountMinor, tipAmountMinor = 0,
@@ -130,7 +135,8 @@ export async function processCheckout(params: {
     paymentMethod = 'card', discountAmountMinor = 0, customerName, customerPhone,
     fulfillmentType, deliveryInstructions, staffId: _staffId, staffSubaccountOverride,
     pageId, idempotencyKey, subtotalMinor, taxTotalMinor, taxBreakdown, isSplitPayment,
-    resourceId, splitCount, splitType, splitShares
+    resourceId, splitCount, splitType, splitShares, useWalletBalance, walletAmountAppliedMinor,
+    promoCode, useLoyaltyPoints
   } = params;
   const supabase = await createAdminClient()
 
@@ -204,8 +210,57 @@ export async function processCheckout(params: {
       return sum + (effectivePriceFor(item) * item.quantity)
     }, 0)
 
+    // Server-side promo code validation
+    let serverDiscountMinor = 0
+    let validatedPromoCodeId: string | null = null
+    if (promoCode) {
+      const { data: promo, error: promoError } = await supabase
+        .from('location_promo_codes')
+        .select('id, discount_type, discount_value, max_uses, current_uses, valid_until, is_active')
+        .eq('location_id', locationId)
+        .eq('code', promoCode.toUpperCase())
+        .single()
+
+      if (promoError || !promo || !promo.is_active || (promo.valid_until && new Date(promo.valid_until) < new Date()) || (promo.max_uses !== null && promo.current_uses >= promo.max_uses)) {
+        throw new Error('Invalid, expired, or fully used promo code. Please remove it and try again.')
+      }
+
+      validatedPromoCodeId = promo.id
+      if (promo.discount_type === 'percentage') {
+        serverDiscountMinor = Math.floor(serverSubtotalMinor * (promo.discount_value / 100))
+      } else {
+        serverDiscountMinor = promo.discount_value
+      }
+    }
+
+    let customerProfileIdForLoyalty: string | null = null
+    let pointsToDeduct = 0
+
+    if (useLoyaltyPoints && customerEmail) {
+      const { data: loyaltySettings } = await supabase
+        .from('loyalty_settings')
+        .select('is_enabled, reward_threshold, reward_discount_minor')
+        .eq('organization_id', organizationId)
+        .single()
+        
+      if (loyaltySettings?.is_enabled) {
+        const { data: customerProfile } = await supabase
+          .from('customer_profiles')
+          .select('id, loyalty_points')
+          .eq('organization_id', organizationId)
+          .eq('email', customerEmail)
+          .single()
+          
+        if (customerProfile && (customerProfile.loyalty_points || 0) >= (loyaltySettings.reward_threshold || 0)) {
+          serverDiscountMinor += (loyaltySettings.reward_discount_minor || 0)
+          customerProfileIdForLoyalty = customerProfile.id
+          pointsToDeduct = (loyaltySettings.reward_threshold || 0)
+        }
+      }
+    }
+
     // Apply discount server-side, capped at subtotal to prevent negative totals
-    const clampedDiscountMinor = Math.min(discountAmountMinor || 0, serverSubtotalMinor)
+    const clampedDiscountMinor = Math.min(serverDiscountMinor, serverSubtotalMinor)
     
     // Add delivery fee if applicable
     const isDelivery = fulfillmentType === 'delivery'
@@ -214,8 +269,11 @@ export async function processCheckout(params: {
     }
     const appliedDeliveryFee = (isDelivery && location?.delivery_fee_minor) ? location.delivery_fee_minor : 0
     
+    // Sanitize client-provided tax to prevent negative injection
+    const sanitizedTaxMinor = Math.max(0, taxTotalMinor || 0)
+
     // Calculate final total (Taxes are included upfront, but Tips are handled post-service)
-    const verifiedTotalMinor = Math.max(0, serverSubtotalMinor - clampedDiscountMinor) + (taxTotalMinor || 0) + appliedDeliveryFee
+    const verifiedTotalMinor = Math.max(0, serverSubtotalMinor - clampedDiscountMinor) + sanitizedTaxMinor + appliedDeliveryFee
 
     // Guard: reject if client total deviates >5% from server-computed total (fraud detection)
     const deviation = Math.abs(verifiedTotalMinor - totalAmountMinor) / Math.max(verifiedTotalMinor, 1)
@@ -331,10 +389,50 @@ export async function processCheckout(params: {
     throw new Error(stockError.message || 'One or more items in your cart just sold out. Please review your cart.')
   }
 
-  const chargeAmountMinor = paymentFractionMinor ?? verifiedTotalMinor
+  let chargeAmountMinor = paymentFractionMinor ?? verifiedTotalMinor
+  let finalPaymentMethod: string = paymentMethod
 
-  // 4c. IOU Payment Verification & Balance Update
-  if (paymentMethod === 'iou') {
+  // 4c. Process Wallet Split Tender
+  if (useWalletBalance && walletAmountAppliedMinor && walletAmountAppliedMinor > 0) {
+    if (!customerEmail) {
+      await adminClient.from('orders').delete().eq('id', order.id)
+      throw new Error('Email is required to use Wallet balance.')
+    }
+    const { data: customer } = await supabase
+      .from('customer_profiles')
+      .select('id')
+      .eq('organization_id', organizationId)
+      .eq('email', customerEmail)
+      .single()
+
+    if (!customer) {
+      await adminClient.from('orders').delete().eq('id', order.id)
+      throw new Error('Customer profile not found for wallet checkout.')
+    }
+
+    const { data: rpcResult, error: walletError } = await adminClient.rpc('process_wallet_checkout', {
+      p_order_id: order.id,
+      p_organization_id: organizationId,
+      p_customer_id: customer.id,
+      p_amount_minor: walletAmountAppliedMinor
+    })
+
+    if (walletError || !(rpcResult as any)?.success) {
+      await adminClient.from('orders').delete().eq('id', order.id)
+      throw new Error(walletError?.message || 'Insufficient wallet balance.')
+    }
+
+    chargeAmountMinor -= walletAmountAppliedMinor
+    
+    // If wallet covers the entire charge, no external payment is needed
+    if (chargeAmountMinor <= 0) {
+      finalPaymentMethod = 'wallet'
+      chargeAmountMinor = 0
+    }
+  }
+
+  // 4d. IOU Payment Verification & Balance Update
+  if (finalPaymentMethod === 'iou') {
     if (!customerEmail) {
       await adminClient.from('orders').delete().eq('id', order.id)
       throw new Error('Email is required to use Pay Later (IOU).')
@@ -380,7 +478,7 @@ export async function processCheckout(params: {
   // 5. Initialize Paystack Transaction if Active and method is card
   const isPaystackLive = paySettings?.is_active && paySettings?.provider_account_id
   
-  if (isPaystackLive && paymentMethod === 'card' && !isSplitPayment) {
+  if (isPaystackLive && finalPaymentMethod === 'card' && !isSplitPayment) {
     // Use verified server total for Paystack — split payment uses fractional amount
     const email = customerEmail || `order_${order.id}@ourmenuos.online`
 
@@ -410,27 +508,71 @@ export async function processCheckout(params: {
       if (pageData?.slug) slug = pageData.slug
     }
 
-    const { authorizationUrl: checkoutUrl } = await paymentProvider.initiatePayment({
-      amountMinor: chargeAmountMinor,
-      customerEmail: email,
-      reference: order.id,
-      currency: 'NGN',
-      callbackUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/m/${slug}/payment-callback`,
-      subaccountCode: subaccountCode || undefined,
-      transactionChargeMinor,
-      channels
-    })
+    try {
+      const { authorizationUrl: checkoutUrl } = await paymentProvider.initiatePayment({
+        amountMinor: chargeAmountMinor,
+        customerEmail: email,
+        reference: order.id,
+        currency: 'NGN',
+        callbackUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/m/${slug}/payment-callback`,
+        subaccountCode: subaccountCode || undefined,
+        transactionChargeMinor,
+        channels
+      })
 
-    return { data: { checkoutUrl, orderId: order.id, paymentMethod: 'card' } }
+      return { data: { checkoutUrl, orderId: order.id, paymentMethod: 'card' } }
+    } catch (err: unknown) {
+      console.error('Failed to initiate external payment', err)
+      
+      // Rollback wallet if it was deducted
+      if (useWalletBalance && walletAmountAppliedMinor && walletAmountAppliedMinor > 0 && customerEmail) {
+        const { data: customer } = await supabase
+          .from('customer_profiles')
+          .select('id')
+          .eq('organization_id', organizationId)
+          .eq('email', customerEmail)
+          .single()
+
+        if (customer) {
+          const { refundWalletTransaction } = await import('@/lib/payments/wallet-service')
+          await refundWalletTransaction(adminClient, order.id, organizationId, customer.id, walletAmountAppliedMinor)
+        }
+      }
+
+      await adminClient.from('orders').delete().eq('id', order.id)
+      throw new Error('Payment initialization failed. Any applied wallet funds have been refunded.')
+    }
+  }
+
+  // Deduct Loyalty Points if applied
+  if (customerProfileIdForLoyalty && pointsToDeduct > 0 && finalPaymentMethod === 'card') {
+    waitUntil((async () => {
+      const { error } = await adminClient.rpc('increment_loyalty_points', {
+        profile_id: customerProfileIdForLoyalty!,
+        points: -pointsToDeduct
+      })
+      if (error) console.error('Failed to deduct loyalty points (card):', error)
+    })())
   }
 
   // Fallback to manual/offline payment: trigger push notification immediately
-  // For offline payments (cash, transfer, pay after service), the order is confirmed instantly.
-  const isOfflinePayment = ['transfer', 'pay_on_delivery_cash', 'pay_on_delivery_link', 'pay_after_service'].includes(paymentMethod)
+  // For offline payments (cash, transfer, pay after service, wallet), the order is confirmed instantly.
+  const isOfflinePayment = ['transfer', 'pay_on_delivery_cash', 'pay_on_delivery_link', 'pay_after_service', 'wallet'].includes(finalPaymentMethod)
   
   if (isOfflinePayment) {
     const { sendPushToOrg, newOrderNotification } = await import('@/lib/notifications/push')
     waitUntil(sendPushToOrg(organizationId, newOrderNotification(tableIdentifier || 'Takeaway', verifiedTotalMinor)))
+    
+    // Dispatch outbound webhook for offline created orders
+    waitUntil(dispatchLocationWebhook(locationId, 'order.created', {
+      order_id: order.id,
+      total_amount_minor: verifiedTotalMinor,
+      fulfillment_type: fulfillmentType || 'table',
+      table_identifier: tableIdentifier,
+      customer_name: customerName,
+      customer_email: customerEmail,
+      items
+    }))
     
     // Record platform fee for offline payments that aren't split shares
     if (verifiedTotalMinor > 0 && !isSplitPayment) {
@@ -481,18 +623,122 @@ export async function processCheckout(params: {
         }
       })())
     }
+
+    // Increment promo code usage if applied
+    if (validatedPromoCodeId) {
+      waitUntil((async () => {
+        try {
+          const { data } = await supabase.from('location_promo_codes').select('current_uses').eq('id', validatedPromoCodeId).single()
+          if (data) {
+            await supabase.from('location_promo_codes').update({ current_uses: data.current_uses + 1 }).eq('id', validatedPromoCodeId)
+          }
+        } catch (err) {
+          console.error('Failed to increment promo code usage:', err)
+        }
+      })())
+    }
+
+    // Award Loyalty Points for offline payments
+    if (customerEmail && verifiedTotalMinor > 0) {
+      waitUntil((async () => {
+        try {
+          const { data: loyaltySettings } = await supabase
+            .from('loyalty_settings')
+            .select('is_enabled, points_per_major_unit')
+            .eq('organization_id', organizationId)
+            .single()
+
+          if (loyaltySettings?.is_enabled) {
+            const { data: customerProfile } = await supabase
+              .from('customer_profiles')
+              .select('id')
+              .eq('organization_id', organizationId)
+              .eq('email', customerEmail)
+              .single()
+
+            if (customerProfile) {
+              const majorUnits = Math.floor(verifiedTotalMinor / 100)
+              const pointsToAward = majorUnits * (loyaltySettings.points_per_major_unit || 1)
+
+              if (pointsToAward > 0) {
+                await supabase.rpc('increment_loyalty_points', {
+                  profile_id: customerProfile.id,
+                  points: pointsToAward
+                })
+              }
+            }
+          }
+        } catch (err) {
+          console.error('Failed to award loyalty points for offline payment:', err)
+        }
+      })())
+    }
     
-    return { data: { orderId: order.id, paymentMethod } }
+    // Deduct Loyalty Points if applied
+    if (customerProfileIdForLoyalty && pointsToDeduct > 0) {
+      waitUntil((async () => {
+        const { error } = await supabase.rpc('increment_loyalty_points', {
+          profile_id: customerProfileIdForLoyalty!,
+          points: -pointsToDeduct
+        })
+        if (error) console.error('Failed to deduct loyalty points:', error)
+      })())
+    }
+    
+    return { data: { orderId: order.id, paymentMethod: finalPaymentMethod } }
   }
 
   // Catch-all fallback
-  return { data: { orderId: order.id, paymentMethod } };
+  return { data: { orderId: order.id, paymentMethod: finalPaymentMethod } };
 };
 
   if (idempotencyKey) {
-    return await withIdempotency(idempotencyKey, checkoutLogic);
+    return await withIdempotency(`checkout_${idempotencyKey}`, checkoutLogic);
   } else {
     return await checkoutLogic();
+  }
+}
+
+export async function validatePromoCode(code: string, locationId: string): Promise<SafeResult<{
+  id: string,
+  discount_type: 'percentage' | 'flat',
+  discount_value: number,
+}>> {
+  try {
+    const supabase = await createAdminClient()
+    const { data: promo, error } = await supabase
+      .from('location_promo_codes')
+      .select('id, discount_type, discount_value, max_uses, current_uses, valid_until, is_active')
+      .eq('location_id', locationId)
+      .eq('code', code.toUpperCase())
+      .single()
+
+    if (error || !promo) {
+      return { serverError: 'Invalid promo code.' }
+    }
+
+    if (!promo.is_active) {
+      return { serverError: 'This promo code is no longer active.' }
+    }
+
+    if (promo.valid_until && new Date(promo.valid_until) < new Date()) {
+      return { serverError: 'This promo code has expired.' }
+    }
+
+    if (promo.max_uses !== null && promo.current_uses >= promo.max_uses) {
+      return { serverError: 'This promo code has reached its usage limit.' }
+    }
+
+    return { 
+      data: {
+        id: promo.id,
+        discount_type: promo.discount_type as 'percentage' | 'flat',
+        discount_value: promo.discount_value
+      } 
+    }
+  } catch (error) {
+    console.error('Promo code validation error:', error)
+    return { serverError: 'An error occurred while validating the promo code.' }
   }
 }
 
@@ -759,3 +1005,81 @@ export async function submitQuoteRequest(formData: FormData): Promise<SafeResult
     return { serverError: err instanceof Error ? err.message : 'Failed to submit quote request' }
   }
 }
+
+export async function submitPaymentProof(formData: FormData): Promise<SafeResult<{ url: string }>> {
+  try {
+    const { checkRateLimit } = await import('@/lib/upstash');
+    const cookieStore = await cookies();
+    const sessionId = cookieStore.get('session_id')?.value || 'anonymous';
+    const { success } = await checkRateLimit('upload_proof', sessionId);
+    
+    if (!success) {
+      return { serverError: 'Too many uploads. Please wait a minute.' };
+    }
+
+    const orderId = formData.get('order_id') as string;
+    const file = formData.get('file') as File | null;
+
+    if (!orderId || !file) {
+      return { serverError: 'Order ID and file are required.' };
+    }
+    if (!file.type.startsWith('image/')) {
+      return { serverError: 'File must be an image.' };
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      return { serverError: 'File size must be less than 5MB.' };
+    }
+
+    const adminClient = await createAdminClient();
+    
+    // Verify order exists
+    const { data: order, error: orderError } = await adminClient
+      .from('orders')
+      .select('id, metadata, status')
+      .eq('id', orderId)
+      .single();
+
+    if (orderError || !order) {
+      return { serverError: 'Order not found.' };
+    }
+
+    const ext = file.name.split('.').pop() || 'png';
+    const fileName = `payment_proofs/${orderId}/${Date.now()}.${ext}`;
+
+    const { error: uploadError } = await adminClient
+      .storage
+      .from('public-assets')
+      .upload(fileName, file, { cacheControl: '3600', upsert: false });
+
+    if (uploadError) {
+      console.error('Upload error:', uploadError);
+      return { serverError: 'Failed to upload image.' };
+    }
+
+    const { data: publicUrlData } = adminClient.storage.from('public-assets').getPublicUrl(fileName);
+    const proofUrl = publicUrlData.publicUrl;
+
+    // Update order metadata
+    const currentMetadata = (order.metadata as Record<string, unknown>) || {};
+    const { error: updateError } = await adminClient
+      .from('orders')
+      .update({
+        metadata: {
+          ...currentMetadata,
+          payment_proof_url: proofUrl,
+        }
+      })
+      .eq('id', orderId);
+
+    if (updateError) {
+       console.error('Failed to update order metadata:', updateError);
+       return { serverError: 'Failed to link image to order.' };
+    }
+
+    return { data: { url: proofUrl } };
+  } catch (err: unknown) {
+    Sentry.captureException(err);
+    return { serverError: (err as Error).message || 'Unexpected error' };
+  }
+}
+

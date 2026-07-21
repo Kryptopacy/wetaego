@@ -16,6 +16,9 @@ export const saveAddonsSettings = authActionClient
     delivery_fee_minor: zfd.numeric(z.number().default(0)),
     delivery_minimum_order_minor: zfd.numeric(z.number().default(0)),
     delivery_note: zfd.text(z.string().optional()),
+    billing_enabled: zfd.checkbox(),
+    billing_mode: zfd.text(z.string().optional()),
+    deposit_percentage: zfd.numeric(z.number().min(0).max(100).optional()),
   }))
   .action(async ({ parsedInput, ctx: { supabase } }) => {
     const { cookies } = await import('next/headers')
@@ -32,6 +35,9 @@ export const saveAddonsSettings = authActionClient
       delivery_fee_minor,
       delivery_minimum_order_minor,
       delivery_note,
+      billing_enabled,
+      billing_mode,
+      deposit_percentage,
     } = parsedInput
 
     let spinner_config = null
@@ -61,7 +67,10 @@ export const saveAddonsSettings = authActionClient
         delivery_enabled,
         delivery_fee_minor,
         delivery_minimum_order_minor,
-        delivery_note: delivery_note || null
+        delivery_note: delivery_note || null,
+        billing_enabled,
+        billing_mode: billing_mode || null,
+        deposit_percentage: deposit_percentage || null,
       })
       .eq('id', pageId)
 

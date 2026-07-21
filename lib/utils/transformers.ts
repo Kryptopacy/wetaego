@@ -50,6 +50,7 @@ export function mapSupabaseOrderToUI(rawOrder: RawOrderPayload): UIOrder {
     amount_paid_minor: rawOrder.amount_paid_minor || null,
     status: (rawOrder.status as UIOrder['status']) || 'pending',
     payment_method: (rawOrder.payment_method as string) || null,
+    wallet_balance_applied_minor: (rawOrder.wallet_balance_applied_minor as number) || null,
     customer_note: (rawOrder.customer_note as string) || null,
     assigned_staff_id: (rawOrder.assigned_staff_id as string) || null,
     created_at: rawOrder.created_at || new Date().toISOString(),

@@ -67,6 +67,14 @@ export default async function POSPage() {
   const { data: loc } = await locQuery.limit(1).maybeSingle()
   const resolvedLocationId = activeLocationId === 'global' ? (loc?.id || '') : activeLocationId
 
+  // Fetch terminals/registers for Desk Pay
+  const { data: registers } = await supabase
+    .from('resources')
+    .select('id, name, type, current_order_id')
+    .eq('location_id', resolvedLocationId)
+    .in('type', ['register', 'reception'])
+    .order('created_at', { ascending: true })
+
   return (
     <div className="flex h-[calc(100vh-(--spacing(16)))] w-full flex-col p-4 md:p-6 overflow-hidden">
       <div className="mb-4 flex items-center justify-between">
@@ -84,6 +92,8 @@ export default async function POSPage() {
           locationId={resolvedLocationId}
           organizationId={loc?.organization_id as string}
           staffId={userData.user.id}
+          slug={pages[0]?.slug as string || 'default'}
+          registers={registers || []}
         />
       </div>
     </div>

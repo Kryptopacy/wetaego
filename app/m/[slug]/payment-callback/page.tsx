@@ -21,10 +21,14 @@ export default async function PaymentCallbackPage({
   // Verify the order status
   // It's possible the webhook hasn't processed it yet (race condition), 
   // so we show a success screen regardless and rely on Realtime on the live tracker
+  
+  // Extract base order ID (handles split payment references like uuid_split_123)
+  const orderId = reference.split('_split_')[0]
+
   const { data: order } = await supabase
     .from('orders')
     .select('id, table_identifier, status')
-    .eq('id', reference)
+    .eq('id', orderId)
     .single()
 
   if (!order) {

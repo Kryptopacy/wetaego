@@ -273,6 +273,9 @@ export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, tem
                       {(order.tip_amount_minor || 0) > 0 && (
                         <div className="text-sm text-blue-400 mb-1 font-medium">+ {formatCurrency(order.tip_amount_minor || 0)} Tip</div>
                       )}
+                      {(order.wallet_balance_applied_minor || 0) > 0 && (
+                        <div className="text-xs text-emerald-400 mb-1 font-medium">- {formatCurrency(order.wallet_balance_applied_minor || 0)} Wallet</div>
+                      )}
                       <span className={`text-xs font-medium px-2 py-1 rounded-full ${order.status === 'paid' ? 'bg-green-500/20 text-green-400' : 'bg-zinc-800 text-zinc-400'}`}>
                         {order.status.toUpperCase()}
                       </span>

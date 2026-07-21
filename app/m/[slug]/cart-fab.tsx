@@ -39,6 +39,7 @@ interface CartFABProps {
   pagePaymentOptions?: string[]
   globalManualPaymentOverride?: boolean
   mapsIntegrationEnabled?: boolean
+  upsellMode?: string | null
 }
 
 export function CartFAB(props: CartFABProps) {
@@ -128,11 +129,13 @@ export function CartFAB(props: CartFABProps) {
         pageFulfillmentOptions={props.pageFulfillmentOptions}
         pageBillingMode={props.pageBillingMode}
         refundPolicy={props.refundPolicy}
-        locationTaxes={props.locationTaxes}
         {...props}
         manualPaymentEnabled={props.globalManualPaymentOverride || props.manualPaymentEnabled}
-        resourceId={urlResourceId}
+        locationTaxes={props.locationTaxes || []}
+        pagePaymentOptions={props.pagePaymentOptions || []}
+        resourceId={urlResourceId || undefined}
         mapsIntegrationEnabled={props.mapsIntegrationEnabled}
+        upsellMode={props.upsellMode}
       />
     </>
   )

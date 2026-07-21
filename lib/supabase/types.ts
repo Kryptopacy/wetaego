@@ -405,6 +405,108 @@ export type Database = {
           },
         ]
       }
+      customer_addresses: {
+        Row: {
+          address_line1: string
+          address_line2: string | null
+          city: string
+          country: string
+          created_at: string
+          customer_id: string
+          id: string
+          is_default: boolean | null
+          state: string
+          updated_at: string
+          zip_code: string | null
+        }
+        Insert: {
+          address_line1: string
+          address_line2?: string | null
+          city: string
+          country?: string
+          created_at?: string
+          customer_id: string
+          id?: string
+          is_default?: boolean | null
+          state: string
+          updated_at?: string
+          zip_code?: string | null
+        }
+        Update: {
+          address_line1?: string
+          address_line2?: string | null
+          city?: string
+          country?: string
+          created_at?: string
+          customer_id?: string
+          id?: string
+          is_default?: boolean | null
+          state?: string
+          updated_at?: string
+          zip_code?: string | null
+        }
+        Relationships: []
+      }
+      customer_payment_methods: {
+        Row: {
+          authorization_code: string
+          bank: string | null
+          bin: string | null
+          brand: string | null
+          channel: string | null
+          country_code: string | null
+          created_at: string
+          currency: string
+          customer_id: string
+          exp_month: string | null
+          exp_year: string | null
+          id: string
+          is_default: boolean | null
+          last4: string | null
+          reusable: boolean | null
+          signature: string | null
+          updated_at: string
+        }
+        Insert: {
+          authorization_code: string
+          bank?: string | null
+          bin?: string | null
+          brand?: string | null
+          channel?: string | null
+          country_code?: string | null
+          created_at?: string
+          currency?: string
+          customer_id: string
+          exp_month?: string | null
+          exp_year?: string | null
+          id?: string
+          is_default?: boolean | null
+          last4?: string | null
+          reusable?: boolean | null
+          signature?: string | null
+          updated_at?: string
+        }
+        Update: {
+          authorization_code?: string
+          bank?: string | null
+          bin?: string | null
+          brand?: string | null
+          channel?: string | null
+          country_code?: string | null
+          created_at?: string
+          currency?: string
+          customer_id?: string
+          exp_month?: string | null
+          exp_year?: string | null
+          id?: string
+          is_default?: boolean | null
+          last4?: string | null
+          reusable?: boolean | null
+          signature?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       customer_profiles: {
         Row: {
           created_at: string | null
@@ -423,6 +525,8 @@ export type Database = {
           total_orders: number | null
           total_spend_minor: number | null
           updated_at: string | null
+          wallet_balance_minor: number
+          wallet_escrow_minor: number
         }
         Insert: {
           created_at?: string | null
@@ -441,6 +545,8 @@ export type Database = {
           total_orders?: number | null
           total_spend_minor?: number | null
           updated_at?: string | null
+          wallet_balance_minor?: number
+          wallet_escrow_minor?: number
         }
         Update: {
           created_at?: string | null
@@ -459,6 +565,8 @@ export type Database = {
           total_orders?: number | null
           total_spend_minor?: number | null
           updated_at?: string | null
+          wallet_balance_minor?: number
+          wallet_escrow_minor?: number
         }
         Relationships: [
           {
@@ -1138,6 +1246,7 @@ export type Database = {
           theme_color: string | null
           title: string
           updated_at: string
+          upsell_mode: string | null
           wifi_network: string | null
           wifi_password: string | null
         }
@@ -1188,6 +1297,7 @@ export type Database = {
           theme_color?: string | null
           title: string
           updated_at?: string
+          upsell_mode?: string | null
           wifi_network?: string | null
           wifi_password?: string | null
         }
@@ -1238,12 +1348,60 @@ export type Database = {
           theme_color?: string | null
           title?: string
           updated_at?: string
+          upsell_mode?: string | null
           wifi_network?: string | null
           wifi_password?: string | null
         }
         Relationships: [
           {
             foreignKeyName: "location_pages_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      location_promo_codes: {
+        Row: {
+          code: string
+          created_at: string
+          current_uses: number
+          discount_type: string
+          discount_value: number
+          id: string
+          is_active: boolean
+          location_id: string
+          max_uses: number | null
+          valid_until: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          current_uses?: number
+          discount_type: string
+          discount_value: number
+          id?: string
+          is_active?: boolean
+          location_id: string
+          max_uses?: number | null
+          valid_until?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          current_uses?: number
+          discount_type?: string
+          discount_value?: number
+          id?: string
+          is_active?: boolean
+          location_id?: string
+          max_uses?: number | null
+          valid_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "location_promo_codes_location_id_fkey"
             columns: ["location_id"]
             isOneToOne: false
             referencedRelation: "locations"
@@ -1523,6 +1681,7 @@ export type Database = {
       }
       loyalty_settings: {
         Row: {
+          advanced_rules: Json | null
           created_at: string | null
           is_enabled: boolean | null
           organization_id: string
@@ -1532,6 +1691,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          advanced_rules?: Json | null
           created_at?: string | null
           is_enabled?: boolean | null
           organization_id: string
@@ -1541,6 +1701,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          advanced_rules?: Json | null
           created_at?: string | null
           is_enabled?: boolean | null
           organization_id?: string
@@ -1896,30 +2057,39 @@ export type Database = {
       }
       order_milestones: {
         Row: {
+          auto_charge_enabled: boolean | null
           completed_at: string | null
           created_at: string
           description: string | null
+          due_date: string | null
           id: string
           is_completed: boolean | null
           order_id: string
+          payment_method_id: string | null
           title: string
         }
         Insert: {
+          auto_charge_enabled?: boolean | null
           completed_at?: string | null
           created_at?: string
           description?: string | null
+          due_date?: string | null
           id?: string
           is_completed?: boolean | null
           order_id: string
+          payment_method_id?: string | null
           title: string
         }
         Update: {
+          auto_charge_enabled?: boolean | null
           completed_at?: string | null
           created_at?: string
           description?: string | null
+          due_date?: string | null
           id?: string
           is_completed?: boolean | null
           order_id?: string
+          payment_method_id?: string | null
           title?: string
         }
         Relationships: [
@@ -1928,6 +2098,13 @@ export type Database = {
             columns: ["order_id"]
             isOneToOne: false
             referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_milestones_payment_method_id_fkey"
+            columns: ["payment_method_id"]
+            isOneToOne: false
+            referencedRelation: "customer_payment_methods"
             referencedColumns: ["id"]
           },
         ]
@@ -2062,6 +2239,7 @@ export type Database = {
           total_amount_minor: number
           tracking_code: string | null
           updated_at: string
+          wallet_balance_applied_minor: number | null
         }
         Insert: {
           abandoned_recovery_sent?: boolean | null
@@ -2099,6 +2277,7 @@ export type Database = {
           total_amount_minor?: number
           tracking_code?: string | null
           updated_at?: string
+          wallet_balance_applied_minor?: number | null
         }
         Update: {
           abandoned_recovery_sent?: boolean | null
@@ -2136,6 +2315,7 @@ export type Database = {
           total_amount_minor?: number
           tracking_code?: string | null
           updated_at?: string
+          wallet_balance_applied_minor?: number | null
         }
         Relationships: [
           {
@@ -2714,6 +2894,7 @@ export type Database = {
           images: string[] | null
           inventory_count: number | null
           is_published: boolean
+          is_upsell_eligible: boolean | null
           item_data: Json | null
           original_price_minor: number | null
           page_id: string
@@ -2738,6 +2919,7 @@ export type Database = {
           images?: string[] | null
           inventory_count?: number | null
           is_published?: boolean
+          is_upsell_eligible?: boolean | null
           item_data?: Json | null
           original_price_minor?: number | null
           page_id: string
@@ -2762,6 +2944,7 @@ export type Database = {
           images?: string[] | null
           inventory_count?: number | null
           is_published?: boolean
+          is_upsell_eligible?: boolean | null
           item_data?: Json | null
           original_price_minor?: number | null
           page_id?: string
@@ -3019,6 +3202,7 @@ export type Database = {
         Row: {
           capacity: number | null
           created_at: string
+          current_order_id: string | null
           id: string
           location_id: string
           name: string
@@ -3031,6 +3215,7 @@ export type Database = {
         Insert: {
           capacity?: number | null
           created_at?: string
+          current_order_id?: string | null
           id?: string
           location_id: string
           name: string
@@ -3043,6 +3228,7 @@ export type Database = {
         Update: {
           capacity?: number | null
           created_at?: string
+          current_order_id?: string | null
           id?: string
           location_id?: string
           name?: string
@@ -3053,6 +3239,13 @@ export type Database = {
           zone_name?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "resources_current_order_id_fkey"
+            columns: ["current_order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "resources_location_id_fkey"
             columns: ["location_id"]
@@ -3552,6 +3745,18 @@ export type Database = {
           token: string
         }[]
       }
+      increment_booking_payment: {
+        Args: {
+          p_amount_minor: number
+          p_booking_id: string
+          p_payment_reference: string
+        }
+        Returns: undefined
+      }
+      increment_loyalty_points: {
+        Args: { points: number; profile_id: string }
+        Returns: undefined
+      }
       increment_stock: { Args: { p_items: Json }; Returns: boolean }
       log_audit_event: {
         Args: {
@@ -3589,6 +3794,15 @@ export type Database = {
           p_reference: string
         }
         Returns: boolean
+      }
+      process_wallet_checkout: {
+        Args: {
+          p_amount_minor: number
+          p_customer_id: string
+          p_order_id: string
+          p_organization_id: string
+        }
+        Returns: Json
       }
     }
     Enums: {

@@ -117,7 +117,12 @@ export function OrderHistoryView({ organizationId, locationId, initialOrders }: 
                           )}
                         </div>
                       ) : (
-                        <span className="text-emerald-400">{formatCurrency(order.total_amount_minor)}</span>
+                        <div className="flex flex-col">
+                          <span className="text-emerald-400">{formatCurrency(order.total_amount_minor)}</span>
+                          {(order.wallet_balance_applied_minor || 0) > 0 && (
+                            <span className="text-[10px] text-emerald-400/70 mt-0.5">- {formatCurrency(order.wallet_balance_applied_minor || 0)} (Wallet)</span>
+                          )}
+                        </div>
                       )}
                     </td>
                     <td className="px-6 py-4 text-right text-xs">
@@ -155,7 +160,12 @@ export function OrderHistoryView({ organizationId, locationId, initialOrders }: 
                         <span className="text-[10px] text-red-400/80 uppercase tracking-wider font-bold mt-0.5">Cancelled</span>
                       </div>
                     ) : (
-                      <span className="text-emerald-400 font-bold">{formatCurrency(order.total_amount_minor)}</span>
+                      <div className="flex flex-col items-end">
+                        <span className="text-emerald-400 font-bold">{formatCurrency(order.total_amount_minor)}</span>
+                        {(order.wallet_balance_applied_minor || 0) > 0 && (
+                          <span className="text-[10px] text-emerald-400/70 mt-0.5">- {formatCurrency(order.wallet_balance_applied_minor || 0)} (Wallet)</span>
+                        )}
+                      </div>
                     )}
                   </div>
                 </div>

@@ -15,13 +15,15 @@ const upsellRequestSchema = z.object({
     id: z.string(),
     name: z.string(),
     price_minor: z.number().optional(),
-    description: z.string().nullable().optional()
+    description: z.string().nullable().optional(),
+    is_upsell_eligible: z.boolean().optional()
   })).min(1, 'No available items to upsell'),
-  templateType: z.string().optional().default('catalog')
+  templateType: z.string().optional().default('catalog'),
+  upsellMode: z.string().optional().default('auto')
 })
 
 export async function POST(req: Request) {
-  let body: { availableItems?: { id: string; name: string }[] } | null = null
+  let body: { availableItems?: { id: string; name: string; is_upsell_eligible?: boolean }[]; upsellMode?: string } | null = null
   try {
     body = await req.json()
     const parsed = upsellRequestSchema.safeParse(body)
@@ -30,7 +32,15 @@ export async function POST(req: Request) {
       return new Response('Invalid payload', { status: 400 })
     }
 
-    const { cartItems, availableItems, templateType } = parsed.data
+    const { cartItems, availableItems, templateType, upsellMode } = parsed.data
+
+    let finalAvailableItems = availableItems
+    if (upsellMode === 'curated') {
+      finalAvailableItems = availableItems.filter(i => i.is_upsell_eligible)
+      if (finalAvailableItems.length === 0) {
+        return new Response('No eligible upsell items in curated mode', { status: 200 })
+      }
+    }
 
     const prompt = `
 You are an expert sales assistant powering the checkout flow for a business.
@@ -40,7 +50,7 @@ Here is the current guest's cart:
 ${JSON.stringify(cartItems, null, 2)}
 
 Here are the available items/services they could add:
-${JSON.stringify(availableItems, null, 2)}
+${JSON.stringify(finalAvailableItems, null, 2)}
 
 Your goal: Suggest EXACTLY ONE available item that perfectly complements their cart but is NOT already in it.
 Provide a short, enticing 1-sentence pitch (max 10 words) encouraging them to add it.
@@ -64,7 +74,7 @@ Examples:
     })
 
     // Verify the item exists
-    const itemExists = availableItems.find((i: { id: string }) => i.id === object.suggestedItemId)
+    const itemExists = finalAvailableItems.find((i: { id: string }) => i.id === object.suggestedItemId)
     if (!itemExists) {
       return new Response('Failed to find a valid upsell item', { status: 400 })
     }
@@ -75,11 +85,14 @@ Examples:
     // AI Circuit Breaker: Graceful Fallback instead of failure
     if (body?.availableItems && Array.isArray(body.availableItems) && body.availableItems.length > 0) {
       // Fallback: Just suggest the first available item if AI fails
-      const fallbackItem = body.availableItems[0]
-      return Response.json({
-        suggestedItemId: fallbackItem.id,
-        pitch: `Would you like to add ${fallbackItem.name}?`
-      })
+      const fallbackItems = body.upsellMode === 'curated' ? body.availableItems.filter((i: any) => i.is_upsell_eligible) : body.availableItems
+      if (fallbackItems.length > 0) {
+        const fallbackItem = fallbackItems[0]
+        return Response.json({
+          suggestedItemId: fallbackItem.id,
+          pitch: `Would you like to add ${fallbackItem.name}?`
+        })
+      }
     }
     return new Response('Internal Server Error', { status: 500 })
   }

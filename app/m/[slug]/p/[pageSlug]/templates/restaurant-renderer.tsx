@@ -16,12 +16,14 @@ export async function RestaurantRenderer({
   tableIdentifier,
   paymentIsLive,
   page,
+  upsellMode,
 }: {
   location: Location
   slug: string
   tableIdentifier?: string
   paymentIsLive: boolean
   page: { id: string; background_color?: string }
+  upsellMode?: string
 }) {
   const fetchMenuCategories = async () => {
     const anonSupabase = createAnonClient()
@@ -55,7 +57,8 @@ export async function RestaurantRenderer({
           dietary_tags: item?.item_data?.dietary_tags || [],
           allergen_tags: item?.item_data?.allergen_tags || [],
           stock_count: item?.item_data?.stock_count || null,
-          availability_status: item?.availability_status
+          availability_status: item?.availability_status,
+          is_upsell_eligible: item?.is_upsell_eligible
         }))
         
       return {
@@ -78,7 +81,8 @@ export async function RestaurantRenderer({
     (cat.menu_items || []).map((item: any) => ({
       id: item.id,
       name: item.name,
-      price_minor: item.price_minor
+      price_minor: item.price_minor,
+      is_upsell_eligible: item.is_upsell_eligible
     }))
   )
 
@@ -128,6 +132,7 @@ export async function RestaurantRenderer({
         deliveryNote={location.delivery_note}
         fulfillmentLocationLabel={location.fulfillment_location_label}
         refundPolicy={(location as { organizations?: { refund_policy?: string } }).organizations?.refund_policy}
+        upsellMode={upsellMode}
       />
     </main>
   )

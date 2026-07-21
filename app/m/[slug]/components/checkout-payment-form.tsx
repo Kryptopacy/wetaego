@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { CreditCard, Building2, Banknote, QrCode, Clock, Wallet, Lock, Shield, CheckCircle2, Sparkles, ArrowRight } from 'lucide-react'
 import { useTranslations } from 'next-intl'
@@ -143,6 +144,10 @@ interface CheckoutPaymentFormProps {
   iouPaymentEnabled?: boolean
   pagePaymentOptions?: string[]
   fulfillmentType?: string
+  promoCode?: string
+  setPromoCode?: (code: string) => void
+  promoDiscountAmountMinor?: number
+  onApplyPromoCode?: (code: string) => Promise<{ success: boolean; discount_minor?: number; error?: string }>
 }
 
 export function CheckoutPaymentForm({
@@ -162,7 +167,15 @@ export function CheckoutPaymentForm({
   iouPaymentEnabled = false,
   pagePaymentOptions = [],
   fulfillmentType,
+  promoCode,
+  setPromoCode,
+  promoDiscountAmountMinor = 0,
+  onApplyPromoCode,
 }: CheckoutPaymentFormProps) {
+  const [promoInput, setPromoInput] = useState('')
+  const [isApplyingPromo, setIsApplyingPromo] = useState(false)
+  const [promoError, setPromoError] = useState('')
+
   const t = useTranslations('Guest')
   const visible = getVisibleOptions(pagePaymentOptions, fulfillmentType, paymentIsLive, manualPaymentEnabled, iouPaymentEnabled)
   const selected = OPTIONS.find(o => o.id === paymentMethod)
@@ -316,6 +329,72 @@ export function CheckoutPaymentForm({
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* ─── Promo Code Input ────────────────────────────────── */}
+      {onApplyPromoCode && (
+        <div className="pt-2 pb-2">
+          {!promoCode ? (
+            <div className="space-y-2">
+              <label className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-2">
+                <Sparkles className="w-3.5 h-3.5" />
+                Have a promo code?
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={promoInput}
+                  onChange={(e) => {
+                    setPromoInput(e.target.value)
+                    setPromoError('')
+                  }}
+                  placeholder="Enter code"
+                  className="flex-1 px-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 uppercase transition-all"
+                />
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (!promoInput.trim()) return
+                    setIsApplyingPromo(true)
+                    setPromoError('')
+                    const res = await onApplyPromoCode(promoInput.trim())
+                    setIsApplyingPromo(false)
+                    if (!res.success) {
+                      setPromoError(res.error || 'Invalid promo code')
+                    }
+                  }}
+                  disabled={!promoInput.trim() || isApplyingPromo}
+                  className="px-4 py-2.5 rounded-xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-sm font-bold disabled:opacity-50 transition-colors"
+                >
+                  {isApplyingPromo ? 'Applying...' : 'Apply'}
+                </button>
+              </div>
+              {promoError && <p className="text-red-500 text-xs px-1 font-medium">{promoError}</p>}
+            </div>
+          ) : (
+            <div className="flex items-center justify-between p-3 rounded-xl border border-emerald-200 bg-emerald-50 dark:border-emerald-900/30 dark:bg-emerald-500/10">
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-emerald-900 dark:text-emerald-100 uppercase tracking-wide">{promoCode}</p>
+                  <p className="text-xs text-emerald-600 dark:text-emerald-400">-{formatCurrency(promoDiscountAmountMinor)}</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setPromoCode?.('')
+                  setPromoInput('')
+                }}
+                className="text-xs font-medium text-emerald-700 dark:text-emerald-300 hover:text-emerald-800 underline underline-offset-2"
+              >
+                Remove
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* ─── Submit CTA ────────────────────────────────────────── */}
       <div className="pt-4 shrink-0 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl border-t border-zinc-200/50 dark:border-zinc-800/50 -mx-6 px-6 -mb-6 pb-8 sm:mb-0 sm:pb-0 sm:border-0 sm:pt-0 sm:bg-transparent sm:dark:bg-transparent">

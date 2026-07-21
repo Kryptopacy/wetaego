@@ -11,7 +11,7 @@ import { motion } from 'framer-motion'
 import { createClient } from '@/lib/supabase/client'
 import { setActiveLocationCookie } from './layout-actions'
 import {
-  LayoutDashboard, ClipboardList, BarChart3, BookOpen, CreditCard, Menu, MessageSquare, Package, QrCode, Settings, Users, Zap, X, User, FileText, LogOut, TrendingUp, Truck, MapPin, ChevronDown, Check, Clock
+  LayoutDashboard, ClipboardList, BarChart3, BookOpen, CreditCard, Menu, MessageSquare, Package, QrCode, Settings, Users, Zap, X, User, FileText, LogOut, TrendingUp, Truck, MapPin, ChevronDown, Check, Clock, Megaphone
 } from 'lucide-react'
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuGroup, DropdownMenuLabel } from '@/components/ui/dropdown-menu'
 import { GlobalRealtime } from './global-realtime'
@@ -207,11 +207,10 @@ export default function ClientLayout({ children, initialData }: { children: Reac
 
   const managerItems: NavItem[] = [
     { href: '/dashboard/inventory', label: 'Inventory (BOM)', icon: Package, tooltip: 'Bill of Materials - Track ingredients and items used per service' },
-    { href: '/dashboard/resources', label: 'Visual Resources', icon: MapPin, tooltip: 'Manage tables, rooms, or physical spaces' },
+    { href: '/dashboard/resources', label: 'Resources & QRs', icon: QrCode, tooltip: 'Manage physical resources, layouts, and dynamic QR codes' },
     { href: '/dashboard/customers', label: 'CRM & Loyalty', icon: Users, tooltip: 'Manage customer profiles and loyalty points' },
     { href: '/dashboard/team-performance', label: 'Team Performance', icon: BarChart3, tooltip: 'Track staff metrics and service quality' },
     { href: '/dashboard/manage/feedback', label: 'Feedback Inbox', icon: MessageSquare, tooltip: 'Review customer reviews and ratings' },
-    { href: '/dashboard/qr', label: 'QR Generator', icon: QrCode, tooltip: 'Generate QR codes for tables or links' },
     { 
       href: activePageId ? `/dashboard/pages/${activePageId}/edit` : '/dashboard/taxonomy', 
       label: activeTemplate === 'booking' ? 'Services Manager' : 
@@ -221,7 +220,10 @@ export default function ClientLayout({ children, initialData }: { children: Reac
       tooltip: 'Manage your offerings, categories, and items'
     },
     { href: '/dashboard/pages', label: 'Your Pages', icon: FileText, tooltip: 'Manage your business pages and branding' },
+    { href: '/dashboard/deals', label: 'Deals & Sales', icon: Zap, tooltip: 'Create active flash sales and discounted items' },
+    { href: '/dashboard/promotions', label: 'Promo Codes', icon: Zap, tooltip: 'Create discount codes for guest checkout' },
     { href: '/dashboard/ads', label: 'Ad Manager', icon: Zap, tooltip: 'Manage sponsored ads and view analytics' },
+    { href: '/dashboard/marketing', label: 'Broadcast Marketing', icon: Megaphone, tooltip: 'Send email campaigns to customers' },
     { href: '/dashboard/settings', label: 'Settings & Team', icon: Settings, tooltip: 'Configure business settings and team access' },
     { href: '/dashboard/availability', label: 'Availability Engine', icon: Clock, tooltip: 'Configure operational timezone and weekly schedule' },
     { href: '/dashboard/webhooks', label: 'Outbound Webhooks', icon: Zap, tooltip: 'Configure real-time POST webhooks' },

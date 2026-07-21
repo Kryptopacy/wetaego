@@ -12,122 +12,68 @@ By deploying dynamic, template-driven digital environments reachable instantly v
 
 ---
 
-## 🏆 Hackathon Judging Criteria & The OurMenu OS Thesis
+## 🏗️ Architecture & Core Engines
 
-OurMenu OS was built from the ground up to redefine how commerce software scales. Here is how we address the core judging pillars:
+OurMenu OS operates on a modern, deeply relational architecture combining Next.js 16, Supabase (PostgreSQL), and AI-driven automation. Below are the core operational engines powering the platform.
 
-### 1. Category Impact (Redefining Commerce)
-We didn't build another static storefront or PDF menu. We built a deeply relational, polymorphic engine capable of unifying physical retail carts and abstract service bookings into the exact same checkout flow. With a **Universal Taxonomy Engine**, a **Visual Resource Manager**, and **Custom Domain White-Labeling**, OurMenu OS fundamentally moves the needle on what a web-based POS and SaaS platform can achieve for businesses of any size.
+### 1. Loyalty & Rewards Engine (Phase 2 Upgrade)
+A scalable, rules-based loyalty system designed to drive customer retention:
+- **Dynamic Rule Presets:** Allows businesses to assign multipliers to loyalty points based on preset logic (e.g., "Triple Points on Upsell Items" or "Double Points on Weekends").
+- **Real-Time Evaluation:** Calculates points atomically within the webhook payment processor.
+- **Redemption & Wallet Escrow:** Points are converted to monetary value seamlessly at checkout, integrated deeply into the pre-paid wallet architecture.
 
-### 2. Business Viability (Real Users, Real Revenue)
-OurMenu OS is engineered for instant monetization and hyper-sustainability:
-- **Automated SaaS Ledger:** A built-in platform ledger automatically extracts a configurable SaaS fee (e.g., 2%) atomically on every transaction, driving pure Monthly Recurring Revenue (MRR).
-- **First-Party Ad Network:** Bypasses ad-blockers by natively injecting "Bring Your Own" (BYO) sponsors directly into the storefront catalog loop for passive B2B revenue.
-- **Chaos Roulette (4 Modes):** A gamified "spin to win" bill-splitting randomizer (Classic, Squad, Survivor, Chaos) that converts the friction of group payments into a viral user-acquisition funnel.
-- **Affiliate Rev-Share (B2B Growth):** Built-in B2B affiliate tracking. Partners register to generate unique referral codes. New tenants are cryptographically tied to their affiliate, generating automated 10% commission payouts on subscription renewals.
+### 2. Intelligent Upsell Engine (Phase 2 Upgrade)
+An AI-powered sales assistant embedded directly in the checkout flow:
+- **Configurable Modes (Auto vs. Curated):** Businesses can allow the AI to automatically analyze the full catalog or explicitly tag specific items (e.g., high-margin products) for upsell eligibility.
+- **Context-Aware Recommendations:** Evaluates the guest's current cart and the business's `template_type` (e.g., restaurant vs. boutique) to generate exactly one highly complementary suggestion.
+- **Graceful Fallbacks:** Uses robust circuit-breakers to fall back to static suggestions if the AI model is unavailable, ensuring zero disruption to the sales funnel.
 
-### 3. AI-Native Operations (AI in Production)
-OurMenu OS runs businesses through dual-sided AI architectures (Public & Business):
-- **Admin AI Copilot (Business):** A deeply integrated conversational assistant that autonomously executes key business decisions (tool calls) shielded by strict Role-Based Access Control (RBAC). It can generate marketing copy, spin up visual assets, triage support requests, and analyze performance.
-- **Voice Dictation & Smart Search (Public):** Customers speak naturally to the public-facing AI, which translates semantic intent ("Show me vegan options under $20") into precise PostgreSQL Full-Text Search parameters and adds matching items directly to the cart.
-- **AI Demand Forecasting:** Analyzes 30-day sales velocity and utilizes Gemini to predict 7-day demand trajectories, issuing smart inventory alerts.
+### 3. Unified Wallet & Split-Tender Checkout
+Built for high-trust commerce and multi-modal payments:
+- **Atomic Rollbacks:** Implements an advanced two-phase commit strategy. If an external payment gateway (like Paystack) fails to initialize after an internal wallet deduction, the `wallet-service.ts` instantly rolls back the wallet balance, guaranteeing ledger accuracy.
+- **Split Tenders:** Supports splitting bills across pre-paid wallet balances and credit/debit cards seamlessly in a single transaction.
 
----
+### 4. Dynamic Portal Routing & Templating
+- **Location Pages & Templates:** A business can spin up multiple "pages" (e.g., a restaurant menu, an event booking page, a retail catalog). If multiple pages exist, the platform dynamically renders a "Portal Nav" landing page.
+- **Specialized Renderers:** Uses polymorphic rendering (e.g., `RestaurantRenderer`, `CatalogPageRenderer`, `BookingRenderer`) to adapt the UI specifically to the industry context while sharing the same underlying checkout infrastructure (`CartFAB`).
 
-## 🏗️ Comprehensive Documentation Index
-
-We have broken down the absolute scale and flexibility of OurMenu OS into deep-dive technical documents. 
-
-### 1. Enterprise Architecture & Security
-- 🛡️ **[Data Layer & PostgreSQL Engine](./docs/architecture/data-layer.md)** (Universal Taxonomy, Full-Text Search, Automated SaaS Ledger)
-- 🔒 **[Security, Zod, and Scale](./docs/architecture/security-and-scale.md)** (RLS, Storage Protection, N+1 Mitigation)
-- 🔌 **[Outbound Webhooks & Integrations](./docs/architecture/integrations.md)** (Dead Letter Queues, API Gateways, Custom Domains)
-- 🏢 **[Enterprise Fleet & RBAC](./docs/architecture/fleet-and-rbac.md)** (Branch Switchers, Geofenced Clock-In, Independent Sub-Businesses)
-- 🧠 **[AI-Native Operations](./docs/architecture/ai-orchestration.md)** (Admin Copilot Tool Calls, Public Voice Dictation, Smart Upselling, Gemini Vision Importer)
-- ⚙️ **[Back-of-House Operations](./docs/architecture/back-of-house.md)** (Master Cron Orchestrator, Superadmin Developer Console, Demo Mode Bypass)
-
-### 2. Core Features & Workflows
-- 💳 **[Omnichannel Checkout & Payments](./docs/features/checkout-and-payments.md)** (Paystack Split Payments, B2B IOU Store Credit, Chaos Roulette [4 Modes], First-Party Ad Network, Extensive Custom Styling)
-- 📦 **[Inventory Manager & BOM Engine](./docs/features/inventory-and-bom.md)** (Live Ledger, Component Breakdown, Signed Movement Triggers, Smart Sell-Out)
-- 👥 **[CRM, Gamification & B2B Growth](./docs/features/crm-and-gamification.md)** (Shadow Profiles, Affiliate Rev-Share Tracking, PIN-Protected Feedback)
-- 💬 **[Enterprise Team & Intercom](./docs/features/team-and-intercom.md)** (Department Routing, WebSockets Realtime Chat, Managerial Audit Logs, Shifts Management)
-- ⚡ **[True Native PWA & Global SEO](./docs/features/pwa-and-seo.md)** (Service Workers, Web Push, SMS Fallback, Fluid Framer Motion, JSON-LD Schema, AEO)
-- 📊 **[Visual Resource Manager & POS](./docs/features/pos.md)** (Live Tables/Bays, Real-time Point of Sale, Cash Handling, QR tracking)
-
-### 3. Industry Standard Templates & Use Cases
-OurMenu OS dynamically renders the correct UI based on the active **Template Builder**. Explore detailed data-flow diagrams for specific industries:
-- 🍽️ **[Hospitality (Restaurants, Cafes, Bars)](./docs/use-cases/hospitality.md)**
-- 🛎️ **[Hotels, Lounges, & Super-clubs](./docs/use-cases/hotels-lounges.md)**
-- 🛒 **[Supermarkets & Retail (Boutiques, Wholesalers)](./docs/use-cases/retail-and-b2b.md)**
-- ✂️ **[Services & Consulting (Spas, Salons)](./docs/use-cases/services.md)**
-- 💼 **[Consultants & Agencies (B2B Rates & Quotes Engine)](./docs/use-cases/consultants-and-agencies.md)**
-- 🏡 **[Real Estate & High-Ticket Inquiries](./docs/use-cases/real-estate.md)**
-- 🌐 **[Enterprise Portal Mode (Macro-Routing)](./docs/use-cases/portal-mode.md)**
+### 5. Progressive Web App (PWA) & Offline Sync
+- **Service Worker Background Sync:** Powered by `@ducanh2912/next-pwa`, critical mutations (like submitting a booking, placing an order, or entering feedback) are queued in IndexedDB via `offline-queue-store.ts` if the user is offline, automatically re-syncing when connectivity is restored.
 
 ---
 
-## 💳 Pricing & Feature Tiers
+## 🛠️ Tech Stack 
 
-OurMenu OS monetizes via three tiered subscription plans, driven by a unified credit system that seamlessly up-sells usage into Pro and Enterprise tiers.
-
-### 🟢 Lite Plan (₦19,999 / month or ₦199,990 / year)
-*Perfect for testing the system at a single venue or food truck.*
-- **Credits:** 10 Monthly Credits
-- **Locations:** 1 active location
-- **QR Codes:** Up to 2 active QR codes/tables
-- **AI Assistant:** Customizable, guest-facing AI Assistant
-- **Edge Translator:** Real-time menu translation for 40+ languages
-
-### 🔵 Pro Plan (₦69,000 / month or ₦690,000 / year)
-*For serious operators who want every edge (restaurants, salons, boutiques).*
-- **Credits:** 50 Monthly Credits (Refreshes every month)
-- **Locations:** 1 active location
-- **QR Codes:** Unlimited QR codes/tables
-- **Premium AI Tools:** AI Copywriter & AI Image Studio Tool Calls
-- **Operations:** Live Fulfillment Dashboard, Smart Request Triaging, Visual Resource Manager
-- **Forecasting:** AI-driven inventory and sales forecasting engine
-
-### 🟣 Enterprise Plan (Custom Pricing)
-*For massive chains, super-clubs, hotels, and multi-location brands.*
-- **Credits:** 200 Monthly Credits
-- **Locations:** Multi-location dashboard (Manage multiple venues under one org)
-- **Features included:** All premium AI tools, independent sub-businesses, unlimited hardware provisioning, custom portals, custom domains.
-- **Integrations:** Direct API access via Webhooks for PMS (Property Management System) integration.
+- **Framework:** Next.js 16 (App Router, Server Actions)
+- **Database & Auth:** Supabase (PostgreSQL, Row Level Security, Edge Functions)
+- **State Management:** Zustand (with fully synchronized SSR hydration middleware)
+- **Validation & Security:** Zod (Strict, impenetrable API boundaries)
+- **AI Engine:** Google AI SDK (`@ai-sdk/google`) + Gemini 3.5 Flash
+- **Caching & Rate Limiting:** Upstash Redis
+- **Error Tracking & Observability:** Sentry (Configured across Client, Server, and Edge `proxy.ts`)
+- **Styling & Animation:** Tailwind CSS v4 + Framer Motion
+- **PWA Integration:** `@ducanh2912/next-pwa`
 
 ---
 
 ## 💻 Running the Application 
 
 ### Live Demo
-Experience the "marvel" of the platform instantly:
+Experience the platform instantly:
 **[https://ourmenuos.online](https://ourmenuos.online)**
-
 *(Use the `?demo=1` parameter on specific routes to bypass login and explore the dashboard capabilities).*
 
-### Running Locally (Next.js)
+### Running Locally
 ```bash
 npm install
 npm run dev
 ```
 Open `http://localhost:3000` to access the local environment.
 
-### Supabase Edge Functions (Local Testing)
-To test Webhooks or Push Notifications locally, install the Supabase CLI:
+### Database Architecture & Migrations
+The database schema heavily leverages PostgreSQL RPCs, triggers, and JSONB structures. Always use Supabase CLI to generate types after running migrations:
 ```bash
-supabase start
-supabase functions serve
+supabase gen types typescript --local > lib/supabase/types.ts
 ```
-*Note: Ensure your `.env.local` is populated with the appropriate Supabase anon keys, service roles, and VAPID keys.*
 
----
-
-## 🛠️ Tech Stack 
-
-- **Framework:** Next.js 16 (App Router, Server Actions, async `params`)
-- **Database & Auth:** Supabase (PostgreSQL, Row Level Security, Edge Functions)
-- **State Management:** Zustand (with fully synchronized SSR hydration middleware)
-- **Validation & Security:** Zod (Strict, impenetrable API boundaries)
-- **AI Engine:** Google AI SDK (`@ai-sdk/google`) + Gemini 3.5 Flash
-- **Caching & Rate Limiting:** Upstash Redis
-- **Error Tracking & Observability:** Sentry
-- **Styling & Animation:** Tailwind CSS v4 + Framer Motion
+> **Note on Edge Middleware:** This project utilizes an upgraded Next.js environment. Edge routing logic is located in `proxy.ts` at the project root, fully replacing traditional `middleware.ts` conventions.

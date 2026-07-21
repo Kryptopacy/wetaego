@@ -1020,6 +1020,53 @@ export default async function SettingsPage({
                 </div>
               </div>
 
+              <div className="pt-6 border-t border-zinc-800 space-y-5">
+                <h3 className="text-md font-bold text-white mb-2">Payment & Deposit Rules</h3>
+                
+                <div className="flex items-center gap-3 bg-zinc-800/50 p-4 rounded-xl border border-zinc-700/50">
+                  <input 
+                    type="checkbox" 
+                    id="billing_enabled"
+                    name="billing_enabled" 
+                    defaultChecked={activePage?.billing_enabled ?? true}
+                    className="w-5 h-5 rounded border-zinc-600 text-blue-500 bg-zinc-800"
+                  />
+                  <label htmlFor="billing_enabled" className="text-sm font-medium text-white flex-1 cursor-pointer">
+                    Enable Checkout/Billing
+                    <span className="block text-xs text-zinc-400 font-normal mt-0.5">Allow customers to submit orders and checkout on this menu.</span>
+                  </label>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-zinc-300">Billing Mode</label>
+                    <select
+                      name="billing_mode"
+                      defaultValue={activePage?.billing_mode || 'upfront'}
+                      className="w-full rounded-xl bg-zinc-800 border-zinc-700 px-4 py-3 text-white outline-none focus:border-blue-500"
+                    >
+                      <option value="upfront">Upfront (Pay Full Amount)</option>
+                      <option value="postpaid">Open Tab (Pay Later)</option>
+                      <option value="deposit">Deposit + Split Tender</option>
+                    </select>
+                    <p className="text-xs text-zinc-500 mt-2">How customers are billed when they checkout.</p>
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-zinc-300">Deposit Percentage (%)</label>
+                    <input
+                      type="number"
+                      name="deposit_percentage"
+                      defaultValue={activePage?.deposit_percentage || 0}
+                      className="w-full rounded-xl bg-zinc-800 border-zinc-700 px-4 py-3 text-white outline-none focus:border-blue-500"
+                      placeholder="e.g. 50"
+                      min="0"
+                      max="100"
+                    />
+                    <p className="text-xs text-zinc-500 mt-2">Only applies if Billing Mode is set to 'Deposit'.</p>
+                  </div>
+                </div>
+              </div>
+
               <div className="mt-2 flex items-center justify-between">
                 <button type="submit" className="px-6 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium transition-colors">
                   Save Add-ons

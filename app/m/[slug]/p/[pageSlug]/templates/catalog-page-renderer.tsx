@@ -31,6 +31,7 @@ interface PageItem {
     category?: string
     variants?: { name: string; options: string[]; required: boolean }[]
   }
+  is_upsell_eligible?: boolean
 }
 
 interface CatalogPageRendererProps {
@@ -65,6 +66,7 @@ interface CatalogPageRendererProps {
   referralSource?: string
   sponsoredAds?: { id: string; title: string; category: string; image_url: string; target_link: string }[]
   tableIdentifier?: string
+  upsellMode?: string
 }
 
 const AVAILABILITY_STYLES: Record<string, string> = {
@@ -81,7 +83,7 @@ const AVAILABILITY_LABELS: Record<string, string> = {
   unavailable: 'Unavailable',
 }
 
-export function CatalogPageRenderer({ location, page, items, locationSlug, paymentIsLive, sponsoredAds, tableIdentifier }: CatalogPageRendererProps) {
+export function CatalogPageRenderer({ location, page, items, locationSlug, paymentIsLive, sponsoredAds, tableIdentifier, upsellMode }: CatalogPageRendererProps) {
   const themeColor = location.theme_color || '#7c3aed'
   const { addItem } = useCartStore()
   const [variantItem, setVariantItem] = useState<PageItem | null>(null)
@@ -367,7 +369,7 @@ export function CatalogPageRenderer({ location, page, items, locationSlug, payme
           paymentIsLive={paymentIsLive}
           tableIdentifier={tableIdentifier}
           templateType="catalog"
-          menuItems={items.map(i => ({ id: i.id, name: i.title, price_minor: i.price_minor || 0 }))}
+          menuItems={items.map(i => ({ id: i.id, name: i.title, price_minor: i.price_minor || 0, is_upsell_eligible: i.is_upsell_eligible }))}
           hideAddressField={page.template_data?.hide_delivery === true}
           deliveryEnabled={location.delivery_enabled ?? false}
           deliveryFeeMinor={location.delivery_fee_minor ?? 0}
@@ -376,6 +378,7 @@ export function CatalogPageRenderer({ location, page, items, locationSlug, payme
           fulfillmentLocationLabel={location.fulfillment_location_label ?? ''}
           pageId={page.id}
           refundPolicy={(location.organizations as { refund_policy?: string })?.refund_policy || (page.template_data?.refund_policy as string | undefined)}
+          upsellMode={upsellMode}
           pageFulfillmentOptions={
             page.template_data?.fulfillment_options as { pickup: boolean, delivery: boolean, table: boolean } | undefined
           }

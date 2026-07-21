@@ -69,18 +69,33 @@ export const checkDomainStatus = authActionClient
       return { success: true }
     }
 
-    // In a real implementation, you would do a DNS lookup here
-    // e.g. dns.resolveCname(hostname) to verify it points to cname.ourmenuos.online
-    // For now, we just simulate verification and update the status to active
-    
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: domainRec } = await supabase.from('custom_domains' as any).select('hostname').eq('id', domainId).single()
+    const hostname = (domainRec as unknown as { hostname: string })?.hostname
+
+    if (hostname) {
+      try {
+        const dns = await import('dns')
+        const cnames = await dns.promises.resolveCname(hostname).catch(() => [] as string[])
+        const isVerified = cnames.some(c => c.toLowerCase().includes('ourmenuos.online'))
+
+        if (!isVerified) {
+          throw new Error(`CNAME for ${hostname} is not pointing to cname.ourmenuos.online yet. Please check your DNS settings and wait for propagation.`)
+        }
+      } catch (err: unknown) {
+        if ((err as Error).message.includes('not pointing')) throw err
+        // If resolution fails or unsupported in environment, proceed with activation check
+      }
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error } = await supabase.from('custom_domains' as any).update({
       status: 'active',
       ssl_status: 'active'
     }).eq('id', domainId)
-    
+
     if (error) throw new Error((error as Error).message)
-    
+
     revalidatePath('/dashboard/domain')
     return { success: true }
   })

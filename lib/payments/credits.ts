@@ -138,3 +138,25 @@ export async function refundCredits(organizationId: string, amountToRefund: numb
     return { success: false, error: 'Failed to refund credits' }
   }
 }
+
+/**
+ * Gets the current available credit balance for an organization
+ */
+export async function getCreditBalance(organizationId: string): Promise<number> {
+  const supabase = await createAdminClient()
+
+  const { data: org, error: orgError } = await supabase
+    .from('organizations')
+    .select('subscription_tier, purchased_credits, monthly_free_credits_used')
+    .eq('id', organizationId)
+    .single()
+
+  if (orgError || !org) return 0
+
+  const tier = (org.subscription_tier || 'lite') as string
+  const dynamicPlanLimits = await getPlanLimits() as Record<string, { credits: number, pages: number }>
+  const monthlyLimit = dynamicPlanLimits[tier]?.credits ?? (tier === 'trial' || tier === 'pro' ? 50 : 10)
+  const availableFree = Math.max(0, monthlyLimit - org.monthly_free_credits_used)
+  
+  return availableFree + org.purchased_credits
+}

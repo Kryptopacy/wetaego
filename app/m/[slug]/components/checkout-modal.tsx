@@ -12,6 +12,8 @@ import { toast } from 'sonner'
 import { processCheckout, checkIouStatus } from '../actions'
 import { useCartStore } from '@/lib/store/cart'
 import dynamic from 'next/dynamic'
+import { createClient } from '@/lib/supabase/client'
+import { GlobalAuthModal } from '@/components/auth/GlobalAuthModal'
 
 const PaymentRouletteModal = dynamic(() => import('@/components/payment-roulette-modal').then(mod => mod.PaymentRouletteModal), { ssr: false })
 
@@ -72,6 +74,7 @@ export interface CheckoutMenuItem {
   price_minor: number;
   image_url?: string;
   description?: string;
+  is_upsell_eligible?: boolean;
 }
 
 export interface CheckoutTax {
@@ -117,6 +120,7 @@ interface CheckoutModalProps {
   pagePaymentOptions?: string[]
   resourceId?: string
   mapsIntegrationEnabled?: boolean
+  upsellMode?: string | null
 }
 
 export function CheckoutModal({
@@ -153,9 +157,10 @@ export function CheckoutModal({
   refundPolicy,
   pageFulfillmentOptions = { pickup: true, delivery: true, table: false },
   locationTaxes = [],
-  pagePaymentOptions = [],
+  pagePaymentOptions,
   resourceId,
-  mapsIntegrationEnabled = true
+  mapsIntegrationEnabled = false,
+  upsellMode = 'auto'
 }: CheckoutModalProps) {
   const t = useTranslations('Guest')
   const { getDiscountAmountMinor, getDiscountedTotalAmountMinor } = useCartStore()
@@ -173,6 +178,43 @@ export function CheckoutModal({
   const [tableNumber, setTableNumber] = useState(tableIdentifier || '')
   const [isFetchingLocation, setIsFetchingLocation] = useState(false)
   const [isSummaryExpanded, setIsSummaryExpanded] = useState(false)
+
+  const [user, setUser] = useState<any>(null)
+  const [showAuthModal, setShowAuthModal] = useState(false)
+  const [walletBalance, setWalletBalance] = useState<number>(0)
+  const [useWallet, setUseWallet] = useState(false)
+
+  // Loyalty State
+  const [loyaltyPoints, setLoyaltyPoints] = useState<number>(0)
+  const [loyaltySettings, setLoyaltySettings] = useState<any>(null)
+  const [useLoyaltyPoints, setUseLoyaltyPoints] = useState(false)
+
+  const fetchUser = async () => {
+    const supabase = createClient()
+    const { data: { user: currentUser } } = await supabase.auth.getUser()
+    if (currentUser) {
+      setUser(currentUser)
+      if (!customerEmail) setCustomerEmail(currentUser.email || '')
+      
+      const { data: profile } = await supabase.from('customer_profiles').select('wallet_balance_minor, loyalty_points').eq('id', currentUser.id).single()
+      if (profile) {
+        setWalletBalance(profile.wallet_balance_minor || 0)
+        setLoyaltyPoints(profile.loyalty_points || 0)
+      }
+    }
+    
+    // Fetch organization loyalty settings regardless of login status (so we can show earn potential)
+    const { data: lSettings } = await supabase.from('loyalty_settings').select('*').eq('organization_id', organizationId).single()
+    if (lSettings) {
+      setLoyaltySettings(lSettings)
+    }
+  }
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchUser()
+    }
+  }, [isOpen])
   
   const showTableOption = pageFulfillmentOptions ? pageFulfillmentOptions.table : !['catalog', 'retail'].includes(templateType)
   const showPickupOption = pageFulfillmentOptions ? pageFulfillmentOptions.pickup : true
@@ -213,6 +255,11 @@ export function CheckoutModal({
   }
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'transfer' | 'iou' | 'pay_on_delivery_cash' | 'pay_on_delivery_link' | 'pay_after_service'>(paymentIsLive ? 'card' : 'transfer')
   const [isIouGloballyEnabled, setIsIouGloballyEnabled] = useState(iouPaymentEnabled)
+
+  const [promoCode, setPromoCode] = useState<string | undefined>()
+  const [promoDiscountAmountMinor, setPromoDiscountAmountMinor] = useState(0)
+  const [promoDiscountType, setPromoDiscountType] = useState<'percentage' | 'flat'>('flat')
+  const [promoDiscountValue, setPromoDiscountValue] = useState(0)
 
   useEffect(() => {
     if (isOpen) {
@@ -259,7 +306,7 @@ export function CheckoutModal({
           const res = await fetch('/api/upsell', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ cartItems: items, availableItems: menuItems, templateType }),
+            body: JSON.stringify({ cartItems: items, availableItems: menuItems, templateType, upsellMode }),
             signal: controller.signal
           })
           if (res.ok) {
@@ -305,9 +352,48 @@ export function CheckoutModal({
   const taxTotalMinor = taxBreakdown.reduce((sum, tax) => sum + tax.amount_minor, 0)
   
   const isDelivery = fulfillmentType === 'delivery'
-  const appliedDeliveryFee = (isDelivery && deliveryFeeMinor) ? deliveryFeeMinor : 0
   
-  const finalTotalMinor = discountedSubtotalMinor + taxTotalMinor + appliedDeliveryFee
+  // Total computations (Client-side display only, verified on server)
+  const itemsTotalMinor = Object.values(items).reduce((total, item) => total + (getDiscountedTotalAmountMinor(item.price_minor, globalDiscountEnabled ? globalDiscountPercentage : null) * item.quantity), 0)
+  const subTotalMinor = itemsTotalMinor
+  
+  let currentPromoDiscountAmountMinor = 0
+  if (promoCode) {
+    if (promoDiscountType === 'percentage') {
+      currentPromoDiscountAmountMinor = Math.floor(itemsTotalMinor * (promoDiscountValue / 100))
+    } else {
+      currentPromoDiscountAmountMinor = promoDiscountValue
+    }
+    // Cap promo discount to itemsTotalMinor
+    currentPromoDiscountAmountMinor = Math.min(currentPromoDiscountAmountMinor, itemsTotalMinor)
+  }
+
+  const appliedDeliveryFee = (isDelivery && deliveryFeeMinor) ? deliveryFeeMinor : 0
+  let finalTotalMinor = Math.max(0, subTotalMinor - currentPromoDiscountAmountMinor) + appliedDeliveryFee + (taxTotalMinor || 0)
+  
+  if (useLoyaltyPoints && loyaltySettings?.is_enabled && loyaltyPoints >= loyaltySettings.reward_threshold) {
+    finalTotalMinor = Math.max(0, finalTotalMinor - (loyaltySettings.reward_discount_minor || 0))
+  }
+
+  // Sync state for CheckoutPaymentForm
+  useEffect(() => {
+    setPromoDiscountAmountMinor(currentPromoDiscountAmountMinor)
+  }, [currentPromoDiscountAmountMinor])
+
+  const handleApplyPromoCode = async (code: string) => {
+    const { validatePromoCode } = await import('../actions')
+    const res = await validatePromoCode(code, locationId)
+    if (res.serverError) {
+      return { success: false, error: res.serverError }
+    }
+    if (res.data) {
+      setPromoCode(code.toUpperCase())
+      setPromoDiscountType(res.data.discount_type)
+      setPromoDiscountValue(res.data.discount_value)
+      return { success: true }
+    }
+    return { success: false, error: 'Unknown error' }
+  }
 
   const handleGetLocation = () => {
     if (!navigator.geolocation) {
@@ -385,10 +471,12 @@ export function CheckoutModal({
         paymentFractionMinor = Math.ceil(finalTotalMinor / splitCount)
       }
 
+      const walletToApply = useWallet ? Math.min(walletBalance, finalTotalMinor) : undefined
+
       const payload: Parameters<typeof processCheckout>[0] = {
         organizationId, locationId, items, totalAmountMinor: finalTotalMinor, tipAmountMinor: 0,
         tableIdentifier: tableNumber, customerNote, customerEmail, paymentFractionMinor,
-        paymentMethod, discountAmountMinor, customerName, customerPhone,
+        paymentMethod, discountAmountMinor: discountAmountMinor + currentPromoDiscountAmountMinor, customerName, customerPhone,
         fulfillmentType, deliveryInstructions, staffId: undefined, staffSubaccountOverride: undefined,
         pageId, idempotencyKey: crypto.randomUUID(), subtotalMinor: discountedSubtotalMinor, taxTotalMinor, taxBreakdown,
         isSplitPayment: splitCount > 1,
@@ -401,7 +489,11 @@ export function CheckoutModal({
         ...(fulfillmentType === 'delivery' ? {
           deliveryLat,
           deliveryLng
-        } : {})
+        } : {}),
+        useWalletBalance: useWallet,
+        walletAmountAppliedMinor: walletToApply,
+        promoCode: promoCode,
+        useLoyaltyPoints: useLoyaltyPoints
       }
 
       const result = await processCheckout(payload)
@@ -477,7 +569,8 @@ export function CheckoutModal({
   }
 
   return (
-    <AnimatePresence>
+    <>
+      <AnimatePresence>
       {isOpen && (
         <div 
           className="fixed inset-0 z-50 flex items-end justify-center sm:items-center p-0 sm:p-4 pointer-events-auto"
@@ -511,6 +604,22 @@ export function CheckoutModal({
             </div>
 
             <div className="overflow-y-auto overflow-x-hidden -mx-6 px-6 pb-6 space-y-6 flex-1">
+              {!user && (
+                <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 flex items-center justify-between">
+                  <div className="flex flex-col">
+                    <span className="text-sm font-bold text-blue-500 dark:text-blue-400">Faster Checkout</span>
+                    <span className="text-xs text-blue-600/80 dark:text-blue-400/80 mt-0.5">Sign in to use Wallet & IOU features.</span>
+                  </div>
+                  <button 
+                    type="button" 
+                    onClick={() => setShowAuthModal(true)}
+                    className="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors"
+                  >
+                    Sign In
+                  </button>
+                </div>
+              )}
+
               {/* Fulfillment Type Segmented Control */}
               {!tableIdentifier && (showTableOption || showDeliveryOption || showPickupOption) && (
                 <div className="relative flex bg-zinc-100/80 dark:bg-zinc-800/80 backdrop-blur-md p-1.5 rounded-[1.25rem] shadow-inner">
@@ -829,6 +938,67 @@ export function CheckoutModal({
                 />
               )}
 
+              {/* Wallet Split Tender Toggle */}
+              {user && walletBalance > 0 && (
+                <div className="bg-purple-500/10 border border-purple-500/20 rounded-xl p-4">
+                  <div className="flex items-center justify-between cursor-pointer" onClick={() => setUseWallet(!useWallet)}>
+                    <div className="flex flex-col">
+                      <span className="text-sm font-bold text-purple-600 dark:text-purple-400">Use Wallet Balance</span>
+                      <span className="text-xs text-purple-700/80 dark:text-purple-300/80 mt-0.5">
+                        Balance: {formatCurrency(walletBalance)}
+                      </span>
+                    </div>
+                    <div className={`w-12 h-6 rounded-full transition-colors flex items-center px-1 ${useWallet ? 'bg-purple-500' : 'bg-zinc-700'}`}>
+                      <motion.div 
+                        className="w-4 h-4 bg-white rounded-full shadow-sm"
+                        animate={{ x: useWallet ? 24 : 0 }}
+                        transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                      />
+                    </div>
+                  </div>
+                  
+                  {useWallet && (
+                    <div className="mt-3 pt-3 border-t border-purple-500/20 flex justify-between items-center text-sm">
+                      <span className="text-purple-700 dark:text-purple-300">Amount to pay with Wallet:</span>
+                      <span className="font-bold text-purple-600 dark:text-purple-400">
+                        {formatCurrency(Math.min(walletBalance, finalTotalMinor))}
+                      </span>
+                    </div>
+                  )}
+                  {useWallet && finalTotalMinor > walletBalance && (
+                    <div className="mt-1 flex justify-between items-center text-sm">
+                      <span className="text-zinc-600 dark:text-zinc-400">Amount remaining (Pay via {paymentMethod}):</span>
+                      <span className="font-bold text-zinc-900 dark:text-white">
+                        {formatCurrency(finalTotalMinor - walletBalance)}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Loyalty Points */}
+              {user && loyaltySettings?.is_enabled && (
+                <div className={`bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 ${loyaltyPoints < loyaltySettings.reward_threshold ? 'opacity-70' : ''}`}>
+                  <div className="flex items-center justify-between cursor-pointer" onClick={() => loyaltyPoints >= loyaltySettings.reward_threshold && setUseLoyaltyPoints(!useLoyaltyPoints)}>
+                    <div className="flex flex-col">
+                      <span className="text-sm font-bold text-amber-700 dark:text-amber-400">Loyalty Points ({loyaltyPoints})</span>
+                      <span className="text-xs text-amber-800/80 dark:text-amber-300/80 mt-0.5">
+                        {loyaltyPoints >= loyaltySettings.reward_threshold ? `Apply discount: ${formatCurrency(loyaltySettings.reward_discount_minor)}` : `Need ${loyaltySettings.reward_threshold - loyaltyPoints} more points to unlock reward`}
+                      </span>
+                    </div>
+                    {loyaltyPoints >= loyaltySettings.reward_threshold && (
+                      <div className={`w-12 h-6 rounded-full transition-colors flex items-center px-1 ${useLoyaltyPoints ? 'bg-amber-500' : 'bg-zinc-700'}`}>
+                        <motion.div 
+                          className="w-4 h-4 bg-white rounded-full shadow-sm"
+                          animate={{ x: useLoyaltyPoints ? 24 : 0 }}
+                          transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {/* Refund Policy */}
               {refundPolicy && (
                 <details className="bg-zinc-100 dark:bg-zinc-800/50 p-4 rounded-xl border border-zinc-200 dark:border-zinc-700/50 group cursor-pointer marker:content-['']">
@@ -841,26 +1011,40 @@ export function CheckoutModal({
               )}
 
               {/* Payment Method / Action Buttons (Extracted Component) */}
-              <CheckoutPaymentForm 
-                paymentIsLive={paymentIsLive || false}
-                manualPaymentEnabled={manualPaymentEnabled || false}
-                manualPaymentBankName={manualPaymentBankName}
-                manualPaymentAccountName={manualPaymentAccountName}
-                manualPaymentAccountNumber={manualPaymentAccountNumber}
-                manualPaymentInstructions={manualPaymentInstructions}
-                paymentMethod={paymentMethod}
-                setPaymentMethod={setPaymentMethod as (m: string) => void}
-                splitCount={splitCount}
-                setSplitCount={setSplitCount}
-                finalTotalMinor={finalTotalMinor}
-                isCheckingOut={isCheckingOut}
-                hideAddressField={hideAddressField}
-                tableNumber={tableNumber}
-                templateType={templateType}
-                iouPaymentEnabled={isIouGloballyEnabled}
-                pagePaymentOptions={pagePaymentOptions}
-                fulfillmentType={fulfillmentType}
-              />
+              {(!useWallet || finalTotalMinor > walletBalance) ? (
+                <CheckoutPaymentForm 
+                  paymentIsLive={paymentIsLive || false}
+                  manualPaymentEnabled={manualPaymentEnabled || false}
+                  manualPaymentBankName={manualPaymentBankName}
+                  manualPaymentAccountName={manualPaymentAccountName}
+                  manualPaymentAccountNumber={manualPaymentAccountNumber}
+                  manualPaymentInstructions={manualPaymentInstructions}
+                  paymentMethod={paymentMethod}
+                  setPaymentMethod={setPaymentMethod as (m: string) => void}
+                  splitCount={splitCount}
+                  setSplitCount={setSplitCount}
+                  finalTotalMinor={finalTotalMinor - (useWallet ? Math.min(walletBalance, finalTotalMinor) : 0)}
+                  isCheckingOut={isCheckingOut}
+                  hideAddressField={hideAddressField}
+                  tableNumber={tableNumber}
+                  templateType={templateType}
+                  iouPaymentEnabled={isIouGloballyEnabled}
+                  pagePaymentOptions={pagePaymentOptions}
+                  fulfillmentType={fulfillmentType}
+                  promoCode={promoCode}
+                  setPromoCode={setPromoCode}
+                  promoDiscountAmountMinor={promoDiscountAmountMinor}
+                  onApplyPromoCode={handleApplyPromoCode}
+                />
+              ) : (
+                <button
+                  type="submit"
+                  disabled={isCheckingOut}
+                  className="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-3.5 rounded-xl text-[15px] transition-colors shadow-lg shadow-purple-600/20"
+                >
+                  {isCheckingOut ? 'Processing...' : `Pay ${formatCurrency(finalTotalMinor)} via Wallet`}
+                </button>
+              )}
 
               
               {refundPolicy && (
@@ -874,5 +1058,14 @@ export function CheckoutModal({
         </div>
       )}
     </AnimatePresence>
+    <GlobalAuthModal 
+      isOpen={showAuthModal} 
+      onClose={() => setShowAuthModal(false)}
+      onSuccess={() => {
+        setShowAuthModal(false)
+        fetchUser()
+      }}
+    />
+  </>
   )
 }

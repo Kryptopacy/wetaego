@@ -4,7 +4,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { getFullOrderDetailsAction } from '@/app/m/[slug]/actions'
+import { getFullOrderDetailsAction, submitPaymentProof } from '@/app/m/[slug]/actions'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 import { formatCurrency } from '@/lib/utils/currency'
@@ -38,6 +38,17 @@ export function OrderStatusClient({
   slug: string
 }) {
   const [order, setOrder] = useState<OrderWithRelations>(initialOrder)
+  const [isRefreshing, setIsRefreshing] = useState(false)
+  const [isUploadingProof, setIsUploadingProof] = useState(false)
+  const [uploadedProofUrl, setUploadedProofUrl] = useState<string | null>(null)
+  
+  // Initialize with existing proof if available
+  useEffect(() => {
+    if (order.metadata && typeof order.metadata === 'object' && 'payment_proof_url' in order.metadata) {
+      setUploadedProofUrl(order.metadata.payment_proof_url as string)
+    }
+  }, [order.metadata])
+
   const supabase = createClient()
 
   useEffect(() => {
@@ -96,10 +107,34 @@ export function OrderStatusClient({
     }
   }, [order.id, order.location_id, supabase, currencyCode])
 
-  const copyToClipboard = () => {
-    if (manualPaymentAccountNumber) {
-      navigator.clipboard.writeText(manualPaymentAccountNumber)
-      toast.success('Account number copied!')
+  const handleProofUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setIsUploadingProof(true)
+    const formData = new FormData()
+    formData.append('order_id', order.id)
+    formData.append('file', file)
+
+    try {
+      const res = await submitPaymentProof(formData)
+      if (res.serverError) {
+        toast.error(res.serverError)
+      } else if (res.data?.url) {
+        setUploadedProofUrl(res.data.url)
+        toast.success('Payment proof uploaded successfully!')
+      }
+    } catch (err) {
+      toast.error('Failed to upload payment proof')
+    } finally {
+      setIsUploadingProof(false)
+    }
+  }
+
+  const copyText = (text: string | undefined, entity: string) => {
+    if (text) {
+      navigator.clipboard.writeText(text)
+      toast.success(`${entity} copied!`)
     }
   }
 
@@ -176,7 +211,14 @@ export function OrderStatusClient({
               <div className="flex justify-between items-end mb-4">
                 <div>
                   <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1">Bank Name</p>
-                  <p className="font-bold text-white text-lg">{manualPaymentBankName || 'N/A'}</p>
+                  <div className="flex items-center gap-2 group">
+                    <p className="font-bold text-white text-lg">{manualPaymentBankName || 'N/A'}</p>
+                    {manualPaymentBankName && (
+                      <button onClick={() => copyText(manualPaymentBankName, 'Bank Name')} className="opacity-0 group-hover:opacity-100 text-zinc-400 hover:text-emerald-400 transition-all p-1">
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                      </button>
+                    )}
+                  </div>
                 </div>
                 {manualPaymentBankName?.toLowerCase().includes('opay') && (
                   <div className="w-8 h-8 bg-green-500/20 rounded-full flex items-center justify-center">
@@ -189,7 +231,7 @@ export function OrderStatusClient({
                 <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1">Account Number</p>
                 <div className="flex items-center justify-between bg-black/20 rounded-lg p-3 group border border-zinc-700/50">
                   <p className="font-mono text-xl text-white tracking-wider">{manualPaymentAccountNumber || 'N/A'}</p>
-                  <button onClick={copyToClipboard} className="text-emerald-400 hover:text-emerald-300 transition-colors p-2 -mr-2">
+                  <button onClick={() => copyText(manualPaymentAccountNumber, 'Account Number')} className="text-emerald-400 hover:text-emerald-300 transition-colors p-2 -mr-2">
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
                   </button>
                 </div>
@@ -197,7 +239,59 @@ export function OrderStatusClient({
 
               <div>
                 <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1">Account Name</p>
-                <p className="font-medium text-zinc-300">{manualPaymentAccountName || 'N/A'}</p>
+                <div className="flex items-center gap-2 group">
+                  <p className="font-medium text-zinc-300">{manualPaymentAccountName || 'N/A'}</p>
+                  {manualPaymentAccountName && (
+                    <button onClick={() => copyText(manualPaymentAccountName, 'Account Name')} className="opacity-0 group-hover:opacity-100 text-zinc-400 hover:text-emerald-400 transition-all p-1">
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Payment Proof Upload Section */}
+              <div className="mt-6 pt-4 border-t border-zinc-800">
+                <p className="text-sm text-zinc-400 mb-3">Already paid? Help us verify faster.</p>
+                {uploadedProofUrl ? (
+                  <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400">
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-white">Receipt Uploaded</p>
+                        <a href={uploadedProofUrl} target="_blank" rel="noreferrer" className="text-xs text-emerald-400 hover:underline">View Image</a>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      id="payment-proof-upload" 
+                      className="hidden" 
+                      onChange={handleProofUpload}
+                      disabled={isUploadingProof}
+                    />
+                    <label 
+                      htmlFor="payment-proof-upload" 
+                      className={`flex items-center justify-center gap-2 w-full py-3 px-4 rounded-xl border border-dashed border-zinc-600 bg-zinc-800/50 hover:bg-zinc-800 transition-colors cursor-pointer text-sm font-medium ${isUploadingProof ? 'opacity-50 cursor-not-allowed text-zinc-500' : 'text-zinc-300 hover:text-white'}`}
+                    >
+                      {isUploadingProof ? (
+                        <>
+                          <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                          Uploading...
+                        </>
+                      ) : (
+                        <>
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+                          Upload Payment Receipt
+                        </>
+                      )}
+                    </label>
+                  </div>
+                )}
               </div>
 
               {manualPaymentInstructions && (

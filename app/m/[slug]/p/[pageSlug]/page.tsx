@@ -172,7 +172,7 @@ export default async function PublicPageView({
     const anonSupabase = createAnonClient()
     let query = anonSupabase
       .from('location_pages')
-      .select('id, title, slug, content, template_type, billing_enabled, billing_mode, payment_mode, deposit_percentage, business_type_preset, randomizer_enabled, deals_enabled, template_data, is_published, theme_color, background_color, operating_hours, contact_email, contact_phone, wifi_network, wifi_password, address')
+      .select('id, title, slug, content, template_type, billing_enabled, billing_mode, payment_mode, deposit_percentage, business_type_preset, randomizer_enabled, deals_enabled, template_data, is_published, theme_color, background_color, operating_hours, contact_email, contact_phone, wifi_network, wifi_password, address, upsell_mode')
       .eq('location_id', loc.id)
       .eq('slug', pageSlug)
 
@@ -372,6 +372,7 @@ export default async function PublicPageView({
     paymentIsLive: paymentSettings?.is_active ?? false,
     globalManualPaymentOverride: (globalManualPayment as { global_manual_payment_override?: boolean })?.global_manual_payment_override === true,
     mapsIntegrationEnabled: infraFlags.maps_integration_enabled !== false,
+    upsellMode: (page.upsell_mode as string) || 'auto',
   }
 
   // Route to the right renderer
