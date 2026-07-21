@@ -102,26 +102,32 @@ export async function proxy(request: NextRequest) {
 
   // --- 3. CUSTOM DOMAIN REWRITES ---
   // If the request comes from a custom domain, rewrite it to /m/[slug]
-  const hostname = request.headers.get('host')
-  const protocol = request.headers.get('x-forwarded-proto') || 'https'
-  
-  // Define our primary domain to ignore rewrites
+  const rawHost = request.headers.get('host') || ''
+  const cleanHost = rawHost.split(':')[0].toLowerCase()
+
+  const primaryDomain = (process.env.NEXT_PUBLIC_PRIMARY_DOMAIN || 'ourmenuos.online').toLowerCase()
+  let siteUrlHost = ''
+  if (process.env.NEXT_PUBLIC_SITE_URL) {
+    try {
+      siteUrlHost = new URL(process.env.NEXT_PUBLIC_SITE_URL).hostname.toLowerCase()
+    } catch {
+      // Ignore URL parse error
+    }
+  }
+
+  // Define our primary domains to ignore rewrites
   const isPrimaryDomain = 
-    hostname === 'localhost:3000' || 
-    hostname === process.env.NEXT_PUBLIC_PRIMARY_DOMAIN || 
-    hostname?.endsWith('.vercel.app')
+    cleanHost === 'localhost' || 
+    cleanHost === '127.0.0.1' || 
+    cleanHost === primaryDomain || 
+    cleanHost === `www.${primaryDomain}` ||
+    (siteUrlHost && (cleanHost === siteUrlHost || cleanHost === `www.${siteUrlHost}`)) ||
+    cleanHost.endsWith('.vercel.app')
 
   // We only rewrite if it's NOT the primary domain, AND not an internal protected/api route
   if (!isPrimaryDomain && !isProtectedPath && !isProtectedRoute && !isAffiliateDashboard) {
-    // We would ideally query Supabase here to get the slug for the custom domain.
-    // However, Edge Middleware cannot use the standard Supabase client to hit the DB without latency.
-    // Instead, we will rewrite the URL to a dynamic route like `/[domain]/...`
-    // OR we pass the hostname in the headers and let the server components handle it.
-    
-    // For Vercel Edge Middleware pattern: rewrite to `/_domain/[hostname]/[path]`
-    const rewriteUrl = request.nextUrl.clone()
-    rewriteUrl.pathname = `/_domain/${hostname}${request.nextUrl.pathname}`
-    return NextResponse.rewrite(rewriteUrl)
+    // For custom domains, if a matching route isn't found, let it fall back to standard handling rather than fake _domain rewrite
+    return supabaseResponse
   }
 
   // --- 4. LOCALE AUTO-DETECTION (Guest UI) ---
