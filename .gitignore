@@ -49,6 +49,9 @@ trash2/
 *.mjs
 !eslint.config.mjs
 !postcss.config.mjs
+!public/sw.js
+!public/workbox-*.js
+!public/*.js
 # Linting output logs
 lint_output.txt
 lint_results.json
