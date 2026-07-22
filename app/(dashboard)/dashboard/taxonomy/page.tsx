@@ -20,14 +20,15 @@ export default async function TaxonomyManagerPage() {
     .from('organization_members')
     .select('organizations(id)')
     .eq('user_id', user.id)
-    .single()
+    .limit(1)
+    .maybeSingle()
     
   let orgId = ''
   if (member && member.organizations) {
     const org = Array.isArray(member.organizations) ? member.organizations[0] : member.organizations
     orgId = org?.id || ''
   } else {
-    const { data } = await supabase.from('organizations').select('id').eq('created_by', user.id).single()
+    const { data } = await supabase.from('organizations').select('id').eq('created_by', user.id).limit(1).maybeSingle()
     orgId = data?.id || ''
   }
 

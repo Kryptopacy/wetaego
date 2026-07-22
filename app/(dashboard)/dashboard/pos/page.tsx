@@ -23,9 +23,17 @@ export default async function POSPage() {
     .from('organization_members')
     .select('role')
     .eq('user_id', userData.user.id)
-    .single()
+    .limit(1)
+    .maybeSingle()
 
-  if (!member) return <div className="p-8 text-white">Access denied.</div>
+  const { data: orgCreated } = !member ? await supabase
+    .from('organizations')
+    .select('id')
+    .eq('created_by', userData.user.id)
+    .limit(1)
+    .maybeSingle() : { data: null }
+
+  if (!member && !orgCreated) return <div className="p-8 text-white">Access denied.</div>
 
   // Fetch the pages for this location
   let pagesQuery = supabase

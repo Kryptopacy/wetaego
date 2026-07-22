@@ -23,7 +23,8 @@ export default async function WebhooksPage() {
     .from('organization_members')
     .select('role, organizations(id)')
     .eq('user_id', userId)
-    .single()
+    .limit(1)
+    .maybeSingle()
 
   if (member && member.organizations) {
     org = member.organizations as { id: string }
@@ -32,7 +33,8 @@ export default async function WebhooksPage() {
       .from('organizations')
       .select('id')
       .eq('created_by', userId)
-      .single()
+      .limit(1)
+      .maybeSingle()
     org = data
   }
 

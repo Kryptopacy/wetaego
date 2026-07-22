@@ -25,13 +25,13 @@ export default async function OrdersPage() {
 
   if (userId) {
     // Check if user is a member of an organization
-    const { data: memberData } = await supabase.from('organization_members').select('organization_id, page_id').eq('user_id', userId).limit(1).single()
+    const { data: memberData } = await supabase.from('organization_members').select('organization_id, page_id').eq('user_id', userId).limit(1).maybeSingle()
     
     if (memberData) {
       org = { id: memberData.organization_id }
     } else {
-      // Fallback: check if they created one (though they should be a member)
-      const { data: orgData } = await supabase.from('organizations').select('id').eq('created_by', userId).single()
+      // Fallback: check if they created one
+      const { data: orgData } = await supabase.from('organizations').select('id').eq('created_by', userId).limit(1).maybeSingle()
       org = orgData
     }
 
@@ -42,7 +42,7 @@ export default async function OrdersPage() {
 
       let locationId = savedLocId
       if (!locationId) {
-        const { data: loc } = await supabase.from('locations').select('id').eq('organization_id', org.id).limit(1).single()
+        const { data: loc } = await supabase.from('locations').select('id').eq('organization_id', org.id).limit(1).maybeSingle()
         locationId = loc?.id
       }
       activeLocationId = locationId || ''

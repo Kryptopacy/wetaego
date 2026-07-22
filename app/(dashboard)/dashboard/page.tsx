@@ -65,7 +65,7 @@ export default async function DashboardOverviewPage() {
   let hasQR = false
 
   if (orgId) {
-    const [locResult, menuResult, qrResult] = await Promise.all([
+    const [locResult, menuResult, pageItemsResult, qrResult] = await Promise.all([
       supabase
         .from('locations')
         .select('slug')
@@ -78,6 +78,10 @@ export default async function DashboardOverviewPage() {
         .eq('organization_id', orgId)
         .limit(1),
       supabase
+        .from('page_items')
+        .select('id', { count: 'exact', head: true })
+        .limit(1),
+      supabase
         .from('qr_codes')
         .select('id', { count: 'exact', head: true })
         .eq('organization_id', orgId)
@@ -85,7 +89,7 @@ export default async function DashboardOverviewPage() {
     ])
 
     locationSlug = locResult.data?.slug || ''
-    hasMenu = (menuResult.count ?? 0) > 0
+    hasMenu = (menuResult.count ?? 0) > 0 || (pageItemsResult.count ?? 0) > 0
     hasQR = (qrResult.count ?? 0) > 0
   }
 
