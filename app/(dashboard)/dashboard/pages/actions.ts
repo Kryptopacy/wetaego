@@ -122,15 +122,17 @@ export const createCustomPage = authActionClient
       }
     }
 
+    const adminClient = await createAdminClient()
+
     if (is_primary) {
-      await supabase
+      await adminClient
         .from('location_pages')
         .update({ is_primary: false })
         .eq('location_id', location_id)
         .eq('is_primary', true)
     }
 
-    const { error } = await supabase.from('location_pages').insert({
+    const { error } = await adminClient.from('location_pages').insert({
       location_id,
       title,
       slug,
@@ -213,7 +215,8 @@ export const updatePage = authActionClient
       ...(fulfillment_options ? { fulfillment_options: JSON.parse(fulfillment_options) } : {})
     }
 
-    const { error } = await supabase
+    const adminClient = await createAdminClient()
+    const { error } = await adminClient
       .from('location_pages')
       .update({ 
         title, content, billing_enabled, billing_mode, payment_mode, 

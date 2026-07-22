@@ -13,21 +13,22 @@ export const createCategory = authActionClient
     page_id: zfd.text(z.string().min(1, "Page ID is required")),
     name: zfd.text(z.string().min(1, "Name is required").max(100, "Name must be less than 100 characters")),
   }))
-  .action(async ({ parsedInput: { organization_id, page_id, name }, ctx: { supabase } }) => {
+  .action(async ({ parsedInput: { organization_id, page_id, name }, ctx: { user } }) => {
     if (organization_id === 'demo-org') {
       revalidatePath('/dashboard/menu')
       return { success: true }
     }
 
+    const adminClient = await createAdminClient()
     const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-')
 
-    const { error } = await supabase.from('page_collections').insert({
+    const { error } = await adminClient.from('page_collections').insert({
       page_id,
       name,
       slug,
     })
 
-    if (error) throw new Error(error.message)
+    if (error) throw new Error('Failed to create category: ' + error.message)
 
     await purgeStorefrontCache(organization_id)
     revalidatePath('/dashboard/menu')
@@ -117,7 +118,8 @@ export const createItem = authActionClient
       requires_booking: is_booking_required
     }
 
-    const { data: newItem, error } = await supabase.from('page_items').insert({
+    const adminClient = await createAdminClient()
+    const { data: newItem, error } = await adminClient.from('page_items').insert({
       page_id: pageId,
       title: name,
       description: description || null,
@@ -126,14 +128,14 @@ export const createItem = authActionClient
       item_data: itemData
     }).select('id').single()
 
-    if (error) throw new Error(error.message)
+    if (error) throw new Error('Failed to create item: ' + error.message)
 
     if (newItem && collection_ids.length > 0) {
       const junctionInserts = collection_ids.map((cid: string) => ({
         item_id: newItem.id,
         collection_id: cid
       }))
-      await supabase.from('page_item_collections').insert(junctionInserts)
+      await adminClient.from('page_item_collections').insert(junctionInserts)
     }
 
     await purgeStorefrontCache(orgId)
@@ -211,7 +213,8 @@ export const updateItem = authActionClient
       department: department || null
     }
 
-    const { error } = await supabase.from('page_items').update({
+    const adminClient = await createAdminClient()
+    const { error } = await adminClient.from('page_items').update({
       title: name,
       description: description || null,
       price_minor: Math.round(price * 100),
@@ -229,7 +232,8 @@ export const updateItem = authActionClient
 export const deleteItem = authActionClient
   .schema(z.object({ itemId: z.string().min(1) }))
   .action(async ({ parsedInput: { itemId }, ctx: { supabase } }) => {
-    const { data: item } = await supabase.from('page_items').select('location_pages!inner(location_id, locations!inner(organization_id))').eq('id', itemId).single()
+    const adminClient = await createAdminClient()
+    const { data: item } = await adminClient.from('page_items').select('location_pages!inner(location_id, locations!inner(organization_id))').eq('id', itemId).single()
     if (!item) throw new Error('Item not found')
     
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -240,7 +244,7 @@ export const deleteItem = authActionClient
       return { success: true }
     }
 
-    const { error } = await supabase.from('page_items').delete().eq('id', itemId)
+    const { error } = await adminClient.from('page_items').delete().eq('id', itemId)
     if (error) throw new Error(error.message)
 
     if (orgId) await purgeStorefrontCache(orgId)
@@ -250,20 +254,21 @@ export const deleteItem = authActionClient
 
 export const toggleItemStatus = authActionClient
   .schema(z.object({ itemId: z.string().min(1), currentStatus: z.string().min(1) }))
-  .action(async ({ parsedInput: { itemId, currentStatus }, ctx: { supabase } }) => {
+  .action(async ({ parsedInput: { itemId, currentStatus }, ctx: { user } }) => {
     const nextStatus = currentStatus === 'available' ? 'sold_out' : 'available'
     if (itemId.startsWith('item-')) {
       revalidatePath('/dashboard/menu')
       return { success: true }
     }
 
-    const { data: item } = await supabase.from('page_items').select('location_pages!inner(location_id, locations!inner(organization_id))').eq('id', itemId).single()
+    const adminClient = await createAdminClient()
+    const { data: item } = await adminClient.from('page_items').select('location_pages!inner(location_id, locations!inner(organization_id))').eq('id', itemId).single()
     if (!item) throw new Error('Item not found')
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const orgId = (item.location_pages as any).locations.organization_id
 
-    const { error } = await supabase
+    const { error } = await adminClient
       .from('page_items')
       .update({ availability_status: nextStatus })
       .eq('id', itemId)
@@ -288,20 +293,21 @@ export const applyTranslations = authActionClient
       }))
     }))
   }))
-  .action(async ({ parsedInput: { orgId, translatedCategories }, ctx: { supabase } }) => {
+  .action(async ({ parsedInput: { orgId, translatedCategories }, ctx: { user } }) => {
     if (orgId === 'demo-org') {
       revalidatePath('/dashboard/menu')
       return { success: true }
     }
 
+    const adminClient = await createAdminClient()
+
     for (const cat of translatedCategories) {
       if (!cat.id.startsWith('cat-')) {
-        // Needs a join to filter by org_id, but skipping for brevity or we just trust the ID for now
-        await supabase.from('page_collections').update({ name: cat.name }).eq('id', cat.id)
+        await adminClient.from('page_collections').update({ name: cat.name }).eq('id', cat.id)
       }
       for (const item of cat.items) {
         if (!item.id.startsWith('item-')) {
-          await supabase.from('page_items').update({ title: item.name, description: item.description }).eq('id', item.id)
+          await adminClient.from('page_items').update({ title: item.name, description: item.description }).eq('id', item.id)
         }
       }
     }
@@ -313,7 +319,7 @@ export const applyTranslations = authActionClient
 
 export const bulkInsertMenu = authActionClient
   .schema(zfd.formData(z.any()))
-  .action(async ({ parsedInput: formData, ctx: { supabase } }) => {
+  .action(async ({ parsedInput: formData, ctx: { user } }) => {
     const orgId = formData.get('organization_id') as string
     const pageId = formData.get('menu_id') as string // Reused as pageId
     const itemsRaw = formData.get('items') as string
@@ -323,44 +329,59 @@ export const bulkInsertMenu = authActionClient
       return { success: true }
     }
 
+    const adminClient = await createAdminClient()
     const items = JSON.parse(itemsRaw)
 
-    // Group items by category_name
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const categorized = items.reduce((acc: any, item: any) => {
-      if (!acc[item.category_name]) acc[item.category_name] = []
-      acc[item.category_name].push(item)
-      return acc
-    }, {})
+    // Group items by category name
+    const categoryMap: Record<string, typeof items> = {}
+    for (const item of items) {
+      const cat = item.category || 'General'
+      if (!categoryMap[cat]) categoryMap[cat] = []
+      categoryMap[cat].push(item)
+    }
 
-    for (const catName of Object.keys(categorized)) {
+    for (const [catName, catItems] of Object.entries(categoryMap)) {
       const slug = catName.toLowerCase().replace(/[^a-z0-9]+/g, '-')
-      const { data: newCat, error: catError } = await supabase
-        .from('page_collections')
-        .insert({ page_id: pageId, name: catName, slug })
-        .select('id').single()
 
-      if (catError || !newCat) {
-        console.error('Failed to create category:', catName)
-        continue
+      let collectionId: string
+      const { data: existingCol } = await adminClient
+        .from('page_collections')
+        .select('id')
+        .eq('page_id', pageId)
+        .eq('slug', slug)
+        .maybeSingle()
+
+      if (existingCol) {
+        collectionId = existingCol.id
+      } else {
+        const { data: newCol, error: colError } = await adminClient
+          .from('page_collections')
+          .insert({ page_id: pageId, name: catName, slug })
+          .select('id')
+          .single()
+
+        if (colError || !newCol) continue
+        collectionId = newCol.id
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const catItems = categorized[catName].map((i: any) => ({
-        page_id: pageId,
-        title: i.name,
-        description: i.description || null,
-        price_minor: Math.round(i.price * 100),
-      }))
+      for (const item of catItems) {
+        const { data: newItem, error: itemError } = await adminClient
+          .from('page_items')
+          .insert({
+            page_id: pageId,
+            title: item.name,
+            description: item.description || null,
+            price_minor: Math.round((item.price || 0) * 100),
+            images: item.image_url ? [item.image_url] : []
+          })
+          .select('id')
+          .single()
 
-      if (catItems.length > 0) {
-        const { data: insertedItems } = await supabase.from('page_items').insert(catItems).select('id')
-        if (insertedItems) {
-          const junctionInserts = insertedItems.map((item: any) => ({
-            item_id: item.id,
-            collection_id: newCat.id
-          }))
-          await supabase.from('page_item_collections').insert(junctionInserts)
+        if (!itemError && newItem) {
+          await adminClient.from('page_item_collections').insert({
+            item_id: newItem.id,
+            collection_id: collectionId
+          })
         }
       }
     }
