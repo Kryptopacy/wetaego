@@ -419,11 +419,10 @@ export default async function SettingsPage({
                 </div>
               </ActionForm>
             </div>
-            )}
-          </div>
-        )}
-          </>
-        )}
+            </>
+          )}
+        </div>
+      )}
 
         {tab === 'venue' && location && (
           <>

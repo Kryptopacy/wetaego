@@ -77,7 +77,7 @@ export async function POST(req: Request) {
             await processCreditPackPayment(supabase, orgId, credits, amountPaidMinor, currency, rawReference)
           }
         } else {
-          await processOrderPayment(supabase, rawReference, amountPaidMinor)
+          await processOrderPayment(supabase, rawReference, amountPaidMinor, rawReference)
         }
       } catch (procErr) {
         console.error(`Bachs webhook logic processing failed for ${rawReference}:`, procErr)
