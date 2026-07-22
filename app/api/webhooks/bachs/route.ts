@@ -58,15 +58,24 @@ export async function POST(req: Request) {
 
       try {
         if (rawReference.startsWith('book_')) {
-          const parts = rawReference.split('_')
-          const bookingId = parts[1]
-          await processBookingPayment(supabase, bookingId, rawReference, amountPaidMinor)
-        } else if (rawReference.startsWith('sub_')) {
-          await processSubscriptionPayment(supabase, data, rawReference)
-        } else if (rawReference.startsWith('credits_')) {
-          await processCreditPackPayment(supabase, data, rawReference)
-        } else if (rawReference.startsWith('quote_')) {
-          await processQuoteMilestonePayment(supabase, data, rawReference)
+          const bookingId = rawReference.replace('book_', '').split('_')[0]
+          await processBookingPayment(supabase, bookingId, amountPaidMinor, rawReference)
+        } else if (rawReference.startsWith('QUOTE_')) {
+          await processQuoteMilestonePayment(supabase, rawReference, amountPaidMinor)
+        } else if (data.metadata?.is_subscription) {
+          const orgId = data.metadata.organization_id
+          const planType = data.metadata.plan_type
+          const currency = data.currency || 'NGN'
+          if (orgId) {
+            await processSubscriptionPayment(supabase, orgId, planType, amountPaidMinor, currency, rawReference)
+          }
+        } else if (data.metadata?.is_credit_pack) {
+          const orgId = data.metadata.organization_id
+          const credits = Number(data.metadata.credits) || 0
+          const currency = data.currency || 'NGN'
+          if (orgId && credits > 0) {
+            await processCreditPackPayment(supabase, orgId, credits, amountPaidMinor, currency, rawReference)
+          }
         } else {
           await processOrderPayment(supabase, rawReference, amountPaidMinor)
         }
