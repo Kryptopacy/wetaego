@@ -2,7 +2,10 @@ import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { processCheckout } from '../app/m/[slug]/actions'
 
 // --- Supabase mock setup ---
-vi.mock('../lib/supabase/server', () => ({ createClient: vi.fn() }))
+vi.mock('../lib/supabase/server', () => ({
+  createClient: vi.fn(),
+  createAdminClient: vi.fn(),
+}))
 vi.mock('next/headers', () => ({
   cookies: vi.fn().mockResolvedValue({ get: vi.fn().mockReturnValue({ value: 'test-session' }) }),
 }))
@@ -38,7 +41,8 @@ vi.mock('../lib/notifications/push', () => ({
   newOrderNotification: vi.fn().mockReturnValue({}),
 }))
 
-import { createClient } from '../lib/supabase/server'
+import { createClient, createAdminClient } from '../lib/supabase/server'
+
 
 // ---- Reusable base payload ----
 const BASE_ITEMS = [{ id: 'item-1', name: 'Jollof Rice', quantity: 2, price_minor: 1500 }]
@@ -131,8 +135,14 @@ function buildSupabaseMock(overrides: Record<string, unknown> = {}) {
     }
   })
 
+  const mockObj = { from: mockFrom, rpc: mockRpc, auth: { getUser: vi.fn() } }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ;(createClient as any).mockResolvedValue(mockObj)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ;(createAdminClient as any).mockResolvedValue(mockObj)
+
   return {
-    mock: { from: mockFrom, rpc: mockRpc, auth: { getUser: vi.fn() } },
+    mock: mockObj,
     mockSingle,
     mockIn,
     mockInsert,

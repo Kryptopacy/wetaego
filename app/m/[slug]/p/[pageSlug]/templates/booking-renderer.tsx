@@ -185,7 +185,7 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
   return (
     <div className="min-h-screen bg-zinc-950 text-white font-sans" style={{ backgroundColor: (page as { background_color?: string }).background_color || undefined }}>
       {/* Hero */}
-      <div className="relative w-full h-[40vh] min-h-[260px] max-h-[380px] overflow-hidden">
+      <div className="relative w-full h-[40vh] min-h-65 max-h-95 overflow-hidden">
         {location.cover_image_url ? (
           <>
             <div className="absolute inset-0 bg-cover bg-top" style={{ backgroundImage: `url(${location.cover_image_url})` }} />
@@ -597,7 +597,7 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
                   <div className="p-5">
                     <div className="flex items-start justify-between gap-4">
                       {item.images?.[0] && (
-                        <div className="w-[72px] h-[72px] shrink-0 rounded-xl overflow-hidden bg-zinc-800 relative block">
+                        <div className="w-18 h-18 shrink-0 rounded-xl overflow-hidden bg-zinc-800 relative block">
                           <Image src={item.images[0]} alt={item.title} fill className="object-cover" />
                         </div>
                       )}

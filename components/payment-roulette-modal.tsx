@@ -244,7 +244,7 @@ export function PaymentRouletteModal({ isOpen, onClose, onSpinComplete, onProcee
                     {mode === 'chaos' && "Everyone pays a completely random percentage."}
                   </div>
 
-                  <div className="flex bg-zinc-950 rounded-lg p-1 w-full max-w-[280px] mx-auto mb-2">
+                  <div className="flex bg-zinc-950 rounded-lg p-1 w-full max-w-70 mx-auto mb-2">
                     <button
                       onClick={() => setUseNames(false)}
                       className={`flex-1 px-2 py-1.5 text-xs font-bold rounded-md transition-colors ${!useNames ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}

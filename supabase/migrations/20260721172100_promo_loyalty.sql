@@ -1,4 +1,4 @@
-create table public.location_promo_codes (
+create table if not exists public.location_promo_codes (
   id uuid default gen_random_uuid() primary key,
   location_id uuid references public.locations(id) not null,
   code text not null,
@@ -11,14 +11,16 @@ create table public.location_promo_codes (
   created_at timestamp with time zone default now() not null
 );
 
-create unique index location_promo_codes_code_idx on public.location_promo_codes (location_id, code);
+create unique index if not exists location_promo_codes_code_idx on public.location_promo_codes (location_id, code);
 
 alter table public.location_promo_codes enable row level security;
 
+drop policy if exists "Promo codes are viewable by everyone." on public.location_promo_codes;
 create policy "Promo codes are viewable by everyone."
   on public.location_promo_codes for select
   using (true);
 
+drop policy if exists "Promo codes are insertable by location managers." on public.location_promo_codes;
 create policy "Promo codes are insertable by location managers."
   on public.location_promo_codes for insert
   with check (
@@ -31,6 +33,7 @@ create policy "Promo codes are insertable by location managers."
     )
   );
 
+drop policy if exists "Promo codes are updatable by location managers." on public.location_promo_codes;
 create policy "Promo codes are updatable by location managers."
   on public.location_promo_codes for update
   using (
@@ -43,6 +46,7 @@ create policy "Promo codes are updatable by location managers."
     )
   );
 
+drop policy if exists "Promo codes are deletable by location managers." on public.location_promo_codes;
 create policy "Promo codes are deletable by location managers."
   on public.location_promo_codes for delete
   using (

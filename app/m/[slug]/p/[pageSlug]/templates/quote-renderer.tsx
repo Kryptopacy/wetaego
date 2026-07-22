@@ -190,7 +190,7 @@ export function QuoteRenderer({ location, page, items, locationSlug }: QuoteRend
   return (
     <div className="min-h-screen bg-zinc-950 text-white font-sans pb-32" style={{ backgroundColor: page.background_color || undefined }}>
       {/* Hero */}
-      <div className="relative w-full h-[35vh] min-h-[260px] max-h-[380px] overflow-hidden">
+      <div className="relative w-full h-[35vh] min-h-65 max-h-95 overflow-hidden">
         {location.cover_image_url ? (
           <>
             <div className="absolute inset-0 bg-cover bg-top" style={{ backgroundImage: `url(${location.cover_image_url})` }} />

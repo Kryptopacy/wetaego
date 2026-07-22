@@ -144,7 +144,7 @@ export function CatalogPageRenderer({ location, page, items, locationSlug, payme
   return (
     <div className="min-h-screen bg-zinc-950 text-white font-sans" style={{ backgroundColor: (page as { background_color?: string }).background_color || undefined }}>
       {/* Hero */}
-      <div className="relative w-full min-h-[32vh] md:max-h-[340px] flex flex-col justify-end overflow-hidden">
+      <div className="relative w-full min-h-[32vh] md:max-h-85 flex flex-col justify-end overflow-hidden">
         {location.cover_image_url ? (
           <>
             <div className="absolute inset-0 bg-cover bg-top" style={{ backgroundImage: `url(${location.cover_image_url})` }} />
@@ -255,7 +255,7 @@ export function CatalogPageRenderer({ location, page, items, locationSlug, payme
                     >
                       <div className="flex items-start justify-between gap-3">
                         {item.images?.[0] && (
-                          <div className="w-[72px] h-[72px] shrink-0 rounded-xl overflow-hidden bg-zinc-800 relative block">
+                          <div className="w-18 h-18 shrink-0 rounded-xl overflow-hidden bg-zinc-800 relative block">
                             <Image src={item.images[0]} alt={item.title} fill className="object-cover" />
                           </div>
                         )}

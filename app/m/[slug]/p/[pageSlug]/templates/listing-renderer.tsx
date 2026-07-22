@@ -189,7 +189,7 @@ export function ListingRenderer({ location, page, items, locationSlug }: Listing
   return (
     <div className="min-h-screen bg-zinc-950 text-white font-sans" style={{ backgroundColor: page.background_color || undefined }}>
       {/* Hero */}
-      <div className="relative w-full h-[35vh] min-h-[240px] max-h-[380px] overflow-hidden">
+      <div className="relative w-full h-[35vh] min-h-60 max-h-95 overflow-hidden">
         {location.cover_image_url ? (
           <Image src={location.cover_image_url} alt={location.name} fill className="object-cover" priority quality={90} sizes="100vw" placeholder="blur" blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiMwYTBhMGYiLz48L3N2Zz4=" />
         ) : (
@@ -253,7 +253,7 @@ export function ListingRenderer({ location, page, items, locationSlug }: Listing
               <div key={filterKey} className="flex flex-col gap-1.5">
                 <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider pl-1">{filterKey.replace('_', ' ')}</label>
                 <select
-                  className="bg-zinc-800 border border-zinc-700 text-white text-sm rounded-lg px-3 py-2 outline-none focus:border-emerald-500 min-w-[120px]"
+                  className="bg-zinc-800 border border-zinc-700 text-white text-sm rounded-lg px-3 py-2 outline-none focus:border-emerald-500 min-w-30"
                   value={activeFilters[filterKey] || ''}
                   onChange={e => setActiveFilters(prev => ({ ...prev, [filterKey]: e.target.value }))}
                 >
