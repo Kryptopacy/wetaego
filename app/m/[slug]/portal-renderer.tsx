@@ -1,6 +1,6 @@
 'use client'
 
-import { Tables } from '@/types'
+import { Tables } from '@/lib/supabase/types'
 import Link from "next/link";
 import { motion } from 'framer-motion';
 import Image from "next/image";
