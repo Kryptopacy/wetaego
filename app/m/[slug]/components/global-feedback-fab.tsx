@@ -19,7 +19,7 @@ export function GlobalFeedbackFAB({ locationId, slug }: { locationId: string, sl
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0, opacity: 0 }}
-        className="fixed bottom-24 right-4 z-40 pointer-events-none"
+        className="fixed bottom-40 right-6 z-40 pointer-events-none"
       >
         <button
           onClick={() => window.location.href = `/m/${slug}/feedback/general?location_id=${locationId}`}
