@@ -11,6 +11,10 @@ on:
     - cron: '0 10 * * *'   # 10:00 AM: IOU Reminders
     - cron: '0 18 * * *'   # 6:00 PM: Daily Report
 
+env:
+  PROD_URL: ${{ secrets.PROD_URL }}
+  CRON_SECRET: ${{ secrets.CRON_SECRET }}
+
 jobs:
   run-crons:
     runs-on: ubuntu-latest
@@ -18,36 +22,37 @@ jobs:
       - name: Hit Webhooks Endpoint
         if: github.event.schedule == '*/5 * * * *' || github.event_name == 'workflow_dispatch'
         run: |
-          curl -X GET "${{ secrets.PROD_URL }}/api/cron/webhooks" -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"
+          curl -X GET "$PROD_URL/api/cron/webhooks" -H "Authorization: Bearer $CRON_SECRET"
         
       - name: Hit Abandoned Carts Endpoint
         if: github.event.schedule == '0 1 * * *' || github.event_name == 'workflow_dispatch'
         run: |
-          curl -X GET "${{ secrets.PROD_URL }}/api/cron/abandoned-carts" -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"
+          curl -X GET "$PROD_URL/api/cron/abandoned-carts" -H "Authorization: Bearer $CRON_SECRET"
         
       - name: Hit Abandoned Bookings Endpoint
         if: github.event.schedule == '0 2 * * *' || github.event_name == 'workflow_dispatch'
         run: |
-          curl -X GET "${{ secrets.PROD_URL }}/api/cron/abandoned-bookings" -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"
+          curl -X GET "$PROD_URL/api/cron/abandoned-bookings" -H "Authorization: Bearer $CRON_SECRET"
         
       - name: Hit Daily Tasks Endpoint
         if: github.event.schedule == '0 8 * * *' || github.event_name == 'workflow_dispatch'
         run: |
-          curl -X GET "${{ secrets.PROD_URL }}/api/cron/daily-tasks" -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"
+          curl -X GET "$PROD_URL/api/cron/daily-tasks" -H "Authorization: Bearer $CRON_SECRET"
         
       - name: Hit Trial Reminders Endpoint
         if: github.event.schedule == '0 9 * * *' || github.event_name == 'workflow_dispatch'
         run: |
-          curl -X GET "${{ secrets.PROD_URL }}/api/cron/trial-reminders" -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"
+          curl -X GET "$PROD_URL/api/cron/trial-reminders" -H "Authorization: Bearer $CRON_SECRET"
 
       - name: Hit IOU Reminders Endpoint
         if: github.event.schedule == '0 10 * * *' || github.event_name == 'workflow_dispatch'
         run: |
-          curl -X GET "${{ secrets.PROD_URL }}/api/cron/iou-reminders" -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"
+          curl -X GET "$PROD_URL/api/cron/iou-reminders" -H "Authorization: Bearer $CRON_SECRET"
 
       - name: Hit Daily Report Endpoint
         if: github.event.schedule == '0 18 * * *' || github.event_name == 'workflow_dispatch'
         run: |
-          curl -X GET "${{ secrets.PROD_URL }}/api/cron/daily-report" -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"
+          curl -X GET "$PROD_URL/api/cron/daily-report" -H "Authorization: Bearer $CRON_SECRET"
+
 
 
