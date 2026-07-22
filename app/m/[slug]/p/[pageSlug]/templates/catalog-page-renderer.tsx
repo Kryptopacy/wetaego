@@ -198,7 +198,7 @@ export function CatalogPageRenderer({ location, page, items, locationSlug, payme
 
         {/* Category tabs if grouped */}
         {(hasCategories || allConditions.length > 0) && (
-          <div className="flex gap-2 overflow-x-auto pb-2 mb-6 scrollbar-hide">
+          <div className="flex gap-2 overflow-x-auto pb-2 mb-6 scrollbar-hide no-scrollbar">
             {allConditions.length > 0 && (
               <div className="flex gap-2 pr-4 border-r border-zinc-800 mr-2 shrink-0">
                 <button
@@ -219,9 +219,19 @@ export function CatalogPageRenderer({ location, page, items, locationSlug, payme
               </div>
             )}
             {hasCategories && categories.map(cat => (
-              <a key={cat} href={`#${cat}`} className="shrink-0 px-4 py-1.5 rounded-full text-xs font-bold bg-zinc-800/80 text-zinc-300 border border-zinc-700 hover:border-zinc-500 transition-colors capitalize">
+              <button
+                key={cat}
+                onClick={() => {
+                  const el = document.getElementById(`cat-section-${cat}`)
+                  if (el) {
+                    const y = el.getBoundingClientRect().top + window.scrollY - 100
+                    window.scrollTo({ top: y, behavior: 'smooth' })
+                  }
+                }}
+                className="shrink-0 px-4 py-1.5 rounded-full text-xs font-bold bg-zinc-900 text-zinc-300 border border-zinc-800 hover:border-emerald-500/50 hover:text-white transition-all capitalize"
+              >
                 {cat}
-              </a>
+              </button>
             ))}
           </div>
         )}
@@ -229,7 +239,7 @@ export function CatalogPageRenderer({ location, page, items, locationSlug, payme
         {/* Items */}
         <div className="space-y-8">
           {Object.entries(groupedItems).map(([cat, catItems]) => (
-            <div key={cat} id={cat}>
+            <div key={cat} id={`cat-section-${cat}`} className="scroll-mt-24">
               {hasCategories && cat !== 'all' && (
                 <h2 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-4">{cat}</h2>
               )}

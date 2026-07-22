@@ -145,3 +145,14 @@ export const getInfrastructureFlags = unstable_cache(
   ['system_setting_infrastructure_flags'],
   { revalidate: 86400, tags: ['infrastructure_flags'] }
 )
+
+const DEFAULT_PAYMENT_GATEWAY_SETTINGS = {
+  default_gateway: (process.env.NEXT_PUBLIC_DEFAULT_PAYMENT_GATEWAY as 'paystack' | 'bachs') || 'paystack'
+}
+
+export const getPaymentGatewaySettings = unstable_cache(
+  async () => fetchSystemSettingFromDB('payment_gateway_settings', DEFAULT_PAYMENT_GATEWAY_SETTINGS),
+  ['system_setting_payment_gateway_settings'],
+  { revalidate: 3600, tags: ['payment_gateway_settings'] }
+)
+

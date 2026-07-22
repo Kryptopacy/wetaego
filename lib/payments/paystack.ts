@@ -134,12 +134,35 @@ export const paystackProvider: PaymentProvider = {
   },
 }
 
+import { bachsProvider } from './bachs'
+
 /**
- * Active payment provider — switch this one export to change providers globally.
- * e.g. import { flutterwaveProvider } from './flutterwave'
- *      export const paymentProvider = flutterwaveProvider
+ * Get active payment provider dynamically based on system_settings or env
  */
-export const paymentProvider: PaymentProvider = paystackProvider
+export async function getPaymentProvider(): Promise<PaymentProvider> {
+  try {
+    const { getPaymentGatewaySettings } = await import('@/lib/utils/settings')
+    const settings = await getPaymentGatewaySettings()
+    if (settings?.default_gateway === 'bachs') {
+      return bachsProvider
+    }
+  } catch (e) {
+    console.warn('Failed to load payment gateway settings, falling back to default:', e)
+  }
+  return paystackProvider
+}
+
+/**
+ * Active payment provider — defaults to Paystack, proxies to active provider dynamically if configured.
+ */
+export const paymentProvider: PaymentProvider = new Proxy(paystackProvider, {
+  get(target, prop, receiver) {
+    const activeGateway = process.env.NEXT_PUBLIC_DEFAULT_PAYMENT_GATEWAY
+    const provider = activeGateway === 'bachs' ? bachsProvider : target
+    return Reflect.get(provider, prop, receiver)
+  }
+})
+
 
 export async function createSubaccount(bankCode: string, accountNumber: string, businessName: string, percentageCharge: number = 0): Promise<string> {
   const secretKey = process.env.PAYSTACK_SECRET_KEY

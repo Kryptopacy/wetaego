@@ -315,7 +315,31 @@ export default async function SettingsPage({
             </div>
 
             {location && (
-              <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
+              <>
+              {/* Crypto & Stablecoin Acceptance Banner */}
+              <div className="bg-linear-to-r from-emerald-500/10 via-teal-500/10 to-transparent border border-emerald-500/20 rounded-2xl p-6 shadow-lg">
+                <div className="flex items-center justify-between flex-wrap gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-black text-lg">
+                      ⚡
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-white text-base flex items-center gap-2">
+                        Crypto & Stablecoin Acceptance
+                        <span className="text-[10px] uppercase tracking-wider font-extrabold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Active via Bachs</span>
+                      </h3>
+                      <p className="text-xs text-zinc-400 mt-0.5">
+                        Accept USDC, USDT, and Solana with gasless checkout for international & Web3 buyers.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-1.5 rounded-xl text-xs font-bold">
+                    <span>✓ Enabled for Storefront</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
                 <h2 className="text-lg font-semibold text-white mb-2 flex items-center gap-2">
                   Manual Transfer Fallback
                   {(activePage?.manual_payment_bank_name ? activePage.manual_payment_enabled : location.manual_payment_enabled) && (

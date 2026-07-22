@@ -1,5 +1,5 @@
 
-import { getPricingSettings, getCreditCosts, getPlanLimits, getAiModels, getPlatformFees, getTrialSettings, getGlobalManualPayment, getKycSettings, getExchangeRates, getAdsNetworkSettings, getTemplateFlags, getInfrastructureFlags } from '@/lib/utils/settings'
+import { getPricingSettings, getCreditCosts, getPlanLimits, getAiModels, getPlatformFees, getTrialSettings, getGlobalManualPayment, getKycSettings, getExchangeRates, getAdsNetworkSettings, getTemplateFlags, getInfrastructureFlags, getPaymentGatewaySettings } from '@/lib/utils/settings'
 import { getUsdToNgnRate } from '@/lib/payments/exchange'
 import { updateSetting } from './actions'
 import { ActionForm } from '@/components/ActionForm'
@@ -25,6 +25,8 @@ export default async function AdminPage() {
   const adsNetwork = await getAdsNetworkSettings()
   const templateFlags = await getTemplateFlags()
   const infraFlags = await getInfrastructureFlags()
+  const gatewaySettings = await getPaymentGatewaySettings()
+
   
   // Fetch live exchange rate for display purposes
   const liveUsdRate = await getUsdToNgnRate()
@@ -453,6 +455,51 @@ export default async function AdminPage() {
 
         {/* Tab 7: Infrastructure */}
         <div className="space-y-6 max-w-2xl min-w-0">
+          <section className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-xl w-full">
+            <h2 className="text-lg font-bold text-white mb-2">Payment Gateway Orchestrator</h2>
+            <p className="text-zinc-400 text-sm mb-6">Choose the active payment gateway powering checkout, credit packs, and subscriptions platform-wide.</p>
+            
+            <ActionForm action={updateSetting} className="space-y-6">
+              <input type="hidden" name="key" value="payment_gateway_settings" />
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <label className={`flex items-start gap-3 p-4 rounded-xl border cursor-pointer transition-all ${gatewaySettings?.default_gateway === 'paystack' ? 'bg-blue-500/10 border-blue-500/50 text-white' : 'bg-zinc-800/40 border-zinc-700/50 text-zinc-400 hover:border-zinc-600'}`}>
+                  <input 
+                    type="radio" 
+                    name="default_gateway" 
+                    value="paystack" 
+                    defaultChecked={gatewaySettings?.default_gateway === 'paystack'}
+                    className="mt-1 text-blue-500 focus:ring-blue-500"
+                  />
+                  <div>
+                    <div className="font-bold text-sm text-white">Paystack</div>
+                    <p className="text-xs text-zinc-400 mt-0.5">Card, Bank Transfer, USSD, NGN local settlements</p>
+                  </div>
+                </label>
+
+                <label className={`flex items-start gap-3 p-4 rounded-xl border cursor-pointer transition-all ${gatewaySettings?.default_gateway === 'bachs' ? 'bg-emerald-500/10 border-emerald-500/50 text-white' : 'bg-zinc-800/40 border-zinc-700/50 text-zinc-400 hover:border-zinc-600'}`}>
+                  <input 
+                    type="radio" 
+                    name="default_gateway" 
+                    value="bachs" 
+                    defaultChecked={gatewaySettings?.default_gateway === 'bachs'}
+                    className="mt-1 text-emerald-500 focus:ring-emerald-500"
+                  />
+                  <div>
+                    <div className="font-bold text-sm text-white flex items-center gap-1.5">
+                      Bachs <span className="bg-emerald-500/20 text-emerald-400 text-[10px] uppercase px-1.5 py-0.5 rounded-full font-extrabold">Crypto + Fiat</span>
+                    </div>
+                    <p className="text-xs text-zinc-400 mt-0.5">Local, International Cards, USDC/USDT/SOL & Instant Payouts</p>
+                  </div>
+                </label>
+              </div>
+              
+              <button type="submit" className="w-full px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-sm font-bold shadow-lg shadow-emerald-600/20 transition">
+                Apply Payment Gateway Switch
+              </button>
+            </ActionForm>
+          </section>
+
           <section className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-xl w-full">
             <h2 className="text-lg font-bold text-white mb-2">Infrastructure Kill Switches</h2>
             <p className="text-zinc-400 text-sm mb-6">Globally toggle external APIs and heavy infrastructure dependencies. Use these as safety nets during rate limits or API outages.</p>
