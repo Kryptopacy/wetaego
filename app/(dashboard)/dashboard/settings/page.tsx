@@ -423,6 +423,8 @@ export default async function SettingsPage({
           )}
         </div>
       )}
+    </>
+  )}
 
         {tab === 'venue' && location && (
           <>
