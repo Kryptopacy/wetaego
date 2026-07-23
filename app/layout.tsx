@@ -86,6 +86,50 @@ export default async function RootLayout({
       lang={locale}
       className={`${inter.variable} ${geistMono.variable} h-full antialiased`}
     >
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@graph': [
+                {
+                  '@type': 'Organization',
+                  '@id': 'https://ourmenuos.online/#organization',
+                  name: 'OurMenu OS',
+                  url: 'https://ourmenuos.online',
+                  logo: 'https://ourmenuos.online/ourmenu-qr-logo.png',
+                  description: 'The complete operating layer for modern hospitality, retail, and service businesses.'
+                },
+                {
+                  '@type': 'SoftwareApplication',
+                  '@id': 'https://ourmenuos.online/#software',
+                  name: 'OurMenu OS',
+                  applicationCategory: 'BusinessApplication',
+                  operatingSystem: 'Web, iOS, Android, PWA',
+                  description: 'Multi-business operating system featuring smart QR portals, AI copilot, POS, inventory management, and multi-gateway billing.',
+                  offers: {
+                    '@type': 'AggregateOffer',
+                    priceCurrency: 'NGN',
+                    lowPrice: '0',
+                    highPrice: '69000'
+                  }
+                },
+                {
+                  '@type': 'WebSite',
+                  '@id': 'https://ourmenuos.online/#website',
+                  url: 'https://ourmenuos.online',
+                  name: 'OurMenu OS',
+                  description: 'Instant multi-template digital presence and operating system for physical businesses.',
+                  publisher: {
+                    '@id': 'https://ourmenuos.online/#organization'
+                  }
+                }
+              ]
+            })
+          }}
+        />
+      </head>
       <body className="min-h-full flex flex-col bg-zinc-950 text-zinc-50">
         <PostHogProvider>
           <NextIntlClientProvider messages={messages}>

@@ -1,0 +1,52 @@
+# OurMenu OS — Full Technical & Product Documentation
+
+OurMenu OS is a multi-tenant, multi-business operating system and SaaS platform built to unify digital presence, customer ordering, operations, inventory, and payment processing for physical businesses.
+
+---
+
+## 1. System Architecture & Tech Stack
+
+- **Frontend**: Next.js (App Router), React, TypeScript, Tailwind CSS, Framer Motion, Progressive Web App (PWA) with Service Workers.
+- **Backend & Database**: Supabase (PostgreSQL) with Row-Level Security (RLS), real-time subscriptions, and atomic database functions.
+- **Edge Caching & WAF**: Upstash Redis for global rate-limiting, idempotency enforcement, and edge WAF security.
+- **AI Engine**: Google Gemini API via Vercel AI SDK (`@ai-sdk/google`) powering the Admin AI Copilot, Multimodal Vision Menu Parser, and AI Edge Translator.
+- **Payment Infrastructure**: Multi-gateway abstraction supporting Paystack & Bachs (Fiat, Credit Cards, Bank Transfers, Crypto USDC/USDT/SOL, Subaccount splits, and IOU store credit).
+
+---
+
+## 2. Platform Modules & Features
+
+### A. Template Builders & Multi-Business Portals
+Organizations can run multiple distinct business templates under a unified custom domain portal:
+1. **Menu Template**: Restaurant & cafe digital ordering (dine-in, pickup, delivery).
+2. **Booking Template**: Hotel rooms, event venues, and table reservations.
+3. **Services & Rate Cards**: Repair shops, salons, and agency service packages.
+4. **Real Estate & Retail**: Property listings, rental catalogs, and retail inventory.
+
+### B. Payment & Settlement Engine
+- **Split Payments**: Group bill splitting via payment roulette or custom fractional shares.
+- **IOU Buy Now Pay Later**: Approved customer credit limits with atomic balance deductions.
+- **Staff Tips & Subaccount Splits**: Automated percentage splits routed directly to business or staff bank accounts.
+
+### C. Backend Operations & Inventory
+- **Operations Board**: Real-time kitchen & fulfillment status tracking.
+- **Inventory & BOM**: Bill of Materials tracking, automatic stock decrement on order creation, and stockout prevention.
+- **Team Intercom**: Department-based staff messaging system.
+
+---
+
+## 3. API & Webhook Endpoints
+
+- Webhooks: `/api/webhooks/paystack`, `/api/webhooks/bachs`
+- AI Copilot API: `/api/ai/copilot`
+- Menu Parser API: `/api/ai/parse-menu`
+- Storefront Actions: `/m/[slug]/actions`
+
+---
+
+## 4. Public Indexing & Canonical URLs
+
+- Canonical Domain: https://ourmenuos.online
+- Sitemap: https://ourmenuos.online/sitemap.xml
+- Robots: https://ourmenuos.online/robots.txt
+- PWA Manifest: https://ourmenuos.online/manifest.json

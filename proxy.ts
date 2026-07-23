@@ -168,8 +168,9 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization)
      * - favicon.ico, icons, manifest, sw.js (PWA assets)
+     * - SEO & AEO assets (robots.txt, sitemap.xml, manifest.json, llms.txt, llms-full.txt)
      * - Public assets with file extensions (images, fonts, etc.)
      */
-    '/((?!_next/static|_next/image|favicon.ico|icon-.*\\.png|apple-touch-icon\\.png|manifest\\.json|sw\\.js|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff2?)).*)',
+    '/((?!_next/static|_next/image|favicon\\.ico|robots\\.txt|sitemap\\.xml|sitemap-.*\\.xml|manifest\\.json|site\\.webmanifest|llms\\.txt|llms-full\\.txt|icon-.*\\.png|apple-touch-icon\\.png|sw\\.js|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff2?|txt|xml|json)).*)',
   ],
 }

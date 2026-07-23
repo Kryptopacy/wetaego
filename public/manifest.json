@@ -2,7 +2,7 @@
   "name": "OurMenu OS",
   "short_name": "OurMenu",
   "description": "Your business, online. Menus, bookings, listings, and rate cards — all in one place.",
-  "start_url": "/dashboard",
+  "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "display_override": ["window-controls-overlay", "standalone"],

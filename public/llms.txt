@@ -1,0 +1,20 @@
+# OurMenu OS
+
+> OurMenu OS is the Operating System and SaaS platform for physical businesses, hospitality venues, retail shops, real estate agencies, and service providers. It replaces custom websites and legacy POS hardware with an all-in-one multi-business portal, Gemini AI Copilot, dynamic catalogs, and multi-gateway billing.
+
+## Core Capabilities
+- **Multi-Template Portals**: Run digital menus, hotel bookings, real estate listings, and service rate cards under a unified portal.
+- **Gemini AI Copilot & Vision**: Automated dashboard configuration, physical menu digitizing via vision models, and 40+ language translations.
+- **Multi-Gateway Payment Integration**: End-to-end payment processing supporting Local & International Cards, Bank Transfers, and Crypto (USDC, USDT, SOL) via Paystack and Bachs.
+- **Inventory & BOM Manager**: Atomic stock tracking, cost-of-goods-sold calculations, and low-stock alerts.
+- **Enterprise Team Intercom**: Department-routed internal staff communication (Kitchen, Bar, Front Desk, Manager).
+- **POS & Timeclock Kiosk**: Unified point-of-sale interface with offline queue sync, staff shift scheduling, and manager kiosk mode.
+
+## Links & Documentation
+- Platform Overview: https://ourmenuos.online
+- Full Technical Specification: https://ourmenuos.online/llms-full.txt
+- XML Sitemap: https://ourmenuos.online/sitemap.xml
+- Robots Directives: https://ourmenuos.online/robots.txt
+- Terms of Service: https://ourmenuos.online/terms
+- Privacy Policy: https://ourmenuos.online/privacy
+- Affiliate Program: https://ourmenuos.online/affiliates

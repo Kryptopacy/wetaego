@@ -1,41 +1,52 @@
 import { MetadataRoute } from 'next'
-import { createClient } from '../lib/supabase/server'
+import { createAdminClient } from '../lib/supabase/server'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const supabase = await createClient()
-
-  // Fetch all locations
-  const { data: locations } = await supabase
-    .from('locations')
-    .select('slug, updated_at')
-
   const baseUrl = 'https://ourmenuos.online'
 
-  const menuUrls = (locations || []).map((loc) => ({
-    url: `${baseUrl}/m/${loc.slug}`,
-    lastModified: new Date(loc.updated_at),
-    changeFrequency: 'daily' as const,
-    priority: 0.8,
-  }))
+  let menuUrls: MetadataRoute.Sitemap = []
+  let portalUrls: MetadataRoute.Sitemap = []
 
-  // Fetch all published location pages (portal pages)
-  const { data: locationPages } = await supabase
-    .from('location_pages')
-    .select('slug, updated_at, locations(slug)')
-    .eq('is_published', true)
+  try {
+    const supabase = await createAdminClient()
 
-  interface LocationPage {
-    slug: string
-    updated_at: string
-    locations?: { slug: string } | null
+    // Fetch all locations
+    const { data: locations } = await supabase
+      .from('locations')
+      .select('slug, updated_at')
+
+    if (locations) {
+      menuUrls = locations.map((loc) => ({
+        url: `${baseUrl}/m/${loc.slug}`,
+        lastModified: new Date(loc.updated_at || Date.now()),
+        changeFrequency: 'daily' as const,
+        priority: 0.8,
+      }))
+    }
+
+    // Fetch all published location pages (portal pages)
+    const { data: locationPages } = await supabase
+      .from('location_pages')
+      .select('slug, updated_at, locations(slug)')
+      .eq('is_published', true)
+
+    interface LocationPage {
+      slug: string
+      updated_at: string
+      locations?: { slug: string } | null
+    }
+
+    if (locationPages) {
+      portalUrls = ((locationPages as unknown as LocationPage[]) || []).map((page) => ({
+        url: `${baseUrl}/m/${page.locations?.slug}/p/${page.slug}`,
+        lastModified: new Date(page.updated_at || Date.now()),
+        changeFrequency: 'weekly' as const,
+        priority: 0.6,
+      }))
+    }
+  } catch (err) {
+    console.error('Failed to fetch dynamic sitemap entries:', err)
   }
-
-  const portalUrls = ((locationPages as unknown as LocationPage[]) || []).map((page) => ({
-    url: `${baseUrl}/m/${page.locations?.slug}/p/${page.slug}`,
-    lastModified: new Date(page.updated_at || new Date()),
-    changeFrequency: 'weekly' as const,
-    priority: 0.6,
-  }))
 
   return [
     {
