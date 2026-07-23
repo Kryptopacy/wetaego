@@ -31,7 +31,7 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules", "trash2", "trash4", "supabase", "launch-video"]
+  "exclude": ["node_modules", ".next", "trash2", "trash4", "supabase", "launch-video"]
 }
 
 
