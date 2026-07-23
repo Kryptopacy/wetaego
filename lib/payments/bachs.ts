@@ -16,20 +16,21 @@ export const bachsProvider: PaymentProvider = {
     const apiKey = params.useTestKeys ? process.env.BACHS_TEST_API_KEY : (process.env.BACHS_API_KEY || process.env.BACHS_SECRET_KEY)
     if (!apiKey) throw new Error('BACHS_API_KEY is not configured')
 
-    const channels = params.channels || ['card', 'bank_transfer', 'crypto', 'usdc', 'usdt', 'solana']
+    const amountInUnits = (params.amountMinor / 100).toFixed(2)
 
     const payload = {
-      amount: params.amountMinor,
-      currency: params.currency.toUpperCase(),
-      email: params.customerEmail,
-      reference: params.reference,
-      redirect_url: params.callbackUrl,
+      pricing: {
+        amount: amountInUnits,
+        currency: params.currency.toUpperCase(),
+      },
       customer: {
         email: params.customerEmail,
         name: params.customerName || undefined,
         phone: params.customerPhone || undefined,
       },
-      payment_options: channels,
+      reference: params.reference,
+      success_url: params.callbackUrl,
+      cancel_url: params.callbackUrl,
       metadata: {
         ...params.metadata,
         provider: 'bachs',
@@ -40,7 +41,7 @@ export const bachsProvider: PaymentProvider = {
       },
     }
 
-    const res = await fetch(`${BACHS_BASE_URL}/checkout/sessions`, {
+    const res = await fetch(`${BACHS_BASE_URL}/checkout-sessions`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${apiKey}`,
@@ -52,18 +53,17 @@ export const bachsProvider: PaymentProvider = {
 
     if (!res.ok) {
       const err = await res.json().catch(() => ({}))
-      if (res.status === 404 || res.status === 401) {
-        return {
-          authorizationUrl: `https://pay.bachs.io/checkout/${encodeURIComponent(params.reference)}?amount=${params.amountMinor}&currency=${params.currency}&email=${encodeURIComponent(params.customerEmail)}`,
-          reference: params.reference,
-        }
-      }
-      throw new Error(`Bachs initiate failed: ${JSON.stringify(err)}`)
+      console.error('[bachsProvider] initiatePayment failed:', err)
+      throw new Error(`Bachs initiate failed: ${err?.detail || err?.message || JSON.stringify(err)}`)
     }
 
     const data = await res.json()
-    const checkoutUrl = data?.data?.checkout_url || data?.checkout_url || data?.url || `https://pay.bachs.io/checkout/${params.reference}`
-    const ref = data?.data?.reference || data?.reference || params.reference
+    const checkoutUrl = data?.checkout_url || data?.data?.checkout_url || data?.url
+    const ref = data?.reference || data?.data?.reference || params.reference
+
+    if (!checkoutUrl) {
+      throw new Error('Bachs API did not return a valid checkout_url')
+    }
 
     return {
       authorizationUrl: checkoutUrl as string,
@@ -75,7 +75,7 @@ export const bachsProvider: PaymentProvider = {
     const apiKey = useTestKeys ? process.env.BACHS_TEST_API_KEY : (process.env.BACHS_API_KEY || process.env.BACHS_SECRET_KEY)
     if (!apiKey) throw new Error('BACHS_API_KEY is not configured')
 
-    const res = await fetch(`${BACHS_BASE_URL}/payments/verify/${encodeURIComponent(reference)}`, {
+    const res = await fetch(`${BACHS_BASE_URL}/checkout-sessions/${encodeURIComponent(reference)}`, {
       headers: {
         Authorization: `Bearer ${apiKey}`,
         'X-Bachs-Key': apiKey,
@@ -97,20 +97,28 @@ export const bachsProvider: PaymentProvider = {
       completed: 'success',
       successful: 'success',
       success: 'success',
+      paid: 'success',
       failed: 'failed',
       cancelled: 'abandoned',
       abandoned: 'abandoned',
+      expired: 'abandoned',
       pending: 'pending',
+      open: 'pending',
+      requires_payment_method: 'pending'
     }
 
-    const statusStr = (tx.status || 'pending').toLowerCase()
+    const rawStatus = (tx.payment_status || tx.status || 'pending').toLowerCase()
+    const status = statusMap[rawStatus] ?? 'pending'
+
+    const rawAmount = tx.charge?.amount_paid || tx.charge?.amount || tx.amount || 0
+    const amountPaid = typeof rawAmount === 'string' ? Math.round(parseFloat(rawAmount) * 100) : rawAmount
 
     return {
-      status: statusMap[statusStr] ?? 'pending',
-      amountPaid: tx.amount_paid || tx.amount || 0,
-      currency: (tx.currency || 'NGN').toUpperCase(),
+      status,
+      amountPaid,
+      currency: (tx.currency || tx.billing_currency || 'NGN').toUpperCase(),
       reference: tx.reference || reference,
-      paidAt: tx.paid_at || tx.completed_at || undefined,
+      paidAt: tx.charge?.completed_at || tx.completed_at || undefined,
       providerData: tx,
     }
   },

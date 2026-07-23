@@ -36,7 +36,7 @@ describe('bachsProvider', () => {
     expect(result.authorizationUrl).toBe('https://pay.bachs.io/checkout/session_123')
     expect(result.reference).toBe('bachs_ref_123')
 
-    expect(fetch).toHaveBeenCalledWith('https://api.bachs.io/v1/checkout/sessions', expect.objectContaining({
+    expect(fetch).toHaveBeenCalledWith('https://api.bachs.io/v1/checkout-sessions', expect.objectContaining({
       method: 'POST',
       headers: expect.objectContaining({
         Authorization: 'Bearer bachs_live_key_123',
@@ -49,7 +49,7 @@ describe('bachsProvider', () => {
   it('uses test keys when useTestKeys is true', async () => {
     (fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
       ok: true,
-      json: async () => ({ data: { checkout_url: 'https://sandbox.bachs.io/pay', reference: 'test_ref' } })
+      json: async () => ({ checkout_url: 'https://sandbox.bachs.io/pay', reference: 'test_ref' })
     })
 
     await bachsProvider.initiatePayment({
@@ -72,11 +72,14 @@ describe('bachsProvider', () => {
     (fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
       ok: true,
       json: async () => ({
-        data: {
-          status: 'completed',
-          amount_paid: 50000,
-          currency: 'NGN',
-          reference: 'ref_verify_999'
+        status: 'completed',
+        payment_status: 'paid',
+        amount: '500.00',
+        currency: 'NGN',
+        reference: 'ref_verify_999',
+        charge: {
+          amount_paid: '500.00',
+          completed_at: '2026-07-23T07:39:29.182512Z'
         }
       })
     })
