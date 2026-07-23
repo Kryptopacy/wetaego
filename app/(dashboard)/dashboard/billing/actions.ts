@@ -50,7 +50,7 @@ export const subscribeToLite = authActionClient
     }
 
     const planCode = await getOrCreateBillingPlan(organization_id, org.name, 'lite', amountMinor, currency, billing_cycle)
-    const authUrl = await initializeSubscription(user.email!, planCode, organization_id, 'lite', currency)
+    const authUrl = await initializeSubscription(user.email!, planCode, organization_id, 'lite', currency, amountMinor)
 
     redirect(authUrl)
   })
@@ -75,8 +75,7 @@ export const subscribeToPro = authActionClient
     const rate = await getUsdToNgnRate()
     const pricing = await getPricingSettings()
     
-    const isAnnual = billing_cycle === 'annually'
-    const baseNgn = isAnnual 
+    const baseNgn = billing_cycle === 'annually' 
       ? ((pricing as Record<string, number>).pro_annual_ngn || 662400)
       : (pricing.pro_monthly_ngn || 69000)
     let amountMinor = 0
@@ -88,7 +87,7 @@ export const subscribeToPro = authActionClient
     }
 
     const planCode = await getOrCreateBillingPlan(organization_id, org.name, 'pro', amountMinor, currency, billing_cycle)
-    const authUrl = await initializeSubscription(user.email!, planCode, organization_id, 'pro', currency)
+    const authUrl = await initializeSubscription(user.email!, planCode, organization_id, 'pro', currency, amountMinor)
 
     redirect(authUrl)
   })

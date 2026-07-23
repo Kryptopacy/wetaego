@@ -1,6 +1,7 @@
-const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY
-
 import { createClient } from '@/lib/supabase/server'
+import { paymentProvider } from '@/lib/payments/paystack'
+
+const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY
 
 export async function getOrCreateBillingPlan(
   organizationId: string, 
@@ -72,7 +73,38 @@ export async function getOrCreateBillingPlan(
   return newPlanCode
 }
 
-export async function initializeSubscription(email: string, planCode: string, organizationId: string, planType: string, currency: string = 'NGN'): Promise<string> {
+export async function initializeSubscription(
+  email: string, 
+  planCode: string, 
+  organizationId: string, 
+  planType: string, 
+  currency: string = 'NGN',
+  amountMinor: number = 5000
+): Promise<string> {
+  const activeGateway = process.env.NEXT_PUBLIC_DEFAULT_PAYMENT_GATEWAY
+
+  // If Bachs (or non-Paystack provider) is active, route dynamically through active payment provider
+  if (activeGateway === 'bachs') {
+    const reference = `sub_${organizationId}_${Date.now()}`
+    const callbackUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard/billing/verify`
+    
+    const { authorizationUrl } = await paymentProvider.initiatePayment({
+      amountMinor,
+      currency,
+      customerEmail: email,
+      reference,
+      callbackUrl,
+      metadata: {
+        organization_id: organizationId,
+        is_subscription: true,
+        plan_type: planType,
+        plan_code: planCode
+      }
+    })
+    return authorizationUrl
+  }
+
+  // Fallback to direct Paystack subscription plan initialization
   const response = await fetch('https://api.paystack.co/transaction/initialize', {
     method: 'POST',
     headers: {
