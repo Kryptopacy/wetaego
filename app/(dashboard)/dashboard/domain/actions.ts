@@ -19,8 +19,7 @@ export const addCustomDomain = authActionClient
       return { data: { success: true } }
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await supabase.from('custom_domains' as any).insert({
+    const { error } = await supabase.from('custom_domains').insert({
       hostname,
       location_id,
       status: 'pending',
@@ -49,8 +48,7 @@ export const removeCustomDomain = authActionClient
       return { success: true }
     }
     
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await supabase.from('custom_domains' as any).delete().eq('id', domainId)
+    const { error } = await supabase.from('custom_domains').delete().eq('id', domainId)
     
     if (error) throw new Error((error as Error).message)
     
@@ -69,9 +67,8 @@ export const checkDomainStatus = authActionClient
       return { success: true }
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: domainRec } = await supabase.from('custom_domains' as any).select('hostname').eq('id', domainId).single()
-    const hostname = (domainRec as unknown as { hostname: string })?.hostname
+    const { data: domainRec } = await supabase.from('custom_domains').select('hostname').eq('id', domainId).single()
+    const hostname = domainRec?.hostname
 
     if (hostname) {
       try {
@@ -88,8 +85,7 @@ export const checkDomainStatus = authActionClient
       }
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await supabase.from('custom_domains' as any).update({
+    const { error } = await supabase.from('custom_domains').update({
       status: 'active',
       ssl_status: 'active'
     }).eq('id', domainId)

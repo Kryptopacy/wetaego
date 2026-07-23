@@ -19,8 +19,8 @@ export default async function DomainPage() {
 
   let orgId = ''
   if (member && member.organizations) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    orgId = (member.organizations as any).id || ''
+    const orgs = member.organizations as { id: string } | { id: string }[]
+    orgId = Array.isArray(orgs) ? orgs[0]?.id || '' : orgs.id || ''
   } else {
     const { data } = await supabase
       .from('organizations')
@@ -51,10 +51,10 @@ export default async function DomainPage() {
   const locationIds = locations?.map(l => l.id) || []
 
   // Fetch custom domains
-  let domains: any[] = []
+  let domains: import('@/lib/supabase/types').Database['public']['Tables']['custom_domains']['Row'][] = []
   if (locationIds.length > 0) {
     const { data: customDomains } = await supabase
-      .from('custom_domains' as any)
+      .from('custom_domains')
       .select('*')
       .in('location_id', locationIds)
       .order('created_at', { ascending: false })

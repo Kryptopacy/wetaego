@@ -234,8 +234,7 @@ export const redeemCoupon = authActionClient
 
     const { error: updateError } = await supabase
       .from('organizations')
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .update(updates as any)
+      .update(updates)
       .eq('id', organization_id)
 
     if (updateError) throw new Error('Failed to apply promo code benefits')

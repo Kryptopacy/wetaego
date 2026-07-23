@@ -70,7 +70,7 @@ export default async function AvailabilityPage() {
     location_id: availability.location_id,
     timezone: availability.timezone,
     slot_interval: availability.slot_interval,
-    schedule: (availability.schedule as any) as AvailabilitySchedule
+    schedule: (availability.schedule as unknown as AvailabilitySchedule) || DEFAULT_SCHEDULE
   } : {
     location_id: activeLocationId,
     timezone: 'Africa/Lagos',

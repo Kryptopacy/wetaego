@@ -169,8 +169,8 @@ export const updateItem = authActionClient
     const { data: item } = await supabase.from('page_items').select('*, location_pages!inner(location_id, locations!inner(organization_id))').eq('id', itemId).single()
     if (!item) throw new Error('Item not found')
     
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const orgId = (item.location_pages as any).locations.organization_id
+    const locPages = item.location_pages as unknown as { locations: { organization_id: string } }
+    const orgId = locPages.locations.organization_id
 
     if (orgId === 'demo-org') {
       revalidatePath('/dashboard/menu')
@@ -205,8 +205,7 @@ export const updateItem = authActionClient
       }
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const currentItemData = (item.item_data as any) || {}
+    const currentItemData = (item.item_data as Record<string, unknown>) || {}
     const updatedItemData = {
       ...currentItemData,
       stock_count: stockCount ?? null,
@@ -231,13 +230,13 @@ export const updateItem = authActionClient
 
 export const deleteItem = authActionClient
   .schema(z.object({ itemId: z.string().min(1) }))
-  .action(async ({ parsedInput: { itemId }, ctx: { supabase } }) => {
+  .action(async ({ parsedInput: { itemId } }) => {
     const adminClient = await createAdminClient()
     const { data: item } = await adminClient.from('page_items').select('location_pages!inner(location_id, locations!inner(organization_id))').eq('id', itemId).single()
     if (!item) throw new Error('Item not found')
     
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const orgId = (item.location_pages as any).locations.organization_id
+    const locPages = item.location_pages as unknown as { locations: { organization_id: string } }
+    const orgId = locPages.locations.organization_id
 
     if (orgId === 'demo-org') {
       revalidatePath('/dashboard/menu')

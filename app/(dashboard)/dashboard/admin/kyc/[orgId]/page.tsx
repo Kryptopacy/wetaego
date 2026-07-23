@@ -17,8 +17,7 @@ export default async function KycReviewPage({ params }: { params: Promise<{ orgI
     redirect('/dashboard')
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: org } = await (supabase as any)
+  const { data: org } = await supabase
     .from('organizations')
     .select('*, organization_kyc(*)')
     .eq('id', orgId)
@@ -26,7 +25,8 @@ export default async function KycReviewPage({ params }: { params: Promise<{ orgI
 
   if (!org) notFound()
 
-  const kyc = org.organization_kyc?.[0] as {
+  const rawKyc = Array.isArray(org.organization_kyc) ? org.organization_kyc[0] : org.organization_kyc
+  const kyc = rawKyc as {
     business_type: string
     legal_name: string
     registration_number: string

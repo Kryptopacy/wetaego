@@ -19,8 +19,8 @@ export default async function ApiKeysPage() {
 
   let orgId = ''
   if (member && member.organizations) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    orgId = (member.organizations as any).id || ''
+    const orgs = member.organizations as { id: string } | { id: string }[]
+    orgId = Array.isArray(orgs) ? orgs[0]?.id || '' : orgs.id || ''
   } else {
     const { data } = await supabase
       .from('organizations')
@@ -42,7 +42,7 @@ export default async function ApiKeysPage() {
   }
 
   const { data: apiKeys } = await supabase
-    .from('api_keys' as any)
+    .from('api_keys')
     .select('*')
     .eq('organization_id', orgId)
     .order('created_at', { ascending: false })
@@ -63,7 +63,7 @@ export default async function ApiKeysPage() {
         </div>
       </div>
 
-      <ApiKeyManager initialKeys={(apiKeys as any[]) || []} organizationId={orgId} />
+      <ApiKeyManager initialKeys={apiKeys || []} organizationId={orgId} />
     </div>
   )
 }

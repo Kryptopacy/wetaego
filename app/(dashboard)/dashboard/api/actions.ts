@@ -22,7 +22,7 @@ export const createApiKey = authActionClient
     // Hash the key for storage (we never store the raw key)
     const keyHash = crypto.createHash('sha256').update(rawKey).digest('hex')
 
-    const { error } = await supabase.from('api_keys' as any).insert({
+    const { error } = await supabase.from('api_keys').insert({
       organization_id,
       name,
       key_hash: keyHash,
@@ -50,7 +50,7 @@ export const revokeApiKey = authActionClient
     }
 
     const { error } = await supabase
-      .from('api_keys' as any)
+      .from('api_keys')
       .delete()
       .eq('id', key_id)
       .eq('organization_id', organization_id)
