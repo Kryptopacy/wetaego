@@ -60,7 +60,7 @@ export const savePaymentSettings = authActionClient
       await supabase
         .from('organization_payment_settings')
         .update({
-          provider: activeGateway,
+          provider: activeGateway as 'paystack',
           provider_account_id: subaccountCode,
           is_active: true
         })
@@ -70,7 +70,7 @@ export const savePaymentSettings = authActionClient
         .from('organization_payment_settings')
         .insert({
           organization_id: org.id,
-          provider: activeGateway,
+          provider: activeGateway as 'paystack',
           provider_account_id: subaccountCode,
           is_active: true
         })
