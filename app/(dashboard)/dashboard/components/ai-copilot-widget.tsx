@@ -75,33 +75,42 @@ export function AICopilotWidget({ organizationId }: { organizationId: string }) 
     cancelSpeech()
   }
 
+  const [isDragging, setIsDragging] = useState(false)
+  const dragOriginRef = useRef({ x: 0, y: 0 })
+
   return (
     <>
-      <AnimatePresence>
-        {!isOpen && (
-          <motion.button
-            drag
-            dragMomentum={false}
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0, opacity: 0 }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setIsOpen(true)}
-            className="fixed bottom-20 md:bottom-24 right-6 z-[90] h-12 px-4 rounded-full shadow-2xl border border-white/20 group flex items-center justify-center overflow-hidden cursor-grab active:cursor-grabbing bg-zinc-900"
-          >
-            <Image src="/hero_emerald_gemstone.png" alt="Unem AI Copilot" fill className="object-cover opacity-60 group-hover:opacity-80 transition-opacity" />
-            <div className="absolute inset-0 bg-teal-900/30 mix-blend-overlay transition-colors" />
-            <div className="relative z-10 flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-emerald-400 drop-shadow-lg" />
-              <span className="text-white font-semibold text-sm">Unem AI</span>
-            </div>
-            
-            {/* Notification Dot (Simulated) */}
-            <span className="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 border-teal-900 animate-pulse" />
-          </motion.button>
-        )}
-      </AnimatePresence>
+      <motion.button
+        drag
+        dragMomentum={false}
+        onDragStart={(_, info) => {
+          dragOriginRef.current = { x: info.point.x, y: info.point.y }
+          setIsDragging(false)
+        }}
+        onDrag={(_, info) => {
+          const dist = Math.hypot(info.point.x - dragOriginRef.current.x, info.point.y - dragOriginRef.current.y)
+          if (dist > 5) setIsDragging(true)
+        }}
+        onDragEnd={() => {
+          setTimeout(() => setIsDragging(false), 150)
+        }}
+        onClick={() => {
+          if (!isDragging) setIsOpen(prev => !prev)
+        }}
+        className={`fixed bottom-20 md:bottom-24 right-6 z-[90] h-12 px-4 rounded-full shadow-2xl border border-white/20 group flex items-center justify-center overflow-hidden cursor-grab active:cursor-grabbing bg-zinc-900 transition-opacity ${
+          isOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'
+        }`}
+      >
+        <Image src="/hero_emerald_gemstone.png" alt="Unem AI Copilot" fill className="object-cover opacity-60 group-hover:opacity-80 transition-opacity" />
+        <div className="absolute inset-0 bg-teal-900/30 mix-blend-overlay transition-colors" />
+        <div className="relative z-10 flex items-center gap-2">
+          <Sparkles className="w-5 h-5 text-emerald-400 drop-shadow-lg" />
+          <span className="text-white font-semibold text-sm">Unem AI</span>
+        </div>
+        
+        {/* Notification Dot (Simulated) */}
+        <span className="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 border-teal-900 animate-pulse" />
+      </motion.button>
 
       <AnimatePresence>
         {isOpen && (

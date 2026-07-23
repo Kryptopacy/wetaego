@@ -272,26 +272,35 @@ export function IntercomWidget({ userId, organizationId }: { userId: string, org
     }
   }
 
+  const [isDragging, setIsDragging] = useState(false)
+  const dragOriginRef = useRef({ x: 0, y: 0 })
+
   return (
     <>
-      <AnimatePresence>
-        {!isOpen && (
-          <motion.button
-            drag
-            dragMomentum={false}
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0, opacity: 0 }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setIsOpen(true)}
-            className="fixed bottom-20 md:bottom-6 left-4 md:left-6 z-50 h-12 px-5 rounded-full bg-blue-600 hover:bg-blue-500 text-white shadow-lg cursor-grab active:cursor-grabbing flex items-center gap-2"
-          >
-            <WalkieTalkieIcon className="w-5 h-5 pointer-events-none" />
-            <span className="font-semibold text-sm pointer-events-none">Staff Intercom</span>
-          </motion.button>
-        )}
-      </AnimatePresence>
+      <motion.button
+        drag
+        dragMomentum={false}
+        onDragStart={(_, info) => {
+          dragOriginRef.current = { x: info.point.x, y: info.point.y }
+          setIsDragging(false)
+        }}
+        onDrag={(_, info) => {
+          const dist = Math.hypot(info.point.x - dragOriginRef.current.x, info.point.y - dragOriginRef.current.y)
+          if (dist > 5) setIsDragging(true)
+        }}
+        onDragEnd={() => {
+          setTimeout(() => setIsDragging(false), 150)
+        }}
+        onClick={() => {
+          if (!isDragging) setIsOpen(prev => !prev)
+        }}
+        className={`fixed bottom-20 md:bottom-6 left-4 md:left-6 z-50 h-12 px-5 rounded-full bg-blue-600 hover:bg-blue-500 text-white shadow-lg cursor-grab active:cursor-grabbing flex items-center gap-2 transition-opacity ${
+          isOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'
+        }`}
+      >
+        <WalkieTalkieIcon className="w-5 h-5 pointer-events-none" />
+        <span className="font-semibold text-sm pointer-events-none">Staff Intercom</span>
+      </motion.button>
 
       <AnimatePresence>
         {isOpen && (

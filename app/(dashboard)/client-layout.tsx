@@ -465,14 +465,6 @@ export default function ClientLayout({ children, initialData }: { children: Reac
             <LogOut className="w-4 h-4" />
             <span>Sign Out</span>
           </button>
-          
-          <div className="flex items-center justify-between px-3 py-2 bg-black/40 rounded-xl border border-white/5">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
-              <span className="text-xs font-medium text-zinc-400">System Active</span>
-            </div>
-            <span className="text-xs font-mono text-zinc-500">{time}</span>
-          </div>
         </div>
     </>
   )

@@ -329,11 +329,11 @@ export function TimeclockWidget({
             {isManager && (
               <Link
                 href="/dashboard/kiosk"
-                className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold text-zinc-500 hover:text-white hover:bg-white/5 transition-all"
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 hover:text-white text-[11px] font-semibold transition-all border border-zinc-700/50 shadow-xs"
                 title="Open Kiosk Mode on company device"
               >
-                <Monitor className="w-3 h-3" />
-                Kiosk
+                <Monitor className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Kiosk Mode</span>
               </Link>
             )}
           </div>

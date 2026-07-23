@@ -155,15 +155,6 @@ export default async function DashboardOverviewPage() {
               : `Complete your business profile to unlock your dashboard.`}
           </p>
         </div>
-        {orgId && (
-          <Link
-            href="/dashboard/menu"
-            className="hidden md:flex items-center gap-2 px-4 py-2.5 rounded-xl bg-linear-to-r from-violet-600 to-fuchsia-600 text-white text-sm font-bold hover:from-violet-500 hover:to-fuchsia-500 transition-all shadow-lg shadow-violet-900/30"
-          >
-            <Sparkles className="w-4 h-4" />
-            Open AI Studio
-          </Link>
-        )}
       </div>
 
       <OnboardingChecklist 
