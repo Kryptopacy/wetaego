@@ -137,8 +137,8 @@ export async function getAvailableSlots(
     const { data: avail } = await supabase
       .from('location_availability')
       .select('timezone, slot_interval, schedule')
-      .eq('location_id', locationId)
-      .single()
+      .limit(1)
+      .maybeSingle()
 
     if (!avail) return []
 

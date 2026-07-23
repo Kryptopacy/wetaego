@@ -50,8 +50,8 @@ async function chargeCreditsFallback(organizationId: string, cost: number, reaso
   const { data: org, error: orgError } = await supabase
     .from('organizations')
     .select('subscription_tier, purchased_credits, monthly_free_credits_used')
-    .eq('id', organizationId)
-    .single()
+    .limit(1)
+    .maybeSingle()
 
   if (orgError || !org) {
     throw new Error('Organization not found')

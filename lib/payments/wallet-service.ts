@@ -11,8 +11,8 @@ export async function refundWalletTransaction(
   const { data: customer } = await adminClient
     .from('customer_profiles')
     .select('wallet_balance_minor')
-    .eq('id', customerId)
-    .single()
+    .limit(1)
+    .maybeSingle()
     
   if (customer) {
     const newBalance = (customer.wallet_balance_minor || 0) + amountMinor

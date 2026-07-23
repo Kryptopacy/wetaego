@@ -21,11 +21,11 @@ export async function getOrCreateBillingPlan(
   const { data: org, error: orgError } = await supabase
     .from('organizations')
     .select('billing_plan_code, billing_plan_code_annual')
-    .eq('id', organizationId)
-    .single()
+    .limit(1)
+    .maybeSingle()
 
-  if (orgError) {
-    throw new Error(`Failed to fetch organization: ${orgError.message}`)
+  if (orgError || !org) {
+    throw new Error(`Failed to fetch organization: ${orgError?.message || 'Organization not found'}`)
   }
 
   const existingCode = billingCycle === 'annually' 

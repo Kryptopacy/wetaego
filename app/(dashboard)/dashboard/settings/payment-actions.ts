@@ -30,27 +30,37 @@ export const savePaymentSettings = authActionClient
       throw new Error('Bank details cannot be modified in demo workspaces to protect end customers.')
     }
 
+    const activeGateway = process.env.NEXT_PUBLIC_DEFAULT_PAYMENT_GATEWAY || 'paystack'
+
     let subaccountCode = ''
     try {
       const { getPlatformFees } = await import('@/lib/utils/settings')
       const platformFees = await getPlatformFees() as { business_subaccount: number }
-      subaccountCode = await createSubaccount(bankName, accountNumber, businessName, platformFees.business_subaccount ?? 5)
-    } catch {
-      throw new Error('Failed to create subaccount')
+      
+      if (activeGateway === 'bachs') {
+        const { createBachsSubaccount } = await import('@/lib/payments/bachs')
+        subaccountCode = await createBachsSubaccount(accountNumber, bankName, businessName)
+      } else {
+        const { createSubaccount } = await import('@/lib/payments/paystack')
+        subaccountCode = await createSubaccount(bankName, accountNumber, businessName, platformFees.business_subaccount ?? 5)
+      }
+    } catch (err) {
+      console.error('Failed to create subaccount:', err)
+      throw new Error('Failed to create payment subaccount. Please verify bank details.')
     }
 
     // Check if settings exist
     const { data: existingSettings } = await supabase
       .from('organization_payment_settings')
       .select('organization_id')
-      .eq('organization_id', org.id)
-      .single()
+      .limit(1)
+      .maybeSingle()
 
     if (existingSettings) {
       await supabase
         .from('organization_payment_settings')
         .update({
-          provider: 'paystack',
+          provider: activeGateway,
           provider_account_id: subaccountCode,
           is_active: true
         })
@@ -60,7 +70,7 @@ export const savePaymentSettings = authActionClient
         .from('organization_payment_settings')
         .insert({
           organization_id: org.id,
-          provider: 'paystack',
+          provider: activeGateway,
           provider_account_id: subaccountCode,
           is_active: true
         })
