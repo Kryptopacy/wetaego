@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import PromoCodesManager from './promo-codes-manager'
+import PromoCodesManager, { PromoCode } from './promo-codes-manager'
 
 export const metadata = {
   title: 'Promo Codes - OurMenu OS',
@@ -56,7 +56,7 @@ export default async function PromotionsPage({
       </div>
 
       <PromoCodesManager 
-        promoCodes={(promoCodes || []) as any[]} 
+        promoCodes={(promoCodes || []) as PromoCode[]} 
         orgId={orgId} 
         locationId={locationId} 
       />

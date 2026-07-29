@@ -6,7 +6,7 @@ import { createPromoCodeAction, togglePromoCodeAction, deletePromoCodeAction } f
 import { formatCurrency } from '@/lib/utils/currency'
 import { useAction } from 'next-safe-action/hooks'
 
-type PromoCode = {
+export type PromoCode = {
   id: string
   location_id: string
   code: string

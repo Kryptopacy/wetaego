@@ -15,7 +15,7 @@ import { mapSupabaseOrderToUI } from '@/lib/utils/transformers'
 import { UIOrder } from '@/lib/types/frontend'
 import { useOfflineSync } from '@/hooks/use-offline-sync'
 import { QueuedAction } from '@/lib/stores/offline-queue-store'
-import { completeOrderAction, markOrderPaidOffline, cancelOrderAction, sendPaymentLinkAction, voidOrderAction, refundOrderAction } from './actions'
+import { completeOrderAction, markOrderPaidOffline, cancelOrderAction, sendPaymentLinkAction, voidOrderAction, refundOrderAction, chargeAuthHoldAction } from './actions'
 import { OfflineIndicator } from './components/offline-indicator'
 import { HardwareSettingsView } from './components/hardware-settings-view'
 import { usePrinterStore } from '@/lib/stores/printer-store'
@@ -53,21 +53,27 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
     switch (action.type) {
       case 'toggleStock':
         const { error } = await supabase.from('menu_items').update({ availability_status: action.payload.newStatus }).eq('id', action.payload.itemId)
-        return !error
+        return { success: !error, retryable: true }
       case 'claimOrder':
         const { error: claimError } = await supabase.rpc('claim_order', { p_order_id: action.payload.orderId, p_prep_time_minutes: action.payload.minutes })
-        return !claimError
+        return { success: !claimError, retryable: true }
       case 'resolveServiceRequest':
         const { error: srError } = await supabase.from('service_requests').update({ status: 'resolved' }).eq('id', action.payload.id)
-        return !srError
+        return { success: !srError, retryable: true }
       case 'markOrderPaid':
         const resPaid = await markOrderPaidOffline({ orderId: action.payload.orderId })
-        return !resPaid?.serverError && !resPaid?.validationErrors
+        return { 
+          success: !resPaid?.serverError && !resPaid?.validationErrors, 
+          retryable: !resPaid?.validationErrors 
+        }
       case 'completeOrder':
         const resComp = await completeOrderAction({ orderId: action.payload.orderId })
-        return !resComp?.serverError && !resComp?.validationErrors
+        return { 
+          success: !resComp?.serverError && !resComp?.validationErrors,
+          retryable: !resComp?.validationErrors
+        }
       default:
-        return true
+        return { success: true }
     }
   }
 
@@ -429,6 +435,22 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
     }
   }
 
+  const handleChargeAuthHold = async (orderId: string) => {
+    toast.loading('Charging card on file...', { id: `charge-${orderId}` })
+    try {
+      const res = await chargeAuthHoldAction({ orderId })
+      if (res?.serverError || res?.validationErrors) {
+        toast.error(res.serverError || 'Failed to charge card', { id: `charge-${orderId}` })
+        return { success: false, error: res.serverError || 'Failed to charge card' }
+      }
+      toast.success('Card successfully charged!', { id: `charge-${orderId}` })
+      return { success: true }
+    } catch (e: unknown) {
+      toast.error((e as Error).message || 'Error charging card', { id: `charge-${orderId}` })
+      return { success: false, error: (e as Error).message || 'Error charging card' }
+    }
+  }
+
   return (
     <div className="flex-1 flex flex-col mt-8">
       <OfflineIndicator socketStatus={socketStatus} />
@@ -487,6 +509,7 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
             onSendPaymentLink={handleSendPaymentLink}
             onVoidOrder={handleVoidOrder}
             onRefundOrder={handleRefundOrder}
+            onChargeAuthHold={handleChargeAuthHold}
           />
         </div>
       ) : activeTab === 'history' ? (

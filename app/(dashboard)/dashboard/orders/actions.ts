@@ -12,6 +12,7 @@ import { PaymentLinkEmail } from '@/emails/payment-link-email'
 import { OrderCancellationEmail } from '@/emails/order-cancellation-email'
 import { OrderRefundEmail } from '@/emails/order-refund-email'
 import { notifyCustomer } from '@/lib/notifications/dispatcher'
+import { getPaymentProvider } from '@/lib/payments'
 
 const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy')
 
@@ -21,7 +22,7 @@ async function requireOrderAuth(orderId: string, user: { id: string }) {
   // Fetch order details
   const { data: order, error: fetchError } = await supabase
     .from('orders')
-    .select('organization_id, customer_email, page_id, organizations(name, slug)')
+    .select('organization_id, customer_email, page_id, total_amount_minor, organizations(name, slug)')
     .eq('id', orderId)
     .single()
 
@@ -560,4 +561,72 @@ export const deleteManualPaymentAction = authActionClient
     }
 
     return { success: true }
+  })
+
+export const chargeAuthHoldAction = authActionClient
+  .schema(z.object({ orderId: z.string(), amountMinor: z.number().optional() }))
+  .action(async ({ parsedInput: { orderId, amountMinor }, ctx: { user } }) => {
+    const { supabase, order } = await requireOrderAuth(orderId, user)
+
+    if (!order.customer_email) {
+      throw new Error('No customer email on order')
+    }
+
+    // Find the token
+    const { data: token } = await supabase
+      .from('customer_payment_tokens')
+      .select('*')
+      .eq('organization_id', order.organization_id)
+      .eq('email', order.customer_email)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single()
+
+    if (!token) {
+      throw new Error('No saved card found for this customer')
+    }
+
+    // Get the provider
+    const { data: paySettings } = await supabase
+      .from('organization_payment_settings')
+      .select('provider')
+      .eq('organization_id', order.organization_id)
+      .single()
+
+    const providerName = paySettings?.provider || token.provider || 'paystack'
+    const provider = getPaymentProvider(providerName)
+
+    if (!provider.chargeCardOnFile) {
+      throw new Error(`Provider ${providerName} does not support charging cards on file.`)
+    }
+
+    // Charge the full amount if not specified
+    const chargeAmount = amountMinor || order.total_amount_minor
+    if (!chargeAmount || chargeAmount <= 0) {
+      throw new Error('Invalid charge amount')
+    }
+
+    // Charge the card
+    try {
+      const verification = await provider.chargeCardOnFile(
+        token.authorization_code,
+        chargeAmount,
+        token.email,
+        `auth_capture_${orderId}_${Date.now()}`
+      )
+
+      if (verification.status === 'success') {
+        // Record the payment
+        await supabase.from('order_payments').insert({
+          order_id: orderId,
+          amount_minor: verification.amountPaid,
+          provider_reference: verification.reference
+        })
+        return { success: true, message: 'Card successfully charged' }
+      } else {
+        throw new Error(`Charge failed with status: ${verification.status}`)
+      }
+    } catch (e: any) {
+      throw new Error(`Charge failed: ${e.message}`)
+    }
   })

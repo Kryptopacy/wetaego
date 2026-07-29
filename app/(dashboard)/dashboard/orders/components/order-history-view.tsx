@@ -46,8 +46,7 @@ export function OrderHistoryView({ organizationId, locationId, initialOrders }: 
       if (error) throw error
 
       if (data && data.length > 0) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const uiOrders = (data as any[]).map(mapSupabaseOrderToUI)
+        const uiOrders = (data as Parameters<typeof mapSupabaseOrderToUI>[0][]).map(mapSupabaseOrderToUI)
         setOrders(prev => [...prev, ...uiOrders])
         if (data.length < 50) {
           setHasMore(false)

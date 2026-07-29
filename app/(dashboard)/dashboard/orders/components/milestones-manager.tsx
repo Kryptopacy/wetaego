@@ -414,7 +414,7 @@ export function MilestonesManager({ order, isOpen, onClose }: MilestonesManagerP
                     <div className="space-y-3">
                       <select
                         value={payMethod}
-                        onChange={e => setPayMethod(e.target.value as any)}
+                        onChange={e => setPayMethod(e.target.value as 'cash' | 'pos_terminal' | 'bank_transfer')}
                         className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500"
                       >
                         <option value="cash">💵 Cash</option>

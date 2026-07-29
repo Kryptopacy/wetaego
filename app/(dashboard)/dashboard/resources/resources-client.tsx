@@ -10,7 +10,7 @@ import { DynamicQR } from '@/components/qr/DynamicQR'
 
 type Resource = Database['public']['Tables']['resources']['Row']
 type QrCodeType = Database['public']['Tables']['qr_codes']['Row']
-type LocationType = Database['public']['Tables']['locations']['Row'] & { location_pages: any[] }
+export type LocationType = Database['public']['Tables']['locations']['Row'] & { location_pages: { id: string; slug: string; title: string; template_type: string }[] }
 
 interface ResourcesClientProps {
   initialResources: Resource[]

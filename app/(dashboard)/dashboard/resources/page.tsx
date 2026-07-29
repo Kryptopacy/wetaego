@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 
 import { MapPin } from 'lucide-react'
-import { ResourcesClient } from './resources-client'
+import { ResourcesClient, LocationType } from './resources-client'
 
 export default async function ResourcesPage() {
   const supabase = await createClient()
@@ -78,7 +78,7 @@ export default async function ResourcesPage() {
       <ResourcesClient 
         initialResources={resources || []}
         organizationId={orgId}
-        location={(locData as any) || undefined}
+        location={(locData as unknown as LocationType) || undefined}
         locationId={locationId}
         slug={locationSlug}
         qrCodes={qrCodes || []}

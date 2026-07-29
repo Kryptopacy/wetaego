@@ -45,6 +45,7 @@ describe('ActiveOrdersGrid', () => {
         onSendPaymentLink={vi.fn()}
         onVoidOrder={vi.fn()}
         onRefundOrder={vi.fn()}
+        onChargeAuthHold={vi.fn()}
       />
     )
     
@@ -65,6 +66,7 @@ describe('ActiveOrdersGrid', () => {
         onSendPaymentLink={vi.fn()}
         onVoidOrder={vi.fn()}
         onRefundOrder={vi.fn()}
+        onChargeAuthHold={vi.fn()}
       />
     )
     
@@ -84,6 +86,7 @@ describe('ActiveOrdersGrid', () => {
         onSendPaymentLink={vi.fn()}
         onVoidOrder={vi.fn()}
         onRefundOrder={vi.fn()}
+        onChargeAuthHold={vi.fn()}
       />
     )
     
@@ -117,6 +120,7 @@ describe('ActiveOrdersGrid', () => {
         onSendPaymentLink={vi.fn()}
         onVoidOrder={vi.fn()}
         onRefundOrder={vi.fn()}
+        onChargeAuthHold={vi.fn()}
       />
     )
     
