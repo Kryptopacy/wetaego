@@ -22,9 +22,10 @@ interface ActiveOrdersGridProps {
   onSendPaymentLink: (id: string) => Promise<void>
   onVoidOrder: (id: string, pin: string) => Promise<{success: boolean, error?: string}>
   onRefundOrder: (id: string, pin: string) => Promise<{success: boolean, error?: string}>
+  onChargeAuthHold: (id: string) => Promise<{success: boolean, error?: string}>
 }
 
-export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, templateType, onClaimOrder, onMarkPaidOffline, onCompleteOrder, onCancelOrder, onSendPaymentLink, onVoidOrder, onRefundOrder }: ActiveOrdersGridProps) {
+export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, templateType, onClaimOrder, onMarkPaidOffline, onCompleteOrder, onCancelOrder, onSendPaymentLink, onVoidOrder, onRefundOrder, onChargeAuthHold }: ActiveOrdersGridProps) {
   const [optimisticOrders, addOptimisticOrder] = useOptimistic(
     activeOrders,
     (state: UIOrder[], updatedOrder: Partial<UIOrder> & { id: string }) => {
@@ -238,7 +239,7 @@ export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, tem
           />
         )}
         
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div className={filteredOrders.length === 0 ? "flex-1 overflow-y-auto p-4 flex items-center justify-center" : "flex-1 overflow-y-auto p-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 content-start"}>
           {filteredOrders.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-zinc-500">
               {optimisticOrders.length === 0 ? (
@@ -252,16 +253,17 @@ export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, tem
             </div>
           ) : (
             filteredOrders.map(order => (
-              <div key={order.id} className="relative overflow-hidden rounded-lg sm:overflow-visible">
+              <div key={order.id} className="relative overflow-hidden rounded-xl sm:overflow-visible flex flex-col h-full">
                 {/* Mobile Swipe Container (CSS Scroll Snap) */}
-                <div className="flex w-full overflow-x-auto snap-x snap-mandatory hide-scrollbar sm:block sm:overflow-visible">
+                <div className="flex w-full overflow-x-auto snap-x snap-mandatory hide-scrollbar sm:block sm:overflow-visible h-full">
                   
                   {/* Main Card Content */}
-                  <div className={`w-full shrink-0 snap-center p-5 border sm:rounded-lg ${order.status === 'paid' ? 'border-blue-500/50 bg-blue-500/5' : 'border-zinc-800 bg-zinc-900/50'}`}>
-                    <div className="flex justify-between items-start mb-4 border-b border-zinc-800/50 pb-4">
-                  <div>
-                    <div className="flex items-center gap-3 mb-1">
-                      <span className="font-bold text-xl text-white">{order.table_identifier || 'Takeaway'}</span>
+                  <div className={`w-full shrink-0 snap-center p-5 border sm:rounded-xl shadow-sm hover:border-zinc-700 transition-all flex flex-col justify-between h-full ${order.status === 'paid' ? 'border-blue-500/50 bg-blue-500/5' : 'border-zinc-800 bg-zinc-900/50'}`}>
+                    <div>
+                      <div className="flex justify-between items-start mb-4 border-b border-zinc-800/50 pb-4">
+                        <div>
+                          <div className="flex items-center gap-3 mb-1">
+                            <span className="font-bold text-xl text-white">{order.table_identifier || 'Takeaway'}</span>
                       <span className="text-zinc-500">·</span>
                       <span className="text-zinc-300 font-medium">{order.customer_name || 'Guest'}</span>
                     </div>
@@ -346,6 +348,7 @@ export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, tem
                     </button>
                   </div>
                 )}
+              </div>
 
                 {/* Desktop Inline Actions (Hidden on Mobile) */}
                 <div className={`hidden sm:flex justify-between items-center mt-4 pt-4 border-t border-zinc-800/50 ${templateType === 'restaurant' ? 'flex-col gap-4 sm:flex-row' : ''}`}>
@@ -366,6 +369,22 @@ export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, tem
                         Refund (Paid)
                       </button>
                     )}
+                    <button
+                      onClick={async () => {
+                        if (!confirm('Are you sure you want to charge the No-Show fee to the card on file?')) return
+                        setIsProcessingAction(true)
+                        const res = await onChargeAuthHold(order.id)
+                        setIsProcessingAction(false)
+                        if (res.success) {
+                          toast.success('Card successfully charged!')
+                        } else {
+                          toast.error(res.error || 'Failed to charge card')
+                        }
+                      }}
+                      className="px-4 py-2 rounded-lg text-red-400 border border-red-500/20 hover:bg-red-500/10 font-medium transition-colors text-sm ml-2"
+                    >
+                      Charge No-Show Fee
+                    </button>
                   </div>
                   <div className={`flex items-center gap-3 ${templateType === 'restaurant' ? 'w-full sm:w-auto flex-col sm:flex-row' : ''}`}>
                     {(templateType === 'services' || order.fulfillment_type === 'delivery' || order.fulfillment_type === 'pickup') && order.status !== 'cancelled' && (
@@ -524,11 +543,11 @@ export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, tem
                     {templateType === 'restaurant' ? 'Bump Order' : 'Complete Order'}
                   </button>
                 )}
-              </div>
+          </div>
             </div>
           </div>
-            ))
-          )}
+          ))
+        )}
         </div>
       </div>
   )

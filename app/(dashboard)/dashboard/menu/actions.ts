@@ -131,11 +131,14 @@ export const createItem = authActionClient
     if (error) throw new Error('Failed to create item: ' + error.message)
 
     if (newItem && collection_ids.length > 0) {
-      const junctionInserts = collection_ids.map((cid: string) => ({
-        item_id: newItem.id,
-        collection_id: cid
-      }))
-      await adminClient.from('page_item_collections').insert(junctionInserts)
+      const valid_collection_ids = collection_ids.filter((cid: string) => cid !== 'uncategorized')
+      if (valid_collection_ids.length > 0) {
+        const junctionInserts = valid_collection_ids.map((cid: string) => ({
+          item_id: newItem.id,
+          collection_id: cid
+        }))
+        await adminClient.from('page_item_collections').insert(junctionInserts)
+      }
     }
 
     await purgeStorefrontCache(orgId)
@@ -264,8 +267,8 @@ export const toggleItemStatus = authActionClient
     const { data: item } = await adminClient.from('page_items').select('location_pages!inner(location_id, locations!inner(organization_id))').eq('id', itemId).single()
     if (!item) throw new Error('Item not found')
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const orgId = (item.location_pages as any).locations.organization_id
+    const locPages = item.location_pages as unknown as { locations: { organization_id: string } }
+    const orgId = locPages.locations.organization_id
 
     const { error } = await adminClient
       .from('page_items')
