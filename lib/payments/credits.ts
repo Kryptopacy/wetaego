@@ -1,6 +1,7 @@
 import { createAdminClient } from '@/lib/supabase/server'
 import { getPlanLimits } from '@/lib/utils/settings'
 import * as Sentry from '@sentry/nextjs'
+import type { Database } from '@/lib/supabase/types'
 
 export type PlanType = 'lite' | 'pro' | 'enterprise' | string
 
@@ -14,8 +15,7 @@ export async function chargeCredits(organizationId: string, cost: number, reason
     const supabase = await createAdminClient()
 
     // Use the atomic RPC function (prevents race conditions via SELECT ... FOR UPDATE)
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error: rpcError } = await supabase.rpc('charge_credits_atomic' as any, {
+    const { data, error: rpcError } = await supabase.rpc('charge_credits_atomic' as unknown as keyof Database['public']['Functions'], {
       p_organization_id: organizationId,
       p_cost: cost,
       p_reason: reason,

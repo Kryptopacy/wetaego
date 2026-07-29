@@ -36,6 +36,7 @@ export const paystackProvider: PaymentProvider = {
           ...params.metadata,
           customer_name: params.customerName,
           customer_phone: params.customerPhone,
+          charge_type: params.chargeType || 'charge',
         },
       }),
     })
@@ -108,6 +109,41 @@ export const paystackProvider: PaymentProvider = {
     }
 
     return { success: true }
+  },
+
+  async chargeCardOnFile(token: string, amountMinor: number, email: string, reference: string, useTestKeys?: boolean): Promise<PaymentVerification> {
+    const secretKey = useTestKeys ? process.env.PAYSTACK_TEST_SECRET_KEY : process.env.PAYSTACK_SECRET_KEY
+    if (!secretKey) throw new Error('PAYSTACK_SECRET_KEY is not configured')
+
+    const res = await fetch(`${PAYSTACK_BASE}/transaction/charge_authorization`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${secretKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        authorization_code: token,
+        email,
+        amount: amountMinor,
+        reference,
+      }),
+    })
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}))
+      throw new Error(`Paystack charge card on file failed: ${JSON.stringify(err)}`)
+    }
+
+    const data = await res.json()
+    
+    return {
+      status: data.data.status === 'success' ? 'success' : (data.data.status === 'failed' ? 'failed' : 'pending'),
+      amountPaid: data.data.amount,
+      currency: data.data.currency,
+      reference: data.data.reference,
+      paidAt: data.data.paidAt,
+      providerData: data.data,
+    }
   },
 
   validateWebhookSignature(payload: string, signature: string): boolean {

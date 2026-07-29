@@ -22,6 +22,7 @@ export const bachsProvider: PaymentProvider = {
       pricing: {
         amount: amountInUnits,
         currency: params.currency.toUpperCase(),
+        ...(params.chargeType === 'auth' ? { charge_type: 'pre_auth' } : {}),
       },
       customer: {
         email: params.customerEmail,
@@ -147,6 +148,45 @@ export const bachsProvider: PaymentProvider = {
     }
 
     return { success: true }
+  },
+
+  async chargeCardOnFile(token: string, amountMinor: number, email: string, reference: string, useTestKeys?: boolean): Promise<PaymentVerification> {
+    const apiKey = useTestKeys ? process.env.BACHS_TEST_API_KEY : (process.env.BACHS_API_KEY || process.env.BACHS_SECRET_KEY)
+    if (!apiKey) throw new Error('BACHS_API_KEY is not configured')
+
+    const amountInUnits = (amountMinor / 100).toFixed(2)
+
+    const res = await fetch(`${BACHS_BASE_URL}/charge_authorization`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'X-Bachs-Key': apiKey,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        authorization_code: token,
+        email,
+        amount: amountInUnits,
+        reference,
+      }),
+    })
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}))
+      console.error('[bachsProvider] chargeCardOnFile failed:', err)
+      throw new Error(`Bachs charge card on file failed: ${err?.detail || err?.message || JSON.stringify(err)}`)
+    }
+
+    const data = await res.json()
+    
+    return {
+      status: data.status === 'succeeded' ? 'success' : (data.status === 'failed' ? 'failed' : 'pending'),
+      amountPaid: Math.round(parseFloat(data.amount) * 100),
+      currency: data.currency,
+      reference: data.reference,
+      paidAt: data.created_at,
+      providerData: data,
+    }
   },
 
   validateWebhookSignature(payload: string, signature: string): boolean {

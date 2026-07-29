@@ -53,7 +53,7 @@ export async function POST(req: Request) {
       // ── Admin Tester Mode ───────────────────────────────────────────────────
       if (event.data.metadata?.is_test_mode === true) {
         // eslint-disable-next-line no-console
-        console.log('✅ Admin test payment processed successfully:', rawReference)
+
         return NextResponse.json({ status: 'test_mode_success' }, { status: 200 })
       }
 
@@ -62,7 +62,7 @@ export async function POST(req: Request) {
         const bookingId = rawReference.replace('book_', '').split('_')[0]
         
         try {
-          await processBookingPayment(supabase, bookingId, amountPaidMinor, rawReference)
+          await processBookingPayment(supabase, bookingId, amountPaidMinor, rawReference, event.data.authorization, event.data.metadata)
         } catch (e: unknown) {
           const errorMessage = e instanceof Error ? e.message : String(e)
           await supabase
@@ -167,7 +167,7 @@ export async function POST(req: Request) {
       const orderId = rawReference.split('_split_')[0]
 
       try {
-        const result = await processOrderPayment(supabase, orderId, amountPaidMinor, event.data.reference)
+        const result = await processOrderPayment(supabase, orderId, amountPaidMinor, event.data.reference, event.data.authorization, event.data.metadata)
         if (result === 'already_processed') {
           return NextResponse.json({ status: 'already_processed' }, { status: 200 })
         }

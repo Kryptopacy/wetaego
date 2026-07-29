@@ -89,13 +89,6 @@ export async function POST(req: Request) {
         .in('id', targetItemIds)
       
       if (items && items.length > 0) {
-        // Validate inventory
-        const requestedGuests = number_of_guests || 1
-        const insufficientItem = items.find(i => i.inventory_count !== null && i.inventory_count < requestedGuests)
-        if (insufficientItem) {
-          return NextResponse.json({ error: `Not enough availability for ${insufficientItem.title}` }, { status: 409 })
-        }
-
         firstItem = items[0]
         basePrice = items.reduce((sum, i) => sum + (i.price_minor || 0), 0)
         
@@ -127,49 +120,33 @@ export async function POST(req: Request) {
       ? Math.round(basePrice * (depositPct / 100))
       : basePrice
 
-    // Check availability if tied to items and has dates
-    if (targetItemIds.length > 0 && booking_date) {
-      for (const id of targetItemIds) {
-        const { data: isAvailable, error: rpcError } = await adminClient.rpc('check_item_availability', {
-          p_item_id: id,
-          p_start_date: booking_date,
-          p_end_date: booking_end_date || booking_date,
-        })
+    // 1. Create the booking record atomically under FOR UPDATE row locks to prevent race conditions
+    const primaryItemId = targetItemIds.length === 1 ? targetItemIds[0] : null
+    const { data: bookingData, error: bookingError } = await adminClient.rpc('create_booking_atomic', {
+      p_page_id: page_id,
+      p_item_id: primaryItemId,
+      p_customer_name: customer_name,
+      p_customer_email: customer_email || null,
+      p_customer_phone: customer_phone,
+      p_booking_date: booking_date || null,
+      p_booking_end_date: booking_end_date || null,
+      p_booking_time: booking_time || null,
+      p_booking_end_time: booking_end_time || null,
+      p_number_of_guests: number_of_guests || 1,
+      p_booking_notes: (targetItemIds.length > 1 ? `Multi-item Booking: ${targetItemIds.length} items.\n\n` : '') + (booking_notes || ''),
+      p_total_amount_minor: basePrice,
+      p_payment_status: 'unpaid'
+    })
 
-        if (rpcError) {
-          console.error('Availability check error:', rpcError)
-        } else if (isAvailable === false) {
-          return NextResponse.json({ error: 'Selected dates are unavailable or sold out for some items' }, { status: 409 })
-        }
-      }
-    }
-
-    // Create the booking record (initially pending)
-    const { data: booking, error: bookingError } = await adminClient
-      .from('page_bookings')
-      .insert({
-        page_id,
-        item_id: targetItemIds.length === 1 ? targetItemIds[0] : null,
-        customer_name,
-        customer_email: customer_email || null,
-        customer_phone,
-        booking_date: booking_date || null,
-        booking_end_date: booking_end_date || null,
-        booking_time: booking_time || null,
-        booking_end_time: booking_end_time || null,
-        number_of_guests: number_of_guests || 1,
-        booking_notes: (targetItemIds.length > 1 ? `Multi-item Booking: ${targetItemIds.length} items.\n\n` : '') + (booking_notes || ''),
-        total_amount_minor: basePrice,
-        status: 'pending',
-        payment_status: 'unpaid',
-      })
-      .select('id')
-      .single()
-
-    if (bookingError || !booking) {
+    if (bookingError || !bookingData) {
       console.error('Booking insert error:', bookingError)
+      if (bookingError?.message?.includes('sold out') || bookingError?.message?.includes('Not enough availability')) {
+        return NextResponse.json({ error: bookingError.message }, { status: 409 })
+      }
       return NextResponse.json({ error: 'Failed to create booking' }, { status: 500 })
     }
+
+    const booking = { id: (bookingData as { id: string }).id }
 
     // Insert child bookings for inventory locking if there are multiple items
     if (targetItemIds.length > 1) {

@@ -52,7 +52,7 @@ export async function POST(req: Request) {
 
       // Admin Tester Mode
       if (data.metadata?.is_test_mode === true) {
-        console.log('✅ Bachs Admin test payment processed:', rawReference)
+
         return NextResponse.json({ status: 'test_mode_success' }, { status: 200 })
       }
 

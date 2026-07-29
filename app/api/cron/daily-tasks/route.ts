@@ -33,11 +33,11 @@ export async function GET(req: Request) {
     })
 
     // eslint-disable-next-line no-console
-    console.log('Running daily-report cron task...')
+
     await runDailyReports(reqForReports)
 
     // eslint-disable-next-line no-console
-    console.log('Running iou-reminders cron task...')
+
     await runIouReminders(reqForIou)
 
     return NextResponse.json({ status: 'success', message: 'Daily tasks completed' })

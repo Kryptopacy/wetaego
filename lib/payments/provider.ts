@@ -1,8 +1,8 @@
 /**
- * Payment Provider Abstraction Layer
- *
- * All payment logic in OurMenu routes through this interface.
- * Swapping Paystack for Flutterwave or Stripe is a one-line config change.
+ * Unified Payment Provider
+ * 
+ * Abstracted payment execution layer. 
+ * Swapping Paystack for Flutterwave or Bachs is a one-line config change.
  */
 
 export interface PaymentParams {
@@ -29,6 +29,11 @@ export interface PaymentParams {
   channels?: string[]
   /** Override to use test environment keys (Admin Testing only) */
   useTestKeys?: boolean
+  /** 
+   * Specifies if this is an immediate charge, or a card tokenization (Auth Hold). 
+   * Defaults to 'charge'.
+   */
+  chargeType?: 'auth' | 'charge'
 }
 
 export interface PaymentVerification {
@@ -47,5 +52,7 @@ export interface PaymentProvider {
   initiatePayment(params: PaymentParams): Promise<{ authorizationUrl: string; reference: string }>
   verifyPayment(reference: string, useTestKeys?: boolean): Promise<PaymentVerification>
   refundPayment?(reference: string, amountMinor?: number, useTestKeys?: boolean): Promise<{ success: boolean; message?: string }>
+  /** Charge a previously tokenized card on file (e.g., for a No-Show fee) */
+  chargeCardOnFile?(token: string, amountMinor: number, email: string, reference: string, useTestKeys?: boolean): Promise<PaymentVerification>
   validateWebhookSignature(payload: string, signature: string): boolean
 }

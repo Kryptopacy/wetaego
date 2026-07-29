@@ -33,8 +33,7 @@ export async function notifyBusiness(
     const orgId = location.organization_id
 
     // 1.5 Save to In-App Notifications
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error: staffNotifError } = await (supabaseAdmin as any)
+    const { error: staffNotifError } = await (supabaseAdmin as unknown as { from: (table: string) => { insert: (data: Record<string, unknown>) => Promise<{ error: unknown }> } })
       .from('staff_notifications')
       .insert({
         organization_id: orgId,
@@ -149,8 +148,7 @@ export async function notifyCustomer(
     // 3. Intercom Sync
     // Without an active Intercom API key, we log the intent. 
     // Usually this requires pushing an event to Intercom's REST API: POST https://api.intercom.io/events
-    // eslint-disable-next-line no-console
-    console.log(`[Intercom Sync] Pushing milestone event '${payload.title}' to customer: ${order.customer_email || order.customer_phone}`)
+    console.info(`[Intercom Sync] Pushing milestone event '${payload.title}' to customer: ${order.customer_email || order.customer_phone}`)
 
   } catch (error) {
     console.error('Error dispatching customer notifications:', error)

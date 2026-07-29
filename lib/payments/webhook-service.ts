@@ -14,7 +14,11 @@ export async function processBookingPayment(
   supabase: SupabaseClient,
   bookingId: string,
   amountPaidMinor: number,
-  rawReference: string
+  rawReference: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  authorization?: any,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  metadata?: any
 ) {
   const { data: booking } = await supabase
     .from('page_bookings')
@@ -44,6 +48,34 @@ export async function processBookingPayment(
         p_amount_minor: amountPaidMinor,
         p_payment_reference: rawReference
       })
+    }
+  }
+
+  const locationPage = Array.isArray(booking.location_pages) ? booking.location_pages[0] : booking.location_pages
+  const locationObj = locationPage ? (Array.isArray(locationPage.locations) ? locationPage.locations[0] : locationPage.locations) : null
+  const orgId = locationObj?.organization_id
+
+  if (authorization && metadata?.charge_type === 'auth_hold' && orgId && booking.customer_email) {
+    const { data: customerProfile } = await supabase
+      .from('customer_profiles')
+      .select('id')
+      .eq('organization_id', orgId)
+      .eq('email', booking.customer_email)
+      .single()
+      
+    if (customerProfile) {
+      await supabase.from('customer_payment_tokens').upsert({
+        customer_id: customerProfile.id,
+        organization_id: orgId,
+        provider: 'paystack',
+        authorization_code: authorization.authorization_code,
+        last4: authorization.last4,
+        exp_month: authorization.exp_month,
+        exp_year: authorization.exp_year,
+        card_type: authorization.card_type,
+        bank: authorization.bank,
+        email: booking.customer_email
+      }, { onConflict: 'customer_id,provider,authorization_code' })
     }
   }
 
@@ -240,7 +272,11 @@ export async function processOrderPayment(
   supabase: SupabaseClient,
   orderId: string,
   amountPaidMinor: number,
-  reference: string
+  reference: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  authorization?: any,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  metadata?: any
 ) {
   const { data: order } = await supabase
     .from('orders')
@@ -265,6 +301,31 @@ export async function processOrderPayment(
 
   if (paymentError) {
     throw new Error('Failed to record payment')
+  }
+
+  // --- Auth Holds (Save Card on File) ---
+  if (authorization && metadata?.charge_type === 'auth_hold' && order.organization_id && order.customer_email) {
+    const { data: customerProfile } = await supabase
+      .from('customer_profiles')
+      .select('id')
+      .eq('organization_id', order.organization_id)
+      .eq('email', order.customer_email)
+      .single()
+      
+    if (customerProfile) {
+      await supabase.from('customer_payment_tokens').upsert({
+        customer_id: customerProfile.id,
+        organization_id: order.organization_id,
+        provider: 'paystack',
+        authorization_code: authorization.authorization_code,
+        last4: authorization.last4,
+        exp_month: authorization.exp_month,
+        exp_year: authorization.exp_year,
+        card_type: authorization.card_type,
+        bank: authorization.bank,
+        email: order.customer_email
+      }, { onConflict: 'customer_id,provider,authorization_code' })
+    }
   }
 
   // --- Loyalty Points Awarding ---
