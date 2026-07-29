@@ -83,6 +83,15 @@ async function main() {
     } else if (command === 'migrate') {
       pushMigrations();
       await fetchTypes();
+    } else if (command === 'status') {
+      execSync(`npx supabase migration list --db-url "${dbUrl}"`, { stdio: 'inherit', env: process.env });
+    } else if (command === 'repair') {
+      const version = args[1];
+      if (!version) {
+        console.error('Please specify a version to repair: node scripts/db.js repair <version>');
+        process.exit(1);
+      }
+      execSync(`npx supabase migration repair --status reverted ${version} --db-url "${dbUrl}"`, { stdio: 'inherit', env: process.env });
     } else {
       console.error(`Unknown command: ${command}`);
       process.exit(1);

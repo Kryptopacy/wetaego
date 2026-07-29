@@ -507,6 +507,69 @@ export type Database = {
         }
         Relationships: []
       }
+      customer_payment_tokens: {
+        Row: {
+          authorization_code: string
+          bank: string | null
+          card_type: string
+          created_at: string
+          customer_id: string
+          email: string
+          exp_month: string
+          exp_year: string
+          id: string
+          last4: string
+          organization_id: string
+          provider: string
+          updated_at: string
+        }
+        Insert: {
+          authorization_code: string
+          bank?: string | null
+          card_type: string
+          created_at?: string
+          customer_id: string
+          email: string
+          exp_month: string
+          exp_year: string
+          id?: string
+          last4: string
+          organization_id: string
+          provider: string
+          updated_at?: string
+        }
+        Update: {
+          authorization_code?: string
+          bank?: string | null
+          card_type?: string
+          created_at?: string
+          customer_id?: string
+          email?: string
+          exp_month?: string
+          exp_year?: string
+          id?: string
+          last4?: string
+          organization_id?: string
+          provider?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_payment_tokens_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customer_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_payment_tokens_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_profiles: {
         Row: {
           created_at: string | null
@@ -1222,6 +1285,7 @@ export type Database = {
           delivery_minimum_order_minor: number | null
           delivery_note: string | null
           deposit_percentage: number | null
+          deposit_type: string | null
           global_discount_banner_text: string | null
           global_discount_enabled: boolean | null
           global_discount_percentage: number | null
@@ -1273,6 +1337,7 @@ export type Database = {
           delivery_minimum_order_minor?: number | null
           delivery_note?: string | null
           deposit_percentage?: number | null
+          deposit_type?: string | null
           global_discount_banner_text?: string | null
           global_discount_enabled?: boolean | null
           global_discount_percentage?: number | null
@@ -1324,6 +1389,7 @@ export type Database = {
           delivery_minimum_order_minor?: number | null
           delivery_note?: string | null
           deposit_percentage?: number | null
+          deposit_type?: string | null
           global_discount_banner_text?: string | null
           global_discount_enabled?: boolean | null
           global_discount_percentage?: number | null
@@ -1493,6 +1559,7 @@ export type Database = {
           ai_escalation_contact: string | null
           ai_faqs: Json | null
           ai_instructions: string | null
+          ai_manager_protection_mode: boolean
           ai_name: string
           brand_knowledge: string | null
           clock_in_mode: string
@@ -1554,6 +1621,7 @@ export type Database = {
           ai_escalation_contact?: string | null
           ai_faqs?: Json | null
           ai_instructions?: string | null
+          ai_manager_protection_mode?: boolean
           ai_name?: string
           brand_knowledge?: string | null
           clock_in_mode?: string
@@ -1615,6 +1683,7 @@ export type Database = {
           ai_escalation_contact?: string | null
           ai_faqs?: Json | null
           ai_instructions?: string | null
+          ai_manager_protection_mode?: boolean
           ai_name?: string
           brand_knowledge?: string | null
           clock_in_mode?: string
@@ -2357,6 +2426,7 @@ export type Database = {
           id: string
           invited_by: string
           organization_id: string
+          page_id: string | null
           role: Database["public"]["Enums"]["member_role"]
           token: string
         }
@@ -2368,6 +2438,7 @@ export type Database = {
           id?: string
           invited_by: string
           organization_id: string
+          page_id?: string | null
           role?: Database["public"]["Enums"]["member_role"]
           token?: string
         }
@@ -2379,6 +2450,7 @@ export type Database = {
           id?: string
           invited_by?: string
           organization_id?: string
+          page_id?: string | null
           role?: Database["public"]["Enums"]["member_role"]
           token?: string
         }
@@ -3803,6 +3875,10 @@ export type Database = {
           p_organization_id: string
         }
         Returns: Json
+      }
+      redeem_coupon_rpc: {
+        Args: { p_code: string; p_organization_id: string }
+        Returns: boolean
       }
     }
     Enums: {
