@@ -13,6 +13,7 @@ import { Pricing } from './components/pricing'
 import { LandingNavbar } from '../components/LandingNavbar'
 import { UseCases } from './components/use-cases'
 import { RouletteTeaser } from './components/roulette-teaser'
+import { IouTeaser } from './components/iou-teaser'
 
 export default async function HomePage() {
   const jsonLd = {
@@ -31,7 +32,8 @@ export default async function HomePage() {
       "Payment Roulette Game",
       "Bill Splitting Randomizer",
       "Who Pays The Bill Roulette",
-      "Progressive Web App (PWA)"
+      "Progressive Web App (PWA)",
+      "Franchise Mode & Branch Autonomy"
     ],
     "url": "https://ourmenuos.online",
     "offers": {
@@ -213,6 +215,9 @@ export default async function HomePage() {
 
       {/* ── ROULETTE GAMIFICATION ── */}
       <RouletteTeaser />
+
+      {/* ── IOU FINANCING ── */}
+      <IouTeaser />
 
       {/* ── PRICING ── */}
       <Pricing />

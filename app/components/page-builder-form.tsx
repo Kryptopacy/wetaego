@@ -10,7 +10,7 @@ import { AiGenerateButton } from './ai-generate-button'
 import { formatCurrency } from '@/lib/utils/currency'
 import { VariantBuilderField, type VariantGroup } from './variant-builder-field'
 
-interface PageItem {
+export interface PageItem {
   id: string
   title: string
   subtitle: string | null

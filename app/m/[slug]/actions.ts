@@ -417,7 +417,7 @@ export async function processCheckout(params: {
       p_amount_minor: walletAmountAppliedMinor
     })
 
-    if (walletError || !(rpcResult as any)?.success) {
+    if (walletError || !(rpcResult as { success?: boolean })?.success) {
       await adminClient.from('orders').delete().eq('id', order.id)
       throw new Error(walletError?.message || 'Insufficient wallet balance.')
     }
@@ -489,12 +489,16 @@ export async function processCheckout(params: {
       ? Math.floor(chargeAmountMinor * (businessFeePercent / 100))
       : undefined
 
-    // Fetch page-specific payment channels restriction
+    // Fetch page-specific payment channels restriction and Auth Hold settings
     let channels: string[] | undefined = undefined
+    let chargeType: 'auth' | 'charge' = 'charge'
     if (pageId) {
-      const { data: pageData } = await supabase.from('location_pages').select('template_data').eq('id', pageId).single()
+      const { data: pageData } = await supabase.from('location_pages').select('template_data, deposit_type, payment_mode').eq('id', pageId).single()
       if (pageData?.template_data && typeof pageData.template_data === 'object' && 'payment_channels' in pageData.template_data) {
         channels = pageData.template_data.payment_channels as string[]
+      }
+      if (pageData?.payment_mode === 'deposit' && pageData?.deposit_type === 'auth_hold') {
+        chargeType = 'auth'
       }
     }
 
@@ -517,7 +521,8 @@ export async function processCheckout(params: {
         callbackUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/m/${slug}/payment-callback`,
         subaccountCode: subaccountCode || undefined,
         transactionChargeMinor,
-        channels
+        channels,
+        chargeType
       })
 
       return { data: { checkoutUrl, orderId: order.id, paymentMethod: 'card' } }
@@ -746,9 +751,10 @@ export async function callStaffFromAi(params: {
   orgId: string,
   locationId: string,
   tableIdentifier: string,
-  requestType: 'waiter' | 'bill' | 'cleanup'
+  requestType: 'waiter' | 'bill' | 'cleanup' | 'manager_escalation',
+  note?: string
 }): Promise<SafeResult<{ success: boolean }>> {
-  const { orgId, locationId, tableIdentifier, requestType } = params;
+  const { orgId, locationId, tableIdentifier, requestType, note } = params;
   const supabase = await createClient()
 
   if (!orgId || !locationId || !tableIdentifier || !requestType) {
@@ -761,6 +767,7 @@ export async function callStaffFromAi(params: {
     location_id: locationId,
     table_identifier: tableIdentifier,
     request_type: requestType as RequestType,
+    custom_request_text: note
   })
 
   if (error) return { serverError: error.message }
@@ -776,10 +783,18 @@ export async function callStaffFromAi(params: {
   const whatsappNumber = location?.whatsapp_number || '08000000000'
 
   // Fire WhatsApp & Business Push/Sound/Email Notifications in the background without blocking the UI
-  waitUntil(sendWhatsAppMessage(whatsappNumber, `Table ${tableIdentifier} needs a ${requestType}!`))
+  const isEscalation = requestType === 'manager_escalation'
+  const title = isEscalation
+    ? `🚨 URGENT: Human Handoff — ${tableIdentifier}`
+    : `[AI REQUEST] Service Needed — ${tableIdentifier}`
+  const body = isEscalation
+    ? `Human assistance requested at ${tableIdentifier}${note ? `: "${note}"` : ''}`
+    : `Requested: ${requestType.toUpperCase()} at ${tableIdentifier}${note ? ` ("${note}")` : ''}`
+
+  waitUntil(sendWhatsAppMessage(whatsappNumber, `*${title}*\n${body}`))
   waitUntil(notifyBusiness(locationId, {
-    title: `[AI REQUEST] Staff Needed — Table ${tableIdentifier}`,
-    body: `Requested: ${requestType}`,
+    title,
+    body,
     url: '/dashboard/orders',
     tag: `service_request_${locationId}`,
   }))

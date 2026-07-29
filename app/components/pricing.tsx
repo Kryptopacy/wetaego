@@ -25,6 +25,7 @@ export async function Pricing() {
       ]}
       liteFeatures={[
         'Includes 10 Credits/mo',
+        'Unlimited Staff Seats (0 per-seat fees)',
         'Customizable AI Assistant (guest-facing)',
         'Edge Translator (40+ languages)',
         'Up to 2 QR codes',
@@ -34,6 +35,8 @@ export async function Pricing() {
       proFeatures={[
         'Everything in Lite',
         `Includes ${planLimits.pro?.credits || 50} Credits/mo`,
+        'Unlimited Staff Seats & Manager Scopes',
+        'Manager Protection Mode (Peak Hour Shield)',
         'AI Copywriter & Image Studio',
         'Smart Request Triaging (KDS)',
         'Demand Forecasting Engine',
@@ -43,6 +46,7 @@ export async function Pricing() {
       enterpriseFeatures={[
         'Everything in Pro',
         `Includes ${planLimits.enterprise?.credits || 200} Credits/mo`,
+        'Franchise Autonomy & Multi-Location Scaling',
         'Dedicated AI model fine-tuning',
         'Multi-location dashboard',
         'API access for PMS integration',

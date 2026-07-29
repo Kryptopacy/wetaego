@@ -41,9 +41,9 @@ const cases = [
     icon: Briefcase,
     title: 'Consultants & Agencies',
     subtitle: 'Freelancers, Marketers & B2B',
-    description: 'Stop sending PDF proposals. Share interactive, polished digital rate cards. Clients can select service tiers, accept quotes, and pay retainers instantly.',
+    description: 'Stop sending static PDF proposals and paying for bloated, enterprise CRMs. Share interactive, CRM-Free Rate Cards & Service Catalogs. Clients can select deliverables, sign off quotes with a 2-tap approval on their phones, and pay retainers instantly.',
     color: 'from-emerald-500 to-teal-600',
-    metrics: ['Digital Rate Cards', 'Quote Engine', 'Retainers'],
+    metrics: ['CRM-Free Rate Cards', '2-Tap Mobile Approvals', 'Instant Retainers'],
     image: '/hero_restaurant_bg.png'
   },
   {

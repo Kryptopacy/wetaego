@@ -1,7 +1,7 @@
 import { createAnonClient } from '@/lib/supabase/server'
 import { unstable_cache } from 'next/cache'
-import { MenuRenderer } from '../../../menu-renderer'
-import { LiveOrderTracker } from '../../../live-order-tracker'
+import { MenuRenderer, CategoryWithItems } from '../../../menu-renderer'
+import { LiveOrderTracker, CustomMilestone } from '../../../live-order-tracker'
 import { GlobalDiscountBanner } from '../../../components/global-discount-banner'
 import { CartFAB } from '../../../cart-fab'
 import { VenueHeader } from '../../../components/venue-header'
@@ -101,9 +101,9 @@ export async function RestaurantRenderer({
             percentage={location.global_discount_percentage || 0} 
           />
         )}
-        <LiveOrderTracker customOrderMilestones={location.custom_order_milestones as any} />
+        <LiveOrderTracker customOrderMilestones={location.custom_order_milestones as CustomMilestone[] | null} />
         
-        <MenuRenderer initialCategories={categories as any} />
+        <MenuRenderer initialCategories={categories as CategoryWithItems[]} />
         
         <div className="mt-12 text-center pb-8">
           <a href="https://ourmenuos.online" className="text-xs text-zinc-400 dark:text-zinc-600 hover:text-zinc-600 dark:hover:text-zinc-400 transition-colors font-medium">

@@ -28,6 +28,14 @@ const categories = [
         badge: 'Tailored to you',
         title: 'Design your own operational flows.',
         description: 'Define varied data structures, custom checkout steps, and unique operational flows to match the precise way your team works.',
+      },
+      {
+        icon: Users,
+        color: 'from-amber-600 to-orange-600',
+        tag: 'Franchise Mode & Branch Autonomy',
+        badge: 'Multi-location scaling',
+        title: 'One brand. Infinite autonomous locations.',
+        description: 'Duplicate locations with 1-click while maintaining branch-specific menus and customization. Assign tiered branch managers who manage their own staff without touching HQ.',
       }
     ]
   },
@@ -148,14 +156,28 @@ const categories = [
         badge: 'Granular permissions',
         title: 'Owner. Manager. Viewer.',
         description: 'Every staff member sees exactly what they need and nothing more. Invite your whole team without losing control.',
+      }
+    ]
+  },
+  {
+    id: 'payments',
+    label: 'Payments & IOUs',
+    features: [
+      {
+        icon: Wallet,
+        color: 'from-emerald-600 to-teal-500',
+        tag: 'Store Credit & IOUs',
+        badge: 'Zero-fee BNPL',
+        title: 'The "Local Trust" Tab.',
+        description: 'Approve trusted VIP clients for a Store Credit tab. They bypass card payments at checkout and deduct instantly from their tab. Completely eliminates third-party BNPL merchant fees (like Klarna/Affirm).',
       },
       {
         icon: CreditCard,
         color: 'from-green-600 to-emerald-600',
-        tag: 'Paystack Payouts',
-        badge: 'Direct to your bank',
+        tag: 'Instant Payouts',
+        badge: 'Paystack / Bachs',
         title: 'Get paid when they checkout.',
-        description: 'Connect your bank account via Paystack. Revenue lands directly in your account the moment a client completes an order or booking.',
+        description: 'Revenue lands directly in your account the moment a client completes an order or booking. Your business, your payment routing.',
       }
     ]
   },
@@ -200,14 +222,6 @@ const categories = [
         badge: 'Viral Engagement',
         title: 'Who pays the bill? Spin the wheel.',
         description: 'Transform group payments. A gamified "spin to win" bill-splitting randomizer that turns checkout friction into a highly engaging, viral group experience.',
-      },
-      {
-        icon: Wallet,
-        color: 'from-emerald-600 to-teal-500',
-        tag: 'Store Credit & IOUs',
-        badge: 'B2B & B2C',
-        title: 'Buy now. Pay later. Built-in.',
-        description: 'Approve trusted clients for a Store Credit tab. They bypass card payments at checkout and deduct instantly from their tab, tracked automatically in your dashboard ledger.',
       }
     ]
   }

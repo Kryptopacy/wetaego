@@ -34,6 +34,7 @@ export function QuoteNegotiateClient({
   onRequestChanges: (message: string) => Promise<void>
 }) {
   const [showChangesForm, setShowChangesForm] = useState(false)
+  const [showApprovalSheet, setShowApprovalSheet] = useState(false)
   const [changeMessage, setChangeMessage] = useState('')
   const [isPending, startTransition] = useTransition()
   const [hasAccepted, setHasAccepted] = useState(false)
@@ -134,25 +135,14 @@ export function QuoteNegotiateClient({
       {/* Action Buttons — shown only when quote is open and not expired */}
       {!isLocked && !isExpired && (
         <div className="flex flex-col sm:flex-row gap-3">
-          {paymentEnabled && paymentIsLive ? (
-            <button
-              onClick={handlePay}
-              disabled={isPending}
-              className="flex-1 py-4 rounded-2xl font-bold text-white text-base transition-all disabled:opacity-50 hover:opacity-90 shadow-lg"
-              style={{ background: `linear-gradient(135deg, ${themeColor}, ${themeColor}cc)` }}
-            >
-              {isPending ? 'Redirecting…' : `Accept & Pay ${formatCurrency(subtotal, currency)}`}
-            </button>
-          ) : (
-            <button
-              onClick={() => setHasAccepted(true)}
-              disabled={isPending}
-              className="flex-1 py-4 rounded-2xl font-bold text-white text-base transition-all disabled:opacity-50 hover:opacity-90 shadow-lg"
-              style={{ background: `linear-gradient(135deg, ${themeColor}, ${themeColor}cc)` }}
-            >
-              Accept Quote
-            </button>
-          )}
+          <button
+            onClick={() => setShowApprovalSheet(true)}
+            disabled={isPending}
+            className="flex-1 py-4 rounded-2xl font-bold text-white text-base transition-all disabled:opacity-50 hover:opacity-90 shadow-lg"
+            style={{ background: `linear-gradient(135deg, ${themeColor}, ${themeColor}cc)` }}
+          >
+            {paymentEnabled && paymentIsLive ? `Approve & Pay Deposit (${formatCurrency(subtotal, currency)})` : 'Accept Quote →'}
+          </button>
 
           <button
             onClick={() => setShowChangesForm(v => !v)}
@@ -160,6 +150,24 @@ export function QuoteNegotiateClient({
           >
             <MessageSquare className="w-4 h-4" />
             Request Changes
+          </button>
+        </div>
+      )}
+
+      {/* 2-Tap Mobile Sticky Approval Bar */}
+      {!isLocked && !isExpired && (
+        <div className="fixed bottom-0 left-0 right-0 p-4 bg-zinc-950/95 backdrop-blur-xl border-t border-zinc-800 z-40 sm:hidden shadow-2xl flex items-center justify-between gap-3">
+          <div>
+            <p className="text-[11px] text-zinc-500 uppercase tracking-wider font-semibold">Total Amount</p>
+            <p className="text-lg font-black text-white">{formatCurrency(subtotal, currency)}</p>
+          </div>
+          <button
+            onClick={() => setShowApprovalSheet(true)}
+            disabled={isPending}
+            className="px-6 py-3 rounded-xl font-bold text-white text-sm shadow-lg active:scale-95 transition-all"
+            style={{ background: `linear-gradient(135deg, ${themeColor}, ${themeColor}cc)` }}
+          >
+            Review & Approve →
           </button>
         </div>
       )}
@@ -203,6 +211,78 @@ export function QuoteNegotiateClient({
               </div>
             </div>
           </motion.form>
+        )}
+      </AnimatePresence>
+
+      {/* 2nd-Tap Bottom Sheet Confirmation */}
+      <AnimatePresence>
+        {showApprovalSheet && !isLocked && !isExpired && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-4"
+            onClick={() => setShowApprovalSheet(false)}
+          >
+            <motion.div
+              initial={{ y: 100, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 100, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-3xl p-6 space-y-5 shadow-2xl"
+            >
+              <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
+                <div>
+                  <h3 className="text-lg font-black text-white">Confirm & Lock Proposal</h3>
+                  <p className="text-xs text-zinc-400">Step 2 of 2: Final confirmation</p>
+                </div>
+                <button onClick={() => setShowApprovalSheet(false)} className="text-zinc-500 hover:text-white text-sm">✕</button>
+              </div>
+
+              <div className="bg-zinc-800/50 rounded-2xl p-4 space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-zinc-400">Total Investment</span>
+                  <span className="font-bold text-white">{formatCurrency(subtotal, currency)}</span>
+                </div>
+                <p className="text-[11px] text-zinc-500">
+                  By confirming, you authorize {businessName} to schedule your project according to this quote.
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-2.5">
+                {paymentEnabled && paymentIsLive ? (
+                  <button
+                    onClick={handlePay}
+                    disabled={isPending}
+                    className="w-full py-4 rounded-2xl font-bold text-white text-base shadow-xl transition-all"
+                    style={{ background: `linear-gradient(135deg, ${themeColor}, ${themeColor}cc)` }}
+                  >
+                    {isPending ? 'Redirecting…' : `Confirm & Pay Deposit (${formatCurrency(subtotal, currency)})`}
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => { setShowApprovalSheet(false); setHasAccepted(true); }}
+                    disabled={isPending}
+                    className="w-full py-4 rounded-2xl font-bold text-white text-base shadow-xl transition-all"
+                    style={{ background: `linear-gradient(135deg, ${themeColor}, ${themeColor}cc)` }}
+                  >
+                    Confirm & Accept Quote
+                  </button>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowApprovalSheet(false);
+                    setShowChangesForm(true);
+                  }}
+                  className="w-full py-3 rounded-xl font-medium text-zinc-300 bg-zinc-800 hover:bg-zinc-700 text-sm transition-colors"
+                >
+                  Request Changes Instead
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
 
