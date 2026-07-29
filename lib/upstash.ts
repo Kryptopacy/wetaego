@@ -58,7 +58,7 @@ export async function checkRateLimit(actionName: string, customIdentifier?: stri
 /**
  * Checks if an idempotency key exists. If it does, returns the cached result.
  * If not, it executes the callback, caches the result for 24 hours, and returns it.
- * This is the industry-standard Stripe-like idempotency pattern.
+ * This is the industry-standard idempotency pattern.
  */
 export async function withIdempotency<T>(
   idempotencyKey: string, 

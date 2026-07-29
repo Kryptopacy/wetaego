@@ -17,7 +17,8 @@
     "plan": "echo \"See docs/PRODUCT_PLAN.md\"",
     "db:push": "node scripts/db.js push",
     "db:types": "node scripts/db.js types",
-    "db:migrate": "node scripts/db.js migrate"
+    "db:migrate": "node scripts/db.js migrate",
+    "db:sync": "node scripts/db.js migrate"
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.80",

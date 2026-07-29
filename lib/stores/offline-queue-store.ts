@@ -30,12 +30,14 @@ export interface QueuedAction {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   payload: any
   timestamp: number
+  retryCount?: number
 }
 
 interface OfflineQueueState {
   queue: QueuedAction[]
-  enqueueAction: (action: Omit<QueuedAction, 'id' | 'timestamp'>) => void
+  enqueueAction: (action: Omit<QueuedAction, 'id' | 'timestamp' | 'retryCount'>) => void
   dequeueAction: (id: string) => void
+  incrementRetryCount: (id: string) => void
   clearQueue: () => void
 }
 
@@ -57,6 +59,12 @@ export const useOfflineQueueStore = create<OfflineQueueState>()(
       dequeueAction: (id) =>
         set((state) => ({
           queue: state.queue.filter((a) => a.id !== id),
+        })),
+      incrementRetryCount: (id) =>
+        set((state) => ({
+          queue: state.queue.map((a) => 
+            a.id === id ? { ...a, retryCount: (a.retryCount || 0) + 1 } : a
+          )
         })),
       clearQueue: () => set({ queue: [] }),
     }),

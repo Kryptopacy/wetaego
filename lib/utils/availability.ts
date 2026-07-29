@@ -145,7 +145,7 @@ export async function getAvailableSlots(
     const availability: LocationAvailability = {
       timezone: avail.timezone,
       slot_interval: avail.slot_interval,
-      schedule: avail.schedule as any
+      schedule: avail.schedule as unknown as LocationAvailability['schedule']
     }
 
     // 2. Format the target date (YYYY-MM-DD) reliably without timezone shifting if string is passed
