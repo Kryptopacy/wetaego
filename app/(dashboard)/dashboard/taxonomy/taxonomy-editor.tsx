@@ -85,7 +85,7 @@ export function TaxonomyEditor({
     if (res.error) {
       toast.error(res.error)
     } else if (res.data) {
-      setCollections(prev => prev.map(c => c.id === id ? { ...c, name: editName.trim(), slug: (res.data as any).slug } : c))
+      setCollections(prev => prev.map(c => c.id === id ? { ...c, name: editName.trim(), slug: (res.data as { slug: string }).slug } : c))
       toast.success('Category updated')
       setEditingId(null)
     }

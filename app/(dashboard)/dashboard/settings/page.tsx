@@ -15,6 +15,7 @@ import { savePaymentSettings, saveManualPaymentSettings } from './payment-action
 import { cookies } from 'next/headers'
 
 import AiFaqBuilder from './ai-faq-builder'
+import { AiKnowledgeBaseEditor } from './ai-knowledge-base-editor'
 import { BusinessTypePicker } from './business-type-picker'
 import { ThemeColorPicker } from './theme-color-picker'
 import { ImageUpload } from '@/components/ui/image-upload'
@@ -915,16 +916,29 @@ export default async function SettingsPage({
                 <AiFaqBuilder initialFaqs={((activePage?.ai_faqs ?? location.ai_faqs) as { question: string, answer: string }[]) ?? []} />
               </div>
 
+              <div className="rounded-xl border border-amber-500/30 bg-amber-950/20 p-4 space-y-2">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <label htmlFor="aiManagerProtectionMode" className="text-sm font-semibold text-amber-300">
+                      🛡️ Manager Protection Mode (Peak-Hour Shield)
+                    </label>
+                    <p className="text-xs text-amber-200/80 mt-0.5">
+                      When active during peak rush hours, the AI proactively intercepts complaints and queues them for post-rush review instead of paging floor managers unless it is an emergency.
+                    </p>
+                  </div>
+                  <input
+                    type="checkbox"
+                    id="aiManagerProtectionMode"
+                    name="aiManagerProtectionMode"
+                    defaultChecked={location.ai_manager_protection_mode || false}
+                    className="h-5 w-5 rounded border-zinc-700 bg-zinc-800 text-amber-500 focus:ring-amber-500"
+                  />
+                </div>
+              </div>
+
               <div>
-                <label className="mb-2 block text-sm font-medium text-zinc-300">Brand Context & Knowledge (Unstructured)</label>
-                <textarea
-                  name="brandKnowledge"
-                  rows={4}
-                  defaultValue={location.brand_knowledge || ''}
-                  className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm"
-                  placeholder="Extra info about the venue. e.g.: Wi-Fi is Lounge2026. Parking is free. Vibe is quiet and upscale."
-                  maxLength={4000}
-                />
+                <label className="mb-2 block text-sm font-medium text-zinc-300">Brand Knowledge & Venue Policies</label>
+                <AiKnowledgeBaseEditor defaultValue={location.brand_knowledge || ''} />
               </div>
 
               <div className="mt-2 flex items-center justify-between">

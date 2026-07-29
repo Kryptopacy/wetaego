@@ -208,6 +208,7 @@ export const saveLocationAiSettings = authActionClient
     aiInstructions: zfd.text(z.string().max(2000).optional()),
     aiFaqs: zfd.text(z.string().optional()), // JSON string
     brandKnowledge: zfd.text(z.string().max(4000).optional()),
+    aiManagerProtectionMode: zfd.checkbox(),
   }))
   .action(async ({ parsedInput, ctx: { supabase, user } }) => {
     const { cookies } = await import('next/headers')
@@ -225,7 +226,8 @@ export const saveLocationAiSettings = authActionClient
       aiEscalationContact,
       aiInstructions,
       aiFaqs,
-      brandKnowledge
+      brandKnowledge,
+      aiManagerProtectionMode
     } = parsedInput
 
     let parsedFaqs = []
@@ -309,10 +311,13 @@ export const saveLocationAiSettings = authActionClient
       if (updateError) throw new Error('Failed to update AI settings')
     }
 
-    // Also update brand_knowledge on the location since it's venue-wide
+    // Also update brand_knowledge and ai_manager_protection_mode on the location since it's venue-wide
     await supabase
       .from('locations')
-      .update({ brand_knowledge: brandKnowledge || null })
+      .update({
+        brand_knowledge: brandKnowledge || null,
+        ai_manager_protection_mode: aiManagerProtectionMode ?? false
+      })
       .eq('id', activeLocationId)
 
     revalidatePath('/dashboard/settings')

@@ -11,6 +11,7 @@ import { SwipeableCard } from '@/components/SwipeableCard'
 import { BUSINESS_TYPE_PRESETS } from '@/lib/templates/presets'
 import { ShareButton } from '@/components/ShareButton'
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
+import { DuplicatePageModal } from './duplicate-page-modal'
 
 export default async function PagesManager() {
   const supabase = await createClient()
@@ -229,6 +230,15 @@ export default async function PagesManager() {
                           </svg>
                           Share Link
                         </ShareButton>
+                      </DropdownMenuItem>
+                      
+                      {/* Duplicate Option */}
+                      <DropdownMenuItem asChild>
+                        <DuplicatePageModal 
+                          sourcePageId={page.id} 
+                          sourceTitle={page.title} 
+                          sourceSlug={page.slug} 
+                        />
                       </DropdownMenuItem>
                       
                       {/* Publish/Unpublish */}

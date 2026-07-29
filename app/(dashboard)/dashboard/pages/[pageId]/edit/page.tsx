@@ -2,7 +2,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
-import { PageBuilderForm } from '@/app/components/page-builder-form'
+import { PageBuilderForm, PageItem } from '@/app/components/page-builder-form'
 import { updatePage } from '../../actions'
 import { ActionForm } from '@/components/ActionForm'
 import { BillingOptionsSelector } from './billing-options-selector'
@@ -179,8 +179,7 @@ export default async function PageEditDashboard({
           pageId={page.id} 
           templateType={page.template_type} 
           
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          initialItems={(items as any[]) || []}
+          initialItems={(items as PageItem[]) || []}
           orgId={page.locations.organization_id}
         />
       </div>

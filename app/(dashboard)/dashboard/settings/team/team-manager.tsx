@@ -36,6 +36,7 @@ interface TeamManagerProps {
   currentUserRole: string
   members: Member[]
   invites: Invite[]
+  pages?: { id: string; title: string; slug: string }[]
 }
 
 export default function TeamManager({
@@ -44,10 +45,12 @@ export default function TeamManager({
   currentUserRole,
   members,
   invites,
+  pages = [],
 }: TeamManagerProps) {
   const [inviteEmail, setInviteEmail] = useState('')
   const [inviteRole, setInviteRole] = useState<'manager' | 'editor' | 'viewer'>('viewer')
   const [inviteDepartment, setInviteDepartment] = useState('')
+  const [invitePageId, setInvitePageId] = useState('')
   const [isInviting, setIsInviting] = useState(false)
   const [generatedLink, setGeneratedLink] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
@@ -65,8 +68,13 @@ export default function TeamManager({
     setSuccess(null)
     setGeneratedLink(null)
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result = await createInviteAction({ orgId: organizationId, email: inviteEmail, role: inviteRole as any, department: inviteDepartment.trim() || undefined })
+    const result = await createInviteAction({ 
+      orgId: organizationId, 
+      email: inviteEmail, 
+      role: inviteRole as 'manager' | 'editor' | 'viewer', 
+      department: inviteDepartment.trim() || undefined,
+      pageId: invitePageId || undefined
+    })
     setIsInviting(false)
 
     if (result?.serverError || result?.validationErrors) {
@@ -77,6 +85,7 @@ export default function TeamManager({
       setSuccess(`Invite generated successfully!`)
       setInviteEmail('')
       setInviteDepartment('')
+      setInvitePageId('')
     }
   }
 
@@ -121,8 +130,7 @@ export default function TeamManager({
     setError(null)
     setSuccess(null)
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result = await updateMemberRoleAction({ orgId: organizationId, targetUserId: userId, newRole: newRole as any })
+    const result = await updateMemberRoleAction({ orgId: organizationId, targetUserId: userId, newRole: newRole as 'manager' | 'editor' | 'viewer' })
     if (result?.serverError || result?.validationErrors) {
       setError(result?.serverError || 'Failed to update member role')
     } else {
@@ -276,6 +284,30 @@ export default function TeamManager({
                 Managers can read all channels.
               </p>
             </div>
+
+            {/* Location Scope (Franchise Branch) field */}
+            {pages && pages.length > 0 && (
+              <div>
+                <label className="mb-2 block text-xs font-semibold text-zinc-400 uppercase tracking-wider">
+                  Location Scope <span className="text-zinc-600 normal-case font-normal">(optional · franchise autonomy)</span>
+                </label>
+                <select
+                  value={invitePageId}
+                  onChange={(e) => setInvitePageId(e.target.value)}
+                  className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                >
+                  <option value="">All Locations (HQ / Organization-wide access)</option>
+                  {pages.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.title} (/menu/{p.slug})
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-zinc-600 mt-1">
+                  Lock a local manager or staff member strictly to this branch.
+                </p>
+              </div>
+            )}
 
             <button
               type="submit"

@@ -7,7 +7,7 @@ import { Database } from '@/lib/supabase/types'
 import { Skeleton } from '@/components/ui/skeleton'
 import { StaggeredList } from '@/components/StaggeredList'
 import { CustomerIouDialog } from './customer-iou-dialog'
-
+import { CustomerImportWizard } from './customer-import-wizard'
 type CustomerProfile = Database['public']['Tables']['customer_profiles']['Row']
 
 interface CustomersClientProps {
@@ -70,9 +70,12 @@ export function CustomersClient({ organizationId, initialProfiles, currencyCode 
 
   return (
     <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden">
-      <div className="p-6 border-b border-zinc-800 flex justify-between items-center">
+      <div className="p-6 border-b border-zinc-800 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <h2 className="text-lg font-semibold text-white">Customer Directory</h2>
-        <span className="text-xs text-zinc-500">Showing {profiles.length} profiles</span>
+        <div className="flex items-center gap-4">
+          <span className="text-xs text-zinc-500">Showing {profiles.length} profiles</span>
+          <CustomerImportWizard organizationId={organizationId} />
+        </div>
       </div>
       <div className="hidden sm:block overflow-x-auto">
         <table className="w-full text-left text-sm text-zinc-400">

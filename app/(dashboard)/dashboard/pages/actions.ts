@@ -499,3 +499,119 @@ export const updateInquiryStatus = authActionClient
     revalidatePath('/dashboard/manage/quotes')
     return { success: true }
   })
+
+// ─── Franchise Location Duplication ──────────────────────────────────────────
+
+export const duplicatePageAction = authActionClient
+  .schema(zfd.formData({
+    sourcePageId: zfd.text(),
+    newTitle: zfd.text(),
+    newSlug: zfd.text()
+  }))
+  .action(async ({ parsedInput: { sourcePageId, newTitle, newSlug }, ctx: { supabase } }) => {
+    if (sourcePageId === 'demo-page') {
+      revalidatePath('/dashboard/pages')
+      return { success: true, newPageId: 'demo-new-page' }
+    }
+
+    // 1. Fetch source page
+    const { data: sourcePage, error: pageErr } = await supabase
+      .from('location_pages')
+      .select('*')
+      .eq('id', sourcePageId)
+      .single()
+      
+    if (pageErr || !sourcePage) throw new Error('Source page not found')
+    
+    // 2. Insert new page
+    const newPageData = {
+      ...sourcePage,
+      id: undefined,
+      created_at: undefined,
+      title: newTitle,
+      slug: newSlug,
+      is_primary: false,
+      is_published: false
+    }
+    
+    const { data: newPage, error: newPageErr } = await supabase
+      .from('location_pages')
+      .insert(newPageData)
+      .select('id')
+      .single()
+      
+    if (newPageErr || !newPage) throw new Error(newPageErr?.message || 'Failed to duplicate page')
+    const newPageId = newPage.id
+    
+    // 3. Duplicate page_collections
+    const { data: collections } = await supabase
+      .from('page_collections')
+      .select('*')
+      .eq('page_id', sourcePageId)
+      
+    const collectionMap = new Map<string, string>()
+    
+    if (collections && collections.length > 0) {
+      for (const col of collections) {
+        const { id: oldColId, created_at, updated_at, ...colData } = col
+        const { data: newCol } = await supabase
+          .from('page_collections')
+          .insert({ ...colData, page_id: newPageId })
+          .select('id')
+          .single()
+          
+        if (newCol) {
+          collectionMap.set(oldColId, newCol.id)
+        }
+      }
+    }
+    
+    // 4. Duplicate page_items
+    const { data: items } = await supabase
+      .from('page_items')
+      .select('*')
+      .eq('page_id', sourcePageId)
+      
+    const itemMap = new Map<string, string>()
+    
+    if (items && items.length > 0) {
+      for (const item of items) {
+        const { id: oldItemId, created_at, ...itemData } = item
+        const { data: newItem } = await supabase
+          .from('page_items')
+          .insert({ ...itemData, page_id: newPageId })
+          .select('id')
+          .single()
+          
+        if (newItem) {
+          itemMap.set(oldItemId, newItem.id)
+        }
+      }
+    }
+    
+    // 5. Re-map page_item_collections
+    if (collectionMap.size > 0 && itemMap.size > 0) {
+      const oldCollectionIds = Array.from(collectionMap.keys())
+      const { data: mappings } = await supabase
+        .from('page_item_collections')
+        .select('*')
+        .in('collection_id', oldCollectionIds)
+        
+      if (mappings && mappings.length > 0) {
+        const newMappings = mappings
+          .filter(m => itemMap.has(m.item_id) && collectionMap.has(m.collection_id))
+          .map(m => ({
+            item_id: itemMap.get(m.item_id)!,
+            collection_id: collectionMap.get(m.collection_id)!
+          }))
+          
+        if (newMappings.length > 0) {
+          await supabase.from('page_item_collections').insert(newMappings)
+        }
+      }
+    }
+    
+    revalidatePath('/dashboard/pages')
+    return { success: true, newPageId }
+  })
+

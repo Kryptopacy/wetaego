@@ -48,8 +48,9 @@ export const createInviteAction = authActionClient
     email: z.string().email(),
     role: z.enum(['owner', 'manager', 'editor', 'viewer']),
     department: z.string().trim().optional(),
+    pageId: z.string().optional(),
   }))
-  .action(async ({ parsedInput: { orgId, email, role, department }, ctx: { supabase, user } }) => {
+  .action(async ({ parsedInput: { orgId, email, role, department, pageId }, ctx: { supabase, user } }) => {
     const { userId } = await verifyOwnerOrManager(orgId, supabase, user)
 
     // Create the invite
@@ -60,6 +61,7 @@ export const createInviteAction = authActionClient
         email: email.trim().toLowerCase(),
         role,
         department: department || null,
+        page_id: pageId || null,
         invited_by: userId,
       })
       .select('token')
@@ -278,3 +280,25 @@ export const deleteOrganizationAction = authActionClient
 
     return { success: true }
   })
+
+export const updateMemberLocationScopeAction = authActionClient
+  .schema(z.object({
+    orgId: z.string().min(1),
+    targetUserId: z.string().min(1),
+    pageId: z.string().nullable(),
+  }))
+  .action(async ({ parsedInput: { orgId, targetUserId, pageId }, ctx: { supabase, user } }) => {
+    await verifyOwnerOrManager(orgId, supabase, user)
+
+    const { error } = await supabase
+      .from('organization_members')
+      .update({ page_id: pageId })
+      .eq('organization_id', orgId)
+      .eq('user_id', targetUserId)
+
+    if (error) throw new Error(error.message)
+
+    revalidatePath('/dashboard/settings/team')
+    return { success: true }
+  })
+

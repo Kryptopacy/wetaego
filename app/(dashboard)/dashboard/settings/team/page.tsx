@@ -134,6 +134,12 @@ export default async function TeamPage() {
 
   const shifts = (shiftsRaw || []).filter(shift => orgLocationIds.includes((shift.locations as unknown as { id: string })?.id))
 
+  const { data: pagesRaw } = await supabase
+    .from('location_pages')
+    .select('id, title, slug')
+    .in('location_id', orgLocationIds)
+  const pages = (pagesRaw || []).map(p => ({ id: p.id, title: p.title, slug: p.slug }))
+
   return (
     <div className="max-w-4xl">
       <div className="flex items-center gap-4 mb-2">
@@ -158,6 +164,7 @@ export default async function TeamPage() {
           currentUserRole={role}
           members={members}
           invites={invites}
+          pages={pages}
         />
         <StaffShifts shifts={shifts as unknown as Parameters<typeof StaffShifts>[0]['shifts']} />
         <DangerZone orgId={organization.id} isOwner={role === 'owner'} />
