@@ -3759,6 +3759,24 @@ export type Database = {
       }
     }
     Functions: {
+      create_booking_atomic: {
+        Args: {
+          p_page_id: string
+          p_item_id: string | null
+          p_customer_name: string
+          p_customer_email: string | null
+          p_customer_phone: string
+          p_booking_date: string | null
+          p_booking_end_date: string | null
+          p_booking_time: string | null
+          p_booking_end_time: string | null
+          p_number_of_guests: number
+          p_booking_notes: string
+          p_total_amount_minor: number
+          p_payment_status: string
+        }
+        Returns: Json
+      }
       accept_invite_by_token: {
         Args: { lookup_token: string }
         Returns: boolean
