@@ -11,13 +11,12 @@ on:
     - cron: '0 10 * * *'   # 10:00 AM: IOU Reminders
     - cron: '0 18 * * *'   # 6:00 PM: Daily Report
 
-env:
-  PROD_URL: ${{ secrets.PROD_URL }}
-  CRON_SECRET: ${{ secrets.CRON_SECRET }}
-
 jobs:
   run-crons:
     runs-on: ubuntu-latest
+    env:
+      PROD_URL: ${{ secrets.PROD_URL }}
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
     steps:
       - name: Hit Webhooks Endpoint
         if: github.event.schedule == '*/5 * * * *' || github.event_name == 'workflow_dispatch'

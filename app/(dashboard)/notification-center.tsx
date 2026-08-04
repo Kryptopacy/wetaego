@@ -30,8 +30,7 @@ export function NotificationCenter() {
       supabase
         .from('organization_members')
         .select('organizations(id)')
-        .eq('user_id', data.user.id)
-        .single()
+        .eq('user_id', data.user.id).limit(1).maybeSingle()
         .then(({ data: m }) => {
           const id = m?.organizations?.id
           if (id) { setOrgId(id); return }
@@ -39,8 +38,7 @@ export function NotificationCenter() {
           supabase
             .from('organizations')
             .select('id')
-            .eq('created_by', data.user.id)
-            .single()
+            .eq('created_by', data.user.id).limit(1).maybeSingle()
             .then(({ data: org }) => { if (org?.id) setOrgId(org.id) })
         })
     })

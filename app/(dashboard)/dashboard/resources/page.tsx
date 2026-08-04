@@ -10,7 +10,7 @@ export default async function ResourcesPage() {
   if (!user) return null
 
   const { data: member } = await supabase.from('organization_members').select('organization_id').eq('user_id', user.id).limit(1).single()
-  const orgData = await supabase.from('organizations').select('id').eq('created_by', user.id).single()
+  const orgData = await supabase.from('organizations').select('id').eq('created_by', user.id).limit(1).maybeSingle()
   const orgId = member?.organization_id || orgData?.data?.id
   
   if (!orgId) return <div className="p-8 text-zinc-100">No organization found.</div>

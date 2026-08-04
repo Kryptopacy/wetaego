@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { CheckCircle2, ChevronRight, Circle } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/currency'
 import { toast } from 'sonner'
 import { processCheckout } from '@/app/m/[slug]/actions'
+import { openSeamlessCheckout, preloadBachsSdk } from '@/components/bachs-overlay-checkout'
 
 interface Milestone {
   id: string
@@ -38,6 +39,10 @@ export function QuotePayment({
 }) {
   const [isProcessing, setIsProcessing] = useState(false)
 
+  useEffect(() => {
+    preloadBachsSdk()
+  }, [])
+
   // Use defined milestones, or fallback to a single "Full Payment" milestone if none exist
   const effectiveMilestones = milestones.length > 0 ? milestones : [
     { id: 'full', name: 'Full Payment', percentage: 100, status: paymentStatus === 'paid' ? 'paid' : 'unpaid' } as Milestone
@@ -51,15 +56,20 @@ export function QuotePayment({
     setIsProcessing(true)
 
     try {
-      const paymentFractionMinor = Math.floor(totalAmountMinor * (nextMilestone.percentage / 100))
+      const paymentFractionMinor = Math.round(totalAmountMinor * (nextMilestone.percentage / 100))
       
       const result = await processCheckout({
         organizationId,
         locationId,
-        items: [], // Quotes don't have standard items at this phase
-        totalAmountMinor,
+        items: [{
+          id: nextMilestone.id,
+          name: `${nextMilestone.name} (${nextMilestone.percentage}%)`,
+          price_minor: paymentFractionMinor,
+          quantity: 1
+        }],
+        totalAmountMinor: paymentFractionMinor,
         tipAmountMinor: 0,
-        tableIdentifier: 'Quote Payment',
+        tableIdentifier: `Quote #${quoteId} - ${nextMilestone.name}`,
         customerNote: `Milestone Payment: ${nextMilestone.name}`,
         customerEmail,
         paymentFractionMinor,
@@ -73,7 +83,7 @@ export function QuotePayment({
 
       if (result?.serverError || result?.validationErrors) throw new Error(result?.serverError || 'Failed to process checkout')
       const checkoutUrl = result.data?.checkoutUrl
-      if (checkoutUrl) window.location.href = checkoutUrl
+      if (checkoutUrl) openSeamlessCheckout(checkoutUrl)
     } catch (e: unknown) {
       toast.error(e instanceof Error ? e.message : 'Payment initiation failed')
       setIsProcessing(false)

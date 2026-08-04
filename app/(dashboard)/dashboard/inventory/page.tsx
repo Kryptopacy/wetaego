@@ -30,8 +30,7 @@ export default async function InventoryPage() {
     const { data } = await supabase
       .from('organizations')
       .select('id, name')
-      .eq('created_by', userId)
-      .single()
+      .eq('created_by', userId).limit(1).maybeSingle()
     org = data
     role = 'owner'
   }

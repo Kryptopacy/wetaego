@@ -17,6 +17,8 @@ import { updateItem, deleteItem } from './actions'
 import { toast } from 'sonner'
 import Image from 'next/image'
 import { formatCurrency } from '@/lib/utils/currency'
+import { ConfirmModal } from '@/components/ui/confirm-modal'
+import { Zap, ExternalLink, QrCode, Plus } from 'lucide-react'
 
 function OptimisticItem({ item, orgId, categoryName }: { item: PageItem, orgId: string, categoryName: string }) {
   const [optimisticStatus, addOptimisticStatus] = useOptimistic(
@@ -35,6 +37,8 @@ function OptimisticItem({ item, orgId, categoryName }: { item: PageItem, orgId: 
   const [isGenerating, setIsGenerating] = useState(false)
   const [isGeneratingImg, setIsGeneratingImg] = useState(false)
   const [aiImageUrl, setAiImageUrl] = useState<string | null>(null)
+  const [showAiImageConfirm, setShowAiImageConfirm] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   async function handleMagicFill() {
     if (!editName) {
@@ -50,7 +54,10 @@ function OptimisticItem({ item, orgId, categoryName }: { item: PageItem, orgId: 
         headers: { 'Content-Type': 'application/json' }
       })
 
-      if (!res.ok) throw new Error('Failed to generate copy')
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}))
+        throw new Error(errData.error || 'Failed to generate copy')
+      }
       
       const data = await res.json()
       if (data.description) setEditDescription(data.description)
@@ -69,8 +76,10 @@ function OptimisticItem({ item, orgId, categoryName }: { item: PageItem, orgId: 
       return
     }
     
-    if (!confirm('This will cost 5 AI Credits. Are you sure?')) return
+    setShowAiImageConfirm(true)
+  }
 
+  async function executeGenerateImage() {
     setIsGeneratingImg(true)
     try {
       const res = await fetch('/api/ai/generate-item-image', {
@@ -115,10 +124,10 @@ function OptimisticItem({ item, orgId, categoryName }: { item: PageItem, orgId: 
               <button 
                 type="button" 
                 onClick={handleMagicFill} 
-                disabled={isGenerating || !editName}
-                className="absolute right-1 bottom-1 px-3 py-1 bg-linear-to-r from-teal-500 to-emerald-600 hover:from-teal-400 hover:to-emerald-500 text-white rounded-md text-xs font-bold transition-all disabled:opacity-50 shadow-lg"
+                disabled={isGenerating}
+                className="absolute right-1 bottom-1 px-3 py-1.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:from-indigo-400 hover:via-purple-400 hover:to-pink-400 text-white rounded-md text-xs font-bold transition-all disabled:opacity-50 disabled:grayscale flex items-center gap-1.5 shadow-lg shadow-purple-500/20"
               >
-                {isGenerating ? 'Wait...' : '✨ Magic Fill'}
+                {isGenerating ? 'Wait...' : <>✨ Magic Fill <span className="flex items-center text-[9px] bg-black/20 px-1 rounded-sm ml-0.5"><Zap className="w-2.5 h-2.5 mr-0.5" /> 1</span></>}
               </button>
             </div>
             <div className="w-24">
@@ -145,10 +154,10 @@ function OptimisticItem({ item, orgId, categoryName }: { item: PageItem, orgId: 
                   <button 
                     type="button"
                     onClick={handleGenerateImage}
-                    disabled={isGeneratingImg || !editName}
-                    className="w-full px-3 py-1.5 bg-linear-to-r from-teal-500 to-emerald-600 hover:from-teal-400 hover:to-emerald-500 text-white rounded-lg text-xs font-bold transition-all disabled:opacity-50 flex items-center justify-center gap-1 shadow-lg mt-1"
+                    disabled={isGeneratingImg}
+                    className="w-full px-3 py-1.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:from-indigo-400 hover:via-purple-400 hover:to-pink-400 text-white rounded-lg text-xs font-bold transition-all disabled:opacity-50 disabled:grayscale flex items-center justify-center gap-1.5 shadow-lg shadow-purple-500/20 mt-1"
                   >
-                    {isGeneratingImg ? 'Generating...' : '✨ AI Image Studio'}
+                    {isGeneratingImg ? 'Generating...' : <>✨ AI Image <span className="flex items-center text-[9px] bg-black/20 px-1 rounded-sm ml-0.5"><Zap className="w-2.5 h-2.5 mr-0.5" /> 5</span></>}
                   </button>
                 </>
               )}
@@ -163,6 +172,15 @@ function OptimisticItem({ item, orgId, categoryName }: { item: PageItem, orgId: 
               Save Changes
             </button>
           </div>
+          <ConfirmModal
+            isOpen={showAiImageConfirm}
+            onClose={() => setShowAiImageConfirm(false)}
+            onConfirm={executeGenerateImage}
+            title="AI Image Studio"
+            description={`This will generate a custom image for "${editName}".`}
+            cost={5}
+            confirmText="Generate Image"
+          />
         </form>
       </div>
     );
@@ -178,14 +196,21 @@ function OptimisticItem({ item, orgId, categoryName }: { item: PageItem, orgId: 
         {item.description && <p className="text-sm text-zinc-400 mt-1">{item.description}</p>}
         <div className="mt-2 flex gap-2">
           <button onClick={() => setIsEditing(true)} className="text-xs font-medium text-blue-400 hover:text-blue-300">Edit</button>
-          <button onClick={async () => {
-            if (confirm('Are you sure you want to delete this item?')) {
-              setIsDeleting(true);
-              await deleteItem({ itemId: item.id });
-            }
-          }} disabled={isDeleting} className="text-xs font-medium text-red-400 hover:text-red-300 disabled:opacity-50">
+          <button onClick={() => setShowDeleteConfirm(true)} disabled={isDeleting} className="text-xs font-medium text-red-400 hover:text-red-300 disabled:opacity-50">
             {isDeleting ? 'Deleting...' : 'Delete'}
           </button>
+          <ConfirmModal
+            isOpen={showDeleteConfirm}
+            onClose={() => setShowDeleteConfirm(false)}
+            onConfirm={async () => {
+              setIsDeleting(true);
+              await deleteItem({ itemId: item.id });
+            }}
+            title="Delete Item"
+            description={`Are you sure you want to delete "${item.title}"? This action cannot be undone.`}
+            confirmText="Yes, Delete"
+            isDestructive={true}
+          />
         </div>
       </div>
       <div>
@@ -215,6 +240,9 @@ export function CategoryTabs({ categories, orgId, menuId, allCollections, pageId
     categories,
     (state, newCat: Category) => [...state, newCat]
   )
+  const [isAddItemOpen, setIsAddItemOpen] = useState(false)
+  
+  const totalItems = optimisticCategories.reduce((acc, cat) => acc + (cat.menu_items?.length || 0), 0)
 
   useEffect(() => {
     if (categories.length > 0 && !categories.some(c => c.id === activeTab)) {
@@ -304,10 +332,31 @@ export function CategoryTabs({ categories, orgId, menuId, allCollections, pageId
           </div>
           
           <div className="bg-zinc-800/30 p-6 border-b border-zinc-800">
-            <h3 className="text-sm font-semibold text-zinc-300 mb-4 flex items-center gap-2">
-              <span className="text-blue-500">＋</span> Add New Item to {activeCategory.name}
-            </h3>
-            <AddItemForm orgId={orgId} pageId={pageId} activeCollectionId={activeCategory.id} allCollections={allCollections} templateType={templateType} />
+            {!isAddItemOpen ? (
+              <button
+                onClick={() => setIsAddItemOpen(true)}
+                className="flex items-center justify-center gap-2 w-full py-4 border-2 border-dashed border-zinc-700 hover:border-blue-500/50 hover:bg-blue-500/5 rounded-xl text-zinc-400 hover:text-blue-400 transition-all font-medium"
+              >
+                <Plus className="w-5 h-5" /> Add New Item to {activeCategory.name}
+              </button>
+            ) : (
+              <div className="relative">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-sm font-semibold text-zinc-300 flex items-center gap-2">
+                    <span className="text-blue-500">＋</span> Add New Item to {activeCategory.name}
+                  </h3>
+                  <button onClick={() => setIsAddItemOpen(false)} className="text-xs text-zinc-500 hover:text-zinc-300">Close</button>
+                </div>
+                <AddItemForm 
+                  orgId={orgId} 
+                  pageId={pageId} 
+                  activeCollectionId={activeCategory.id} 
+                  allCollections={allCollections} 
+                  templateType={templateType} 
+                  onSuccess={() => setIsAddItemOpen(false)}
+                />
+              </div>
+            )}
           </div>
 
           <div className="p-6 divide-y divide-zinc-800/50">
@@ -319,6 +368,30 @@ export function CategoryTabs({ categories, orgId, menuId, allCollections, pageId
               ))
             )}
           </div>
+          
+          {totalItems > 0 && (
+            <div className="p-6 bg-gradient-to-br from-blue-900/20 to-emerald-900/10 border-t border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div>
+                <h4 className="text-white font-semibold flex items-center gap-2">🎉 Your menu is taking shape!</h4>
+                <p className="text-zinc-400 text-sm mt-1">You have added {totalItems} item(s). What would you like to do next?</p>
+              </div>
+              <div className="flex gap-3 w-full sm:w-auto">
+                <a 
+                  href={`/dashboard/qr`} 
+                  className="flex-1 sm:flex-none px-4 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white text-sm font-medium rounded-lg transition-colors border border-zinc-700 flex items-center justify-center gap-2"
+                >
+                  <QrCode className="w-4 h-4" /> Get QR Code
+                </a>
+                <a 
+                  href={`/m/${orgId}?preview=true`} 
+                  target="_blank"
+                  className="flex-1 sm:flex-none px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold rounded-lg transition-colors flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20"
+                >
+                  <ExternalLink className="w-4 h-4" /> Live Preview
+                </a>
+              </div>
+            </div>
+          )}
         </motion.div>
       </AnimatePresence>
         </>

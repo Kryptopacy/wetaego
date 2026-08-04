@@ -20,7 +20,7 @@ export const updateQrConfig = authActionClient
     const { data: member } = await supabase.from('organization_members').select('role').eq('organization_id', loc.organization_id).eq('user_id', user.id).single();
     let isAuthorized = !!member;
     if (!member) {
-      const { data: org } = await supabase.from('organizations').select('id').eq('id', loc.organization_id).eq('created_by', user.id).single();
+      const { data: org } = await supabase.from('organizations').select('id').eq('id', loc.organization_id).eq('created_by', user.id).limit(1).maybeSingle();
       isAuthorized = !!org;
     }
     if (!isAuthorized) throw new Error("Unauthorized");

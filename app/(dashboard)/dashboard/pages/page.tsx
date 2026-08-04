@@ -44,8 +44,7 @@ export default async function PagesManager() {
     const { data } = await supabase
       .from('organizations')
       .select('id, subscription_tier, purchased_credits, monthly_free_credits_used, business_type')
-      .eq('created_by', userId)
-      .single()
+      .eq('created_by', userId).limit(1).maybeSingle()
     org = data
 
     org = data

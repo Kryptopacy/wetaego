@@ -8,7 +8,8 @@ import {
   processSubscriptionPayment,
   processCreditPackPayment,
   processOrderPayment,
-  processQuoteMilestonePayment
+  processQuoteMilestonePayment,
+  processSubscriptionLifecycleEvent
 } from '@/lib/payments/webhook-service'
 
 export async function POST(req: Request) {
@@ -19,10 +20,16 @@ export async function POST(req: Request) {
     }
 
     const rawBody = await req.text()
-    const signature = req.headers.get('x-bachs-signature') || req.headers.get('x-signature') || req.headers.get('authorization')
+    const signature =
+      req.headers.get('x-bachs-signature') ||
+      req.headers.get('x-signature') ||
+      req.headers.get('authorization')
+    const timestamp =
+      req.headers.get('x-bachs-timestamp') ||
+      req.headers.get('x-timestamp')
 
     // Validate signature (bypasses in local test mode if configured)
-    if (signature && !bachsProvider.validateWebhookSignature(rawBody, signature)) {
+    if (signature && !bachsProvider.validateWebhookSignature(rawBody, signature, timestamp)) {
       if (process.env.NODE_ENV === 'production') {
         return NextResponse.json({ error: 'Invalid signature' }, { status: 400 })
       }
@@ -31,10 +38,25 @@ export async function POST(req: Request) {
     const event = JSON.parse(rawBody)
     const eventType = event.event || event.type || 'payment.completed'
 
-    if (['payment.completed', 'charge.success', 'checkout.session.completed', 'payment_intent.succeeded'].includes(eventType)) {
+    const SUCCESS_EVENTS = [
+      'collection.succeeded',
+      'collection.underpaid',
+      'payment.completed',
+      'charge.success',
+      'checkout.session.completed',
+      'payment_intent.succeeded',
+    ]
+
+    if (SUCCESS_EVENTS.includes(eventType)) {
       const data = event.data || event
       const rawReference = (data.reference || data.id || data.checkout_session_id) as string
-      const amountPaidMinor = (data.amount || data.amount_paid || 0) as number
+
+      const rawAmount = data.amount_paid || data.amount || 0
+      const amountPaidMinor =
+        typeof rawAmount === 'string'
+          ? Math.round(parseFloat(rawAmount) * 100)
+          : Math.round(Number(rawAmount))
+
       const supabase = await createAdminClient()
 
       // Bulletproof Idempotency check
@@ -86,6 +108,27 @@ export async function POST(req: Request) {
       }
 
       return NextResponse.json({ status: 'success' }, { status: 200 })
+    }
+
+    const SUBSCRIPTION_EVENTS = [
+      'customer.subscription.created',
+      'customer.subscription.updated',
+      'customer.subscription.deleted',
+      'invoice.payment_failed',
+    ]
+
+    if (SUBSCRIPTION_EVENTS.includes(eventType)) {
+      const data = event.data || event
+      const subscriptionId = data.id || data.subscription_id || data.subscription?.id
+      const status = data.status || (eventType === 'customer.subscription.deleted' ? 'canceled' : 'active')
+      const orgId = data.metadata?.organization_id || data.customer?.metadata?.organization_id
+
+      if (orgId && subscriptionId) {
+        const supabase = await createAdminClient()
+        await processSubscriptionLifecycleEvent(supabase, orgId, subscriptionId, status, eventType)
+      }
+
+      return NextResponse.json({ status: 'subscription_event_processed' }, { status: 200 })
     }
 
     return NextResponse.json({ status: 'ignored_event' }, { status: 200 })

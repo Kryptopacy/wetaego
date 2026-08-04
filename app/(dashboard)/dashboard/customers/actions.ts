@@ -35,8 +35,7 @@ export const importCustomersAction = authActionClient
         .from('organizations')
         .select('id')
         .eq('id', organizationId)
-        .eq('created_by', user.id)
-        .single()
+        .eq('created_by', user.id).limit(1).maybeSingle()
 
       if (!org) {
         throw new Error('Unauthorized')

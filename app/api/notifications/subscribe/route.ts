@@ -40,8 +40,7 @@ export async function POST(req: Request) {
     const { data: member } = await supabase
       .from('organization_members')
       .select('organizations(id)')
-      .eq('user_id', userData.user.id)
-      .maybeSingle()
+      .eq('user_id', userData.user.id).limit(1).maybeSingle()
 
     if (member && member.organizations) {
       orgId = (member.organizations as unknown as { id: string }).id
@@ -49,8 +48,7 @@ export async function POST(req: Request) {
       const { data: org } = await supabase
         .from('organizations')
         .select('id')
-        .eq('created_by', userData.user.id)
-        .maybeSingle()
+        .eq('created_by', userData.user.id).limit(1).maybeSingle()
       if (org) {
         orgId = org.id
       }

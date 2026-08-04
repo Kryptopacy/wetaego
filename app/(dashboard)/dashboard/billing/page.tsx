@@ -41,8 +41,7 @@ export default async function BillingPage(props: { searchParams: Promise<{ curre
     const { data: creatorOrg } = await supabase
       .from('organizations')
       .select('*')
-      .eq('created_by', userId)
-      .single()
+      .eq('created_by', userId).limit(1).maybeSingle()
     org = creatorOrg
   }
 

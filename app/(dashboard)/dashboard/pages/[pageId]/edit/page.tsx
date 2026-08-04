@@ -46,8 +46,7 @@ export default async function PageEditDashboard({
       .from('organizations')
       .select('id')
       .eq('id', page.locations.organization_id)
-      .eq('created_by', userData.user!.id)
-      .single()
+      .eq('created_by', userData.user!.id).limit(1).maybeSingle()
     
     if (!org) redirect('/dashboard')
   }

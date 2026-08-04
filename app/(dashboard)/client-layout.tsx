@@ -206,11 +206,6 @@ export default function ClientLayout({ children, initialData }: { children: Reac
   const activeTemplate = activePage ? activePage.template_type : initialData.templateType
 
   const managerItems: NavItem[] = [
-    { href: '/dashboard/inventory', label: 'Inventory (BOM)', icon: Package, tooltip: 'Bill of Materials - Track ingredients and items used per service' },
-    { href: '/dashboard/resources', label: 'Resources & QRs', icon: QrCode, tooltip: 'Manage physical resources, layouts, and dynamic QR codes' },
-    { href: '/dashboard/customers', label: 'CRM & Loyalty', icon: Users, tooltip: 'Manage customer profiles and loyalty points' },
-    { href: '/dashboard/team-performance', label: 'Team Performance', icon: BarChart3, tooltip: 'Track staff metrics and service quality' },
-    { href: '/dashboard/manage/feedback', label: 'Feedback Inbox', icon: MessageSquare, tooltip: 'Review customer reviews and ratings' },
     { 
       href: activePageId ? `/dashboard/pages/${activePageId}/edit` : '/dashboard/taxonomy', 
       label: activeTemplate === 'booking' ? 'Services Manager' : 
@@ -220,13 +215,11 @@ export default function ClientLayout({ children, initialData }: { children: Reac
       tooltip: 'Manage your offerings, categories, and items'
     },
     { href: '/dashboard/pages', label: 'Your Pages', icon: FileText, tooltip: 'Manage your business pages and branding' },
-    { href: '/dashboard/deals', label: 'Deals & Sales', icon: Zap, tooltip: 'Create active flash sales and discounted items' },
-    { href: '/dashboard/promotions', label: 'Promo Codes', icon: Zap, tooltip: 'Create discount codes for guest checkout' },
-    { href: '/dashboard/ads', label: 'Ad Manager', icon: Zap, tooltip: 'Manage sponsored ads and view analytics' },
-    { href: '/dashboard/marketing', label: 'Broadcast Marketing', icon: Megaphone, tooltip: 'Send email campaigns to customers' },
-    { href: '/dashboard/settings', label: 'Settings & Team', icon: Settings, tooltip: 'Configure business settings and team access' },
-    { href: '/dashboard/availability', label: 'Availability Engine', icon: Clock, tooltip: 'Configure operational timezone and weekly schedule' },
-    { href: '/dashboard/webhooks', label: 'Outbound Webhooks', icon: Zap, tooltip: 'Configure real-time POST webhooks' },
+    { href: '/dashboard/inventory', label: 'Inventory (BOM)', icon: Package, tooltip: 'Bill of Materials - Track ingredients and items used per service' },
+    { href: '/dashboard/customers', label: 'CRM & Loyalty', icon: Users, tooltip: 'Manage customer profiles and loyalty points' },
+    { href: '/dashboard/team-performance', label: 'Team Performance', icon: BarChart3, tooltip: 'Track staff metrics and service quality' },
+    { href: '/dashboard/marketing', label: 'Marketing Hub', icon: Megaphone, tooltip: 'Broadcasts, Ads, and Deals' },
+    { href: '/dashboard/settings', label: 'Settings & Apps', icon: Settings, tooltip: 'Configure business settings and integrations' },
     { href: '/dashboard/billing', label: 'Billing & Plan', icon: CreditCard, tooltip: 'Manage your subscription and credits' },
     { href: '/dashboard/support', label: 'Help & Support', icon: MessageSquare, tooltip: 'Get help and contact OurMenuOS support' },
   ]
@@ -345,6 +338,18 @@ export default function ClientLayout({ children, initialData }: { children: Reac
                       {locations.length > 1 && <DropdownMenuSeparator />}
                     </DropdownMenuGroup>
                   ))}
+                  
+                  {isOwnerOrManager && (
+                    <>
+                      <DropdownMenuSeparator className="bg-zinc-800 my-1" />
+                      <DropdownMenuItem className="cursor-pointer" asChild>
+                        <Link href="/dashboard/settings?tab=locations" className="flex items-center w-full text-emerald-400 py-1.5" onClick={onClose}>
+                          <span className="mr-2">➕</span>
+                          <span className="flex-1 font-bold">+ Add / Manage Locations</span>
+                        </Link>
+                      </DropdownMenuItem>
+                    </>
+                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -413,12 +418,14 @@ export default function ClientLayout({ children, initialData }: { children: Reac
            </div>
           )}
           {credits !== null && (
-            <Link href="/dashboard/billing" className="flex items-center justify-between px-3 py-2.5 bg-emerald-500/10 hover:bg-emerald-500/20 rounded-xl border border-emerald-500/20 mb-4 transition-colors group" onClick={onClose}>
+            <Link href="/dashboard/billing" className="flex items-center justify-between px-3 py-2.5 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 hover:from-emerald-500/20 hover:to-teal-500/20 rounded-xl border border-emerald-500/20 mb-4 transition-all duration-300 group shadow-[0_0_15px_rgba(16,185,129,0.05)]" onClick={onClose}>
               <div className="flex items-center gap-2">
-                <Zap className="w-4 h-4 text-emerald-400" />
-                <span className="text-xs font-bold text-emerald-100">Credits</span>
+                <div className="bg-emerald-500/20 p-1.5 rounded-lg">
+                  <Zap className="w-3.5 h-3.5 text-emerald-400 group-hover:scale-110 transition-transform" />
+                </div>
+                <span className="text-xs font-bold text-emerald-100">AI Credits</span>
               </div>
-              <span className="text-xs font-black text-emerald-400 group-hover:scale-110 transition-transform">{credits}</span>
+              <span className="text-sm font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400">{credits}</span>
             </Link>
           )}
 
@@ -498,9 +505,15 @@ export default function ClientLayout({ children, initialData }: { children: Reac
             )}
           </div>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
+          {credits !== null && (
+            <Link href="/dashboard/billing" className="flex items-center gap-1.5 px-2.5 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 rounded-full border border-emerald-500/20 transition-colors shadow-sm">
+              <Zap className="w-3.5 h-3.5 text-emerald-400" />
+              <span className="text-xs font-black text-emerald-400">{credits}</span>
+            </Link>
+          )}
           <NotificationCenter />
-          <button onClick={() => setMobileMenuOpen(true)} className="text-zinc-400 hover:text-white">
+          <button onClick={() => setMobileMenuOpen(true)} className="text-zinc-400 hover:text-white ml-1">
             <Menu className="w-6 h-6" />
           </button>
         </div>
@@ -523,6 +536,12 @@ export default function ClientLayout({ children, initialData }: { children: Reac
       <main className="flex-1 flex flex-col h-full relative pt-16 pb-20 md:pt-0 md:pb-0 overflow-y-auto print:pt-0 print:pb-0 print:overflow-visible">
         <CommandPalette />
         <div className="absolute top-0 right-0 p-4 z-10 hidden md:flex items-center gap-3 print:hidden">
+          {credits !== null && (
+            <Link href="/dashboard/billing" className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 rounded-full border border-emerald-500/20 transition-colors shadow-sm cursor-pointer hover:scale-105 active:scale-95 duration-200">
+              <Zap className="w-3.5 h-3.5 text-emerald-400" />
+              <span className="text-xs font-black text-emerald-400">{credits}</span>
+            </Link>
+          )}
           <NotificationCenter />
           {orgName ? (
             <span className="text-xs font-bold text-zinc-500 uppercase tracking-widest">{orgName}</span>

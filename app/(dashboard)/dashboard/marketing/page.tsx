@@ -27,8 +27,7 @@ export default async function MarketingPage() {
     const { data: org } = await supabase
       .from('organizations')
       .select('id')
-      .eq('created_by', userId)
-      .single()
+      .eq('created_by', userId).limit(1).maybeSingle()
     if (org) orgId = org.id
   }
 

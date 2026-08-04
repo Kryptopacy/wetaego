@@ -59,8 +59,7 @@ export async function POST(req: Request) {
         .from('organizations')
         .select('id')
         .eq('id', organizationId)
-        .eq('created_by', userData.user.id)
-        .single()
+        .eq('created_by', userData.user.id).limit(1).maybeSingle()
       isAuthorized = !!org
     }
 

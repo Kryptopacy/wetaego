@@ -14,8 +14,7 @@ export default async function ApiKeysPage() {
   const { data: member } = await supabase
     .from('organization_members')
     .select('role, organizations(id)')
-    .eq('user_id', user.id)
-    .single()
+    .eq('user_id', user.id).limit(1).maybeSingle()
 
   let orgId = ''
   if (member && member.organizations) {
@@ -25,8 +24,7 @@ export default async function ApiKeysPage() {
     const { data } = await supabase
       .from('organizations')
       .select('id')
-      .eq('created_by', user.id)
-      .single()
+      .eq('created_by', user.id).limit(1).maybeSingle()
     orgId = data?.id || ''
   }
 

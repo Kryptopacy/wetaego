@@ -25,8 +25,7 @@ export default async function QrSettingsPage() {
     const { data: org } = await supabase
       .from('organizations')
       .select('id')
-      .eq('created_by', user.id)
-      .single();
+      .eq('created_by', user.id).limit(1).maybeSingle();
     if (org) {
       orgId = org.id;
     }

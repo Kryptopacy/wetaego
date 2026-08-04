@@ -1,12 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Search, CheckCircle2, Settings, MessageSquare } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/currency'
 import { useTranslations } from 'next-intl'
 import { getTrackingDetailsAction, sendMessageAction, generateBalancePaymentLinkAction } from './actions'
 import { AnimatedDialog, AnimatedDialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Building2 } from 'lucide-react'
+import { openSeamlessCheckout, preloadBachsSdk } from '@/components/bachs-overlay-checkout'
 
 type TrackOrderClientProps = {
   location: { id: string; currency_code: string; [key: string]: unknown }
@@ -40,6 +41,10 @@ export function TrackOrderClient({ location }: TrackOrderClientProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [order, setOrder] = useState<OrderDetails | null>(null)
+
+  useEffect(() => {
+    preloadBachsSdk()
+  }, [])
 
   const [message, setMessage] = useState('')
   const [isSendingMessage, setIsSendingMessage] = useState(false)
@@ -104,7 +109,7 @@ export function TrackOrderClient({ location }: TrackOrderClientProps) {
       }
       
       if (res.data.checkoutUrl) {
-        window.location.href = res.data.checkoutUrl
+        openSeamlessCheckout(res.data.checkoutUrl)
       } else if (res.data.manualDetails) {
         setManualDetails(res.data.manualDetails)
       }
@@ -208,11 +213,11 @@ export function TrackOrderClient({ location }: TrackOrderClientProps) {
               
               <div className="relative pl-6 space-y-8 py-4">
                 {/* Vertical Line */}
-                <div className="absolute top-0 bottom-0 left-[11px] w-0.5 bg-zinc-200 dark:bg-zinc-800" />
+                <div className="absolute top-0 bottom-0 left-2.75 w-0.5 bg-zinc-200 dark:bg-zinc-800" />
                 
                 {/* Intake step (auto-generated) */}
                 <div className="relative">
-                  <div className="absolute left-[-30px] top-1 w-6 h-6 rounded-full bg-blue-500 border-4 border-white dark:border-zinc-900 flex items-center justify-center shadow-sm z-10">
+                  <div className="absolute -left-7.5 top-1 w-6 h-6 rounded-full bg-blue-500 border-4 border-white dark:border-zinc-900 flex items-center justify-center shadow-sm z-10">
                     <CheckCircle2 className="w-3 h-3 text-white" />
                   </div>
                   <div>
@@ -223,7 +228,7 @@ export function TrackOrderClient({ location }: TrackOrderClientProps) {
 
                 {order.milestones.map((m) => (
                   <div key={m.id} className="relative">
-                    <div className={`absolute left-[-30px] top-1 w-6 h-6 rounded-full border-4 border-white dark:border-zinc-900 flex items-center justify-center z-10 transition-colors duration-500 ${m.is_completed ? 'bg-blue-500' : 'bg-zinc-200 dark:bg-zinc-800'}`}>
+                    <div className={`absolute -left-7.5 top-1 w-6 h-6 rounded-full border-4 border-white dark:border-zinc-900 flex items-center justify-center z-10 transition-colors duration-500 ${m.is_completed ? 'bg-blue-500' : 'bg-zinc-200 dark:bg-zinc-800'}`}>
                       {m.is_completed ? <CheckCircle2 className="w-3 h-3 text-white" /> : <div className="w-2 h-2 rounded-full bg-zinc-400 dark:bg-zinc-600" />}
                     </div>
                     <div>
@@ -279,7 +284,7 @@ export function TrackOrderClient({ location }: TrackOrderClientProps) {
                     <button
                       type="submit"
                       disabled={isSendingMessage || !message.trim()}
-                      className="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold transition-all disabled:opacity-50 flex items-center justify-center min-w-[120px]"
+                      className="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold transition-all disabled:opacity-50 flex items-center justify-center min-w-30"
                     >
                       {isSendingMessage ? (
                         <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />

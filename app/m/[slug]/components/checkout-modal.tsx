@@ -14,6 +14,7 @@ import { useCartStore } from '@/lib/store/cart'
 import dynamic from 'next/dynamic'
 import { createClient } from '@/lib/supabase/client'
 import { GlobalAuthModal } from '@/components/auth/GlobalAuthModal'
+import { openSeamlessCheckout, preloadBachsSdk } from '@/components/bachs-overlay-checkout'
 
 const PaymentRouletteModal = dynamic(() => import('@/components/payment-roulette-modal').then(mod => mod.PaymentRouletteModal), { ssr: false })
 
@@ -267,6 +268,7 @@ export function CheckoutModal({
       setLocalSplitCount(useCartStore.getState().splitCount)
 
       setLocalSplitType(useCartStore.getState().splitType)
+      preloadBachsSdk()
     }
   }, [isOpen])
 
@@ -533,7 +535,7 @@ export function CheckoutModal({
         const currentSlug = window.location.pathname.split('/')[2]
         window.location.assign(`/pay/${orderId}/share?split=${splitCount}&type=${splitType}&slug=${currentSlug}`)
       } else if (checkoutUrl) {
-        window.location.assign(checkoutUrl)
+        openSeamlessCheckout(checkoutUrl)
       } else {
         toast.success('Order placed!')
         onClose()

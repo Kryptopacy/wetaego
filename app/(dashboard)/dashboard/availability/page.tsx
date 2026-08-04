@@ -33,8 +33,7 @@ export default async function AvailabilityPage() {
   const { data: member } = await supabase
     .from('organization_members')
     .select('role, organizations(id)')
-    .eq('user_id', userId)
-    .single()
+    .eq('user_id', userId).limit(1).maybeSingle()
 
   if (member && member.organizations) {
     org = member.organizations as { id: string }
@@ -42,8 +41,7 @@ export default async function AvailabilityPage() {
     const { data } = await supabase
       .from('organizations')
       .select('id')
-      .eq('created_by', userId)
-      .single()
+      .eq('created_by', userId).limit(1).maybeSingle()
     org = data
   }
 

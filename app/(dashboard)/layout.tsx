@@ -3,6 +3,7 @@ import { createClient, createAdminClient } from '@/lib/supabase/server'
 import ClientLayout, { InitialDashboardData, NavItem } from './client-layout'
 import { cookies } from 'next/headers'
 import { isAdminEmail } from '@/lib/utils/admin'
+import { getPlanLimits } from '@/lib/utils/settings'
 import { IntercomWidget } from '@/components/intercom/intercom-widget'
 import { AICopilotWidget } from './dashboard/components/ai-copilot-widget'
 
@@ -47,8 +48,11 @@ export default async function DashboardLayout({ children }: { children: ReactNod
         orgName = orgData.name
         isOwnerOrManager = ['owner', 'manager'].includes(member.role)
         
-        const planLimits: Record<string, number> = { lite: 10, pro: 50, enterprise: 200 }
-        const availableFree = (planLimits[orgData.subscription_tier || 'lite'] || 0) - (orgData.monthly_free_credits_used || 0)
+        const dynamicPlanLimits = await getPlanLimits() as Record<string, { credits: number, pages: number }>
+        const tier = orgData.subscription_tier || 'lite'
+        const monthlyLimit = dynamicPlanLimits[tier]?.credits ?? (tier === 'trial' || tier === 'pro' ? 50 : 10)
+        
+        const availableFree = monthlyLimit - (orgData.monthly_free_credits_used || 0)
         const cb = Math.max(0, availableFree) + (orgData.purchased_credits || 0)
         if (!isNaN(cb)) credits = cb
 

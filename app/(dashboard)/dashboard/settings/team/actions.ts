@@ -37,8 +37,7 @@ async function checkIsCreator(orgId: string, userId: string, supabase: any): Pro
     .from('organizations')
     .select('id')
     .eq('id', orgId)
-    .eq('created_by', userId)
-    .single()
+    .eq('created_by', userId).limit(1).maybeSingle()
   return !!data
 }
 

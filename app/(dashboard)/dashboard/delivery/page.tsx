@@ -19,7 +19,7 @@ export default async function DeliveryPage() {
 
   // Determine user's active org and location
   const { data: member } = await supabase.from('organization_members').select('organization_id').eq('user_id', user.id).limit(1).single()
-  const orgId = member?.organization_id || (await supabase.from('organizations').select('id').eq('created_by', user.id).single())?.data?.id
+  const orgId = member?.organization_id || (await supabase.from('organizations').select('id').eq('created_by', user.id).limit(1).maybeSingle())?.data?.id
   
   if (!orgId) return <div className="p-8 text-white">No organization found.</div>
 

@@ -4,6 +4,7 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { applyTranslations } from './actions'
+import { ConfirmModal } from '@/components/ui/confirm-modal'
 
 interface TranslateMenuButtonProps {
   orgId: string
@@ -17,6 +18,7 @@ const LANGUAGES = [
 export function TranslateMenuButton({ orgId, categories }: TranslateMenuButtonProps) {
   const [isTranslating, setIsTranslating] = useState(false)
   const [selectedLang, setSelectedLang] = useState(LANGUAGES[0])
+  const [showConfirm, setShowConfirm] = useState(false)
 
   async function handleTranslate() {
     if (!categories || categories.length === 0) {
@@ -25,9 +27,10 @@ export function TranslateMenuButton({ orgId, categories }: TranslateMenuButtonPr
     }
 
     const cost = categories.length * 2
-    if (!window.confirm(`Translate your menu to ${selectedLang}? This will permanently overwrite current names and descriptions and will consume ${cost} Credits.`)) {
-      return
-    }
+    setShowConfirm(true)
+  }
+
+  async function executeTranslate() {
 
     setIsTranslating(true)
     try {
@@ -84,10 +87,20 @@ export function TranslateMenuButton({ orgId, categories }: TranslateMenuButtonPr
       <button 
         onClick={handleTranslate}
         disabled={isTranslating}
-        className="px-4 py-2 rounded-lg bg-linear-to-r from-teal-500 to-emerald-600 hover:from-teal-400 hover:to-emerald-500 text-white text-sm font-bold transition-all disabled:opacity-50 flex items-center gap-2 shadow-lg"
+        className="px-4 py-2 rounded-lg bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:from-indigo-400 hover:via-purple-400 hover:to-pink-400 text-white text-sm font-bold transition-all disabled:opacity-50 flex items-center gap-2 shadow-lg shadow-purple-500/20"
       >
-        {isTranslating ? 'Translating...' : 'ðŸŒ Translate Menu'}
+        {isTranslating ? 'Translating...' : 'ðŸŒ  Translate Menu'}
       </button>
+
+      <ConfirmModal
+        isOpen={showConfirm}
+        onClose={() => setShowConfirm(false)}
+        onConfirm={executeTranslate}
+        title="Translate Menu"
+        description={`Translate your menu to ${selectedLang}? This will permanently overwrite current names and descriptions.`}
+        cost={categories?.length ? categories.length * 2 : 0}
+        confirmText="Translate"
+      />
     </div>
   )
 }

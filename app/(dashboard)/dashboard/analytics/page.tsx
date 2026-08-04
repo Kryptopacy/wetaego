@@ -21,8 +21,7 @@ export default async function AnalyticsDashboardPage() {
   const { data: member } = await supabase
     .from('organization_members')
     .select('organizations(id)')
-    .eq('user_id', user.id)
-    .single()
+    .eq('user_id', user.id).limit(1).maybeSingle()
 
   const orgId = member?.organizations ? (member.organizations as unknown as { id: string }).id : null
 

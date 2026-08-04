@@ -38,8 +38,7 @@ export const createPromoCodeAction = authActionClient
         .from('organizations')
         .select('id')
         .eq('id', organization_id)
-        .eq('created_by', user.id)
-        .single()
+        .eq('created_by', user.id).limit(1).maybeSingle()
       isAuthorized = !!org
     }
 

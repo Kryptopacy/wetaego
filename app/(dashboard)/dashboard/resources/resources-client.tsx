@@ -7,6 +7,7 @@ import Image from 'next/image'
 import { Database } from '@/lib/supabase/types'
 import { addResource, updateResource, deleteResource, generateResourceQr, generateQrBatch, deleteQrCode, assignQrTable, createQrZone, assignQrZone } from './actions'
 import { DynamicQR } from '@/components/qr/DynamicQR'
+import { ConfirmModal } from '@/components/ui/confirm-modal'
 
 type Resource = Database['public']['Tables']['resources']['Row']
 type QrCodeType = Database['public']['Tables']['qr_codes']['Row']
@@ -46,6 +47,18 @@ export function ResourcesClient({ initialResources, organizationId, locationId, 
   const [assignModalOpen, setAssignModalOpen] = useState(false)
   const [assigningQr, setAssigningQr] = useState<QrCodeType | null>(null)
   const [tableInput, setTableInput] = useState('')
+
+  // -- Confirmation Modal State --
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean,
+    title: string,
+    description: string,
+    onConfirm: () => void,
+    isDestructive: boolean,
+    confirmText: string
+  }>({
+    isOpen: false, title: '', description: '', onConfirm: () => {}, isDestructive: false, confirmText: ''
+  })
 
   // -- Computed Resources --
   const zones = useMemo(() => {
@@ -96,8 +109,18 @@ export function ResourcesClient({ initialResources, organizationId, locationId, 
     })
   }
 
-  const handleDeleteResource = (id: string, name: string) => {
-    if (!confirm(`Are you sure you want to delete ${name}?`)) return
+  const promptDeleteResource = (id: string, name: string) => {
+    setConfirmModal({
+      isOpen: true,
+      title: 'Delete Resource',
+      description: `Are you sure you want to delete ${name}? This action cannot be undone.`,
+      isDestructive: true,
+      confirmText: 'Delete',
+      onConfirm: () => handleDeleteResource(id)
+    })
+  }
+
+  const handleDeleteResource = (id: string) => {
     startTransition(async () => {
       const res = await deleteResource(id)
       if (res.serverError) { toast.error(res.serverError); return }
@@ -184,11 +207,19 @@ export function ResourcesClient({ initialResources, organizationId, locationId, 
         )}
 
         <button 
-          onClick={async () => {
-            if (!confirm('Are you sure you want to delete this QR?')) return;
-            const res = await deleteQrCode({ qrId: qr.id })
-            if (res?.serverError) toast.error(res.serverError)
-            else setLocalQrCodes(prev => prev.filter(q => q.id !== qr.id))
+          onClick={() => {
+            setConfirmModal({
+              isOpen: true,
+              title: 'Delete QR Code',
+              description: 'Are you sure you want to delete this QR code? Any printed versions will stop working.',
+              isDestructive: true,
+              confirmText: 'Delete',
+              onConfirm: async () => {
+                const res = await deleteQrCode({ qrId: qr.id })
+                if (res?.serverError) toast.error(res.serverError)
+                else setLocalQrCodes(prev => prev.filter(q => q.id !== qr.id))
+              }
+            })
           }}
           className="absolute top-4 right-4 p-2 rounded-full bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white opacity-0 group-hover:opacity-100 transition-all print:hidden z-10"
         >
@@ -342,7 +373,7 @@ export function ResourcesClient({ initialResources, organizationId, locationId, 
                       
                       <div className="mt-6 pt-4 border-t border-zinc-800 flex gap-2 flex-wrap">
                         {dynamicQr ? (
-                           <button onClick={() => window.alert('Scroll down to "Resource QRs" to view and print this QR.')} className="flex-1 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 px-3 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center justify-center gap-2">
+                           <button onClick={() => toast.info('Scroll down to "Resource QRs" to view and print this QR.')} className="flex-1 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 px-3 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center justify-center gap-2">
                              <QrCode className="w-4 h-4" /> Has Dynamic QR
                            </button>
                         ) : (
@@ -356,7 +387,7 @@ export function ResourcesClient({ initialResources, organizationId, locationId, 
                         <button onClick={() => setModalState({ isOpen: true, isEdit: true, data: resource })} className="p-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-lg transition-colors">
                           <MapPin className="w-4 h-4" />
                         </button>
-                        <button onClick={() => handleDeleteResource(resource.id, resource.name)} className="p-2 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white rounded-lg transition-colors">
+                        <button onClick={() => promptDeleteResource(resource.id, resource.name)} className="p-2 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white rounded-lg transition-colors">
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
@@ -562,6 +593,17 @@ export function ResourcesClient({ initialResources, organizationId, locationId, 
           </div>
         </div>
       )}
+
+      {/* Shared Confirmation Modal */}
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={confirmModal.onConfirm}
+        title={confirmModal.title}
+        description={confirmModal.description}
+        confirmText={confirmModal.confirmText}
+        isDestructive={confirmModal.isDestructive}
+      />
     </div>
   )
 }

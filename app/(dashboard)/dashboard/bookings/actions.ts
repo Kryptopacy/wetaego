@@ -43,8 +43,7 @@ export const updateBookingStatus = authActionClient
         .from('organizations')
         .select('id')
         .eq('id', orgId)
-        .eq('created_by', user.id)
-        .single()
+        .eq('created_by', user.id).limit(1).maybeSingle()
       isAuthorized = !!org
     }
 

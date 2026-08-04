@@ -231,6 +231,31 @@ export async function processSubscriptionPayment(
   }
 }
 
+export async function processSubscriptionLifecycleEvent(
+  supabase: SupabaseClient,
+  orgId: string,
+  subscriptionId: string,
+  status: string,
+  eventType: string
+) {
+  const statusMap: Record<string, string> = {
+    active: 'active',
+    trialing: 'trialing',
+    past_due: 'past_due',
+    unpaid: 'unpaid',
+    canceled: 'canceled',
+    cancelled: 'canceled',
+  }
+  const mappedStatus = statusMap[status.toLowerCase()] || status
+
+  await supabase
+    .from('organizations')
+    .update({ subscription_status: mappedStatus })
+    .eq('id', orgId)
+
+  console.log(`[Bachs Subscription Lifecycle] org=${orgId} sub=${subscriptionId} status=${mappedStatus} event=${eventType}`)
+}
+
 export async function processCreditPackPayment(
   supabase: SupabaseClient,
   orgId: string,

@@ -9,6 +9,8 @@ import { addPageItem, updatePageItem, deletePageItem } from '../(dashboard)/dash
 import { AiGenerateButton } from './ai-generate-button'
 import { formatCurrency } from '@/lib/utils/currency'
 import { VariantBuilderField, type VariantGroup } from './variant-builder-field'
+import { ConfirmModal } from '@/components/ui/confirm-modal'
+import { Zap } from 'lucide-react'
 
 export interface PageItem {
   id: string
@@ -38,7 +40,9 @@ export function PageBuilderForm({ pageId, templateType, initialItems, orgId }: P
   const [isSaving, setIsSaving] = useState(false)
   // Track pending variants for the active form (add or edit)
   const [pendingVariants, setPendingVariants] = useState<VariantGroup[]>([])
-
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
+  const [aiConfirmFormId, setAiConfirmFormId] = useState<string | null>(null)
+  
   const handleAddSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsSaving(true)
@@ -124,7 +128,6 @@ export function PageBuilderForm({ pageId, templateType, initialItems, orgId }: P
   }
 
   const handleDelete = async (itemId: string) => {
-    if (!confirm('Are you sure you want to delete this item?')) return
     setIsSaving(true)
     const formData = new FormData()
     formData.append('itemId', itemId)
@@ -174,6 +177,40 @@ export function PageBuilderForm({ pageId, templateType, initialItems, orgId }: P
     } catch (err: unknown) {
       console.error('AI Gen Error:', err)
       toast.error((err as Error).message || 'Failed to generate description. Please try again.')
+    }
+  }
+
+  const executeAiImage = async (formId: string) => {
+    const form = document.getElementById(formId) as HTMLFormElement
+    if (!form) return
+    const title = (form.elements.namedItem('title') as HTMLInputElement)?.value
+    const desc = (form.elements.namedItem('description') as HTMLTextAreaElement)?.value
+    
+    try {
+      const res = await fetch('/api/ai/generate-item-image', {
+        method: 'POST',
+        body: JSON.stringify({ itemName: title, itemContext: desc, organizationId: orgId }), 
+        headers: { 'Content-Type': 'application/json' }
+      })
+      if (!res.ok) {
+        if (res.status === 429) throw new Error('Too many requests. Please try again later.')
+        throw new Error(await res.text())
+      }
+      const data = await res.json()
+      if (data.url) {
+        let hidden = form.elements.namedItem('ai_image_url') as HTMLInputElement
+        if (!hidden) {
+          hidden = document.createElement('input')
+          hidden.type = 'hidden'
+          hidden.name = 'ai_image_url'
+          form.appendChild(hidden)
+        }
+        hidden.value = data.url
+        toast.success('AI Image Generated! It will be saved when you submit.')
+      }
+
+    } catch(e: unknown) {
+      toast.error((e as Error).message || 'AI generation failed.')
     }
   }
 
@@ -272,45 +309,18 @@ export function PageBuilderForm({ pageId, templateType, initialItems, orgId }: P
             <input type="file" name="image" accept="image/*,video/mp4,video/webm,video/quicktime" className="w-full text-xs text-zinc-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-medium file:bg-zinc-800 file:text-zinc-300 hover:file:bg-zinc-700 cursor-pointer" />
             <button 
               type="button"
-              onClick={async () => {
+              onClick={() => {
                 const form = document.getElementById(formId) as HTMLFormElement
                 const title = (form.elements.namedItem('title') as HTMLInputElement)?.value
-                const desc = (form.elements.namedItem('description') as HTMLTextAreaElement)?.value
                 if (!title) {
                   toast.error('Enter a title first')
                   return
                 }
-                if (!confirm('This will cost 5 AI Credits. Continue?')) return
-                try {
-                  const res = await fetch('/api/ai/generate-item-image', {
-                    method: 'POST',
-                    body: JSON.stringify({ itemName: title, itemContext: desc, organizationId: orgId }), 
-                    headers: { 'Content-Type': 'application/json' }
-                  })
-                  if (!res.ok) {
-                    if (res.status === 429) throw new Error('Too many requests. Please try again later.')
-                    throw new Error(await res.text())
-                  }
-                  const data = await res.json()
-                  if (data.url) {
-                    let hidden = form.elements.namedItem('ai_image_url') as HTMLInputElement
-                    if (!hidden) {
-                      hidden = document.createElement('input')
-                      hidden.type = 'hidden'
-                      hidden.name = 'ai_image_url'
-                      form.appendChild(hidden)
-                    }
-                    hidden.value = data.url
-                    toast.success('AI Image Generated! It will be saved when you submit.')
-                  }
-  
-                } catch(e: unknown) {
-                  toast.error((e as Error).message || 'AI generation failed.')
-                }
+                setAiConfirmFormId(formId)
               }}
-              className="px-3 py-1.5 bg-linear-to-r from-teal-500 to-emerald-600 hover:from-teal-400 hover:to-emerald-500 text-white rounded-lg text-xs font-bold transition-all whitespace-nowrap"
+              className="px-3 py-1.5 bg-linear-to-r from-indigo-500 via-purple-500 to-pink-500 hover:from-indigo-400 hover:via-purple-400 hover:to-pink-400 text-white rounded-lg text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 shadow-lg shadow-purple-500/20"
             >
-              ✨ AI Image Studio
+              ✨ AI Image Studio <span className="flex items-center text-[10px] bg-black/20 px-1 rounded-sm"><Zap className="w-3 h-3 mr-0.5" /> 5</span>
             </button>
           </div>
           <p className="text-[10px] text-zinc-500 mt-1">Upload a photo or generate one. Existing image will be replaced.</p>
@@ -421,7 +431,7 @@ export function PageBuilderForm({ pageId, templateType, initialItems, orgId }: P
                   <button onClick={() => setEditingId(item.id)} disabled={isSaving} className="p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors">
                     Edit
                   </button>
-                  <button onClick={() => handleDelete(item.id)} disabled={isSaving} className="p-2 text-zinc-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors">
+                  <button onClick={() => setDeleteConfirmId(item.id)} disabled={isSaving} className="p-2 text-zinc-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors">
                     Delete
                   </button>
                 </div>
@@ -430,6 +440,30 @@ export function PageBuilderForm({ pageId, templateType, initialItems, orgId }: P
           </div>
         ))}
       </div>
+
+      <ConfirmModal
+        isOpen={deleteConfirmId !== null}
+        onClose={() => setDeleteConfirmId(null)}
+        onConfirm={() => {
+          if (deleteConfirmId) handleDelete(deleteConfirmId)
+        }}
+        title="Delete Item"
+        description="Are you sure you want to delete this item? This action cannot be undone."
+        confirmText="Yes, Delete"
+        isDestructive={true}
+      />
+
+      <ConfirmModal
+        isOpen={aiConfirmFormId !== null}
+        onClose={() => setAiConfirmFormId(null)}
+        onConfirm={() => {
+          if (aiConfirmFormId) executeAiImage(aiConfirmFormId)
+        }}
+        title="AI Image Studio"
+        description="This will generate a custom high-quality image for your item."
+        cost={5}
+        confirmText="Generate Image"
+      />
     </div>
   )
 }

@@ -22,7 +22,7 @@ export default async function IOUsPage() {
   if (member) {
     orgId = member.organization_id
   } else {
-    const { data: orgData } = await supabase.from('organizations').select('id').eq('created_by', userId).single()
+    const { data: orgData } = await supabase.from('organizations').select('id').eq('created_by', userId).limit(1).maybeSingle()
     if (orgData) orgId = orgData.id
   }
 

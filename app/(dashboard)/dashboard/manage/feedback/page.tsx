@@ -25,8 +25,7 @@ export default async function FeedbackManagementPage() {
     const { data: org } = await supabase
       .from('organizations')
       .select('id')
-      .eq('created_by', userId)
-      .maybeSingle()
+      .eq('created_by', userId).limit(1).maybeSingle()
     if (org) {
       orgId = org.id
     }

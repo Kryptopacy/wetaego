@@ -34,6 +34,11 @@ export interface PaymentParams {
    * Defaults to 'charge'.
    */
   chargeType?: 'auth' | 'charge'
+  /**
+   * Optional local-currency prices per market for Bachs multi-currency pricing.
+   * e.g. [{ currency: 'GHS', amountMinor: 15000 }, { currency: 'KES', amountMinor: 130000 }]
+   */
+  currencyOptions?: { currency: string; amountMinor: number }[]
 }
 
 export interface PaymentVerification {
@@ -54,5 +59,5 @@ export interface PaymentProvider {
   refundPayment?(reference: string, amountMinor?: number, useTestKeys?: boolean): Promise<{ success: boolean; message?: string }>
   /** Charge a previously tokenized card on file (e.g., for a No-Show fee) */
   chargeCardOnFile?(token: string, amountMinor: number, email: string, reference: string, useTestKeys?: boolean): Promise<PaymentVerification>
-  validateWebhookSignature(payload: string, signature: string): boolean
+  validateWebhookSignature(payload: string, signature: string, timestamp?: string | null): boolean
 }

@@ -42,8 +42,7 @@ export default async function BuildTemplatePage({
     const { data } = await supabase
       .from('organizations')
       .select('id, name, subscription_tier, purchased_credits, monthly_free_credits_used')
-      .eq('created_by', userData.user!.id)
-      .single()
+      .eq('created_by', userData.user!.id).limit(1).maybeSingle()
     org = data
   }
 

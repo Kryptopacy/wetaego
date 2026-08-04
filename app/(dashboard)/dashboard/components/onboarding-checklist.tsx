@@ -59,13 +59,6 @@ export function OnboardingChecklist({ hasOrg, hasLocation, hasMenu, hasQR, templ
       href: '/dashboard/settings',
     },
     {
-      id: 'location',
-      title: 'Add a location',
-      description: 'Where is your business located?',
-      isComplete: hasLocation,
-      href: '/dashboard/properties',
-    },
-    {
       id: 'menu',
       title: itemTitle,
       description: itemDesc,

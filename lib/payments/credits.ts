@@ -19,7 +19,7 @@ export async function chargeCredits(organizationId: string, cost: number, reason
       p_organization_id: organizationId,
       p_cost: cost,
       p_reason: reason,
-      p_user_id: userId || undefined,
+      p_user_id: (userId || null) as unknown as undefined,
     })
 
     if (rpcError) {

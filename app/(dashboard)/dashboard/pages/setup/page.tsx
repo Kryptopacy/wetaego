@@ -42,8 +42,7 @@ export default async function BusinessTypeSetupPage({
     const { data } = await supabase
       .from('organizations')
       .select('id, name, business_type')
-      .eq('created_by', userId)
-      .single()
+      .eq('created_by', userId).limit(1).maybeSingle()
     org = data
   }
 

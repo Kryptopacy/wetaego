@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
 import { submitFeedbackAndTip } from './actions'
+import { openSeamlessCheckout, preloadBachsSdk } from '@/components/bachs-overlay-checkout'
 
 export default function FeedbackPage({
   params
@@ -30,9 +31,14 @@ export default function FeedbackPage({
   const [locationId, setLocationId] = useState<string | null>(null)
 
   useEffect(() => {
+    preloadBachsSdk()
+  }, [])
+
+  useEffect(() => {
     if (isGeneral) {
       const urlParams = new URLSearchParams(window.location.search)
-      Promise.resolve().then(() => setLocationId(urlParams.get('location_id')))
+      const loc = urlParams.get('loc')
+      if (loc) setLocationId(loc)
     }
   }, [isGeneral])
 
@@ -66,7 +72,7 @@ export default function FeedbackPage({
       }
 
       if (checkoutUrl) {
-        window.location.href = checkoutUrl
+        openSeamlessCheckout(checkoutUrl)
       } else {
         setSubmitted(true)
         toast.success('Thank you for your feedback!')

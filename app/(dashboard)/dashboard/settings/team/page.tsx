@@ -54,8 +54,7 @@ export default async function TeamPage() {
     const { data: org } = await supabase
       .from('organizations')
       .select('id, name, slug')
-      .eq('created_by', userId)
-      .single()
+      .eq('created_by', userId).limit(1).maybeSingle()
     organization = org
     role = 'owner'
   }

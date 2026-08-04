@@ -5,13 +5,15 @@ import Image from 'next/image'
 import { createItem } from './actions'
 import { toast } from 'sonner'
 import { SubmitButton } from '@/components/submit-button'
+import { ConfirmModal } from '@/components/ui/confirm-modal'
+import { Zap } from 'lucide-react'
 
 interface Collection {
   id: string;
   name: string;
 }
 
-export function AddItemForm({ orgId, pageId, activeCollectionId, allCollections, templateType }: { orgId: string, pageId: string, activeCollectionId: string, allCollections: Collection[], templateType?: string }) {
+export function AddItemForm({ orgId, pageId, activeCollectionId, allCollections, templateType, onSuccess }: { orgId: string, pageId: string, activeCollectionId: string, allCollections: Collection[], templateType?: string, onSuccess?: () => void }) {
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [dietaryTags, setDietaryTags] = useState<string[]>([])
@@ -25,6 +27,7 @@ export function AddItemForm({ orgId, pageId, activeCollectionId, allCollections,
   
   const [isGenerating, setIsGenerating] = useState(false)
   const [isGeneratingImg, setIsGeneratingImg] = useState(false)
+  const [showAiImageConfirm, setShowAiImageConfirm] = useState(false)
   const [aiImageUrl, setAiImageUrl] = useState<string | null>(null)
   const formRef = useRef<HTMLFormElement>(null)
 
@@ -50,12 +53,15 @@ export function AddItemForm({ orgId, pageId, activeCollectionId, allCollections,
         headers: { 'Content-Type': 'application/json' }
       })
 
-      if (!res.ok) throw new Error('Failed to generate copy')
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}))
+        throw new Error(errData.error || 'Failed to generate copy')
+      }
       
       const data = await res.json()
       if (data.description) setDescription(data.description)
       if (data.dietary_tags) setDietaryTags(data.dietary_tags)
-      if (data.allergen_tags) setAllergens(data.allergen_tags)
+      if (data.allergens) setAllergens(data.allergens)
       
       toast.success('AI magic applied successfully!')
     } catch (err: unknown) {
@@ -71,8 +77,10 @@ export function AddItemForm({ orgId, pageId, activeCollectionId, allCollections,
       return
     }
     
-    if (!confirm('This will cost 5 AI Credits. Are you sure?')) return
+    setShowAiImageConfirm(true)
+  }
 
+  async function executeGenerateImage() {
     setIsGeneratingImg(true)
     try {
       const res = await fetch('/api/ai/generate-item-image', {
@@ -122,6 +130,7 @@ export function AddItemForm({ orgId, pageId, activeCollectionId, allCollections,
       setSelectedCollections([activeCollectionId])
       setAiImageUrl(null)
       formRef.current?.reset()
+      onSuccess?.()
     }
   }
 
@@ -217,10 +226,10 @@ export function AddItemForm({ orgId, pageId, activeCollectionId, allCollections,
             <button 
               type="button" 
               onClick={handleMagicFill} 
-              disabled={isGenerating || !name}
-              className="absolute right-2 bottom-3 px-3 bg-linear-to-r from-teal-500 to-emerald-600 hover:from-teal-400 hover:to-emerald-500 text-white rounded-md text-xs font-bold py-1.5 transition-all disabled:opacity-50 disabled:grayscale flex items-center gap-1 shadow-lg"
+              disabled={isGenerating}
+              className="absolute right-2 bottom-3 px-3 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:from-indigo-400 hover:via-purple-400 hover:to-pink-400 text-white rounded-md text-xs font-bold py-1.5 transition-all disabled:opacity-50 disabled:grayscale flex items-center gap-1.5 shadow-lg shadow-purple-500/20"
             >
-              {isGenerating ? 'Wait...' : '✨ Magic Fill'}
+              {isGenerating ? 'Wait...' : <>✨ Magic Fill <span className="flex items-center text-[10px] bg-black/20 px-1 rounded-sm ml-1"><Zap className="w-3 h-3 mr-0.5" /> 1</span></>}
             </button>
           </div>
           
@@ -255,10 +264,10 @@ export function AddItemForm({ orgId, pageId, activeCollectionId, allCollections,
               <button 
                 type="button"
                 onClick={handleGenerateImage}
-                disabled={isGeneratingImg || !name}
-                className="w-full px-3 py-2 bg-linear-to-r from-teal-500 to-emerald-600 hover:from-teal-400 hover:to-emerald-500 text-white rounded-lg text-xs font-bold transition-all disabled:opacity-50 disabled:grayscale flex items-center justify-center gap-1 shadow-lg"
+                disabled={isGeneratingImg}
+                className="w-full px-3 py-2.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:from-indigo-400 hover:via-purple-400 hover:to-pink-400 text-white rounded-lg text-xs font-bold transition-all disabled:opacity-50 disabled:grayscale flex items-center justify-center gap-1.5 shadow-lg shadow-purple-500/20"
               >
-                {isGeneratingImg ? 'Generating...' : '✨ AI Image Studio'}
+                {isGeneratingImg ? 'Generating...' : <>✨ AI Image Studio <span className="flex items-center text-[10px] bg-black/20 px-1 rounded-sm ml-1"><Zap className="w-3 h-3 mr-0.5" /> 5</span></>}
               </button>
             </>
           )}
@@ -294,6 +303,15 @@ export function AddItemForm({ orgId, pageId, activeCollectionId, allCollections,
           )}
         </div>
       )}
+      <ConfirmModal
+        isOpen={showAiImageConfirm}
+        onClose={() => setShowAiImageConfirm(false)}
+        onConfirm={executeGenerateImage}
+        title="AI Image Studio"
+        description={`This will generate a custom image for "${name}". High-quality image generation consumes AI credits.`}
+        cost={5}
+        confirmText="Generate Image"
+      />
     </form>
   )
 }

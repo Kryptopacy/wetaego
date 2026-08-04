@@ -132,8 +132,7 @@ export default async function PublicPageView({
           .from('organizations')
           .select('id')
           .eq('id', loc.organization_id)
-          .eq('created_by', userData.user.id)
-          .single()
+          .eq('created_by', userData.user.id).limit(1).maybeSingle()
         if (org) isPreview = true
       }
     }

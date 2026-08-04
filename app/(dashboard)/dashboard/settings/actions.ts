@@ -287,8 +287,7 @@ export const saveLocationAiSettings = authActionClient
         .from('organizations')
         .select('id')
         .eq('id', loc.organization_id)
-        .eq('created_by', user.id)
-        .single()
+        .eq('created_by', user.id).limit(1).maybeSingle()
       isAuthorized = !!org
     }
 
@@ -359,8 +358,7 @@ export const saveLocationTheme = authActionClient
         .from('organizations')
         .select('id')
         .eq('id', loc.organization_id)
-        .eq('created_by', user.id)
-        .single()
+        .eq('created_by', user.id).limit(1).maybeSingle()
       isAuthorized = !!org
     }
 
@@ -434,8 +432,7 @@ export const saveLocationInfoSettings = authActionClient
         .from('organizations')
         .select('id')
         .eq('id', loc.organization_id)
-        .eq('created_by', user.id)
-        .single()
+        .eq('created_by', user.id).limit(1).maybeSingle()
       isAuthorized = !!org
     }
 
@@ -524,8 +521,7 @@ export const saveLoyaltySettings = authActionClient
         .from('organizations')
         .select('id')
         .eq('id', organizationId)
-        .eq('created_by', user.id)
-        .single()
+        .eq('created_by', user.id).limit(1).maybeSingle()
       isAuthorized = !!org
     }
 
@@ -619,3 +615,88 @@ export const updateProfile = authActionClient
     revalidatePath('/dashboard/settings')
     return { success: true }
   })
+
+export const createLocation = authActionClient
+  .schema(zfd.formData({
+    name: zfd.text(z.string().min(2, "Location name must be at least 2 characters").max(100)),
+    slug: zfd.text(z.string().min(3, "Slug must be at least 3 characters").max(50).regex(/^[a-z0-9-]+$/, "Slug can only contain lowercase letters, numbers, and hyphens")),
+  }))
+  .action(async ({ parsedInput, ctx: { supabase, user } }) => {
+    const { cookies } = await import('next/headers')
+    if ((await cookies()).get('demo_mode')?.value === '1') {
+      revalidatePath('/dashboard/settings')
+      return { success: true }
+    }
+
+    const { name, slug } = parsedInput
+
+    const { createAdminClient } = await import('@/lib/supabase/server')
+    const adminClient = await createAdminClient()
+
+    // 1. Get user org
+    const { data: member } = await supabase
+      .from('organization_members')
+      .select('organization_id, role')
+      .eq('user_id', user.id)
+      .limit(1)
+      .single()
+
+    let orgId = member?.organization_id
+    let isAuthorized = member?.role === 'owner' || member?.role === 'manager'
+
+    if (!orgId) {
+      const { data: org } = await supabase
+        .from('organizations')
+        .select('id')
+        .eq('created_by', user.id)
+        .limit(1)
+        .single()
+      
+      if (org) {
+        orgId = org.id
+        isAuthorized = true
+      }
+    }
+
+    if (!orgId || !isAuthorized) {
+      throw new Error('You do not have permission to create locations for this organization.')
+    }
+
+    // 2. Insert new location
+    const { data: newLoc, error: locError } = await adminClient
+      .from('locations')
+      .insert({
+        organization_id: orgId,
+        name,
+        slug,
+        address: 'Update your address',
+      })
+      .select('id')
+      .single()
+
+    if (locError) {
+      if (locError.code === '23505' || locError.message.toLowerCase().includes('unique constraint') || locError.message.toLowerCase().includes('slug')) {
+        throw new Error('This public slug (URL) is already taken. Please choose another slug.')
+      }
+      throw new Error('Failed to create location: ' + locError.message)
+    }
+
+    if (newLoc) {
+      // 3. Set up a default main menu
+      await adminClient.from('menus').insert({
+        organization_id: orgId,
+        location_id: newLoc.id,
+        name: 'Main Menu',
+      })
+      
+      // 4. Switch the user to the new location context immediately
+      const cookieStore = await cookies()
+      cookieStore.set('ourmenu_active_location_id', newLoc.id, { path: '/' })
+      cookieStore.delete('ourmenu_active_page_id') // Clear page context since it's a new location
+    }
+
+    revalidatePath('/dashboard')
+    revalidatePath('/dashboard/settings')
+    return { success: true }
+  })
+

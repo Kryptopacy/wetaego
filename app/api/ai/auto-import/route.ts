@@ -23,7 +23,7 @@ export async function POST(req: Request) {
     // Verify membership
     const { data: member } = await supabase.from('organization_members').select('role').eq('organization_id', organizationId).eq('user_id', userData.user.id).single()
     if (!member) {
-      const { data: org } = await supabase.from('organizations').select('id').eq('id', organizationId).eq('created_by', userData.user.id).single()
+      const { data: org } = await supabase.from('organizations').select('id').eq('id', organizationId).eq('created_by', userData.user.id).limit(1).maybeSingle()
       if (!org) return new NextResponse('Unauthorized', { status: 403 })
     }
 

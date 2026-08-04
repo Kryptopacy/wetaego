@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
       .eq('user_id', user.id)
       .single()
 
-    if (!member && !(await supabase.from('organizations').select('id').eq('id', organizationId).eq('created_by', user.id).single()).data) {
+    if (!member && !(await supabase.from('organizations').select('id').eq('id', organizationId).eq('created_by', user.id).limit(1).maybeSingle()).data) {
       return NextResponse.json({ error: 'Not authorized' }, { status: 403 })
     }
 

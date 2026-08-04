@@ -22,8 +22,7 @@ export const savePaymentSettings = authActionClient
     const { data: org } = await supabase
       .from('organizations')
       .select('id, is_demo')
-      .eq('created_by', user.id)
-      .single()
+      .eq('created_by', user.id).limit(1).maybeSingle()
 
     if (!org) throw new Error('Organization not found')
     if (org.is_demo) {
