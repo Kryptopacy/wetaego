@@ -26,6 +26,7 @@ import { LocationAutocomplete } from './location-autocomplete'
 import { CustomMilestonesSettings } from './custom-milestones-settings'
 import { getInfrastructureFlags } from '@/lib/utils/settings'
 import { LocationFleetManager } from './location-fleet-manager'
+import { PageHeader } from '@/components/ui/page-header'
 
 
 
@@ -161,28 +162,30 @@ export default async function SettingsPage({
     .single()
 
   return (
-    <div className="max-w-3xl pb-20">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Business Settings</h1>
-          {activePage ? (
-            <p className="text-sm text-emerald-400 mt-1">Editing context: <strong>{activePage.title}</strong> (Page Level)</p>
-          ) : location ? (
-            <p className="text-sm text-zinc-400 mt-1">Editing context: <strong>{location.portal_display_name || location.name}</strong> (Location Level)</p>
-          ) : null}
-        </div>
-        {isOwnerOrManager && (
-          <Link 
-            href="/dashboard/settings/team" 
-            className="self-start px-4 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 hover:text-white font-medium transition-colors border border-zinc-700 flex items-center gap-2"
-          >
-            <svg className="w-5 h-5 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-            </svg>
-            Manage Team
-          </Link>
-        )}
-      </div>
+    <div className="max-w-5xl space-y-6 pb-20">
+      <PageHeader
+        title="Business Settings"
+        description={
+          activePage
+            ? `Editing context: ${activePage.title} (Page Level)`
+            : location
+            ? `Editing context: ${location.portal_display_name || location.name} (Location Level)`
+            : 'Configure organization details, operational rules, AI assistant, and payments.'
+        }
+        action={
+          isOwnerOrManager ? (
+            <Link 
+              href="/dashboard/settings/team" 
+              className="px-3.5 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 hover:text-white text-xs font-semibold transition-colors border border-zinc-700 flex items-center gap-2"
+            >
+              <svg className="w-4 h-4 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+              Manage Team
+            </Link>
+          ) : undefined
+        }
+      />
 
       <div className="flex flex-col md:flex-row gap-8">
         <div className="w-full md:w-64 shrink-0">

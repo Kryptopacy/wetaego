@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { QrSettingsClient } from "./QrSettingsClient";
+import { PageHeader } from "@/components/ui/page-header";
 
 export default async function QrSettingsPage() {
   const supabase = await createClient();
@@ -47,13 +48,11 @@ export default async function QrSettingsPage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">QR Generator</h1>
-        <p className="text-muted-foreground mt-2">
-          Customize and download premium QR codes for your ecosystem.
-        </p>
-      </div>
+    <div className="max-w-5xl space-y-6 pb-20">
+      <PageHeader
+        title="QR Code Studio"
+        description="Customize, style, and download high-resolution dynamic QR codes for table stands and storefront windows."
+      />
       <QrSettingsClient location={location} />
     </div>
   );

@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { ApiKeyManager } from './api-key-manager'
+import { PageHeader } from '@/components/ui/page-header'
 
 export default async function ApiKeysPage() {
   const supabase = await createClient()
@@ -30,9 +31,12 @@ export default async function ApiKeysPage() {
 
   if (!orgId) {
     return (
-      <div className="max-w-4xl">
-        <h1 className="text-2xl font-bold text-white mb-6">API Keys</h1>
-        <div className="rounded-xl border border-yellow-800 bg-yellow-900/20 p-6">
+      <div className="max-w-4xl space-y-6">
+        <PageHeader
+          title="API Keys"
+          description="Manage inbound API keys for custom POS, webhook listeners, and third-party integrations."
+        />
+        <div className="rounded-2xl border border-yellow-800 bg-yellow-900/20 p-6">
           <p className="text-yellow-400">Please complete your Business Settings first.</p>
         </div>
       </div>
@@ -46,13 +50,11 @@ export default async function ApiKeysPage() {
     .order('created_at', { ascending: false })
 
   return (
-    <div className="max-w-4xl">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-white mb-1">API Keys</h1>
-          <p className="text-sm text-zinc-400">Manage inbound API keys for custom POS and external integrations.</p>
-        </div>
-      </div>
+    <div className="max-w-4xl space-y-6 pb-20">
+      <PageHeader
+        title="API Keys"
+        description="Manage inbound API keys for custom POS systems, ERP synchronization, and external automations."
+      />
 
       <div className="rounded-xl border border-blue-500/30 bg-blue-500/10 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-blue-300 text-sm mb-8">
         <div className="flex items-center gap-2.5">

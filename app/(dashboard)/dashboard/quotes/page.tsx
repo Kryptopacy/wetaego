@@ -2,6 +2,9 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { format } from 'date-fns'
+import { PageHeader } from '@/components/ui/page-header'
+import { FileText } from 'lucide-react'
+import { EmptyState } from '@/components/ui/empty-state'
 
 export default async function QuotesDashboard() {
   const supabase = await createClient()
@@ -34,12 +37,10 @@ export default async function QuotesDashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Quotes & Inquiries</h1>
-          <p className="text-sm text-zinc-400 mt-1">Manage project quotes, creative service inquiries, and questions.</p>
-        </div>
-      </div>
+      <PageHeader
+        title="Quotes & Inquiries"
+        description="Manage custom quotes, service inquiries, and project requests."
+      />
 
       <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl overflow-hidden shadow-2xl">
         <div className="overflow-x-auto">
@@ -57,8 +58,13 @@ export default async function QuotesDashboard() {
             <tbody className="divide-y divide-white/5 text-zinc-300">
               {quotes?.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-zinc-500">
-                    No quotes or inquiries found.
+                  <td colSpan={6} className="p-0">
+                    <EmptyState
+                      icon={FileText}
+                      title="No Quotes Requested"
+                      description="Custom price quote requests submitted through your business pages will land here."
+                      className="border-0 rounded-none shadow-none bg-transparent"
+                    />
                   </td>
                 </tr>
               ) : (

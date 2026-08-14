@@ -5,6 +5,8 @@ import { updateBookingStatus } from './actions'
 import { BookingsClient } from './bookings-client'
   
 import { format } from 'date-fns'
+import { Calendar } from 'lucide-react'
+import { EmptyState } from '@/components/ui/empty-state'
 
 export default async function BookingsDashboard() {
   const supabase = await createClient()
@@ -54,8 +56,13 @@ export default async function BookingsDashboard() {
             <tbody className="divide-y divide-white/5 text-zinc-300">
               {bookings?.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center text-zinc-500">
-                    No bookings found.
+                  <td colSpan={7} className="p-0">
+                    <EmptyState
+                      icon={Calendar}
+                      title="No Bookings Yet"
+                      description="When guests reserve appointments or book tables via your storefront, they will appear here in real-time."
+                      className="border-0 rounded-none shadow-none bg-transparent"
+                    />
                   </td>
                 </tr>
               ) : (

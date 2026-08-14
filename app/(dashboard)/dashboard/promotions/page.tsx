@@ -1,9 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import PromoCodesManager, { PromoCode } from './promo-codes-manager'
+import { PageHeader } from '@/components/ui/page-header'
 
 export const metadata = {
-  title: 'Promo Codes - OurMenu OS',
+  title: 'Promo Codes | OurMenu OS',
 }
 
 export default async function PromotionsPage({
@@ -21,9 +22,14 @@ export default async function PromotionsPage({
 
   if (!locationId) {
     return (
-      <div className="p-8">
-        <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">Promo Codes</h1>
-        <p className="text-zinc-500 mt-2">Please select a location from the sidebar location picker to manage promo codes.</p>
+      <div className="max-w-6xl space-y-6">
+        <PageHeader
+          title="Promo Codes"
+          description="Create cart-level coupon codes (like SUMMER20 or WELCOME5) that guests can apply at checkout."
+        />
+        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-8 text-center">
+          <p className="text-zinc-400 text-sm">Please select a location from the sidebar location picker to manage promo codes.</p>
+        </div>
       </div>
     )
   }
@@ -45,15 +51,11 @@ export default async function PromotionsPage({
     .order('created_at', { ascending: false })
 
   return (
-    <div className="max-w-6xl mx-auto p-4 md:p-8">
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">Promo Codes</h1>
-          <p className="text-sm text-zinc-500 mt-1">
-            Create cart-level discount codes (like SUMMER20 or WELCOME5) that guests can apply at checkout.
-          </p>
-        </div>
-      </div>
+    <div className="max-w-6xl space-y-6">
+      <PageHeader
+        title="Promo Codes"
+        description="Create cart-level discount codes (like SUMMER20 or WELCOME5) that guests can apply at checkout."
+      />
 
       <PromoCodesManager 
         promoCodes={(promoCodes || []) as PromoCode[]} 

@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { TrendingUp, Users, CalendarDays, ShoppingBag, Star, DollarSign } from 'lucide-react'
 import type { Database } from '@/lib/supabase/types'
 import { formatCurrency } from '@/lib/utils/currency'
+import { PageHeader } from '@/components/ui/page-header'
 
 type OrderRow = Database['public']['Tables']['orders']['Row']
 type OrderItemRow = Database['public']['Tables']['order_items']['Row']
@@ -214,14 +215,11 @@ export default async function AnalyticsDashboardPage() {
   }
 
   return (
-    <div className="p-8 pb-20 max-w-6xl mx-auto space-y-12">
-      <header className="mb-8">
-        <h1 className="text-3xl font-black text-white flex items-center gap-3">
-          <TrendingUp className="w-8 h-8 text-blue-500" />
-          Deep Analytics
-        </h1>
-        <p className="text-zinc-400 mt-2">Your module-driven insights dashboard. Adapts automatically to what you sell.</p>
-      </header>
+    <div className="max-w-6xl space-y-8 pb-20">
+      <PageHeader
+        title="Analytics"
+        description="Comprehensive insights across revenue, order velocity, customer retention, and staff performance."
+      />
 
       {/* Global Revenue Timeline */}
       <section className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 relative overflow-hidden">

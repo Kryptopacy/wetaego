@@ -1,11 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { Truck } from 'lucide-react'
 import { DeliveryClient } from './delivery-client'
-
-
-
-
+import { PageHeader } from '@/components/ui/page-header'
 
 export default async function DeliveryPage() {
   const supabase = await createClient()
@@ -55,14 +51,11 @@ export default async function DeliveryPage() {
   const { data: location } = await supabase.from('locations').select('currency_code').eq('id', locationId).single()
 
   return (
-    <div className="max-w-7xl h-[calc(100vh-80px)] flex flex-col space-y-6 pb-6">
-      <div>
-        <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-          <Truck className="w-6 h-6 text-indigo-400" />
-          Fulfillment Board
-        </h1>
-        <p className="text-zinc-400 mt-1">Manage incoming orders and fulfillments.</p>
-      </div>
+    <div className="max-w-7xl h-[calc(100vh-8rem)] flex flex-col space-y-6 pb-6">
+      <PageHeader
+        title="Delivery & Fulfillment"
+        description="Kanban pipeline for managing delivery drivers, order packaging, and pickups."
+      />
 
       <DeliveryClient 
         initialOrders={orders || []} 

@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { Mail, MessageSquare, Bug, Lightbulb } from 'lucide-react'
+import { PageHeader } from '@/components/ui/page-header'
 
 export default async function SupportPage() {
   const supabase = await createClient()
@@ -12,8 +13,11 @@ export default async function SupportPage() {
   }
 
   return (
-    <div className="max-w-4xl pb-20">
-      <h1 className="text-2xl font-bold text-white mb-6">Help & Support</h1>
+    <div className="max-w-4xl space-y-8 pb-20">
+      <PageHeader
+        title="Help & Support"
+        description="Submit bug reports, propose feature additions, or get in touch with our product engineers."
+      />
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
         <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 relative overflow-hidden group">

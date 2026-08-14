@@ -13,6 +13,7 @@ import { BUSINESS_TYPE_PRESETS } from '@/lib/templates/presets'
 import { ShareButton } from '@/components/ShareButton'
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
 import { DuplicatePageModal } from './duplicate-page-modal'
+import { PageHeader } from '@/components/ui/page-header'
 
 export default async function PagesManager() {
   const supabase = await createClient()
@@ -95,26 +96,22 @@ export default async function PagesManager() {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://ourmenuos.online'
 
   return (
-    <div className="max-w-5xl">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Your Pages</h1>
-          <p className="text-sm text-zinc-500 mt-1">
-            {currentCount} of {freeLimit} free pages used
-            {isOverLimit && <span className="text-amber-400 ml-2">· Extra pages cost {pageCost} credits each</span>}
-          </p>
-        </div>
-        <Link
-          href="/dashboard/pages/setup?mode=new"
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-zinc-900 text-sm font-bold hover:bg-zinc-200 transition-all shadow-sm"
-        >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          Add Page
-        </Link>
-      </div>
+    <div className="max-w-5xl space-y-6">
+      <PageHeader
+        title="Pages"
+        description={`${currentCount} of ${freeLimit} free pages used${isOverLimit ? ` · Extra pages cost ${pageCost} credits each` : ''}`}
+        action={
+          <Link
+            href="/dashboard/pages/setup?mode=new"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white text-zinc-900 text-xs font-bold hover:bg-zinc-200 transition-all shadow-sm"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Add Page
+          </Link>
+        }
+      />
 
       {/* Pages list */}
       <StaggeredList className="space-y-3">

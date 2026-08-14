@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
 import { TaxonomyEditor } from './taxonomy-editor'
+import { PageHeader } from '@/components/ui/page-header'
 
 export default async function TaxonomyManagerPage() {
   const supabase = await createClient()
@@ -91,13 +92,11 @@ export default async function TaxonomyManagerPage() {
     .eq('page_id', defaultPage.id)
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Taxonomy & Collections</h1>
-          <p className="text-zinc-400 text-sm mt-1">Organize your offerings into nested categories and sub-categories.</p>
-        </div>
-      </div>
+    <div className="max-w-6xl space-y-6 pb-20">
+      <PageHeader
+        title="Taxonomy & Collections"
+        description="Organize your offerings into nested categories, collections, and custom modifier groups."
+      />
 
       <TaxonomyEditor 
         orgId={orgId} 

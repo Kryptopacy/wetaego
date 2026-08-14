@@ -6,6 +6,7 @@ import { UIOrder } from '@/lib/types/frontend'
 import { cookies } from 'next/headers'
 import { getTranslations } from 'next-intl/server'
 import { getInfrastructureFlags } from '@/lib/utils/settings'
+import { PageHeader } from '@/components/ui/page-header'
 
 export default async function OrdersPage() {
   const supabase = await createClient()
@@ -121,7 +122,11 @@ export default async function OrdersPage() {
   const infraFlags = await getInfrastructureFlags() as Record<string, boolean>
 
   return (
-    <div className="h-[calc(100vh-10rem)] flex flex-col">
+    <div className="flex flex-col min-h-[calc(100vh-8rem)]">
+      <PageHeader 
+        title={t('liveOperations')}
+        description="Monitor incoming orders, kitchen queue, service requests, and live stock in real time."
+      />
       {org && activeLocationId ? (
         <OrdersClient 
           organizationId={org.id}

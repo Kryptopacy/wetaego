@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { POSClient } from './pos-client'
+import { PageHeader } from '@/components/ui/page-header'
 
 export const dynamic = 'force-dynamic'
 
@@ -12,7 +13,17 @@ export default async function POSPage() {
   const activePageId = cookieStore.get('ourmenu_active_page_id')?.value
 
   if (!activeLocationId) {
-    return <div className="p-8 text-white">Please select a location from the sidebar.</div>
+    return (
+      <div className="max-w-6xl space-y-6">
+        <PageHeader
+          title="Point of Sale"
+          description="Walk-in counter orders, cash register, and quick table checkouts."
+        />
+        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-8 text-center">
+          <p className="text-zinc-400 text-sm">Please select a location from the sidebar location picker.</p>
+        </div>
+      </div>
+    )
   }
 
   // Check auth & role
@@ -53,7 +64,17 @@ export default async function POSPage() {
   const { data: pages } = await pagesQuery
 
   if (!pages || pages.length === 0) {
-    return <div className="p-8 text-white">No active menus or catalogs found for this location.</div>
+    return (
+      <div className="max-w-6xl space-y-6">
+        <PageHeader
+          title="Point of Sale"
+          description="Walk-in counter orders, cash register, and quick table checkouts."
+        />
+        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-8 text-center">
+          <p className="text-zinc-400 text-sm">No active menus or catalogs found for this location. Create or publish a catalog first.</p>
+        </div>
+      </div>
+    )
   }
 
   const pageIds = pages.map(p => p.id)
@@ -84,13 +105,11 @@ export default async function POSPage() {
     .order('created_at', { ascending: true })
 
   return (
-    <div className="flex h-[calc(100vh-(--spacing(16)))] w-full flex-col p-4 md:p-6 overflow-hidden">
-      <div className="mb-4 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-black text-white">Point of Sale</h1>
-          <p className="text-zinc-400 text-sm">Walk-in orders & cash register</p>
-        </div>
-      </div>
+    <div className="flex h-[calc(100vh-8rem)] w-full flex-col overflow-hidden">
+      <PageHeader
+        title="Point of Sale"
+        description="Walk-in counter orders, terminal registers, and quick checkouts."
+      />
       
       <div className="flex-1 bg-zinc-950 border border-zinc-800 rounded-2xl overflow-hidden relative shadow-2xl">
         <POSClient 

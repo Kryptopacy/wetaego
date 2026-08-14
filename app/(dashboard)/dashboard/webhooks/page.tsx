@@ -2,9 +2,10 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
 import { WebhooksManager } from './webhooks-manager'
+import { PageHeader } from '@/components/ui/page-header'
 
 export const metadata = {
-  title: 'Outbound Webhooks | OurMenu OS',
+  title: 'Webhooks | OurMenu OS',
 }
 
 export default async function WebhooksPage() {
@@ -58,17 +59,13 @@ export default async function WebhooksPage() {
     .order('created_at', { ascending: false })
 
   return (
-    <div className="flex-1 space-y-4 p-8 pt-6">
-      <div className="flex items-center justify-between space-y-2">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Outbound Webhooks</h2>
-          <p className="text-muted-foreground mt-1">
-            Configure webhooks to receive real-time HTTP POST payloads when events occur.
-          </p>
-        </div>
-      </div>
+    <div className="max-w-5xl space-y-6">
+      <PageHeader
+        title="Webhooks"
+        description="Configure webhooks to receive real-time HTTP POST payloads when orders, bookings, and customer events occur."
+      />
 
-      <div className="mt-8">
+      <div>
         <WebhooksManager locationId={activeLocationId} initialWebhooks={webhooks || []} />
       </div>
     </div>

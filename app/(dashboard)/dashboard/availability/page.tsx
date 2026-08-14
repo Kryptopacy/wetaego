@@ -3,9 +3,10 @@ import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
 import { AvailabilityClient } from './availability-client'
 import { AvailabilitySchedule } from '@/lib/utils/availability'
+import { PageHeader } from '@/components/ui/page-header'
 
 export const metadata = {
-  title: 'Availability Engine | OurMenu OS',
+  title: 'Availability | OurMenu OS',
 }
 
 const DEFAULT_SCHEDULE = {
@@ -77,17 +78,13 @@ export default async function AvailabilityPage() {
   }
 
   return (
-    <div className="flex-1 space-y-4 p-8 pt-6">
-      <div className="flex items-center justify-between space-y-2">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Availability Engine</h2>
-          <p className="text-muted-foreground mt-1">
-            Configure your timezone and operational hours to power real-time smart bookings.
-          </p>
-        </div>
-      </div>
+    <div className="max-w-4xl space-y-6">
+      <PageHeader
+        title="Availability"
+        description="Configure your timezone and operational hours to power real-time smart bookings."
+      />
 
-      <div className="mt-8 max-w-4xl">
+      <div>
         <AvailabilityClient initialData={initialAvailability} locationId={activeLocationId} />
       </div>
     </div>

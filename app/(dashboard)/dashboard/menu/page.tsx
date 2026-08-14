@@ -5,6 +5,7 @@ import { cookies } from 'next/headers'
 import { CategoryTabs } from './category-tabs'
 import { TranslateMenuButton } from './translate-menu-button'
 import { AutoImportButton } from './auto-import-button'
+import { PageHeader } from '@/components/ui/page-header'
 
 export default async function MenuManagerPage() {
   const supabase = await createClient()
@@ -142,12 +143,13 @@ export default async function MenuManagerPage() {
 
   if (categories.length === 0) {
     return (
-      <div className="max-w-4xl">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-4">
-          <h1 className="text-2xl font-bold text-white">Catalog Setup</h1>
-          <AutoImportButton orgId={org.id} menuId={page.id} />
-        </div>
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-12 text-center">
+      <div className="max-w-4xl space-y-6">
+        <PageHeader
+          title="Catalog"
+          description="Manage menu items, prices, modifiers, and categories."
+          action={<AutoImportButton orgId={org.id} menuId={page.id} />}
+        />
+        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-12 text-center">
           <div className="max-w-md mx-auto">
             <h3 className="text-lg font-semibold text-white mb-2">Your catalog is empty</h3>
             <p className="text-zinc-400 text-sm mb-6">
@@ -161,17 +163,20 @@ export default async function MenuManagerPage() {
   }
 
   return (
-    <div className="max-w-5xl">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-4">
-        <h1 className="text-2xl font-bold text-white">Primary Catalog</h1>
-        <div className="flex items-center gap-3">
-          <AutoImportButton orgId={org.id} menuId={page.id} />
-          <TranslateMenuButton orgId={org.id} categories={categories} />
-        </div>
-      </div>
+    <div className="max-w-5xl space-y-6">
+      <PageHeader
+        title="Catalog"
+        description="Manage menu items, prices, modifiers, and collections."
+        action={
+          <div className="flex items-center gap-3">
+            <AutoImportButton orgId={org.id} menuId={page.id} />
+            <TranslateMenuButton orgId={org.id} categories={categories} />
+          </div>
+        }
+      />
 
       {savedLocId === 'global' && orgLocs && orgLocs.length > 1 && (
-        <div className="mb-6 rounded-xl border border-blue-500/30 bg-blue-500/10 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-blue-300 text-sm">
+        <div className="rounded-xl border border-blue-500/30 bg-blue-500/10 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-blue-300 text-sm">
           <div className="flex items-center gap-2.5">
             <span className="text-lg">🌐</span>
             <span>You are currently in <strong>All Businesses (Global View)</strong>. Showing catalogue for primary branch: <strong>{orgLocs.find(l => l.id === activeLocationId)?.name || 'Main Branch'}</strong>.</span>

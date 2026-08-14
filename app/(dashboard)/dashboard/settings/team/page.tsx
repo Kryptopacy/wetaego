@@ -5,6 +5,7 @@ import Link from 'next/link'
 import TeamManager from './team-manager'
 import DangerZone from './danger-zone'
 import { StaffShifts } from './staff-shifts'
+import { PageHeader } from '@/components/ui/page-header'
 
 export default async function TeamPage() {
   const supabase = await createClient()
@@ -140,23 +141,25 @@ export default async function TeamPage() {
   const pages = (pagesRaw || []).map(p => ({ id: p.id, title: p.title, slug: p.slug }))
 
   return (
-    <div className="max-w-4xl">
-      <div className="flex items-center gap-4 mb-2">
-        <Link href="/dashboard/settings" className="text-zinc-500 hover:text-white transition-colors">
-          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
-        </Link>
-        <div>
-          <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Business Settings</span>
-          <h1 className="text-2xl font-bold text-white">Team Management</h1>
-        </div>
-      </div>
-      <p className="text-sm text-zinc-400 mb-8 ml-10">
-        Manage access for staff, editors, and managers in your business dashboard.
-      </p>
+    <div className="max-w-4xl space-y-6 pb-20">
+      <PageHeader
+        eyebrow="Business Settings"
+        title="Team Management"
+        description="Manage access roles, invite staff or managers, and track active clock-in shifts."
+        action={
+          <Link
+            href="/dashboard/settings"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-xs font-semibold text-zinc-400 hover:text-white transition-colors"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Back to Settings
+          </Link>
+        }
+      />
 
-      <div className="ml-10">
+      <div>
         <TeamManager
           organizationId={organization.id}
           currentUserId={userId}

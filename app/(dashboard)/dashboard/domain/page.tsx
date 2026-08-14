@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { DomainManager } from './domain-manager'
+import { PageHeader } from '@/components/ui/page-header'
 
 export default async function DomainPage() {
   const supabase = await createClient()
@@ -30,9 +31,12 @@ export default async function DomainPage() {
 
   if (!orgId) {
     return (
-      <div className="max-w-4xl">
-        <h1 className="text-2xl font-bold text-white mb-6">Custom Domains</h1>
-        <div className="rounded-xl border border-yellow-800 bg-yellow-900/20 p-6">
+      <div className="max-w-4xl space-y-6">
+        <PageHeader
+          title="Custom Domains"
+          description="Manage white-labeled domains and automatic SSL provisioning for your storefronts."
+        />
+        <div className="rounded-2xl border border-yellow-800 bg-yellow-900/20 p-6">
           <p className="text-yellow-400">Please complete your Business Settings first.</p>
         </div>
       </div>
@@ -61,13 +65,11 @@ export default async function DomainPage() {
   }
 
   return (
-    <div className="max-w-4xl">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-white mb-1">Custom Domains</h1>
-          <p className="text-sm text-zinc-400">Manage white-labeled domains for your storefronts.</p>
-        </div>
-      </div>
+    <div className="max-w-4xl space-y-6 pb-20">
+      <PageHeader
+        title="Custom Domains"
+        description="Connect and manage custom domains (e.g. menu.yourbrand.com) directly to your OurMenu storefronts with automatic SSL."
+      />
 
       <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-emerald-300 text-sm mb-8">
         <div className="flex items-center gap-2.5">

@@ -2,6 +2,7 @@ import { ActionForm } from '@/components/ActionForm'
 import { SubmitButton } from '@/components/submit-button'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { PageHeader } from '@/components/ui/page-header'
 
 export default async function ProfilePage() {
   const supabase = await createClient()
@@ -24,13 +25,11 @@ export default async function ProfilePage() {
     .maybeSingle()
 
   return (
-    <div className="max-w-3xl mx-auto pb-20 mt-8">
-      <div className="flex flex-col gap-4 mb-8">
-        <h1 className="text-2xl font-bold text-white">My Profile</h1>
-        <p className="text-sm text-zinc-400">
-          Set your personal profile details and payout information.
-        </p>
-      </div>
+    <div className="max-w-3xl space-y-6 pb-20">
+      <PageHeader
+        title="My Profile"
+        description="Set your personal profile details, account identity, and payout bank information."
+      />
 
       <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
         <ActionForm action={async (formData) => {

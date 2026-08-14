@@ -4,6 +4,7 @@ import { getAdsNetworkSettings } from '@/lib/utils/settings'
 import { AdsManagerClient } from './ads-manager-client'
 import { AlertCircle, Zap } from 'lucide-react'
 import Link from 'next/link'
+import { PageHeader } from '@/components/ui/page-header'
 
 export const metadata = {
   title: 'Ad Manager | OurMenu OS',
@@ -92,11 +93,11 @@ export default async function AdsManagerPage() {
   // Wait, if there are thousands of events, fetching them all is bad. We'll use a server action to fetch stats.
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8">
-      <div>
-        <h1 className="text-3xl font-black text-white mb-2">Ad Manager</h1>
-        <p className="text-zinc-400">Bring your own sponsors. Seamlessly inject native partner banners into your portals.</p>
-      </div>
+    <div className="max-w-6xl space-y-6 pb-20">
+      <PageHeader
+        title="Ad Manager"
+        description="Bring your own sponsors. Seamlessly inject native partner banners and sponsored promotions into your storefronts."
+      />
 
       <AdsManagerClient initialAds={(ads as unknown as Parameters<typeof AdsManagerClient>[0]['initialAds']) || []} locations={locations} />
     </div>

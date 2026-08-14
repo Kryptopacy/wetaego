@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { CancelButton } from './cancel-button'
 import { ActionForm } from '@/components/ActionForm'
 import { redeemCoupon } from './actions'
+import { PageHeader } from '@/components/ui/page-header'
 
 export default async function BillingPage(props: { searchParams: Promise<{ currency?: string; cycle?: string }> }) {
   const searchParams = await props.searchParams
@@ -88,28 +89,28 @@ export default async function BillingPage(props: { searchParams: Promise<{ curre
   const credits50Price = convertPrice(c50Base)
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-white mb-2">Billing & Subscription</h1>
-          <p className="text-zinc-400">Manage your OurMenu OS subscription and payment methods.</p>
-        </div>
-        <div className="flex flex-col gap-2 items-end">
-          {/* Billing Cycle Toggle */}
-          <div className="flex bg-zinc-900 border border-zinc-800 rounded-lg p-1">
-            <Link href={`/dashboard/billing?currency=${currency}&cycle=monthly`} className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${!isAnnual ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}>Monthly</Link>
-            <Link href={`/dashboard/billing?currency=${currency}&cycle=annual`} className={`relative px-4 py-2 text-sm font-medium rounded-md transition-colors ${isAnnual ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}>
-              Annual
-              <span className="ml-1.5 text-[10px] font-bold text-emerald-400">−20%</span>
-            </Link>
+    <div className="max-w-5xl space-y-6">
+      <PageHeader
+        title="Billing & Subscription"
+        description="Manage your OurMenu OS subscription tier, buy top-up credits, and view plan limits."
+        action={
+          <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2">
+            {/* Billing Cycle Toggle */}
+            <div className="flex bg-zinc-900 border border-zinc-800 rounded-xl p-1">
+              <Link href={`/dashboard/billing?currency=${currency}&cycle=monthly`} className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${!isAnnual ? 'bg-zinc-800 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}>Monthly</Link>
+              <Link href={`/dashboard/billing?currency=${currency}&cycle=annual`} className={`relative px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${isAnnual ? 'bg-zinc-800 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}>
+                Annual
+                <span className="ml-1 text-[10px] font-bold text-emerald-400">−20%</span>
+              </Link>
+            </div>
+            {/* Currency Toggle */}
+            <div className="flex bg-zinc-900 border border-zinc-800 rounded-xl p-1">
+              <Link href={`/dashboard/billing?currency=NGN&cycle=${cycle}`} className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${currency === 'NGN' ? 'bg-zinc-800 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}>NGN</Link>
+              <Link href={`/dashboard/billing?currency=USD&cycle=${cycle}`} className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${currency === 'USD' ? 'bg-zinc-800 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}>USD</Link>
+            </div>
           </div>
-          {/* Currency Toggle */}
-          <div className="flex bg-zinc-900 border border-zinc-800 rounded-lg p-1">
-            <Link href={`/dashboard/billing?currency=NGN&cycle=${cycle}`} className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${currency === 'NGN' ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}>NGN</Link>
-            <Link href={`/dashboard/billing?currency=USD&cycle=${cycle}`} className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${currency === 'USD' ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}>USD</Link>
-          </div>
-        </div>
-      </div>
+        }
+      />
 
       {/* Current Status */}
       <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mt-8">

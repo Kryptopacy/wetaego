@@ -11,6 +11,7 @@ import { OnboardingChecklist } from './components/onboarding-checklist'
 import { BUSINESS_TYPE_PRESETS } from '@/lib/templates/presets'
 import { DashboardStats } from './components/dashboard-stats'
 import { Suspense } from 'react'
+import { PageHeader } from '@/components/ui/page-header'
 
 export default async function DashboardOverviewPage() {
   const supabase = await createClient()
@@ -138,24 +139,16 @@ export default async function DashboardOverviewPage() {
   // const currencyCode = 'NGN' // Note: In a real multi-currency setup, this would come from the org settings
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8">
-
-      {/* === WELCOME HEADER === */}
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-zinc-500 text-sm mb-1">
-            {orgId ? `${greeting}, ${orgName} 👋` : `Welcome to OurMenu OS 👋`}
-          </p>
-          <h1 className="text-3xl font-bold text-white tracking-tight">
-            {orgId ? 'Overview' : 'Get Started'}
-          </h1>
-          <p className="text-zinc-400 text-sm mt-1">
-            {orgId 
-              ? `Here's what's happening across your venue today.` 
-              : `Complete your business profile to unlock your dashboard.`}
-          </p>
-        </div>
-      </div>
+    <div className="max-w-6xl space-y-8">
+      <PageHeader
+        eyebrow={orgId ? `${greeting}, ${orgName} 👋` : `Welcome to OurMenu OS 👋`}
+        title={orgId ? 'Overview' : 'Get Started'}
+        description={
+          orgId 
+            ? `Here's what's happening across your venue today.` 
+            : `Complete your business profile to unlock your dashboard.`
+        }
+      />
 
       <OnboardingChecklist 
         hasOrg={!!orgId} 

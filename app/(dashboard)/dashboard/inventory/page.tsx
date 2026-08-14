@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
 import { InventoryClient } from './inventory-client'
+import { PageHeader } from '@/components/ui/page-header'
 
 export const dynamic = 'force-dynamic'
 
@@ -85,13 +86,11 @@ export default async function InventoryPage() {
   ])
 
   return (
-    <div className="max-w-6xl">
-      <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Inventory Manager</h1>
-          <p className="text-zinc-500 text-sm mt-1">Track physical stock levels across your {activeLoc.name} location</p>
-        </div>
-      </div>
+    <div className="max-w-6xl space-y-6">
+      <PageHeader
+        title="Inventory"
+        description={`Track physical stock levels, recipes (BOM), and material movements across your ${activeLoc.name} location.`}
+      />
       <InventoryClient
         organizationId={org.id}
         locationId={activeLoc.id}

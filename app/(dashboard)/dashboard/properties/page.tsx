@@ -1,6 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { format } from 'date-fns'
+import { PageHeader } from '@/components/ui/page-header'
+import { Building2 } from 'lucide-react'
+import { EmptyState } from '@/components/ui/empty-state'
 
 export default async function PropertiesDashboard() {
   const supabase = await createClient()
@@ -33,12 +36,10 @@ export default async function PropertiesDashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Property Management System</h1>
-          <p className="text-sm text-zinc-400 mt-1">Manage property inquiries, tour requests, and short-stay bookings.</p>
-        </div>
-      </div>
+      <PageHeader
+        title="Properties"
+        description="Manage property inquiries, tour requests, and short-stay bookings."
+      />
 
       <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl overflow-hidden shadow-2xl">
         <div className="overflow-x-auto">
@@ -56,8 +57,13 @@ export default async function PropertiesDashboard() {
             <tbody className="divide-y divide-white/5 text-zinc-300">
               {inquiries?.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-zinc-500">
-                    No property inquiries found.
+                  <td colSpan={6} className="p-0">
+                    <EmptyState
+                      icon={Building2}
+                      title="No Property Inquiries"
+                      description="Tour requests and short-stay booking inquiries from your real estate listings will appear here."
+                      className="border-0 rounded-none shadow-none bg-transparent"
+                    />
                   </td>
                 </tr>
               ) : (
