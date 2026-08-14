@@ -2,58 +2,68 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Utensils, ShoppingBag, Scissors, Briefcase, Building, ArrowRight } from 'lucide-react'
+import { Utensils, ShoppingBag, Scissors, Briefcase, Building, Store, ArrowRight, Sparkles } from 'lucide-react'
 import Image from 'next/image'
 
 const cases = [
   {
+    id: 'supermarkets',
+    icon: Store,
+    title: 'Supermarkets & Multi-Branch Chains',
+    subtitle: 'Grocery Chains, Hypermarkets, In-Store Bakeries & Boutiques',
+    description: 'Manage entire multi-department supermarket fleets with unified HQ reporting, aisle sub-departments (Grocery, Fresh Bakery, Butchery & Deli), and 1-click catalog cloning across branches in < 1s.',
+    color: 'from-emerald-500 via-teal-500 to-cyan-600',
+    metrics: ['1-Click Catalog Duplication', 'Sub-Department Aisles', 'Fleet Aggregation', 'Raw Thermal POS'],
+    image: '/hero_emerald_gemstone.png'
+  },
+  {
     id: 'hospitality',
     icon: Utensils,
-    title: 'Hospitality',
-    subtitle: 'Restaurants, Cafes, Bars & Food Trucks',
+    title: 'Hospitality & Dining',
+    subtitle: 'Restaurants, Cafes, Rooftop Bars & Food Trucks',
     description: 'Transform operations with live dine-in ordering, split payments, and a real-time fulfillment dashboard. Replace paper menus with dynamic, AI-translated catalogs.',
     color: 'from-orange-500 to-rose-500',
-    metrics: ['Live Fulfillment', 'Split Payments', 'Table Mapping'],
-    image: '/hero_restaurant_bg.png' // We reuse the existing hero image as a placeholder/visual
+    metrics: ['Live Fulfillment', 'Split Payments', 'Table Mapping', 'Roulette Gamification'],
+    image: '/hero_restaurant_bg.png'
   },
   {
     id: 'retail',
     icon: ShoppingBag,
-    title: 'Retail & Boutiques',
-    subtitle: 'Gadgets, Fashion, Pharmacies & Stores',
+    title: 'Retail & Fashion Boutiques',
+    subtitle: 'Gadgets, Fashion, Pharmacies & Specialty Stores',
     description: 'Deploy a high-converting digital storefront in minutes. Track inventory automatically, alert staff on low stock, and offer seamless pickup or delivery checkout.',
-    color: 'from-blue-500 to-teal-600',
-    metrics: ['Inventory Sync', 'Omnichannel', 'Low Stock Alerts'],
-    image: '/hero_restaurant_bg.png'
+    color: 'from-blue-500 to-indigo-600',
+    metrics: ['Atomic Inventory Sync', 'Low Stock Alerts', 'Omnichannel POS'],
+    image: '/hero_emerald_gemstone.png'
   },
   {
     id: 'services',
     icon: Scissors,
-    title: 'Salons & Services',
+    title: 'Salons, Spas & Wellness',
     subtitle: 'Spas, Therapists, Tutors & Barbers',
     description: 'Eliminate no-shows with upfront deposits and smart booking calendars. Clients can browse services, select staff, and book slots directly from their phones.',
     color: 'from-fuchsia-500 to-pink-600',
-    metrics: ['Smart Booking', 'Upfront Deposits', 'Staff Selection'],
+    metrics: ['Smart Booking Calendars', 'Upfront Deposits', 'Staff Tier Selection'],
     image: '/hero_restaurant_bg.png'
   },
   {
     id: 'consultants',
     icon: Briefcase,
-    title: 'Consultants & Agencies',
-    subtitle: 'Freelancers, Marketers & B2B',
-    description: 'Stop sending static PDF proposals and paying for bloated, enterprise CRMs. Share interactive, CRM-Free Rate Cards & Service Catalogs. Clients can select deliverables, sign off quotes with a 2-tap approval on their phones, and pay retainers instantly.',
+    title: 'Consultants & B2B Agencies',
+    subtitle: 'Freelancers, Marketers & Agencies',
+    description: 'Stop sending static PDF proposals and paying for bloated, enterprise CRMs. Share interactive, CRM-Free Rate Cards & Service Catalogs with 2-tap approvals and instant retainers.',
     color: 'from-emerald-500 to-teal-600',
     metrics: ['CRM-Free Rate Cards', '2-Tap Mobile Approvals', 'Instant Retainers'],
-    image: '/hero_restaurant_bg.png'
+    image: '/hero_emerald_gemstone.png'
   },
   {
     id: 'real-estate',
     icon: Building,
-    title: 'Real Estate & Auto',
+    title: 'Real Estate & Auto Dealerships',
     subtitle: 'Property Rentals & Dealerships',
     description: 'Showcase high-value assets with image-heavy, immersive galleries. Capture leads effortlessly and allow clients to schedule viewings or test drives.',
-    color: 'from-emerald-500 to-emerald-600',
-    metrics: ['Immersive Galleries', 'Lead Capture', 'Scheduling'],
+    color: 'from-amber-500 to-orange-600',
+    metrics: ['Immersive Galleries', 'Automated Lead Capture', 'Viewing Schedule'],
     image: '/hero_restaurant_bg.png'
   }
 ]
@@ -67,7 +77,7 @@ export function UseCases() {
 
         <h2 className="text-4xl md:text-6xl font-black text-white mb-6 tracking-tight">
           One Operating System.<br />
-          <span className="text-transparent bg-clip-text bg-gradient-to-br from-zinc-400 to-zinc-600">Every Business Type.</span>
+          <span className="text-transparent bg-clip-text bg-linear-to-br from-zinc-400 to-zinc-600">Every Business Type.</span>
         </h2>
         <p className="text-zinc-400 text-lg md:text-xl max-w-2xl mx-auto font-light">
           Our dynamic template builders instantly adapt the platform to fit your specific operational needs.
@@ -98,7 +108,7 @@ export function UseCases() {
                 )}
                 
                 <div className={`relative z-10 flex items-center justify-center w-12 h-12 rounded-2xl shrink-0 transition-all duration-500 ${
-                  isActive ? `bg-gradient-to-br ${c.color} shadow-lg shadow-black/50` : 'bg-zinc-800'
+                  isActive ? `bg-linear-to-br ${c.color} shadow-lg shadow-black/50` : 'bg-zinc-800'
                 }`}>
                   <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-zinc-400 group-hover:text-white transition-colors'}`} />
                 </div>
@@ -129,10 +139,10 @@ export function UseCases() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -20, scale: 0.95 }}
               transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-              className="relative h-full min-h-[500px] rounded-[40px] overflow-hidden border border-white/10 group"
+              className="relative h-full min-h-125 rounded-[40px] overflow-hidden border border-white/10 group"
             >
               {/* Background Glow */}
-              <div className={`absolute inset-0 bg-gradient-to-br ${active.color} opacity-20 mix-blend-screen transition-opacity duration-1000 group-hover:opacity-30`} />
+              <div className={`absolute inset-0 bg-linear-to-br ${active.color} opacity-20 mix-blend-screen transition-opacity duration-1000 group-hover:opacity-30`} />
               
               {/* Image / Visual */}
               <div className="absolute inset-0">
@@ -142,12 +152,12 @@ export function UseCases() {
                   fill
                   className="object-cover opacity-30 mix-blend-luminosity transition-transform duration-1000 group-hover:scale-105"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent" />
+                <div className="absolute inset-0 bg-linear-to-t from-black via-black/80 to-transparent" />
               </div>
 
               {/* Content */}
               <div className="relative z-10 h-full flex flex-col justify-end p-10 md:p-14">
-                <div className={`w-16 h-16 rounded-3xl bg-gradient-to-br ${active.color} flex items-center justify-center shadow-2xl mb-8`}>
+                <div className={`w-16 h-16 rounded-3xl bg-linear-to-br ${active.color} flex items-center justify-center shadow-2xl mb-8`}>
                   <active.icon className="w-8 h-8 text-white" />
                 </div>
                 <h3 className="text-3xl md:text-5xl font-black text-white mb-4 tracking-tight">

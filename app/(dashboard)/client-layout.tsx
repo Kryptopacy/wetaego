@@ -182,18 +182,6 @@ export default function ClientLayout({ children, initialData }: { children: Reac
   const [dynamicNavItems, setDynamicNavItems] = useState<NavItem[]>(initialData.dynamicNavItems)
   const [isTrialBannerDismissed, setIsTrialBannerDismissed] = useState(false)
 
-  // Append Delivery Kanban to daily operations if not already there
-  useEffect(() => {
-    queueMicrotask(() => {
-      setDynamicNavItems(prev => {
-        if (!prev.find(item => item.href === '/dashboard/delivery')) {
-          return [...prev, { href: '/dashboard/delivery', label: 'Delivery Hub', icon: Truck }]
-        }
-        return prev
-      })
-    })
-  }, [])
-
   const [credits] = useState<number | null>(initialData.credits)
 
   let trialDaysLeft = null
@@ -416,17 +404,6 @@ export default function ClientLayout({ children, initialData }: { children: Reac
              <span className="text-xs font-medium text-red-400">Free Trial</span>
              <span className="text-xs font-bold text-red-300">Expired</span>
            </div>
-          )}
-          {credits !== null && (
-            <Link href="/dashboard/billing" className="flex items-center justify-between px-3 py-2.5 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 hover:from-emerald-500/20 hover:to-teal-500/20 rounded-xl border border-emerald-500/20 mb-4 transition-all duration-300 group shadow-[0_0_15px_rgba(16,185,129,0.05)]" onClick={onClose}>
-              <div className="flex items-center gap-2">
-                <div className="bg-emerald-500/20 p-1.5 rounded-lg">
-                  <Zap className="w-3.5 h-3.5 text-emerald-400 group-hover:scale-110 transition-transform" />
-                </div>
-                <span className="text-xs font-bold text-emerald-100">AI Credits</span>
-              </div>
-              <span className="text-sm font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400">{credits}</span>
-            </Link>
           )}
 
           {/* Timeclock — staff clock in/out lives here in the sidebar */}

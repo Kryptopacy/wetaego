@@ -4,7 +4,6 @@ import ClientLayout, { InitialDashboardData, NavItem } from './client-layout'
 import { cookies } from 'next/headers'
 import { isAdminEmail } from '@/lib/utils/admin'
 import { getPlanLimits } from '@/lib/utils/settings'
-import { IntercomWidget } from '@/components/intercom/intercom-widget'
 import { AICopilotWidget } from './dashboard/components/ai-copilot-widget'
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
@@ -68,7 +67,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
     if (orgId) {
         const { data: locs } = await supabase
           .from('locations')
-          .select('id, name, slug, portal_display_name')
+          .select('id, name, slug, portal_display_name, delivery_enabled')
           .eq('organization_id', orgId)
 
         if (locs && locs.length > 0) {
@@ -131,6 +130,9 @@ export default async function DashboardLayout({ children }: { children: ReactNod
             dynamicNavItems.push({ href: '/dashboard/orders', label: 'Order Inbox', icon: 'ClipboardList', badge: 'LIVE' })
             dynamicNavItems.push({ href: '/dashboard/pos', label: 'Point of Sale', icon: 'MonitorSmartphone' })
           }
+          if (activeLoc?.delivery_enabled) {
+            dynamicNavItems.push({ href: '/dashboard/delivery', label: 'Delivery Hub', icon: 'Truck' })
+          }
           if (templates.has('booking')) {
             dynamicNavItems.push({ href: '/dashboard/bookings', label: 'Bookings (BMS)', icon: 'BookOpen' })
           }
@@ -144,9 +146,8 @@ export default async function DashboardLayout({ children }: { children: ReactNod
           dynamicNavItems.push({ href: '/dashboard/analytics', label: 'Deep Analytics', icon: 'TrendingUp' })
           dynamicNavItems.push({ href: '/dashboard/forecast', label: 'Demand Forecast', icon: 'BarChart3' })
 
-          // Add Developer/Integration settings
-          dynamicNavItems.push({ href: '/dashboard/webhooks', label: 'Webhooks', icon: 'Zap' })
-          dynamicNavItems.push({ href: '/dashboard/api', label: 'API Keys', icon: 'QrCode' })
+          // Add Intercom Hub
+          dynamicNavItems.push({ href: '/dashboard/intercom', label: 'Intercom', icon: 'MessagesSquare', badge: 'LIVE' })
         }
     }
   }
@@ -176,10 +177,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
     <ClientLayout initialData={initialData}>
       {children}
       {userData?.user && orgId && (
-        <>
-          <IntercomWidget userId={userData.user.id} organizationId={orgId} />
-          <AICopilotWidget organizationId={orgId} />
-        </>
+        <AICopilotWidget organizationId={orgId} />
       )}
     </ClientLayout>
   )

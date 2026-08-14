@@ -24,10 +24,21 @@ export default async function DeliveryPage() {
   if (!orgId) return <div className="p-8 text-white">No organization found.</div>
 
   const { cookies } = await import('next/headers')
-  const locationId = (await cookies()).get('active_location_id')?.value
+  const cookieStore = await cookies()
+  let locationId = cookieStore.get('ourmenu_active_location_id')?.value || cookieStore.get('active_location_id')?.value
+
+  if (!locationId || locationId === 'global') {
+    const { data: firstLoc } = await supabase
+      .from('locations')
+      .select('id')
+      .eq('organization_id', orgId)
+      .limit(1)
+      .maybeSingle()
+    locationId = firstLoc?.id
+  }
 
   if (!locationId) {
-    return <div className="p-8 text-white">Please select a location from the sidebar.</div>
+    return <div className="p-8 text-white">Please create a location in Settings.</div>
   }
 
   // Fetch active orders

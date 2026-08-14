@@ -144,6 +144,7 @@ export const updateOrganization = authActionClient
           name: 'Main Location',
           slug,
           address: 'Update your address',
+          publication_status: 'draft',
           ...(designTokens ? { design_tokens: designTokens } : {})
         })
         .select('id')
@@ -159,6 +160,7 @@ export const updateOrganization = authActionClient
             name: 'Main Location',
             slug: fallbackSlug,
             address: 'Update your address',
+            publication_status: 'draft',
             ...(designTokens ? { design_tokens: designTokens } : {})
           })
           .select('id')
@@ -679,6 +681,7 @@ export const createLocation = authActionClient
         name,
         slug,
         address: 'Update your address',
+        publication_status: 'draft',
       })
       .select('id')
       .single()
@@ -704,8 +707,17 @@ export const createLocation = authActionClient
       cookieStore.delete('ourmenu_active_page_id') // Clear page context since it's a new location
     }
 
+    const { revalidateTag } = await import('next/cache')
+    try {
+      revalidateTag(`location_${slug}`, 'default')
+      if (newLoc?.id) revalidateTag(`location_pages_${newLoc.id}`, 'default')
+    } catch {
+      // Ignore cache tag errors in background
+    }
+
     revalidatePath('/dashboard')
     revalidatePath('/dashboard/settings')
+    revalidatePath(`/m/${slug}`)
     return { success: true }
   })
 

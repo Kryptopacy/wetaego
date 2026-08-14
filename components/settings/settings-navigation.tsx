@@ -35,6 +35,7 @@ export function SettingsNavigation({ currentTab, isOwnerOrManager }: SettingsNav
     { href: '/dashboard/resources', label: 'Resources & QRs' },
     { href: '/dashboard/availability', label: 'Availability Engine' },
     { href: '/dashboard/webhooks', label: 'Outbound Webhooks' },
+    { href: '/dashboard/api', label: 'Developer API Keys' },
     { href: '/dashboard/manage/feedback', label: 'Feedback Inbox' },
   ] : []
 

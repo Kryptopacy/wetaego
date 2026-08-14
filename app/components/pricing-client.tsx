@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Zap, Check, ArrowRight } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/currency'
 import { FadeIn } from './animations'
+import { EnterpriseQuoteModal } from '@/components/enterprise-quote-modal'
 
 interface CreditPack {
   amount: number
@@ -37,6 +38,7 @@ export function PricingClient({
   enterpriseFeatures,
 }: PricingClientProps) {
   const [isAnnual, setIsAnnual] = useState(false)
+  const [isEnterpriseModalOpen, setIsEnterpriseModalOpen] = useState(false)
 
   const litePrice = isAnnual ? liteAnnualPerMonth : liteMonthly
   const proPrice = isAnnual ? proAnnualPerMonth : proMonthly
@@ -153,15 +155,31 @@ export function PricingClient({
                   </li>
                 ))}
               </ul>
-              <a href={plan.href} className={`flex items-center justify-center gap-2 py-4 rounded-2xl text-sm font-bold transition-all duration-300 ${plan.highlighted
-                  ? 'bg-white text-black hover:scale-105 shadow-[0_0_20px_rgba(255,255,255,0.2)]'
-                  : 'bg-white/5 border border-white/10 text-white hover:bg-white/10'
-                }`}>
-                {plan.cta} <ArrowRight className="w-4 h-4" aria-hidden="true" />
-              </a>
+              {plan.name === 'Enterprise' ? (
+                <button
+                  type="button"
+                  onClick={() => setIsEnterpriseModalOpen(true)}
+                  className="flex items-center justify-center gap-2 py-4 rounded-2xl text-sm font-bold bg-white/5 border border-white/10 text-white hover:bg-emerald-500 hover:text-black hover:border-emerald-400 transition-all duration-300 shadow-lg cursor-pointer"
+                >
+                  {plan.cta} <ArrowRight className="w-4 h-4" aria-hidden="true" />
+                </button>
+              ) : (
+                <a href={plan.href} className={`flex items-center justify-center gap-2 py-4 rounded-2xl text-sm font-bold transition-all duration-300 ${plan.highlighted
+                    ? 'bg-white text-black hover:scale-105 shadow-[0_0_20px_rgba(255,255,255,0.2)]'
+                    : 'bg-white/5 border border-white/10 text-white hover:bg-white/10'
+                  }`}>
+                  {plan.cta} <ArrowRight className="w-4 h-4" aria-hidden="true" />
+                </a>
+              )}
             </FadeIn>
           ))}
         </div>
+
+        <EnterpriseQuoteModal
+          isOpen={isEnterpriseModalOpen}
+          onClose={() => setIsEnterpriseModalOpen(false)}
+          initialBranches={4}
+        />
 
         {/* Credit Packs */}
         <div className="mt-32 max-w-5xl mx-auto">

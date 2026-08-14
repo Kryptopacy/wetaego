@@ -265,7 +265,7 @@ export function AICopilotWidget({ organizationId }: { organizationId: string }) 
                       {isLiveConnected 
                         ? (isCameraActive ? 'Show menus, dishes, stock, or invoices to Tego.' : 'Speak naturally or tap "Show Tego" to turn on camera.') 
                         : isLiveConnecting 
-                          ? 'Minting session token with Gemini 3.1 Flash Live...' 
+                          ? 'Minting session token with Gemini Live...' 
                           : 'Ultra-low latency audio & vision streaming.'}
                     </p>
                   </div>

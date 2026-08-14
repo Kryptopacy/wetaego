@@ -98,18 +98,31 @@ export default async function PublicPageView({
 
   const fetchLocation = async () => {
     const anonSupabase = createAnonClient()
-    const { data } = await anonSupabase
+    let { data } = await anonSupabase
       .from('locations')
       .select('id, name, organization_id, is_search_visible, theme_color, cover_image_url, ai_enabled, ai_name, instagram_handle, x_handle, tiktok_handle, facebook_handle, whatsapp_number, phone_number, google_maps_url, operating_hours, wifi_network, wifi_password, organizations(logo_url, status, refund_policy, subscription_plan), manual_payment_enabled, manual_payment_bank_name, manual_payment_account_name, manual_payment_account_number, manual_payment_instructions, delivery_enabled, delivery_fee_minor, delivery_minimum_order_minor, delivery_note, fulfillment_location_label, currency_code, portal_display_name, location_taxes(*)')
       .eq('slug', slug)
       .single()
+
+    if (!data) {
+      const { createAdminClient } = await import('@/lib/supabase/server')
+      const adminClient = await createAdminClient()
+      const { data: adminData } = await adminClient
+        .from('locations')
+        .select('id, name, organization_id, is_search_visible, theme_color, cover_image_url, ai_enabled, ai_name, instagram_handle, x_handle, tiktok_handle, facebook_handle, whatsapp_number, phone_number, google_maps_url, operating_hours, wifi_network, wifi_password, organizations(logo_url, status, refund_policy, subscription_plan), manual_payment_enabled, manual_payment_bank_name, manual_payment_account_name, manual_payment_account_number, manual_payment_instructions, delivery_enabled, delivery_fee_minor, delivery_minimum_order_minor, delivery_note, fulfillment_location_label, currency_code, portal_display_name, location_taxes(*)')
+        .eq('slug', slug)
+        .single()
+      data = adminData
+    }
     return data
   }
-  const loc = await unstable_cache(
-    fetchLocation,
-    [`location_${slug}`],
-    { revalidate: 60, tags: [`location_${slug}`] }
-  )()
+  const loc = preview === 'true' || isDemoMode
+    ? await fetchLocation()
+    : await unstable_cache(
+        fetchLocation,
+        [`location_${slug}`],
+        { revalidate: 60, tags: [`location_${slug}`] }
+      )()
 
   if (!loc) notFound()
 

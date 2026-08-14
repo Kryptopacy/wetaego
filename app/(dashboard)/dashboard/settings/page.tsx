@@ -25,6 +25,7 @@ import { WheelBuilder } from '@/components/ui/wheel-builder'
 import { LocationAutocomplete } from './location-autocomplete'
 import { CustomMilestonesSettings } from './custom-milestones-settings'
 import { getInfrastructureFlags } from '@/lib/utils/settings'
+import { LocationFleetManager } from './location-fleet-manager'
 
 
 
@@ -439,83 +440,12 @@ export default async function SettingsPage({
 )}
 
       {tab === 'locations' && organization && (
-        <div className="space-y-6">
-          <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-semibold text-white">Manage Branches / Locations</h2>
-              <span className="text-sm text-zinc-400 bg-zinc-800 px-3 py-1 rounded-full">{allLocations.length} Active</span>
-            </div>
-            
-            <div className="space-y-3 mb-8">
-              {allLocations.map((l) => (
-                <div key={l.id} className={`flex items-center justify-between p-4 rounded-xl border transition-colors ${activeLocationId === l.id ? 'border-emerald-500/30 bg-emerald-900/10' : 'border-zinc-800 bg-black'}`}>
-                  <div>
-                    <h3 className="text-base font-bold text-white flex items-center gap-2">
-                      {l.portal_display_name || l.name}
-                      {activeLocationId === l.id && <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400">Current</span>}
-                    </h3>
-                    <div className="flex items-center gap-4 mt-1">
-                      <p className="text-sm text-zinc-400">ourmenuos.online/m/{l.slug}</p>
-                      <span className="text-xs text-zinc-600 border-l border-zinc-800 pl-4">Added {new Date(l.created_at).toLocaleDateString()}</span>
-                    </div>
-                  </div>
-                  {activeLocationId !== l.id && (
-                    <ActionForm action={async () => {
-                      'use server'
-                      const { setActiveLocationCookie } = await import('../../layout-actions')
-                      await setActiveLocationCookie(l.id, '')
-                      redirect('/dashboard')
-                    }}>
-                      <button type="submit" className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-sm font-medium text-white rounded-lg transition-colors">
-                        Switch To Location
-                      </button>
-                    </ActionForm>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            <div className="pt-6 border-t border-zinc-800/50">
-              <h3 className="text-md font-bold text-white mb-2">Create New Location</h3>
-              <p className="text-sm text-zinc-400 mb-6">Launch a new branch or franchise under your parent organization. They will have their own independent inventory, URL, and settings.</p>
-              
-              <ActionForm action={createLocation} successMessage="Location created! Switching context..." triggerConfettiOnSuccess className="flex flex-col gap-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-zinc-300">Location Name</label>
-                    <input
-                      type="text"
-                      name="name"
-                      required
-                      className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                      placeholder="e.g. Victoria Island Branch"
-                    />
-                  </div>
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-zinc-300">Location URL Slug</label>
-                    <div className="flex items-center rounded-lg border border-zinc-700 bg-zinc-800/50 overflow-hidden focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500">
-                      <span className="px-4 text-zinc-500">/m/</span>
-                      <input
-                        type="text"
-                        name="slug"
-                        required
-                        pattern="[a-z0-9\-]+"
-                        className="w-full bg-transparent py-2.5 text-white outline-none"
-                        placeholder="my-lounge-vi"
-                      />
-                    </div>
-                    <p className="mt-1 text-xs text-zinc-500">Must be unique across the platform.</p>
-                  </div>
-                </div>
-                <div className="mt-2">
-                  <SubmitButton className="w-full sm:w-auto px-6 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-medium transition-colors">
-                    + Launch New Location
-                  </SubmitButton>
-                </div>
-              </ActionForm>
-            </div>
-          </div>
-        </div>
+        <LocationFleetManager
+          locations={allLocations}
+          currentLocationId={activeLocationId || ''}
+          subscriptionTier={organization.subscription_tier || 'free'}
+          companyName={organization.name || location?.name || 'My Business Fleet'}
+        />
       )}
 
         {tab === 'venue' && location && (

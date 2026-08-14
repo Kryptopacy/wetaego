@@ -4,68 +4,99 @@ import { useState } from 'react'
 import {
   Zap, ChefHat, Globe, BarChart3, ClipboardList,
   QrCode, Bell, FileText, ShieldCheck, CreditCard,
-  Star, Users, MessageCircle, Gamepad2, Wallet, Package, MessagesSquare
+  Star, Users, MessageCircle, Gamepad2, Wallet, Package, MessagesSquare,
+  Sparkles, Printer, Store, Cpu
 } from 'lucide-react'
 import { StaggerContainer, StaggerItem } from './animations'
 
 const categories = [
   {
-    id: 'architecture',
-    label: 'Flexible Architecture',
+    id: 'ai-intelligence',
+    label: 'Tego Live AI & Vision',
     features: [
       {
-        icon: Globe,
-        color: 'from-blue-600 to-teal-600',
-        tag: 'Multi-template/Multibusiness',
-        badge: 'Any business type',
-        title: 'Built for more than just restaurants.',
-        description: 'Our multi-template architecture supports custom templates for restaurants, salons, consulting, and hotels. Your digital storefront adapts exactly to your business model.',
+        icon: Sparkles,
+        color: 'from-emerald-500 via-teal-500 to-cyan-500',
+        tag: 'Gemini Live',
+        badge: 'Real-time Voice & Vision',
+        title: '"Tego, clone our supermarket catalog to Ikeja."',
+        description: 'Talk directly with your business operating system using natural two-way voice, instant barge-in interruption, and live camera video to inspect stock or build menus with zero typing.',
       },
       {
-        icon: FileText,
-        color: 'from-emerald-600 to-fuchsia-600',
-        tag: 'Custom Flows & Structure',
-        badge: 'Tailored to you',
-        title: 'Design your own operational flows.',
-        description: 'Define varied data structures, custom checkout steps, and unique operational flows to match the precise way your team works.',
+        icon: ChefHat,
+        color: 'from-blue-600 to-indigo-600',
+        tag: 'AI Copywriter + Cover Studio',
+        badge: '3× faster launches',
+        title: 'Studio-grade visuals and sensory descriptions.',
+        description: 'Type an item name. Gemini automatically crafts evocative sensory copy, tags allergens and dietary flags, and renders high-res cover imagery for your catalog.',
       },
       {
-        icon: Users,
-        color: 'from-amber-600 to-orange-600',
-        tag: 'Franchise Mode & Branch Autonomy',
-        badge: 'Multi-location scaling',
-        title: 'One brand. Infinite autonomous locations.',
-        description: 'Duplicate locations with 1-click while maintaining branch-specific menus and customization. Assign tiered branch managers who manage their own staff without touching HQ.',
+        icon: BarChart3,
+        color: 'from-amber-500 to-orange-600',
+        tag: 'Predictive Demand Forecaster',
+        badge: '30-day velocity matrix',
+        title: 'Never stock out on your best-sellers.',
+        description: 'Analyzes recent sales velocity and predicts upcoming item demand, firing stock alerts before shelves run dry across all physical branches.',
       }
     ]
   },
   {
     id: 'command-center',
-    label: 'Operations Hub',
+    label: 'Operations & Hardware',
     features: [
       {
         icon: ClipboardList,
         color: 'from-red-600 to-orange-600',
         tag: 'Live Fulfillment Dashboard',
         badge: '< 1s delivery',
-        title: '"Order received. Team notified."',
-        description: 'Realtime request stream powered by Supabase WebSockets. New orders, bookings, and quotes flash onto your fulfillment dashboard instantly. No refresh. No delay. Ever.',
+        title: '"Order received. Floor notified."',
+        description: 'Realtime order stream powered by Supabase WebSockets. Orders, table service calls, and bookings flash onto your fulfillment dashboard instantly without refresh.',
       },
       {
-        icon: MessageCircle,
-        color: 'from-blue-600 to-cyan-600',
-        tag: 'AI Digital Concierge',
-        badge: 'Gemini-powered',
-        title: 'Your best associate, always on shift.',
-        description: 'Clients chat to get recommendations, ask about services, customize items, and add to cart — all without flagging down staff.',
+        icon: Printer,
+        color: 'from-emerald-600 to-teal-600',
+        tag: 'Raw ESC/POS Thermal Printing',
+        badge: 'WebUSB / Bluetooth / Serial',
+        title: 'Zero-daemon hardware printing.',
+        description: 'Direct binary printing over WebUSB, Serial COM, and Bluetooth BLE. Print thermal order chits and receipts in < 50ms with automatic cash drawer pulses and zero browser dialogs.',
       },
       {
         icon: Package,
-        color: 'from-emerald-600 to-teal-600',
-        tag: 'Inventory Manager',
-        badge: 'Atomic Tracking',
-        title: 'Real-time physical stock tracking.',
-        description: 'Track retail items, kitchen ingredients, or spa products. Features low-stock alerts, wastage logs, and instant atomic sell-out triggers to prevent overselling.',
+        color: 'from-teal-600 to-cyan-600',
+        tag: 'Atomic Inventory Manager',
+        badge: 'Real-time sync',
+        title: 'Physical stock tracking per branch.',
+        description: 'Track retail items, kitchen ingredients, or spa products with low-stock alerts, wastage logs, and instant atomic sell-out triggers to prevent overselling.',
+      }
+    ]
+  },
+  {
+    id: 'architecture',
+    label: 'Fleet & Design Engine',
+    features: [
+      {
+        icon: Store,
+        color: 'from-blue-600 to-teal-600',
+        tag: 'Enterprise Multi-Branch Fleet',
+        badge: '1-Click Duplication',
+        title: 'One brand. Infinite autonomous branches.',
+        description: 'Replicate 5,000+ item catalogs to new locations in < 1s. Manage supermarket sub-departments (Grocery, Bakery, Deli) with localized staff permissions.',
+      },
+      {
+        icon: Globe,
+        color: 'from-emerald-600 to-fuchsia-600',
+        tag: '9 Universal Templates & Design Tokens',
+        badge: 'Bento, Masonry, Glass',
+        title: 'A digital storefront that adapts to you.',
+        description: 'Switch between Bento Grids, Clean Catalogs, Portfolios, Booking Calendars, and Rate Cards with sub-16ms live CSS design token previews.',
+      },
+      {
+        icon: Cpu,
+        color: 'from-amber-600 to-orange-600',
+        tag: '6-Language i18n & Edge Translator',
+        badge: 'en, es, fr, yo, ig, ha',
+        title: 'Localized for global & domestic customers.',
+        description: 'Full multi-language support across English, Spanish, French, Yorùbá, Igbo, and Hausa for seamless customer engagement.',
       }
     ]
   },
@@ -236,21 +267,21 @@ export function FeatureTabs() {
     <div className="flex flex-col lg:flex-row gap-8 lg:gap-16">
       {/* Navigation - Horizontal on mobile, Vertical on desktop */}
       <div className="lg:w-1/4 shrink-0">
-        <div className="flex lg:flex-col gap-2 overflow-x-auto pb-4 lg:pb-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] -mx-6 px-6 lg:mx-0 lg:px-0 lg:sticky lg:top-24 snap-x snap-mandatory">
+        <div className="flex lg:flex-col gap-2 overflow-x-auto pb-4 lg:pb-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] scrollbar-none -mx-6 px-6 lg:mx-0 lg:px-0 lg:sticky lg:top-24 snap-x snap-mandatory">
           {categories.map((category) => {
             const isActive = category.id === activeTab
             return (
               <button
                 key={category.id}
                 onClick={() => setActiveTab(category.id)}
-                className={`flex-shrink-0 snap-start text-left px-4 py-3 text-sm lg:text-base lg:px-5 lg:py-4 rounded-2xl transition-all duration-300 font-bold whitespace-nowrap lg:whitespace-normal group relative overflow-hidden ${
+                className={`shrink-0 snap-start text-left px-4 py-3 text-sm lg:text-base lg:px-5 lg:py-4 rounded-2xl transition-all duration-300 font-bold whitespace-nowrap lg:whitespace-normal group relative overflow-hidden ${
                   isActive 
                     ? 'text-white bg-white/5 lg:bg-transparent' 
-                    : 'text-zinc-500 hover:text-zinc-300 bg-white/[0.02] lg:bg-transparent border border-transparent lg:border-none'
+                    : 'text-zinc-500 hover:text-zinc-300 bg-white/2 lg:bg-transparent border border-transparent lg:border-none'
                 }`}
               >
                 {isActive && (
-                  <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent rounded-2xl border border-white/10 shadow-[0_0_20px_rgba(255,255,255,0.05)]" />
+                  <div className="absolute inset-0 bg-linear-to-r from-white/10 to-transparent rounded-2xl border border-white/10 shadow-[0_0_20px_rgba(255,255,255,0.05)]" />
                 )}
                 <span className="relative z-10">{category.label}</span>
               </button>
@@ -271,12 +302,12 @@ export function FeatureTabs() {
               return (
                 <StaggerItem 
                   key={f.tag} 
-                  className={`group relative rounded-3xl border border-white/[0.06] bg-zinc-900/40 backdrop-blur-xl overflow-hidden hover:border-white/15 transition-all duration-500 hover:shadow-2xl hover:shadow-black/50 ${isFullWidth ? 'md:col-span-2' : ''}`}
+                  className={`group relative rounded-3xl border border-white/6 bg-zinc-900/40 backdrop-blur-xl overflow-hidden hover:border-white/15 transition-all duration-500 hover:shadow-2xl hover:shadow-black/50 ${isFullWidth ? 'md:col-span-2' : ''}`}
                 >
-                  <div className={`absolute inset-0 bg-gradient-to-br ${f.color} opacity-0 group-hover:opacity-10 transition-all duration-700 blur-2xl group-hover:scale-110`} />
+                  <div className={`absolute inset-0 bg-linear-to-br ${f.color} opacity-0 group-hover:opacity-10 transition-all duration-700 blur-2xl group-hover:scale-110`} />
                   <div className="p-8 h-full flex flex-col z-10 relative">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                      <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${f.color} flex items-center justify-center shadow-[0_0_30px_rgba(0,0,0,0.5)] shrink-0 border border-white/10 group-hover:scale-110 transition-transform duration-500`}>
+                      <div className={`w-14 h-14 rounded-2xl bg-linear-to-br ${f.color} flex items-center justify-center shadow-[0_0_30px_rgba(0,0,0,0.5)] shrink-0 border border-white/10 group-hover:scale-110 transition-transform duration-500`}>
                         <Icon className="w-6 h-6 text-white" aria-hidden="true" />
                       </div>
                       <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/5 backdrop-blur-md self-start sm:self-auto">

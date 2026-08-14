@@ -17,11 +17,22 @@ export default async function LocationLayout({
 }) {
   const resolvedParams = await params
   const supabase = createAnonClient()
-  const { data: location } = await supabase
+  let { data: location } = await supabase
     .from('locations')
     .select('id, theme_color, design_tokens')
     .eq('slug', resolvedParams.slug)
     .single()
+
+  if (!location) {
+    const { createAdminClient } = await import('@/lib/supabase/server')
+    const admin = await createAdminClient()
+    const { data: adminLoc } = await admin
+      .from('locations')
+      .select('id, theme_color, design_tokens')
+      .eq('slug', resolvedParams.slug)
+      .single()
+    location = adminLoc
+  }
 
   if (!location) return <>{children}</>
 
