@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { formatCurrency } from '@/lib/utils/currency'
 import { DatePicker } from '@/app/components/date-picker'
 import { Search, X } from 'lucide-react'
+import { useTheme } from '../../../theme-injector'
 
 interface PageItem {
   id: string
@@ -79,6 +80,8 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
   const [formSuccess, setFormSuccess] = useState(false)
   const [isPending, startTransition] = useTransition()
   const [searchQuery, setSearchQuery] = useState('')
+  const { tokens } = useTheme()
+  const layoutMode = tokens.layout_mode || 'list'
 
   const filteredItems = items.filter(item => {
     if (!searchQuery) return true;
@@ -580,19 +583,26 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
                 <motion.div 
                   initial="hidden" animate="show" 
                   variants={{ hidden: {}, show: { transition: { staggerChildren: 0.1 } } }}
-                  className="space-y-4"
+                  className={
+                    layoutMode === 'bento_grid' ? 'grid grid-cols-1 sm:grid-cols-2 gap-4' :
+                    layoutMode === 'masonry' ? 'columns-1 sm:columns-2 gap-4 space-y-4' :
+                    'space-y-4' // List
+                  }
                 >
 
-                {categoryItems.map(item => {
+                {categoryItems.map((item, idx) => {
               const avail = AVAILABILITY_LABELS[item.availability_status] || AVAILABILITY_LABELS.available
               const isAvailable = item.availability_status === 'available'
+              
+              const bentoClass = (layoutMode === 'bento_grid' && idx === 0 && categoryItems.length > 1) ? 'sm:col-span-2' : ''
+              const masonryClass = layoutMode === 'masonry' ? 'break-inside-avoid' : ''
 
               return (
                 <motion.div 
                   variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}
                   whileHover={isAvailable ? { y: -4, boxShadow: "0 10px 30px -10px rgba(0,0,0,0.5)", scale: 1.01 } : {}}
                   key={item.id} 
-                  className={`rounded-2xl border transition-all ${isAvailable ? 'border-zinc-800 bg-zinc-900/50 hover:border-zinc-700 backdrop-blur-sm' : 'border-zinc-800/50 bg-zinc-900/20 opacity-60'}`}
+                  className={`rounded-2xl border transition-all ${isAvailable ? 'border-zinc-800 bg-zinc-900/50 hover:border-zinc-700 backdrop-blur-sm' : 'border-zinc-800/50 bg-zinc-900/20 opacity-60'} ${bentoClass} ${masonryClass}`}
                 >
                   <div className="p-5">
                     <div className="flex items-start justify-between gap-4">

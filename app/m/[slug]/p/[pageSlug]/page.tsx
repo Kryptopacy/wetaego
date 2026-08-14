@@ -14,13 +14,13 @@ import { RestaurantRenderer } from './templates/restaurant-renderer'
 import { PortfolioRenderer } from './templates/portfolio-renderer'
 import { AIChat } from '../../ai-chat'
 import { RouletteFAB } from '../../roulette-fab'
-import { CallStaffFAB } from '../../call-staff-fab'
 import { FabGroup } from '../../components/fab-group'
 import { PortalNav } from '../../components/portal-nav'
 import { unstable_cache } from 'next/cache'
 import { PreviewBanner } from '@/components/preview-banner'
 import { getGlobalManualPayment } from '@/lib/utils/settings'
 import { DealsFAB } from '../../components/deals-fab'
+import { PageThemeOverride } from './page-theme-override'
 
 export async function generateMetadata({
   params,
@@ -171,7 +171,7 @@ export default async function PublicPageView({
     const anonSupabase = createAnonClient()
     let query = anonSupabase
       .from('location_pages')
-      .select('id, title, slug, content, template_type, billing_enabled, billing_mode, payment_mode, deposit_percentage, business_type_preset, randomizer_enabled, deals_enabled, template_data, is_published, theme_color, background_color, operating_hours, contact_email, contact_phone, wifi_network, wifi_password, address, upsell_mode')
+      .select('id, title, slug, content, template_type, billing_enabled, billing_mode, payment_mode, deposit_percentage, business_type_preset, randomizer_enabled, deals_enabled, template_data, is_published, theme_color, background_color, operating_hours, contact_email, contact_phone, wifi_network, wifi_password, address, upsell_mode, design_tokens')
       .eq('location_id', loc.id)
       .eq('slug', pageSlug)
 
@@ -436,6 +436,7 @@ export default async function PublicPageView({
         />
       )}
       {isPreview && <PreviewBanner />}
+      <PageThemeOverride pageTokens={page.design_tokens as any || undefined} />
       {RendererContent}
       
       {publishedPagesCount > 1 && (
@@ -448,6 +449,7 @@ export default async function PublicPageView({
             locationId={loc.id}
             organizationId={loc.organization_id}
             aiName={loc.ai_name || ''}
+            businessName={loc.name}
             themeColor={loc.theme_color || '#7c3aed'}
             tableIdentifier="QR Scan" // Standard fallback for generic pages
             menuItems={((items as Record<string, unknown>[]) || []).map(i => ({ id: i.id as string, name: i.title as string, price_minor: (i.price_minor as number) || 0 }))}
@@ -456,7 +458,6 @@ export default async function PublicPageView({
             businessTypePreset={page.business_type_preset as string}
           />
         )}
-        <CallStaffFAB organizationId={loc.organization_id} locationId={loc.id} tableIdentifier="QR Scan" />
         {Boolean(page.randomizer_enabled) && (
           <RouletteFAB />
         )}

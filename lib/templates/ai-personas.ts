@@ -2,25 +2,32 @@
  * AI Assistant Persona System
  *
  * Maps the page template + billing mode to the right AI persona.
- * The public page AI assistant is entirely different depending on what
- * the business does — a spa should not have an "AI Waiter."
+ * The public page AI assistant is dynamically customized to the business type,
+ * acting as Tego (or the merchant's custom configured AI name) representing the business.
  */
 
 export type AITool =
-  | 'addToCart' | 'removeFromCart' | 'clearCart' | 'checkout'  // catalog / food
-  | 'callStaff'                                                 // table service only
-  | 'checkAvailability' | 'bookSlot'                           // booking
-  | 'getServiceInfo'                                            // booking + rate_card
-  | 'getProductInfo'                                            // catalog / retail
-  | 'getPropertyInfo' | 'submitInquiry'                        // listing
+  | 'addToCart' | 'removeFromCart' | 'clearCart' | 'checkout'       // catalog / dining
+  | 'searchByDietaryAllergen'                                       // food / catalog
+  | 'callStaffToTable'                                              // table service dining
+  | 'checkAvailability' | 'getServiceDetails' | 'bookAppointmentSlot' // booking
+  | 'messageFrontDesk'                                              // salon / spa / clinic / hotel
+  | 'getProductSpecs' | 'checkStock' | 'requestSalesAssociate'      // retail / catalog
+  | 'getPropertySpecs' | 'checkViewingAvailability' | 'submitBrokerInquiry' // listing
+  | 'getPackageDetails' | 'calculateEstimate' | 'submitCustomQuoteLead' | 'requestConsultantCallback' // quote / rate_card
+  | 'requestStaffHandoff'                                           // universal human handoff fallback
 
 export interface AIPersona {
-  /** Default display name — overridden by the business's custom aiName setting */
+  /** Display name shown in the chat header, e.g. "Tego • Blue Ribbon Bistro" */
   defaultName: string
-  /** Shown under the name in the chat header */
+  /** The base name, e.g. "Tego" or custom name "Bella" */
+  baseName: string
+  /** Role shown under the name in the chat header */
   subtitle: string
   /** First message shown when chat is opened */
   greeting: string
+  /** Contextual quick action suggestion chips shown above input */
+  suggestionChips: string[]
   /** What tools the AI is allowed to call */
   tools: AITool[]
   /** Placeholder text in the chat input */
@@ -40,99 +47,157 @@ export type BusinessMode =
   | 'info'
   | 'custom'
 
-export const AI_PERSONAS: Record<BusinessMode, AIPersona> = {
+interface BasePersonaDefinition {
+  subtitle: string
+  greetingBody: string
+  suggestionChips: string[]
+  tools: AITool[]
+  inputPlaceholder: string
+}
+
+export const BASE_PERSONAS: Record<BusinessMode, BasePersonaDefinition> = {
   catalog_table_service: {
-    defaultName: 'AI Waiter',
-    subtitle: 'Live Dining Assistant',
-    greeting: "Hi! I can recommend dishes, tell you about ingredients, add items to your order, or call a staff member for you. What can I help with?",
-    tools: ['addToCart', 'removeFromCart', 'clearCart', 'callStaff', 'checkout'],
-    inputPlaceholder: "e.g. 'Recommend a starter', 'No nuts please'",
+    subtitle: 'Live Dining & Table Assistant',
+    greetingBody: 'I can recommend dishes, check ingredients & allergens, add items to your cart, or page our floor staff for your table. How can I help you today?',
+    suggestionChips: [
+      '🍽️ Chef recommendations',
+      '🥜 Allergen & dietary check',
+      '🧾 Request the bill',
+      '🙋 Call waiter to table'
+    ],
+    tools: ['addToCart', 'removeFromCart', 'clearCart', 'searchByDietaryAllergen', 'callStaffToTable', 'checkout', 'requestStaffHandoff'],
+    inputPlaceholder: "e.g. 'Gluten-free options', 'Add 2 burgers', 'Bill please'",
   },
 
   catalog_standard_checkout: {
-    defaultName: 'AI Shop Assistant',
-    subtitle: 'Product Guide',
-    greeting: "Hi! I can help you find the right product, check what's in stock, or answer questions about specs. What are you looking for?",
-    tools: ['getProductInfo'],
-    inputPlaceholder: "e.g. 'Do you have iPhone 15 Pro?', 'What's the difference between...'",
+    subtitle: 'Product & Catalog Guide',
+    greetingBody: 'I can help you explore our catalog, check specifications, verify stock availability, and manage your cart. What are you looking for?',
+    suggestionChips: [
+      '🔍 Check product specs',
+      '📦 Delivery & shipping info',
+      '🏷️ Active promotions',
+      '💬 Connect with sales'
+    ],
+    tools: ['getProductSpecs', 'checkStock', 'addToCart', 'removeFromCart', 'clearCart', 'checkout', 'requestSalesAssociate', 'requestStaffHandoff'],
+    inputPlaceholder: "e.g. 'Do you have size Medium in stock?', 'Shipping fee'",
   },
 
   booking_spa: {
-    defaultName: 'AI Concierge',
-    subtitle: 'Wellness Assistant',
-    greeting: "Welcome! I can help you understand our treatments, check what's available, or guide you through booking. How can I help?",
-    tools: ['checkAvailability', 'getServiceInfo'],
-    inputPlaceholder: "e.g. 'What does a hot stone massage include?'",
+    subtitle: 'Wellness & Booking Specialist',
+    greetingBody: 'I can explain our treatments, verify therapist availability, and assist with scheduling your appointment. How can I assist your visit?',
+    suggestionChips: [
+      '💆 Treatment details',
+      '📅 Available time slots',
+      '🧴 Package inclusions',
+      '💬 Message front desk'
+    ],
+    tools: ['checkAvailability', 'getServiceDetails', 'bookAppointmentSlot', 'messageFrontDesk', 'requestStaffHandoff'],
+    inputPlaceholder: "e.g. 'What is included in the Aromatherapy package?'",
   },
 
   booking_hotel: {
-    defaultName: 'AI Guest Services',
-    subtitle: 'Hotel Concierge',
-    greeting: "Hello! I can help you find the right room, explain amenities, check availability, or guide you through a reservation. What brings you in?",
-    tools: ['checkAvailability', 'getServiceInfo'],
-    inputPlaceholder: "e.g. 'Do you have suites with ocean views?'",
+    subtitle: 'Guest Services & Reservations',
+    greetingBody: 'I can explain room amenities, check stay availability, and assist with your reservation inquiries. How can I assist you?',
+    suggestionChips: [
+      '🛏️ Room amenities',
+      '📅 Check availability',
+      '🏊 Pool & gym hours',
+      '💬 Guest services desk'
+    ],
+    tools: ['checkAvailability', 'getServiceDetails', 'bookAppointmentSlot', 'messageFrontDesk', 'requestStaffHandoff'],
+    inputPlaceholder: "e.g. 'Check-in time', 'Suites with balcony'",
   },
 
   booking_salon: {
-    defaultName: 'AI Booking Assistant',
-    subtitle: 'Salon & Beauty',
-    greeting: "Hi! I can help you understand our services, check open slots, or walk you through booking your appointment.",
-    tools: ['checkAvailability', 'getServiceInfo'],
-    inputPlaceholder: "e.g. 'How long does a balayage take?'",
+    subtitle: 'Salon & Beauty Specialist',
+    greetingBody: 'I can help you explore our beauty services, check stylist schedules, and book your appointment. What are you looking to do today?',
+    suggestionChips: [
+      '💇 Service menu & pricing',
+      '📅 Open stylist slots',
+      '⏳ Treatment duration',
+      '💬 Message salon coordinator'
+    ],
+    tools: ['checkAvailability', 'getServiceDetails', 'bookAppointmentSlot', 'messageFrontDesk', 'requestStaffHandoff'],
+    inputPlaceholder: "e.g. 'How long does a balayage take?', 'Open slots Saturday'",
   },
 
   booking_venue: {
-    defaultName: 'AI Events Assistant',
-    subtitle: 'Venue Coordinator',
-    greeting: "Hello! I can tell you about our packages, capacity, included amenities, and help you check availability for your event date.",
-    tools: ['checkAvailability', 'getServiceInfo'],
-    inputPlaceholder: "e.g. 'Can you hold 200 guests?', 'Do you allow external caterers?'",
+    subtitle: 'Venue & Events Coordinator',
+    greetingBody: 'I can tell you about our space capacities, event packages, included equipment, and check date availability for your function.',
+    suggestionChips: [
+      '🏛️ Capacity & floor plans',
+      '📅 Date availability',
+      '🍾 Catering & equipment',
+      '💬 Contact events team'
+    ],
+    tools: ['checkAvailability', 'getServiceDetails', 'bookAppointmentSlot', 'messageFrontDesk', 'requestStaffHandoff'],
+    inputPlaceholder: "e.g. 'Can you host 150 seated guests?', 'Audio-visual gear'",
   },
 
   booking_generic: {
-    defaultName: 'AI Assistant',
-    subtitle: 'Booking Assistant',
-    greeting: "Hi! I can help you learn about our services and check availability. What would you like to know?",
-    tools: ['checkAvailability', 'getServiceInfo'],
-    inputPlaceholder: "e.g. 'What services do you offer?'",
+    subtitle: 'Appointments & Scheduling Specialist',
+    greetingBody: 'I can help you explore our services, review pricing, and check scheduling availability. How can I help you?',
+    suggestionChips: [
+      '📋 Available services',
+      '📅 Check calendar slots',
+      '💬 Connect with coordinator'
+    ],
+    tools: ['checkAvailability', 'getServiceDetails', 'bookAppointmentSlot', 'messageFrontDesk', 'requestStaffHandoff'],
+    inputPlaceholder: "e.g. 'What appointments are open this week?'",
   },
 
   listing: {
-    defaultName: 'AI Property Advisor',
-    subtitle: 'Property Assistant',
-    greeting: "Hi! I can help you find the right property, answer questions about specs or location, or help you get in touch with the agent.",
-    tools: ['getPropertyInfo', 'submitInquiry'],
-    inputPlaceholder: "e.g. 'Are there any 3-beds under ₦2M?', 'Is parking included?'",
+    subtitle: 'Property & Listing Advisor',
+    greetingBody: 'I can answer questions regarding property features, pricing, square footage, neighborhood amenities, and arrange a viewing with our broker.',
+    suggestionChips: [
+      '🏡 Property specifications',
+      '📍 Location & amenities',
+      '📅 Schedule a viewing',
+      '💬 Connect with agent'
+    ],
+    tools: ['getPropertySpecs', 'checkViewingAvailability', 'submitBrokerInquiry', 'requestStaffHandoff'],
+    inputPlaceholder: "e.g. 'Is parking included?', 'Book a viewing for tomorrow'",
   },
 
   rate_card: {
-    defaultName: 'AI Assistant',
-    subtitle: 'Enquiry Helper',
-    greeting: "Hi! I can explain what's included in each package, check availability, or help you get a quote. What are you interested in?",
-    tools: ['getServiceInfo', 'submitInquiry'],
-    inputPlaceholder: "e.g. 'What's included in the Premium package?'",
+    subtitle: 'Scope & Quote Specialist',
+    greetingBody: 'I can break down what is included in each tier, calculate estimated project budgets, or submit a custom scope inquiry to our team.',
+    suggestionChips: [
+      '📑 Tier breakdown',
+      '💰 Estimate my project',
+      '📑 Request custom quote',
+      '📞 Schedule consultation'
+    ],
+    tools: ['getPackageDetails', 'calculateEstimate', 'submitCustomQuoteLead', 'requestConsultantCallback', 'requestStaffHandoff'],
+    inputPlaceholder: "e.g. 'What is included in the Growth tier?', 'Custom quote'",
   },
 
   info: {
-    defaultName: 'AI Assistant',
-    subtitle: 'Page Assistant',
-    greeting: "Hi! I can help answer questions about this page. What would you like to know?",
-    tools: [],
-    inputPlaceholder: "Ask a question...",
+    subtitle: 'Information Assistant',
+    greetingBody: 'I am here to answer your questions about our services, policies, and venue details. What would you like to know?',
+    suggestionChips: [
+      '🕒 Hours & location',
+      '❓ General FAQs',
+      '💬 Connect with team'
+    ],
+    tools: ['requestStaffHandoff'],
+    inputPlaceholder: "Ask anything about this venue...",
   },
 
   custom: {
-    defaultName: 'AI Assistant',
     subtitle: 'Assistant',
-    greeting: "Hi! How can I help you today?",
-    tools: [],
+    greetingBody: 'How can I assist you with our services and information today?',
+    suggestionChips: [
+      '❓ Ask a question',
+      '💬 Contact staff'
+    ],
+    tools: ['requestStaffHandoff'],
     inputPlaceholder: "Ask a question...",
   },
 }
 
 /**
  * Derives the business mode from page template + billing config.
- * Used to pick the right AI persona for the public page.
  */
 export function getBusinessMode(
   templateType: string,
@@ -154,18 +219,42 @@ export function getBusinessMode(
   }
 
   if (templateType === 'listing') return 'listing'
-  if (templateType === 'rate_card') return 'rate_card'
+  if (templateType === 'rate_card' || templateType === 'quote') return 'rate_card'
   if (templateType === 'info') return 'info'
   return 'custom'
 }
 
 /**
- * Get the resolved persona, merging the business's custom AI name if set.
+ * Get the resolved persona, properly branding as Tego (or custom configured AI name)
+ * acting on behalf of the specific business, with support for custom quick action chips.
  */
 export function resolvePersona(
   mode: BusinessMode,
-  customAiName?: string | null
+  customAiName?: string | null,
+  businessName?: string | null,
+  customQuickActions?: string[] | null
 ): AIPersona {
-  const base = AI_PERSONAS[mode]
-  return customAiName ? { ...base, defaultName: customAiName } : base
+  const base = BASE_PERSONAS[mode] || BASE_PERSONAS.custom
+  const rawName = customAiName?.trim()
+  const baseName = rawName || 'Tego'
+  const biz = businessName?.trim()
+
+  const displayName = biz ? `${baseName} • ${biz}` : baseName
+  const greeting = `Hi! I'm ${baseName}, your assistant at ${biz || 'our venue'}. ${base.greetingBody}`
+
+  // Merge custom quick actions with base chips if provided
+  const validCustomActions = (customQuickActions || []).filter(a => typeof a === 'string' && a.trim().length > 0)
+  const finalChips = validCustomActions.length > 0
+    ? [...validCustomActions, ...base.suggestionChips.filter(c => !validCustomActions.includes(c))].slice(0, 6)
+    : base.suggestionChips
+
+  return {
+    defaultName: displayName,
+    baseName,
+    subtitle: base.subtitle,
+    greeting,
+    suggestionChips: finalChips,
+    tools: base.tools,
+    inputPlaceholder: base.inputPlaceholder,
+  }
 }

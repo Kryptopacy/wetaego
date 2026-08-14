@@ -4,7 +4,19 @@
     "receivingOrders": "Receiving Orders",
     "hardwareSettings": "Hardware Settings",
     "language": "Language",
-    "languageDesc": "Fulfillment dashboard interface language"
+    "languageDesc": "Fulfillment dashboard interface language",
+    "activeOrders": "Active Orders",
+    "orderHistory": "Order History",
+    "stockManagement": "Stock & Inventory",
+    "serviceRequests": "Service Requests",
+    "posTerminal": "Point of Sale",
+    "crmCustomers": "CRM & Customers",
+    "analytics": "Analytics & Reports",
+    "pagesManager": "Storefront Pages",
+    "visualBuilder": "Live Visual Builder",
+    "settings": "Settings & Organization",
+    "team": "Team & Intercom",
+    "addons": "Add-ons & Gamification"
   },
   "Guest": {
     "add_to_order": "Add to Order",
@@ -22,6 +34,22 @@
     "order_received": "Order Received",
     "preparing": "Preparing",
     "ready": "Ready",
-    "completed": "Completed"
+    "completed": "Completed",
+    "call_staff": "Call Staff",
+    "split_bill": "Split Bill",
+    "book_appointment": "Book Appointment",
+    "request_quote": "Request Quote",
+    "view_details": "View Details"
+  },
+  "Hardware": {
+    "title": "Hardware & Regional Settings",
+    "description": "Configure direct binary thermal printer communication (ESC/POS bytecode over WebUSB, Serial, Bluetooth, or LAN) and localized interface languages.",
+    "protocol": "Receipt Printing Protocol",
+    "ipAddress": "Printer IPv4 Address",
+    "baudRate": "Serial Baud Rate",
+    "autoPrint": "Enable automated fulfillment routing (Auto-print upon resolution)",
+    "syncConfig": "Sync Configuration",
+    "testPrint": "Test Print",
+    "pairHardware": "Pair & Test Hardware"
   }
 }

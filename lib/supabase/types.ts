@@ -1286,6 +1286,7 @@ export type Database = {
           delivery_note: string | null
           deposit_percentage: number | null
           deposit_type: string | null
+          design_tokens: Json | null
           global_discount_banner_text: string | null
           global_discount_enabled: boolean | null
           global_discount_percentage: number | null
@@ -1338,6 +1339,7 @@ export type Database = {
           delivery_note?: string | null
           deposit_percentage?: number | null
           deposit_type?: string | null
+          design_tokens?: Json | null
           global_discount_banner_text?: string | null
           global_discount_enabled?: boolean | null
           global_discount_percentage?: number | null
@@ -1390,6 +1392,7 @@ export type Database = {
           delivery_note?: string | null
           deposit_percentage?: number | null
           deposit_type?: string | null
+          design_tokens?: Json | null
           global_discount_banner_text?: string | null
           global_discount_enabled?: boolean | null
           global_discount_percentage?: number | null
@@ -1571,6 +1574,7 @@ export type Database = {
           delivery_fee_minor: number | null
           delivery_minimum_order_minor: number | null
           delivery_note: string | null
+          design_tokens: Json | null
           facebook_handle: string | null
           fulfillment_location_label: string | null
           geofence_radius_meters: number | null
@@ -1633,6 +1637,7 @@ export type Database = {
           delivery_fee_minor?: number | null
           delivery_minimum_order_minor?: number | null
           delivery_note?: string | null
+          design_tokens?: Json | null
           facebook_handle?: string | null
           fulfillment_location_label?: string | null
           geofence_radius_meters?: number | null
@@ -1695,6 +1700,7 @@ export type Database = {
           delivery_fee_minor?: number | null
           delivery_minimum_order_minor?: number | null
           delivery_note?: string | null
+          design_tokens?: Json | null
           facebook_handle?: string | null
           fulfillment_location_label?: string | null
           geofence_radius_meters?: number | null

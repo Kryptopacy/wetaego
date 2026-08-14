@@ -55,11 +55,11 @@ export default async function SupportPage() {
         </div>
       </div>
 
-      <div className="bg-gradient-to-r from-blue-900/20 to-indigo-900/20 border border-blue-900/50 rounded-xl p-8 text-center">
+      <div className="bg-linear-to-r from-blue-900/20 to-indigo-900/20 border border-blue-900/50 rounded-xl p-8 text-center">
         <MessageSquare className="w-12 h-12 text-blue-400 mx-auto mb-4" />
         <h2 className="text-2xl font-bold text-white mb-2">Need Immediate Assistance?</h2>
         <p className="text-zinc-400 max-w-2xl mx-auto mb-8">
-          Our Unem AI Co-Pilot (located in the bottom right corner) is always available to answer questions about how the platform works and guide you through configuration steps. For anything else, our support team is a click away.
+          Our Tego AI Co-Pilot (located in the bottom right corner) is always available to answer questions about how the platform works and guide you through configuration steps. For anything else, our support team is a click away.
         </p>
         <a 
           href="mailto:support@ourmenuos.online"

@@ -12,6 +12,7 @@ import { AnimatedDialog, AnimatedDialogContent, DialogTitle, DialogDescription }
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import { ShareButton } from '@/app/components/share-button'
 import { useTranslations } from 'next-intl'
+import { useTheme } from './theme-injector'
 
 interface ItemCardProps {
   item: Tables<'menu_items'>
@@ -31,6 +32,7 @@ export function ItemCard({ item }: ItemCardProps) {
   const [modifiers, setModifiers] = useState('')
   const [mediaIndex, setMediaIndex] = useState(0)
   const [showVR, setShowVR] = useState(false)
+  const { tokens } = useTheme()
 
   const searchParams = useSearchParams()
   const pathname = usePathname()
@@ -115,17 +117,30 @@ export function ItemCard({ item }: ItemCardProps) {
 
   if (isHidden) return null
 
+  const surfaceStyle = tokens.surface_style || 'flat'
+  const getSurfaceClasses = () => {
+    if (surfaceStyle === 'glassmorphism') return 'bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border border-zinc-200/50 dark:border-zinc-800/50 shadow-md'
+    if (surfaceStyle === 'neumorphism') return 'bg-white dark:bg-zinc-900 border-transparent shadow-[4px_4px_10px_rgba(0,0,0,0.05),-4px_-4px_10px_rgba(255,255,255,0.8)] dark:shadow-[4px_4px_10px_rgba(0,0,0,0.3),-4px_-4px_10px_rgba(255,255,255,0.02)]'
+    // flat or solid
+    return 'bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 shadow-sm hover:shadow-md'
+  }
+
+  const radiusMap: Record<string, string> = { none: 'rounded-none', sm: 'rounded-sm', md: 'rounded-md', lg: 'rounded-lg', xl: 'rounded-xl', full: 'rounded-[2rem]' }
+  const innerRadiusMap: Record<string, string> = { none: 'rounded-none', sm: 'rounded-sm', md: 'rounded-sm', lg: 'rounded-md', xl: 'rounded-lg', full: 'rounded-full' }
+  const cardRadius = radiusMap[tokens.corner_radius || 'xl'] || 'rounded-xl'
+  const imageRadius = innerRadiusMap[tokens.corner_radius || 'xl'] || 'rounded-lg'
+
   return (
     <>
       <motion.div 
         onClick={handleOpenDetails}
         whileHover={{ scale: 1.01 }}
         whileTap={{ scale: 0.99 }}
-        className={`group relative cursor-pointer flex gap-4 p-4 bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-100 dark:border-zinc-800 shadow-sm hover:shadow-md transition-all duration-300 ${!isAvailable ? 'opacity-60 grayscale-[0.5]' : ''}`}
+        className={`group relative cursor-pointer flex gap-4 p-4 transition-all duration-300 ${cardRadius} ${getSurfaceClasses()} ${!isAvailable ? 'opacity-60 grayscale-[0.5]' : ''}`}
       >
         {/* Product Image */}
         {item.image_url && (
-          <div className="w-[88px] h-[88px] shrink-0 relative rounded-xl overflow-hidden bg-zinc-100 dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-800">
+          <div className={`w-[88px] h-[88px] shrink-0 relative overflow-hidden bg-zinc-100 dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-800 ${imageRadius}`}>
             <Image 
               src={item.image_url} 
               alt={item.name}

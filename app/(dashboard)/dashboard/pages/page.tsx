@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { cookies } from 'next/headers'
 import { Tier } from '@/lib/utils/billing'
 import { togglePageStatus, deletePage } from './actions'
 import { ActionForm } from '@/components/ActionForm'
@@ -23,9 +24,12 @@ export default async function PagesManager() {
   }
 
   const userId = user.id
+  const cookieStore = await cookies()
+  const activeLocationCookieId = cookieStore.get('ourmenu_active_location_id')?.value
 
   let org: { id: string; subscription_tier: string; purchased_credits: number; monthly_free_credits_used: number; business_type: string | null } | null = null
-  let locData: { id: string; slug: string } | null = null
+  let locData: { id: string; name: string; slug: string } | null = null
+  let allLocations: { id: string; name: string; slug: string }[] = []
   let pages: {
     id: string; title: string; slug: string; is_published: boolean;
     template_type: string; is_primary: boolean; created_at: string;
@@ -46,16 +50,17 @@ export default async function PagesManager() {
       .select('id, subscription_tier, purchased_credits, monthly_free_credits_used, business_type')
       .eq('created_by', userId).limit(1).maybeSingle()
     org = data
-
-    org = data
   }
 
-  const { data: locDataResult } = await supabase
-    .from('locations')
-    .select('id, slug')
-    .eq('organization_id', org?.id || '')
-    .single()
-  locData = locDataResult
+  if (org?.id) {
+    const { data: locs } = await supabase
+      .from('locations')
+      .select('id, name, slug')
+      .eq('organization_id', org.id)
+      
+    allLocations = locs || []
+    locData = allLocations.find(l => l.id === activeLocationCookieId) || allLocations[0] || null
+  }
 
   if (locData) {
     const { data: pagesData } = await supabase
@@ -237,6 +242,8 @@ export default async function PagesManager() {
                           sourcePageId={page.id} 
                           sourceTitle={page.title} 
                           sourceSlug={page.slug} 
+                          locations={allLocations}
+                          currentLocationId={locData.id}
                         />
                       </DropdownMenuItem>
                       

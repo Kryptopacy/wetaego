@@ -762,12 +762,18 @@ export async function callStaffFromAi(params: {
   }
 
   const adminClient = await createAdminClient()
+  const dbRequestType = requestType === 'manager_escalation' ? 'waiter' : requestType
+  const customText = requestType === 'manager_escalation' 
+    ? (note ? `[AI Escalation] ${note}` : '[AI Escalation] Human assistance requested') 
+    : (note || null)
+
   const { error } = await adminClient.from('service_requests').insert({
     organization_id: orgId,
     location_id: locationId,
     table_identifier: tableIdentifier,
-    request_type: requestType as RequestType,
-    custom_request_text: note
+    request_type: dbRequestType,
+    custom_request_text: customText,
+    urgency_tier: requestType === 'manager_escalation' ? 'critical' : 'standard'
   })
 
   if (error) return { serverError: error.message }

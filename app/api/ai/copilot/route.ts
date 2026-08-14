@@ -73,31 +73,68 @@ export async function POST(req: Request) {
     const aiModels = await getAiModels() as Record<string, string>
     const modelName = aiModels.business_ai_model || aiModels.text_generation || 'gemini-3-flash-preview'
 
+    const { data: orgData } = await supabase
+      .from('organizations')
+      .select('name, business_type')
+      .eq('id', organizationId)
+      .single()
+
+    const { count: locationCount } = await supabase
+      .from('locations')
+      .select('*', { count: 'exact', head: true })
+      .eq('organization_id', organizationId)
+
+    const dynamicContext = `You are Tego, the autonomous Admin AI Co-Pilot for OurMenu OS, a universal digital operating layer for physical and service businesses.
+      You are an expert business assistant built directly into the merchant dashboard, capable of real-time Voice, Camera Vision streaming, and administrative execution. 
+      Your goal is to help merchants operate their business efficiently, tweak their storefront design, check incoming orders, and answer any technical questions about OurMenu OS.
+
+      LIVE MERCHANT CONTEXT:
+      - Organization Name: ${orgData?.name || 'Unknown'}
+      - Business Type: ${orgData?.business_type || 'Unknown'}
+      - Total Locations: ${locationCount || 0}
+      - Your Permission Level: ${userRole}
+
+      Core OurMenu OS Capabilities & Architecture:
+      1. Universal Design Tokens & 9 Multi-Templates:
+         - Templates: 'catalog' (menus & retail), 'booking' (spas, salons, hotels), 'rate_card' (freelancers & agencies), 'quote' (B2B quotes), 'listing' (real estate & cars), 'portfolio', 'item_card', 'portal', and 'builder'.
+         - Design Tokens: 'layout_mode' ('bento_grid', 'masonry', 'list'), 'surface_style' ('flat', 'glassmorphism', 'neumorphism'), 'corner_radius' ('none', 'sm', 'md', 'lg', 'xl', 'full'), 'typography' ('modern', 'elegant', 'playful', 'industrial'), 'density' ('airy', 'standard', 'cozy'), and 'color_theme' ('true_dark', 'dim', 'light', 'tinted').
+         - Scopes: Can be applied globally to a location or overridden per specific page ('pageId') with a 1-click 'Revert to Global Settings' fail-safe.
+      2. Tego Multimodal Live Voice & Vision:
+         - Real-time bidirectional voice dialogue (16kHz audio in / 24kHz audio out with barge-in interruption) and 1 FPS camera video ingestion via Gemini Live ('gemini-3.1-flash-live-preview').
+         - Merchants can show you physical dishes, handwritten menus, receipts, or inventory stock via camera.
+      3. Frontline Public Assistant & Human Handoff:
+         - The storefront assistant dynamically adapts its role to the business preset (e.g. 'Tego • {businessName} - Live Dining Assistant' for restaurants, 'Wellness & Booking Specialist' for spas).
+         - Operates with strict zero-hallucination guardrails (only answers from verified menu items, FAQs, and pages).
+         - Executes public tools ('addToCart', 'searchByDietaryAllergen', 'callStaffToTable', 'checkAvailability', 'submitCustomQuoteLead').
+         - When customer requests human help or asks unlisted questions, it generates a ticket in 'service_requests', alerting staff on the Orders dashboard for 1-click resolution.
+      4. Add-On Modules:
+         - Lucky Wheel Gamification (contextual checkout discounts).
+         - Surprise Me Randomizer (dish roulette for guests).
+         - In-house Delivery minimums and fee calculations.
+         - Deposit & Partial Billing.
+         - IOU Buy Now Pay Later customer credit ledger.
+      5. QR Codes & Decoupled Routing:
+         - Dynamic routing of physical QR codes to locations or specific pages without reprinting.
+      6. Supermarkets, Multi-Branch Chains & Fleet Management:
+         - 'locations' represents physical branches across cities/neighborhoods (e.g. Downtown Branch, Lekki Mega Store).
+         - 'location_pages' represents sub-departments within a single location (e.g. Main Grocery Aisles, Fresh Bakery, Butchery & Deli, In-Store Pharmacy).
+         - The Top-Left Unified Switcher toggles 'Global View' (fleet-wide revenue, tickets, inventory) or individual branch/department views.
+         - Merchants create physical branches in Settings -> Locations tab ('/dashboard/settings?tab=locations').
+         - 1-Click Franchise Duplication: In Storefront Pages ('/dashboard/pages'), clicking 'Duplicate Page' clones an entire master catalog (collections, items, taxonomy mappings) to a new branch in < 1 second.
+         - Granular Franchise RBAC: In Settings -> Team ('/dashboard/settings?tab=team'), branch managers can be invited and cryptographically scoped to their specific branch ('page_id' or 'location_id').
+      
+      System Guidelines:
+      - You can guide merchants through setting up branches, duplicating catalogs, or configuring sub-departments step-by-step.
+      - You can update design tokens directly using the 'update_brand_appearance' tool.
+      - Use the 'get_business_structure' tool to inspect the merchant's active locations and pages.
+      - Use 'get_recent_orders' to review incoming sales.
+      - If unsure of deep architectural features (Webhooks, CRM, Delivery, POS, Multi-Branch Fleet), use the 'query_os_documentation' tool.
+      - Keep spoken and chat responses concise, clear, and actionable.`
+
     const result = streamText({
       model: google(modelName),
       messages: await convertToModelMessages(messages),
-      system: `You are the Admin AI Co-Pilot for OurMenu OS, a universal digital operating layer for modern businesses.
-      You are an expert business assistant built directly into the merchant dashboard. 
-      Your goal is to help merchants manage their business efficiently and answer their questions about OurMenu OS features.
-
-      Core OurMenu OS Concepts you must know:
-      1. Locations: A physical or virtual venue representing the business.
-      2. Pages (location_pages): Sub-sections or mini-sites within a location, powered by multi-templates.
-         - 'catalog': Used for restaurant menus, boutiques, tech shops.
-         - 'booking': Used for spas, salons, and hotels requiring appointment slots or deposits.
-         - 'rate_card': Used for consultants, freelancers, or media creators to showcase services and pricing.
-         - 'quote': Used for dynamic B2B quote generators.
-         - 'listing': Used for real estate and automotive galleries.
-      3. QR Codes: Decoupled hardware. Owners can print generic QR codes and dynamically route them to specific Locations or Pages (e.g., routing a QR to 'Room Service' vs 'Lobby Cafe') without reprinting.
-      4. Inventory: Tracks stock levels for physical items.
-      System Guidelines:
-      - Answer questions about how OurMenu OS works.
-      - If they report a bug, issue, or feature request, politely instruct them to use the "Feedback & Support" page in their sidebar, where they can submit it directly to our engineering team.
-      - Explain complex concepts simply (e.g., BOM means "Bill of Materials", which lets them link ingredients to menu items to automatically calculate costs and deduct stock when sales happen).
-      
-      Always use the 'get_business_structure' tool first if you need to know their specific locations or pages.
-      You can also check inventory, update stock levels, and generate sales summaries.
-      Keep responses brief, actionable, and act like a professional, friendly assistant.`,
+      system: dynamicContext,
       tools: {
         get_business_structure: tool({
           description: 'Fetch the locations and pages (menus, booking pages) belonging to this organization.',
@@ -109,6 +146,144 @@ export async function POST(req: Request) {
               .select('id, name, slug, location_pages(id, title, template_type, is_published)')
               .eq('organization_id', organizationId)
             return locations || []
+          }
+        }),
+        query_os_documentation: tool({
+          description: 'Query the OurMenu OS technical documentation to answer questions about deep platform features like Webhooks, CRM, Delivery, POS, Affiliates, etc.',
+          parameters: z.object({
+            query: z.string().describe('The topic to search for (e.g., "how do webhooks work", "crm integration")')
+          }),
+          // @ts-expect-error - TS inference struggles
+          execute: async ({ query }: { query: string }): Promise<Record<string, unknown>> => {
+            try {
+              const origin = new URL(req.url).origin
+              const res = await fetch(`${origin}/llms-full.txt`)
+              if (!res.ok) {
+                // fallback to basic llms.txt if full is missing
+                const fallback = await fetch(`${origin}/llms.txt`)
+                if (fallback.ok) return { success: true, documentation: await fallback.text() }
+                return { error: 'Documentation unavailable.' }
+              }
+              const docs = await res.text()
+              return { success: true, documentation: docs, note: 'Synthesize the answer based on this documentation.' }
+            } catch (e) {
+              return { error: 'Failed to fetch documentation.' }
+            }
+          }
+        }),
+        update_brand_appearance: tool({
+          description: 'Update the design tokens (theme, layout, colors, font) for a specific location. Use this when the merchant wants to change how their storefront looks.',
+          parameters: z.object({
+            locationId: z.string().uuid(),
+            pageId: z.string().uuid().optional().describe('Optional ID of a specific page. If provided, updates aesthetic only for this page.'),
+            tokens: z.object({
+              theme_color: z.string().optional(),
+              layout_mode: z.enum(['bento_grid', 'masonry', 'list']).optional(),
+              corner_radius: z.enum(['none', 'sm', 'md', 'lg', 'xl', 'full']).optional(),
+              surface_style: z.enum(['flat', 'glassmorphism', 'neumorphism']).optional(),
+              typography: z.enum(['modern', 'elegant', 'playful', 'industrial']).optional(),
+              animation_style: z.enum(['energetic', 'elegant', 'instant']).optional(),
+              density: z.enum(['airy', 'standard', 'cozy']).optional(),
+              color_theme: z.enum(['true_dark', 'dim', 'light', 'tinted']).optional(),
+            }).describe('The design tokens to update. Only include the fields the merchant specifically requested to change.')
+          }),
+          // @ts-expect-error - TS inference struggles
+          execute: async ({ locationId, pageId, tokens }: { locationId: string; pageId?: string; tokens: Record<string, string> }): Promise<Record<string, unknown>> => {
+            if (userRole !== 'owner' && userRole !== 'manager') {
+              return { error: 'Unauthorized: Only owners and managers can update appearance.' }
+            }
+            
+            if (pageId) {
+              const { data: page } = await supabase.from('location_pages').select('design_tokens, location_id').eq('id', pageId).single()
+              if (!page || page.location_id !== locationId) return { error: 'Page not found or does not belong to this location.' }
+              
+              const existingTokens = (typeof page.design_tokens === 'object' && page.design_tokens !== null ? page.design_tokens : {}) as Record<string, string>
+              const newTokens = { ...existingTokens }
+              
+              if (tokens.layout_mode) newTokens.layout_mode = tokens.layout_mode
+              if (tokens.corner_radius) newTokens.corner_radius = tokens.corner_radius
+              if (tokens.surface_style) newTokens.surface_style = tokens.surface_style
+              if (tokens.typography) newTokens.typography = tokens.typography
+              if (tokens.animation_style) newTokens.animation_style = tokens.animation_style
+              if (tokens.density) newTokens.density = tokens.density
+              if (tokens.color_theme) newTokens.color_theme = tokens.color_theme
+
+              const { error } = await supabase
+                .from('location_pages')
+                .update({ design_tokens: newTokens } as never)
+                .eq('id', pageId)
+
+              if (error) return { error: error.message }
+              return { success: true, updatedTokens: newTokens, message: `Page aesthetic updated successfully!` }
+            } else {
+              const { data: loc } = await supabase.from('locations').select('design_tokens').eq('id', locationId).single()
+              if (!loc) return { error: 'Location not found.' }
+              
+              const existingTokens = (typeof loc.design_tokens === 'object' && loc.design_tokens !== null ? loc.design_tokens : {}) as Record<string, string>
+              
+              const newTokens = { ...existingTokens }
+              if (tokens.layout_mode) newTokens.layout_mode = tokens.layout_mode
+              if (tokens.corner_radius) newTokens.corner_radius = tokens.corner_radius
+              if (tokens.surface_style) newTokens.surface_style = tokens.surface_style
+              if (tokens.typography) newTokens.typography = tokens.typography
+              if (tokens.animation_style) newTokens.animation_style = tokens.animation_style
+              if (tokens.density) newTokens.density = tokens.density
+              if (tokens.color_theme) newTokens.color_theme = tokens.color_theme
+
+              const updates: Record<string, unknown> = {
+                design_tokens: newTokens,
+                updated_at: new Date().toISOString()
+              }
+              if (tokens.theme_color) updates.theme_color = tokens.theme_color
+
+              const { error } = await supabase
+                .from('locations')
+                .update(updates as never)
+                .eq('id', locationId)
+                
+              if (error) return { error: error.message }
+              return { success: true, updatedTokens: newTokens, message: 'Global storefront appearance updated successfully!' }
+            }
+          }
+        }),
+        get_recent_orders: tool({
+          description: 'Fetch recent orders for a specific location. Use this to help merchants check new incoming orders or order status.',
+          parameters: z.object({
+            locationId: z.string().uuid(),
+            limit: z.number().default(5).describe('Number of orders to fetch')
+          }),
+          // @ts-expect-error - TS inference struggles
+          execute: async ({ locationId, limit }: { locationId: string; limit: number }): Promise<Record<string, unknown>[]> => {
+            if (userRole !== 'owner' && userRole !== 'manager') {
+              return [{ error: 'Unauthorized: Cannot view orders.' }]
+            }
+            const { data: orders } = await supabase
+              .from('orders')
+              .select('id, status, total_amount_minor, customer_name, created_at')
+              .eq('location_id', locationId)
+              .order('created_at', { ascending: false })
+              .limit(limit)
+            return orders || []
+          }
+        }),
+        update_order_status: tool({
+          description: 'Update the status of an order (e.g. from pending to completed or cancelled).',
+          parameters: z.object({
+            orderId: z.string().uuid(),
+            status: z.enum(['pending', 'processing', 'ready', 'completed', 'cancelled'])
+          }),
+          // @ts-expect-error - TS inference struggles
+          execute: async ({ orderId, status }: { orderId: string; status: string }): Promise<Record<string, unknown>> => {
+            if (userRole !== 'owner' && userRole !== 'manager') {
+              return { error: 'Unauthorized: Cannot update order status.' }
+            }
+            const { error } = await supabase
+              .from('orders')
+              .update({ status, updated_at: new Date().toISOString() } as never)
+              .eq('id', orderId)
+            
+            if (error) return { error: error.message }
+            return { success: true, orderId, status }
           }
         }),
         get_low_stock_alerts: tool({
@@ -288,12 +463,159 @@ export async function POST(req: Request) {
             return { success: true, pageId: data.id, title, slug, url: `/dashboard/pages/${data.id}/edit` }
           }
         }),
+        create_fleet_location: tool({
+          description: 'Create a new physical branch location for this organization (e.g. "Supermarket - Ikeja", "Downtown Branch"). Use this when the merchant asks to open/add a new branch.',
+          parameters: z.object({
+            name: z.string().describe('The display name of the branch, e.g. "Supermarket - Ikeja Mall"'),
+            slug: z.string().optional().describe('The URL slug for the branch (must be lowercase alphanumeric + hyphens). If omitted, generated from name.'),
+            address: z.string().optional().describe('The physical address of the branch.')
+          }),
+          // @ts-expect-error - TS inference struggles
+          execute: async ({ name, slug, address }: { name: string; slug?: string; address?: string }): Promise<Record<string, unknown>> => {
+            if (userRole !== 'owner' && userRole !== 'manager') {
+              return { error: 'Unauthorized: Only owners and managers can launch new physical locations.' }
+            }
+
+            const cleanSlug = (slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '')) + '-' + Date.now().toString().slice(-4)
+
+            const { data, error } = await supabase
+              .from('locations')
+              .insert({
+                organization_id: organizationId,
+                name,
+                slug: cleanSlug,
+                address: address || null
+              } as never)
+              .select('id, name, slug')
+              .single()
+
+            if (error) throw new Error(error.message)
+            return { success: true, locationId: data.id, name: data.name, slug: data.slug, message: `New branch "${data.name}" launched successfully!` }
+          }
+        }),
+        duplicate_page_catalog: tool({
+          description: 'Duplicate an entire product catalog or page (including all categories, items, and prices) to another location or branch. Use this when the merchant asks to clone or copy inventory to a new branch.',
+          parameters: z.object({
+            sourcePageId: z.string().uuid().describe('ID of the source page/catalog to clone.'),
+            newTitle: z.string().describe('Title for the cloned page, e.g. "Grocery Catalog (Ikeja)"'),
+            targetLocationId: z.string().uuid().optional().describe('Target location ID if cloning to a different physical branch. If omitted, clones to the same location.')
+          }),
+          // @ts-expect-error - TS inference struggles
+          execute: async ({ sourcePageId, newTitle, targetLocationId }: { sourcePageId: string; newTitle: string; targetLocationId?: string }): Promise<Record<string, unknown>> => {
+            if (userRole !== 'owner' && userRole !== 'manager') {
+              return { error: 'Unauthorized: Only owners and managers can duplicate catalogs.' }
+            }
+
+            // 1. Fetch source page
+            const { data: sourcePage, error: pageErr } = await supabase
+              .from('location_pages')
+              .select('*')
+              .eq('id', sourcePageId)
+              .single()
+              
+            if (pageErr || !sourcePage) return { error: 'Source page not found.' }
+
+            const cleanSlug = newTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '') + '-' + Date.now().toString().slice(-4)
+
+            // 2. Insert new page
+            const newPageData = {
+              ...sourcePage,
+              id: undefined,
+              created_at: undefined,
+              location_id: targetLocationId || sourcePage.location_id,
+              title: newTitle,
+              slug: cleanSlug,
+              is_primary: false,
+              is_published: true
+            }
+
+            const { data: newPage, error: newPageErr } = await supabase
+              .from('location_pages')
+              .insert(newPageData as never)
+              .select('id')
+              .single()
+
+            if (newPageErr || !newPage) return { error: newPageErr?.message || 'Failed to duplicate page' }
+            const newPageId = newPage.id
+
+            // 3. Duplicate collections
+            const { data: collections } = await supabase
+              .from('page_collections')
+              .select('*')
+              .eq('page_id', sourcePageId)
+
+            const collectionMap = new Map<string, string>()
+            if (collections && collections.length > 0) {
+              for (const col of collections) {
+                const { id: oldColId, created_at, updated_at, ...colData } = col
+                const { data: newCol } = await supabase
+                  .from('page_collections')
+                  .insert({ ...colData, page_id: newPageId } as never)
+                  .select('id')
+                  .single()
+
+                if (newCol) collectionMap.set(oldColId, newCol.id)
+              }
+            }
+
+            // 4. Duplicate items
+            const { data: items } = await supabase
+              .from('page_items')
+              .select('*')
+              .eq('page_id', sourcePageId)
+
+            const itemMap = new Map<string, string>()
+            if (items && items.length > 0) {
+              for (const item of items) {
+                const { id: oldItemId, created_at, ...itemData } = item
+                const { data: newItem } = await supabase
+                  .from('page_items')
+                  .insert({ ...itemData, page_id: newPageId } as never)
+                  .select('id')
+                  .single()
+
+                if (newItem) itemMap.set(oldItemId, newItem.id)
+              }
+            }
+
+            // 5. Re-map junction table
+            if (collectionMap.size > 0 && itemMap.size > 0) {
+              const oldCollectionIds = Array.from(collectionMap.keys())
+              const { data: mappings } = await supabase
+                .from('page_item_collections')
+                .select('*')
+                .in('collection_id', oldCollectionIds)
+
+              if (mappings && mappings.length > 0) {
+                const newMappings = mappings
+                  .filter(m => itemMap.has(m.item_id) && collectionMap.has(m.collection_id))
+                  .map(m => ({
+                    item_id: itemMap.get(m.item_id)!,
+                    collection_id: collectionMap.get(m.collection_id)!
+                  }))
+
+                if (newMappings.length > 0) {
+                  await supabase.from('page_item_collections').insert(newMappings as never)
+                }
+              }
+            }
+
+            return { 
+              success: true, 
+              newPageId, 
+              title: newTitle, 
+              itemsCloned: items?.length || 0,
+              collectionsCloned: collections?.length || 0,
+              message: `Catalog "${newTitle}" duplicated successfully with ${items?.length || 0} items!` 
+            }
+          }
+        }),
       }
     })
 
     // Fallback to toTextStreamResponse or toDataStreamResponse depending on ai sdk version
-    type AIResult = { toDataStreamResponse?: () => Response, toTextStreamResponse?: () => Response }
-    return (result as AIResult).toDataStreamResponse ? (result as AIResult).toDataStreamResponse!() : (result as AIResult).toTextStreamResponse!()
+    const anyResult = result as any
+    return anyResult.toDataStreamResponse ? anyResult.toDataStreamResponse() : anyResult.toTextStreamResponse()
     
   } catch (error) {
     console.error('Co-Pilot Error:', error)

@@ -1,14 +1,16 @@
 # OurMenu OS
 
-> OurMenu OS is the Operating System and SaaS platform for physical businesses, hospitality venues, retail shops, real estate agencies, and service providers. It replaces custom websites and legacy POS hardware with an all-in-one multi-business portal, Gemini AI Copilot, dynamic catalogs, and multi-gateway billing.
+> OurMenu OS is the universal digital operating system and SaaS platform for physical businesses, supermarkets & retail chains, hospitality venues, salons, spas, clinics, real estate agencies, and professional service providers. It unifies digital presence, customer ordering, operations, inventory, design customization, multi-branch fleet management, and multi-gateway billing.
 
-## Core Capabilities
-- **Multi-Template Portals**: Run digital menus, hotel bookings, real estate listings, and service rate cards under a unified portal.
-- **Gemini AI Copilot & Vision**: Automated dashboard configuration, physical menu digitizing via vision models, and 40+ language translations.
+## Core Platform Capabilities
+- **Universal Design Tokens & 9 Multi-Templates**: Run digital menus, supermarket aisles, hotel bookings, real estate listings, and service rate cards under a unified portal. Portals dynamically adapt layouts (bento grid, masonry, list) and aesthetics (glassmorphism, neumorphism, flat) based on robust design tokens, with per-page overrides and a 1-click "Revert to Global Settings" fail-safe.
+- **Enterprise Fleet & Multi-Branch Management**: Run physical branches (`locations`) across cities/regions from a single dashboard. Features a Top-Left Unified Switcher (Global View vs Branch/Department Tree), 1-click franchise catalog duplication (`duplicatePageAction`), and granular role-based access control (RBAC).
+- **Tego Multimodal Live API (Voice & Vision)**: Ultra-low latency bidirectional voice dialogue (16kHz/24kHz with barge-in interruption) and 1 FPS camera video ingestion (`gemini-3.1-flash-live-preview`) using secure ephemeral tokens (`/api/ai/live-token`).
+- **Frontline Business-Adaptive AI Assistant**: Domain-specific public assistant with strict zero-hallucination guardrails, public tool calling (cart modification, dietary filtering, slot booking, quote captures), and a real-time human handoff loop to the dashboard.
+- **Native Raw ESC/POS Thermal Printing**: Zero-daemon direct binary receipt printing via WebUSB, WebSerial, and WebBluetooth with hardware cash drawer kicks and paper cuts.
 - **Multi-Gateway Payment Integration**: End-to-end payment processing supporting Local & International Cards, Bank Transfers, and Crypto (USDC, USDT, SOL) via Paystack and Bachs.
-- **Inventory & BOM Manager**: Atomic stock tracking, cost-of-goods-sold calculations, and low-stock alerts.
-- **Enterprise Team Intercom**: Department-routed internal staff communication (Kitchen, Bar, Front Desk, Manager).
-- **POS & Timeclock Kiosk**: Unified point-of-sale interface with offline queue sync, staff shift scheduling, and manager kiosk mode.
+- **Add-On Modules**: Gamified Lucky Wheel, Surprise Me Randomizer, In-house Delivery Rules, Deposit Billing, and IOU Customer Credit.
+- **POS & Operations Board**: Real-time fulfillment tracking, staff shift scheduling, and manager kiosk mode.
 
 ## Links & Documentation
 - Platform Overview: https://ourmenuos.online
@@ -17,4 +19,3 @@
 - Robots Directives: https://ourmenuos.online/robots.txt
 - Terms of Service: https://ourmenuos.online/terms
 - Privacy Policy: https://ourmenuos.online/privacy
-- Affiliate Program: https://ourmenuos.online/affiliates

@@ -7,6 +7,7 @@ import { toast } from 'sonner'
 import { Tables } from '@/lib/supabase/types'
 import { Sparkles, Search, X, Globe, ChevronRight } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { useTheme } from './theme-injector'
 
 export type CategoryWithItems = Tables<'menu_categories'> & {
   menu_items?: Tables<'menu_items'>[]
@@ -23,6 +24,8 @@ export function MenuRenderer({ initialCategories }: { initialCategories: Categor
   const [recommendedItems, setRecommendedItems] = useState<Tables<'menu_items'>[]>([])
   const [isPersonalizing, setIsPersonalizing] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
+  const { tokens } = useTheme()
+  const layoutMode = tokens.layout_mode || 'list'
 
   // AI Personalization
   useEffect(() => {
@@ -298,9 +301,18 @@ export function MenuRenderer({ initialCategories }: { initialCategories: Categor
                       <div className="ml-2 w-4 h-4 border-2 border-teal-500 border-t-transparent rounded-full animate-spin"></div>
                     )}
                   </div>
-                  <div className="grid gap-4">
-                    {recommendedItems.map(item => (
-                      <ItemCard key={`rec-${item.id}`} item={item} />
+                  <div className={
+                    layoutMode === 'bento_grid' ? 'grid grid-cols-1 sm:grid-cols-2 gap-4' :
+                    layoutMode === 'masonry' ? 'columns-1 sm:columns-2 gap-4 space-y-4' :
+                    'grid grid-cols-1 gap-4'
+                  }>
+                    {recommendedItems.map((item, i) => (
+                      <div key={`rec-${item.id}`} className={
+                        (layoutMode === 'bento_grid' && i === 0 && recommendedItems.length > 1) ? 'sm:col-span-2' : 
+                        (layoutMode === 'masonry') ? 'break-inside-avoid' : ''
+                      }>
+                        <ItemCard item={item} />
+                      </div>
                     ))}
                   </div>
                 </section>
@@ -320,9 +332,18 @@ export function MenuRenderer({ initialCategories }: { initialCategories: Categor
                     <div className="h-px flex-1 bg-zinc-200 dark:bg-zinc-800 ml-4"></div>
                   </div>
                   
-                  <div className="grid gap-4">
-                    {category.menu_items?.map((item: Tables<'menu_items'>) => (
-                      <ItemCard key={item.id} item={item} />
+                  <div className={
+                    layoutMode === 'bento_grid' ? 'grid grid-cols-1 sm:grid-cols-2 gap-4' :
+                    layoutMode === 'masonry' ? 'columns-1 sm:columns-2 gap-4 space-y-4' :
+                    'grid grid-cols-1 gap-4'
+                  }>
+                    {category.menu_items?.map((item: Tables<'menu_items'>, i: number) => (
+                      <div key={item.id} className={
+                        (layoutMode === 'bento_grid' && i === 0 && (category.menu_items?.length || 0) > 1) ? 'sm:col-span-2' : 
+                        (layoutMode === 'masonry') ? 'break-inside-avoid' : ''
+                      }>
+                        <ItemCard item={item} />
+                      </div>
                     ))}
                   </div>
                 </section>

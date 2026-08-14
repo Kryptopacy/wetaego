@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 import { formatCurrency } from '@/lib/utils/currency'
 import { Search, X } from 'lucide-react'
+import { useTheme } from '../../../theme-injector'
 
 interface PageItem {
   id: string
@@ -74,6 +75,9 @@ export function RateCardRenderer({ location, page, items, locationSlug, paymentI
   const themeColor = location.theme_color || '#7c3aed'
 
   const [searchQuery, setSearchQuery] = useState('')
+  const { tokens } = useTheme()
+  const layoutMode = tokens.layout_mode || 'list'
+  
   const [selectedItems, setSelectedItems] = useState<PageItem[]>([])
   const [showCheckout, setShowCheckout] = useState(false)
   const [formSuccess, setFormSuccess] = useState(false)
@@ -165,7 +169,7 @@ export function RateCardRenderer({ location, page, items, locationSlug, paymentI
   return (
     <div className="min-h-screen bg-zinc-950 text-white font-sans" style={{ backgroundColor: page.background_color || undefined }}>
       {/* Hero */}
-      <div className="relative w-full h-[40vh] min-h-[260px] max-h-[420px] overflow-hidden">
+      <div className="relative w-full h-[40vh] min-h-65 max-h-105 overflow-hidden">
         {location.cover_image_url ? (
           <>
             <div className="absolute inset-0 bg-cover bg-top" style={{ backgroundImage: `url(${location.cover_image_url})` }} />
@@ -284,15 +288,22 @@ export function RateCardRenderer({ location, page, items, locationSlug, paymentI
                   </span>
                   <div className="h-px flex-1 bg-zinc-800" />
                 </div>
-                <div className="space-y-3">
-                  {sectionItems.map(item => {
+                <div className={
+                  layoutMode === 'bento_grid' ? 'grid grid-cols-1 md:grid-cols-2 gap-3' :
+                  layoutMode === 'masonry' ? 'columns-1 md:columns-2 gap-3 space-y-3' :
+                  'space-y-3'
+                }>
+                  {sectionItems.map((item, idx) => {
                     const isSelected = selectedItems.some(i => i.id === item.id)
                     const isAvail = item.availability_status === 'available'
+                    const bentoClass = (layoutMode === 'bento_grid' && idx === 0 && sectionItems.length > 1) ? 'md:col-span-2' : ''
+                    const masonryClass = layoutMode === 'masonry' ? 'break-inside-avoid' : ''
+                    
                     return (
                       <div 
                         key={item.id} 
                         onClick={() => isAvail && handleToggleItem(item)}
-                        className={`flex items-start gap-4 rounded-xl border transition-all p-4 ${!isAvail ? 'opacity-50 cursor-not-allowed border-zinc-800 bg-zinc-900/10' : isSelected ? 'border-emerald-500 bg-emerald-500/10' : 'border-zinc-800 bg-zinc-900/30 hover:border-zinc-700 cursor-pointer'}`}
+                        className={`flex items-start gap-4 rounded-xl border transition-all p-4 ${!isAvail ? 'opacity-50 cursor-not-allowed border-zinc-800 bg-zinc-900/10' : isSelected ? 'border-emerald-500 bg-emerald-500/10' : 'border-zinc-800 bg-zinc-900/30 hover:border-zinc-700 cursor-pointer'} ${bentoClass} ${masonryClass}`}
                       >
                         <div className={`mt-0.5 shrink-0 w-5 h-5 rounded border flex items-center justify-center transition-colors ${isSelected ? 'bg-emerald-500 border-emerald-500' : 'border-zinc-600 bg-zinc-800'}`}>
                           {isSelected && <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
@@ -300,7 +311,7 @@ export function RateCardRenderer({ location, page, items, locationSlug, paymentI
                         <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:justify-between gap-4">
                           <div className="flex gap-4 items-start">
                             {item.images?.[0] && (
-                              <div className="w-[60px] h-[60px] shrink-0 rounded-lg overflow-hidden bg-zinc-800 relative block">
+                              <div className="w-15 h-15 shrink-0 rounded-lg overflow-hidden bg-zinc-800 relative block">
                                 <Image src={item.images[0]} alt={item.title} fill className="object-cover" />
                               </div>
                             )}

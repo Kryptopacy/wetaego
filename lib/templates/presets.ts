@@ -40,6 +40,16 @@ export interface BusinessTypePreset {
   chat_enabled?: boolean
   /** Category group for the picker UI */
   group: 'food_drink' | 'hospitality' | 'services' | 'retail' | 'property' | 'creative' | 'quote_based'
+  /** Recommended design tokens for zero-demo setup */
+  design_tokens?: {
+    layout_mode: 'bento_grid' | 'masonry' | 'list'
+    corner_radius: 'none' | 'sm' | 'md' | 'lg' | 'full'
+    surface_style: 'flat' | 'glassmorphism' | 'neumorphism'
+    typography?: 'modern' | 'elegant' | 'playful' | 'industrial'
+    animation_style?: 'energetic' | 'elegant' | 'instant'
+    density?: 'airy' | 'standard' | 'cozy'
+    color_theme?: 'true_dark' | 'dim' | 'light' | 'tinted'
+  }
 }
 
 export const BUSINESS_TYPE_PRESETS: Record<string, BusinessTypePreset> = {
@@ -58,6 +68,7 @@ export const BUSINESS_TYPE_PRESETS: Record<string, BusinessTypePreset> = {
     ai_item_hint: 'a dish description for a restaurant menu, sensory and appetizing',
     randomizer_enabled: true,
     group: 'food_drink',
+    design_tokens: { layout_mode: 'bento_grid', corner_radius: 'md', surface_style: 'flat', typography: 'modern', animation_style: 'instant', density: 'standard', color_theme: 'dim' }
   },
   bar_lounge: {
     label: 'Bar / Club / Lounge',
@@ -145,6 +156,7 @@ export const BUSINESS_TYPE_PRESETS: Record<string, BusinessTypePreset> = {
     ai_cover_hint: 'serene spa interior with candles, white towels, ambient lighting, orchids',
     ai_item_hint: 'a spa treatment description, relaxing and indulgent',
     group: 'hospitality',
+    design_tokens: { layout_mode: 'list', corner_radius: 'full', surface_style: 'glassmorphism', typography: 'elegant', animation_style: 'elegant', density: 'airy', color_theme: 'dim' }
   },
   salon: {
     label: 'Salon / Barbershop',
@@ -203,6 +215,7 @@ export const BUSINESS_TYPE_PRESETS: Record<string, BusinessTypePreset> = {
     ai_cover_hint: 'lifestyle creator photoshoot, ring light, stylish bedroom studio, creative aesthetic',
     ai_item_hint: 'an influencer service description (e.g. Instagram Reel, TikTok video), professional and persuasive',
     group: 'creative',
+    design_tokens: { layout_mode: 'masonry', corner_radius: 'none', surface_style: 'neumorphism', typography: 'modern', animation_style: 'energetic', density: 'airy', color_theme: 'true_dark' }
   },
   photographer: {
     label: 'Photographer / Videographer',

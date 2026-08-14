@@ -168,7 +168,7 @@ export default async function DashboardOverviewPage() {
       {!!orgId && (
         <>
           <Suspense fallback={
-            <div className="w-full flex items-center justify-center p-12 bg-zinc-900/40 rounded-2xl border border-white/6 animate-pulse h-[400px]">
+            <div className="w-full flex items-center justify-center p-12 bg-zinc-900/40 rounded-2xl border border-white/6 animate-pulse h-100">
               <p className="text-zinc-500 font-medium">Loading metrics...</p>
             </div>
           }>

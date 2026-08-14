@@ -1,13 +1,25 @@
 {
   "Dashboard": {
     "liveOperations": "Operaciones en Vivo",
-    "receivingOrders": "Recibiendo Órdenes",
+    "receivingOrders": "Recibiendo Pedidos",
     "hardwareSettings": "Configuración de Hardware",
     "language": "Idioma",
-    "languageDesc": "Idioma de la interfaz del panel de cumplimiento"
+    "languageDesc": "Idioma de la interfaz del panel de control",
+    "activeOrders": "Pedidos Activos",
+    "orderHistory": "Historial de Pedidos",
+    "stockManagement": "Inventario y Stock",
+    "serviceRequests": "Solicitudes de Servicio",
+    "posTerminal": "Punto de Venta (POS)",
+    "crmCustomers": "CRM y Clientes",
+    "analytics": "Análisis e Informes",
+    "pagesManager": "Páginas de la Tienda",
+    "visualBuilder": "Constructor Visual en Vivo",
+    "settings": "Ajustes y Organización",
+    "team": "Equipo e Intercomunicador",
+    "addons": "Complementos y Gamificación"
   },
   "Guest": {
-    "add_to_order": "Agregar al Pedido",
+    "add_to_order": "Añadir al Pedido",
     "sold_out": "Agotado",
     "search": "Buscar...",
     "translate_prompt_title": "¿Traducir página?",
@@ -17,11 +29,27 @@
     "checkout": "Pagar",
     "subtotal": "Subtotal",
     "total": "Total",
-    "delivery_fee": "Tarifa de Envío",
+    "delivery_fee": "Tarifa de Entrega",
     "place_order": "Realizar Pedido",
     "order_received": "Pedido Recibido",
     "preparing": "Preparando",
     "ready": "Listo",
-    "completed": "Completado"
+    "completed": "Completado",
+    "call_staff": "Llamar al Personal",
+    "split_bill": "Dividir Cuenta",
+    "book_appointment": "Reservar Cita",
+    "request_quote": "Solicitar Cotización",
+    "view_details": "Ver Detalles"
+  },
+  "Hardware": {
+    "title": "Configuración de Hardware y Región",
+    "description": "Configure la comunicación binaria directa con impresoras térmicas (código de bytes ESC/POS a través de WebUSB, Serial, Bluetooth o LAN) e idiomas de interfaz localizados.",
+    "protocol": "Protocolo de Impresión de Recibos",
+    "ipAddress": "Dirección IPv4 de la Impresora",
+    "baudRate": "Velocidad en Baudios Serial",
+    "autoPrint": "Habilitar enrutamiento automatizado (Impresión automática al resolver)",
+    "syncConfig": "Sincronizar Configuración",
+    "testPrint": "Prueba de Impresión",
+    "pairHardware": "Emparejar y Probar Hardware"
   }
 }

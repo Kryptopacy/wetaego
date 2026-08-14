@@ -28,6 +28,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   let firstTemplate = 'catalog'
   const baseNavItems: NavItem[] = [
     { href: '/dashboard', label: 'Overview', icon: 'LayoutDashboard', exact: true },
+    { href: '/dashboard/appearance', label: 'Storefront Builder', icon: 'Palette' },
   ]
   const dynamicNavItems: NavItem[] = [...baseNavItems]
 

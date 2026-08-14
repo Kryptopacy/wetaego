@@ -1,25 +1,52 @@
 # Integrations & Fleet Management
 
-OurMenuOS seamlessly interfaces with the outside world, acting as a true enterprise hub for multi-location brands.
+OurMenu OS seamlessly interfaces with the outside world, acting as a true enterprise hub for multi-location brands.
 
-## 1. Outbound Webhooks & Dead Letter Queue (DLQ)
+---
 
-Businesses must be able to export their data instantly to legacy POS systems, CRMs, or Zapier.
+## 1. Outbound Webhook & DLQ Pipeline
 
-- **Delivery System:** Our system captures internal events (`order.created`, `booking.updated`) and fires them to registered endpoints.
-- **Dead Letter Queue (DLQ):** If a webhook fails (e.g., the receiving server returns a 500 error), the delivery is queued. A Vercel Cron orchestrator automatically retries the delivery with exponential backoff.
-- **Cryptographic Signatures:** Payloads are signed using auto-generated `whsec_` secrets, allowing external consumers to cryptographically verify that the payload originated from OurMenuOS.
+```mermaid
+sequenceDiagram
+    autonumber
+    participant App as OurMenu OS Core
+    participant DB as Supabase (webhook_logs)
+    participant Edge as Dispatch Engine (HMAC whsec_)
+    participant Dest as Merchant Destination (POS / CRM / Zapier)
+    participant Cron as Cron DLQ Retry Engine
+
+    App->>Edge: Trigger event (e.g. order.created)
+    Edge->>Edge: Sign payload with HMAC-SHA256 (whsec_)
+    Edge->>Dest: POST payload with signature header
+    alt Successful Delivery (HTTP 200)
+        Dest-->>Edge: 200 OK
+        Edge->>DB: Log status: 'delivered'
+    else Failed Delivery (HTTP 500 / Timeout)
+        Dest-->>Edge: Error / No response
+        Edge->>DB: Log status: 'failed', attempts: 1, next_retry: +5m
+        Cron->>DB: Scan pending retries
+        Cron->>Dest: Exponential backoff retry
+        Dest-->>Cron: 200 OK
+        Cron->>DB: Update status: 'delivered'
+    end
+```
+
+---
 
 ## 2. Inbound API Gateway
 
-Legacy point-of-sale systems and third-party CRMs can programmatically push inventory and orders *into* OurMenuOS via mathematically rate-limited, Bearer-token protected REST API endpoints.
+Legacy point-of-sale systems and third-party CRMs can programmatically push inventory and orders *into* OurMenu OS via mathematically rate-limited, Bearer-token protected REST API endpoints.
+
+---
 
 ## 3. Custom Domains & White-Labeling
 
-A true multi-tenant middleware layer intercepts requests to custom domains (e.g., `menu.luxuryhotel.com`).
+A true multi-tenant proxy layer (`proxy.ts`) intercepts requests to custom domains (e.g., `menu.luxuryhotel.com`):
 
-- Transparents maps requests to the correct location storefront without visible redirects.
+- Transparently maps requests to the correct location storefront without visible redirects.
 - Organizations completely white-label the customer experience, keeping their branding at the forefront.
+
+---
 
 ## 4. Hardware Provisioning & Smart Routing
 
@@ -28,13 +55,17 @@ Printing physical QR codes for hundreds of tables or rooms is expensive and stat
 - **Dummy QR Deployment:** Businesses can print thousands of generic "dummy" QR codes in bulk and deploy them globally.
 - **Smart Re-mapping:** Using the dashboard, QR codes can be dynamically routed to specific location pages (e.g., routing a QR code from the "Main Dining" page directly to the "Spa Bookings" sub-page) without ever reprinting the physical asset.
 
+---
+
 ## 5. Automated SaaS Lifecycle
 
 Integrated automated email sequences (powered by Resend and Vercel Cron) autonomously handle Trial Expirations, Subscription Activations, and precise Invoicing without requiring external CRM orchestration.
 
+---
+
 ## 6. Payment Infrastructure & Bachs Payments Platform
 
-OurMenuOS utilizes a multi-gateway abstraction layer (`lib/payments/provider.ts`) that enables frictionless switching between payment processors (Paystack, Flutterwave, and Bachs).
+OurMenu OS utilizes a multi-gateway abstraction layer (`lib/payments/provider.ts`) that enables frictionless switching between payment processors (Paystack, Flutterwave, and Bachs).
 
 - **Bachs Payments Integration (`lib/payments/bachs.ts`)**:
   - **Dynamic Environment Routing**: Inspects Bearer token prefixes (`sk_sandbox_` vs. `sk_live_`) to route requests to `sandbox-api.bachs.io/v1` or `api.bachs.io/v1` automatically.

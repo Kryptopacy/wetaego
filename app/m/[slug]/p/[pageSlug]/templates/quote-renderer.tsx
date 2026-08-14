@@ -8,6 +8,7 @@ import { motion } from 'framer-motion'
 import { formatCurrency } from '@/lib/utils/currency'
 import { Plus, Minus, Check, ArrowRight, ArrowLeft, Search, X } from 'lucide-react'
 import { submitQuoteRequest } from '@/app/m/[slug]/actions'
+import { useTheme } from '../../../theme-injector'
 
 interface PageItem {
   id: string
@@ -58,6 +59,8 @@ export function QuoteRenderer({ location, page, items, locationSlug }: QuoteRend
   const availableItems = items.filter(i => i.availability_status === 'available')
   
   const [searchQuery, setSearchQuery] = useState('')
+  const { tokens } = useTheme()
+  const layoutMode = tokens.layout_mode || 'list'
   
   const searchedItems = availableItems.filter(item => {
     if (!searchQuery) return true;
@@ -277,8 +280,16 @@ export function QuoteRenderer({ location, page, items, locationSlug }: QuoteRend
               ).map(([categoryName, categoryItems]) => (
                 <div key={categoryName} className="space-y-4">
                   <h3 className="text-xs font-bold text-zinc-500 tracking-widest mb-4">{categoryName}</h3>
-                  {categoryItems.map(item => {
+                  <div className={
+                    layoutMode === 'bento_grid' ? 'grid grid-cols-1 md:grid-cols-2 gap-4' :
+                    layoutMode === 'masonry' ? 'columns-1 md:columns-2 gap-4 space-y-4' :
+                    'space-y-4'
+                  }>
+                  {categoryItems.map((item, idx) => {
                     const isSelected = selectedItems.find(i => i.item.id === item.id)
+                    const bentoClass = (layoutMode === 'bento_grid' && idx === 0 && categoryItems.length > 1) ? 'md:col-span-2' : ''
+                    const masonryClass = layoutMode === 'masonry' ? 'break-inside-avoid' : ''
+                    
                     return (
                   <div 
                     key={item.id} 
@@ -287,7 +298,7 @@ export function QuoteRenderer({ location, page, items, locationSlug }: QuoteRend
                       isSelected 
                         ? 'border-white bg-zinc-900' 
                         : 'border-zinc-800 bg-zinc-950 hover:bg-zinc-900 hover:border-zinc-700'
-                    }`}
+                    } ${bentoClass} ${masonryClass}`}
                   >
                     <div className="flex items-start gap-4">
                       {item.images?.[0] && (
@@ -347,6 +358,7 @@ export function QuoteRenderer({ location, page, items, locationSlug }: QuoteRend
                     </div>
                   )
                 })}
+                </div>
               </div>
               ))}
             </div>

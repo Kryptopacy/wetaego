@@ -71,7 +71,7 @@ async function fetchTypes() {
 
 function pushMigrations() {
   console.log('Pushing database migrations to remote DB via pooler URL...');
-  execSync(`npx supabase db push --db-url "${dbUrl}" --include-all --yes`, { stdio: 'inherit', env: process.env });
+  execSync(`echo y | npx supabase db push --db-url "${dbUrl}" --include-all`, { stdio: 'inherit', env: process.env });
 }
 
 async function main() {

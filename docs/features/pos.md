@@ -2,7 +2,58 @@
 
 The **Visual Resource Manager (VRM)** is the bridge between OurMenu OS's digital ordering system and the physical reality of a business location. Whether mapping tables in a restaurant, bays in an auto shop, or rooms in a hotel, the VRM allows for a dynamic connection between physical space and digital transactions.
 
-## 1. Unified Resource & QR Architecture
+---
+
+## 1. Dynamic QR Routing & POS Architecture
+
+```mermaid
+flowchart TD
+    subgraph PhysicalWorld ["Physical Space & Hardware"]
+        T1["Table 10 (Outdoor Patio)"]
+        QR["Dynamic Fleet QR Sticker"]
+        POSDevice["Staff Tablet / POS Register"]
+        Printer["Direct ESC/POS Thermal Printer"]
+    end
+
+    subgraph QREngine ["Decoupled QR Routing Engine"]
+        QRLookup["/m/:slug?qr_id=xyz"]
+        CheckAssignment{"Assigned to Resource?"}
+        AssignFlow["Scan-to-Assign Manager Flow"]
+    end
+
+    subgraph DigitalCheckout ["Storefront & Checkout"]
+        TableService["Table-Service Ordering (Tagged: Table 10)"]
+        DeskPay["Desk Pay Mode (?terminal=res_xxx)"]
+        StaffTickets["Service Requests & Bill Calls"]
+    end
+
+    subgraph HardwareEngine ["Native Hardware & ESC/POS Driver"]
+        WebUSB["WebUSB (Direct Raw Bytecode)"]
+        WebSerial["WebSerial / RS232 COM Port"]
+        WebBLE["WebBluetooth BLE"]
+        EpsonEPOS["Network LAN (Epson ePOS XML)"]
+    end
+
+    QR --> QRLookup
+    QRLookup --> CheckAssignment
+    CheckAssignment -->|"Unassigned"| AssignFlow
+    AssignFlow -->|"Manager links to Table 10"| CheckAssignment
+    CheckAssignment -->|"Assigned"| TableService
+
+    POSDevice --> DeskPay
+    TableService --> StaffTickets
+    POSDevice --> HardwareEngine
+    HardwareEngine --> WebUSB & WebSerial & WebBLE & EpsonEPOS --> Printer
+
+    style PhysicalWorld fill:#0f172a,stroke:#3b82f6,stroke-width:2px,color:#fff
+    style QREngine fill:#1e1b4b,stroke:#818cf8,stroke-width:2px,color:#fff
+    style DigitalCheckout fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#fff
+    style HardwareEngine fill:#78350f,stroke:#fbbf24,stroke-width:2px,color:#fff
+```
+
+---
+
+## 2. Unified Resource & QR Architecture
 
 In OurMenu OS, physical resources and their tracking mechanisms are tightly integrated:
 
@@ -17,31 +68,48 @@ We do not charge for physical printouts or static storefront links. Merchants ca
   - **Dynamic Fleet QRs:** Pre-generated QR codes that use credits from the plan. These can be printed in bulk and then physically assigned to tables later using a "Scan-to-Assign" process.
   - **Resource-Linked QRs:** Generated directly for a specific resource, linking it to the cart flow.
 
-## 2. Storefront Links (Static) vs. Dynamic Fleet
+---
+
+## 3. Storefront Links (Static) vs. Dynamic Fleet
 
 ### Static Storefront QRs (Free)
 
-- These point to static URLs like `/m/venue-slug` or `/m/venue-slug/p/menu`.
-- They do **not** carry unique session IDs or table identifiers.
-- They are free and do not deduct credits. Useful for generic marketing, front door posters, or digital billboards.
+- Point to static URLs like `/m/venue-slug` or `/m/venue-slug/p/menu`.
+- Do **not** carry unique session IDs or table identifiers.
+- Free and do not deduct credits. Useful for generic marketing, front door posters, or digital billboards.
 
 ### Dynamic QR Fleet (Credit-Based)
 
-To solve the common problem of "QR tents moving around," OurMenu OS supports a dynamic QR fleet.
+To solve the common problem of "QR tents moving around," OurMenu OS supports a dynamic QR fleet:
 
 - Businesses can generate a batch of unassigned dynamic QRs (deducting 1 credit each).
 - These are printed and placed on tables.
 - A waiter/manager scans the QR and assigns it to "Table 12".
 - This decouples the physical printout from the digital mapping. If a table tent is lost or moved, the manager simply re-assigns the QR.
 
-## 3. Hardware Locking (Desk Pay)
+---
 
-A resource of type `register` can be used to lock a POS terminal.
+## 4. Hardware Locking (Desk Pay)
+
+A resource of type `register` can be used to lock a POS terminal:
 
 - When the URL contains `?terminal=res_xxxx`, the checkout flow enters **Desk Pay** mode.
 - In this mode, the POS interface is active, enabling cash payments and direct order dispatch from a staff-operated device.
 
-## 4. UI Consolidation
+---
+
+## 5. Native Raw Hardware ESC/POS Binary Printing
+
+OurMenu OS contains a zero-dependency, native ESC/POS bytecode engine (`lib/utils/escpos-driver.ts`) that writes raw binary bytes directly to thermal receipt printers from modern browsers:
+
+- **WebUSB (`navigator.usb`):** Direct USB endpoint communication with thermal printers. Zero print dialogs, zero desktop daemons, instant hardware paper cuts, and cash drawer kick pulses (`ESC p`).
+- **WebSerial / COM (`navigator.serial`):** RS-232 and virtual COM port support with configurable baud rates (9600 to 115200).
+- **WebBluetooth BLE (`navigator.bluetooth`):** Wireless thermal receipt printing to portable mobile belt printers.
+- **Epson ePOS XML & Kiosk HTML:** Network LAN printing and universal fallback iframe printing.
+
+---
+
+## 6. UI Consolidation
 
 The **Resources & QRs** dashboard unifies this workflow into three tabs:
 

@@ -127,6 +127,16 @@ export const updateOrganization = authActionClient
       .limit(1)
 
     if (!loc || loc.length === 0) {
+      let designTokens = null
+      let preset = null
+      if (business_type) {
+        const { BUSINESS_TYPE_PRESETS } = await import('@/lib/templates/presets')
+        preset = BUSINESS_TYPE_PRESETS[business_type]
+        if (preset?.design_tokens) {
+          designTokens = preset.design_tokens
+        }
+      }
+
       const { data: newLoc, error: locErr } = await adminClient
         .from('locations')
         .insert({
@@ -134,6 +144,7 @@ export const updateOrganization = authActionClient
           name: 'Main Location',
           slug,
           address: 'Update your address',
+          ...(designTokens ? { design_tokens: designTokens } : {})
         })
         .select('id')
         .single()
@@ -148,6 +159,7 @@ export const updateOrganization = authActionClient
             name: 'Main Location',
             slug: fallbackSlug,
             address: 'Update your address',
+            ...(designTokens ? { design_tokens: designTokens } : {})
           })
           .select('id')
           .single()
@@ -167,24 +179,21 @@ export const updateOrganization = authActionClient
         })
 
         // Auto-create their primary page based on their selected business type
-        if (business_type) {
-          const { BUSINESS_TYPE_PRESETS, buildPageTitle } = await import('@/lib/templates/presets')
-          const preset = BUSINESS_TYPE_PRESETS[business_type]
-          if (preset) {
-            await adminClient.from('location_pages').insert({
-              location_id: newLoc.id,
-              title: buildPageTitle(preset, name),
-              slug: 'home',
-              template_type: preset.template_type,
-              is_primary: true,
-              billing_enabled: preset.billing_enabled,
-              billing_mode: preset.billing_mode,
-              payment_mode: preset.payment_mode,
-              deposit_percentage: preset.deposit_percentage || null,
-              business_type_preset: business_type,
-              is_published: true,
-            })
-          }
+        if (preset) {
+          const { buildPageTitle } = await import('@/lib/templates/presets')
+          await adminClient.from('location_pages').insert({
+            location_id: newLoc.id,
+            title: buildPageTitle(preset, name),
+            slug: 'home',
+            template_type: preset.template_type,
+            is_primary: true,
+            billing_enabled: preset.billing_enabled,
+            billing_mode: preset.billing_mode,
+            payment_mode: preset.payment_mode,
+            deposit_percentage: preset.deposit_percentage || null,
+            business_type_preset: business_type,
+            is_published: true,
+          })
         }
       }
     }
@@ -700,3 +709,94 @@ export const createLocation = authActionClient
     return { success: true }
   })
 
+
+export const saveLocationDesignTokens = authActionClient
+  .schema(zfd.formData({
+    locationId: zfd.text(z.string().uuid()),
+    layout_mode: zfd.text(z.string().optional()),
+    corner_radius: zfd.text(z.string().optional()),
+    surface_style: zfd.text(z.string().optional()),
+    typography: zfd.text(z.string().optional()),
+    animation_style: zfd.text(z.string().optional()),
+    density: zfd.text(z.string().optional()),
+    color_theme: zfd.text(z.string().optional()),
+  }))
+  .action(async ({ parsedInput, ctx: { supabase, user } }) => {
+    const { cookies } = await import('next/headers')
+    if ((await cookies()).get('demo_mode')?.value === '1') {
+      revalidatePath('/dashboard/settings')
+      return { success: true }
+    }
+
+    const { locationId, ...tokens } = parsedInput
+    const { data: loc } = await supabase.from('locations').select('organization_id').eq('id', locationId).single()
+    if (!loc) throw new Error('Location not found')
+    
+    const { data: member } = await supabase.from('organization_members').select('role').eq('organization_id', loc.organization_id).eq('user_id', user.id).single()
+    let isAuthorized = member?.role === 'owner' || member?.role === 'manager'
+    if (!member) {
+      const { data: org } = await supabase.from('organizations').select('id').eq('id', loc.organization_id).eq('created_by', user.id).single()
+      isAuthorized = !!org
+    }
+    if (!isAuthorized) throw new Error('Unauthorized')
+
+    // Filter out undefined tokens
+    const cleanTokens = Object.fromEntries(Object.entries(tokens).filter(([_, v]) => v !== undefined))
+
+    const { error } = await supabase.from('locations').update({ design_tokens: cleanTokens } as never).eq('id', locationId)
+    if (error) throw new Error(error.message)
+    
+    revalidatePath('/dashboard/settings')
+    revalidatePath('/dashboard/appearance')
+    return { success: true }
+  })
+
+export const savePageDesignTokens = authActionClient
+  .schema(zfd.formData({
+    pageId: zfd.text(z.string()),
+    layout_mode: zfd.text(z.string().optional()),
+    corner_radius: zfd.text(z.string().optional()),
+    surface_style: zfd.text(z.string().optional()),
+    typography: zfd.text(z.string().optional()),
+    animation_style: zfd.text(z.string().optional()),
+    density: zfd.text(z.string().optional()),
+    color_theme: zfd.text(z.string().optional()),
+  }))
+  .action(async ({ parsedInput, ctx: { supabase, user } }) => {
+    const { cookies } = await import('next/headers')
+    if ((await cookies()).get('demo_mode')?.value === '1') {
+      revalidatePath('/dashboard/settings')
+      return { success: true }
+    }
+
+    const { pageId, ...tokens } = parsedInput
+    
+    // Auth check
+    const { data: page } = await supabase.from('location_pages').select('location_id').eq('id', pageId).single()
+    if (!page) throw new Error('Page not found')
+      
+    const { data: loc } = await supabase.from('locations').select('organization_id').eq('id', page.location_id).single()
+    if (!loc) throw new Error('Location not found')
+    
+    const { data: member } = await supabase.from('organization_members').select('role').eq('organization_id', loc.organization_id).eq('user_id', user.id).single()
+    let isAuthorized = member?.role === 'owner' || member?.role === 'manager'
+    if (!member) {
+      const { data: org } = await supabase.from('organizations').select('id').eq('id', loc.organization_id).eq('created_by', user.id).single()
+      isAuthorized = !!org
+    }
+    if (!isAuthorized) throw new Error('Unauthorized')
+
+    // If tokens are all undefined/null, we want to set it to null to revert to Global
+    const hasValues = Object.values(tokens).some(v => v !== undefined && v !== null && v !== '')
+    
+    const updateData = hasValues 
+      ? Object.fromEntries(Object.entries(tokens).filter(([_, v]) => v !== undefined))
+      : null
+
+    const { error } = await supabase.from('location_pages').update({ design_tokens: updateData } as never).eq('id', pageId)
+    if (error) throw new Error(error.message)
+    
+    revalidatePath('/dashboard/settings')
+    revalidatePath('/dashboard/appearance')
+    return { success: true }
+  })

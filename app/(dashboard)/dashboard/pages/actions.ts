@@ -506,9 +506,10 @@ export const duplicatePageAction = authActionClient
   .schema(zfd.formData({
     sourcePageId: zfd.text(),
     newTitle: zfd.text(),
-    newSlug: zfd.text()
+    newSlug: zfd.text(),
+    targetLocationId: zfd.text(z.string().optional())
   }))
-  .action(async ({ parsedInput: { sourcePageId, newTitle, newSlug }, ctx: { supabase } }) => {
+  .action(async ({ parsedInput: { sourcePageId, newTitle, newSlug, targetLocationId }, ctx: { supabase } }) => {
     if (sourcePageId === 'demo-page') {
       revalidatePath('/dashboard/pages')
       return { success: true, newPageId: 'demo-new-page' }
@@ -523,11 +524,12 @@ export const duplicatePageAction = authActionClient
       
     if (pageErr || !sourcePage) throw new Error('Source page not found')
     
-    // 2. Insert new page
+    // 2. Insert new page (optionally targeting another branch location)
     const newPageData = {
       ...sourcePage,
       id: undefined,
       created_at: undefined,
+      location_id: targetLocationId || sourcePage.location_id,
       title: newTitle,
       slug: newSlug,
       is_primary: false,

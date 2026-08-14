@@ -12,6 +12,7 @@ import { formatCurrency } from '@/lib/utils/currency'
 import { Search, X } from 'lucide-react'
 import { getConditionBadgeStyles } from '@/lib/utils/condition-badges'
 import { PartnerShowcaseCard } from '@/components/native-ad-card'
+import { useTheme } from '../../../theme-injector'
 
 // The catalog page renderer is a light version for pages created via the pages builder
 // (NOT the main /m/[slug] menu — that stays as is).
@@ -89,7 +90,10 @@ export function CatalogPageRenderer({ location, page, items, locationSlug, payme
   const [variantItem, setVariantItem] = useState<PageItem | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCondition, setSelectedCondition] = useState<string | null>(null)
-
+  
+  const { tokens } = useTheme()
+  const layoutMode = tokens.layout_mode || 'bento_grid' // Default to bento grid for catalogs usually, or fallback
+  
   function handleAddToCart(item: PageItem) {
     const variants = item.item_data?.variants
     if (variants && variants.length > 0) {
@@ -246,7 +250,11 @@ export function CatalogPageRenderer({ location, page, items, locationSlug, payme
               <motion.div 
                 initial="hidden" animate="show"
                 variants={{ hidden: {}, show: { transition: { staggerChildren: 0.05 } } }}
-                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"
+                className={
+                  layoutMode === 'bento_grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3' :
+                  layoutMode === 'masonry' ? 'columns-1 sm:columns-2 lg:columns-3 gap-3 space-y-3' :
+                  'grid grid-cols-1 md:grid-cols-2 gap-3' // List
+                }
               >
                 {catItems.map((item, idx) => {
                   const isAvail = item.availability_status === 'available'
@@ -255,13 +263,16 @@ export function CatalogPageRenderer({ location, page, items, locationSlug, payme
                   const adToInject = sponsoredAds && sponsoredAds.length > 0 && (idx + 1) % 4 === 0 
                     ? sponsoredAds[((idx + 1) / 4 - 1) % sponsoredAds.length] 
                     : null;
+                    
+                  const bentoClass = (layoutMode === 'bento_grid' && idx === 0 && catItems.length > 1) ? 'sm:col-span-2' : ''
+                  const masonryClass = layoutMode === 'masonry' ? 'break-inside-avoid' : ''
 
                   return (
                     <Fragment key={item.id}>
                     <motion.div 
                       variants={{ hidden: { opacity: 0, scale: 0.95 }, show: { opacity: 1, scale: 1 } }}
                       whileHover={isAvail ? { scale: 1.02, boxShadow: "0 10px 30px -10px rgba(0,0,0,0.5)" } : {}}
-                      className={`rounded-2xl border p-4 transition-all ${isAvail ? 'border-zinc-800 bg-zinc-900/50 hover:border-zinc-700 backdrop-blur-sm' : 'border-zinc-800/40 bg-zinc-900/20 opacity-60'}`}
+                      className={`rounded-2xl border p-4 transition-all ${isAvail ? 'border-zinc-800 bg-zinc-900/50 hover:border-zinc-700 backdrop-blur-sm' : 'border-zinc-800/40 bg-zinc-900/20 opacity-60'} ${bentoClass} ${masonryClass}`}
                     >
                       <div className="flex items-start justify-between gap-3">
                         {item.images?.[0] && (

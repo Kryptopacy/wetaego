@@ -23,6 +23,7 @@ const Github = ({ className }: { className?: string }) => (
 )
 import { toast } from 'sonner'
 import { formatCurrency } from '@/lib/utils/currency'
+import { useTheme } from '../../../theme-injector'
 
 interface PageItem {
   id: string
@@ -68,6 +69,8 @@ export function PortfolioRenderer({ location, page, items, locationSlug }: Portf
   const [selectedItem, setSelectedItem] = useState<PageItem | null>(null)
   
   const [searchQuery, setSearchQuery] = useState('')
+  const { tokens } = useTheme()
+  const layoutMode = tokens.layout_mode || 'masonry'
   
   const searchedItems = items.filter(item => {
     if (!searchQuery) return true;
@@ -208,7 +211,11 @@ export function PortfolioRenderer({ location, page, items, locationSlug }: Portf
               <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Selected Work</h2>
             </div>
             
-            <div className="columns-1 md:columns-2 xl:columns-3 gap-6 space-y-6">
+            <div className={
+              layoutMode === 'list' ? 'space-y-6' :
+              layoutMode === 'bento_grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' :
+              'columns-1 md:columns-2 xl:columns-3 gap-6 space-y-6' // masonry
+            }>
               {projects.map((item, idx) => (
                 <motion.div 
                   key={item.id}
@@ -216,7 +223,7 @@ export function PortfolioRenderer({ location, page, items, locationSlug }: Portf
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: idx * 0.1 }}
-                  className="break-inside-avoid cursor-pointer group"
+                  className={`cursor-pointer group ${layoutMode === 'masonry' ? 'break-inside-avoid' : ''} ${(layoutMode === 'bento_grid' && idx === 0 && projects.length > 1) ? 'md:col-span-2' : ''}`}
                   onClick={() => setSelectedItem(item)}
                 >
                   <div className="relative rounded-3xl overflow-hidden bg-zinc-100 dark:bg-zinc-900 mb-4 ring-1 ring-black/5 dark:ring-white/10">
@@ -259,7 +266,11 @@ export function PortfolioRenderer({ location, page, items, locationSlug }: Portf
         {services.length > 0 && (
           <section className="mb-24">
             <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-10">Services</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className={
+              layoutMode === 'list' ? 'space-y-6' :
+              layoutMode === 'masonry' ? 'columns-1 md:columns-2 xl:columns-3 gap-6 space-y-6' :
+              'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' // bento
+            }>
               {services.map((item, idx) => (
                 <motion.div 
                   key={item.id}
@@ -267,7 +278,7 @@ export function PortfolioRenderer({ location, page, items, locationSlug }: Portf
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: idx * 0.1 }}
-                  className="bg-white dark:bg-zinc-900 rounded-3xl p-6 md:p-8 shadow-xl border border-zinc-100 dark:border-zinc-800 flex flex-col h-full"
+                  className={`bg-white dark:bg-zinc-900 rounded-3xl p-6 md:p-8 shadow-xl border border-zinc-100 dark:border-zinc-800 flex flex-col h-full ${layoutMode === 'masonry' ? 'break-inside-avoid' : ''} ${(layoutMode === 'bento_grid' && idx === 0 && services.length > 1) ? 'md:col-span-2' : ''}`}
                 >
                   {item.images?.[0] && (
                     <div className="relative w-full h-48 rounded-2xl overflow-hidden mb-6">

@@ -10,6 +10,7 @@ import { toast } from 'sonner'
 import { formatCurrency } from '@/lib/utils/currency'
 import { DatePicker } from '@/app/components/date-picker'
 import { Search, X } from 'lucide-react'
+import { useTheme } from '../../../theme-injector'
 
 interface PageItem {
   id: string
@@ -67,6 +68,8 @@ export function ListingRenderer({ location, page, items, locationSlug }: Listing
 
   const [activeFilters, setActiveFilters] = useState<Record<string, string>>({})
   const [searchQuery, setSearchQuery] = useState('')
+  const { tokens } = useTheme()
+  const layoutMode = tokens.layout_mode || 'bento_grid'
 
   const filteredItems = useMemo(() => {
     return items.filter(item => {
@@ -460,16 +463,23 @@ export function ListingRenderer({ location, page, items, locationSlug }: Listing
         <motion.div 
           initial="hidden" animate="show"
           variants={{ hidden: {}, show: { transition: { staggerChildren: 0.1 } } }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+          className={
+            layoutMode === 'list' ? 'space-y-4' :
+            layoutMode === 'masonry' ? 'columns-1 md:columns-2 lg:columns-3 gap-4 space-y-4' :
+            'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4' // Bento / grid
+          }
         >
-          {filteredItems.map(item => {
+          {filteredItems.map((item, idx) => {
             const isAvail = item.availability_status === 'available'
+            const bentoClass = (layoutMode === 'bento_grid' && idx === 0 && filteredItems.length > 1) ? 'md:col-span-2' : ''
+            const masonryClass = layoutMode === 'masonry' ? 'break-inside-avoid' : ''
+            
             return (
               <motion.div 
                 variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}
                 whileHover={isAvail ? { y: -4, boxShadow: "0 10px 30px -10px rgba(0,0,0,0.5)" } : {}}
                 key={item.id} 
-                className={`rounded-2xl border overflow-hidden transition-all ${isAvail ? 'border-zinc-800 bg-zinc-900/50 hover:border-zinc-700' : 'border-zinc-800/40 bg-zinc-900/20 opacity-60'}`}
+                className={`rounded-2xl border overflow-hidden transition-all ${isAvail ? 'border-zinc-800 bg-zinc-900/50 hover:border-zinc-700' : 'border-zinc-800/40 bg-zinc-900/20 opacity-60'} ${bentoClass} ${masonryClass}`}
               >
                 <Link href={`/m/${locationSlug}/p/${page.slug || page.id}/${item.id}`} className="block">
                   {item.images?.[0] && (

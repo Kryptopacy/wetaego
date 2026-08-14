@@ -3,20 +3,43 @@ import { PrinterMode } from '@/lib/stores/printer-store'
 import { createElement } from 'react'
 import { renderToString } from 'react-dom/server'
 import { ReceiptTemplate } from '@/components/thermal-printer/receipt-template'
+import { 
+  buildOrderReceiptBytes, 
+  printDirectWebUsb, 
+  printDirectWebSerial, 
+  printDirectWebBluetooth 
+} from './escpos-driver'
 
 interface PrintSettings {
   mode: PrinterMode
-  ipAddress: string
+  ipAddress?: string
+  baudRate?: number
   businessName?: string
   businessType?: string
 }
 
 export async function printOrder(order: UIOrder, settings: PrintSettings): Promise<boolean> {
   try {
-    if (settings.mode === 'epson_epos') {
-      return await printViaEpsonEpos(order, settings)
-    } else {
-      return await printViaHtmlKiosk(order, settings)
+    switch (settings.mode) {
+      case 'raw_escpos_usb': {
+        const payload = buildOrderReceiptBytes(order, settings.businessName)
+        return await printDirectWebUsb(payload)
+      }
+      case 'raw_escpos_serial': {
+        const payload = buildOrderReceiptBytes(order, settings.businessName)
+        return await printDirectWebSerial(payload, settings.baudRate || 9600)
+      }
+      case 'raw_escpos_bluetooth': {
+        const payload = buildOrderReceiptBytes(order, settings.businessName)
+        return await printDirectWebBluetooth(payload)
+      }
+      case 'epson_epos': {
+        return await printViaEpsonEpos(order, settings)
+      }
+      case 'html_kiosk':
+      default: {
+        return await printViaHtmlKiosk(order, settings)
+      }
     }
   } catch (err) {
     console.error('Printing failed:', err)
@@ -27,7 +50,6 @@ export async function printOrder(order: UIOrder, settings: PrintSettings): Promi
 async function printViaEpsonEpos(order: UIOrder, settings: PrintSettings): Promise<boolean> {
   if (!settings.ipAddress) throw new Error('No IP address configured for Epson printer')
   
-  // Construct Epson ePOS XML (ePOS-Print API)
   const eposXml = `
     <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
       <s:Body>
@@ -64,7 +86,6 @@ async function printViaEpsonEpos(order: UIOrder, settings: PrintSettings): Promi
 
 async function printViaHtmlKiosk(order: UIOrder, settings: PrintSettings): Promise<boolean> {
   return new Promise((resolve) => {
-    // Render the React component to an HTML string
     const htmlString = renderToString(
       createElement(ReceiptTemplate, {
         order,
@@ -103,15 +124,13 @@ async function printViaHtmlKiosk(order: UIOrder, settings: PrintSettings): Promi
     `)
     iframeDoc.close()
 
-    iframe.onload = () => {
+    iframe.contentWindow?.focus()
+    setTimeout(() => {
+      iframe.contentWindow?.print()
       setTimeout(() => {
-        iframe.contentWindow?.focus()
-        iframe.contentWindow?.print()
-        setTimeout(() => {
-          document.body.removeChild(iframe)
-          resolve(true)
-        }, 500)
-      }, 200)
-    }
+        document.body.removeChild(iframe)
+        resolve(true)
+      }, 1000)
+    }, 500)
   })
 }
