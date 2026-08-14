@@ -42,7 +42,7 @@ export default async function BookingsDashboard() {
       <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl overflow-hidden shadow-2xl">
         <div className="hidden sm:block overflow-x-auto">
           <table className="w-full text-left text-sm whitespace-nowrap">
-            <thead className="bg-white/[0.02] border-b border-white/5 text-zinc-400">
+            <thead className="bg-white/2 border-b border-white/5 text-zinc-400">
               <tr>
                 <th className="px-6 py-4 font-medium">Customer</th>
                 <th className="px-6 py-4 font-medium">Service / Item</th>
@@ -67,7 +67,7 @@ export default async function BookingsDashboard() {
                 </tr>
               ) : (
                 bookings?.map((booking) => (
-                  <tr key={booking.id} className="hover:bg-white/[0.02] transition-colors">
+                  <tr key={booking.id} className="hover:bg-white/2 transition-colors">
                     <td className="px-6 py-4">
                       <div className="font-medium text-white">{booking.customer_name}</div>
                       <div className="text-xs text-zinc-500 mt-0.5">{booking.customer_phone}</div>
@@ -145,7 +145,7 @@ export default async function BookingsDashboard() {
             </div>
           ) : (
             bookings?.map((booking) => (
-              <div key={booking.id} className="p-4 flex flex-col gap-3 hover:bg-white/[0.02] transition-colors">
+              <div key={booking.id} className="p-4 flex flex-col gap-3 hover:bg-white/2 transition-colors">
                 <div className="flex justify-between items-start">
                   <div>
                     <div className="font-medium text-white">{booking.customer_name}</div>

@@ -261,7 +261,7 @@ export function AIChat({
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: '100%', opacity: 0 }}
               transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-              className="w-full max-w-md h-[82vh] sm:h-[600px] rounded-t-3xl sm:rounded-3xl relative z-10 flex flex-col pointer-events-auto overflow-hidden border border-white/[0.07]"
+              className="w-full max-w-md h-[82vh] sm:h-150 rounded-t-3xl sm:rounded-3xl relative z-10 flex flex-col pointer-events-auto overflow-hidden border border-white/7"
               style={{
                 background: 'linear-gradient(170deg, #111111 0%, #0a0a0a 100%)',
                 boxShadow: `0 -12px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.05), 0 -4px 30px ${tcAlpha(0.12)}`,
@@ -271,7 +271,7 @@ export function AIChat({
               <div className="absolute top-0 left-0 right-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${tc}60, transparent)` }} />
 
               {/* ── Header ── */}
-              <div className="shrink-0 px-4 pt-4 pb-3 flex items-center justify-between border-b border-white/[0.05]"
+              <div className="shrink-0 px-4 pt-4 pb-3 flex items-center justify-between border-b border-white/5"
                 style={{ background: `linear-gradient(180deg, ${tcAlpha(0.05)} 0%, transparent 100%)` }}
               >
                 <div className="flex items-center gap-2.5 min-w-0">
@@ -333,7 +333,7 @@ export function AIChat({
                     </div>
                     <div>
                       <h4 className="text-sm font-bold text-white">Welcome to {businessName || 'our venue'}!</h4>
-                      <p className="text-[11px] text-zinc-500 mt-1.5 max-w-[200px] mx-auto leading-relaxed">
+                      <p className="text-[11px] text-zinc-500 mt-1.5 max-w-50 mx-auto leading-relaxed">
                         {persona.greeting}
                       </p>
                     </div>
@@ -417,7 +417,7 @@ export function AIChat({
               )}
 
               {/* ── Input ── */}
-              <div className="px-3.5 py-3 shrink-0 border-t border-white/[0.04]"
+              <div className="px-3.5 py-3 shrink-0 border-t border-white/4"
                 style={{ background: 'linear-gradient(0deg, rgba(0,0,0,0.3) 0%, transparent 100%)' }}
               >
                 {limitReached ? (

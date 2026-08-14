@@ -44,11 +44,11 @@ export default async function PropertiesDashboard() {
       <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl overflow-hidden shadow-2xl">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm whitespace-nowrap">
-            <thead className="bg-white/[0.02] border-b border-white/5 text-zinc-400">
+            <thead className="bg-white/2 border-b border-white/5 text-zinc-400">
               <tr>
                 <th className="px-6 py-4 font-medium">Customer</th>
-                <th className="px-6 py-4 font-medium">Property</th>
-                <th className="px-6 py-4 font-medium">Date Requested</th>
+                <th className="px-6 py-4 font-medium">Property / Listing</th>
+                <th className="px-6 py-4 font-medium">Requested Date</th>
                 <th className="px-6 py-4 font-medium">Type</th>
                 <th className="px-6 py-4 font-medium">Status</th>
                 <th className="px-6 py-4 font-medium text-right">Actions</th>
@@ -68,7 +68,7 @@ export default async function PropertiesDashboard() {
                 </tr>
               ) : (
                 inquiries?.map((inq) => (
-                  <tr key={inq.id} className="hover:bg-white/[0.02] transition-colors">
+                  <tr key={inq.id} className="hover:bg-white/2 transition-colors">
                     <td className="px-6 py-4">
                       <div className="font-medium text-white">{inq.customer_name}</div>
                       <div className="text-xs text-zinc-500 mt-0.5">{inq.customer_phone}</div>

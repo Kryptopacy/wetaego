@@ -45,7 +45,7 @@ export default async function QuotesDashboard() {
       <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl overflow-hidden shadow-2xl">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm whitespace-nowrap">
-            <thead className="bg-white/[0.02] border-b border-white/5 text-zinc-400">
+            <thead className="bg-white/2 border-b border-white/5 text-zinc-400">
               <tr>
                 <th className="px-6 py-4 font-medium">Customer</th>
                 <th className="px-6 py-4 font-medium">Interest / Package</th>
@@ -69,7 +69,7 @@ export default async function QuotesDashboard() {
                 </tr>
               ) : (
                 quotes?.map((quote) => (
-                  <tr key={quote.id} className="hover:bg-white/[0.02] transition-colors">
+                  <tr key={quote.id} className="hover:bg-white/2 transition-colors">
                     <td className="px-6 py-4">
                       <div className="font-medium text-white">{quote.customer_name}</div>
                       <div className="text-xs text-zinc-500 mt-0.5">{quote.customer_email || quote.customer_phone}</div>
@@ -80,7 +80,7 @@ export default async function QuotesDashboard() {
                     <td className="px-6 py-4">
                       {format(new Date(quote.created_at), 'MMM d, yyyy h:mm a')}
                     </td>
-                    <td className="px-6 py-4 max-w-[200px] truncate">
+                    <td className="px-6 py-4 max-w-50 truncate">
                       {quote.booking_notes || <span className="text-zinc-600 italic">No message</span>}
                     </td>
                     <td className="px-6 py-4">

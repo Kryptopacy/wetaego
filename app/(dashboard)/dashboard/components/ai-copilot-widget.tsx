@@ -153,14 +153,14 @@ export function AICopilotWidget({ organizationId }: { organizationId: string }) 
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 16, scale: 0.97 }}
             transition={{ type: 'spring', stiffness: 340, damping: 30 }}
-            className="fixed bottom-20 md:bottom-6 right-2 md:right-6 z-100 w-full sm:w-[380px] max-w-[calc(100vw-1rem)] sm:max-w-[calc(100vw-3rem)] h-[540px] max-h-[80vh] flex flex-col rounded-2xl shadow-[0_24px_80px_rgba(0,0,0,0.8),0_0_0_1px_rgba(255,255,255,0.06)] overflow-hidden"
+            className="fixed bottom-20 md:bottom-6 right-2 md:right-6 z-100 w-full sm:w-95 max-w-[calc(100vw-1rem)] sm:max-w-[calc(100vw-3rem)] h-135 max-h-[80vh] flex flex-col rounded-2xl shadow-[0_24px_80px_rgba(0,0,0,0.8),0_0_0_1px_rgba(255,255,255,0.06)] overflow-hidden"
             style={{ background: 'linear-gradient(145deg, #0d0d0d 0%, #0a0a0a 100%)' }}
           >
             {/* Subtle top glow line */}
             <div className="absolute top-0 left-0 right-0 h-px bg-linear-to-r from-transparent via-emerald-500/40 to-transparent" />
 
             {/* ── Header ── */}
-            <div className="shrink-0 flex items-center justify-between px-4 py-3 cursor-grab active:cursor-grabbing border-b border-white/[0.05]"
+            <div className="shrink-0 flex items-center justify-between px-4 py-3 cursor-grab active:cursor-grabbing border-b border-white/5"
               style={{ background: 'linear-gradient(180deg, rgba(16,185,129,0.04) 0%, transparent 100%)' }}
             >
               <div className="flex items-center gap-3">
@@ -252,7 +252,7 @@ export function AICopilotWidget({ organizationId }: { organizationId: string }) 
                     <p className="text-sm font-semibold text-white">
                       {isLiveSpeaking ? 'Tego is responding…' : isLiveConnected ? (isCameraActive ? 'Watching & listening…' : 'Listening…') : isLiveConnecting ? 'Establishing stream…' : 'Tap to start'}
                     </p>
-                    <p className="text-[11px] text-zinc-500 mt-1 max-w-[220px] mx-auto leading-relaxed">
+                    <p className="text-[11px] text-zinc-500 mt-1 max-w-55 mx-auto leading-relaxed">
                       {isLiveConnected ? (isCameraActive ? 'Point your camera at a menu, dish, or invoice.' : 'Speak naturally. Tap "Show Tego" to share your camera.') : 'Ultra-low latency voice & vision.'}
                     </p>
                   </div>
@@ -277,7 +277,7 @@ export function AICopilotWidget({ organizationId }: { organizationId: string }) 
                 </div>
 
                 {/* Live controls */}
-                <div className="flex items-center justify-center gap-2 pt-4 border-t border-white/[0.04] mt-2">
+                <div className="flex items-center justify-center gap-2 pt-4 border-t border-white/4 mt-2">
                   <button
                     onClick={() => isCameraActive ? stopCamera() : startCamera()}
                     className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-semibold border transition-all ${
@@ -322,7 +322,7 @@ export function AICopilotWidget({ organizationId }: { organizationId: string }) 
                           <motion.div
                             animate={{ scale: [1, 1.12, 1], opacity: [0.15, 0.28, 0.15] }}
                             transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
-                            className="absolute inset-0 w-20 h-20 rounded-full bg-emerald-500/20 blur-xl -translate-x-0"
+                            className="absolute inset-0 w-20 h-20 rounded-full bg-emerald-500/20 blur-xl translate-x-0"
                           />
                           <div className="relative w-14 h-14 rounded-2xl overflow-hidden border border-emerald-500/20 shadow-[0_0_24px_rgba(16,185,129,0.15)] mx-auto">
                             <Image src="/hero_emerald_gemstone.png" alt="Tego" fill className="object-cover opacity-70" />
@@ -333,7 +333,7 @@ export function AICopilotWidget({ organizationId }: { organizationId: string }) 
                         </div>
                         <div>
                           <p className="text-sm font-semibold text-zinc-200">What can I help with?</p>
-                          <p className="text-[11px] text-zinc-600 mt-1 max-w-[200px] mx-auto leading-relaxed">
+                          <p className="text-[11px] text-zinc-600 mt-1 max-w-50 mx-auto leading-relaxed">
                             Orders, forecasts, inventory, storefront — just ask.
                           </p>
                         </div>
@@ -409,7 +409,7 @@ export function AICopilotWidget({ organizationId }: { organizationId: string }) 
                 </div>
 
                 {/* ── Input ── */}
-                <form onSubmit={handleSubmit} className="shrink-0 px-3 py-3 border-t border-white/[0.04]"
+                <form onSubmit={handleSubmit} className="shrink-0 px-3 py-3 border-t border-white/4"
                   style={{ background: 'linear-gradient(0deg, rgba(0,0,0,0.4) 0%, transparent 100%)' }}
                 >
                   <div className="flex items-center gap-2 bg-zinc-900/60 border border-zinc-800/60 hover:border-zinc-700/80 focus-within:border-emerald-500/40 rounded-xl px-3 py-2 transition-colors">
