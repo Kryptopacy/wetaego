@@ -595,7 +595,7 @@ export function IntercomHub({
 
       {/* ── Tab 2: Staff Intercom ── */}
       {activeTab === 'staff' && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 h-[640px] bg-zinc-950 border border-zinc-800/80 rounded-2xl overflow-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 h-160 bg-zinc-950 border border-zinc-800/80 rounded-2xl overflow-hidden">
           {/* Channels & Direct Staff Sidebar */}
           <div className="lg:col-span-4 border-r border-zinc-800/80 p-4 flex flex-col justify-between bg-zinc-900/40">
             <div className="space-y-6 overflow-y-auto custom-scrollbar">

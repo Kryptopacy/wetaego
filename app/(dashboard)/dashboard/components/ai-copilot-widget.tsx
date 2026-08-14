@@ -141,9 +141,9 @@ export function AICopilotWidget({ organizationId }: { organizationId: string }) 
         }`}
       >
         <Image src="/hero_emerald_gemstone.png" alt="Tego AI Copilot" fill className="object-cover opacity-50 group-hover:opacity-70 transition-opacity" />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-black/70 transition-colors" />
+        <div className="absolute inset-0 bg-linear-to-r from-black/70 via-black/40 to-black/70 transition-colors" />
         <div className="relative z-10 flex items-center justify-center">
-          <span className="font-black tracking-tight text-sm bg-gradient-to-r from-white via-emerald-50 to-emerald-300 bg-clip-text text-transparent drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] select-none">
+          <span className="font-black tracking-tight text-sm bg-linear-to-r from-white via-emerald-50 to-emerald-300 bg-clip-text text-transparent drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] select-none">
             Tego AI
           </span>
         </div>

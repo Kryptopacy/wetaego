@@ -282,7 +282,7 @@ export function PerformanceHubClient({
         <div className="space-y-6">
           {/* Private Individual Tips Card (Only visible to current logged-in staff member) */}
           {myStats && myStats.totalTipsMinor > 0 && (
-            <div className="bg-gradient-to-r from-emerald-950/20 via-zinc-900/60 to-zinc-900/60 border border-emerald-500/30 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="bg-linear-to-r from-emerald-950/20 via-zinc-900/60 to-zinc-900/60 border border-emerald-500/30 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-400">
                   <Lock className="w-5 h-5" />
