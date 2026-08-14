@@ -6,9 +6,11 @@ import { InfoStrip } from '../../../components/info-strip'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { formatCurrency } from '@/lib/utils/currency'
-import { Plus, Minus, Check, ArrowRight, ArrowLeft, Search, X } from 'lucide-react'
+import { Plus, Minus, Check, ArrowRight, ArrowLeft, Search, X, FileText } from 'lucide-react'
 import { submitQuoteRequest } from '@/app/m/[slug]/actions'
 import { useTheme } from '../../../theme-injector'
+import { StorefrontHero } from '../../../components/storefront-hero'
+import { EmptyState } from '@/components/ui/empty-state'
 
 interface PageItem {
   id: string
@@ -192,30 +194,21 @@ export function QuoteRenderer({ location, page, items, locationSlug }: QuoteRend
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white font-sans pb-32" style={{ backgroundColor: page.background_color || undefined }}>
-      {/* Hero */}
-      <div className="relative w-full h-[35vh] min-h-65 max-h-95 overflow-hidden">
-        {location.cover_image_url ? (
-          <>
-            <div className="absolute inset-0 bg-cover bg-top" style={{ backgroundImage: `url(${location.cover_image_url})` }} />
-            <div className="absolute inset-0 bg-linear-to-b from-black/30 via-transparent to-transparent" />
-          </>
-        ) : (
-          <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${themeColor}40 0%, #0a0a0f 100%)` }} />
-        )}
-        <div className="absolute inset-0 bg-linear-to-t from-zinc-950 via-black/40 to-transparent" />
-        <div className="absolute bottom-0 left-0 right-0 p-6 max-w-2xl mx-auto">
-          {location.organizations?.logo_url && (
-            <Image src={location.organizations.logo_url} alt="Logo" width={100} height={48} className="h-12 w-auto object-contain mb-3 drop-shadow-lg" />
-          )}
-          <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight drop-shadow-lg">{page.title}</h1>
-          {page.content && (
-            <p className="text-white/70 text-sm mt-2 max-w-md leading-relaxed">{page.content}</p>
-          )}
-          <InfoStrip location={location} />
-        </div>
-      </div>
+      {/* Universal Luxury Hero */}
+      <StorefrontHero
+        title={page.title}
+        subtitle={page.content}
+        badge={{ text: '📋 Request a Quote' }}
+        coverImageUrl={location.cover_image_url}
+        businessTypePreset="contractor"
+        templateType="quote"
+        logoUrl={location.organizations?.logo_url}
+        themeColor={themeColor}
+        location={location}
+        maxContentWidth="max-w-2xl"
+      />
 
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 -mt-6 relative z-10">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 mt-6 relative z-10">
         
         {/* Progress Steps */}
         <div className="flex items-center justify-between mb-8 px-2">
@@ -361,6 +354,15 @@ export function QuoteRenderer({ location, page, items, locationSlug }: QuoteRend
                 </div>
               </div>
               ))}
+
+              {searchedItems.length === 0 && (
+                <EmptyState
+                  icon={FileText}
+                  title={searchQuery ? "No Matching Services" : "Services in Preparation"}
+                  description={searchQuery ? `No services found matching "${searchQuery}".` : "Service options will appear here once published."}
+                  className="my-8"
+                />
+              )}
             </div>
           </motion.div>
         )}

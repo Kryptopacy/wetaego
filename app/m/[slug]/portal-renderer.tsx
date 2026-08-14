@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion } from 'framer-motion';
 import Image from "next/image";
 import { ArrowRight, Utensils, Calendar, Info, FileText, LayoutGrid, FileSignature, ShoppingBag, Building2, MapPin, Phone, MessageCircle, ExternalLink } from "lucide-react";
+import { getDefaultCoverForPreset } from '@/lib/templates/presets';
 
 function getLuminance(hex: string) {
   let r = 0, g = 0, b = 0;
@@ -63,7 +64,7 @@ export function PortalRenderer({location,pages}:{
     portal_background_color?:string|null,
     portal_cover_image_url?:string|null
   }|null};
-  pages:{id:string;slug:string;title:string;template_type:string;is_published:boolean}[];
+  pages: { id: string; slug: string; title: string; template_type: string; is_published: boolean; business_type_preset?: string | null }[];
 }) {
   const org = location.organizations;
   const { tokens: liveTokens } = useTheme()
@@ -120,34 +121,57 @@ export function PortalRenderer({location,pages}:{
     liveTokens.typography === 'industrial' ? 'font-mono' :
     'font-sans'; // Default is modern
 
+  const effectiveCover = coverImageUrl || getDefaultCoverForPreset(pages[0]?.business_type_preset, pages[0]?.template_type)
+
   return (
     <div className={`min-h-screen ${fontClass} overflow-x-hidden transition-colors duration-300`} style={{ backgroundColor: themeBgColor }}>
-      <div className={`relative h-72 sm:h-80 overflow-hidden`}>
-        {coverImageUrl?(
+      <div className="relative h-72 sm:h-80 overflow-hidden">
+        {effectiveCover ? (
           <>
-            <Image src={coverImageUrl} alt={displayName} fill className="object-cover object-top" priority quality={90} sizes="100vw"/>
-            <div className="absolute inset-0 bg-linear-to-b from-black/20 via-transparent" style={{ backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, transparent 50%, ${bgColor} 100%)` }}/>
+            <Image src={effectiveCover} alt={displayName} fill className="object-cover object-top" priority quality={90} sizes="100vw"/>
+            <div className="absolute inset-0" style={{ backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 50%, ${bgColor} 100%)` }}/>
           </>
-        ):(
-          <div className="absolute inset-0" style={{backgroundColor:themeColor,opacity:0.3}}/>
+        ) : (
+          <div
+            className="absolute inset-0 bg-zinc-950"
+            style={{
+              background: `
+                radial-gradient(ellipse 80% 80% at 50% -20%, ${hexToRgba(themeColor, 0.4)} 0%, transparent 70%),
+                radial-gradient(circle at 100% 100%, ${hexToRgba(themeColor, 0.15)} 0%, transparent 50%),
+                linear-gradient(180deg, #09090b 0%, ${bgColor} 100%)
+              `
+            }}
+          >
+            {/* Ambient micro-grid */}
+            <div className="absolute inset-0 opacity-[0.08] bg-[radial-gradient(#ffffff_1px,transparent_1px)] bg-size-[24px_24px]" />
+            {/* Top rim glow */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-24 blur-3xl opacity-50 pointer-events-none rounded-full" style={{ backgroundColor: themeColor }} />
+          </div>
         )}
-        <div className="absolute inset-0" style={{background:`linear-gradient(to bottom,${hexToRgba(themeColor,0.15)} 0%, ${hexToRgba(bgColor, 0.5)} 60%, ${bgColor} 100%)`}}/>
-        <div className="absolute top-0 left-0 right-0 h-1" style={{backgroundColor:themeColor}}/>
+        <div className="absolute inset-0" style={{background:`linear-gradient(to bottom, ${hexToRgba(themeColor, 0.1)} 0%, ${hexToRgba(bgColor, 0.6)} 65%, ${bgColor} 100%)`}}/>
+        <div className="absolute top-0 left-0 right-0 h-1 shadow-sm" style={{backgroundColor:themeColor}}/>
       </div>
 
       <div className="relative z-10 -mt-24 px-5 max-w-2xl mx-auto">
         <motion.div initial={{opacity:0,y:24}} animate={{opacity:1,y:0}} transition={{duration:0.45,ease:[0.22,1,0.36,1]}} className="flex flex-col items-center text-center">
-          {logoUrl?(
+          {logoUrl ? (
             <div className="mb-6 flex justify-center items-center h-20 sm:h-24 w-full">
               <Image src={logoUrl} alt={displayName} width={256} height={128} className={`w-auto h-full object-contain drop-shadow-2xl ${radiusClass}`}/>
             </div>
-          ):(
-            <div className={`w-24 h-24 ${radiusClass} flex items-center justify-center text-3xl font-black shadow-2xl mb-4 border-4 border-white/5 ${onThemeText}`} style={{backgroundColor:themeColor,boxShadow:`0 0 0 1px ${hexToRgba(themeColor,0.4)},0 20px 60px -12px ${hexToRgba(themeColor,0.4)}`}}>
-              {displayName.substring(0,2).toUpperCase()}
+          ) : (
+            <div
+              className={`w-20 h-20 sm:w-24 sm:h-24 ${radiusClass} flex items-center justify-center text-2xl sm:text-3xl font-black shadow-2xl mb-4 border border-white/20 backdrop-blur-xl relative overflow-hidden text-white`}
+              style={{
+                backgroundColor: hexToRgba(themeColor, 0.25),
+                boxShadow: `0 0 32px -4px ${hexToRgba(themeColor, 0.45)}, 0 20px 40px -15px rgba(0,0,0,0.7)`
+              }}
+            >
+              <div className="absolute inset-0 bg-linear-to-br from-white/25 via-transparent to-black/20 pointer-events-none" />
+              <span className="relative z-10 tracking-widest">{displayName.substring(0,2).toUpperCase()}</span>
             </div>
           )}
           <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">{displayName}</h1>
-          {location.tagline&&<p className="text-white/60 text-sm mt-1.5 max-w-xs leading-relaxed">{location.tagline}</p>}
+          {location.tagline && <p className="text-white/60 text-sm mt-1.5 max-w-xs leading-relaxed">{location.tagline}</p>}
         </motion.div>
 
         <motion.div 

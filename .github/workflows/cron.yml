@@ -15,8 +15,8 @@ jobs:
   run-crons:
     runs-on: ubuntu-latest
     env:
-      PROD_URL: ${{ secrets['PROD_URL'] }}
-      CRON_SECRET: ${{ secrets['CRON_SECRET'] }}
+      PROD_URL: ${{ secrets.PROD_URL }}
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
     steps:
       - name: Hit Webhooks Endpoint
         if: github.event.schedule == '*/5 * * * *' || github.event_name == 'workflow_dispatch'

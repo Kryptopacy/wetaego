@@ -527,3 +527,40 @@ export function getPresetsByGroup(group: string): Array<{ key: string; preset: B
 export function buildPageTitle(preset: BusinessTypePreset, businessName: string): string {
   return preset.default_page_title.replace('{businessName}', businessName)
 }
+
+const CATEGORY_COVERS: Record<string, string> = {
+  restaurant: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=1920&h=1080',
+  bar_lounge: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&q=80&w=1920&h=1080',
+  food_truck: 'https://images.unsplash.com/photo-1565123409695-7b5ef63a2efb?auto=format&fit=crop&q=80&w=1920&h=1080',
+  catering: 'https://images.unsplash.com/photo-1555244162-803834f70033?auto=format&fit=crop&q=80&w=1920&h=1080',
+  hotel: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=1920&h=1080',
+  spa_wellness: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&q=80&w=1920&h=1080',
+  salon: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&q=80&w=1920&h=1080',
+  barbershop: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&q=80&w=1920&h=1080',
+  short_stay: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&q=80&w=1920&h=1080',
+  real_estate: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=1920&h=1080',
+  boutique: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&q=80&w=1920&h=1080',
+  phone_store: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&q=80&w=1920&h=1080',
+  fitness: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&q=80&w=1920&h=1080',
+  influencer: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1920&h=1080',
+  automotive: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=1920&h=1080',
+}
+
+const TEMPLATE_COVERS: Record<string, string> = {
+  catalog: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&q=80&w=1920&h=1080',
+  booking: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&q=80&w=1920&h=1080',
+  listing: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&q=80&w=1920&h=1080',
+  rate_card: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1920&h=1080',
+  quote: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1920&h=1080',
+  portfolio: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&q=80&w=1920&h=1080',
+}
+
+/**
+ * Returns a high-resolution, curated editorial cover photo for a business preset or template type
+ * to guarantee luxury presentation even when zero custom images are uploaded.
+ */
+export function getDefaultCoverForPreset(preset?: string | null, templateType?: string | null): string {
+  if (preset && CATEGORY_COVERS[preset]) return CATEGORY_COVERS[preset]
+  if (templateType && TEMPLATE_COVERS[templateType]) return TEMPLATE_COVERS[templateType]
+  return 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=1920&h=1080'
+}

@@ -9,8 +9,10 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 import { formatCurrency } from '@/lib/utils/currency'
 import { DatePicker } from '@/app/components/date-picker'
-import { Search, X } from 'lucide-react'
+import { Search, X, Building2 } from 'lucide-react'
 import { useTheme } from '../../../theme-injector'
+import { StorefrontHero } from '../../../components/storefront-hero'
+import { EmptyState } from '@/components/ui/empty-state'
 
 interface PageItem {
   id: string
@@ -191,25 +193,19 @@ export function ListingRenderer({ location, page, items, locationSlug }: Listing
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white font-sans" style={{ backgroundColor: page.background_color || undefined }}>
-      {/* Hero */}
-      <div className="relative w-full h-[35vh] min-h-60 max-h-95 overflow-hidden">
-        {location.cover_image_url ? (
-          <Image src={location.cover_image_url} alt={location.name} fill className="object-cover" priority quality={90} sizes="100vw" placeholder="blur" blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiMwYTBhMGYiLz48L3N2Zz4=" />
-        ) : (
-          <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${themeColor}30 0%, #0a0a0f 100%)` }} />
-        )}
-        <div className="absolute inset-0 bg-linear-to-t from-zinc-950 via-black/30 to-transparent" />
-        <div className="absolute bottom-0 left-0 right-0 p-6 max-w-5xl mx-auto">
-          {location.organizations?.logo_url && (
-            <div className="relative h-10 w-24 mb-3 drop-shadow-lg">
-              <Image src={location.organizations.logo_url} alt="" fill className="object-contain" />
-            </div>
-          )}
-          <h1 className="text-3xl font-black text-white tracking-tight drop-shadow-lg">{page.title}</h1>
-          {page.content && <p className="text-white/60 text-sm mt-1 max-w-lg">{page.content}</p>}
-          <InfoStrip location={location} />
-        </div>
-      </div>
+      {/* Universal Luxury Hero */}
+      <StorefrontHero
+        title={page.title}
+        subtitle={page.content}
+        badge={{ text: '🏢 Properties & Listings' }}
+        coverImageUrl={location.cover_image_url}
+        businessTypePreset="short_stay"
+        templateType="listing"
+        logoUrl={location.organizations?.logo_url}
+        themeColor={themeColor}
+        location={location}
+        maxContentWidth="max-w-5xl"
+      />
 
       <div className="max-w-5xl mx-auto px-4 md:px-6 py-8">
         <BackButton href={`/m/${locationSlug}`} className="inline-flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-300 mb-6 transition-colors">
@@ -553,9 +549,12 @@ export function ListingRenderer({ location, page, items, locationSlug }: Listing
         </motion.div>
 
         {filteredItems.length === 0 && (
-          <div className="text-center py-16 text-zinc-600 text-sm">
-            {searchQuery ? `No listings found matching "${searchQuery}".` : 'No listings found matching your criteria.'}
-          </div>
+          <EmptyState
+            icon={Building2}
+            title={searchQuery ? "No Matching Listings" : "Listings in Preparation"}
+            description={searchQuery ? `No listings found matching "${searchQuery}". Try a different search term.` : "Available properties and items will be displayed here as they are published."}
+            className="my-8"
+          />
         )}
 
         <div className="mt-12 text-center">

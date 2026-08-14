@@ -9,10 +9,12 @@ import { motion } from 'framer-motion'
 import { CartFAB } from '../../../cart-fab'
 import { VariantSelector } from '@/components/variant-selector'
 import { formatCurrency } from '@/lib/utils/currency'
-import { Search, X } from 'lucide-react'
+import { Search, X, ShoppingBag } from 'lucide-react'
 import { getConditionBadgeStyles } from '@/lib/utils/condition-badges'
 import { PartnerShowcaseCard } from '@/components/native-ad-card'
 import { useTheme } from '../../../theme-injector'
+import { StorefrontHero } from '../../../components/storefront-hero'
+import { EmptyState } from '@/components/ui/empty-state'
 
 // The catalog page renderer is a light version for pages created via the pages builder
 // (NOT the main /m/[slug] menu — that stays as is).
@@ -147,28 +149,20 @@ export function CatalogPageRenderer({ location, page, items, locationSlug, payme
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white font-sans" style={{ backgroundColor: (page as { background_color?: string }).background_color || undefined }}>
-      {/* Hero */}
-      <div className="relative w-full min-h-[32vh] md:max-h-85 flex flex-col justify-end overflow-hidden">
-        {location.cover_image_url ? (
-          <>
-            <div className="absolute inset-0 bg-cover bg-top" style={{ backgroundImage: `url(${location.cover_image_url})` }} />
-            <div className="absolute inset-0 bg-linear-to-b from-black/30 via-transparent to-transparent" />
-          </>
-        ) : (
-          <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${themeColor}30, #0a0a0f)` }} />
-        )}
-        <div className="absolute inset-0 bg-linear-to-t from-zinc-950 via-black/40 to-transparent" />
-        <div className="relative z-10 w-full p-5 pt-[calc(env(safe-area-inset-top,24px)+40px)] max-w-4xl mx-auto flex flex-col justify-end mt-auto">
-          {location.organizations?.logo_url && (
-            <div className="relative h-10 w-24 mb-3 drop-shadow-lg">
-              <Image src={location.organizations.logo_url} alt="Logo" fill sizes="96px" className="object-contain" />
-            </div>
-          )}
-          <h1 className="text-3xl font-black text-white">{page.title}</h1>
-          {page.content && <p className="text-white/60 text-sm mt-1">{page.content}</p>}
-          <InfoStrip location={location} />
-        </div>
-      </div>
+      {/* Universal Luxury Hero */}
+      <StorefrontHero
+        title={page.title}
+        subtitle={page.content}
+        badge={{ text: '🛍️ Store Catalog' }}
+        coverImageUrl={location.cover_image_url}
+        businessTypePreset={(page as { business_type_preset?: string }).business_type_preset || 'boutique'}
+        templateType="catalog"
+        logoUrl={location.organizations?.logo_url}
+        themeColor={themeColor}
+        tableIdentifier={tableIdentifier}
+        location={location}
+        maxContentWidth="max-w-4xl"
+      />
 
       <div className="max-w-4xl mx-auto px-4 md:px-6 py-8">
         <BackButton href={`/m/${locationSlug}`} className="inline-flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-300 mb-6 transition-colors">
@@ -371,9 +365,12 @@ export function CatalogPageRenderer({ location, page, items, locationSlug, payme
         </div>
 
         {filteredItems.length === 0 && (
-          <div className="text-center py-16 text-zinc-600 text-sm">
-            {searchQuery ? `No items found matching "${searchQuery}"` : 'No items yet.'}
-          </div>
+          <EmptyState
+            icon={ShoppingBag}
+            title={searchQuery ? "No Matching Items" : "Catalog in Preparation"}
+            description={searchQuery ? `No items found matching "${searchQuery}". Try a different keyword.` : "Items and collections will appear here once published."}
+            className="my-8"
+          />
         )}
 
         <div className="mt-12 text-center">

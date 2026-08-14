@@ -1,5 +1,7 @@
-import Image from 'next/image'
 import { BackButton } from '../../../components/back-button'
+import { StorefrontHero } from '../../../components/storefront-hero'
+import { EmptyState } from '@/components/ui/empty-state'
+import { Info } from 'lucide-react'
 
 interface InfoRendererProps {
   location: {
@@ -12,6 +14,9 @@ interface InfoRendererProps {
     instagram_handle?: string
     x_handle?: string
     tiktok_handle?: string
+    operating_hours?: string | null
+    address?: string | null
+    google_maps_url?: string | null
   }
   page: {
     title: string
@@ -26,7 +31,7 @@ interface InfoRendererProps {
 
 export function InfoRenderer({ location, page, locationSlug }: InfoRendererProps) {
   const themeColor = location.theme_color || '#7c3aed'
-  const lines = (page.content || '').split('\n')
+  const lines = (page.content || '').split('\n').filter(Boolean)
 
   const whatsapp = (page.template_data?.whatsapp_number as string) || location.whatsapp_number
   const phone = (page.template_data?.phone_number as string) || location.phone_number
@@ -42,7 +47,6 @@ export function InfoRenderer({ location, page, locationSlug }: InfoRendererProps
     }
   } catch (e) {
     // Ignore JSON parse errors, fallback to markdown
-    console.error('InfoRenderer parse fallback:', e)
   }
 
   function renderLine(line: string, i: number) {
@@ -82,23 +86,16 @@ export function InfoRenderer({ location, page, locationSlug }: InfoRendererProps
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white font-sans" style={{ backgroundColor: page.background_color || undefined }}>
-      {/* Hero */}
-      <div className="relative w-full h-[30vh] min-h-[200px] max-h-[300px] overflow-hidden">
-        {location.cover_image_url ? (
-          <Image src={location.cover_image_url} alt="Cover" fill className="object-cover object-center priority" priority quality={90} sizes="100vw" />
-        ) : (
-          <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${themeColor}30 0%, #0a0a0f 100%)` }} />
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-black/40 to-transparent" />
-        <div className="absolute bottom-0 left-0 right-0 p-6 max-w-2xl mx-auto">
-          {location.organizations?.logo_url && (
-            <div className="relative h-10 w-24 mb-3 drop-shadow-lg">
-              <Image src={location.organizations.logo_url} alt="" fill className="object-contain" />
-            </div>
-          )}
-          <h1 className="text-3xl font-black text-white tracking-tight drop-shadow-lg">{page.title}</h1>
-        </div>
-      </div>
+      {/* Universal Luxury Hero */}
+      <StorefrontHero
+        title={page.title}
+        badge={{ text: 'ℹ️ About & Info' }}
+        coverImageUrl={location.cover_image_url}
+        logoUrl={location.organizations?.logo_url}
+        themeColor={themeColor}
+        location={location}
+        maxContentWidth="max-w-2xl"
+      />
 
       <div className="max-w-2xl mx-auto px-6 py-8">
         <BackButton href={`/m/${locationSlug}`} className="inline-flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-300 mb-8 transition-colors">
@@ -122,10 +119,17 @@ export function InfoRenderer({ location, page, locationSlug }: InfoRendererProps
               </a>
             ))}
           </div>
-        ) : (
+        ) : lines.length > 0 ? (
           <div className="prose-custom space-y-1">
             {lines.map((line, i) => renderLine(line, i))}
           </div>
+        ) : (
+          <EmptyState
+            icon={Info}
+            title="Information in Preparation"
+            description="Details and updates will appear here once published."
+            className="my-8"
+          />
         )}
 
         {/* Contact Strip */}

@@ -7,8 +7,10 @@ import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 import { formatCurrency } from '@/lib/utils/currency'
-import { Search, X } from 'lucide-react'
+import { Search, X, CreditCard } from 'lucide-react'
 import { useTheme } from '../../../theme-injector'
+import { StorefrontHero } from '../../../components/storefront-hero'
+import { EmptyState } from '@/components/ui/empty-state'
 
 interface PageItem {
   id: string
@@ -168,47 +170,19 @@ export function RateCardRenderer({ location, page, items, locationSlug, paymentI
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white font-sans" style={{ backgroundColor: page.background_color || undefined }}>
-      {/* Hero */}
-      <div className="relative w-full h-[40vh] min-h-65 max-h-105 overflow-hidden">
-        {location.cover_image_url ? (
-          <>
-            <div className="absolute inset-0 bg-cover bg-top" style={{ backgroundImage: `url(${location.cover_image_url})` }} />
-            <div className="absolute inset-0 bg-linear-to-b from-black/30 via-transparent to-transparent" />
-          </>
-        ) : (
-          <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${themeColor}30, #0a0a0f 60%)` }}>
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-size-[30px_30px]" />
-          </div>
-        )}
-        <div className="absolute inset-0 bg-linear-to-t from-zinc-950 via-black/30 to-transparent" />
-        <div className="absolute bottom-0 left-0 right-0 p-6 max-w-2xl mx-auto flex items-end gap-4">
-          {location.organizations?.logo_url && (
-            <div className="relative w-16 h-16 rounded-xl overflow-hidden shrink-0 bg-black/40 p-1 border border-white/10">
-              <Image src={location.organizations.logo_url} alt="" fill className="object-contain" sizes="64px" priority />
-            </div>
-          )}
-          <div>
-            <h1 className="text-3xl font-black text-white tracking-tight drop-shadow-lg">{page.title}</h1>
-            <div className="flex gap-3 mt-2">
-              {location.instagram_handle && (
-                <a href={`https://instagram.com/${location.instagram_handle.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="text-xs text-white/60 hover:text-white transition-colors">
-                  @{location.instagram_handle.replace('@', '')}
-                </a>
-              )}
-              {location.x_handle && (
-                <a href={`https://x.com/${location.x_handle.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="text-xs text-white/60 hover:text-white transition-colors">
-                  𝕏 {location.x_handle}
-                </a>
-              )}
-              {location.tiktok_handle && (
-                <a href={`https://tiktok.com/@${location.tiktok_handle.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="text-xs text-white/60 hover:text-white transition-colors">
-                  🎵 {location.tiktok_handle}
-                </a>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Universal Luxury Hero */}
+      <StorefrontHero
+        title={page.title}
+        subtitle={page.content}
+        badge={{ text: '💼 Services & Rate Card' }}
+        coverImageUrl={location.cover_image_url}
+        businessTypePreset="influencer"
+        templateType="rate_card"
+        logoUrl={location.organizations?.logo_url}
+        themeColor={themeColor}
+        location={location}
+        maxContentWidth="max-w-2xl"
+      />
 
       <div className="max-w-2xl mx-auto px-4 md:px-6 py-8">
         <div className="flex items-center justify-between mb-6">
@@ -351,6 +325,15 @@ export function RateCardRenderer({ location, page, items, locationSlug, paymentI
               </div>
             )
           })}
+
+          {searchedItems.length === 0 && (
+            <EmptyState
+              icon={CreditCard}
+              title={searchQuery ? "No Matching Services" : "Rate Card in Preparation"}
+              description={searchQuery ? `No services or packages found matching "${searchQuery}".` : "Service tiers and rate cards will be published here shortly."}
+              className="my-8"
+            />
+          )}
         </div>
 
         {/* Contact Strip */}
