@@ -10,11 +10,15 @@ import { GemstoneSpinner } from '@/components/ui/gemstone-spinner'
 export function AICoverStudio({ 
   locationId, 
   currentCoverUrl, 
-  creditsRemaining 
+  creditsRemaining,
+  onCoverGenerated,
+  compact = false
 }: { 
   locationId: string
   currentCoverUrl?: string | null
-  creditsRemaining: number 
+  creditsRemaining: number
+  onCoverGenerated?: (url: string) => void
+  compact?: boolean
 }) {
   const [isGenerating, setIsGenerating] = useState(false)
   const [prompt, setPrompt] = useState('')
@@ -38,6 +42,7 @@ export function AICoverStudio({
       }
       
       setCoverUrl(data.url)
+      onCoverGenerated?.(data.url)
       toast.success('Cover image generated successfully!')
       
     } catch (err: unknown) {
