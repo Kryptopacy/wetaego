@@ -8,7 +8,8 @@ import { z } from 'zod'
 
 const generateCoverSchema = z.object({
   locationId: z.string().uuid('Invalid location ID'),
-  prompt: z.string().optional().nullable()
+  prompt: z.string().optional().nullable(),
+  preset: z.string().optional().nullable()
 })
 
 // We will use standard fetch for Gemini Imagen to be perfectly safe, 
@@ -45,7 +46,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Invalid payload', details: parsed.error.format() }, { status: 400 })
     }
 
-    const { locationId, prompt } = parsed.data
+    const { locationId, prompt, preset } = parsed.data
 
     // 1. Fetch location and verify ownership
     const { data: loc, error: locError } = await supabase
@@ -79,10 +80,13 @@ export async function POST(req: Request) {
 
     // Fetch dynamic settings
     const { getCreditCosts, getAiModels } = await import('@/lib/utils/settings')
+    const { BUSINESS_TYPE_PRESETS } = await import('@/lib/templates/presets')
     const creditCosts = await getCreditCosts() as Record<string, number>
     const aiModels = await getAiModels() as Record<string, string>
     const cost = creditCosts.ai_cover || 5
     const modelName = aiModels.image_generation || 'imagen-3.0-generate-001'
+
+    const presetHint = (preset && BUSINESS_TYPE_PRESETS[preset]?.ai_cover_hint) || 'upscale interior architecture with cinematic lighting'
 
     // 2. Charge Credits
     const charge = await chargeCredits(loc.organization_id, cost, 'AI Cover Image Generation', userData.user.id)
@@ -100,13 +104,14 @@ export async function POST(req: Request) {
     const systemPrompt = `You are a professional architectural and interior photographer. 
 Generate a stunning, high-quality, 4k cinematic 16:9 shot for the venue cover image. 
 Venue Name: ${loc.name}
-Tagline: ${loc.tagline || 'A great place to eat'}
-Context: ${loc.brand_knowledge || 'No extra context'}
+Tagline: ${loc.tagline || 'A great place to visit'}
+Context: ${loc.brand_knowledge || presetHint}
+Aesthetic Atmosphere: ${presetHint}
 
 CRITICAL RULES:
 - DO NOT INCLUDE ANY TEXT, WORDS, OR TYPOGRAPHY IN THE IMAGE. 
 - It must be purely environmental, architectural, or mood-focused.
-- Photorealistic, perfect lighting, welcoming atmosphere.
+- Photorealistic, volumetric lighting, welcoming atmosphere.
 `
 
     const finalPrompt = prompt ? `${systemPrompt}\n\nUser Fine-Tuning Request: ${prompt}` : systemPrompt

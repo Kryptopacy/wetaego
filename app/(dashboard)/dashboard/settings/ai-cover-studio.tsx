@@ -92,31 +92,54 @@ export function AICoverStudio({
            </div>
         )}
 
-        <div className="flex flex-col sm:flex-row gap-3">
-          <input
-            type="text"
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            placeholder="Optional: Fine-tune the result (e.g. 'Add neon lights' or 'Make it a sunny patio')"
-            className="flex-1 rounded-lg border border-zinc-700 bg-zinc-800/80 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm"
-            disabled={isGenerating}
-          />
-          <button
-            onClick={handleGenerate}
-            disabled={isGenerating || creditsRemaining < 5}
-            className="flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium transition-colors whitespace-nowrap"
-          >
-            {isGenerating ? (
-              <>
-                <GemstoneSpinner size="xs" />
-                Generating...
-              </>
-            ) : (
-              <>
-                Generate (5 Credits)
-              </>
-            )}
-          </button>
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-wrap gap-2 mb-1">
+            {[
+              '✨ Candlelit & Romantic',
+              '🍸 Moody Neon & Velvet',
+              '🌿 Botanical & Sunlit Patio',
+              '🏛️ Minimalist Luxury',
+              '🌆 Sunset Skyline View',
+              '🎨 Creative Modern Studio'
+            ].map((suggestion) => (
+              <button
+                key={suggestion}
+                type="button"
+                onClick={() => setPrompt(suggestion.replace(/^[^\s]+\s/, ''))}
+                className="px-2.5 py-1 text-xs rounded-full bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 hover:text-white border border-zinc-700/60 transition-colors"
+              >
+                {suggestion}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3">
+            <input
+              type="text"
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              placeholder="Fine-tune your visual (e.g. 'Warm amber lighting, velvet booths, polished marble')"
+              className="flex-1 rounded-lg border border-zinc-700 bg-zinc-800/80 px-4 py-2.5 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm"
+              disabled={isGenerating}
+            />
+            <button
+              onClick={handleGenerate}
+              disabled={isGenerating || creditsRemaining < 5}
+              className="flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium transition-colors whitespace-nowrap shadow-lg shadow-blue-500/20"
+            >
+              {isGenerating ? (
+                <>
+                  <GemstoneSpinner size="xs" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Wand2 className="w-4 h-4" />
+                  {coverUrl ? 'Regenerate Unique (5 Credits)' : 'Generate (5 Credits)'}
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </div>
