@@ -1,9 +1,8 @@
-import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { cookies } from 'next/headers'
-import { FeedbackInboxClient } from './feedback-client'
 
-export default async function FeedbackManagementPage() {
+export default function FeedbackManagementPage() {
+  redirect('/dashboard/team-performance')
+}
   const supabase = await createClient()
 
   const { data: userData } = await supabase.auth.getUser()

@@ -205,7 +205,7 @@ export default function ClientLayout({ children, initialData }: { children: Reac
     { href: '/dashboard/pages', label: 'Your Pages', icon: FileText, tooltip: 'Manage your business pages and branding' },
     { href: '/dashboard/inventory', label: 'Inventory (BOM)', icon: Package, tooltip: 'Bill of Materials - Track ingredients and items used per service' },
     { href: '/dashboard/customers', label: 'CRM & Loyalty', icon: Users, tooltip: 'Manage customer profiles and loyalty points' },
-    { href: '/dashboard/team-performance', label: 'Team Performance', icon: BarChart3, tooltip: 'Track staff metrics and service quality' },
+    { href: '/dashboard/team-performance', label: 'Performance', icon: BarChart3, tooltip: 'Business ratings, customer feedback, and staff leaderboard' },
     { href: '/dashboard/marketing', label: 'Marketing Hub', icon: Megaphone, tooltip: 'Broadcasts, Ads, and Deals' },
     { href: '/dashboard/settings', label: 'Settings & Apps', icon: Settings, tooltip: 'Configure business settings and integrations' },
     { href: '/dashboard/billing', label: 'Billing & Plan', icon: CreditCard, tooltip: 'Manage your subscription and credits' },
@@ -512,21 +512,31 @@ export default function ClientLayout({ children, initialData }: { children: Reac
       {/* Main Content */}
       <main className="flex-1 flex flex-col h-full relative pt-16 pb-20 md:pt-0 md:pb-0 overflow-y-auto print:pt-0 print:pb-0 print:overflow-visible">
         <CommandPalette />
-        <div className="absolute top-0 right-0 p-4 z-10 hidden md:flex items-center gap-3 print:hidden">
-          {credits !== null && (
-            <Link href="/dashboard/billing" className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 rounded-full border border-emerald-500/20 transition-colors shadow-sm cursor-pointer hover:scale-105 active:scale-95 duration-200">
-              <Zap className="w-3.5 h-3.5 text-emerald-400" />
-              <span className="text-xs font-black text-emerald-400">{credits}</span>
-            </Link>
-          )}
-          <NotificationCenter />
-          {orgName ? (
-            <span className="text-xs font-bold text-zinc-500 uppercase tracking-widest">{orgName}</span>
-          ) : (
-            <span className="text-xs font-bold text-orange-400 uppercase tracking-widest">Setup Workspace</span>
-          )}
-        </div>
-        <div className="flex-1 p-4 md:p-10 max-w-[1600px] mx-auto w-full print:p-0">
+        {/* Desktop Top Bar — sits as a real header above page content, no overlap */}
+        <header className="hidden md:flex shrink-0 items-center justify-between px-8 py-0 h-14 border-b border-white/5 bg-[#0a0a0a]/70 backdrop-blur-md sticky top-0 z-20 print:hidden">
+          {/* Left: Page context hint — pages inject their own h1 below, so we keep this light */}
+          <div className="flex items-center gap-2 min-w-0">
+            {orgName && (
+              <span className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest truncate">
+                {orgName}
+              </span>
+            )}
+          </div>
+          {/* Right: global controls */}
+          <div className="flex items-center gap-3">
+            {credits !== null && (
+              <Link href="/dashboard/billing" className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 rounded-full border border-emerald-500/20 transition-colors shadow-sm cursor-pointer hover:scale-105 active:scale-95 duration-200">
+                <Zap className="w-3.5 h-3.5 text-emerald-400" />
+                <span className="text-xs font-black text-emerald-400">{credits}</span>
+              </Link>
+            )}
+            <NotificationCenter />
+            {!orgName && (
+              <span className="text-xs font-bold text-orange-400 uppercase tracking-widest">Setup Workspace</span>
+            )}
+          </div>
+        </header>
+        <div className="flex-1 p-4 md:px-8 md:py-7 max-w-[1600px] mx-auto w-full print:p-0">
           {children}
         </div>
       </main>

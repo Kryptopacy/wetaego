@@ -121,17 +121,7 @@ export default async function OrdersPage() {
   const infraFlags = await getInfrastructureFlags() as Record<string, boolean>
 
   return (
-    <div className="max-w-6xl h-[calc(100vh-8rem)] flex flex-col">
-      <div className="flex items-center justify-between mb-8 shrink-0">
-        <h1 className="text-2xl font-bold text-white">{t('liveOperations')}</h1>
-        <div className="flex gap-2">
-          <span className="flex items-center gap-2 px-3 py-1 rounded-full bg-green-500/10 text-green-400 text-sm font-medium border border-green-500/20">
-            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-            {t('receivingOrders')}
-          </span>
-        </div>
-      </div>
-
+    <div className="h-[calc(100vh-10rem)] flex flex-col">
       {org && activeLocationId ? (
         <OrdersClient 
           organizationId={org.id}
