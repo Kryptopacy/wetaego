@@ -21,7 +21,7 @@ export default async function ProfilePage() {
     .from('user_profiles')
     .select('full_name, bank_name, account_number, account_name')
     .eq('id', userId)
-    .single()
+    .maybeSingle()
 
   return (
     <div className="max-w-3xl mx-auto pb-20 mt-8">
