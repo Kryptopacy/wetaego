@@ -134,19 +134,19 @@ export function AICopilotWidget({ organizationId }: { organizationId: string }) 
         onClick={() => {
           if (!isDragging) setIsOpen(prev => !prev)
         }}
-        className={`fixed bottom-20 md:bottom-24 right-6 z-90 h-12 px-4 rounded-full shadow-2xl border border-white/20 group flex items-center justify-center overflow-hidden cursor-grab active:cursor-grabbing bg-zinc-900 transition-opacity ${
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        className={`fixed bottom-20 md:bottom-24 right-6 z-90 h-11 px-5 rounded-full shadow-[0_8px_30px_rgba(0,0,0,0.7)] border border-emerald-500/40 hover:border-emerald-400/80 group flex items-center justify-center overflow-hidden cursor-grab active:cursor-grabbing bg-zinc-950/90 backdrop-blur-xl transition-all duration-300 ${
           isOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'
         }`}
       >
-        <Image src="/hero_emerald_gemstone.png" alt="Tego AI Copilot" fill className="object-cover opacity-60 group-hover:opacity-80 transition-opacity" />
-        <div className="absolute inset-0 bg-teal-900/30 mix-blend-overlay transition-colors" />
-        <div className="relative z-10 flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-emerald-400 drop-shadow-lg" />
-          <span className="text-white font-semibold text-sm">Tego AI</span>
+        <Image src="/hero_emerald_gemstone.png" alt="Tego AI Copilot" fill className="object-cover opacity-50 group-hover:opacity-70 transition-opacity" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-black/70 transition-colors" />
+        <div className="relative z-10 flex items-center justify-center">
+          <span className="font-black tracking-tight text-sm bg-gradient-to-r from-white via-emerald-50 to-emerald-300 bg-clip-text text-transparent drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] select-none">
+            Tego AI
+          </span>
         </div>
-        
-        {/* Notification Dot (Simulated) */}
-        <span className="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 border-teal-900 animate-pulse" />
       </motion.button>
 
       <AnimatePresence>
