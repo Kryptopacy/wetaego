@@ -168,7 +168,7 @@ export function PromotionsStudio({
 
                 {isCurrent && (
                   <span className="shrink-0 p-1 rounded-full bg-emerald-500 text-black">
-                    <Check className="w-3 h-3 stroke-[3]" />
+                    <Check className="w-3 h-3 stroke-3" />
                   </span>
                 )}
               </button>

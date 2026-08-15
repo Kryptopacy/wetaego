@@ -155,7 +155,7 @@ export default async function AiConciergePage() {
           </div>
 
           <div>
-            <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+            <label className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-zinc-400">
               <Sparkles className="w-3.5 h-3.5 text-amber-400" />
               Custom Instructions & Upsell Guidelines
             </label>
@@ -215,7 +215,7 @@ export default async function AiConciergePage() {
           </div>
 
           <div className="pt-6 border-t border-zinc-800">
-            <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+            <label className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-zinc-400">
               <HelpCircle className="w-3.5 h-3.5 text-blue-400" />
               Frequently Asked Questions (FAQs)
             </label>
