@@ -216,7 +216,7 @@ export function DeliveryClient({
         return (
           <div 
             key={col.id} 
-            className="flex-shrink-0 w-80 md:w-96 flex flex-col bg-zinc-900/50 rounded-2xl border border-zinc-800/80 snap-center overflow-hidden"
+            className="shrink-0 w-80 md:w-96 flex flex-col bg-zinc-900/50 rounded-2xl border border-zinc-800/80 snap-center overflow-hidden"
             onDragOver={handleDragOver}
             onDrop={(e) => handleDrop(e, col.id)}
           >

@@ -95,7 +95,7 @@ export function AiSimulator({
   ]
 
   return (
-    <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6 flex flex-col h-[520px]">
+    <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6 flex flex-col h-130">
       <div className="flex items-center justify-between pb-4 border-b border-zinc-800 shrink-0">
         <div className="flex items-center gap-2.5">
           <div className="p-2 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400">
