@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Plus, Trash2, ExternalLink, Image as ImageIcon, Zap, Power } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { Plus, Trash2, ExternalLink, Image as ImageIcon, Zap, Power, UploadCloud, Loader2 } from 'lucide-react'
 import { createAd, toggleAdStatus, deleteAd, getAdStats } from './actions'
+import { uploadImage } from '../settings/upload-actions'
 import { toast } from 'sonner'
 import Image from 'next/image'
 
@@ -167,36 +168,71 @@ export function AdsManagerClient({ initialAds, locations }: { initialAds: Ad[], 
 
 function CreateAdForm({ locations, onSuccess, onCancel }: { locations: {id: string, name: string}[], onSuccess: (ad: Ad) => void, onCancel: () => void }) {
   const [loading, setLoading] = useState(false)
+  const [uploadingImage, setUploadingImage] = useState(false)
   const [imageUrl, setImageUrl] = useState('')
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file (PNG, JPG, WEBP).')
+      return
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Ad creative must be less than 5MB.')
+      return
+    }
+
+    setUploadingImage(true)
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      const res = await uploadImage(formData)
+      if (res.error || !res.url) {
+        throw new Error(res.error || 'Failed to upload ad image')
+      }
+      setImageUrl(res.url)
+      toast.success('Ad creative uploaded successfully!')
+    } catch (err: unknown) {
+      toast.error((err as Error).message || 'Failed to upload creative.')
+    } finally {
+      setUploadingImage(false)
+      if (fileInputRef.current) fileInputRef.current.value = ''
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (!imageUrl) {
-      toast.error('Please upload an ad image')
+      toast.error('Please upload an ad creative image')
       return
     }
 
     setLoading(true)
     const formData = new FormData(e.currentTarget)
-    const data = {
+    const res = await createAd({
       location_id: formData.get('location_id') as string,
       title: formData.get('title') as string,
       category: formData.get('category') as string,
       target_link: formData.get('target_link') as string,
-      image_url: imageUrl
-    }
+      image_url: imageUrl,
+    })
 
-    const res = await createAd(data)
     setLoading(false)
-
     if (res.error) {
       toast.error(res.error)
-    } else {
-      toast.success('Ad created successfully')
-      // Fake local ad object to append instantly
+    } else if (res.ad) {
+      toast.success('Ad campaign created successfully')
       onSuccess({
-        id: Math.random().toString(), // fake id for UI until refresh
-        ...data,
+        id: res.ad.id,
+        location_id: res.ad.location_id,
+        title: res.ad.title,
+        category: res.ad.category,
+        image_url: res.ad.image_url,
+        target_link: res.ad.target_link,
         is_active: true,
         approval_status: 'approved'
       })
@@ -211,7 +247,7 @@ function CreateAdForm({ locations, onSuccess, onCancel }: { locations: {id: stri
         </div>
         <div>
           <h3 className="font-bold text-white">Upload BYO Sponsor</h3>
-          <p className="text-xs text-zinc-400">Add a native ad to your catalog flow.</p>
+          <p className="text-xs text-zinc-400">Add a native ad banner to your digital catalog.</p>
         </div>
       </div>
 
@@ -252,27 +288,31 @@ function CreateAdForm({ locations, onSuccess, onCancel }: { locations: {id: stri
                 </button>
               </>
             ) : (
-              <div className="flex flex-col items-center justify-center p-6 w-full h-full text-center">
-                <ImageIcon className="w-8 h-8 text-zinc-600 mb-3" />
-                <p className="text-xs text-zinc-400 mb-4">Paste an image URL directly for your ad creative.</p>
-                <input 
-                  type="url" 
-                  placeholder="https://.../image.jpg" 
-                  className="w-3/4 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-white text-xs focus:outline-none focus:border-emerald-500"
-                  onBlur={(e) => {
-                    if (e.target.value) setImageUrl(e.target.value)
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault()
-                      if (e.currentTarget.value) setImageUrl(e.currentTarget.value)
-                    }
-                  }}
-                />
+              <div 
+                onClick={() => !uploadingImage && fileInputRef.current?.click()}
+                className="flex flex-col items-center justify-center p-6 w-full h-full text-center cursor-pointer hover:bg-zinc-800/80 transition-colors"
+              >
+                {uploadingImage ? (
+                  <Loader2 className="w-8 h-8 text-emerald-400 animate-spin mb-2" />
+                ) : (
+                  <UploadCloud className="w-8 h-8 text-zinc-400 mb-2" />
+                )}
+                <p className="text-xs font-semibold text-white">
+                  {uploadingImage ? 'Uploading creative...' : 'Click or drop image to upload'}
+                </p>
+                <p className="text-[11px] text-zinc-500 mt-1">PNG, JPG, WEBP • Max 5MB</p>
               </div>
             )}
           </div>
-          <p className="text-[10px] text-zinc-500 mt-2 text-center">Recommended aspect ratio: 16:9 or 2:1</p>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/png, image/jpeg, image/webp"
+            onChange={handleImageUpload}
+            className="hidden"
+            disabled={uploadingImage}
+          />
+          <p className="text-[10px] text-zinc-500 mt-2 text-center">Recommended aspect ratio: 16:9 or 2:1 (1200×630px)</p>
         </div>
       </div>
 

@@ -199,9 +199,9 @@ export default async function SettingsPage({
           <h2 className="text-lg font-semibold text-white mb-4">General Info</h2>
           <ActionForm action={updateOrganization} className="flex flex-col gap-4">
             <div>
-              <label className="mb-2 block text-sm font-medium text-zinc-300">Business Logo URL</label>
+              <label className="mb-2 block text-sm font-medium text-zinc-300">Business Logo</label>
               <ImageUpload name="logo_url" defaultValue={organization?.logo_url || ''} />
-              <p className="mt-2 text-xs text-zinc-500">This logo will be displayed across your customer portals and digital menus.</p>
+              <p className="mt-2 text-xs text-zinc-500">PNG, JPG, SVG, WEBP (Max. 5MB) • Displayed across your customer portals and checkout receipts.</p>
             </div>
             <div>
               <label className="mb-2 block text-sm font-medium text-zinc-300">Business Name</label>
