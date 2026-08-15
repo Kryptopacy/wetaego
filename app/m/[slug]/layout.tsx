@@ -54,7 +54,6 @@ export default async function LocationLayout({
       >
         <ThemeInjector initialTokens={tokens} themeColor={location.theme_color || undefined}>
           {children}
-          <GlobalFeedbackFAB locationId={location.id} slug={resolvedParams.slug} />
         </ThemeInjector>
       </div>
   )

@@ -53,7 +53,8 @@ function hexToRgba(hex: string, alpha: number) {
 
 function formatTitle(str: string) {
   if (!str) return ''
-  return str.replace(/\b([a-z])/g, (_, char) => char.toUpperCase())
+  // Capitalize start of words while preserving apostrophes like 's
+  return str.replace(/(?:^|\s|\/|-)([a-z])/g, (_, char) => char.toUpperCase())
 }
 
 /**

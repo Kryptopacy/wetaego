@@ -184,7 +184,7 @@ export default async function PublicPageView({
     const anonSupabase = createAnonClient()
     let query = anonSupabase
       .from('location_pages')
-      .select('id, title, slug, content, template_type, billing_enabled, billing_mode, payment_mode, deposit_percentage, business_type_preset, randomizer_enabled, deals_enabled, template_data, is_published, theme_color, background_color, operating_hours, contact_email, contact_phone, wifi_network, wifi_password, address, upsell_mode, design_tokens')
+      .select('id, title, slug, content, template_type, billing_enabled, billing_mode, payment_mode, deposit_percentage, business_type_preset, randomizer_enabled, deals_enabled, template_data, is_published, theme_color, background_color, operating_hours, contact_email, contact_phone, wifi_network, wifi_password, address, upsell_mode, design_tokens, ai_enabled, ai_name, ai_base_personality')
       .eq('location_id', loc.id)
       .eq('slug', pageSlug)
 
@@ -457,14 +457,14 @@ export default async function PublicPageView({
       )}
       
       <FabGroup>
-        {loc.ai_enabled && (
+        {(page.ai_enabled ?? loc.ai_enabled ?? true) && (
           <AIChat
             locationId={loc.id}
             organizationId={loc.organization_id}
-            aiName={loc.ai_name || ''}
-            businessName={loc.name}
-            themeColor={loc.theme_color || '#7c3aed'}
-            tableIdentifier="QR Scan" // Standard fallback for generic pages
+            aiName={(page.ai_name as string) || loc.ai_name || 'Concierge'}
+            businessName={loc.portal_display_name || loc.name}
+            themeColor={(page.theme_color as string) || loc.theme_color || '#10b981'}
+            tableIdentifier={_resource?.name || "Online Storefront"}
             menuItems={((items as Record<string, unknown>[]) || []).map(i => ({ id: i.id as string, name: i.title as string, price_minor: (i.price_minor as number) || 0 }))}
             templateType={page.template_type as string}
             billingMode={page.billing_mode as string}
