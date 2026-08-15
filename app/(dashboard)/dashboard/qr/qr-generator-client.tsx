@@ -477,7 +477,7 @@ export function QRGeneratorClient({
         {/* Submit */}
         <button
           type="submit"
-          className="w-full md:w-auto h-[44px] px-6 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-600/20 transition-all cursor-pointer shrink-0"
+          className="w-full md:w-auto h-11 px-6 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-600/20 transition-all cursor-pointer shrink-0"
         >
           <Plus className="w-4 h-4" /> Add QR Card
         </button>
@@ -563,7 +563,7 @@ export function QRGeneratorClient({
                 <div className="h-10 mb-2 flex items-center justify-center">
                   {logoUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={logoUrl} alt="Logo" className="h-9 max-w-[140px] object-contain" />
+                    <img src={logoUrl} alt="Logo" className="h-9 max-w-35 object-contain" />
                   ) : (
                     <span className="font-black text-lg text-zinc-900 tracking-tight">
                       {locationName}
@@ -614,11 +614,11 @@ export function QRGeneratorClient({
                 </div>
 
                 {/* Label pill */}
-                <div className="bg-zinc-900 text-emerald-400 px-6 py-2 rounded-full font-bold text-lg shadow-md capitalize text-center w-full max-w-[240px] truncate">
+                <div className="bg-zinc-900 text-emerald-400 px-6 py-2 rounded-full font-bold text-lg shadow-md capitalize text-center w-full max-w-60 truncate">
                   {labelFor(item)}
                 </div>
 
-                <p className="text-[11px] text-zinc-500 mt-2 uppercase tracking-wider text-center max-w-[220px] font-bold">
+                <p className="text-[11px] text-zinc-500 mt-2 uppercase tracking-wider text-center max-w-55 font-bold">
                   {subLabelFor(item)}
                 </p>
               </div>

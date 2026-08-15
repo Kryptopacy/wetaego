@@ -169,7 +169,7 @@ export function AICopilotWidget({ organizationId }: { organizationId: string }) 
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.94, y: 16 }}
             transition={{ type: 'spring', damping: 26, stiffness: 300 }}
-            className="fixed bottom-20 md:bottom-24 right-3 sm:right-6 z-90 w-[calc(100vw-1.5rem)] sm:w-[410px] max-h-[85vh] h-[560px] rounded-3xl flex flex-col overflow-hidden border border-emerald-500/30 bg-zinc-950/95 shadow-2xl backdrop-blur-2xl"
+            className="fixed bottom-20 md:bottom-24 right-3 sm:right-6 z-90 w-[calc(100vw-1.5rem)] sm:w-102.5 max-h-[85vh] h-140 rounded-3xl flex flex-col overflow-hidden border border-emerald-500/30 bg-zinc-950/95 shadow-2xl backdrop-blur-2xl"
             style={{
               boxShadow: '0 24px 64px -12px rgba(0, 0, 0, 0.85), 0 0 36px 0 rgba(16, 185, 129, 0.12)'
             }}
