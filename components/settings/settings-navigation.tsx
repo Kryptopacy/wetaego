@@ -16,12 +16,7 @@ export function SettingsNavigation({ currentTab, isOwnerOrManager }: SettingsNav
       { id: 'general', label: 'General & Payments' },
       { id: 'locations', label: 'Manage Locations' },
       { id: 'venue', label: 'Venue Information' },
-      { id: 'ai', label: 'AI Assistant' },
-      { id: 'promotions', label: 'Promotions' },
-      { id: 'portal', label: 'Portal Customization' },
       { id: 'kyc', label: 'KYC & Compliance' },
-    ] : []),
-    ...(isOwnerOrManager ? [
       { id: 'loyalty', label: 'Loyalty & CRM' },
       { id: 'addons', label: 'Add-ons' },
       { id: 'taxes', label: 'Taxes & Fees' },
@@ -29,9 +24,12 @@ export function SettingsNavigation({ currentTab, isOwnerOrManager }: SettingsNav
   ]
 
   const advancedLinks = isOwnerOrManager ? [
-    { href: '/dashboard/deals', label: 'Deals & Sales' },
-    { href: '/dashboard/promotions', label: 'Promo Codes' },
-    { href: '/dashboard/ads', label: 'Ad Manager' },
+    { href: '/dashboard/appearance', label: 'Live Storefront Builder' },
+    { href: '/dashboard/ai', label: 'AI Concierge & Copilot' },
+    { href: '/dashboard/promotions', label: 'Promo Codes & Discounts' },
+    { href: '/dashboard/delivery', label: 'Delivery & Dispatch' },
+    { href: '/dashboard/deals', label: 'Flash Deals & Sales' },
+    { href: '/dashboard/ads', label: 'Ad Manager (BYO)' },
     { href: '/dashboard/resources', label: 'Resources & QRs' },
     { href: '/dashboard/availability', label: 'Availability Engine' },
     { href: '/dashboard/webhooks', label: 'Outbound Webhooks' },
