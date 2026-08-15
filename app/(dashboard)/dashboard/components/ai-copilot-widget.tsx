@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useChat, UIMessage, Chat } from '@ai-sdk/react'
 import { DefaultChatTransport } from 'ai'
-import { X, Send, Sparkles, AlertCircle, Mic, MicOff, Radio, PhoneOff, Camera, CameraOff, RefreshCw, ChevronRight } from 'lucide-react'
+import { X, Send, Sparkles, AlertCircle, Radio, PhoneOff, Camera, CameraOff, RefreshCw, ChevronRight, Eye, Mic } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useSpeech } from '@/hooks/use-speech'
 import { useGeminiLive } from '@/hooks/use-gemini-live'
@@ -89,16 +89,29 @@ export function AICopilotWidget({ organizationId }: { organizationId: string }) 
     setMode('text')
   }
 
+  const startLiveVoice = () => {
+    setConversationMode(false)
+    stopListening()
+    cancelSpeech()
+    setMode('live')
+    startLiveSession(organizationId)
+  }
+
+  const startLiveVisionAndVoice = async () => {
+    setConversationMode(false)
+    stopListening()
+    cancelSpeech()
+    setMode('live')
+    await startLiveSession(organizationId)
+    await startCamera()
+  }
+
   const toggleLiveMode = () => {
     if (mode === 'live') {
       stopLiveSession()
       setMode('text')
     } else {
-      setConversationMode(false)
-      stopListening()
-      cancelSpeech()
-      setMode('live')
-      startLiveSession(organizationId)
+      startLiveVoice()
     }
   }
 
@@ -149,22 +162,26 @@ export function AICopilotWidget({ organizationId }: { organizationId: string }) 
           <motion.div
             drag
             dragMomentum={false}
-            initial={{ opacity: 0, y: 16, scale: 0.97 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 16, scale: 0.97 }}
-            transition={{ type: 'spring', stiffness: 340, damping: 30 }}
-            className="fixed bottom-20 md:bottom-6 right-2 md:right-6 z-100 w-full sm:w-95 max-w-[calc(100vw-1rem)] sm:max-w-[calc(100vw-3rem)] h-135 max-h-[80vh] flex flex-col rounded-2xl shadow-[0_24px_80px_rgba(0,0,0,0.8),0_0_0_1px_rgba(255,255,255,0.06)] overflow-hidden"
-            style={{ background: 'linear-gradient(145deg, #0d0d0d 0%, #0a0a0a 100%)' }}
+            dragConstraints={{ top: 0, left: 0, right: 0, bottom: 0 }}
+            dragElastic={0.05}
+            initial={{ opacity: 0, scale: 0.94, y: 16 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.94, y: 16 }}
+            transition={{ type: 'spring', damping: 26, stiffness: 300 }}
+            className="fixed bottom-20 md:bottom-24 right-4 sm:right-6 z-90 w-[calc(100vw-2rem)] sm:w-96 h-140 rounded-3xl flex flex-col overflow-hidden border border-emerald-500/20 bg-zinc-950/95 shadow-2xl backdrop-blur-2xl"
+            style={{
+              boxShadow: '0 24px 64px -12px rgba(0, 0, 0, 0.8), 0 0 32px 0 rgba(16, 185, 129, 0.08)'
+            }}
           >
-            {/* Subtle top glow line */}
-            <div className="absolute top-0 left-0 right-0 h-px bg-linear-to-r from-transparent via-emerald-500/40 to-transparent" />
+            {/* Top iridescent border accent */}
+            <div className="absolute top-0 left-0 right-0 h-px bg-linear-to-r from-transparent via-emerald-500/50 to-transparent" />
 
             {/* ── Header ── */}
             <div className="shrink-0 flex items-center justify-between px-4 py-3 cursor-grab active:cursor-grabbing border-b border-white/5"
-              style={{ background: 'linear-gradient(180deg, rgba(16,185,129,0.04) 0%, transparent 100%)' }}
+              style={{ background: 'linear-gradient(180deg, rgba(16,185,129,0.06) 0%, transparent 100%)' }}
             >
               <div className="flex items-center gap-3">
-                <div className="relative w-8 h-8 rounded-xl overflow-hidden border border-emerald-500/25 shadow-lg shrink-0">
+                <div className="relative w-8 h-8 rounded-xl overflow-hidden border border-emerald-500/30 shadow-lg shrink-0">
                   <Image src="/hero_emerald_gemstone.png" alt="Tego" fill className="object-cover opacity-90" />
                   <div className="absolute inset-0 bg-emerald-500/10" />
                 </div>
@@ -174,93 +191,103 @@ export function AICopilotWidget({ organizationId }: { organizationId: string }) 
                     <span className="text-[10px] text-zinc-500 font-medium">Admin Co‑Pilot</span>
                   </div>
                   <div className="flex items-center gap-1.5 mt-0.5">
-                    <span className={`w-1.5 h-1.5 rounded-full ${mode === 'live' && isLiveConnected ? 'bg-emerald-400 animate-pulse' : mode === 'live' && isLiveConnecting ? 'bg-amber-400 animate-pulse' : 'bg-zinc-600'}`} />
-                    <span className="text-[10px] text-zinc-500">
-                      {mode === 'live' ? (isLiveConnecting ? 'Connecting…' : isLiveConnected ? 'Live active' : 'Live ready') : 'Ready'}
+                    <span className={`w-1.5 h-1.5 rounded-full ${mode === 'live' && isLiveConnected ? 'bg-emerald-400 animate-pulse' : mode === 'live' && isLiveConnecting ? 'bg-amber-400 animate-pulse' : 'bg-emerald-500/80'}`} />
+                    <span className="text-[10px] text-zinc-400">
+                      {mode === 'live' ? (isLiveConnecting ? 'Connecting stream…' : isLiveConnected ? (isCameraActive ? 'Voice & Vision Live' : 'Live Voice Active') : 'Live Standby') : 'Ready'}
                     </span>
                   </div>
                 </div>
               </div>
+
               <div className="flex items-center gap-1.5">
                 <button
+                  type="button"
                   onClick={toggleLiveMode}
-                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold border transition-all ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold border transition-all cursor-pointer ${
                     mode === 'live'
-                      ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30 shadow-[0_0_12px_rgba(16,185,129,0.2)]'
-                      : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800'
+                      ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-[0_0_16px_rgba(16,185,129,0.3)]'
+                      : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-800'
                   }`}
-                  title="Toggle Gemini Live Voice"
+                  title="Toggle Gemini Live Voice & Vision"
                 >
-                  <Radio className={`w-3 h-3 ${mode === 'live' && isLiveConnected ? 'animate-spin' : ''}`} />
-                  {mode === 'live' ? 'Live On' : 'Live Voice'}
+                  <Radio className={`w-3 h-3 ${mode === 'live' && isLiveConnected ? 'animate-pulse text-emerald-400' : ''}`} />
+                  {mode === 'live' ? 'Live Session' : 'Start Live'}
                 </button>
                 <button
+                  type="button"
                   onClick={handleClose}
-                  className="p-1.5 rounded-lg text-zinc-600 hover:text-zinc-200 hover:bg-zinc-800/80 transition-colors"
+                  className="p-1.5 rounded-lg text-zinc-500 hover:text-white hover:bg-zinc-800/80 transition-colors cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
             </div>
 
-            {/* ── Live Voice View ── */}
+            {/* ── Live Voice & Vision View ── */}
             {mode === 'live' ? (
-              <div className="flex-1 flex flex-col justify-between p-5 overflow-y-auto" style={{ background: 'radial-gradient(ellipse at 50% 30%, rgba(16,185,129,0.06) 0%, transparent 70%)' }}>
+              <div className="flex-1 flex flex-col justify-between p-5 overflow-y-auto" style={{ background: 'radial-gradient(ellipse at 50% 30%, rgba(16,185,129,0.08) 0%, transparent 70%)' }}>
                 <div className="flex flex-col items-center justify-center my-auto space-y-5 text-center w-full">
                   {isCameraActive ? (
-                    <div className="relative w-full rounded-2xl overflow-hidden border border-emerald-500/30 shadow-xl bg-black aspect-video">
+                    <div className="relative w-full rounded-2xl overflow-hidden border border-emerald-500/40 shadow-2xl bg-black aspect-video">
                       <video ref={videoElementRef} autoPlay playsInline muted className="w-full h-full object-cover" />
-                      <div className="absolute top-2 left-2 flex items-center gap-1.5 bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-full border border-emerald-500/30">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                        <span className="text-[10px] text-emerald-300 font-semibold tracking-wide uppercase">Tego Vision</span>
+                      <div className="absolute top-2 left-2 flex items-center gap-1.5 bg-black/80 backdrop-blur-md px-3 py-1 rounded-full border border-emerald-500/30 shadow-lg">
+                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                        <span className="text-[10px] text-emerald-300 font-bold tracking-wider uppercase">Tego Eyes Active</span>
                       </div>
-                      <div className="absolute bottom-2 right-2 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded text-[10px] text-zinc-400">
-                        1 FPS · {cameraFacingMode === 'user' ? 'Front' : 'Back'}
+                      <div className="absolute bottom-2 right-2 bg-black/70 backdrop-blur-md px-2.5 py-0.5 rounded-md text-[10px] text-zinc-300 font-mono">
+                        {cameraFacingMode === 'user' ? 'Front Lens' : 'Rear Lens'}
                       </div>
                     </div>
                   ) : (
+                    /* Gemstone Orb with Sound Wave Ripple */
                     <div className="relative flex items-center justify-center py-4">
-                      {/* Ambient rings */}
                       <motion.div
-                        animate={{ scale: isLiveSpeaking ? [1, 1.4, 1.1, 1.35, 1] : isLiveConnected ? [1, 1.1, 1] : 1, opacity: isLiveSpeaking ? [0.3, 0.6, 0.3] : 0.2 }}
-                        transition={{ duration: isLiveSpeaking ? 1.0 : 3, repeat: Infinity, ease: 'easeInOut' }}
-                        className="absolute w-40 h-40 rounded-full border border-emerald-500/20 blur-md"
+                        animate={{
+                          scale: isLiveSpeaking ? [1, 1.3, 1] : isLiveConnected ? [1, 1.12, 1] : [1, 1.04, 1],
+                          opacity: isLiveSpeaking ? [0.35, 0.7, 0.35] : isLiveConnected ? [0.2, 0.4, 0.2] : [0.1, 0.2, 0.1],
+                        }}
+                        transition={{ duration: isLiveSpeaking ? 1.4 : 2.5, repeat: Infinity, ease: 'easeInOut' }}
+                        className="absolute w-36 h-36 rounded-full bg-emerald-500/25 blur-2xl pointer-events-none"
                       />
                       <motion.div
-                        animate={{ scale: isLiveSpeaking ? [1, 1.2, 1] : 1, opacity: isLiveSpeaking ? [0.5, 0.9, 0.5] : 0.3 }}
-                        transition={{ duration: isLiveSpeaking ? 0.8 : 2, repeat: Infinity }}
-                        className="absolute w-28 h-28 rounded-full bg-emerald-500/10 blur-lg"
-                      />
-                      {/* Core orb */}
-                      <motion.div
-                        animate={{ scale: isLiveSpeaking ? [1, 1.12, 1] : 1 }}
-                        transition={{ duration: 0.5, repeat: Infinity }}
-                        className={`relative w-20 h-20 rounded-full flex items-center justify-center border transition-all ${
+                        animate={{
+                          scale: isLiveSpeaking ? [1, 1.06, 1] : [1, 1.02, 1],
+                        }}
+                        transition={{ duration: 1.2, repeat: Infinity, ease: 'easeInOut' }}
+                        className={`relative w-24 h-24 rounded-3xl overflow-hidden border-2 flex items-center justify-center shadow-2xl transition-all ${
                           isLiveSpeaking
-                            ? 'border-emerald-400/60 bg-emerald-500/15 shadow-[0_0_32px_rgba(16,185,129,0.4)]'
+                            ? 'border-emerald-400 bg-emerald-500/20 shadow-[0_0_40px_rgba(16,185,129,0.5)]'
                             : isLiveConnected
-                              ? 'border-zinc-700 bg-zinc-900/80'
-                              : 'border-zinc-800/60 bg-zinc-900/40'
+                              ? 'border-emerald-500/40 bg-zinc-900 shadow-[0_0_24px_rgba(16,185,129,0.2)]'
+                              : 'border-zinc-800 bg-zinc-900/60'
                         }`}
                       >
-                        <Radio className={`w-8 h-8 ${isLiveSpeaking ? 'text-emerald-300 animate-pulse' : isLiveConnected ? 'text-zinc-300' : 'text-zinc-600'}`} />
+                        <Image src="/hero_emerald_gemstone.png" alt="Tego Live" fill className="object-cover opacity-80" />
+                        <div className="absolute inset-0 bg-emerald-950/20" />
+                        <div className="relative z-10">
+                          {isLiveSpeaking ? (
+                            <Sparkles className="w-8 h-8 text-emerald-300 animate-pulse drop-shadow-lg" />
+                          ) : (
+                            <Radio className={`w-8 h-8 ${isLiveConnected ? 'text-emerald-400 animate-pulse' : 'text-zinc-500'}`} />
+                          )}
+                        </div>
                       </motion.div>
                     </div>
                   )}
 
                   <div>
-                    <p className="text-sm font-semibold text-white">
-                      {isLiveSpeaking ? 'Tego is responding…' : isLiveConnected ? (isCameraActive ? 'Watching & listening…' : 'Listening…') : isLiveConnecting ? 'Establishing stream…' : 'Tap to start'}
+                    <p className="text-sm font-bold text-white tracking-tight">
+                      {isLiveSpeaking ? 'Tego is speaking…' : isLiveConnected ? (isCameraActive ? 'Tego is watching & listening…' : 'Listening… Speak freely') : isLiveConnecting ? 'Connecting stream…' : 'Tap to start'}
                     </p>
-                    <p className="text-[11px] text-zinc-500 mt-1 max-w-55 mx-auto leading-relaxed">
-                      {isLiveConnected ? (isCameraActive ? 'Point your camera at a menu, dish, or invoice.' : 'Speak naturally. Tap "Show Tego" to share your camera.') : 'Ultra-low latency voice & vision.'}
+                    <p className="text-[11px] text-zinc-400 mt-1 max-w-60 mx-auto leading-relaxed">
+                      {isLiveConnected ? (isCameraActive ? 'Show menus, dishes, POS screens, or invoices.' : 'Gemini Live bidirectional conversation.') : 'Ultra-low latency real-time voice & vision.'}
                     </p>
                   </div>
 
                   {liveTranscripts.length > 0 && (
-                    <div className="w-full max-h-28 overflow-y-auto bg-zinc-950/80 border border-zinc-800/60 rounded-xl p-3 text-left space-y-1.5 custom-scrollbar">
+                    <div className="w-full max-h-28 overflow-y-auto bg-zinc-950/80 border border-zinc-800/60 rounded-2xl p-3 text-left space-y-1.5 custom-scrollbar">
                       {liveTranscripts.slice(-4).map((t) => (
-                        <div key={t.id} className={`text-[11px] leading-relaxed ${t.role === 'user' ? 'text-zinc-400' : 'text-emerald-400 font-medium'}`}>
+                        <div key={t.id} className={`text-[11px] leading-relaxed ${t.role === 'user' ? 'text-zinc-400' : 'text-emerald-400 font-semibold'}`}>
                           <span className="opacity-50 uppercase tracking-widest text-[9px] font-bold">{t.role === 'user' ? 'You ' : 'Tego '}</span>
                           {t.text}
                         </div>
@@ -269,42 +296,45 @@ export function AICopilotWidget({ organizationId }: { organizationId: string }) 
                   )}
 
                   {liveError && (
-                    <div className="flex items-center gap-1.5 text-[11px] text-red-400 bg-red-500/8 px-3 py-2 rounded-xl border border-red-500/20">
+                    <div className="flex items-center gap-1.5 text-[11px] text-red-400 bg-red-500/10 px-3 py-2 rounded-xl border border-red-500/20">
                       <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                       {liveError}
                     </div>
                   )}
                 </div>
 
-                {/* Live controls */}
-                <div className="flex items-center justify-center gap-2 pt-4 border-t border-white/4 mt-2">
+                {/* Live Controls Bar */}
+                <div className="flex items-center justify-center gap-2 pt-4 border-t border-white/5 mt-2">
                   <button
+                    type="button"
                     onClick={() => isCameraActive ? stopCamera() : startCamera()}
-                    className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-semibold border transition-all ${
+                    className={`flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
                       isCameraActive
-                        ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
-                        : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800'
+                        ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-sm'
+                        : 'bg-zinc-900 border-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-800'
                     }`}
                   >
-                    {isCameraActive ? <Camera className="w-3.5 h-3.5" /> : <CameraOff className="w-3.5 h-3.5" />}
-                    {isCameraActive ? 'Vision On' : 'Show Tego'}
+                    {isCameraActive ? <Camera className="w-4 h-4 text-emerald-400" /> : <Eye className="w-4 h-4 text-emerald-400" />}
+                    {isCameraActive ? 'Eyes On' : 'Share Camera'}
                   </button>
 
                   {isCameraActive && (
                     <button
+                      type="button"
                       onClick={switchCamera}
-                      className="p-2 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 transition-colors"
-                      title="Switch camera"
+                      className="p-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors cursor-pointer"
+                      title="Switch Camera lens"
                     >
-                      <RefreshCw className="w-3.5 h-3.5" />
+                      <RefreshCw className="w-4 h-4" />
                     </button>
                   )}
 
                   <button
+                    type="button"
                     onClick={() => { stopLiveSession(); setMode('text') }}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 text-[11px] font-semibold transition-colors"
+                    className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-red-500/15 hover:bg-red-500/25 text-red-400 border border-red-500/30 text-xs font-bold transition-colors cursor-pointer"
                   >
-                    <PhoneOff className="w-3.5 h-3.5" />
+                    <PhoneOff className="w-4 h-4" />
                     End Call
                   </button>
                 </div>
@@ -316,38 +346,40 @@ export function AICopilotWidget({ organizationId }: { organizationId: string }) 
                 <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3.5 custom-scrollbar">
                   {messages.length === 0 && (
                     <div className="flex flex-col h-full">
-                      {/* Ambient empty state */}
+                      {/* Ambient Gemstone Hero Empty State */}
                       <div className="flex-1 flex flex-col items-center justify-center text-center space-y-4 pb-2">
                         <div className="relative">
                           <motion.div
-                            animate={{ scale: [1, 1.12, 1], opacity: [0.15, 0.28, 0.15] }}
+                            animate={{ scale: [1, 1.14, 1], opacity: [0.2, 0.4, 0.2] }}
                             transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
-                            className="absolute inset-0 w-20 h-20 rounded-full bg-emerald-500/20 blur-xl translate-x-0"
+                            className="absolute inset-0 w-24 h-24 rounded-full bg-emerald-500/25 blur-xl -translate-x-2 -translate-y-2"
                           />
-                          <div className="relative w-14 h-14 rounded-2xl overflow-hidden border border-emerald-500/20 shadow-[0_0_24px_rgba(16,185,129,0.15)] mx-auto">
-                            <Image src="/hero_emerald_gemstone.png" alt="Tego" fill className="object-cover opacity-70" />
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <Sparkles className="w-5 h-5 text-emerald-300/80 drop-shadow-md" />
+                          <div className="relative w-16 h-16 rounded-3xl overflow-hidden border border-emerald-500/30 shadow-[0_0_28px_rgba(16,185,129,0.2)] mx-auto">
+                            <Image src="/hero_emerald_gemstone.png" alt="Tego" fill className="object-cover opacity-80" />
+                            <div className="absolute inset-0 flex items-center justify-center bg-emerald-950/20">
+                              <Sparkles className="w-6 h-6 text-emerald-300 drop-shadow-md" />
                             </div>
                           </div>
                         </div>
                         <div>
-                          <p className="text-sm font-semibold text-zinc-200">What can I help with?</p>
-                          <p className="text-[11px] text-zinc-600 mt-1 max-w-50 mx-auto leading-relaxed">
-                            Orders, forecasts, inventory, storefront — just ask.
+                          <p className="text-sm font-bold text-white tracking-tight">What can I help with?</p>
+                          <p className="text-[11px] text-zinc-400 mt-1 max-w-56 mx-auto leading-relaxed">
+                            Orders, forecasts, inventory, storefront — chat or tap Live Voice & Eyes.
                           </p>
                         </div>
                       </div>
-                      {/* Suggestion chips */}
+
+                      {/* Suggestion Chips */}
                       <div className="flex flex-wrap gap-2 justify-center pb-1">
                         {SUGGESTION_CHIPS.map((chip) => (
                           <button
                             key={chip}
+                            type="button"
                             onClick={() => { sendMessage({ text: chip }); }}
-                            className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 text-[11px] text-zinc-400 hover:text-zinc-200 transition-all group"
+                            className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 text-[11px] text-zinc-400 hover:text-white transition-all group cursor-pointer"
                           >
                             {chip}
-                            <ChevronRight className="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 -translate-x-1 group-hover:translate-x-0 transition-all" />
+                            <ChevronRight className="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 -translate-x-1 group-hover:translate-x-0 transition-all text-emerald-400" />
                           </button>
                         ))}
                       </div>
@@ -368,8 +400,8 @@ export function AICopilotWidget({ organizationId }: { organizationId: string }) 
                         <div
                           className={`max-w-[80%] rounded-2xl px-3.5 py-2.5 text-[13px] leading-relaxed ${
                             isUser
-                              ? 'bg-emerald-600/90 text-white rounded-tr-sm shadow-[0_4px_16px_rgba(16,185,129,0.25)]'
-                              : 'bg-zinc-900/90 text-zinc-200 border border-zinc-800/60 rounded-tl-sm'
+                              ? 'bg-emerald-600 text-white rounded-tr-sm shadow-[0_4px_16px_rgba(16,185,129,0.25)] font-medium'
+                              : 'bg-zinc-900/90 text-zinc-200 border border-zinc-800/80 rounded-tl-sm'
                           }`}
                         >
                           {text}
@@ -398,7 +430,7 @@ export function AICopilotWidget({ organizationId }: { organizationId: string }) 
 
                   {error && (
                     <div className="flex justify-center">
-                      <div className="flex items-center gap-1.5 text-red-400 text-[11px] bg-red-500/8 px-3 py-2 rounded-xl border border-red-500/20">
+                      <div className="flex items-center gap-1.5 text-red-400 text-[11px] bg-red-500/10 px-3 py-2 rounded-xl border border-red-500/20">
                         <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                         Failed to send. Try again.
                       </div>
@@ -408,47 +440,64 @@ export function AICopilotWidget({ organizationId }: { organizationId: string }) 
                   <div ref={messagesEndRef} />
                 </div>
 
-                {/* ── Input ── */}
-                <form onSubmit={handleSubmit} className="shrink-0 px-3 py-3 border-t border-white/4"
-                  style={{ background: 'linear-gradient(0deg, rgba(0,0,0,0.4) 0%, transparent 100%)' }}
+                {/* ── Bottom Input & Live Voice / Vision Actions ── */}
+                <div className="shrink-0 px-3 py-3 border-t border-white/5 space-y-2"
+                  style={{ background: 'linear-gradient(0deg, rgba(0,0,0,0.6) 0%, transparent 100%)' }}
                 >
-                  <div className="flex items-center gap-2 bg-zinc-900/60 border border-zinc-800/60 hover:border-zinc-700/80 focus-within:border-emerald-500/40 rounded-xl px-3 py-2 transition-colors">
-                    <input
-                      type="text"
-                      value={input}
-                      onChange={handleInputChange}
-                      placeholder="Ask Tego…"
-                      className="flex-1 bg-transparent text-[13px] text-white placeholder:text-zinc-600 outline-none"
-                      disabled={isLoading}
-                    />
-                    <div className="flex items-center gap-1 shrink-0">
-                      {isSpeechSupported && !conversationMode && (
-                        <button
-                          type="button"
-                          onClick={() => isListening ? stopListening() : startListening()}
-                          disabled={isLoading}
-                          className={`p-1.5 rounded-lg transition-colors ${
-                            isListening
-                              ? 'text-red-400 bg-red-500/10'
-                              : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800'
-                          }`}
-                        >
-                          {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-                        </button>
-                      )}
+                  <form onSubmit={handleSubmit} className="flex items-center gap-2">
+                    {/* Live Camera Eyes Button */}
+                    <button
+                      type="button"
+                      onClick={startLiveVisionAndVoice}
+                      title="Activate Tego's Eyes (Live Camera & Multimodal Vision)"
+                      className="p-2.5 rounded-2xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-emerald-500/40 text-emerald-400 hover:text-emerald-300 transition-all flex items-center justify-center shrink-0 cursor-pointer shadow-sm group"
+                    >
+                      <Eye className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                    </button>
+
+                    {/* Text Input */}
+                    <div className="flex-1 flex items-center gap-2 bg-zinc-900/80 border border-zinc-800 hover:border-zinc-700 focus-within:border-emerald-500/50 rounded-2xl px-3 py-2 transition-colors">
+                      <input
+                        type="text"
+                        value={input}
+                        onChange={handleInputChange}
+                        placeholder="Ask Tego anything…"
+                        className="flex-1 bg-transparent text-xs text-white placeholder:text-zinc-600 outline-none"
+                        disabled={isLoading}
+                      />
                       <button
                         type="submit"
                         disabled={isLoading || !input.trim()}
-                        className="p-1.5 bg-emerald-600 hover:bg-emerald-500 disabled:bg-zinc-800 disabled:text-zinc-600 text-white rounded-lg transition-all disabled:cursor-not-allowed"
+                        className="p-1.5 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-30 text-white rounded-xl transition-all disabled:cursor-not-allowed cursor-pointer shrink-0"
                       >
                         <Send className="w-3.5 h-3.5" />
                       </button>
                     </div>
-                  </div>
-                  <p className="text-center text-[9px] text-zinc-700 mt-2 tracking-wide">
-                    Tego can make mistakes — verify important actions
+
+                    {/* Live Voice Gemstone Orb Trigger */}
+                    <motion.button
+                      type="button"
+                      onClick={startLiveVoice}
+                      whileHover={{ scale: 1.08 }}
+                      whileTap={{ scale: 0.92 }}
+                      title="Start Gemini Live Voice Session"
+                      className="relative w-10 h-10 rounded-2xl overflow-hidden border border-emerald-500/40 hover:border-emerald-400 flex items-center justify-center shadow-lg shadow-emerald-500/20 shrink-0 cursor-pointer group"
+                    >
+                      <Image src="/hero_emerald_gemstone.png" alt="Live Voice" fill className="object-cover opacity-85 group-hover:opacity-100 transition-opacity" />
+                      <div className="absolute inset-0 bg-emerald-950/20" />
+                      <motion.span
+                        animate={{ scale: [1, 1.25, 1], opacity: [0.3, 0.8, 0.3] }}
+                        transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                        className="absolute inset-0 bg-emerald-400/20 rounded-2xl pointer-events-none"
+                      />
+                      <Sparkles className="relative z-10 w-4 h-4 text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]" />
+                    </motion.button>
+                  </form>
+
+                  <p className="text-center text-[9px] text-zinc-600 tracking-wide">
+                    Tap <Eye className="w-2.5 h-2.5 inline text-emerald-400 mb-0.5" /> for Eyes or the <Sparkles className="w-2.5 h-2.5 inline text-emerald-400 mb-0.5" /> Gem for Live Voice.
                   </p>
-                </form>
+                </div>
               </>
             )}
           </motion.div>
