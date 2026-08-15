@@ -3,7 +3,8 @@
 import { useState, useRef, useEffect } from 'react'
 import { DesignTokensEditor } from '../settings/design-tokens-editor'
 import { AICoverStudio } from '../settings/ai-cover-studio'
-import { Monitor, Smartphone, Wand2, Palette, RotateCw, Minimize2 } from 'lucide-react'
+import { PromotionsStudio } from './promotions-studio'
+import { Monitor, Smartphone, Wand2, Palette, RotateCw, Minimize2, Megaphone } from 'lucide-react'
 
 export function LiveBuilder({
   locationId,
@@ -25,7 +26,7 @@ export function LiveBuilder({
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const [tokens, setTokens] = useState(initialTokens)
   const [currentCover, setCurrentCover] = useState(coverImageUrl)
-  const [activeTab, setActiveTab] = useState<'tokens' | 'ai_cover'>('tokens')
+  const [activeTab, setActiveTab] = useState<'tokens' | 'ai_cover' | 'promos'>('tokens')
   const [device, setDevice] = useState<'mobile' | 'desktop'>('mobile')
   const [isSheetOpen, setIsSheetOpen] = useState(false)
   const [refreshKey, setRefreshKey] = useState(0)
@@ -60,34 +61,56 @@ export function LiveBuilder({
   const renderSidebarContent = () => (
     <>
       {/* Tab Switcher */}
-      <div className="flex bg-zinc-900 p-1 rounded-xl border border-zinc-800 mb-6">
+      <div className="flex bg-zinc-900 p-1 rounded-xl border border-zinc-800 mb-6 gap-1">
         <button
           type="button"
           onClick={() => setActiveTab('tokens')}
-          className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold transition-all ${
+          className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-lg text-xs font-semibold transition-all ${
             activeTab === 'tokens'
               ? 'bg-zinc-800 text-white shadow-sm'
               : 'text-zinc-400 hover:text-zinc-200'
           }`}
         >
           <Palette className="w-3.5 h-3.5" />
-          Style & Tokens
+          Tokens
         </button>
         <button
           type="button"
           onClick={() => setActiveTab('ai_cover')}
-          className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold transition-all ${
+          className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-lg text-xs font-semibold transition-all ${
             activeTab === 'ai_cover'
               ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30 shadow-sm'
               : 'text-zinc-400 hover:text-zinc-200'
           }`}
         >
           <Wand2 className="w-3.5 h-3.5 text-blue-400" />
-          Hero Visuals
+          Hero
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('promos')}
+          className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-lg text-xs font-semibold transition-all ${
+            activeTab === 'promos'
+              ? 'bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 shadow-sm'
+              : 'text-zinc-400 hover:text-zinc-200'
+          }`}
+        >
+          <Megaphone className="w-3.5 h-3.5 text-emerald-400" />
+          Promos
         </button>
       </div>
 
-      {activeTab === 'ai_cover' ? (
+      {activeTab === 'promos' ? (
+        <div className="space-y-4">
+          <PromotionsStudio
+            pageId={(scope === 'global' ? pages[0]?.id : scope) || ''}
+            initialEnabled={(scope === 'global' ? pages[0]?.global_discount_enabled : selectedPage?.global_discount_enabled) || false}
+            initialPercentage={(scope === 'global' ? pages[0]?.global_discount_percentage : selectedPage?.global_discount_percentage) || 0}
+            initialBannerText={(scope === 'global' ? pages[0]?.global_discount_banner_text : selectedPage?.global_discount_banner_text) || ''}
+            onPromotionChanged={() => setRefreshKey(prev => prev + 1)}
+          />
+        </div>
+      ) : activeTab === 'ai_cover' ? (
         <div className="space-y-4">
           <div className="p-4 bg-zinc-900/60 rounded-xl border border-zinc-800">
             <h3 className="text-sm font-semibold text-white mb-1 flex items-center gap-2">

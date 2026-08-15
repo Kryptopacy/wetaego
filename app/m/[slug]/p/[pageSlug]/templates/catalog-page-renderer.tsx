@@ -62,6 +62,10 @@ interface CatalogPageRendererProps {
     billing_enabled?: boolean
     billing_mode?: string
     template_data?: Record<string, unknown>
+    business_type_preset?: string
+    global_discount_enabled?: boolean
+    global_discount_percentage?: number
+    global_discount_banner_text?: string
   }
   paymentIsLive?: boolean
   items: PageItem[]
@@ -160,6 +164,8 @@ export function CatalogPageRenderer({ location, page, items, locationSlug, payme
         logoUrl={location.organizations?.logo_url}
         themeColor={themeColor}
         tableIdentifier={tableIdentifier}
+        promotionalBanner={page.global_discount_enabled ? page.global_discount_banner_text : null}
+        discountPercentage={page.global_discount_enabled ? page.global_discount_percentage : null}
         location={location}
         maxContentWidth="max-w-4xl"
       />

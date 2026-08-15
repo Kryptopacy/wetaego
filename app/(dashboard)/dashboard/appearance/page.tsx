@@ -67,7 +67,7 @@ export default async function AppearancePage() {
 
   const { data: pages } = await supabase
     .from('location_pages')
-    .select('id, title, slug, design_tokens')
+    .select('id, title, slug, design_tokens, global_discount_enabled, global_discount_percentage, global_discount_banner_text')
     .eq('location_id', activeLocationId)
     .order('created_at')
 

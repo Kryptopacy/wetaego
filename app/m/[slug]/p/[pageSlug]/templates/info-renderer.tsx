@@ -23,6 +23,9 @@ interface InfoRendererProps {
     content?: string
     template_data?: Record<string, unknown>
     background_color?: string
+    global_discount_enabled?: boolean
+    global_discount_percentage?: number
+    global_discount_banner_text?: string
   }
   items: unknown[]
   locationSlug: string
@@ -93,6 +96,8 @@ export function InfoRenderer({ location, page, locationSlug }: InfoRendererProps
         coverImageUrl={location.cover_image_url}
         logoUrl={location.organizations?.logo_url}
         themeColor={themeColor}
+        promotionalBanner={page.global_discount_enabled ? page.global_discount_banner_text : null}
+        discountPercentage={page.global_discount_enabled ? page.global_discount_percentage : null}
         location={location}
         maxContentWidth="max-w-2xl"
       />

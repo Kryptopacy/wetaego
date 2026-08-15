@@ -20,6 +20,8 @@ interface StorefrontHeroProps {
   logoUrl?: string | null
   themeColor?: string | null
   tableIdentifier?: string | null
+  promotionalBanner?: string | null
+  discountPercentage?: number | null
   location: {
     name: string
     portal_display_name?: string | null
@@ -63,6 +65,8 @@ export function StorefrontHero({
   logoUrl,
   themeColor = '#10b981',
   tableIdentifier,
+  promotionalBanner,
+  discountPercentage,
   location,
   maxContentWidth = 'max-w-4xl',
   className = ''
@@ -181,6 +185,25 @@ export function StorefrontHero({
           <p className="text-white/80 text-sm md:text-base font-normal drop-shadow-sm max-w-xl leading-relaxed mb-4">
             {subtitle}
           </p>
+        )}
+
+        {/* Promotional Campaign Banner */}
+        {promotionalBanner && (
+          <div
+            className="mb-4 inline-flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white shadow-lg border backdrop-blur-xl animate-in fade-in slide-in-from-top-2 duration-300"
+            style={{
+              background: `linear-gradient(135deg, ${hexToRgba(primaryColor, 0.4)} 0%, rgba(0,0,0,0.7) 100%)`,
+              borderColor: hexToRgba(primaryColor, 0.5)
+            }}
+          >
+            <span className="p-1 rounded-md bg-white/20 text-white text-xs">🎉</span>
+            <span className="truncate">{promotionalBanner}</span>
+            {discountPercentage !== undefined && discountPercentage !== null && discountPercentage > 0 && (
+              <span className="ml-auto px-2 py-0.5 rounded-full bg-white text-black font-black text-[10px] tracking-wider uppercase">
+                {discountPercentage}% OFF
+              </span>
+            )}
+          </div>
         )}
 
         {/* Persistent Venue Info (Wi-Fi, Hours, Phone, Address) */}

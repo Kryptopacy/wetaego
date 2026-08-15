@@ -148,6 +148,9 @@ export default async function DashboardLayout({ children }: { children: ReactNod
 
           // Add Intercom Hub
           dynamicNavItems.push({ href: '/dashboard/intercom', label: 'Intercom', icon: 'MessagesSquare', badge: 'LIVE' })
+
+          // Add AI Concierge Hub
+          dynamicNavItems.push({ href: '/dashboard/ai', label: 'AI Concierge', icon: 'Bot', badge: 'AI' })
         }
     }
   }

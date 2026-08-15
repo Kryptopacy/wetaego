@@ -11,7 +11,7 @@ import { motion } from 'framer-motion'
 import { createClient } from '@/lib/supabase/client'
 import { setActiveLocationCookie } from './layout-actions'
 import {
-  LayoutDashboard, ClipboardList, BarChart3, BookOpen, CreditCard, Menu, MessageSquare, Package, QrCode, Settings, Users, Zap, X, User, FileText, LogOut, TrendingUp, Truck, MapPin, ChevronDown, Check, Clock, Megaphone
+  LayoutDashboard, ClipboardList, BarChart3, BookOpen, CreditCard, Menu, MessageSquare, Package, QrCode, Settings, Users, Zap, X, User, FileText, LogOut, TrendingUp, Truck, MapPin, ChevronDown, Check, Clock, Megaphone, Bot, Sparkles, Palette, MonitorSmartphone, MessagesSquare
 } from 'lucide-react'
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuGroup, DropdownMenuLabel } from '@/components/ui/dropdown-menu'
 import { GlobalRealtime } from './global-realtime'
@@ -46,7 +46,13 @@ const ICON_MAP: Record<string, React.ElementType> = {
   TrendingUp,
   MessageSquare,
   Package,
-  Clock
+  Clock,
+  Bot,
+  Sparkles,
+  Palette,
+  Truck,
+  MonitorSmartphone,
+  MessagesSquare
 }
 
 

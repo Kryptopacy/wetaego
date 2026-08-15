@@ -58,6 +58,9 @@ interface RateCardRendererProps {
     payment_mode?: string
     deposit_percentage?: number
     background_color?: string
+    global_discount_enabled?: boolean
+    global_discount_percentage?: number
+    global_discount_banner_text?: string
   }
   items: PageItem[]
   locationSlug: string
@@ -180,6 +183,8 @@ export function RateCardRenderer({ location, page, items, locationSlug, paymentI
         templateType="rate_card"
         logoUrl={location.organizations?.logo_url}
         themeColor={themeColor}
+        promotionalBanner={page.global_discount_enabled ? page.global_discount_banner_text : null}
+        discountPercentage={page.global_discount_enabled ? page.global_discount_percentage : null}
         location={location}
         maxContentWidth="max-w-2xl"
       />

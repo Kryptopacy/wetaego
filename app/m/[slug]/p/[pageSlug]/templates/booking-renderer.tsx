@@ -60,6 +60,9 @@ interface BookingRendererProps {
     deposit_percentage?: number
     business_type_preset?: string
     slug?: string
+    global_discount_enabled?: boolean
+    global_discount_percentage?: number
+    global_discount_banner_text?: string
   }
   items: PageItem[]
   locationSlug: string
@@ -199,6 +202,8 @@ export function BookingRenderer({ location, page, items, locationSlug, paymentIs
         templateType="booking"
         logoUrl={location.organizations?.logo_url}
         themeColor={themeColor}
+        promotionalBanner={page.global_discount_enabled ? page.global_discount_banner_text : null}
+        discountPercentage={page.global_discount_enabled ? page.global_discount_percentage : null}
         location={location}
         maxContentWidth="max-w-2xl"
       />
