@@ -307,46 +307,32 @@ export function TimeclockWidget({
   ) : null
 
   if (fullWidth) {
-    // Sidebar card layout
+    // Ultra-sleek sidebar card layout
     return (
       <>
-        <div className="w-full bg-zinc-900/60 border border-zinc-800 rounded-xl p-3 flex flex-col gap-3">
-          {/* Status row */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${activeShiftId ? 'bg-emerald-500/20 text-emerald-400' : 'bg-white/5 text-zinc-500'}`}>
-                <Clock className="w-3.5 h-3.5" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-white font-bold text-xs leading-tight">{time || '--:--'}</span>
-                <span className={`text-[9px] uppercase font-bold tracking-wider ${activeShiftId ? 'text-emerald-500' : 'text-zinc-600'}`}>
-                  {activeShiftId ? 'On Shift' : 'Off Duty'}
-                </span>
-              </div>
+        <div className="w-full bg-zinc-900/50 hover:bg-zinc-900/80 border border-zinc-800/80 hover:border-zinc-700/80 rounded-xl p-2.5 flex items-center justify-between gap-2.5 transition-all shadow-xs">
+          {/* Status info */}
+          <div className="flex items-center gap-2 min-w-0">
+            <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${activeShiftId ? 'bg-emerald-500/20 text-emerald-400' : 'bg-white/5 text-zinc-500'}`}>
+              <Clock className="w-3.5 h-3.5" />
             </div>
-
-            {/* Kiosk link for managers */}
-            {isManager && (
-              <Link
-                href="/dashboard/kiosk"
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 hover:text-white text-[11px] font-semibold transition-all border border-zinc-700/50 shadow-xs"
-                title="Open Kiosk Mode on company device"
-              >
-                <Monitor className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Kiosk Mode</span>
-              </Link>
-            )}
+            <div className="flex flex-col min-w-0">
+              <span className="text-white font-bold text-xs leading-none truncate">{time || '--:--'}</span>
+              <span className={`text-[9px] uppercase font-bold tracking-wider mt-0.5 ${activeShiftId ? 'text-emerald-400' : 'text-zinc-500'}`}>
+                {activeShiftId ? 'On Shift' : 'Off Duty'}
+              </span>
+            </div>
           </div>
 
-          {/* Action button — full width */}
+          {/* Action button */}
           <motion.button
-            whileTap={{ scale: 0.97 }}
+            whileTap={{ scale: 0.96 }}
             onClick={handleAction}
             disabled={loading}
-            className={`w-full flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 cursor-pointer ${
               activeShiftId
-                ? 'bg-rose-500/15 text-rose-400 hover:bg-rose-500 hover:text-white border border-rose-500/20 hover:border-rose-500'
-                : 'bg-emerald-500 text-white shadow-md shadow-emerald-500/20 hover:bg-emerald-400'
+                ? 'bg-rose-500/15 text-rose-400 hover:bg-rose-500 hover:text-white border border-rose-500/20'
+                : 'bg-emerald-500 text-white hover:bg-emerald-400 shadow-xs'
             }`}
           >
             {loading ? <GemstoneSpinner size="xs" className="w-3 h-3" /> : clockInLabel}

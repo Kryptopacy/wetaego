@@ -51,6 +51,11 @@ function hexToRgba(hex: string, alpha: number) {
   return `rgba(${r},${g},${b},${alpha})`
 }
 
+function formatTitle(str: string) {
+  if (!str) return ''
+  return str.replace(/\b([a-z])/g, (_, char) => char.toUpperCase())
+}
+
 /**
  * Ultra-premium Storefront Hero used across all customer-facing templates and portals.
  * Renders rich ambient depth, glass badge indicators, and atmospheric lighting even with zero custom uploads.
@@ -72,7 +77,15 @@ export function StorefrontHero({
   className = ''
 }: StorefrontHeroProps) {
   const primaryColor = themeColor || '#10b981'
-  const initials = (title || location.name || 'OM').slice(0, 2).toUpperCase()
+  const displayTitle = formatTitle(title)
+  const venueName = location.portal_display_name || location.name || title || 'OM'
+  const initials = venueName
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map(w => w[0])
+    .join('')
+    .toUpperCase() || 'OM'
   const effectiveCover = coverImageUrl || getDefaultCoverForPreset(businessTypePreset, templateType)
 
   return (
@@ -168,7 +181,7 @@ export function StorefrontHero({
         {/* Main Title & Table Badge */}
         <div className="flex items-center flex-wrap gap-3 mb-2">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight leading-tight drop-shadow-md">
-            {title}
+            {displayTitle}
           </h1>
           {tableIdentifier && (
             <span

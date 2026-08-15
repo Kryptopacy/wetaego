@@ -218,28 +218,42 @@ export function AIChat({
 
   return (
     <>
-      {/* ── Floating Trigger ── */}
+      {/* ── Luxury Floating AI Trigger Capsule ── */}
       <motion.button
         onClick={() => setIsOpen(!isOpen)}
-        animate={{ scale: [1, 1.03, 1] }}
-        transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-        whileHover={{ scale: 1.07 }}
-        whileTap={{ scale: 0.93 }}
+        animate={{ y: [0, -3, 0] }}
+        transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
         aria-label={isOpen ? 'Close AI Assistant' : 'Open AI Assistant'}
-        className="relative z-40 h-12 px-5 rounded-full flex items-center gap-2 cursor-pointer overflow-hidden border border-white/20 backdrop-blur-md group"
+        className="relative z-40 h-12 pl-3.5 pr-4.5 rounded-full flex items-center gap-2.5 cursor-pointer overflow-hidden border border-white/15 hover:border-white/30 backdrop-blur-xl bg-zinc-950/90 group shadow-2xl transition-colors"
         style={{
-          backgroundColor: tc,
-          boxShadow: `0 6px 28px ${tcAlpha(0.45)}, 0 2px 8px ${tcAlpha(0.3)}`,
+          boxShadow: `0 12px 36px rgba(0,0,0,0.7), 0 0 24px ${tcAlpha(0.25)}`,
         }}
       >
         {/* Shimmer sweep */}
         <motion.div
           animate={{ x: ['-100%', '200%'] }}
-          transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut', repeatDelay: 3 }}
-          className="absolute inset-0 bg-linear-to-r from-transparent via-white/20 to-transparent skew-x-12 pointer-events-none"
+          transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut', repeatDelay: 3.5 }}
+          className="absolute inset-0 bg-linear-to-r from-transparent via-white/15 to-transparent skew-x-12 pointer-events-none"
         />
-        <Sparkles className="w-4 h-4 text-white/90 shrink-0" />
-        <span className="text-white font-bold text-sm tracking-wide relative z-10">{persona.baseName}</span>
+
+        {/* Illuminated Bot Avatar Bubble */}
+        <div
+          className="w-7 h-7 rounded-full flex items-center justify-center border shadow-xs shrink-0 relative"
+          style={{ backgroundColor: `${tc}25`, borderColor: `${tc}50` }}
+        >
+          <Sparkles className="w-3.5 h-3.5" style={{ color: tc }} />
+          <span
+            className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full border border-black"
+            style={{ backgroundColor: tc }}
+          />
+        </div>
+
+        <div className="flex flex-col items-start leading-none text-left">
+          <span className="text-[10px] font-semibold tracking-wider uppercase text-zinc-400">AI Concierge</span>
+          <span className="text-white font-bold text-xs tracking-tight mt-0.5">Ask {persona.baseName}</span>
+        </div>
       </motion.button>
 
       {/* ── Slide-in Panel ── */}

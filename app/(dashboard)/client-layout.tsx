@@ -11,7 +11,7 @@ import { motion } from 'framer-motion'
 import { createClient } from '@/lib/supabase/client'
 import { setActiveLocationCookie } from './layout-actions'
 import {
-  LayoutDashboard, ClipboardList, BarChart3, BookOpen, CreditCard, Menu, MessageSquare, Package, QrCode, Settings, Users, Zap, X, User, FileText, LogOut, TrendingUp, Truck, MapPin, ChevronDown, Check, Clock, Megaphone, Bot, Sparkles, Palette, MonitorSmartphone, MessagesSquare
+  LayoutDashboard, ClipboardList, BarChart3, BookOpen, CreditCard, Menu, MessageSquare, Package, QrCode, Settings, Users, Zap, X, User, FileText, LogOut, TrendingUp, Truck, MapPin, ChevronDown, Check, Clock, Megaphone, Bot, Sparkles, Palette, MonitorSmartphone, MessagesSquare, ExternalLink, Monitor
 } from 'lucide-react'
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuGroup, DropdownMenuLabel } from '@/components/ui/dropdown-menu'
 import { GlobalRealtime } from './global-realtime'
@@ -423,22 +423,10 @@ export default function ClientLayout({ children, initialData }: { children: Reac
             </div>
           )}
 
-          {locationSlug && (
-            <a 
-              href={`/m/${locationSlug}?preview=true`} 
-              target="_blank" 
-              rel="noreferrer"
-              className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 text-white text-sm font-medium rounded-xl transition-all mb-4 group"
-            >
-              Live Preview
-              <svg className="w-4 h-4 text-zinc-500 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
-            </a>
-          )}
-
           <Link 
             href="/dashboard/profile"
             onClick={onClose}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-zinc-400 hover:text-white hover:bg-white/5 transition-all w-full mb-1"
+            className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-zinc-400 hover:text-white hover:bg-white/5 transition-all w-full mb-1"
           >
             <User className="w-4 h-4" />
             <span>My Profile</span>
@@ -529,7 +517,31 @@ export default function ClientLayout({ children, initialData }: { children: Reac
             )}
           </div>
           {/* Right: global controls */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
+            {isOwnerOrManager && (
+              <Link
+                href="/dashboard/kiosk"
+                className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 text-zinc-300 hover:text-white text-xs font-semibold rounded-xl transition-all shadow-xs"
+                title="Launch Kiosk Mode for Tablets & Staff Stations"
+              >
+                <Monitor className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Kiosk Mode</span>
+              </Link>
+            )}
+
+            {locationSlug && (
+              <a
+                href={`/m/${locationSlug}?preview=true`}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 hover:border-emerald-500/50 text-emerald-400 hover:text-emerald-300 text-xs font-bold rounded-xl transition-all shadow-sm group"
+                title="Open Live Public Storefront"
+              >
+                <span>Live Storefront</span>
+                <ExternalLink className="w-3.5 h-3.5 text-emerald-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+              </a>
+            )}
+
             {credits !== null && (
               <Link href="/dashboard/billing" className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 rounded-full border border-emerald-500/20 transition-colors shadow-sm cursor-pointer hover:scale-105 active:scale-95 duration-200">
                 <Zap className="w-3.5 h-3.5 text-emerald-400" />

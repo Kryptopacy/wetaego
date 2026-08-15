@@ -275,14 +275,18 @@ export function CatalogPageRenderer({ location, page, items, locationSlug, payme
                       className={`rounded-2xl border p-4 transition-all ${isAvail ? 'border-zinc-800 bg-zinc-900/50 hover:border-zinc-700 backdrop-blur-sm' : 'border-zinc-800/40 bg-zinc-900/20 opacity-60'} ${bentoClass} ${masonryClass}`}
                     >
                       <div className="flex items-start justify-between gap-3">
-                        {item.images?.[0] && (
+                        {item.images?.[0] ? (
                           <div className="w-18 h-18 shrink-0 rounded-xl overflow-hidden bg-zinc-800 relative block">
                             <Image src={item.images[0]} alt={item.title} fill className="object-cover" />
+                          </div>
+                        ) : (
+                          <div className="w-14 h-14 shrink-0 rounded-xl bg-linear-to-br from-zinc-800 to-zinc-900 border border-white/5 flex items-center justify-center text-zinc-400 font-bold text-xs shadow-inner">
+                            <span className="uppercase tracking-wider">{item.title.slice(0, 2)}</span>
                           </div>
                         )}
                         <div className="flex-1 min-w-0">
                           <div className="flex flex-wrap items-center gap-2">
-                            <h3 className="font-bold text-white text-sm">{item.title}</h3>
+                            <h3 className="font-bold text-white text-sm capitalize">{item.title}</h3>
                             {item.item_data?.variants?.find(v => v.name.toLowerCase() === 'condition') && (
                               <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full border ${getConditionBadgeStyles(item.item_data.variants.find(v => v.name.toLowerCase() === 'condition')!.options[0] || '')}`}>
                                 {item.item_data.variants.find(v => v.name.toLowerCase() === 'condition')!.options[0]}
