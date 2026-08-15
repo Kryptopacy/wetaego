@@ -11,14 +11,14 @@ export async function createAd(data: {
   target_link: string
 }) {
   const supabase = await createClient()
-  const { error } = await supabase.from('sponsored_ads').insert([
+  const { data: insertedAd, error } = await supabase.from('sponsored_ads').insert([
     {
       ...data,
       is_platform_ad: false, // Merchants can only create BYO ads
       approval_status: 'approved', // BYO ads are auto-approved for their own catalog
       is_active: true
     }
-  ])
+  ]).select().single()
 
   if (error) {
     return { error: error.message }
@@ -26,7 +26,7 @@ export async function createAd(data: {
 
   revalidatePath('/dashboard/ads')
   revalidatePath('/m/[slug]', 'layout') // Revalidate public portals
-  return { success: true }
+  return { success: true, ad: insertedAd }
 }
 
 export async function toggleAdStatus(adId: string, isActive: boolean) {

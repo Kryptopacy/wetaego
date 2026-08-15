@@ -224,15 +224,16 @@ function CreateAdForm({ locations, onSuccess, onCancel }: { locations: {id: stri
     setLoading(false)
     if (res.error) {
       toast.error(res.error)
-    } else if (res.ad) {
+    } else {
       toast.success('Ad campaign created successfully')
+      const created = (res as { ad?: Ad }).ad
       onSuccess({
-        id: res.ad.id,
-        location_id: res.ad.location_id,
-        title: res.ad.title,
-        category: res.ad.category,
-        image_url: res.ad.image_url,
-        target_link: res.ad.target_link,
+        id: created?.id || Math.random().toString(),
+        location_id: created?.location_id || (formData.get('location_id') as string),
+        title: created?.title || (formData.get('title') as string),
+        category: created?.category || (formData.get('category') as string),
+        image_url: created?.image_url || imageUrl,
+        target_link: created?.target_link || (formData.get('target_link') as string),
         is_active: true,
         approval_status: 'approved'
       })
