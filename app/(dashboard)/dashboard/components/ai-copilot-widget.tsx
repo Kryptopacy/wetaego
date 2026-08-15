@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useChat, UIMessage, Chat } from '@ai-sdk/react'
 import { DefaultChatTransport } from 'ai'
-import { X, Send, Sparkles, AlertCircle, Radio, PhoneOff, Camera, CameraOff, RefreshCw, ChevronRight, Eye, Mic } from 'lucide-react'
+import { X, Send, Sparkles, AlertCircle, Radio, PhoneOff, Camera, RefreshCw, ChevronRight, Eye, EyeOff, Mic, ShieldAlert } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useSpeech } from '@/hooks/use-speech'
 import { useGeminiLive } from '@/hooks/use-gemini-live'
@@ -23,7 +23,7 @@ export function AICopilotWidget({ organizationId }: { organizationId: string }) 
 
   const [conversationMode, setConversationMode] = useState(false)
 
-  const { isSupported: isSpeechSupported, isListening, startListening, stopListening, speak, cancelSpeech } = useSpeech({
+  const { isSupported: _isSpeechSupported, isListening: _isListening, startListening: _startListening, stopListening, speak, cancelSpeech } = useSpeech({
     onTranscriptComplete: (text) => {
       if (conversationMode) {
         sendMessage({ text })
@@ -33,7 +33,7 @@ export function AICopilotWidget({ organizationId }: { organizationId: string }) 
     },
     onSpeechEnd: () => {
       if (conversationMode && isOpen && mode === 'text') {
-        startListening()
+        _startListening()
       }
     }
   })
@@ -145,18 +145,19 @@ export function AICopilotWidget({ organizationId }: { organizationId: string }) 
         whileHover={{ scale: 1.06 }}
         whileTap={{ scale: 0.94 }}
         aria-label={isOpen ? 'Close Tego AI' : 'Open Tego AI'}
-        className={`fixed bottom-20 md:bottom-24 right-6 z-90 h-11 px-5 rounded-full border border-emerald-500/40 hover:border-emerald-400/80 group flex items-center justify-center overflow-hidden cursor-grab active:cursor-grabbing bg-zinc-950/90 backdrop-blur-xl transition-all duration-300 shadow-[0_8px_32px_rgba(16,185,129,0.18)] ${
+        className={`fixed bottom-20 md:bottom-24 right-4 sm:right-6 z-90 h-12 px-5 rounded-full border border-emerald-500/40 hover:border-emerald-400/80 group flex items-center justify-center overflow-hidden cursor-grab active:cursor-grabbing bg-zinc-950/95 backdrop-blur-xl transition-all duration-300 shadow-[0_8px_32px_rgba(16,185,129,0.22)] ${
           isOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'
         }`}
       >
         <Image src="/hero_emerald_gemstone.png" alt="Tego AI" fill className="object-cover opacity-40 group-hover:opacity-60 transition-opacity" />
         <div className="absolute inset-0 bg-linear-to-r from-black/70 via-black/40 to-black/70" />
-        <span className="relative z-10 font-black tracking-tight text-sm bg-linear-to-r from-white via-emerald-50 to-emerald-300 bg-clip-text text-transparent drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] select-none">
+        <span className="relative z-10 font-black tracking-tight text-sm bg-linear-to-r from-white via-emerald-50 to-emerald-300 bg-clip-text text-transparent drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] select-none flex items-center gap-2">
+          <Sparkles className="w-4 h-4 text-emerald-400 animate-pulse" />
           Tego AI
         </span>
       </motion.button>
 
-      {/* ── Panel ── */}
+      {/* ── Main Panel ── */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -168,13 +169,13 @@ export function AICopilotWidget({ organizationId }: { organizationId: string }) 
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.94, y: 16 }}
             transition={{ type: 'spring', damping: 26, stiffness: 300 }}
-            className="fixed bottom-20 md:bottom-24 right-4 sm:right-6 z-90 w-[calc(100vw-2rem)] sm:w-96 h-140 rounded-3xl flex flex-col overflow-hidden border border-emerald-500/20 bg-zinc-950/95 shadow-2xl backdrop-blur-2xl"
+            className="fixed bottom-20 md:bottom-24 right-3 sm:right-6 z-90 w-[calc(100vw-1.5rem)] sm:w-[410px] max-h-[85vh] h-[560px] rounded-3xl flex flex-col overflow-hidden border border-emerald-500/30 bg-zinc-950/95 shadow-2xl backdrop-blur-2xl"
             style={{
-              boxShadow: '0 24px 64px -12px rgba(0, 0, 0, 0.8), 0 0 32px 0 rgba(16, 185, 129, 0.08)'
+              boxShadow: '0 24px 64px -12px rgba(0, 0, 0, 0.85), 0 0 36px 0 rgba(16, 185, 129, 0.12)'
             }}
           >
             {/* Top iridescent border accent */}
-            <div className="absolute top-0 left-0 right-0 h-px bg-linear-to-r from-transparent via-emerald-500/50 to-transparent" />
+            <div className="absolute top-0 left-0 right-0 h-px bg-linear-to-r from-transparent via-emerald-500/60 to-transparent" />
 
             {/* ── Header ── */}
             <div className="shrink-0 flex items-center justify-between px-4 py-3 cursor-grab active:cursor-grabbing border-b border-white/5"
@@ -225,26 +226,48 @@ export function AICopilotWidget({ organizationId }: { organizationId: string }) 
 
             {/* ── Live Voice & Vision View ── */}
             {mode === 'live' ? (
-              <div className="flex-1 flex flex-col justify-between p-5 overflow-y-auto" style={{ background: 'radial-gradient(ellipse at 50% 30%, rgba(16,185,129,0.08) 0%, transparent 70%)' }}>
-                <div className="flex flex-col items-center justify-center my-auto space-y-5 text-center w-full">
+              <div className="flex-1 flex flex-col justify-between p-4 sm:p-5 overflow-y-auto" style={{ background: 'radial-gradient(ellipse at 50% 30%, rgba(16,185,129,0.08) 0%, transparent 70%)' }}>
+                <div className="flex flex-col items-center justify-center my-auto space-y-4 text-center w-full">
                   {isCameraActive ? (
-                    <div className="relative w-full rounded-2xl overflow-hidden border border-emerald-500/40 shadow-2xl bg-black aspect-video">
+                    /* ── AR Viewfinder Camera Screen ── */
+                    <div className="relative w-full rounded-2xl overflow-hidden border border-emerald-500/40 shadow-2xl bg-black aspect-video max-h-52">
                       <video ref={videoElementRef} autoPlay playsInline muted className="w-full h-full object-cover" />
-                      <div className="absolute top-2 left-2 flex items-center gap-1.5 bg-black/80 backdrop-blur-md px-3 py-1 rounded-full border border-emerald-500/30 shadow-lg">
+                      
+                      {/* Viewfinder Reticles */}
+                      <div className="absolute inset-3 pointer-events-none border border-emerald-500/20 rounded-lg flex flex-col justify-between p-2">
+                        <div className="flex justify-between text-emerald-400 font-mono text-[9px] opacity-70">
+                          <span>⌜ SCANNING</span>
+                          <span>⌝</span>
+                        </div>
+                        <div className="flex justify-between text-emerald-400 font-mono text-[9px] opacity-70">
+                          <span>⌞</span>
+                          <span>1 FPS ⌟</span>
+                        </div>
+                      </div>
+
+                      {/* Vision Active Pill */}
+                      <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 bg-black/80 backdrop-blur-md px-2.5 py-1 rounded-full border border-emerald-500/40 shadow-lg">
                         <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                        <span className="text-[10px] text-emerald-300 font-bold tracking-wider uppercase">Tego Eyes Active</span>
+                        <span className="text-[9px] text-emerald-300 font-bold tracking-wider uppercase">Tego Eyes Active</span>
                       </div>
-                      <div className="absolute bottom-2 right-2 bg-black/70 backdrop-blur-md px-2.5 py-0.5 rounded-md text-[10px] text-zinc-300 font-mono">
-                        {cameraFacingMode === 'user' ? 'Front Lens' : 'Rear Lens'}
-                      </div>
+
+                      {/* Quick Flip Button Overlay */}
+                      <button
+                        type="button"
+                        onClick={switchCamera}
+                        className="absolute top-2.5 right-2.5 p-1.5 rounded-full bg-black/70 hover:bg-black/90 text-zinc-300 hover:text-white border border-white/10 backdrop-blur-md transition-all cursor-pointer"
+                        title="Flip Front / Rear Lens"
+                      >
+                        <RefreshCw className="w-3.5 h-3.5" />
+                      </button>
                     </div>
                   ) : (
-                    /* Gemstone Orb with Sound Wave Ripple */
-                    <div className="relative flex items-center justify-center py-4">
+                    /* ── Gemstone Orb with Radiant Ripple ── */
+                    <div className="relative flex items-center justify-center py-2">
                       <motion.div
                         animate={{
-                          scale: isLiveSpeaking ? [1, 1.3, 1] : isLiveConnected ? [1, 1.12, 1] : [1, 1.04, 1],
-                          opacity: isLiveSpeaking ? [0.35, 0.7, 0.35] : isLiveConnected ? [0.2, 0.4, 0.2] : [0.1, 0.2, 0.1],
+                          scale: isLiveSpeaking ? [1, 1.35, 1] : isLiveConnected ? [1, 1.15, 1] : [1, 1.05, 1],
+                          opacity: isLiveSpeaking ? [0.4, 0.75, 0.4] : isLiveConnected ? [0.2, 0.45, 0.2] : [0.1, 0.2, 0.1],
                         }}
                         transition={{ duration: isLiveSpeaking ? 1.4 : 2.5, repeat: Infinity, ease: 'easeInOut' }}
                         className="absolute w-36 h-36 rounded-full bg-emerald-500/25 blur-2xl pointer-events-none"
@@ -254,7 +277,7 @@ export function AICopilotWidget({ organizationId }: { organizationId: string }) 
                           scale: isLiveSpeaking ? [1, 1.06, 1] : [1, 1.02, 1],
                         }}
                         transition={{ duration: 1.2, repeat: Infinity, ease: 'easeInOut' }}
-                        className={`relative w-24 h-24 rounded-3xl overflow-hidden border-2 flex items-center justify-center shadow-2xl transition-all ${
+                        className={`relative w-22 h-22 rounded-3xl overflow-hidden border-2 flex items-center justify-center shadow-2xl transition-all ${
                           isLiveSpeaking
                             ? 'border-emerald-400 bg-emerald-500/20 shadow-[0_0_40px_rgba(16,185,129,0.5)]'
                             : isLiveConnected
@@ -262,7 +285,7 @@ export function AICopilotWidget({ organizationId }: { organizationId: string }) 
                               : 'border-zinc-800 bg-zinc-900/60'
                         }`}
                       >
-                        <Image src="/hero_emerald_gemstone.png" alt="Tego Live" fill className="object-cover opacity-80" />
+                        <Image src="/hero_emerald_gemstone.png" alt="Tego Live" fill className="object-cover opacity-85" />
                         <div className="absolute inset-0 bg-emerald-950/20" />
                         <div className="relative z-10">
                           {isLiveSpeaking ? (
@@ -277,15 +300,15 @@ export function AICopilotWidget({ organizationId }: { organizationId: string }) 
 
                   <div>
                     <p className="text-sm font-bold text-white tracking-tight">
-                      {isLiveSpeaking ? 'Tego is speaking…' : isLiveConnected ? (isCameraActive ? 'Tego is watching & listening…' : 'Listening… Speak freely') : isLiveConnecting ? 'Connecting stream…' : 'Tap to start'}
+                      {isLiveSpeaking ? 'Tego is speaking…' : isLiveConnected ? (isCameraActive ? 'Watching & listening… Speak naturally' : 'Listening… Ask anything') : isLiveConnecting ? 'Connecting live stream…' : 'Tap to start'}
                     </p>
-                    <p className="text-[11px] text-zinc-400 mt-1 max-w-60 mx-auto leading-relaxed">
-                      {isLiveConnected ? (isCameraActive ? 'Show menus, dishes, POS screens, or invoices.' : 'Gemini Live bidirectional conversation.') : 'Ultra-low latency real-time voice & vision.'}
+                    <p className="text-[11px] text-zinc-400 mt-0.5 max-w-64 mx-auto leading-relaxed">
+                      {isLiveConnected ? (isCameraActive ? 'Hold up a menu, dish, screen, or invoice.' : 'Speak freely. Tap "Share Eyes" to show your camera.') : 'Bidirectional real-time Gemini multimodal session.'}
                     </p>
                   </div>
 
                   {liveTranscripts.length > 0 && (
-                    <div className="w-full max-h-28 overflow-y-auto bg-zinc-950/80 border border-zinc-800/60 rounded-2xl p-3 text-left space-y-1.5 custom-scrollbar">
+                    <div className="w-full max-h-24 overflow-y-auto bg-zinc-950/80 border border-zinc-800/60 rounded-2xl p-3 text-left space-y-1.5 custom-scrollbar">
                       {liveTranscripts.slice(-4).map((t) => (
                         <div key={t.id} className={`text-[11px] leading-relaxed ${t.role === 'user' ? 'text-zinc-400' : 'text-emerald-400 font-semibold'}`}>
                           <span className="opacity-50 uppercase tracking-widest text-[9px] font-bold">{t.role === 'user' ? 'You ' : 'Tego '}</span>
@@ -304,7 +327,7 @@ export function AICopilotWidget({ organizationId }: { organizationId: string }) 
                 </div>
 
                 {/* Live Controls Bar */}
-                <div className="flex items-center justify-center gap-2 pt-4 border-t border-white/5 mt-2">
+                <div className="flex items-center justify-center gap-2 pt-3 border-t border-white/5 mt-1">
                   <button
                     type="button"
                     onClick={() => isCameraActive ? stopCamera() : startCamera()}
@@ -314,20 +337,9 @@ export function AICopilotWidget({ organizationId }: { organizationId: string }) 
                         : 'bg-zinc-900 border-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-800'
                     }`}
                   >
-                    {isCameraActive ? <Camera className="w-4 h-4 text-emerald-400" /> : <Eye className="w-4 h-4 text-emerald-400" />}
-                    {isCameraActive ? 'Eyes On' : 'Share Camera'}
+                    {isCameraActive ? <EyeOff className="w-4 h-4 text-emerald-400" /> : <Eye className="w-4 h-4 text-emerald-400" />}
+                    {isCameraActive ? 'Hide Eyes' : 'Share Eyes (Camera)'}
                   </button>
-
-                  {isCameraActive && (
-                    <button
-                      type="button"
-                      onClick={switchCamera}
-                      className="p-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors cursor-pointer"
-                      title="Switch Camera lens"
-                    >
-                      <RefreshCw className="w-4 h-4" />
-                    </button>
-                  )}
 
                   <button
                     type="button"
@@ -335,14 +347,14 @@ export function AICopilotWidget({ organizationId }: { organizationId: string }) 
                     className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-red-500/15 hover:bg-red-500/25 text-red-400 border border-red-500/30 text-xs font-bold transition-colors cursor-pointer"
                   >
                     <PhoneOff className="w-4 h-4" />
-                    End Call
+                    End Session
                   </button>
                 </div>
               </div>
             ) : (
               /* ── Text Chat View ── */
               <>
-                {/* Messages */}
+                {/* Messages Container */}
                 <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3.5 custom-scrollbar">
                   {messages.length === 0 && (
                     <div className="flex flex-col h-full">
@@ -355,7 +367,7 @@ export function AICopilotWidget({ organizationId }: { organizationId: string }) 
                             className="absolute inset-0 w-24 h-24 rounded-full bg-emerald-500/25 blur-xl -translate-x-2 -translate-y-2"
                           />
                           <div className="relative w-16 h-16 rounded-3xl overflow-hidden border border-emerald-500/30 shadow-[0_0_28px_rgba(16,185,129,0.2)] mx-auto">
-                            <Image src="/hero_emerald_gemstone.png" alt="Tego" fill className="object-cover opacity-80" />
+                            <Image src="/hero_emerald_gemstone.png" alt="Tego" fill className="object-cover opacity-85" />
                             <div className="absolute inset-0 flex items-center justify-center bg-emerald-950/20">
                               <Sparkles className="w-6 h-6 text-emerald-300 drop-shadow-md" />
                             </div>
@@ -450,9 +462,10 @@ export function AICopilotWidget({ organizationId }: { organizationId: string }) 
                       type="button"
                       onClick={startLiveVisionAndVoice}
                       title="Activate Tego's Eyes (Live Camera & Multimodal Vision)"
-                      className="p-2.5 rounded-2xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-emerald-500/40 text-emerald-400 hover:text-emerald-300 transition-all flex items-center justify-center shrink-0 cursor-pointer shadow-sm group"
+                      className="h-10 px-2.5 sm:px-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-emerald-500/50 text-emerald-400 hover:text-emerald-300 transition-all flex items-center gap-1.5 shrink-0 cursor-pointer shadow-sm group"
                     >
                       <Eye className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                      <span className="hidden sm:inline text-[11px] font-bold">Eyes</span>
                     </button>
 
                     {/* Text Input */}
