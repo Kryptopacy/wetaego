@@ -4,11 +4,19 @@ import { useState, useEffect } from 'react'
 import { Database } from '@/lib/supabase/types'
 import { formatCurrency } from '@/lib/utils/currency'
 import { createClient } from '@/lib/supabase/client'
-import { Package, Truck, CheckCircle, Clock, MapPin, User as UserIcon, Phone } from 'lucide-react'
+import { Package, Truck, CheckCircle, Clock, MapPin, User as UserIcon, Phone, Settings2, Sliders, X } from 'lucide-react'
 import { toast } from 'sonner'
+import { saveDeliveryRules } from './actions'
 
 type Order = Database['public']['Tables']['orders']['Row'] & {
   order_items: Database['public']['Tables']['order_items']['Row'][]
+}
+
+interface DeliveryRulesState {
+  delivery_enabled: boolean
+  delivery_fee_minor: number
+  delivery_minimum_order_minor: number
+  delivery_note: string
 }
 
 interface DeliveryClientProps {
@@ -16,6 +24,8 @@ interface DeliveryClientProps {
   organizationId: string
   locationId: string
   currencyCode: string
+  pageId?: string
+  initialDeliverySettings?: DeliveryRulesState
 }
 
 type ColumnStatus = 'preparing' | 'out_for_delivery' | 'completed'
@@ -26,9 +36,24 @@ const COLUMNS: { id: ColumnStatus; label: string; icon: React.ElementType; color
   { id: 'completed', label: 'Completed', icon: CheckCircle, color: 'bg-emerald-500/10 text-emerald-500', border: 'border-emerald-500/20' }
 ]
 
-export function DeliveryClient({ initialOrders, organizationId, locationId, currencyCode }: DeliveryClientProps) {
+export function DeliveryClient({
+  initialOrders,
+  organizationId,
+  locationId,
+  currencyCode,
+  pageId,
+  initialDeliverySettings
+}: DeliveryClientProps) {
   const [orders, setOrders] = useState<Order[]>(initialOrders)
   const [selectedDepartment, setSelectedDepartment] = useState<string>('All')
+  const [isRulesOpen, setIsRulesOpen] = useState(false)
+  const [isSavingRules, setIsSavingRules] = useState(false)
+  const [rules, setRules] = useState<DeliveryRulesState>(initialDeliverySettings || {
+    delivery_enabled: false,
+    delivery_fee_minor: 0,
+    delivery_minimum_order_minor: 0,
+    delivery_note: ''
+  })
   const supabase = createClient()
   
   const availableDepartments = Array.from(new Set(
@@ -95,39 +120,84 @@ export function DeliveryClient({ initialOrders, organizationId, locationId, curr
       setOrders(previousOrders)
     }
   }
+
+  async function handleSaveRules(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    setIsSavingRules(true)
+    const formData = new FormData()
+    formData.append('locationId', locationId)
+    if (pageId) formData.append('pageId', pageId)
+    if (rules.delivery_enabled) formData.append('delivery_enabled', 'on')
+    formData.append('delivery_fee_minor', rules.delivery_fee_minor.toString())
+    formData.append('delivery_minimum_order_minor', rules.delivery_minimum_order_minor.toString())
+    formData.append('delivery_note', rules.delivery_note || '')
+
+    try {
+      const res = await saveDeliveryRules(formData)
+      if (res?.serverError || res?.validationErrors) {
+        toast.error(res?.serverError || 'Validation error saving delivery rules')
+      } else {
+        toast.success('Delivery rules & dispatch rates updated!')
+        setIsRulesOpen(false)
+      }
+    } catch {
+      toast.error('Failed to update delivery rules')
+    } finally {
+      setIsSavingRules(false)
+    }
+  }
+
   return (
-    <div className="flex flex-col h-full gap-4">
-      {/* Filters */}
-      {availableDepartments.length > 0 && (
+    <div className="flex flex-col h-full gap-4 relative">
+      {/* Top Bar with Filters & Quick Delivery Settings */}
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-zinc-900/60 p-3 rounded-2xl border border-zinc-800">
         <div className="flex items-center gap-3">
-          <label className="text-sm text-zinc-400 font-medium">Workstation:</label>
-          <div className="flex flex-wrap gap-2">
-            <button
-              onClick={() => setSelectedDepartment('All')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
-                selectedDepartment === 'All' 
-                  ? 'bg-blue-500 text-white' 
-                  : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
-              }`}
-            >
-              All
-            </button>
-            {availableDepartments.map(dept => (
-              <button
-                key={dept}
-                onClick={() => setSelectedDepartment(dept)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
-                  selectedDepartment === dept 
-                    ? 'bg-blue-500 text-white' 
-                    : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
-                }`}
-              >
-                {dept}
-              </button>
-            ))}
-          </div>
+          {availableDepartments.length > 0 && (
+            <>
+              <label className="text-xs text-zinc-400 font-semibold uppercase tracking-wider">Workstation:</label>
+              <div className="flex flex-wrap gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setSelectedDepartment('All')}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors ${
+                    selectedDepartment === 'All' 
+                      ? 'bg-blue-600 text-white' 
+                      : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
+                  }`}
+                >
+                  All
+                </button>
+                {availableDepartments.map(dept => (
+                  <button
+                    key={dept}
+                    type="button"
+                    onClick={() => setSelectedDepartment(dept)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors ${
+                      selectedDepartment === dept 
+                        ? 'bg-blue-600 text-white' 
+                        : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
+                    }`}
+                  >
+                    {dept}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
         </div>
-      )}
+
+        <button
+          type="button"
+          onClick={() => setIsRulesOpen(true)}
+          className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-bold border border-zinc-700 transition-all hover:border-zinc-500 shadow-sm ml-auto"
+        >
+          <Sliders className="w-3.5 h-3.5 text-indigo-400" />
+          Delivery Rules & Dispatch Rates
+          {rules.delivery_enabled && (
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          )}
+        </button>
+      </div>
 
       {/* Board */}
       <div className="flex-1 flex gap-6 overflow-x-auto pb-4 snap-x snap-mandatory">
@@ -233,6 +303,135 @@ export function DeliveryClient({ initialOrders, organizationId, locationId, curr
         )
       })}
     </div>
+
+    {/* ── Slide-Over Delivery Rules & Rates Drawer ── */}
+    {isRulesOpen && (
+      <div className="fixed inset-0 z-50 flex items-center justify-end bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+        <div className="w-full max-w-md h-full bg-zinc-900 border-l border-zinc-800 p-6 shadow-2xl flex flex-col justify-between overflow-y-auto animate-in slide-in-from-right duration-300">
+          <div>
+            <div className="flex items-center justify-between pb-4 border-b border-zinc-800 mb-6">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
+                  <Truck className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-white text-base">Delivery Rules & Rates</h3>
+                  <p className="text-xs text-zinc-400">Configure fulfillment terms for this venue.</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsRulesOpen(false)}
+                className="p-2 rounded-xl hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form id="deliveryRulesForm" onSubmit={handleSaveRules} className="space-y-5">
+              {/* Toggle Delivery */}
+              <div className="flex items-center justify-between p-4 rounded-xl border border-zinc-800 bg-zinc-950/60">
+                <div>
+                  <label htmlFor="deliveryEnabledToggle" className="text-sm font-semibold text-white block">
+                    Enable Customer Delivery
+                  </label>
+                  <p className="text-xs text-zinc-400 mt-0.5">
+                    Allow guests to enter delivery addresses at checkout.
+                  </p>
+                </div>
+                <input
+                  type="checkbox"
+                  id="deliveryEnabledToggle"
+                  checked={rules.delivery_enabled}
+                  onChange={(e) => setRules(r => ({ ...r, delivery_enabled: e.target.checked }))}
+                  className="h-5 w-5 rounded border-zinc-700 bg-zinc-800 text-emerald-500 focus:ring-emerald-500 cursor-pointer shrink-0"
+                />
+              </div>
+
+              {/* Delivery Fee */}
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-2">
+                  Flat Delivery Fee ({currencyCode})
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={rules.delivery_fee_minor / 100}
+                  onChange={(e) => {
+                    const val = parseFloat(e.target.value) || 0
+                    setRules(r => ({ ...r, delivery_fee_minor: Math.round(val * 100) }))
+                  }}
+                  className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-indigo-500"
+                  placeholder="e.g. 5.00"
+                />
+                <p className="text-xs text-zinc-500 mt-1.5">
+                  Added automatically to the checkout subtotal when Delivery is selected.
+                </p>
+              </div>
+
+              {/* Minimum Order */}
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-2">
+                  Minimum Order Value ({currencyCode})
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={rules.delivery_minimum_order_minor / 100}
+                  onChange={(e) => {
+                    const val = parseFloat(e.target.value) || 0
+                    setRules(r => ({ ...r, delivery_minimum_order_minor: Math.round(val * 100) }))
+                  }}
+                  className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-indigo-500"
+                  placeholder="e.g. 20.00"
+                />
+                <p className="text-xs text-zinc-500 mt-1.5">
+                  Guests cannot place a delivery order below this cart value.
+                </p>
+              </div>
+
+              {/* Delivery Note */}
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-2">
+                  Dispatch Delivery Notes & Instructions
+                </label>
+                <textarea
+                  rows={3}
+                  value={rules.delivery_note}
+                  onChange={(e) => setRules(r => ({ ...r, delivery_note: e.target.value }))}
+                  className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-indigo-500"
+                  placeholder="e.g. Estimated delivery 30-45 mins. Drivers dispatched from Main Island Hub."
+                  maxLength={500}
+                />
+                <p className="text-xs text-zinc-500 mt-1.5">
+                  Shown directly to the customer in the checkout delivery selection box.
+                </p>
+              </div>
+            </form>
+          </div>
+
+          <div className="flex items-center justify-end gap-3 pt-6 border-t border-zinc-800 mt-6">
+            <button
+              type="button"
+              onClick={() => setIsRulesOpen(false)}
+              className="px-4 py-2.5 text-zinc-400 hover:text-white font-medium text-xs transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              form="deliveryRulesForm"
+              disabled={isSavingRules}
+              className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold rounded-xl text-xs transition-all shadow-lg shadow-indigo-600/20 flex items-center gap-1.5"
+            >
+              {isSavingRules ? 'Saving Changes...' : 'Save Delivery Rules'}
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
     </div>
   )
 }
