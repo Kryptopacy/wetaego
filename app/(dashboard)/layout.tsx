@@ -151,6 +151,9 @@ export default async function DashboardLayout({ children }: { children: ReactNod
 
           // Add AI Concierge Hub
           dynamicNavItems.push({ href: '/dashboard/ai', label: 'AI Concierge', icon: 'Bot', badge: 'AI' })
+
+          // Add QR & Signage Hub
+          dynamicNavItems.push({ href: '/dashboard/qr', label: 'QR & Signage', icon: 'QrCode' })
         }
     }
   }
