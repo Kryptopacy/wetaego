@@ -23,7 +23,7 @@ export default async function AppearancePage() {
   // Fetch location and organization details
   const { data: loc } = await supabase
     .from('locations')
-    .select('id, theme_color, cover_image_url, design_tokens, organization_id, organizations(id, slug, subscription_tier, purchased_credits, monthly_free_credits_used)')
+    .select('id, slug, theme_color, cover_image_url, design_tokens, organization_id, organizations(id, slug, subscription_tier, purchased_credits, monthly_free_credits_used)')
     .eq('id', activeLocationId)
     .single()
 
@@ -54,7 +54,6 @@ export default async function AppearancePage() {
   }
 
   const orgData = Array.isArray(loc.organizations) ? loc.organizations[0] : loc.organizations
-  const orgSlug = orgData?.slug
 
   let creditsRemaining = 0
   if (orgData) {
@@ -67,7 +66,7 @@ export default async function AppearancePage() {
 
   const { data: pages } = await supabase
     .from('location_pages')
-    .select('id, title, slug, design_tokens, global_discount_enabled, global_discount_percentage, global_discount_banner_text')
+    .select('id, title, slug, cover_image_url, design_tokens, global_discount_enabled, global_discount_percentage, global_discount_banner_text')
     .eq('location_id', activeLocationId)
     .order('created_at')
 
@@ -78,7 +77,7 @@ export default async function AppearancePage() {
       themeColor={loc.theme_color || '#10b981'}
       coverImageUrl={loc.cover_image_url}
       creditsRemaining={creditsRemaining}
-      storefrontSlug={orgSlug || ''}
+      storefrontSlug={loc.slug || ''}
       pages={pages || []}
     />
   )

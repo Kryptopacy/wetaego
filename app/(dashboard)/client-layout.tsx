@@ -209,6 +209,7 @@ export default function ClientLayout({ children, initialData }: { children: Reac
       tooltip: 'Manage your offerings, categories, and items'
     },
     { href: '/dashboard/pages', label: 'Your Pages', icon: FileText, tooltip: 'Manage your business pages and branding' },
+    { href: '/dashboard/qr', label: 'QR & Signage', icon: QrCode, tooltip: 'Generate print-ready QR codes for tables, rooms, and pages' },
     { href: '/dashboard/inventory', label: 'Inventory (BOM)', icon: Package, tooltip: 'Bill of Materials - Track ingredients and items used per service' },
     { href: '/dashboard/customers', label: 'CRM & Loyalty', icon: Users, tooltip: 'Manage customer profiles and loyalty points' },
     { href: '/dashboard/team-performance', label: 'Performance', icon: BarChart3, tooltip: 'Business ratings, customer feedback, and staff leaderboard' },

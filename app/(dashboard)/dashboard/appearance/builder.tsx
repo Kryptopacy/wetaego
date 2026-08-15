@@ -32,7 +32,10 @@ export function LiveBuilder({
   const [refreshKey, setRefreshKey] = useState(0)
   
   // Scope selector state
-  const [scope, setScope] = useState<'global' | string>('global') // 'global' or pageId
+  const [scope, setScope] = useState<'global' | string>(() => {
+    if (pages.length > 1) return 'global'
+    return pages[0]?.id || 'global'
+  })
   const currentTokens = scope === 'global' ? tokens : (pages.find(p => p.id === scope)?.design_tokens || tokens)
 
   // Whenever tokens change, send a postMessage to the iframe
@@ -49,7 +52,7 @@ export function LiveBuilder({
 
   const selectedPage = pages.find(p => p.id === scope)
   const baseSrc = scope === 'global' 
-    ? `/m/${storefrontSlug}?preview=true` 
+    ? (pages.length === 1 ? `/m/${storefrontSlug}/p/${pages[0]?.slug}?preview=true` : `/m/${storefrontSlug}?preview=true`)
     : `/m/${storefrontSlug}/p/${selectedPage?.slug}?preview=true`
   const iframeSrc = refreshKey ? `${baseSrc}&_v=${refreshKey}` : baseSrc
 
@@ -132,21 +135,43 @@ export function LiveBuilder({
       ) : (
         <>
           {/* Scope Selector */}
-          <div className="mb-6 p-4 bg-zinc-900 rounded-xl border border-zinc-800">
-            <label className="block text-xs font-medium text-zinc-400 mb-2 uppercase tracking-wider">Editing Scope</label>
-            <select 
-              value={scope}
-              onChange={(e) => setScope(e.target.value)}
-              className="w-full bg-zinc-800 text-white border-zinc-700 rounded-lg p-2 text-sm focus:ring-emerald-500 focus:border-emerald-500"
-            >
-              <option value="global">Global (All Pages)</option>
-              {pages.map(p => (
-                <option key={p.id} value={p.id}>Page: {p.title}</option>
-              ))}
-            </select>
-            {scope !== 'global' && (
-              <p className="text-xs text-zinc-500 mt-2">
-                Any changes made here will only apply to {selectedPage?.title}, overriding the Global aesthetic.
+          <div className="mb-6 p-4 bg-zinc-900/80 rounded-2xl border border-zinc-800">
+            <label className="block text-xs font-semibold text-zinc-400 mb-2 uppercase tracking-wider">
+              Editing Scope
+            </label>
+            {pages.length <= 1 ? (
+              <div className="flex items-center justify-between p-3 bg-zinc-950 border border-zinc-800 rounded-xl">
+                <span className="text-xs font-bold text-white truncate">
+                  📄 {pages[0]?.title || 'Storefront Menu'}
+                </span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-bold shrink-0">
+                  Single Page Mode
+                </span>
+              </div>
+            ) : (
+              <select 
+                value={scope}
+                onChange={(e) => {
+                  const newScope = e.target.value
+                  setScope(newScope)
+                  if (newScope !== 'global') {
+                    const p = pages.find(page => page.id === newScope)
+                    if (p?.cover_image_url) setCurrentCover(p.cover_image_url)
+                  } else {
+                    setCurrentCover(coverImageUrl)
+                  }
+                }}
+                className="w-full bg-zinc-950 text-white border-zinc-800 rounded-xl p-2.5 text-xs font-bold focus:ring-emerald-500 focus:border-emerald-500"
+              >
+                <option value="global">🌐 Portal Hub (Directory Landing Page)</option>
+                {pages.map(p => (
+                  <option key={p.id} value={p.id}>📄 Page: {p.title}</option>
+                ))}
+              </select>
+            )}
+            {scope !== 'global' && pages.length > 1 && (
+              <p className="text-xs text-zinc-500 mt-2 leading-relaxed">
+                Changes made here specifically style <span className="text-zinc-300 font-semibold">{selectedPage?.title}</span>, overriding global portal defaults.
               </p>
             )}
           </div>
