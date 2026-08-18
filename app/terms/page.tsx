@@ -1,8 +1,12 @@
 import React from 'react'
+import type { Metadata } from 'next'
 
-export const metadata = {
+export const metadata: Metadata = {
   title: 'Terms of Service | OurMenu OS',
   description: 'Terms and conditions for using OurMenu OS',
+  alternates: {
+    canonical: 'https://ourmenuos.online/terms',
+  },
 }
 
 export default function TermsPage() {

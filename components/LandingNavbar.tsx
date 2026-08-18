@@ -27,9 +27,9 @@ export function LandingNavbar() {
   }, [isOpen]);
 
   const navLinks = [
-    { name: "Platform", href: "/#features" },
+    { name: "Features", href: "/features" },
+    { name: "Solutions", href: "/#features" },
     { name: "Pricing", href: "/#pricing" },
-    { name: "Customers", href: "/#testimonials" },
     { name: "Affiliates", href: "/affiliates" },
   ];
 

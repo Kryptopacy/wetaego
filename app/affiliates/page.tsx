@@ -1,9 +1,13 @@
 import Link from 'next/link'
 import { LandingNavbar } from '@/components/LandingNavbar'
+import type { Metadata } from 'next'
 
-export const metadata = {
+export const metadata: Metadata = {
   title: 'Affiliate Program | OurMenu OS',
-  description: 'Refer restaurants and hospitality venues to OurMenu OS and earn lifetime recurring commissions.'
+  description: 'Refer restaurants and hospitality venues to OurMenu OS and earn lifetime recurring commissions.',
+  alternates: {
+    canonical: 'https://ourmenuos.online/affiliates',
+  },
 }
 
 export default function AffiliatesLandingPage() {

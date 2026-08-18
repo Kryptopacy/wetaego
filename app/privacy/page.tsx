@@ -1,8 +1,12 @@
 import React from 'react'
+import type { Metadata } from 'next'
 
-export const metadata = {
+export const metadata: Metadata = {
   title: 'Privacy Policy | OurMenu OS',
   description: 'How we collect and protect your data at OurMenu OS',
+  alternates: {
+    canonical: 'https://ourmenuos.online/privacy',
+  },
 }
 
 export default function PrivacyPage() {

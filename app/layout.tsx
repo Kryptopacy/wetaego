@@ -15,6 +15,9 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://ourmenuos.online'),
+  alternates: {
+    canonical: 'https://ourmenuos.online',
+  },
   title: {
     default: "OurMenu OS | Storefronts & Operations for Hospitality, Retail & Services",
     template: "%s | OurMenu OS"

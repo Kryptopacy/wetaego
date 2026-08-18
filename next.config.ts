@@ -106,6 +106,20 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: '/affiliate',
+        destination: '/affiliates',
+        permanent: true,
+      },
+      {
+        source: '/roulette',
+        destination: '/tools/who-pays-the-bill',
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {

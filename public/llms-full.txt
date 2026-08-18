@@ -1,35 +1,40 @@
-# OurMenu OS — Full Technical & Product Documentation
+# OurMenu OS — Full Technical & Architecture Specification
 
-OurMenu OS is a universal, multi-tenant operating system and SaaS platform built to unify digital presence, customer ordering, operations, inventory, design customization, and payment processing for physical and service businesses across 9 major industry templates.
+> **Official Production URL**: https://ourmenuos.online  
+> **Documentation Feed**: https://ourmenuos.online/llms-full.txt  
+> **Sitemap**: https://ourmenuos.online/sitemap.xml  
+> **Robots Directives**: https://ourmenuos.online/robots.txt  
+
+OurMenu OS is a universal, multi-tenant operating system and SaaS platform built to unify digital presence, customer ordering, frontline live operations, in-built CRM, staff intercom, customer feedback, inventory management, design customization, multi-branch fleet management, raw hardware ESC/POS thermal printing, and multi-gateway billing across 9 major physical and service industry verticals.
 
 ---
 
 ## 1. System Architecture & Core Stack
 
-- **Frontend Core**: Next.js (App Router), React, TypeScript, Tailwind CSS, Framer Motion.
-- **PWA & Offline First**: `@ducanh2912/next-pwa` with Service Worker background sync, `idb-keyval` IndexedDB offline cart persistence, and `useOfflineSync` queue.
-- **Backend & Database**: Supabase (PostgreSQL) with Row-Level Security (RLS), atomic database functions, and real-time WebSocket subscriptions.
+- **Frontend Core**: Next.js (App Router), React, TypeScript, Tailwind CSS, Framer Motion, Lucide Icons, Sonner.
+- **PWA & Offline First**: `@ducanh2912/next-pwa` with Service Worker background sync, `idb-keyval` IndexedDB offline cart persistence, and `useOfflineSync` queue for guaranteed transaction delivery during network drops.
+- **Backend & Database**: Supabase (PostgreSQL 15+) with Row-Level Security (RLS), atomic stored procedures, and real-time WebSocket subscriptions for instant order routing.
 - **Edge Security & WAF**: Upstash Redis for global rate-limiting, idempotency enforcement, and DDOS mitigation.
 - **AI Infrastructure**:
   - **Tego Multimodal Live API**: WebAudio & Camera streaming via `gemini-3.1-flash-live-preview` (`@google/genai`) using secure server-minted ephemeral tokens (`/api/ai/live-token`). Supports bidirectional 16kHz audio input, 24kHz audio playback with instant barge-in interruption, and 1 FPS camera video ingestion.
-  - **Frontline Public Assistant**: Adaptive domain-specific AI assistant (`/api/chat`) with strict zero-hallucination guardrails, public tool calling, and human handoff routing.
-  - **Admin AI Co-Pilot**: Deep operational intelligence (`/api/ai/copilot`) for analytics, inventory adjustments, and live design token modifications.
+  - **Frontline Public Concierge**: Adaptive domain-specific AI assistant (`/api/chat`) with strict zero-hallucination guardrails, public tool calling, and human handoff routing.
+  - **Admin AI Co-Pilot**: Deep operational intelligence (`/api/ai/copilot`) for cross-branch analytics, inventory adjustments, and live design token modifications.
 - **Payment & Settlement**: Multi-gateway abstraction supporting Paystack & Bachs (Cards, Bank Transfers, USSD, Crypto USDC/USDT/SOL, Subaccount splits, and IOU store credit).
 
 ---
 
-## 2. Universal Design System & Multi-Template Architecture
+## 2. The 9 Core Industry Templates & Universal Design Tokens
 
-### A. The 9 Core Template Renderers
-1. **Catalog & Restaurant Menu** (`menu-renderer.tsx`, `catalog-page-renderer.tsx`): Bento grid hero layouts, masonry columns, or compact lists with real-time dietary filtering.
-2. **Booking & Wellness** (`booking-renderer.tsx`): Spa treatments, salon styling, and hotel reservations with date/time slot selection and deposit billing.
-3. **Services & Rate Card** (`rate-card-renderer.tsx`): Package tiers, scope checklists, and hourly rate calculators for creators and freelancers.
+### A. Template Renderers
+1. **Catalog & Restaurant Menu** (`menu-renderer.tsx`, `catalog-page-renderer.tsx`): Bento grid hero layouts, masonry columns, or compact lists with real-time dietary filtering (vegan, halal, gluten-free, nut-free, keto).
+2. **Booking & Wellness** (`booking-renderer.tsx`): Spa treatments, salon styling, clinics, and hotel reservations with date/time slot selection and deposit billing.
+3. **Services & Rate Card** (`rate-card-renderer.tsx`): Package tiers, scope checklists, and hourly rate calculators for creators, influencers, and agencies.
 4. **B2B Dynamic Quote** (`quote-renderer.tsx`): Interactive scope builder, milestone estimates, and custom project lead submission.
-5. **Real Estate & Listings** (`listing-renderer.tsx`): Property specifications, photo galleries, virtual tours, and broker inquiries.
-6. **Portfolio** (`portfolio-renderer.tsx`): Showcase tiles, project case studies, and creative work galleries.
-7. **Universal Card** (`item-card.tsx`): Adaptive card with video/VR embedding, dietary badges, and structured modifiers.
-8. **Multi-Page Hub Portal** (`portal-renderer.tsx`): Multi-location or multi-division parent brand hub.
-9. **Live Builder** (`app/(dashboard)/dashboard/appearance/builder.tsx`): Split-screen desktop and mobile bottom-sheet visual editor with zero-refresh `postMessage` synchronization.
+5. **Real Estate & Listings** (`listing-renderer.tsx`): Property specifications, photo galleries, virtual tours, and broker WhatsApp inquiries.
+6. **Automotive Dealership** (`listing-renderer.tsx`): Vehicle specifications, mileage, transmission, condition, and test drive booking.
+7. **Portfolio** (`portfolio-renderer.tsx`): Showcase tiles, project case studies, and creative work galleries.
+8. **Universal Card** (`item-card.tsx`): Adaptive card with video/VR embedding, dietary badges, and structured modifiers.
+9. **Multi-Page Hub Portal** (`portal-renderer.tsx`): Multi-location or multi-division parent brand hub.
 
 ### B. Universal Theme Tokens (`ThemeInjector` & `PageThemeOverride`)
 - Tokens Engine: JSONB `design_tokens` column stored on `locations` (Global) and `location_pages` (Per-Page Override).
@@ -40,24 +45,25 @@ OurMenu OS is a universal, multi-tenant operating system and SaaS platform built
   - `typography`: `modern` | `elegant` | `playful` | `industrial`
   - `density`: `airy` | `standard` | `cozy`
   - `color_theme`: `true_dark` | `dim` | `light` | `tinted`
-- **"Revert to Global Settings" Fail-Safe**: 1-click restoration button allowing pages to seamlessly resync with global brand tokens.
+- **1-Click "Revert to Global Settings" Fail-Safe**: Immediate restoration mechanism allowing individual pages to resync with global brand tokens.
 
 ---
 
 ## 3. Tego Autonomous AI System
 
 ### A. Tego Admin Co-Pilot (Voice & Vision)
-- Accessible from the Merchant Dashboard floating widget.
 - **Voice Mode**: Real-time ultra-low latency conversational dialogue with barge-in interruption.
 - **Vision Mode**: Point smartphone/tablet camera at physical menus, handwritten receipts, stock shelves, or kitchen dishes for instant recognition and extraction.
 - **Admin Tools**:
-  - `update_brand_appearance`: Voice-controlled live design token updates (global or page-specific).
+  - `update_brand_appearance`: Voice-controlled live design token updates.
   - `get_business_structure`: Query locations, pages, and template types.
   - `get_recent_orders`: Check incoming customer orders.
-  - `query_os_documentation`: Ingest and explain platform features.
+  - `create_fleet_location`: Autonomously launch new physical store branches.
+  - `duplicate_page_catalog`: Autonomously clone product catalogs across branches in <1s.
+  - `query_os_documentation`: Instant RAG lookup over technical platform specifications.
 
 ### B. Frontline Public Tego Assistant
-- **Adaptive Identity**: Defaults to `"Tego • {businessName}"` (or custom name configured in `locations.ai_name`, e.g. `"Bella • {businessName}"`).
+- **Adaptive Identity**: Configured via `locations.ai_name` (e.g., `"Tego • {businessName}"`).
 - **Domain Subtitles**: *Live Dining Assistant*, *Wellness & Booking Specialist*, *Product Guide*, *Property Advisor*, *Scope & Quote Specialist*.
 - **Autonomous Public Tools**:
   - `addToCart`, `removeFromCart`, `clearCart`, `checkout`
@@ -67,16 +73,11 @@ OurMenu OS is a universal, multi-tenant operating system and SaaS platform built
   - `getProductSpecs`, `checkStock`, `requestSalesAssociate`
   - `submitCustomQuoteLead`, `requestConsultantCallback`
 - **Zero-Hallucination Guardrails**: Strictly restricted to verified database facts (`menus`, `menu_items`, `page_items`, `location_pages`, `ai_faqs`, `operating_hours`, `delivery_rules`). If unlisted, refuses to guess and triggers immediate staff escalation.
-- **Custom Quick Action Chips**: 1-tap chips displayed above the input (`locations.brand_knowledge`, `locations.ai_faqs`, or default domain chips).
-
-### C. Dashboard Human Handoff Loop
-- When customer asks for human staff or asks an unlisted question, a ticket is created in `service_requests`.
-- `ServiceRequestsPanel` on `/dashboard/orders` receives real-time WebSocket push with sound chime and customer query context.
-- Staff resolve or take over with 1-click **"✓ Mark Resolved & Hand Back"**.
+- **Dashboard Human Handoff Loop**: Unresolved queries push real-time WebSocket tickets into `service_requests` with sound chimes for staff to attend and hand back.
 
 ---
 
-## 4. Supermarkets, Multi-Branch Fleet & Franchise Management
+## 4. Supermarket Chains & Multi-Branch Fleet Management
 
 ### A. Pages vs. Fleet Architectural Boundaries
 - **Fleet Management (`locations`)**: Physical branch stores across different cities/neighborhoods (e.g. Lekki Mega Store, Ikeja Mall Branch, Abuja Central Branch). Each location maintains dedicated geofencing, physical addresses, localized taxes/currencies, and independent stock pools.
@@ -84,49 +85,112 @@ OurMenu OS is a universal, multi-tenant operating system and SaaS platform built
 
 ### B. Fleet Administration & Context Switching
 - **Top-Left Unified Switcher**: Allows headquarters to toggle between **"🌐 All Businesses (Global View)"** (aggregating cross-branch revenue, ticket volume, and stock counts) and specific branch/department views with zero page reload.
-- **Instant Branch Provisioning**: Admins launch new physical locations in Settings -> Locations (`/dashboard/settings?tab=locations`).
 - **1-Click Franchise Duplication (`duplicatePageAction`)**: When launching a new branch with thousands of catalog SKUs, managers duplicate the master catalog in `< 1 second`, recursively cloning all collections, items, prices, and taxonomy mappings.
 - **Granular Franchise RBAC**: Branch managers are cryptographically restricted to their assigned store (`location_id` or `page_id`) in `organization_members`.
 
 ---
 
-## 5. Add-On & Growth Modules
+## 5. In-Built CRM, Staff Intercom & Feedback Reputation Loop
 
-1. **Lucky Wheel Spinner**: Gamified discount wheel triggered contextually at checkout.
-2. **Surprise Me Randomizer**: Interactive dish/service roulette for undecided customers.
-3. **In-House Delivery Rules**: Configurable delivery fee, minimum order threshold, and delivery notes.
-4. **Deposit & Partial Billing**: Percentage deposits for bookings and table reservations.
-5. **IOU Customer Credit**: Buy Now Pay Later customer ledger with credit limits and repayment terms.
-6. **QR Routing Engine**: Decoupled physical QR codes dynamically routed to any location or page.
-7. **Native Raw ESC/POS Thermal Printing**: WebUSB, WebSerial, and WebBluetooth bytecode direct printing.
+### A. Automatic Customer Shadow Profiles & Broadcast Marketing
+- Automatically aggregates guest phone numbers, visit frequency, average check size, and total Lifetime Value (LTV) on every transaction.
+- Filter guests by spending tiers (VIP, Regular, Lapsed 30+ days) and broadcast high-converting SMS/Email promotional campaigns with 1 click.
 
----
+### B. Real-Time Staff Intercom & Kitchen Dispatch
+- Zero-latency WebSocket intercom and push-to-talk audio connecting kitchen displays, bar workstations, and floor waitstaff.
+- Instant dish-ready notifications and guest table calls (water, bill, service) dispatched directly to server devices.
 
-## 6. The 5 Pillars of Self-Service "Human-Proof" UX
+### C. PIN-Verified Customer Feedback & CSAT Loop
+- Automated email receipts include a cryptographic 4-digit PIN ensuring only verified paying customers submit reviews.
+- Private grievance resolution flow alerts managers to service complaints before negative reviews hit Google or Yelp.
+- Gamified staff performance leaderboard tracks tip analytics, CSAT ratings, and table turn speed.
 
-1. **Adaptive Context-Aware Onboarding Engine** (`onboarding-checklist.tsx`): Dynamically adapts terminology and setup tasks to the merchant's business template (`catalog`, `booking`, `rate_card`, `listing`).
-2. **Self-Healing State & Auto-Provisioning Pipeline** (`menu/page.tsx`): Automatically creates default primary catalogs on uninitialized states, eliminating blank screens and 404 dead ends.
-3. **Multimodal AI Menu & Price Sheet Ingestion** (`/api/ai/parse-menu`): Zero-data-entry onboarding from physical menus, flyers, and clipboard photos via OCR and structured schema extraction.
-4. **Tego 24/7 Autonomous Voice & Chat Co-Pilot** (`/api/ai/copilot`): Answers merchant questions and directly executes administrative tools (`create_fleet_location`, `duplicate_page_catalog`, `update_brand_appearance`).
-5. **Live Visual Builder with 1-Click Fail-Safe** (`builder.tsx`): WYSIWYG editor with live phone preview (<16ms sync) and a 1-click **"Revert to Global Settings"** safety net.
-
----
-
-## 7. API & Webhook Endpoints
-
-- Ephemeral Token Minting: `POST /api/ai/live-token`
-- Admin Copilot: `POST /api/ai/copilot`
-- Public Frontline Chat: `POST /api/chat`
-- Webhooks: `/api/webhooks/paystack`, `/api/webhooks/bachs`
-- Menu Parser: `POST /api/ai/parse-menu`
-- Storefront Actions: `POST /m/[slug]/actions`
+### D. Flash Deals, Happy Hours & Smart Upselling
+- Scheduled time-based happy hour discounts and limited-quantity chef drop specials that automatically appear and expire.
+- Real-time cart upselling recommendations to maximize average order value (AOV).
 
 ---
 
-## 8. Official Links & Resources
+## 6. Native Raw Hardware ESC/POS Binary Printing
 
-- Canonical URL: https://ourmenuos.online
-- Technical Specification: https://ourmenuos.online/llms-full.txt
-- Sitemap: https://ourmenuos.online/sitemap.xml
-- Robots: https://ourmenuos.online/robots.txt
-- PWA Manifest: https://ourmenuos.online/manifest.json
+OurMenu OS contains a zero-dependency, native ESC/POS bytecode engine (`lib/utils/escpos-driver.ts`) that writes raw binary bytes directly to thermal receipt printers from modern browsers:
+- **WebUSB (`navigator.usb`)**: Direct USB endpoint communication with thermal printers. Zero print dialogs, zero desktop daemons, instant hardware paper cuts, and cash drawer kick pulses (`ESC p`).
+- **WebSerial / COM (`navigator.serial`)**: RS-232 and virtual COM port support with configurable baud rates (9600 to 115200).
+- **WebBluetooth BLE (`navigator.bluetooth`)**: Wireless thermal receipt printing to portable mobile belt printers.
+- **Epson ePOS XML & Kiosk HTML**: Network LAN printing and universal fallback iframe printing.
+
+---
+
+## 7. Payment Rails & Settlement
+
+1. **Paystack Integration**: Full support for credit/debit cards, bank transfers, USSD, Apple Pay, and automated subaccount split payouts.
+2. **Bachs Crypto Settlement**: Instant settlement in USDC, USDT, and SOL for cross-border and decentralized transactions.
+3. **Manual Bank Transfer Verification**: Zero-gateway bank transfers with instant reference matching and cashier confirmation.
+4. **Deposit & Partial Billing**: Configurable percentage deposits (e.g., 20%, 50%) for appointments, reservations, and custom quotes.
+5. **Customer IOU Ledger (BNPL)**: "Pay Later" customer credit tracking with automated reminder alerts and risk controls.
+
+---
+
+## 8. Visual Resource Manager & Dynamic QR Fleet
+
+- **Decoupled Dynamic QR Fleet**: Bulk pre-printed QR tents assigned dynamically to physical tables/registers via the "Scan-to-Assign" manager flow.
+- **Hardware Locking (Desk Pay)**: When a terminal parameter `?terminal=res_xxxx` is present, the interface locks into a dedicated cashier register POS.
+
+---
+
+## 9. Viral Gamification & Customer Retention
+
+1. **Payment Roulette Game**: Interactive wheel game that randomly selects who pays the restaurant bill or splits the check among dining guests.
+2. **Surprise Me Randomizer**: Dish and cocktail recommendation roulette for undecided diners.
+3. **Lucky Wheel Spinner**: Post-checkout discount gamification to boost repeat visits.
+
+---
+
+## 10. Dedicated Feature URLs
+
+- **Feature Directory**: https://ourmenuos.online/features
+- **Restaurant QR Digital Menus**: https://ourmenuos.online/features/restaurant-qr-menu
+- **Supermarket & Multi-Branch POS**: https://ourmenuos.online/features/supermarket-multi-branch-pos
+- **Salon & Spa Booking System**: https://ourmenuos.online/features/salon-spa-booking-system
+- **Retail Boutiques & E-Commerce**: https://ourmenuos.online/features/retail-boutique-ecommerce
+- **Rate Cards & B2B Quotes**: https://ourmenuos.online/features/rate-card-consulting-quotes
+- **Real Estate & Vehicle Listings**: https://ourmenuos.online/features/real-estate-vehicle-listings
+- **Tego Multimodal AI**: https://ourmenuos.online/features/ai-copilot-tego-multimodal
+- **In-Built CRM & Broadcasts**: https://ourmenuos.online/features/hospitality-crm-customer-broadcasts
+- **Staff Intercom & Kitchen Radio**: https://ourmenuos.online/features/staff-intercom-kitchen-communication
+- **Customer Feedback & CSAT**: https://ourmenuos.online/features/customer-feedback-reputation-management
+- **Flash Deals & Smart Upselling**: https://ourmenuos.online/features/flash-deals-upselling-engine
+- **Customer IOU Financing**: https://ourmenuos.online/features/customer-iou-financing
+- **Payment Roulette Game**: https://ourmenuos.online/features/payment-roulette
+- **Interactive Payment Roulette Tool**: https://ourmenuos.online/tools/who-pays-the-bill
+- **Affiliate Partner Program**: https://ourmenuos.online/affiliates
+
+---
+
+## 11. API & Webhook Endpoints
+
+- **Live Token Minting**: `POST /api/ai/live-token`
+- **Admin Copilot Intelligence**: `POST /api/ai/copilot`
+- **Frontline Public Assistant**: `POST /api/chat`
+- **Menu OCR Parser**: `POST /api/ai/parse-menu`
+- **Payment Webhooks**: `POST /api/webhooks/paystack`, `POST /api/webhooks/bachs`
+- **Storefront Actions**: `POST /m/[slug]/actions`
+
+---
+
+## 12. Security, Privacy & Compliance
+
+- **Authentication**: Supabase Auth with Server-Side Session Refresh in `proxy.ts`.
+- **WAF & Rate Limiting**: Upstash Redis sliding window limiter (100 req / 10s per IP on API and payment paths).
+- **Compliance**: Fully compliant with **Nigerian Data Protection Regulation (NDPR)** and **General Data Protection Regulation (GDPR)**.
+- **AI Data Privacy**: Customer and merchant PII is **never** used to train public AI models.
+
+---
+
+## 13. Contact & Official Resources
+
+- **Website**: https://ourmenuos.online
+- **Support**: support@ourmenuos.online
+- **Privacy Policy**: https://ourmenuos.online/privacy
+- **Terms of Service**: https://ourmenuos.online/terms
+- **Organization**: CRUISEHQ LTD / KRYPTOPACY

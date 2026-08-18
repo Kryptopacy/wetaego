@@ -15,37 +15,109 @@ import { UseCases } from './components/use-cases'
 import { RouletteTeaser } from './components/roulette-teaser'
 import { IouTeaser } from './components/iou-teaser'
 
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'OurMenu OS | Storefronts & Operations for Hospitality, Retail & Services',
+  description: 'The complete operating layer for modern businesses. Build your digital storefront, manage operations, and process payments instantly with 9 specialized industry templates and Tego Multimodal AI.',
+  alternates: {
+    canonical: 'https://ourmenuos.online',
+  },
+}
+
 export default async function HomePage() {
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    "name": "OurMenu OS",
-    "alternateName": "ourmenuos",
-    "operatingSystem": "Web",
-    "applicationCategory": "BusinessApplication",
-    "description": "The ultimate operating layer for multi-business operations. Supports dynamic templates for Hospitality, Retail Boutiques, Wellness Services, Real Estate Listings, Consultant Rate Cards, Automotive Dealerships, and Multi-venue Portals.",
-    "featureList": [
-      "Omnichannel Checkout",
-      "Live Fulfillment Dashboard",
-      "AI Demand Forecasting",
-      "Smart Upselling Engine",
-      "Payment Roulette Game",
-      "Bill Splitting Randomizer",
-      "Who Pays The Bill Roulette",
-      "Progressive Web App (PWA)",
-      "Franchise Mode & Branch Autonomy"
-    ],
-    "url": "https://ourmenuos.online",
-    "offers": {
-      "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "USD",
-      "description": "Free Starter Plan available"
-    },
-    "provider": {
-      "@type": "Organization",
-      "name": "KRYPTOPACY"
-    }
+    "@graph": [
+      {
+        "@type": "SoftwareApplication",
+        "@id": "https://ourmenuos.online/#software",
+        "name": "OurMenu OS",
+        "alternateName": ["ourmenuos", "OurMenu", "OurMenu Operating System"],
+        "operatingSystem": "Web, iOS, Android, PWA",
+        "applicationCategory": "BusinessApplication",
+        "description": "The ultimate operating layer for multi-business operations. Supports dynamic templates for Hospitality, Supermarket Chains, Retail Boutiques, Wellness Services, Real Estate Listings, Consultant Rate Cards, Automotive Dealerships, and Multi-venue Portals.",
+        "featureList": [
+          "Omnichannel POS & Digital Checkout",
+          "Tego Multimodal Live Voice & Vision AI",
+          "Dynamic QR Digital Menu & Table Intercom",
+          "Supermarket & Multi-Branch Fleet Management",
+          "Native Raw ESC/POS Thermal Printing Driver (WebUSB/WebSerial/WebBluetooth)",
+          "Salon & Spa Calendar Booking with Deposit Billing",
+          "B2B Interactive Dynamic Quotes & Rate Cards",
+          "Payment Roulette & Bill Splitting Randomizer Game",
+          "Customer IOU Store Credit & Tab Financing Ledger",
+          "1-Click Franchise Catalog Duplication in <1s",
+          "Multi-Gateway Settlement (Paystack, Bachs, USDC/USDT/SOL)"
+        ],
+        "url": "https://ourmenuos.online",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD",
+          "description": "Free Starter Plan available"
+        },
+        "provider": {
+          "@type": "Organization",
+          "@id": "https://ourmenuos.online/#organization",
+          "name": "KRYPTOPACY",
+          "url": "https://ourmenuos.online"
+        }
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://ourmenuos.online/#website",
+        "url": "https://ourmenuos.online",
+        "name": "OurMenu OS",
+        "description": "Instant multi-template digital presence and operating system for physical and service businesses.",
+        "publisher": {
+          "@id": "https://ourmenuos.online/#organization"
+        },
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://ourmenuos.online/m/{search_term_string}",
+          "query-input": "required name=search_term_string"
+        }
+      },
+      {
+        "@type": "FAQPage",
+        "@id": "https://ourmenuos.online/#faq",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What businesses can use OurMenu OS?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "OurMenu OS supports 9 tailored industry templates: Restaurants & Bars (QR digital menus, split bills, kitchen display), Supermarkets & Retail Chains (multi-branch fleet switcher, sub-department aisles, ESC/POS printing), Salons & Spas (appointment bookings, deposit billing), Retail Boutiques (variants, inventory), Consultants & Agencies (media rate cards, dynamic quotes), Real Estate & Automotive (property/car showrooms), and Multi-venue Portals."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What is Tego Multimodal AI?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Tego AI is our dual-layer intelligence engine powered by Gemini 3.1 Flash Live. It provides bidirectional low-latency voice dialogue and 1 FPS camera video ingestion for managers to parse physical menus or stock shelves, plus a zero-hallucination frontline concierge on customer storefronts."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does OurMenu OS support direct thermal receipt printing?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes! OurMenu OS features a native raw ESC/POS bytecode engine that writes direct binary commands over WebUSB, WebSerial (RS232 COM), and WebBluetooth to thermal receipt printers without needing print daemons, third-party software, or print dialogs."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What is the Payment Roulette game?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Payment Roulette is an interactive, gamified bill randomizer built into OurMenu OS that lets dining parties spin a digital wheel to randomly decide who pays the restaurant bill or how the check is split."
+            }
+          }
+        ]
+      }
+    ]
   };
 
   return (
@@ -232,7 +304,7 @@ export default async function HomePage() {
           <p className="text-zinc-400 text-lg md:text-xl max-w-2xl mx-auto font-light mb-10">
             Join our affiliate program and earn a percentage of the revenue for every venue you refer. Rack up invites, track your conversions, and get paid out automatically via our transparent dashboard.
           </p>
-          <Link href="/affiliate" className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-white/5 border border-white/10 text-white text-sm font-semibold hover:bg-white/10 transition-colors">
+          <Link href="/affiliates" className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-white/5 border border-white/10 text-white text-sm font-semibold hover:bg-white/10 transition-colors">
             Learn about Affiliates <ArrowRight className="w-4 h-4 text-zinc-400" />
           </Link>
         </div>
@@ -265,17 +337,57 @@ export default async function HomePage() {
       </section>
 
       {/* ── FOOTER ── */}
-      <footer className="border-t border-white/[0.04] py-12 px-6">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-3">
-            <Image src="/ourmenu-qr-icon.svg" alt="OurMenu Logo" width={20} height={20} className="object-contain grayscale opacity-70" />
-            <span className="font-semibold text-white text-sm">OurMenu</span>
+      <footer className="border-t border-white/[0.04] py-16 px-6 bg-zinc-950/80">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
+          {/* Col 1: Brand */}
+          <div className="space-y-4 md:col-span-1">
+            <div className="flex items-center gap-3">
+              <Image src="/ourmenu-qr-icon.svg" alt="OurMenu Logo" width={24} height={24} className="object-contain" />
+              <span className="font-bold text-white text-base tracking-tight">OurMenu OS</span>
+            </div>
+            <p className="text-zinc-400 text-sm leading-relaxed">
+              The universal operating layer for modern hospitality, supermarkets, retail chains, and service businesses.
+            </p>
+            <p className="text-zinc-600 text-xs">
+              © {new Date().getFullYear()} OurMenu OS. A CRUISEHQ LTD concept.
+            </p>
           </div>
-          <p className="text-zinc-600 text-sm">© {new Date().getFullYear()} OurMenu. A CRUISEHQ LTD concept.</p>
-          <div className="flex items-center gap-6 text-zinc-500 text-sm">
-            <Link href="/privacy" className="hover:text-white transition-colors">Privacy</Link>
-            <Link href="/terms" className="hover:text-white transition-colors">Terms</Link>
-            <a href="mailto:support@ourmenuos.online" className="hover:text-white transition-colors">Contact</a>
+
+          {/* Col 2: Solutions */}
+          <div>
+            <h4 className="text-white text-sm font-semibold mb-4">Solutions</h4>
+            <ul className="space-y-2.5 text-sm text-zinc-400">
+              <li><Link href="/features/restaurant-qr-menu" className="hover:text-emerald-400 transition-colors">Restaurant QR & Dining</Link></li>
+              <li><Link href="/features/supermarket-multi-branch-pos" className="hover:text-emerald-400 transition-colors">Supermarkets & Fleet POS</Link></li>
+              <li><Link href="/features/salon-spa-booking-system" className="hover:text-emerald-400 transition-colors">Salon & Spa Bookings</Link></li>
+              <li><Link href="/features/retail-boutique-ecommerce" className="hover:text-emerald-400 transition-colors">Retail Boutiques & Gadgets</Link></li>
+              <li><Link href="/features/rate-card-consulting-quotes" className="hover:text-emerald-400 transition-colors">Rate Cards & B2B Quotes</Link></li>
+              <li><Link href="/features/real-estate-vehicle-listings" className="hover:text-emerald-400 transition-colors">Real Estate & Dealerships</Link></li>
+            </ul>
+          </div>
+
+          {/* Col 3: Capabilities & Tools */}
+          <div>
+            <h4 className="text-white text-sm font-semibold mb-4">Platform & Tools</h4>
+            <ul className="space-y-2.5 text-sm text-zinc-400">
+              <li><Link href="/features" className="hover:text-emerald-400 transition-colors">All Features Index</Link></li>
+              <li><Link href="/features/ai-copilot-tego-multimodal" className="hover:text-emerald-400 transition-colors">Tego Multimodal AI</Link></li>
+              <li><Link href="/tools/who-pays-the-bill" className="hover:text-emerald-400 transition-colors">Payment Roulette Tool 🎲</Link></li>
+              <li><Link href="/features/customer-iou-financing" className="hover:text-emerald-400 transition-colors">Customer IOU Financing</Link></li>
+              <li><Link href="/affiliates" className="hover:text-emerald-400 transition-colors">Affiliate Partner Program</Link></li>
+              <li><Link href="/llms-full.txt" className="hover:text-emerald-400 transition-colors">AI & Developer Docs</Link></li>
+            </ul>
+          </div>
+
+          {/* Col 4: Trust & Legal */}
+          <div>
+            <h4 className="text-white text-sm font-semibold mb-4">Trust & Legal</h4>
+            <ul className="space-y-2.5 text-sm text-zinc-400">
+              <li><Link href="/privacy" className="hover:text-emerald-400 transition-colors">Privacy Policy</Link></li>
+              <li><Link href="/terms" className="hover:text-emerald-400 transition-colors">Terms of Service</Link></li>
+              <li><a href="mailto:support@ourmenuos.online" className="hover:text-emerald-400 transition-colors">Contact Support</a></li>
+              <li><a href="mailto:partners@ourmenuos.online" className="hover:text-emerald-400 transition-colors">Enterprise Inquiries</a></li>
+            </ul>
           </div>
         </div>
       </footer>
@@ -285,8 +397,8 @@ export default async function HomePage() {
         <h2>What is ourmenuos?</h2>
         <p>
           ourmenuos (OurMenu OS) is the ultimate software and digital storefront platform providing comprehensive business templates and applications for multiple industries. 
-          ourmenuos offers specialized software for hospitality, restaurant os, QR menus, retail boutiques, gadget shops, fashion stores, spa booking systems, salon scheduling, media rate cards, consulting portals, real estate listings, automotive dealerships, and hotel PMS. 
-          With ourmenuos, you can manage omnichannel checkouts, physical inventory, live fulfillment, loyalty programs, and process payments instantly across any vertical.
+          ourmenuos offers specialized software for hospitality, restaurant os, QR menus, supermarket chains, multi-branch fleet management, raw ESC/POS thermal printing, retail boutiques, gadget shops, fashion stores, spa booking systems, salon scheduling, media rate cards, consulting portals, real estate listings, automotive dealerships, and hotel PMS. 
+          With ourmenuos, you can manage omnichannel checkouts, physical inventory, live fulfillment, loyalty programs, Tego multimodal voice/vision AI, viral payment roulette games, customer IOU credit ledgers, and process payments instantly across any vertical.
         </p>
       </section>
 

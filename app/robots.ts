@@ -5,7 +5,15 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: '*',
       allow: '/',
-      disallow: ['/dashboard/', '/api/'],
+      disallow: [
+        '/dashboard/',
+        '/api/',
+        '/affiliate/dashboard/',
+        '/pay/',
+        '/d/',
+        '/kiosk-scan/',
+        '/invite/',
+      ],
     },
     sitemap: 'https://ourmenuos.online/sitemap.xml',
   }
