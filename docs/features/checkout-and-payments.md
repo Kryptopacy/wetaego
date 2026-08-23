@@ -84,6 +84,20 @@ The Roulette modal seamlessly integrates with the POS and checkout engines to ca
 
 ---
 
+---
+
 ## 6. First-Party Native Ad Network
 
-Bypasses ad-blockers by natively injecting "Bring Your Own" (BYO) sponsors or platform-wide advertisements directly into the storefront catalog loop, generating purely passive MRR. Features zero layout shift and highly accurate `IntersectionObserver` impression tracking.
+Bypasses ad-blockers by natively injecting "Bring Your Own" (BYO) sponsors or platform-wide advertisements directly into the storefront catalog loop, generating purely passive MRR. Features zero layout shift and highly accurate \`IntersectionObserver\` impression tracking.
+
+---
+
+## 7. Autonomous Agent-Native Payments (x402, MPP, UCP, ACP)
+
+OurMenu OS introduces direct machine settlement channels allowing autonomous AI agents to pay for orders and services without human intervention:
+
+- **Coinbase x402 Protocol**: Programmatic settlement over HTTP 402 Payment Required via \`/.well-known/x402.json\` and \`/api/x402\`.
+- **Machine Payment Protocol (MPP)**: Declares payment metadata in \`openapi.json\` (\`x-payment-info\`) for automated checkout routing.
+- **Universal Commerce Protocol (UCP)**: Exposes unified commerce services (\`checkout\`, \`fulfillment\`, \`reservations\`) via \`/.well-known/ucp\`.
+- **Agentic Commerce Protocol (ACP)**: Published at \`/.well-known/acp.json\` with support for \`https\`, \`mcp\`, and \`websocket\` transports.
+
