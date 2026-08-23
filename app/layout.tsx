@@ -100,9 +100,41 @@ export default async function RootLayout({
                   '@type': 'Organization',
                   '@id': 'https://ourmenuos.online/#organization',
                   name: 'OurMenu OS',
+                  legalName: 'OurMenu OS by CRUISEHQ LTD',
                   url: 'https://ourmenuos.online',
                   logo: 'https://ourmenuos.online/ourmenu-qr-logo.png',
-                  description: 'The complete operating layer for modern hospitality, retail, and service businesses.'
+                  description: 'The complete operating layer for modern hospitality, supermarkets, retail, and service businesses.',
+                  email: 'support@ourmenuos.online',
+                  telephone: '+234-800-687-6368',
+                  contactPoint: [
+                    {
+                      '@type': 'ContactPoint',
+                      telephone: '+234-800-687-6368',
+                      contactType: 'customer support',
+                      email: 'support@ourmenuos.online',
+                      availableLanguage: ['English', 'Spanish', 'French', 'Yoruba', 'Igbo', 'Hausa'],
+                      areaServed: 'Global'
+                    },
+                    {
+                      '@type': 'ContactPoint',
+                      contactType: 'sales',
+                      email: 'partners@ourmenuos.online',
+                      availableLanguage: ['English'],
+                      areaServed: 'Global'
+                    }
+                  ],
+                  address: {
+                    '@type': 'PostalAddress',
+                    streetAddress: '12 Admiralty Way, Lekki Phase 1',
+                    addressLocality: 'Lagos',
+                    addressRegion: 'Lagos State',
+                    postalCode: '105102',
+                    addressCountry: 'NG'
+                  },
+                  sameAs: [
+                    'https://twitter.com/ourmenuos',
+                    'https://github.com/Kryptopacy/ourmenuos'
+                  ]
                 },
                 {
                   '@type': 'SoftwareApplication',

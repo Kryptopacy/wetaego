@@ -26,13 +26,13 @@ describe('AI Personas Logic', () => {
   describe('resolvePersona', () => {
     it('returns default persona when no custom name is provided', () => {
       const persona = resolvePersona('catalog_table_service')
-      expect(persona.defaultName).toBe('AI Waiter')
+      expect(persona.defaultName).toBe('Tego')
     })
 
     it('overrides defaultName when custom name is provided', () => {
       const persona = resolvePersona('catalog_table_service', 'Jarvis')
       expect(persona.defaultName).toBe('Jarvis')
-      expect(persona.subtitle).toBe('Live Dining Assistant') // Preserves other fields
+      expect(persona.subtitle).toBe('Live Dining & Table Assistant') // Preserves other fields
     })
   })
 })

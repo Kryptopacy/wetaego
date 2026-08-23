@@ -1,0 +1,217 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "OurMenu OS API",
+    "version": "1.0.0",
+    "description": "Public REST API, Webhooks, and AI Agent endpoints for OurMenu OS — the universal operating system for physical and service businesses.",
+    "contact": {
+      "name": "OurMenu OS Developer Support",
+      "email": "support@ourmenuos.online",
+      "url": "https://ourmenuos.online/docs"
+    },
+    "license": {
+      "name": "Proprietary",
+      "url": "https://ourmenuos.online/terms"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://ourmenuos.online/api",
+      "description": "Production API Server"
+    }
+  ],
+  "paths": {
+    "/chat": {
+      "post": {
+        "summary": "Frontline AI Concierge Chat",
+        "description": "Stream conversational zero-hallucination assistant answers grounded in verified venue catalogs.",
+        "operationId": "sendChatMessage",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["messages", "locationId"],
+                "properties": {
+                  "messages": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": ["role", "content"],
+                      "properties": {
+                        "role": { "type": "string", "enum": ["user", "assistant", "system"] },
+                        "content": { "type": "string" }
+                      }
+                    }
+                  },
+                  "locationId": { "type": "string", "description": "Venue location UUID" },
+                  "pageId": { "type": "string", "description": "Optional sub-page UUID" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Streaming AI response chunks (text/plain or text/event-stream)"
+          },
+          "429": {
+            "description": "Rate limit exceeded (WAF or session limiter active)"
+          }
+        }
+      }
+    },
+    "/ai/parse-menu": {
+      "post": {
+        "summary": "Multimodal Menu / Inventory OCR",
+        "description": "Parses an uploaded image or camera frame of a physical menu, receipt, or inventory shelf into structured catalog items.",
+        "operationId": "parseMenuImage",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": { "type": "string", "format": "binary" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Extracted structured menu JSON",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "categories": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": { "type": "string" },
+                          "items": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "title": { "type": "string" },
+                                "price": { "type": "number" },
+                                "description": { "type": "string" },
+                                "dietary": { "type": "array", "items": { "type": "string" } }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ai/live-token": {
+      "post": {
+        "summary": "Mint Gemini Live Ephemeral Token",
+        "description": "Generates a short-lived cryptographic token for bidirectional WebAudio (16kHz in / 24kHz out) and 1 FPS camera video streaming via Gemini 3.1 Flash Live.",
+        "operationId": "mintLiveToken",
+        "responses": {
+          "200": {
+            "description": "Live token payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": { "type": "string" },
+                    "expiresAt": { "type": "string", "format": "date-time" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/orders": {
+      "post": {
+        "summary": "Create Guest Order",
+        "description": "Submits a new order with selected items, modifier choices, table identifier, and payment mode.",
+        "operationId": "createOrder",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["locationId", "items"],
+                "properties": {
+                  "locationId": { "type": "string" },
+                  "tableIdentifier": { "type": "string" },
+                  "customerName": { "type": "string" },
+                  "customerEmail": { "type": "string", "format": "email" },
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": ["itemId", "quantity"],
+                      "properties": {
+                        "itemId": { "type": "string" },
+                        "quantity": { "type": "integer", "minimum": 1 },
+                        "modifiers": { "type": "object" },
+                        "notes": { "type": "string" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Order created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "orderId": { "type": "string" },
+                    "status": { "type": "string" },
+                    "totalAmount": { "type": "number" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/paystack/webhook": {
+      "post": {
+        "summary": "Paystack Payment Settlement Webhook",
+        "description": "Handles asynchronous payment notifications signed with HMAC SHA512 (x-paystack-signature).",
+        "operationId": "handlePaystackWebhook",
+        "responses": {
+          "200": { "description": "Webhook received and verified" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}

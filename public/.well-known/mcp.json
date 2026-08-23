@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "name": "ourmenuos-mcp",
+  "version": "1.0.0",
+  "description": "Model Context Protocol (MCP) server manifest for OurMenu OS — Digital Storefronts & Physical Operations Layer",
+  "homepage": "https://ourmenuos.online/docs",
+  "tools": [
+    {
+      "name": "ourmenu_query_catalog",
+      "description": "Search dishes, menu items, or products at an OurMenu OS venue with dietary (vegan, halal, keto, nut-free, gluten-free) and stock filters.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "locationId": { "type": "string", "description": "Venue location UUID" },
+          "query": { "type": "string", "description": "Search keywords" },
+          "dietary": { "type": "string", "enum": ["vegan", "halal", "gluten_free", "nut_free", "keto"] }
+        },
+        "required": ["locationId"]
+      }
+    },
+    {
+      "name": "ourmenu_create_order",
+      "description": "Submit a validated customer order with line items, modifier selections, and table number.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "locationId": { "type": "string", "description": "Venue location UUID" },
+          "tableIdentifier": { "type": "string", "description": "Table or room number" },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "itemId": { "type": "string" },
+                "quantity": { "type": "integer" },
+                "notes": { "type": "string" }
+              },
+              "required": ["itemId", "quantity"]
+            }
+          }
+        },
+        "required": ["locationId", "items"]
+      }
+    },
+    {
+      "name": "ourmenu_check_availability",
+      "description": "Query available appointment booking slots for salon, spa, wellness, or consulting services.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "locationId": { "type": "string" },
+          "date": { "type": "string", "format": "date", "description": "YYYY-MM-DD date" },
+          "serviceId": { "type": "string" }
+        },
+        "required": ["locationId", "date"]
+      }
+    },
+    {
+      "name": "ourmenu_request_staff",
+      "description": "Trigger floor staff call chime (waiter, bill, cleanup, water) at an OurMenu OS venue.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "locationId": { "type": "string" },
+          "tableIdentifier": { "type": "string" },
+          "reason": { "type": "string", "enum": ["waiter", "bill", "cleanup", "water", "escalation"] }
+        },
+        "required": ["locationId", "tableIdentifier", "reason"]
+      }
+    }
+  ]
+}

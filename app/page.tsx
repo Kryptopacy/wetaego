@@ -60,8 +60,37 @@ export default async function HomePage() {
         "provider": {
           "@type": "Organization",
           "@id": "https://ourmenuos.online/#organization",
-          "name": "KRYPTOPACY",
-          "url": "https://ourmenuos.online"
+          "name": "OurMenu OS",
+          "legalName": "OurMenu OS by CRUISEHQ LTD",
+          "url": "https://ourmenuos.online",
+          "logo": "https://ourmenuos.online/ourmenu-qr-logo.png",
+          "email": "support@ourmenuos.online",
+          "telephone": "+234-800-687-6368",
+          "contactPoint": [
+            {
+              "@type": "ContactPoint",
+              "telephone": "+234-800-687-6368",
+              "contactType": "customer support",
+              "email": "support@ourmenuos.online",
+              "availableLanguage": ["English", "Spanish", "French", "Yoruba", "Igbo", "Hausa"],
+              "areaServed": "Global"
+            },
+            {
+              "@type": "ContactPoint",
+              "contactType": "sales",
+              "email": "partners@ourmenuos.online",
+              "availableLanguage": ["English"],
+              "areaServed": "Global"
+            }
+          ],
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "12 Admiralty Way, Lekki Phase 1",
+            "addressLocality": "Lagos",
+            "addressRegion": "Lagos State",
+            "postalCode": "105102",
+            "addressCountry": "NG"
+          }
         }
       },
       {
@@ -194,9 +223,9 @@ export default async function HomePage() {
           <FadeIn className="flex flex-col justify-center mt-12 md:mt-0">
 
             <h1 className="text-5xl md:text-7xl font-black text-white tracking-[-0.04em] leading-[1.05] md:leading-[1.02] mb-5 md:mb-6 drop-shadow-md">
-              The ultimate digital storefront.
+              OurMenu OS: The Ultimate Digital Storefront.
               <span className="block mt-1 md:mt-2 text-transparent bg-clip-text bg-gradient-to-br from-emerald-300 via-green-200 to-teal-400 drop-shadow-[0_0_15px_rgba(52,211,153,0.3)]">
-                A complete operating layer.
+                A Complete Operating & Payment Suite.
               </span>
             </h1>
             <p className="text-base md:text-xl text-zinc-200 md:text-zinc-300 max-w-xl font-light leading-relaxed mb-8 md:mb-10 drop-shadow-sm">
@@ -336,6 +365,55 @@ export default async function HomePage() {
         </FadeIn>
       </section>
 
+      {/* ── SSR FAQ & ARCHITECTURE SECTION ── */}
+      <section id="faq" className="py-24 px-6 max-w-5xl mx-auto border-t border-white/[0.04]">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-5xl font-black text-white mb-4 tracking-tight">
+            Frequently Asked Questions
+          </h2>
+          <p className="text-zinc-400 text-base md:text-lg max-w-2xl mx-auto font-light">
+            Everything you need to know about deploying OurMenu OS, managing branch fleets, and integrating hardware peripherals.
+          </p>
+        </div>
+
+        <div className="space-y-6 text-left">
+          <div className="p-6 md:p-8 rounded-2xl bg-zinc-900/40 border border-white/5 space-y-2">
+            <h3 className="text-xl font-bold text-white">What physical and service industries does OurMenu OS support?</h3>
+            <p className="text-zinc-300 text-sm leading-relaxed">
+              OurMenu OS includes 9 tailored industry engines: Restaurants, Bars & Food Trucks (dine-in ordering, split tabs, kitchen display); Supermarkets & Retail Chains (multi-branch fleet switcher, sub-department aisles, ESC/POS printing); Salons, Spas & Wellness (smart booking calendars, upfront deposits); Retail Boutiques & Gadgets (variants, stock alerts); Consultants & Agencies (interactive dynamic rate cards, retainers); Real Estate & Automotive (immersive asset showcases, lead capture); and Multi-Venue Portals.
+            </p>
+          </div>
+
+          <div className="p-6 md:p-8 rounded-2xl bg-zinc-900/40 border border-white/5 space-y-2">
+            <h3 className="text-xl font-bold text-white">How does the driverless thermal receipt printing work?</h3>
+            <p className="text-zinc-300 text-sm leading-relaxed">
+              OurMenu OS has a built-in native ESC/POS binary command engine. It connects directly from modern web browsers to thermal receipt printers over WebUSB, WebSerial (RS232 COM), and WebBluetooth. It triggers instant hardware paper cuts and cash drawer kick pulses without third-party print drivers, external daemons, or OS print dialogs.
+            </p>
+          </div>
+
+          <div className="p-6 md:p-8 rounded-2xl bg-zinc-900/40 border border-white/5 space-y-2">
+            <h3 className="text-xl font-bold text-white">What is Tego Multimodal AI and how is it grounded?</h3>
+            <p className="text-zinc-300 text-sm leading-relaxed">
+              Tego AI is powered by Google Gemini 3.1 Flash Live. For store managers, it provides real-time voice control and 1 FPS camera video ingestion to parse physical paper menus or inventory shelves into digital databases in seconds. For storefront guests, Tego acts as a zero-hallucination public concierge strictly bounded by verified database records, triggering live floor staff escalations when queries fall outside known stock.
+            </p>
+          </div>
+
+          <div className="p-6 md:p-8 rounded-2xl bg-zinc-900/40 border border-white/5 space-y-2">
+            <h3 className="text-xl font-bold text-white">How does 1-second franchise catalog duplication work?</h3>
+            <p className="text-zinc-300 text-sm leading-relaxed">
+              When a supermarket brand or restaurant group opens a new branch, our atomic cloning stored procedure recursively duplicates all collections, categories, items, price rules, and modifier groups from the master branch to the new location in under 1 second, saving weeks of manual catalog entry.
+            </p>
+          </div>
+
+          <div className="p-6 md:p-8 rounded-2xl bg-zinc-900/40 border border-white/5 space-y-2">
+            <h3 className="text-xl font-bold text-white">What is the Payment Roulette game?</h3>
+            <p className="text-zinc-300 text-sm leading-relaxed">
+              Payment Roulette is a viral bill-splitting randomizer game built directly into OurMenu OS. Dining parties spin a digital wheel on their mobile devices to randomly select who pays the restaurant check, turns paying the bill into an engaging social game, and boosts merchant organic social shares.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* ── FOOTER ── */}
       <footer className="border-t border-white/[0.04] py-16 px-6 bg-zinc-950/80">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
@@ -355,7 +433,7 @@ export default async function HomePage() {
 
           {/* Col 2: Solutions */}
           <div>
-            <h4 className="text-white text-sm font-semibold mb-4">Solutions</h4>
+            <h3 className="text-white text-sm font-semibold mb-4">Solutions</h3>
             <ul className="space-y-2.5 text-sm text-zinc-400">
               <li><Link href="/features/restaurant-qr-menu" className="hover:text-emerald-400 transition-colors">Restaurant QR & Dining</Link></li>
               <li><Link href="/features/supermarket-multi-branch-pos" className="hover:text-emerald-400 transition-colors">Supermarkets & Fleet POS</Link></li>
@@ -368,37 +446,42 @@ export default async function HomePage() {
 
           {/* Col 3: Capabilities & Tools */}
           <div>
-            <h4 className="text-white text-sm font-semibold mb-4">Platform & Tools</h4>
+            <h3 className="text-white text-sm font-semibold mb-4">Platform & Tools</h3>
             <ul className="space-y-2.5 text-sm text-zinc-400">
               <li><Link href="/features" className="hover:text-emerald-400 transition-colors">All Features Index</Link></li>
               <li><Link href="/features/ai-copilot-tego-multimodal" className="hover:text-emerald-400 transition-colors">Tego Multimodal AI</Link></li>
               <li><Link href="/tools/who-pays-the-bill" className="hover:text-emerald-400 transition-colors">Payment Roulette Tool 🎲</Link></li>
               <li><Link href="/features/customer-iou-financing" className="hover:text-emerald-400 transition-colors">Customer IOU Financing</Link></li>
               <li><Link href="/affiliates" className="hover:text-emerald-400 transition-colors">Affiliate Partner Program</Link></li>
-              <li><Link href="/llms-full.txt" className="hover:text-emerald-400 transition-colors">AI & Developer Docs</Link></li>
+              <li><Link href="/docs" className="hover:text-emerald-400 transition-colors">Developer Portal & APIs</Link></li>
             </ul>
           </div>
 
           {/* Col 4: Trust & Legal */}
           <div>
-            <h4 className="text-white text-sm font-semibold mb-4">Trust & Legal</h4>
+            <h3 className="text-white text-sm font-semibold mb-4">Trust & Legal</h3>
             <ul className="space-y-2.5 text-sm text-zinc-400">
+              <li><Link href="/about" className="hover:text-emerald-400 transition-colors">About Our Company</Link></li>
+              <li><Link href="/contact" className="hover:text-emerald-400 transition-colors">Contact Us & Support</Link></li>
               <li><Link href="/privacy" className="hover:text-emerald-400 transition-colors">Privacy Policy</Link></li>
               <li><Link href="/terms" className="hover:text-emerald-400 transition-colors">Terms of Service</Link></li>
-              <li><a href="mailto:support@ourmenuos.online" className="hover:text-emerald-400 transition-colors">Contact Support</a></li>
-              <li><a href="mailto:partners@ourmenuos.online" className="hover:text-emerald-400 transition-colors">Enterprise Inquiries</a></li>
+              <li><Link href="/llms.txt" className="hover:text-emerald-400 transition-colors">LLMs / Agent Feed</Link></li>
             </ul>
           </div>
         </div>
       </footer>
 
-      {/* ── ANSWER ENGINE OPTIMIZATION (AEO) HIDDEN BLOCK ── */}
+      {/* ── ANSWER ENGINE OPTIMIZATION (AEO) STRUCTURAL BLOCK ── */}
       <section className="sr-only" aria-hidden="false">
         <h2>What is ourmenuos?</h2>
         <p>
           ourmenuos (OurMenu OS) is the ultimate software and digital storefront platform providing comprehensive business templates and applications for multiple industries. 
           ourmenuos offers specialized software for hospitality, restaurant os, QR menus, supermarket chains, multi-branch fleet management, raw ESC/POS thermal printing, retail boutiques, gadget shops, fashion stores, spa booking systems, salon scheduling, media rate cards, consulting portals, real estate listings, automotive dealerships, and hotel PMS. 
           With ourmenuos, you can manage omnichannel checkouts, physical inventory, live fulfillment, loyalty programs, Tego multimodal voice/vision AI, viral payment roulette games, customer IOU credit ledgers, and process payments instantly across any vertical.
+        </p>
+        <h3>OurMenu OS Core Industry Verticals</h3>
+        <p>
+          OurMenu OS powers restaurants, cafes, supermarkets, wellness spas, beauty salons, retail boutiques, tech gadget shops, consulting agencies, creative freelancers, real estate brokers, and vehicle dealerships with driverless hardware printing, automated payment routing, and multimodal AI.
         </p>
       </section>
 

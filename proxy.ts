@@ -17,6 +17,41 @@ const wafLimiter = redis
       prefix: '@upstash/ratelimit/waf'
     })
   : null
+import { getMarkdownForPath } from './lib/markdown-content'
+
+function prefersMarkdown(acceptHeader: string | null): boolean {
+  if (!acceptHeader) return false
+  const lower = acceptHeader.toLowerCase()
+  if (!lower.includes('text/markdown') && !lower.includes('text/x-markdown')) {
+    return false
+  }
+  const parts = lower.split(',').map((p) => p.trim())
+  let mdQuality = -1
+  let htmlQuality = -1
+
+  for (const part of parts) {
+    const [media, ...params] = part.split(';')
+    const mediaType = media.trim()
+    let q = 1.0
+    for (const param of params) {
+      const [key, val] = param.trim().split('=')
+      if (key === 'q') {
+        const parsed = parseFloat(val)
+        if (!isNaN(parsed)) q = parsed
+      }
+    }
+    if (mediaType === 'text/markdown' || mediaType === 'text/x-markdown') {
+      mdQuality = Math.max(mdQuality, q)
+    } else if (mediaType === 'text/html') {
+      htmlQuality = Math.max(htmlQuality, q)
+    }
+  }
+
+  if (mdQuality <= 0) return false
+  if (htmlQuality < 0) return true
+  return mdQuality >= htmlQuality
+}
+
 /**
  * Next.js Middleware — Supabase Session Refresh & Route Protection
  *
@@ -24,10 +59,28 @@ const wafLimiter = redis
  * 1. Refreshes the Supabase auth session on every request (prevents silent token expiry)
  * 2. Protects /dashboard/* routes — redirects unauthenticated users to /login
  * 3. Allows all public routes (/m/*, /api/*, /login, /, etc.) without auth
+ * 4. Negotiates Accept: text/markdown content for AI agents (acceptmarkdown.com compliant)
  */
 export async function proxy(request: NextRequest) {
-  // --- 1. EDGE WAF PROTECTION ---
+  // --- 0. MARKDOWN CONTENT NEGOTIATION (acceptmarkdown.com) ---
   const path = request.nextUrl.pathname
+  const acceptHeader = request.headers.get('accept')
+
+  if (prefersMarkdown(acceptHeader) && !path.startsWith('/api/') && !path.startsWith('/pay/')) {
+    const mdResult = getMarkdownForPath(path)
+    return new NextResponse(mdResult.content, {
+      status: mdResult.status,
+      headers: {
+        'Content-Type': 'text/markdown; charset=utf-8',
+        'Vary': 'Accept, Accept-Encoding',
+        'Cache-Control': mdResult.status === 200 
+          ? 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=86400' 
+          : 'no-cache',
+      },
+    })
+  }
+
+  // --- 1. EDGE WAF PROTECTION ---
   const isProtectedPath = path.startsWith('/api') || path.startsWith('/pay')
   
   if (isProtectedPath && wafLimiter) {
@@ -158,6 +211,7 @@ export async function proxy(request: NextRequest) {
     }
   }
 
+  supabaseResponse.headers.set('Vary', 'Accept, Accept-Encoding')
   return supabaseResponse
 }
 

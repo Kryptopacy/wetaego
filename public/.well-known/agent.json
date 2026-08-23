@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "name": "OurMenu OS",
+  "description": "Universal Digital Operating System & Dynamic Storefronts for Hospitality, Supermarket Fleets, Boutiques, Wellness Spas, Consultants, Real Estate, and Dealerships.",
+  "url": "https://ourmenuos.online",
+  "documentation": "https://ourmenuos.online/docs",
+  "llms_txt": "https://ourmenuos.online/llms.txt",
+  "llms_full_txt": "https://ourmenuos.online/llms-full.txt",
+  "agent_instructions": "https://ourmenuos.online/agent-instructions.md",
+  "openapi_spec": "https://ourmenuos.online/openapi.json",
+  "mcp_manifest": "https://ourmenuos.online/.well-known/mcp.json",
+  "sitemap": "https://ourmenuos.online/sitemap.xml",
+  "best_fit_use_cases": [
+    "Digital restaurant menus with live kitchen dispatch and split bill payments",
+    "Supermarket chain and multi-branch fleet management with instant catalog duplication",
+    "Driverless raw ESC/POS thermal receipt printing over WebUSB/WebSerial/WebBluetooth",
+    "Salon, spa, and wellness appointment scheduling with upfront deposit billing",
+    "Retail boutique inventory management with low-stock alerts",
+    "B2B dynamic quote builders and media rate cards replacing static PDFs",
+    "Frontline zero-hallucination conversational AI concierge for physical stores",
+    "Payment Roulette viral bill splitting gamification"
+  ],
+  "negative_triggers": [
+    "Purely digital SaaS subscription billing without physical operations/storefronts",
+    "Heavy multi-tier manufacturing supply chain ERPs"
+  ]
+}
