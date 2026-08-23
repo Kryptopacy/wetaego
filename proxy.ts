@@ -78,10 +78,24 @@ export const AGENT_LINK_HEADERS = [
  * 5. Emits RFC 8288 Link discovery headers for agent discovery
  */
 export async function proxy(request: NextRequest) {
-  // --- 0. MARKDOWN CONTENT NEGOTIATION (acceptmarkdown.com) ---
   const path = request.nextUrl.pathname
   const acceptHeader = request.headers.get('accept')
 
+  // --- 0. AGENT DISCOVERY & AUTH.MD DIRECT PASS-THROUGH ---
+  if (path.startsWith('/.well-known/') || path === '/auth.md') {
+    const response = NextResponse.next()
+    response.headers.set('Link', AGENT_LINK_HEADERS)
+    response.headers.set('Vary', 'Accept, Accept-Encoding')
+    response.headers.set('Access-Control-Allow-Origin', '*')
+    if (path.includes('x402')) {
+      response.headers.set('X-402-Payment-Required', 'true')
+      response.headers.set('X-402-Facilitator', 'https://ourmenuos.online/api/x402')
+      response.headers.set('WWW-Authenticate', 'X402 token="USDC", network="base", address="0x87A8f8303e339F091F8402D3b934789518d6e9d6", amount="0.05", facilitator="https://ourmenuos.online/api/x402"')
+    }
+    return response
+  }
+
+  // --- 1. MARKDOWN CONTENT NEGOTIATION (acceptmarkdown.com) ---
   if (prefersMarkdown(acceptHeader) && !path.startsWith('/api/') && !path.startsWith('/pay/')) {
     const mdResult = getMarkdownForPath(path)
     return new NextResponse(mdResult.content, {
@@ -97,7 +111,7 @@ export async function proxy(request: NextRequest) {
     })
   }
 
-  // --- 1. EDGE WAF PROTECTION ---
+  // --- 2. EDGE WAF PROTECTION ---
   const isProtectedPath = path.startsWith('/api') || path.startsWith('/pay')
   
   if (isProtectedPath && wafLimiter) {
@@ -240,9 +254,9 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization)
      * - favicon.ico, icons, manifest, sw.js (PWA assets)
-     * - SEO & AEO assets (robots.txt, sitemap.xml, manifest.json, llms.txt, llms-full.txt)
-     * - Public assets with file extensions (images, fonts, etc.)
+     * - SEO, AEO & Agent assets (robots.txt, sitemap.xml, manifest.json, site.webmanifest, llms.txt, llms-full.txt, auth.md, .well-known/*)
+     * - Public assets with file extensions (images, fonts, markdown, json, etc.)
      */
-    '/((?!_next/static|_next/image|favicon\\.ico|robots\\.txt|sitemap\\.xml|sitemap-.*\\.xml|manifest\\.json|site\\.webmanifest|llms\\.txt|llms-full\\.txt|icon-.*\\.png|apple-touch-icon\\.png|sw\\.js|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff2?|txt|xml|json)).*)',
+    '/((?!_next/static|_next/image|favicon\\.ico|robots\\.txt|sitemap\\.xml|sitemap-.*\\.xml|manifest\\.json|site\\.webmanifest|llms\\.txt|llms-full\\.txt|auth\\.md|\\.well-known/.*|icon-.*\\.png|apple-touch-icon\\.png|sw\\.js|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff2?|txt|xml|json|md)).*)',
   ],
 }

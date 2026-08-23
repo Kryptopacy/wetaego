@@ -10,6 +10,7 @@ export async function GET() {
     },
     entries: [
       {
+        identifier: 'urn:air:ourmenuos.online:mcp:storefront-server',
         id: 'urn:air:ourmenuos.online:mcp:storefront-server',
         displayName: 'OurMenu OS MCP Server',
         description: 'Model Context Protocol tools for querying restaurant menus, supermarket catalogs, booking appointments, and placing orders.',
@@ -23,6 +24,7 @@ export async function GET() {
         ]
       },
       {
+        identifier: 'urn:air:ourmenuos.online:openapi:core-api',
         id: 'urn:air:ourmenuos.online:openapi:core-api',
         displayName: 'OurMenu OS OpenAPI Specification',
         description: 'Formal OpenAPI 3.1.0 specification for public storefront, OCR parser, and live Gemini AI token APIs.',
@@ -35,6 +37,7 @@ export async function GET() {
         ]
       },
       {
+        identifier: 'urn:air:ourmenuos.online:skills:catalog-ordering',
         id: 'urn:air:ourmenuos.online:skills:catalog-ordering',
         displayName: 'OurMenu OS Agent Skills Index',
         description: 'Agent skills discovery manifest detailing catalog search, order dispatch, appointment booking, and ESC/POS thermal printing.',
@@ -47,6 +50,7 @@ export async function GET() {
         ]
       },
       {
+        identifier: 'urn:air:ourmenuos.online:a2a:tego-concierge',
         id: 'urn:air:ourmenuos.online:a2a:tego-concierge',
         displayName: 'Tego Multimodal Concierge (Agent-to-Agent)',
         description: 'Frontline AI concierge supporting streaming conversational dialogue and live staff handoff.',

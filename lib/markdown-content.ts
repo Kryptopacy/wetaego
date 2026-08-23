@@ -288,6 +288,12 @@ export function getMarkdownForPath(pathname: string): { content: string; status:
       return { content: MARKDOWN_AFFILIATES, status: 200 }
     case '/features':
       return { content: MARKDOWN_FEATURES, status: 200 }
+    case '/auth.md':
+    case '/auth':
+      return {
+        content: `# OurMenu OS Agent Authentication Guide (Auth.md)\n\n> **Specification**: [auth.md](https://workos.com/auth-md)\n> **Issuer**: https://ourmenuos.online\n> **OAuth Protected Resource**: https://ourmenuos.online/.well-known/oauth-protected-resource\n> **OAuth Authorization Server**: https://ourmenuos.online/.well-known/oauth-authorization-server\n\n## 1. Credentials\n- **Merchant Secret API Key**: \`Authorization: Bearer om_live_...\`\n- **JWT Token**: \`Authorization: Bearer <JWT>\`\n- **Agent DID & Client Assertion**: Supported via \`/api/auth/token\`.\n\n## 2. Protected Endpoints\n- \`/api/orders\` (scopes: \`orders:read\`, \`orders:write\`)\n- \`/api/bookings\` (scopes: \`bookings:read\`, \`bookings:write\`)\n- \`/api/ai/live-token\` (scopes: \`ai:live\`)\n\nFull documentation at https://ourmenuos.online/docs`,
+        status: 200
+      }
     default:
       // Check feature subpaths
       if (normalizedPath.startsWith('/features/')) {

@@ -104,6 +104,7 @@ describe('14 Agent Discovery & Protocol Standards Compliance', () => {
       expect(catalog.entries.length).toBeGreaterThanOrEqual(4)
 
       for (const entry of catalog.entries) {
+        expect(entry.identifier).toMatch(/^urn:air:ourmenuos\.online:/)
         expect(entry.id).toMatch(/^urn:air:ourmenuos\.online:/)
         expect(entry.representativeQueries.length).toBeGreaterThanOrEqual(2)
       }
@@ -111,11 +112,14 @@ describe('14 Agent Discovery & Protocol Standards Compliance', () => {
   })
 
   describe('8. x402 Protocol for Agent Payments', () => {
-    it('has x402.json discovery configuration with facilitator and networks', () => {
+    it('has x402.json discovery configuration with facilitator, wallet, and networks', () => {
       const filePath = path.join(process.cwd(), 'public', '.well-known', 'x402.json')
       expect(fs.existsSync(filePath)).toBe(true)
       const x402 = JSON.parse(fs.readFileSync(filePath, 'utf8'))
       expect(x402.version).toBe('1.0')
+      expect(x402.x402).toBeDefined()
+      expect(x402.x402.facilitator).toBe('https://ourmenuos.online/api/x402')
+      expect(x402.x402.wallet).toBeDefined()
       expect(x402.facilitator).toBe('https://ourmenuos.online/api/x402')
       expect(x402.supported_networks).toContain('base')
       expect(x402.supported_tokens).toContain('USDC')
@@ -137,10 +141,12 @@ describe('14 Agent Discovery & Protocol Standards Compliance', () => {
   })
 
   describe('10. Universal Commerce Protocol (UCP)', () => {
-    it('has ucp profile manifest with services and capabilities', () => {
+    it('has ucp profile manifest with required ucp field, services and capabilities', () => {
       const ucpPath = path.join(process.cwd(), 'public', '.well-known', 'ucp')
       expect(fs.existsSync(ucpPath)).toBe(true)
       const ucp = JSON.parse(fs.readFileSync(ucpPath, 'utf8'))
+      expect(ucp.ucp).toBeDefined()
+      expect(ucp.ucp.version).toBe('1.0.0')
       expect(ucp.protocol).toBe('ucp')
       expect(ucp.services).toContain('checkout')
       expect(ucp.capabilities).toContain('table_ordering')
