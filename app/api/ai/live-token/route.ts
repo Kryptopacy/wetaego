@@ -23,7 +23,14 @@ export async function POST(req: Request) {
     const supabase = await createClient()
     const { data: userData, error: authError } = await supabase.auth.getUser()
     if (authError || !userData?.user) {
-      return new Response('Not authenticated', { status: 401 })
+      return new Response(JSON.stringify({ error: 'Unauthorized', message: 'Authentication required' }), {
+        status: 401,
+        headers: {
+          'Content-Type': 'application/json',
+          'WWW-Authenticate': 'Bearer realm="OurMenu OS", resource_metadata="https://ourmenuos.online/.well-known/oauth-protected-resource", resource="https://ourmenuos.online/api"',
+          'Access-Control-Allow-Origin': '*'
+        }
+      })
     }
 
     // Verify user belongs to organization
