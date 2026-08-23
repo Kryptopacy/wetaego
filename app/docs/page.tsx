@@ -202,6 +202,59 @@ export default function DocsPage() {
             </div>
           </div>
 
+          {/* Section 5: Standards, Protocols & Agent Payment Discovery */}
+          <div className="bg-zinc-900/50 border border-white/10 rounded-3xl p-8 md:p-10 space-y-6">
+            <div className="flex items-center gap-3">
+              <Code className="w-6 h-6 text-emerald-400" />
+              <h2 className="text-2xl font-bold text-white">5. Supported Machine Standards & Discovery Protocols</h2>
+            </div>
+            <p className="text-zinc-300 text-sm leading-relaxed">
+              OurMenu OS actively publishes and complies with open web and AI agent interoperability standards:
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono">
+              <div className="p-4 rounded-xl bg-black/60 border border-white/5 space-y-1">
+                <span className="text-emerald-400 font-bold">RFC 9727 API Catalog</span>
+                <p className="text-zinc-400 font-sans text-xs">Advertised via <code>/.well-known/api-catalog</code> with <code>application/linkset+json</code>.</p>
+              </div>
+              <div className="p-4 rounded-xl bg-black/60 border border-white/5 space-y-1">
+                <span className="text-emerald-400 font-bold">OIDC & RFC 8414 OAuth Discovery</span>
+                <p className="text-zinc-400 font-sans text-xs">Advertised via <code>/.well-known/openid-configuration</code> and <code>/.well-known/oauth-authorization-server</code>.</p>
+              </div>
+              <div className="p-4 rounded-xl bg-black/60 border border-white/5 space-y-1">
+                <span className="text-emerald-400 font-bold">RFC 9728 Protected Resource</span>
+                <p className="text-zinc-400 font-sans text-xs">Published at <code>/.well-known/oauth-protected-resource</code>.</p>
+              </div>
+              <div className="p-4 rounded-xl bg-black/60 border border-white/5 space-y-1">
+                <span className="text-emerald-400 font-bold">Auth.md Agent Registration</span>
+                <p className="text-zinc-400 font-sans text-xs">Instructions served at <code>/auth.md</code> for agent credential onboarding.</p>
+              </div>
+              <div className="p-4 rounded-xl bg-black/60 border border-white/5 space-y-1">
+                <span className="text-emerald-400 font-bold">Agent Skills Index (RFC v0.2.0)</span>
+                <p className="text-zinc-400 font-sans text-xs">Published at <code>/.well-known/agent-skills/index.json</code> with SHA-256 digests.</p>
+              </div>
+              <div className="p-4 rounded-xl bg-black/60 border border-white/5 space-y-1">
+                <span className="text-emerald-400 font-bold">WebMCP Browser Agent API</span>
+                <p className="text-zinc-400 font-sans text-xs">Exposed dynamically via <code>navigator.modelContext.provideContext()</code>.</p>
+              </div>
+              <div className="p-4 rounded-xl bg-black/60 border border-white/5 space-y-1">
+                <span className="text-emerald-400 font-bold">ARD Manifest (ai-catalog.json)</span>
+                <p className="text-zinc-400 font-sans text-xs">Available at <code>/.well-known/ai-catalog.json</code> with URNs and embedding queries.</p>
+              </div>
+              <div className="p-4 rounded-xl bg-black/60 border border-white/5 space-y-1">
+                <span className="text-emerald-400 font-bold">x402 & MPP Payment Protocol</span>
+                <p className="text-zinc-400 font-sans text-xs">HTTP 402 agent settlement at <code>/.well-known/x402.json</code> and <code>/.well-known/mpp.json</code>.</p>
+              </div>
+              <div className="p-4 rounded-xl bg-black/60 border border-white/5 space-y-1">
+                <span className="text-emerald-400 font-bold">UCP & ACP Commerce Protocols</span>
+                <p className="text-zinc-400 font-sans text-xs">Universal Commerce Profile at <code>/.well-known/ucp</code> and ACP at <code>/.well-known/acp.json</code>.</p>
+              </div>
+              <div className="p-4 rounded-xl bg-black/60 border border-white/5 space-y-1">
+                <span className="text-emerald-400 font-bold">DNS-AID Service Discovery</span>
+                <p className="text-zinc-400 font-sans text-xs">Configured via SVCB/HTTPS records at <code>_index._agents.ourmenuos.online</code> and <code>/.well-known/dns-aid.json</code>.</p>
+              </div>
+            </div>
+          </div>
+
           {/* Bottom Links */}
           <div className="pt-6 border-t border-white/10 flex flex-wrap items-center justify-between gap-4 text-sm">
             <Link href="/" className="text-zinc-400 hover:text-white transition-colors">

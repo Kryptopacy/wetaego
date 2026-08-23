@@ -52,6 +52,21 @@ function prefersMarkdown(acceptHeader: string | null): boolean {
   return mdQuality >= htmlQuality
 }
 
+export const AGENT_LINK_HEADERS = [
+  '</.well-known/api-catalog>; rel="api-catalog"',
+  '</docs>; rel="service-doc"',
+  '</openapi.json>; rel="service-desc"; type="application/openapi+json"',
+  '</llms.txt>; rel="describedby"',
+  '</.well-known/oauth-authorization-server>; rel="oauth-authorization-server"',
+  '</.well-known/oauth-protected-resource>; rel="oauth-protected-resource"',
+  '</.well-known/ai-catalog.json>; rel="ai-catalog"',
+  '</.well-known/agent-skills/index.json>; rel="agent-skills"',
+  '</.well-known/mcp.json>; rel="mcp"',
+  '</.well-known/ucp>; rel="ucp"',
+  '</.well-known/acp.json>; rel="acp"',
+  '</auth.md>; rel="author-doc"'
+].join(', ')
+
 /**
  * Next.js Middleware — Supabase Session Refresh & Route Protection
  *
@@ -60,6 +75,7 @@ function prefersMarkdown(acceptHeader: string | null): boolean {
  * 2. Protects /dashboard/* routes — redirects unauthenticated users to /login
  * 3. Allows all public routes (/m/*, /api/*, /login, /, etc.) without auth
  * 4. Negotiates Accept: text/markdown content for AI agents (acceptmarkdown.com compliant)
+ * 5. Emits RFC 8288 Link discovery headers for agent discovery
  */
 export async function proxy(request: NextRequest) {
   // --- 0. MARKDOWN CONTENT NEGOTIATION (acceptmarkdown.com) ---
@@ -73,6 +89,7 @@ export async function proxy(request: NextRequest) {
       headers: {
         'Content-Type': 'text/markdown; charset=utf-8',
         'Vary': 'Accept, Accept-Encoding',
+        'Link': AGENT_LINK_HEADERS,
         'Cache-Control': mdResult.status === 200 
           ? 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=86400' 
           : 'no-cache',
@@ -212,6 +229,7 @@ export async function proxy(request: NextRequest) {
   }
 
   supabaseResponse.headers.set('Vary', 'Accept, Accept-Encoding')
+  supabaseResponse.headers.set('Link', AGENT_LINK_HEADERS)
   return supabaseResponse
 }
 

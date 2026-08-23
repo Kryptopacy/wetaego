@@ -1,0 +1,45 @@
+import { NextResponse } from 'next/server'
+
+export async function GET() {
+  const x402Config = {
+    version: '1.0',
+    name: 'OurMenu OS x402 Payment Gateway',
+    description: 'Agent-native HTTP 402 micropayment protocol supporting instant automated agent settlement for dining orders, deposits, and AI credits.',
+    facilitator: 'https://ourmenuos.online/api/x402',
+    supported_networks: ['base', 'solana', 'polygon', 'ethereum'],
+    supported_tokens: ['USDC', 'USDT', 'SOL', 'ETH'],
+    receiver_addresses: {
+      evm: '0x87A8f8303e339F091F8402D3b934789518d6e9d6',
+      solana: '9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM'
+    },
+    payable_endpoints: [
+      {
+        path: '/api/orders',
+        method: 'POST',
+        pricing: {
+          model: 'dynamic_order_total',
+          currency: 'USDC'
+        }
+      },
+      {
+        path: '/api/ai/live-token',
+        method: 'POST',
+        pricing: {
+          model: 'fixed',
+          amount: 0.05,
+          currency: 'USDC'
+        }
+      }
+    ]
+  }
+
+  return NextResponse.json(x402Config, {
+    status: 200,
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Access-Control-Allow-Origin': '*',
+      'Cache-Control': 'public, max-age=3600, s-maxage=86400',
+      'Vary': 'Accept, Accept-Encoding'
+    }
+  })
+}

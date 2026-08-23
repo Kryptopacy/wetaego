@@ -122,6 +122,13 @@
         "summary": "Mint Gemini Live Ephemeral Token",
         "description": "Generates a short-lived cryptographic token for bidirectional WebAudio (16kHz in / 24kHz out) and 1 FPS camera video streaming via Gemini 3.1 Flash Live.",
         "operationId": "mintLiveToken",
+        "x-payment-info": {
+          "intent": "charge",
+          "method": "crypto",
+          "amount": 0.05,
+          "currency": "USDC",
+          "protocols": ["x402", "mpp"]
+        },
         "responses": {
           "200": {
             "description": "Live token payload",
@@ -145,6 +152,12 @@
         "summary": "Create Guest Order",
         "description": "Submits a new order with selected items, modifier choices, table identifier, and payment mode.",
         "operationId": "createOrder",
+        "x-payment-info": {
+          "intent": "charge",
+          "method": "dynamic",
+          "currency": "NGN",
+          "protocols": ["paystack", "bachs", "x402", "mpp"]
+        },
         "requestBody": {
           "required": true,
           "content": {

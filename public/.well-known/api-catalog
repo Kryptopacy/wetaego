@@ -1,0 +1,31 @@
+{
+  "linkset": [
+    {
+      "anchor": "https://ourmenuos.online/api",
+      "service-desc": [
+        {
+          "href": "https://ourmenuos.online/openapi.json",
+          "type": "application/openapi+json"
+        }
+      ],
+      "service-doc": [
+        {
+          "href": "https://ourmenuos.online/docs",
+          "type": "text/html"
+        }
+      ],
+      "status": [
+        {
+          "href": "https://ourmenuos.online/api/health",
+          "type": "application/json"
+        }
+      ],
+      "describedby": [
+        {
+          "href": "https://ourmenuos.online/llms.txt",
+          "type": "text/plain"
+        }
+      ]
+    }
+  ]
+}

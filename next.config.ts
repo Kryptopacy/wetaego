@@ -146,6 +146,10 @@ const nextConfig: NextConfig = {
             value: 'Accept, Accept-Encoding',
           },
           {
+            key: 'Link',
+            value: '</.well-known/api-catalog>; rel="api-catalog", </docs>; rel="service-doc", </openapi.json>; rel="service-desc"; type="application/openapi+json", </llms.txt>; rel="describedby", </.well-known/oauth-authorization-server>; rel="oauth-authorization-server", </.well-known/oauth-protected-resource>; rel="oauth-protected-resource", </.well-known/ai-catalog.json>; rel="ai-catalog", </.well-known/agent-skills/index.json>; rel="agent-skills", </.well-known/mcp.json>; rel="mcp", </.well-known/ucp>; rel="ucp", </.well-known/acp.json>; rel="acp", </auth.md>; rel="author-doc"',
+          },
+          {
             key: 'Content-Security-Policy',
             value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.paystack.co https://checkout.paystack.com https://vercel.live https://us-assets.i.posthog.com; worker-src 'self' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.unsplash.com https://picsum.photos https://api.dicebear.com *.supabase.co https://api.qrserver.com; font-src 'self' data:; connect-src 'self' *.supabase.co wss://*.supabase.co https://api.paystack.co https://us.i.posthog.com https://us-assets.i.posthog.com wss://ws-us2.pusher.com https://sockjs-us2.pusher.com wss://*.vercel.live https://*.vercel.live; frame-src 'self' https://checkout.paystack.com https://vercel.live;"
           },

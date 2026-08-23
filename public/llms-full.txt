@@ -4,7 +4,19 @@
 > **Documentation Feed**: https://ourmenuos.online/llms-full.txt  
 > **Developer Documentation**: https://ourmenuos.online/docs  
 > **OpenAPI 3.1 Spec**: https://ourmenuos.online/openapi.json  
+> **API Catalog (RFC 9727)**: https://ourmenuos.online/.well-known/api-catalog  
+> **OIDC Discovery**: https://ourmenuos.online/.well-known/openid-configuration  
+> **OAuth Authorization Server**: https://ourmenuos.online/.well-known/oauth-authorization-server  
+> **OAuth Protected Resource**: https://ourmenuos.online/.well-known/oauth-protected-resource  
+> **Agent Skills Index (RFC v0.2.0)**: https://ourmenuos.online/.well-known/agent-skills/index.json  
 > **MCP Manifest**: https://ourmenuos.online/.well-known/mcp.json  
+> **ARD Manifest**: https://ourmenuos.online/.well-known/ai-catalog.json  
+> **x402 Micropayments**: https://ourmenuos.online/.well-known/x402.json  
+> **Machine Payment Protocol (MPP)**: https://ourmenuos.online/.well-known/mpp.json  
+> **Universal Commerce Protocol (UCP)**: https://ourmenuos.online/.well-known/ucp  
+> **Agentic Commerce Protocol (ACP)**: https://ourmenuos.online/.well-known/acp.json  
+> **DNS-AID Discovery**: https://ourmenuos.online/.well-known/dns-aid.json  
+> **Auth.md Agent Registration**: https://ourmenuos.online/auth.md  
 > **Agent Instructions**: https://ourmenuos.online/agent-instructions.md  
 > **Sitemap**: https://ourmenuos.online/sitemap.xml  
 > **Robots Directives**: https://ourmenuos.online/robots.txt  

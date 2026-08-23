@@ -1,0 +1,17 @@
+# robots.txt for OurMenu OS (https://ourmenuos.online)
+
+User-agent: *
+Allow: /
+Disallow: /dashboard/
+Disallow: /api/
+Disallow: /affiliate/dashboard/
+Disallow: /pay/
+Disallow: /d/
+Disallow: /kiosk-scan/
+Disallow: /invite/
+
+# Content Signals for AI and Search Agents (https://contentsignals.org)
+Content-Signal: ai-train=no, search=yes, ai-input=yes
+
+# Discovery & Sitemap
+Sitemap: https://ourmenuos.online/sitemap.xml

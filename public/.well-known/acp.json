@@ -1,0 +1,35 @@
+{
+  "protocol": {
+    "name": "acp",
+    "version": "1.0.0"
+  },
+  "name": "OurMenu OS Agentic Commerce Protocol",
+  "description": "Agentic Commerce Protocol (ACP) discovery manifest for autonomous agent browsing, cart building, order placement, and booking.",
+  "api_base_url": "https://ourmenuos.online/api",
+  "transports": ["https", "mcp", "websocket"],
+  "capabilities": {
+    "services": [
+      "catalog_search",
+      "cart_management",
+      "order_checkout",
+      "service_booking",
+      "receipt_printing",
+      "payment_roulette"
+    ],
+    "settlement_methods": [
+      "paystack",
+      "bachs",
+      "x402",
+      "mpp",
+      "crypto_usdc"
+    ]
+  },
+  "endpoints": {
+    "catalog": "https://ourmenuos.online/api/chat",
+    "orders": "https://ourmenuos.online/api/orders",
+    "bookings": "https://ourmenuos.online/api/bookings",
+    "ocr": "https://ourmenuos.online/api/ai/parse-menu",
+    "mcp_server": "https://ourmenuos.online/.well-known/mcp.json",
+    "skills_index": "https://ourmenuos.online/.well-known/agent-skills/index.json"
+  }
+}

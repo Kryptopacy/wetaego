@@ -76,6 +76,8 @@ import { getLocale, getMessages } from 'next-intl/server'
 
 import { AuthErrorToast } from '@/components/AuthErrorToast'
 
+import { WebMcpProvider } from '@/components/WebMcpProvider'
+
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -170,6 +172,7 @@ export default async function RootLayout({
           <NextIntlClientProvider messages={messages}>
             <AuthErrorToast />
             <OfflineBanner />
+            <WebMcpProvider />
             {children}
             <PwaInstallPrompt />
             <Toaster theme="dark" position="bottom-center" richColors />

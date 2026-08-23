@@ -1,0 +1,48 @@
+import { NextResponse } from 'next/server'
+
+export async function GET() {
+  const skillsIndex = {
+    $schema: 'https://agentskills.io/schema/v0.2.0/discovery.json',
+    version: '0.2.0',
+    skills: [
+      {
+        name: 'ourmenu-catalog',
+        type: 'tool',
+        description: 'Search, browse, and filter physical store catalogs, restaurant menus, and retail inventories with dietary and stock attributes.',
+        url: 'https://ourmenuos.online/.well-known/agent-skills/ourmenu-catalog/SKILL.md',
+        sha256: 'c1312a14d37b8e38a32109ab17a7fdbb63c4a9bb4db27acd99140fba44ae79d4'
+      },
+      {
+        name: 'ourmenu-ordering',
+        type: 'tool',
+        description: 'Submit and validate customer orders for restaurant dine-in, takeaway, or boutique retail pickup with item modifiers.',
+        url: 'https://ourmenuos.online/.well-known/agent-skills/ourmenu-ordering/SKILL.md',
+        sha256: 'aa1bbf0d2630b8c681374880b4ef51d058f1c21d82cdf3828001b2c36cd402a0'
+      },
+      {
+        name: 'ourmenu-booking',
+        type: 'tool',
+        description: 'Query availability calendars and schedule appointment bookings for salons, spas, clinics, and consultants with deposit processing.',
+        url: 'https://ourmenuos.online/.well-known/agent-skills/ourmenu-booking/SKILL.md',
+        sha256: '11923144ba565d3462d4495feb2d51f8568e3e7b56da6cba3173ddf1980598d2'
+      },
+      {
+        name: 'ourmenu-escpos-print',
+        type: 'tool',
+        description: 'Driverless direct binary ESC/POS thermal receipt printing over WebUSB, WebSerial (RS232 COM), and WebBluetooth.',
+        url: 'https://ourmenuos.online/.well-known/agent-skills/ourmenu-escpos-print/SKILL.md',
+        sha256: 'c878a267d0422dd9fbbd6a5064a56c7b7924922edaddc53f9fdb2bd5fbbe4f27'
+      }
+    ]
+  }
+
+  return NextResponse.json(skillsIndex, {
+    status: 200,
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Access-Control-Allow-Origin': '*',
+      'Cache-Control': 'public, max-age=3600, s-maxage=86400',
+      'Vary': 'Accept, Accept-Encoding'
+    }
+  })
+}
