@@ -123,66 +123,55 @@ export const MARKDOWN_CONTACT = `# Contact & Support — OurMenu OS
 - **Terms of Service**: https://ourmenuos.online/terms
 `;
 
-export const MARKDOWN_DOCS = `# OurMenu OS — Developer Documentation & API Reference
+export const MARKDOWN_DOCS = `# OurMenu OS — Developer Documentation & Architecture Reference
 
 > **API Base URL**: https://ourmenuos.online/api  
 > **OpenAPI 3.1.0 Spec**: https://ourmenuos.online/openapi.json  
-> **MCP Manifest**: https://ourmenuos.online/.well-known/mcp.json  
-> **Agent Guidance**: https://ourmenuos.online/agent-instructions.md  
+> **RFC 9727 API Catalog**: https://ourmenuos.online/.well-known/api-catalog  
+> **OIDC Discovery**: https://ourmenuos.online/.well-known/openid-configuration  
+> **OAuth Authorization**: https://ourmenuos.online/.well-known/oauth-authorization-server  
+> **OAuth Protected Resource**: https://ourmenuos.online/.well-known/oauth-protected-resource  
+> **Agent Registration Guide**: https://ourmenuos.online/auth.md  
+> **Agent Skills Index (RFC v0.2.0)**: https://ourmenuos.online/.well-known/agent-skills/index.json  
+> **Model Context Protocol (MCP)**: https://ourmenuos.online/.well-known/mcp.json  
+> **Agentic Resource Discovery (ARD)**: https://ourmenuos.online/.well-known/ai-catalog.json  
+> **x402 Micropayments**: https://ourmenuos.online/.well-known/x402.json  
+> **Machine Payment Protocol (MPP)**: https://ourmenuos.online/.well-known/mpp.json  
+> **Universal Commerce Protocol (UCP)**: https://ourmenuos.online/.well-known/ucp  
+> **Agentic Commerce Protocol (ACP)**: https://ourmenuos.online/.well-known/acp.json  
+> **DNS-AID Service Discovery**: https://ourmenuos.online/.well-known/dns-aid.json  
 
-OurMenu OS provides public REST APIs, webhooks, and Model Context Protocol (MCP) integrations for developers and autonomous AI agents.
+OurMenu OS provides public REST APIs, webhooks, Model Context Protocol (MCP) integrations, WebMCP browser context, x402 HTTP micropayments, and direct binary hardware printing drivers.
 
-## 1. Authentication
-All merchant endpoints require a Bearer token or Supabase API key passed in the \`Authorization\` header:
-\`\`\`http
-Authorization: Bearer <MERCHANT_API_KEY_OR_TOKEN>
-\`\`\`
-Public endpoints (such as \`/api/chat\` and storefront order lookups) require a valid \`location_id\` or \`slug\` parameter.
+## 1. Authentication & Agent Registration
+- **Merchant API Keys**: Passed via \`Authorization: Bearer <MERCHANT_API_KEY>\`.
+- **Agent Self-Registration**: Follows the WorkOS Auth.md standard at \`https://ourmenuos.online/auth.md\`.
+- **Public Storefront APIs**: Grounded by venue \`location_id\` or \`slug\` parameters.
 
-## 2. Core API Endpoints
+## 2. Core REST Endpoints
+- \`POST /api/chat\`: Streaming conversational AI concierge grounded in catalog items with zero hallucination.
+- \`POST /api/ai/parse-menu\`: Multimodal OCR parser extracting categories, items, prices, dietary attributes from images.
+- \`POST /api/ai/live-token\`: Mints ephemeral credentials for Gemini 3.1 Flash Live WebAudio/Vision streaming.
+- \`POST /api/orders\`: Guest order submission with table identifiers, item modifiers, and split bill instructions.
+- \`POST /api/bookings\`: Real-time calendar slot reservation and deposit processing.
+- \`GET /api/health\`: System telemetry and feature availability matrix.
+- \`POST /api/x402\`: HTTP 402 agent micropayment facilitator endpoint.
+- \`POST /api/paystack/webhook\`: Cryptographic HMAC SHA512 verified payment callbacks.
 
-### A. Frontline AI Concierge (\`/api/chat\`)
-- **Method**: \`POST\`
-- **Description**: Conversational zero-hallucination AI assistant for storefront guests.
-- **Request Body**:
-  \`\`\`json
-  {
-    "messages": [{ "role": "user", "content": "What vegan options are available?" }],
-    "locationId": "loc_123",
-    "pageId": "page_456"
-  }
-  \`\`\`
-- **Response**: Streaming text / markdown answers grounded in venue catalog items.
+## 3. Extended Operational & Hardware Capabilities
+- **Zero-Daemon ESC/POS Printing**: Raw binary ticket printing across WebUSB, WebSerial (RS232), and WebBluetooth with automated cash drawer kick pulses (\`ESC p\`) and paper cuts.
+- **Push-to-Talk Staff Intercom**: Real-time staff audio dispatch, kitchen-to-floor ready chimes, and guest assistance paging.
+- **1-Second Franchise Catalog Duplication**: Multi-branch supermarket/restaurant fleet replication (\`duplicatePageAction\`).
+- **Customer IOU Tab BNPL Ledger**: In-house credit financing, customer limits, and automated debt collection alerts.
+- **Payment Roulette Gamification**: Interactive bill splitting randomizer tool (\`/tools/who-pays-the-bill\`).
 
-### B. Multimodal Menu & Inventory OCR (\`/api/ai/parse-menu\`)
-- **Method**: \`POST\`
-- **Description**: Ingests raw images or camera frames of physical menus, invoices, or stock shelves to generate structured catalog JSON.
-- **Request Body**: \`multipart/form-data\` with image file or base64 data.
-
-### C. Live Gemini Token Minting (\`/api/ai/live-token\`)
-- **Method**: \`POST\`
-- **Description**: Mints ephemeral authentication tokens for real-time bidirectional WebAudio / Vision streaming via Gemini 3.1 Flash Live.
-
-### D. Orders Management (\`/api/orders\`)
-- **Method**: \`POST\` / \`GET\`
-- **Description**: Place or query customer orders with item modifiers, table IDs, and payment status.
-
-### E. Bookings & Appointments (\`/api/bookings\`)
-- **Method**: \`POST\` / \`GET\`
-- **Description**: Schedule wellness/salon/clinic appointment slots and verify deposit payments.
-
-### F. Paystack Webhook Handler (\`/api/paystack/webhook\`)
-- **Method**: \`POST\`
-- **Description**: Handles automated payment settlement callbacks with cryptographic HMAC signature verification (\`x-paystack-signature\`).
-
-## 3. Model Context Protocol (MCP) Tools
-OurMenu OS exposes MCP tools for agents to query catalogs, create orders, and check branch stock:
-- \`ourmenu_query_catalog\`: Search menu/product catalog with dietary and allergen filters.
-- \`ourmenu_create_order\`: Submit validated guest order.
-- \`ourmenu_check_availability\`: Query booking calendar slots.
-- \`ourmenu_request_staff\`: Trigger floor staff call chime.
-
-For complete tool definitions, fetch https://ourmenuos.online/.well-known/mcp.json.
+## 4. Autonomous Agent Tools & Model Context Protocol
+Discover our MCP server tools at \`/.well-known/mcp.json\` and Agent Skills at \`/.well-known/agent-skills/index.json\`:
+- \`ourmenu_query_catalog\`: Search dishes, retail stock, and menu items with dietary (vegan, halal, keto) filters.
+- \`ourmenu_create_order\`: Submit validated guest orders.
+- \`ourmenu_check_availability\`: Query open booking calendar slots.
+- \`ourmenu_request_staff\`: Trigger floor staff call chimes.
+- \`ourmenu_payment_roulette\`: Spin bill randomizer.
 `;
 
 export const MARKDOWN_PRIVACY = `# Privacy Policy — OurMenu OS
