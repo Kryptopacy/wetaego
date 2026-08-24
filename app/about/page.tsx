@@ -29,6 +29,24 @@ export default function AboutPage() {
       "logo": "https://ourmenuos.online/ourmenu-qr-logo.png",
       "email": "support@ourmenuos.online",
       "telephone": "+234-800-687-6368",
+      "contactPoint": [
+        {
+          "@type": "ContactPoint",
+          "telephone": "+234-800-687-6368",
+          "contactType": "customer service",
+          "email": "support@ourmenuos.online",
+          "availableLanguage": ["English", "Spanish", "French", "Yoruba", "Igbo", "Hausa"],
+          "areaServed": "Global"
+        },
+        {
+          "@type": "ContactPoint",
+          "telephone": "+234-800-687-6368",
+          "contactType": "sales",
+          "email": "partners@ourmenuos.online",
+          "availableLanguage": ["English"],
+          "areaServed": "Global"
+        }
+      ],
       "address": {
         "@type": "PostalAddress",
         "streetAddress": "12 Admiralty Way, Lekki Phase 1",

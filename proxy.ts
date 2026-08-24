@@ -19,15 +19,17 @@ const wafLimiter = redis
   : null
 import { getMarkdownForPath } from './lib/markdown-content'
 
-function prefersMarkdown(acceptHeader: string | null): boolean {
+export function prefersMarkdown(acceptHeader: string | null): boolean {
   if (!acceptHeader) return false
   const lower = acceptHeader.toLowerCase()
   if (!lower.includes('text/markdown') && !lower.includes('text/x-markdown')) {
     return false
   }
   const parts = lower.split(',').map((p) => p.trim())
-  let mdQuality = -1
-  let htmlQuality = -1
+  let mdQuality = 0
+  let htmlQuality = 0
+  let hasMarkdown = false
+  let hasHtml = false
 
   for (const part of parts) {
     const [media, ...params] = part.split(';')
@@ -42,13 +44,15 @@ function prefersMarkdown(acceptHeader: string | null): boolean {
     }
     if (mediaType === 'text/markdown' || mediaType === 'text/x-markdown') {
       mdQuality = Math.max(mdQuality, q)
-    } else if (mediaType === 'text/html') {
+      hasMarkdown = true
+    } else if (mediaType === 'text/html' || mediaType === 'application/xhtml+xml') {
       htmlQuality = Math.max(htmlQuality, q)
+      hasHtml = true
     }
   }
 
-  if (mdQuality <= 0) return false
-  if (htmlQuality < 0) return true
+  if (!hasMarkdown || mdQuality <= 0) return false
+  if (!hasHtml) return true
   return mdQuality >= htmlQuality
 }
 
