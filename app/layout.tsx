@@ -77,6 +77,7 @@ import { getLocale, getMessages } from 'next-intl/server'
 import { AuthErrorToast } from '@/components/AuthErrorToast'
 
 import { WebMcpProvider } from '@/components/WebMcpProvider'
+import { CookieConsentBanner } from '@/components/cookie-banner'
 
 export default async function RootLayout({
   children,
@@ -127,7 +128,7 @@ export default async function RootLayout({
                   ],
                   address: {
                     '@type': 'PostalAddress',
-                    streetAddress: '12 Admiralty Way, Lekki Phase 1',
+                    streetAddress: 'Admiralty Way, Lekki Phase 1',
                     addressLocality: 'Lagos',
                     addressRegion: 'Lagos State',
                     postalCode: '105102',
@@ -175,6 +176,7 @@ export default async function RootLayout({
             <WebMcpProvider />
             {children}
             <PwaInstallPrompt />
+            <CookieConsentBanner />
             <Toaster theme="dark" position="bottom-center" richColors />
           </NextIntlClientProvider>
         </PostHogProvider>
