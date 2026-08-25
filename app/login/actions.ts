@@ -102,6 +102,70 @@ export const signup = actionClient
     }
   })
 
+const resetPasswordRequestSchema = z.object({
+  email: z.string().email('Please enter a valid email address'),
+})
+
+const updatePasswordSchema = z.object({
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+})
+
+export const requestPasswordReset = actionClient
+  .schema(resetPasswordRequestSchema)
+  .action(async ({ parsedInput: { email } }) => {
+    const rl = await checkRateLimit('auth_reset_password')
+    if (!rl.success) {
+      return {
+        error: 'Too many password reset requests. Please wait a few minutes before trying again.'
+      }
+    }
+
+    const { headers } = await import('next/headers')
+    const headersList = await headers()
+    const forwardedHost = headersList.get('x-forwarded-host')
+    const host = forwardedHost || headersList.get('host') || 'ourmenuos.online'
+    const proto = headersList.get('x-forwarded-proto') || (host.includes('localhost') ? 'http' : 'https')
+    
+    const origin = (process.env.NEXT_PUBLIC_SITE_URL && !host.includes('localhost'))
+      ? process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, '')
+      : `${proto}://${host}`
+
+    const supabase = await createClient()
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${origin}/auth/callback?next=/reset-password`,
+    })
+
+    if (error) {
+      return {
+        error: error.message || 'Could not send reset password email. Please try again.'
+      }
+    }
+
+    return {
+      success: true,
+      message: 'Password reset link sent! Please check your email inbox (and spam folder).'
+    }
+  })
+
+export const updatePassword = actionClient
+  .schema(updatePasswordSchema)
+  .action(async ({ parsedInput: { password } }) => {
+    const supabase = await createClient()
+    const { error } = await supabase.auth.updateUser({ password })
+
+    if (error) {
+      return {
+        error: error.message || 'Could not update password. Please try requesting a new reset link.'
+      }
+    }
+
+    revalidatePath('/', 'layout')
+    return {
+      success: true,
+      redirect: '/dashboard'
+    }
+  })
+
 export async function signInWithGoogle() {
   const supabase = await createClient()
   
