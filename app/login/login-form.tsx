@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, Suspense } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import { login, signup, signInWithGoogle } from './actions'
@@ -28,28 +28,64 @@ function SubmitButton({ isLogin }: { isLogin: boolean }) {
 function LoginFormInner() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLogin, setIsLogin] = useState(true)
+  const [actionError, setActionError] = useState<string | null>(null)
+  const [actionSuccess, setActionSuccess] = useState<string | null>(null)
   const searchParams = useSearchParams()
   const redirectTo = searchParams.get('redirectTo') || '/dashboard'
 
+  useEffect(() => {
+    // Parse URL hash for OAuth / Supabase errors (e.g. #error=access_denied&error_description=...)
+    if (typeof window !== 'undefined' && window.location.hash) {
+      const hashParams = new URLSearchParams(window.location.hash.substring(1))
+      const hashError = hashParams.get('error_description') || hashParams.get('error')
+      if (hashError) {
+        setActionError(decodeURIComponent(hashError.replace(/\+/g, ' ')))
+      }
+    }
+  }, [])
+
   const handleAction = async (formData: FormData) => {
+    setActionError(null)
+    setActionSuccess(null)
+
     const payload = {
       email: formData.get('email') as string,
       password: formData.get('password') as string,
       redirectTo: formData.get('redirectTo') as string
     }
-    let res;
-    if (isLogin) {
-      res = await login(payload)
-    } else {
-      res = await signup(payload)
-    }
-    
-    if (res?.data?.redirect) {
-      window.location.href = res.data.redirect
-    } else if (res?.serverError || res?.validationErrors) {
-      console.error("Login Action Error:", res.serverError || res.validationErrors);
+
+    try {
+      let res;
+      if (isLogin) {
+        res = await login(payload)
+      } else {
+        res = await signup(payload)
+      }
+      
+      if (res?.data?.error) {
+        setActionError(res.data.error)
+      } else if (res?.data?.redirect) {
+        window.location.href = res.data.redirect
+      } else if (res?.data?.message) {
+        setActionSuccess(res.data.message)
+      } else if (res?.serverError) {
+        setActionError(res.serverError)
+      } else if (res?.validationErrors) {
+        const valErrors = res.validationErrors
+        const errStrings = typeof valErrors === 'object' && valErrors !== null
+          ? Object.values(valErrors).flat().filter(Boolean).join('. ')
+          : 'Invalid inputs provided.'
+        setActionError(errStrings)
+      }
+    } catch (err: unknown) {
+      console.error("Login Action Error:", err)
+      setActionError((err as Error)?.message || 'An unexpected error occurred. Please try again.')
     }
   }
+
+  const urlError = searchParams.get('error_description') || searchParams.get('error') || searchParams.get('message')
+  const displayedError = actionError || urlError
+  const displayedSuccess = actionSuccess || searchParams.get('success')
 
   return (
     <div className="w-full max-w-sm rounded-2xl bg-zinc-900/50 p-8 shadow-2xl ring-1 ring-white/10 backdrop-blur-xl">
@@ -61,18 +97,18 @@ function LoginFormInner() {
         </p>
       </div>
 
-      {searchParams.get('message') && (
+      {displayedError && (
         <div className="mb-6 rounded-lg bg-red-500/10 border border-red-500/20 p-4">
           <p className="text-sm font-medium text-red-500 text-center">
-            {searchParams.get('message')}
+            {displayedError}
           </p>
         </div>
       )}
 
-      {searchParams.get('success') && (
+      {displayedSuccess && (
         <div className="mb-6 rounded-lg bg-emerald-500/10 border border-emerald-500/20 p-4">
           <p className="text-sm font-medium text-emerald-500 text-center">
-            {searchParams.get('success')}
+            {displayedSuccess}
           </p>
         </div>
       )}

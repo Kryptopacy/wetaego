@@ -34,6 +34,16 @@ export const publicAiRateLimiter = redis
     })
   : null;
 
+// Auth limiter (Login / Signup) to prevent brute-force (10 attempts per 10 minutes)
+export const authRateLimiter = redis
+  ? new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(10, '10 m'),
+      analytics: true,
+      prefix: '@upstash/ratelimit/auth'
+    })
+  : null;
+
 /**
  * Validates request rate limit based on IP.
  * @returns { success: boolean, limit: number, remaining: number, reset: number }
@@ -42,17 +52,23 @@ export async function checkRateLimit(actionName: string, customIdentifier?: stri
   let limiter = globalRateLimiter;
   if (actionName.includes('webhook')) limiter = webhookRateLimiter;
   if (actionName.includes('public_ai')) limiter = publicAiRateLimiter;
+  if (actionName.includes('auth')) limiter = authRateLimiter;
   
   if (!limiter) return { success: true };
   
-  const reqHeaders = await headers();
-  const ip = reqHeaders.get('x-forwarded-for') || 'anonymous';
-  
-  // Use customIdentifier (like a session token) if provided, otherwise fallback to IP
-  const identity = customIdentifier || ip;
-  const key = `rate_limit_${actionName}_${identity}`;
-  
-  return await limiter.limit(key);
+  try {
+    const reqHeaders = await headers();
+    const ip = reqHeaders.get('x-forwarded-for') || reqHeaders.get('x-real-ip') || 'anonymous';
+    
+    // Use customIdentifier (like a session token) if provided, otherwise fallback to IP
+    const identity = customIdentifier || ip;
+    const key = `rate_limit_${actionName}_${identity}`;
+    
+    return await limiter.limit(key);
+  } catch (err) {
+    console.error('Rate limit error, failing open:', err);
+    return { success: true };
+  }
 }
 
 /**

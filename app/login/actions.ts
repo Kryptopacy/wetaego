@@ -6,15 +6,7 @@ import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { sendWelcomeEmail } from '@/lib/notifications/email'
 import { z } from 'zod'
 import { actionClient } from '@/lib/safe-action'
-import { Ratelimit } from '@upstash/ratelimit'
-import { Redis } from '@upstash/redis'
-
-const ratelimit = new Ratelimit({
-  redis: Redis.fromEnv(),
-  limiter: Ratelimit.slidingWindow(2, "1 h"),
-  analytics: true,
-})
-
+import { checkRateLimit } from '@/lib/upstash'
 
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -39,14 +31,13 @@ function sanitizeRedirect(target: string | null): string {
 export const login = actionClient
   .schema(loginSchema)
   .action(async ({ parsedInput: { email, password, redirectTo: rawRedirect } }) => {
-    const { headers } = await import('next/headers')
-    const ip = (await headers()).get('x-forwarded-for') || 'anonymous'
-    const { success } = await ratelimit.limit(`login_${ip}`)
-    
     const redirectTo = sanitizeRedirect(rawRedirect || null)
 
-    if (!success) {
-      return { redirect: `/login?message=${encodeURIComponent('Too many login attempts. Please try again later.')}&redirectTo=${encodeURIComponent(redirectTo)}` }
+    const rl = await checkRateLimit('auth_login')
+    if (!rl.success) {
+      return { 
+        error: 'Too many login attempts. Please wait a few minutes before trying again.' 
+      }
     }
 
     const supabase = await createClient()
@@ -60,7 +51,9 @@ export const login = actionClient
     const { error } = await supabase.auth.signInWithPassword({ email, password })
 
     if (error) {
-      return { redirect: `/login?message=${encodeURIComponent('Could not authenticate user')}&redirectTo=${encodeURIComponent(redirectTo)}` }
+      return { 
+        error: error.message || 'Invalid email or password. Please try again.' 
+      }
     }
 
     revalidatePath('/', 'layout')
@@ -70,14 +63,13 @@ export const login = actionClient
 export const signup = actionClient
   .schema(signupSchema)
   .action(async ({ parsedInput: { email, password, redirectTo: rawRedirect } }) => {
-    const { headers } = await import('next/headers')
-    const ip = (await headers()).get('x-forwarded-for') || 'anonymous'
-    const { success } = await ratelimit.limit(`signup_${ip}`)
-    
     const redirectTo = sanitizeRedirect(rawRedirect || null)
 
-    if (!success) {
-      return { redirect: `/login?message=${encodeURIComponent('Too many signup attempts. Please try again later.')}&redirectTo=${encodeURIComponent(redirectTo)}` }
+    const rl = await checkRateLimit('auth_signup')
+    if (!rl.success) {
+      return { 
+        error: 'Too many signup attempts. Please wait a few minutes before trying again.' 
+      }
     }
 
     const supabase = await createClient()
@@ -88,17 +80,26 @@ export const signup = actionClient
       await supabase.auth.signOut()
     }
 
-    const { error, data: _data } = await supabase.auth.signUp({ email, password })
+    const { data, error } = await supabase.auth.signUp({ email, password })
 
     if (error) {
-      return { redirect: `/login?message=${encodeURIComponent('Could not sign up user')}&redirectTo=${encodeURIComponent(redirectTo)}` }
+      return { 
+        error: error.message || 'Could not create account. Please try again.' 
+      }
     }
 
     // Trigger welcome email in the background
     sendWelcomeEmail(email).catch(console.error)
 
-    revalidatePath('/', 'layout')
-    return { redirect: redirectTo }
+    if (data.session) {
+      revalidatePath('/', 'layout')
+      return { redirect: redirectTo }
+    }
+
+    return { 
+      success: true, 
+      message: 'Account created! If email confirmation is required, please check your inbox.' 
+    }
   })
 
 export async function signInWithGoogle() {
@@ -113,9 +114,13 @@ export async function signInWithGoogle() {
   const { headers } = await import('next/headers')
   
   const headersList = await headers()
-  const host = headersList.get('host') || 'localhost:3000'
-  const protocol = host.includes('localhost') ? 'http' : 'https'
-  const origin = `${protocol}://${host}`
+  const forwardedHost = headersList.get('x-forwarded-host')
+  const host = forwardedHost || headersList.get('host') || 'ourmenuos.online'
+  const proto = headersList.get('x-forwarded-proto') || (host.includes('localhost') ? 'http' : 'https')
+  
+  const origin = (process.env.NEXT_PUBLIC_SITE_URL && !host.includes('localhost'))
+    ? process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, '')
+    : `${proto}://${host}`
   
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
@@ -125,7 +130,7 @@ export async function signInWithGoogle() {
   })
 
   if (error) {
-    redirect(`/login?message=Could not authenticate via Google`)
+    redirect(`/login?error=${encodeURIComponent(error.message)}`)
   }
 
   if (data.url) {
@@ -134,16 +139,14 @@ export async function signInWithGoogle() {
 }
 
 export async function startInteractiveDemo() {
-  const { headers } = await import('next/headers')
-  const headersList = await headers()
-  const ip = headersList.get('x-forwarded-for') || headersList.get('x-real-ip') || 'unknown'
-
-  if (ip !== 'unknown') {
-    const { success } = await ratelimit.limit(`demo_creation_${ip}`)
-    if (!success) {
+  try {
+    const rl = await checkRateLimit('demo_creation')
+    if (!rl.success) {
       redirect(`/login?message=${encodeURIComponent('Too many demo workspaces created. Try again later.')}`)
       return
     }
+  } catch {
+    // Fail open if rate limit check fails
   }
 
   const supabase = await createClient()
