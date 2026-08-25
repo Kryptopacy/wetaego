@@ -458,3 +458,102 @@ export async function sendTrialExpirationReminder(toEmail: string, daysLeft: num
     return false;
   }
 }
+
+export async function sendMarketingBroadcastEmail({
+  toEmail,
+  businessName,
+  logoUrl,
+  subject,
+  message,
+  locationSlug,
+}: {
+  toEmail: string;
+  businessName: string;
+  logoUrl?: string | null;
+  subject: string;
+  message: string;
+  locationSlug?: string | null;
+}) {
+  if (!(await isEmailEnabled())) return true;
+  if (!process.env.RESEND_API_KEY) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('RESEND_API_KEY is missing in production environment');
+    }
+    console.warn(`RESEND_API_KEY missing. Mocking Marketing Broadcast to ${toEmail}: ${subject}`);
+    return true;
+  }
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://ourmenuos.online';
+  const storeUrl = locationSlug ? `${siteUrl}/m/${locationSlug}` : siteUrl;
+
+  try {
+    const { error } = await resend.emails.send({
+      from: `${businessName.replace(/["<>\r\n]/g, '')} via OurMenu <marketing@ourmenuos.online>`,
+      to: [toEmail],
+      subject: subject,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>${escapeHTML(subject)}</title>
+        </head>
+        <body style="margin:0;padding:0;background-color:#050505;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#d4d4d8;">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#050505;padding:40px 15px;">
+            <tr>
+              <td align="center">
+                <table role="presentation" width="100%" style="max-width:580px;background-color:#121214;border:1px solid #27272a;border-radius:16px;overflow:hidden;box-shadow:0 20px 25px -5px rgba(0,0,0,0.5);">
+                  <!-- Merchant Header -->
+                  <tr>
+                    <td style="padding:32px 36px 24px 36px;border-bottom:1px solid #1e1e24;text-align:center;">
+                      ${logoUrl ? `<img src="${escapeHTML(logoUrl)}" alt="${escapeHTML(businessName)}" style="max-height:48px;max-width:180px;margin-bottom:12px;object-fit:contain;" />` : ''}
+                      <h2 style="margin:0;font-size:20px;font-weight:700;color:#ffffff;letter-spacing:-0.01em;">${escapeHTML(businessName)}</h2>
+                    </td>
+                  </tr>
+                  <!-- Content Body -->
+                  <tr>
+                    <td style="padding:32px 36px;">
+                      <div style="font-size:15px;line-height:1.7;color:#e4e4e7;white-space:pre-wrap;">${escapeHTML(message)}</div>
+
+                      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:32px 0 16px 0;">
+                        <tr>
+                          <td align="center">
+                            <a href="${storeUrl}" style="display:inline-block;background-color:#10b981;color:#ffffff;font-size:15px;font-weight:600;text-decoration:none;padding:14px 32px;border-radius:10px;box-shadow:0 4px 14px 0 rgba(16,185,129,0.39);">
+                              Visit Storefront →
+                            </a>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                  <!-- Compliance & Consent Footer -->
+                  <tr>
+                    <td style="padding:24px 36px;background-color:#0c0c0e;border-top:1px solid #1e1e24;text-align:center;">
+                      <p style="margin:0 0 6px 0;font-size:12px;color:#71717a;line-height:1.5;">
+                        You received this email because you opted into updates and special offers when placing an order or registering at <strong style="color:#a1a1aa;">${escapeHTML(businessName)}</strong>.
+                      </p>
+                      <p style="margin:0;font-size:11px;color:#52525b;">
+                        Powered by OurMenu OS • Privacy Protected under NDPR & GDPR
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
+      `,
+    });
+
+    if (error) {
+      console.error('Failed to send marketing broadcast email via Resend:', error);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.error('Failed to send marketing broadcast email:', err);
+    return false;
+  }
+}

@@ -1,7 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { sendEmailNotification } from '@/lib/notifications/email'
+import { sendMarketingBroadcastEmail } from '@/lib/notifications/email'
 import { sendWhatsAppMessage } from '@/lib/notifications/termii'
 
 export async function sendBroadcastAction(
@@ -15,6 +15,17 @@ export async function sendBroadcastAction(
   // Verify auth and permissions
   const { data: userData } = await supabase.auth.getUser()
   if (!userData?.user) throw new Error('Unauthorized')
+
+  // Fetch business details
+  const { data: org } = await supabase
+    .from('organizations')
+    .select('name, logo_url, slug')
+    .eq('id', organizationId)
+    .single()
+
+  const businessName = org?.name || 'OurMenu Partner'
+  const logoUrl = org?.logo_url || null
+  const slug = org?.slug || null
 
   // Fetch opted-in customers
   const { data: customers } = await supabase
@@ -32,22 +43,25 @@ export async function sendBroadcastAction(
   await Promise.all(
     customers.map(async (customer) => {
       let sent = false
-      // Infer name from email if needed
       const name = customer.email ? customer.email.split('@')[0] : 'Valued Customer'
+      const personalizedMessage = message.replace(/\{\{name\}\}/gi, name).replace(/\{\{business_name\}\}/gi, businessName)
 
       if (channels.includes('email') && customer.email) {
-        const success = await sendEmailNotification(
-          customer.email, 
-          subject, 
-          message.replace('{{name}}', name)
-        )
+        const success = await sendMarketingBroadcastEmail({
+          toEmail: customer.email,
+          businessName,
+          logoUrl,
+          subject,
+          message: personalizedMessage,
+          locationSlug: slug,
+        })
         if (success) sent = true
       }
 
       if (channels.includes('whatsapp') && customer.phone_number) {
         const success = await sendWhatsAppMessage(
           customer.phone_number,
-          `*${subject}*\n\n${message.replace('{{name}}', name)}`
+          `*${businessName}*\n*${subject}*\n\n${personalizedMessage}`
         ).then(() => true).catch(() => false)
         if (success) sent = true
       }
