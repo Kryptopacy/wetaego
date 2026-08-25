@@ -148,3 +148,42 @@ export async function unlinkResourceOrder(resourceId: string) {
   const supabase = await createClient()
   await supabase.from('resources').update({ current_order_id: null }).eq('id', resourceId)
 }
+
+export async function createRegisterAction(locationId: string, name: string, type: string = 'register') {
+  const { createClient } = await import('@/lib/supabase/server')
+  const supabase = await createClient()
+
+  const { data: userData } = await supabase.auth.getUser()
+  if (!userData.user) throw new Error('Unauthorized')
+
+  if (!name.trim()) throw new Error('Terminal name is required')
+
+  const { data: loc } = await supabase
+    .from('locations')
+    .select('organization_id')
+    .eq('id', locationId)
+    .single()
+
+  if (!loc?.organization_id) throw new Error('Location organization not found')
+
+  const { data, error } = await supabase
+    .from('resources')
+    .insert({
+      location_id: locationId,
+      organization_id: loc.organization_id,
+      name: name.trim(),
+      type: type || 'register',
+    })
+    .select('id, name, type, current_order_id')
+    .single()
+
+  if (error) {
+    console.error('Failed to create POS register:', error)
+    throw new Error('Failed to create register: ' + error.message)
+  }
+
+  const { revalidatePath } = await import('next/cache')
+  revalidatePath('/dashboard/pos')
+  return { success: true, register: data }
+}
+
