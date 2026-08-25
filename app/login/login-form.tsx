@@ -67,10 +67,11 @@ function LoginFormInner() {
     try {
       if (authMode === 'forgot_password') {
         const res = await requestPasswordReset({ email })
-        if (res?.data?.error) {
-          setActionError(res.data.error)
-        } else if (res?.data?.message) {
-          setActionSuccess(res.data.message)
+        const resetData = res?.data as { error?: string; message?: string; success?: boolean } | undefined
+        if (resetData?.error) {
+          setActionError(resetData.error)
+        } else if (resetData?.message) {
+          setActionSuccess(resetData.message)
         } else if (res?.serverError) {
           setActionError(res.serverError)
         }
@@ -84,12 +85,13 @@ function LoginFormInner() {
         res = await signup({ email, password, redirectTo: redirectParam })
       }
       
-      if (res?.data?.error) {
-        setActionError(res.data.error)
-      } else if (res?.data?.redirect) {
-        window.location.href = res.data.redirect
-      } else if (res?.data?.message) {
-        setActionSuccess(res.data.message)
+      const authData = res?.data as { error?: string; redirect?: string; message?: string; success?: boolean } | undefined
+      if (authData?.error) {
+        setActionError(authData.error)
+      } else if (authData?.redirect) {
+        window.location.href = authData.redirect
+      } else if (authData?.message) {
+        setActionSuccess(authData.message)
       } else if (res?.serverError) {
         setActionError(res.serverError)
       } else if (res?.validationErrors) {

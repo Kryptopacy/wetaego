@@ -46,13 +46,14 @@ export default function ResetPasswordForm() {
 
     try {
       const res = await updatePassword({ password })
+      const data = res?.data as { error?: string; redirect?: string; success?: boolean } | undefined
 
-      if (res?.data?.error) {
-        setActionError(res.data.error)
-      } else if (res?.data?.success && res?.data?.redirect) {
+      if (data?.error) {
+        setActionError(data.error)
+      } else if (data?.success && data?.redirect) {
         setIsSuccess(true)
         setTimeout(() => {
-          window.location.href = res.data.redirect
+          window.location.href = data.redirect!
         }, 1500)
       } else if (res?.serverError) {
         setActionError(res.serverError)
