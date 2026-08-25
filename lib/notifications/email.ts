@@ -34,12 +34,34 @@ export async function sendEmailNotification(toEmail: string, subject: string, me
       to: [toEmail],
       subject: subject,
       html: `
-        <div style="font-family: sans-serif; max-w: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
-          <h2 style="color: #333; margin-top: 0;">${escapeHTML(subject)}</h2>
-          <p style="color: #555; font-size: 16px; line-height: 1.5; white-space: pre-line;">${escapeHTML(message)}</p>
-          <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
-          <p style="color: #999; font-size: 12px;">This is an automated notification from OurMenu OS.</p>
-        </div>
+        <!DOCTYPE html>
+        <html>
+        <body style="margin:0;padding:0;background-color:#050505;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#d4d4d8;">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#050505;padding:40px 15px;">
+            <tr>
+              <td align="center">
+                <table role="presentation" width="100%" style="max-width:560px;background-color:#121214;border:1px solid #27272a;border-radius:16px;overflow:hidden;box-shadow:0 20px 25px -5px rgba(0,0,0,0.5);">
+                  <tr>
+                    <td style="padding:32px 36px 20px 36px;border-bottom:1px solid #1e1e24;">
+                      <h2 style="margin:0;font-size:20px;font-weight:700;color:#ffffff;">${escapeHTML(subject)}</h2>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:28px 36px;">
+                      <p style="margin:0;font-size:15px;line-height:1.6;color:#d4d4d8;white-space:pre-line;">${escapeHTML(message)}</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:20px 36px;background-color:#0c0c0e;border-top:1px solid #1e1e24;text-align:center;">
+                      <p style="margin:0;font-size:12px;color:#52525b;">This is an automated operational notification from OurMenu OS.</p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
       `,
     });
 
@@ -65,33 +87,71 @@ export async function sendWelcomeEmail(toEmail: string, name?: string) {
     return true;
   }
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://ourmenuos.online';
+
   try {
     const { error } = await resend.emails.send({
-      from: 'OurMenu Welcome <welcome@ourmenuos.online>',
+      from: 'OurMenu OS <welcome@ourmenuos.online>',
       to: [toEmail],
       subject: 'Welcome to OurMenu OS! 🚀',
       html: `
-        <div style="font-family: sans-serif; max-w: 600px; margin: 0 auto; padding: 30px; border: 1px solid #eee; border-radius: 12px; background: #fafafa;">
-          <h1 style="color: #111; margin-top: 0;">Welcome aboard${name ? `, ${escapeHTML(name)}` : ''}! 🎉</h1>
-          <p style="color: #444; font-size: 16px; line-height: 1.6;">
-            We're thrilled to have you join OurMenu OS. Our mission is to give you absolute control over your digital storefront, bookings, and customer interactions without the technical headache.
-          </p>
-          <p style="color: #444; font-size: 16px; line-height: 1.6;">
-            <strong>Next Steps:</strong>
-            <ul style="color: #444; font-size: 16px; line-height: 1.6;">
-              <li>Customize your business profile and location</li>
-              <li>Add your first few menu items or booking services</li>
-              <li>Setup your QR codes or ecosystem links</li>
-            </ul>
-          </p>
-          <p style="color: #444; font-size: 16px; line-height: 1.6;">
-            If you run into any snags or have questions, simply reply to this email. We're here to help you scale!
-          </p>
-          <br/>
-          <a href="${process.env.NEXT_PUBLIC_SITE_URL}/dashboard" style="display: inline-block; background: #000; color: #fff; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: bold;">Go to Dashboard</a>
-          <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;" />
-          <p style="color: #888; font-size: 12px;">© OurMenu OS. All rights reserved.</p>
-        </div>
+        <!DOCTYPE html>
+        <html>
+        <body style="margin:0;padding:0;background-color:#050505;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#d4d4d8;">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#050505;padding:40px 15px;">
+            <tr>
+              <td align="center">
+                <table role="presentation" width="100%" style="max-width:560px;background-color:#121214;border:1px solid #27272a;border-radius:16px;overflow:hidden;box-shadow:0 20px 25px -5px rgba(0,0,0,0.5);">
+                  <tr>
+                    <td style="padding:36px 36px 20px 36px;text-align:center;border-bottom:1px solid #1e1e24;">
+                      <div style="display:inline-block;padding:10px;border-radius:12px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);margin-bottom:16px;">
+                        <span style="font-size:24px;">🚀</span>
+                      </div>
+                      <h1 style="margin:0;font-size:24px;font-weight:800;color:#ffffff;letter-spacing:-0.02em;">Welcome aboard${name ? `, ${escapeHTML(name)}` : ''}!</h1>
+                      <p style="margin:6px 0 0 0;font-size:13px;color:#71717a;">Your Digital Storefront & Operating System is Ready</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:32px 36px;">
+                      <p style="margin:0 0 16px 0;font-size:15px;line-height:1.6;color:#e4e4e7;">
+                        We're thrilled to have you join OurMenu OS. You now have complete autonomy over your QR menus, booking schedules, live order dispatch, and payment collections without middleman commissions.
+                      </p>
+                      
+                      <div style="background-color:#18181b;border:1px solid #27272a;border-radius:12px;padding:20px;margin:24px 0;">
+                        <p style="margin:0 0 12px 0;font-size:13px;font-weight:700;color:#10b981;text-transform:uppercase;letter-spacing:0.05em;">3-Step Quick Launch:</p>
+                        <ol style="margin:0;padding-left:20px;font-size:14px;color:#d4d4d8;line-height:1.8;">
+                          <li><strong>Create your first page</strong> (Restaurant Menu, Salon Booking, or Retail Catalog).</li>
+                          <li><strong>Set your payout details</strong> under Profile or Location settings.</li>
+                          <li><strong>Print your branded QR codes</strong> directly from your dashboard.</li>
+                        </ol>
+                      </div>
+
+                      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:28px 0;">
+                        <tr>
+                          <td align="center">
+                            <a href="${siteUrl}/dashboard" style="display:inline-block;background-color:#10b981;color:#ffffff;font-size:15px;font-weight:600;text-decoration:none;padding:14px 32px;border-radius:10px;box-shadow:0 4px 14px 0 rgba(16,185,129,0.39);">
+                              Open Merchant Dashboard →
+                            </a>
+                          </td>
+                        </tr>
+                      </table>
+
+                      <p style="margin:20px 0 0 0;font-size:13px;color:#71717a;line-height:1.6;">
+                        Need assistance? Simply reply to this email or chat with our Tego AI Copilot inside your dashboard.
+                      </p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:20px 36px;background-color:#0c0c0e;border-top:1px solid #1e1e24;text-align:center;">
+                      <p style="margin:0;font-size:12px;color:#52525b;">© ${new Date().getFullYear()} OurMenu OS. All rights reserved.</p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
       `,
     });
 
@@ -106,23 +166,163 @@ export async function sendWelcomeEmail(toEmail: string, name?: string) {
   }
 }
 
+export async function sendPasswordResetEmail(toEmail: string, resetLink: string, name?: string) {
+  if (!(await isEmailEnabled())) return true;
+  if (!process.env.RESEND_API_KEY) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('RESEND_API_KEY is missing in production environment');
+    }
+    console.warn(`RESEND_API_KEY missing. Mocking Password Reset email to ${toEmail}: ${resetLink}`);
+    return true;
+  }
+
+  try {
+    const { error } = await resend.emails.send({
+      from: 'OurMenu Security <security@ourmenuos.online>',
+      to: [toEmail],
+      subject: 'Reset Your OurMenu OS Password 🔐',
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Reset Your Password</title>
+        </head>
+        <body style="margin:0;padding:0;background-color:#050505;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#d4d4d8;">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#050505;padding:40px 15px;">
+            <tr>
+              <td align="center">
+                <table role="presentation" width="100%" style="max-width:560px;background-color:#121214;border:1px solid #27272a;border-radius:16px;overflow:hidden;box-shadow:0 20px 25px -5px rgba(0,0,0,0.5);">
+                  <tr>
+                    <td style="padding:36px 36px 20px 36px;text-align:center;border-bottom:1px solid #1e1e24;">
+                      <div style="display:inline-block;padding:10px;border-radius:12px;background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.2);margin-bottom:16px;">
+                        <span style="font-size:24px;">🔐</span>
+                      </div>
+                      <h1 style="margin:0;font-size:22px;font-weight:700;color:#ffffff;letter-spacing:-0.02em;">Password Reset Request</h1>
+                      <p style="margin:6px 0 0 0;font-size:13px;color:#71717a;">OurMenu OS Security & Identity</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:32px 36px;">
+                      <p style="margin:0 0 16px 0;font-size:15px;line-height:1.6;color:#e4e4e7;">
+                        Hi ${name ? escapeHTML(name) : 'there'},
+                      </p>
+                      <p style="margin:0 0 24px 0;font-size:15px;line-height:1.6;color:#a1a1aa;">
+                        We received a request to reset the password associated with your account (<strong style="color:#ffffff;">${escapeHTML(toEmail)}</strong>). Click the secure button below to choose a new password:
+                      </p>
+                      
+                      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:28px 0;">
+                        <tr>
+                          <td align="center">
+                            <a href="${resetLink}" style="display:inline-block;background-color:#2563eb;color:#ffffff;font-size:15px;font-weight:600;text-decoration:none;padding:14px 32px;border-radius:10px;box-shadow:0 4px 14px 0 rgba(37,99,235,0.39);">
+                              Reset Password →
+                            </a>
+                          </td>
+                        </tr>
+                      </table>
+
+                      <div style="background-color:#18181b;border:1px solid #27272a;border-radius:10px;padding:16px;margin:24px 0 0 0;">
+                        <p style="margin:0 0 8px 0;font-size:12px;font-weight:600;color:#71717a;text-transform:uppercase;letter-spacing:0.05em;">
+                          Security Notice:
+                        </p>
+                        <ul style="margin:0;padding-left:18px;font-size:13px;color:#a1a1aa;line-height:1.5;">
+                          <li>This link is single-use and expires in <strong>1 hour</strong>.</li>
+                          <li>If you did not make this request, your account remains secure and you can ignore this email.</li>
+                        </ul>
+                      </div>
+
+                      <p style="margin:24px 0 0 0;font-size:12px;color:#71717a;line-height:1.5;word-break:break-all;">
+                        Button not working? Copy and paste this URL directly into your browser:<br/>
+                        <a href="${resetLink}" style="color:#3b82f6;text-decoration:underline;">${resetLink}</a>
+                      </p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:20px 36px;background-color:#0c0c0e;border-top:1px solid #1e1e24;text-align:center;">
+                      <p style="margin:0;font-size:12px;color:#52525b;">
+                        © ${new Date().getFullYear()} OurMenu OS. All rights reserved.
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
+      `,
+    });
+
+    if (error) {
+      console.error('Failed to send password reset email via Resend:', error);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.error('Failed to send password reset email:', err);
+    return false;
+  }
+}
+
 export async function sendSubscriptionActivated(toEmail: string, planName: string, name?: string) {
   if (!(await isEmailEnabled())) return true;
   if (!process.env.RESEND_API_KEY) return true;
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://ourmenuos.online';
+
   try {
     const { error } = await resend.emails.send({
       from: 'OurMenu Billing <billing@ourmenuos.online>',
       to: [toEmail],
       subject: 'Your Subscription is Active! 🎉',
       html: `
-        <div style="font-family: sans-serif; max-w: 600px; margin: 0 auto; padding: 30px; border: 1px solid #eee; border-radius: 12px;">
-          <h1 style="color: #111; margin-top: 0;">Subscription Activated!</h1>
-          <p style="color: #444; font-size: 16px; line-height: 1.6;">
-            Hi ${name ? escapeHTML(name) : 'there'},<br/><br/>
-            Great news! Your <strong>${escapeHTML(planName)}</strong> subscription is now active. You have full access to all premium features.
-          </p>
-          <a href="${process.env.NEXT_PUBLIC_SITE_URL}/dashboard" style="display: inline-block; background: #10b981; color: #fff; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: bold;">Go to Dashboard</a>
-        </div>
+        <!DOCTYPE html>
+        <html>
+        <body style="margin:0;padding:0;background-color:#050505;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#d4d4d8;">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#050505;padding:40px 15px;">
+            <tr>
+              <td align="center">
+                <table role="presentation" width="100%" style="max-width:560px;background-color:#121214;border:1px solid #27272a;border-radius:16px;overflow:hidden;box-shadow:0 20px 25px -5px rgba(0,0,0,0.5);">
+                  <tr>
+                    <td style="padding:36px 36px 20px 36px;text-align:center;border-bottom:1px solid #1e1e24;">
+                      <div style="display:inline-block;padding:10px;border-radius:12px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);margin-bottom:16px;">
+                        <span style="font-size:24px;">⚡</span>
+                      </div>
+                      <h1 style="margin:0;font-size:22px;font-weight:700;color:#ffffff;">Subscription Activated</h1>
+                      <p style="margin:6px 0 0 0;font-size:13px;color:#71717a;">OurMenu OS Pro Platform</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:32px 36px;">
+                      <p style="margin:0 0 16px 0;font-size:15px;line-height:1.6;color:#e4e4e7;">
+                        Hi ${name ? escapeHTML(name) : 'there'},
+                      </p>
+                      <p style="margin:0 0 24px 0;font-size:15px;line-height:1.6;color:#a1a1aa;">
+                        Your <strong>${escapeHTML(planName)}</strong> tier has been activated successfully! All pro features, AI tools, and higher throughput limits are now unlocked on your workspace.
+                      </p>
+                      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:28px 0;">
+                        <tr>
+                          <td align="center">
+                            <a href="${siteUrl}/dashboard" style="display:inline-block;background-color:#10b981;color:#ffffff;font-size:15px;font-weight:600;text-decoration:none;padding:14px 32px;border-radius:10px;">
+                              Go to Dashboard →
+                            </a>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:20px 36px;background-color:#0c0c0e;border-top:1px solid #1e1e24;text-align:center;">
+                      <p style="margin:0;font-size:12px;color:#52525b;">© ${new Date().getFullYear()} OurMenu OS. All rights reserved.</p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
       `,
     });
     if (error) throw error;
@@ -140,29 +340,50 @@ export async function sendInvoice(toEmail: string, amount: string, reference: st
     const { error } = await resend.emails.send({
       from: 'OurMenu Billing <billing@ourmenuos.online>',
       to: [toEmail],
-      subject: 'Payment Receipt - OurMenu OS',
+      subject: 'Payment Receipt - OurMenu OS 🧾',
       html: `
-        <div style="font-family: sans-serif; max-w: 600px; margin: 0 auto; padding: 30px; border: 1px solid #eee; border-radius: 12px;">
-          <h1 style="color: #111; margin-top: 0;">Payment Receipt</h1>
-          <p style="color: #444; font-size: 16px; line-height: 1.6;">
-            Thank you for your payment. Here are the details of your recent transaction:
-          </p>
-          <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+        <!DOCTYPE html>
+        <html>
+        <body style="margin:0;padding:0;background-color:#050505;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#d4d4d8;">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#050505;padding:40px 15px;">
             <tr>
-              <td style="padding: 10px; border-bottom: 1px solid #eee; color: #666;">Plan</td>
-              <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right; font-weight: bold;">${escapeHTML(planName)}</td>
-            </tr>
-            <tr>
-              <td style="padding: 10px; border-bottom: 1px solid #eee; color: #666;">Amount</td>
-              <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right; font-weight: bold;">${escapeHTML(amount)}</td>
-            </tr>
-            <tr>
-              <td style="padding: 10px; border-bottom: 1px solid #eee; color: #666;">Reference</td>
-              <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right; font-family: monospace;">${escapeHTML(reference)}</td>
+              <td align="center">
+                <table role="presentation" width="100%" style="max-width:560px;background-color:#121214;border:1px solid #27272a;border-radius:16px;overflow:hidden;box-shadow:0 20px 25px -5px rgba(0,0,0,0.5);">
+                  <tr>
+                    <td style="padding:36px 36px 20px 36px;text-align:center;border-bottom:1px solid #1e1e24;">
+                      <h1 style="margin:0;font-size:22px;font-weight:700;color:#ffffff;">Payment Receipt</h1>
+                      <p style="margin:6px 0 0 0;font-size:13px;color:#71717a;">Transaction Ref: ${escapeHTML(reference)}</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:32px 36px;">
+                      <table style="width:100%;border-collapse:collapse;margin:10px 0 20px 0;">
+                        <tr>
+                          <td style="padding:12px 0;border-bottom:1px solid #27272a;color:#a1a1aa;font-size:14px;">Plan / Service</td>
+                          <td style="padding:12px 0;border-bottom:1px solid #27272a;text-align:right;font-weight:600;color:#ffffff;font-size:14px;">${escapeHTML(planName)}</td>
+                        </tr>
+                        <tr>
+                          <td style="padding:12px 0;border-bottom:1px solid #27272a;color:#a1a1aa;font-size:14px;">Total Paid</td>
+                          <td style="padding:12px 0;border-bottom:1px solid #27272a;text-align:right;font-weight:700;color:#10b981;font-size:16px;">${escapeHTML(amount)}</td>
+                        </tr>
+                        <tr>
+                          <td style="padding:12px 0;border-bottom:1px solid #27272a;color:#a1a1aa;font-size:14px;">Status</td>
+                          <td style="padding:12px 0;border-bottom:1px solid #27272a;text-align:right;color:#10b981;font-weight:600;font-size:14px;">Paid & Confirmed</td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:20px 36px;background-color:#0c0c0e;border-top:1px solid #1e1e24;text-align:center;">
+                      <p style="margin:0;font-size:12px;color:#52525b;">© ${new Date().getFullYear()} OurMenu OS. All rights reserved.</p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
             </tr>
           </table>
-          <p style="color: #888; font-size: 12px;">If you have any questions about this receipt, please contact support.</p>
-        </div>
+        </body>
+        </html>
       `,
     });
     if (error) throw error;
@@ -176,23 +397,58 @@ export async function sendInvoice(toEmail: string, amount: string, reference: st
 export async function sendTrialExpirationReminder(toEmail: string, daysLeft: number, name?: string) {
   if (!(await isEmailEnabled())) return true;
   if (!process.env.RESEND_API_KEY) return true;
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://ourmenuos.online';
+
   try {
     const { error } = await resend.emails.send({
       from: 'OurMenu OS <support@ourmenuos.online>',
       to: [toEmail],
-      subject: `Your free trial expires in ${daysLeft} days`,
+      subject: `Your free trial expires in ${daysLeft} days ⏳`,
       html: `
-        <div style="font-family: sans-serif; max-w: 600px; margin: 0 auto; padding: 30px; border: 1px solid #eee; border-radius: 12px;">
-          <h1 style="color: #111; margin-top: 0;">Action Required</h1>
-          <p style="color: #444; font-size: 16px; line-height: 1.6;">
-            Hi ${name ? escapeHTML(name) : 'there'},<br/><br/>
-            We hope you're enjoying OurMenu OS! Your free trial is ending in exactly <strong>${daysLeft} days</strong>.
-          </p>
-          <p style="color: #444; font-size: 16px; line-height: 1.6;">
-            To keep your digital storefront and dashboard active without interruption, please add a payment method and select a plan.
-          </p>
-          <a href="${process.env.NEXT_PUBLIC_SITE_URL}/dashboard/billing" style="display: inline-block; background: #3b82f6; color: #fff; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: bold; margin-top: 10px;">Select a Plan</a>
-        </div>
+        <!DOCTYPE html>
+        <html>
+        <body style="margin:0;padding:0;background-color:#050505;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#d4d4d8;">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#050505;padding:40px 15px;">
+            <tr>
+              <td align="center">
+                <table role="presentation" width="100%" style="max-width:560px;background-color:#121214;border:1px solid #27272a;border-radius:16px;overflow:hidden;box-shadow:0 20px 25px -5px rgba(0,0,0,0.5);">
+                  <tr>
+                    <td style="padding:36px 36px 20px 36px;text-align:center;border-bottom:1px solid #1e1e24;">
+                      <h1 style="margin:0;font-size:22px;font-weight:700;color:#ffffff;">Trial Ending Soon</h1>
+                      <p style="margin:6px 0 0 0;font-size:13px;color:#f59e0b;">${daysLeft} days remaining</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:32px 36px;">
+                      <p style="margin:0 0 16px 0;font-size:15px;line-height:1.6;color:#e4e4e7;">
+                        Hi ${name ? escapeHTML(name) : 'there'},
+                      </p>
+                      <p style="margin:0 0 24px 0;font-size:15px;line-height:1.6;color:#a1a1aa;">
+                        We hope you're enjoying OurMenu OS. Your trial period is ending in exactly <strong>${daysLeft} days</strong>. Choose a plan to ensure continuous live orders and customer checkout.
+                      </p>
+                      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:28px 0;">
+                        <tr>
+                          <td align="center">
+                            <a href="${siteUrl}/dashboard/billing" style="display:inline-block;background-color:#3b82f6;color:#ffffff;font-size:15px;font-weight:600;text-decoration:none;padding:14px 32px;border-radius:10px;">
+                              Select a Plan →
+                            </a>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:20px 36px;background-color:#0c0c0e;border-top:1px solid #1e1e24;text-align:center;">
+                      <p style="margin:0;font-size:12px;color:#52525b;">© ${new Date().getFullYear()} OurMenu OS. All rights reserved.</p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
       `,
     });
     if (error) throw error;

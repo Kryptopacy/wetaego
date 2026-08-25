@@ -130,9 +130,35 @@ export const requestPasswordReset = actionClient
       ? process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, '')
       : `${proto}://${host}`
 
+    const redirectToUrl = `${origin}/auth/callback?next=/reset-password`
+
+    // 1. Generate recovery link using admin client to send our custom branded email
+    try {
+      const adminClient = await createAdminClient()
+      const { data: linkData, error: linkError } = await adminClient.auth.admin.generateLink({
+        type: 'recovery',
+        email,
+        options: {
+          redirectTo: redirectToUrl,
+        }
+      })
+
+      if (!linkError && linkData?.properties?.action_link) {
+        const { sendPasswordResetEmail } = await import('@/lib/notifications/email')
+        await sendPasswordResetEmail(email, linkData.properties.action_link)
+        return {
+          success: true,
+          message: 'Password reset link sent! Please check your email inbox (and spam folder).'
+        }
+      }
+    } catch (adminErr) {
+      console.warn('Admin link generation failed, falling back to standard reset:', adminErr)
+    }
+
+    // 2. Fallback to standard Supabase auth reset if generateLink is unavailable
     const supabase = await createClient()
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${origin}/auth/callback?next=/reset-password`,
+      redirectTo: redirectToUrl,
     })
 
     if (error) {
