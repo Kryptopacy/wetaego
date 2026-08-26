@@ -33,6 +33,18 @@ const TEMPLATE_META: Record<string,{icon:React.ReactNode;subtitle:string}> = {
   custom:{icon:<LayoutGrid className="w-5 h-5"/>,subtitle:'Explore'},
 };
 
+function getTemplateMeta(page: { template_type: string; title?: string; business_type_preset?: string | null }) {
+  const isFood = 
+    ['restaurant', 'bar_lounge', 'food_truck', 'cafe', 'catering'].includes(page.business_type_preset || '') ||
+    /menu|dining|food|dish|drink|beverage|kitchen|bar|lunch|dinner|breakfast|snack|patio/i.test(page.title || '');
+
+  if (page.template_type === 'catalog' && isFood) {
+    return { icon: <Utensils className="w-5 h-5" />, subtitle: 'Browse & Order' };
+  }
+
+  return TEMPLATE_META[page.template_type] ?? TEMPLATE_META.custom;
+}
+
 type DesignTokens = {
   layout_mode?: 'list' | 'bento_grid' | 'masonry';
   surface_style?: 'glassmorphism' | 'solid' | 'flat' | 'neumorphism';
@@ -179,7 +191,7 @@ export function PortalRenderer({location,pages}:{
           initial="hidden" animate="show" variants={{hidden:{},show:{transition:{staggerChildren:0.08,delayChildren:0.15}}}}
         >
           {pages.map((page,i)=>{
-            const meta=TEMPLATE_META[page.template_type]??TEMPLATE_META.custom;
+            const meta = getTemplateMeta(page);
             const isFirst=i===0;
             const bentoClass = (layoutMode === 'bento_grid' && isFirst) ? 'sm:col-span-2' : '';
             const masonryClass = layoutMode === 'masonry' ? 'break-inside-avoid' : '';

@@ -282,7 +282,7 @@ export function CatalogPageRenderer({ location, page, items, locationSlug, payme
                           </div>
                         ) : (
                           <div className="w-16 h-16 shrink-0 rounded-2xl overflow-hidden relative shadow-inner border border-white/5">
-                            <ItemImagePlaceholder title={item.title} iconSize="sm" />
+                            <ItemImagePlaceholder title={item.title} size="sm" />
                           </div>
                         )}
                         <div className="flex-1 min-w-0">
