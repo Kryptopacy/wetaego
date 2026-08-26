@@ -636,6 +636,7 @@ export function InventoryClient({
       {activeTab === 'bom' && (
         <BomManager 
           organizationId={organizationId} 
+          locationId={locationId}
           inventoryItems={items} 
         />
       )}

@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { DesignTokensEditor } from '../settings/design-tokens-editor'
 import { AICoverStudio } from '../settings/ai-cover-studio'
 import { PromotionsStudio } from './promotions-studio'
-import { Monitor, Smartphone, Wand2, Palette, RotateCw, Megaphone, Eye, Sliders, ExternalLink, Sparkles, Laptop } from 'lucide-react'
+import { Monitor, Smartphone, Wand2, Palette, RotateCw, Megaphone, Eye, Sliders, ExternalLink, Sparkles, Laptop, Plus } from 'lucide-react'
 import Link from 'next/link'
 
 export function LiveBuilder({
@@ -175,6 +175,13 @@ export function LiveBuilder({
                 Changes made here specifically style <span className="text-zinc-300 font-semibold">{selectedPage?.title}</span>.
               </p>
             )}
+
+            <div className="flex items-center justify-between mt-3 pt-2.5 border-t border-zinc-800/60">
+              <span className="text-[11px] text-zinc-500">Need another menu or catalog?</span>
+              <Link href="/dashboard/menus" className="text-[11px] font-bold text-emerald-400 hover:text-emerald-300 flex items-center gap-1 transition-colors">
+                <Plus className="w-3 h-3" /> + New Page
+              </Link>
+            </div>
           </div>
 
           <DesignTokensEditor 

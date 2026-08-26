@@ -308,7 +308,7 @@ export default function ClientLayout({ children, initialData }: { children: Reac
                         </div>
                       </DropdownMenuItem>
 
-                      {loc.id === activeLocationId && pages.length > 0 && (
+                      {loc.id === activeLocationId && (
                         <>
                           {pages.map(page => (
                             <DropdownMenuItem
@@ -327,6 +327,12 @@ export default function ClientLayout({ children, initialData }: { children: Reac
                               </div>
                             </DropdownMenuItem>
                           ))}
+                          <DropdownMenuItem className="cursor-pointer pl-6 text-emerald-400 font-semibold" asChild>
+                            <Link href="/dashboard/menus" onClick={onClose}>
+                              <span className="mr-2 text-emerald-400">➕</span>
+                              <span className="flex-1 truncate">+ Create Menu / Catalog</span>
+                            </Link>
+                          </DropdownMenuItem>
                         </>
                       )}
                       
