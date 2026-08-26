@@ -20,7 +20,7 @@ export function useTheme() {
 
 export function ThemeInjector({ 
   initialTokens, 
-  themeColor,
+  themeColor: initialThemeColor,
   children
 }: { 
   initialTokens: ThemeTokens
@@ -28,14 +28,18 @@ export function ThemeInjector({
   children?: ReactNode
 }) {
   const [tokens, setTokens] = useState<ThemeTokens>(initialTokens)
+  const [themeColor, setThemeColor] = useState<string | undefined>(initialThemeColor)
 
   // Listen for real-time postMessages from builder
   useEffect(() => {
     const handleMessage = (e: MessageEvent) => {
       if (e.data?.type === 'LIVE_PREVIEW_TOKENS') {
-        const { tokens: newTokens } = e.data
+        const { tokens: newTokens, themeColor: newThemeColor } = e.data
         if (newTokens && typeof newTokens === 'object') {
           setTokens(prev => ({ ...prev, ...newTokens }))
+        }
+        if (newThemeColor) {
+          setThemeColor(newThemeColor)
         }
       }
     }
