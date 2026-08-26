@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { DesignTokensEditor } from '../settings/design-tokens-editor'
 import { AICoverStudio } from '../settings/ai-cover-studio'
 import { PromotionsStudio } from './promotions-studio'
@@ -14,7 +14,7 @@ export function LiveBuilder({
   coverImageUrl,
   creditsRemaining = 0,
   storefrontSlug,
-  pages,
+  pages = [],
 }: {
   locationId: string
   initialTokens: any
@@ -25,7 +25,15 @@ export function LiveBuilder({
   pages: any[]
 }) {
   const iframeRef = useRef<HTMLIFrameElement>(null)
-  const [tokens, setTokens] = useState(initialTokens)
+  const [tokens, setTokens] = useState<any>(initialTokens || {})
+  const [pageTokens, setPageTokens] = useState<Record<string, any>>(() => {
+    const map: Record<string, any> = {}
+    pages.forEach(p => {
+      map[p.id] = p.design_tokens || initialTokens || {}
+    })
+    return map
+  })
+  
   const [currentCover, setCurrentCover] = useState(coverImageUrl)
   const [activeTab, setActiveTab] = useState<'tokens' | 'ai_cover' | 'promos'>('tokens')
   const [device, setDevice] = useState<'mobile' | 'desktop'>('mobile')
@@ -37,19 +45,46 @@ export function LiveBuilder({
     if (pages.length > 1) return 'global'
     return pages[0]?.id || 'global'
   })
-  const currentTokens = scope === 'global' ? tokens : (pages.find(p => p.id === scope)?.design_tokens || tokens)
 
-  // Whenever tokens change, send a postMessage to the iframe
-  useEffect(() => {
+  const currentTokens = scope === 'global' ? tokens : (pageTokens[scope] || tokens)
+
+  // Broadcast tokens to iframe helper
+  const broadcastTokens = useCallback((tokensToSend: any) => {
     if (iframeRef.current && iframeRef.current.contentWindow) {
       iframeRef.current.contentWindow.postMessage({
         type: 'LIVE_PREVIEW_TOKENS',
-        tokens: currentTokens,
+        tokens: tokensToSend,
         isGlobal: scope === 'global',
         pageId: scope === 'global' ? undefined : scope
       }, '*')
     }
-  }, [currentTokens, scope])
+  }, [scope])
+
+  // Instant token change handler
+  const handleTokensChange = (newTokens: any) => {
+    if (scope === 'global') {
+      setTokens(newTokens)
+    } else {
+      setPageTokens(prev => ({ ...prev, [scope]: newTokens }))
+    }
+    broadcastTokens(newTokens)
+  }
+
+  // Send tokens whenever currentTokens or scope changes
+  useEffect(() => {
+    broadcastTokens(currentTokens)
+  }, [currentTokens, scope, broadcastTokens])
+
+  // Listen for iframe ready message and send latest tokens
+  useEffect(() => {
+    const handleMessage = (e: MessageEvent) => {
+      if (e.data?.type === 'LIVE_PREVIEW_READY') {
+        broadcastTokens(currentTokens)
+      }
+    }
+    window.addEventListener('message', handleMessage)
+    return () => window.removeEventListener('message', handleMessage)
+  }, [currentTokens, broadcastTokens])
 
   const selectedPage = pages.find(p => p.id === scope)
   const baseSrc = scope === 'global' 
@@ -187,9 +222,7 @@ export function LiveBuilder({
           <DesignTokensEditor 
             locationId={locationId} 
             initialTokens={currentTokens} 
-            onTokensChange={(newTokens) => {
-              if (scope === 'global') setTokens(newTokens)
-            }}
+            onTokensChange={handleTokensChange}
             isLiveBuilder={true}
             pageId={scope === 'global' ? undefined : scope}
           />
@@ -219,9 +252,9 @@ export function LiveBuilder({
           <button
             type="button"
             onClick={() => setMobileViewMode('editor')}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-bold transition-all ${
+            className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-bold transition-all ${
               mobileViewMode === 'editor'
-                ? 'bg-zinc-800 text-white shadow-sm border border-zinc-700/50'
+                ? 'bg-zinc-800 text-white shadow-md border border-zinc-700/60'
                 : 'text-zinc-400 hover:text-zinc-200'
             }`}
           >
@@ -231,9 +264,9 @@ export function LiveBuilder({
           <button
             type="button"
             onClick={() => setMobileViewMode('preview')}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-bold transition-all ${
+            className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-bold transition-all ${
               mobileViewMode === 'preview'
-                ? 'bg-emerald-600 text-white shadow-sm'
+                ? 'bg-emerald-600 text-white shadow-md'
                 : 'text-zinc-400 hover:text-zinc-200'
             }`}
           >
@@ -243,28 +276,16 @@ export function LiveBuilder({
         </div>
       </div>
 
-      {/* Desktop Left Sidebar (Always Visible on PC) */}
-      <div className="hidden md:block w-[420px] shrink-0 border-r border-zinc-800 bg-zinc-950 overflow-y-auto p-6 scrollbar-hide">
-        <div className="flex items-center justify-between mb-2">
+      {/* Desktop Left Sidebar: Controls & Settings */}
+      <div className="hidden md:block w-[400px] border-r border-zinc-800 bg-zinc-950 overflow-y-auto p-6 shrink-0 h-full">
+        <div className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
-              Storefront Builder
-            </h1>
-            <p className="text-xs text-zinc-400 mt-0.5">Real-time design token customizer & live studio.</p>
+            <h1 className="text-xl font-black text-white tracking-tight">Storefront Builder</h1>
+            <p className="text-xs text-zinc-400 mt-1">Live customize brand themes, AI hero covers, & promotions.</p>
           </div>
-          <button
-            type="button"
-            onClick={() => setRefreshKey(prev => prev + 1)}
-            title="Refresh Preview Canvas"
-            className="p-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white border border-zinc-800 transition-colors"
-          >
-            <RotateCw className="w-4 h-4" />
-          </button>
         </div>
 
-        <div className="mt-6">
-          {renderSidebarContent()}
-        </div>
+        {renderSidebarContent()}
       </div>
 
       {/* Mobile Content Pane: Editor Mode */}
@@ -334,6 +355,7 @@ export function LiveBuilder({
             <iframe
               ref={iframeRef}
               src={iframeSrc}
+              onLoad={() => broadcastTokens(currentTokens)}
               className="w-full h-full bg-white"
               style={{ border: 'none' }}
               title="Live Storefront Preview"

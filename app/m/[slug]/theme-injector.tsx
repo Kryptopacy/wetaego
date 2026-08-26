@@ -29,16 +29,23 @@ export function ThemeInjector({
 }) {
   const [tokens, setTokens] = useState<ThemeTokens>(initialTokens)
 
+  // Listen for real-time postMessages from builder
   useEffect(() => {
     const handleMessage = (e: MessageEvent) => {
       if (e.data?.type === 'LIVE_PREVIEW_TOKENS') {
         const { tokens: newTokens } = e.data
-        // We accept updates regardless of isGlobal, because in preview mode, 
-        // the builder broadcasts the merged state that should be displayed.
-        setTokens(prev => ({ ...prev, ...newTokens }))
+        if (newTokens && typeof newTokens === 'object') {
+          setTokens(prev => ({ ...prev, ...newTokens }))
+        }
       }
     }
     window.addEventListener('message', handleMessage)
+
+    // Notify parent builder that iframe is mounted and ready for initial tokens
+    if (typeof window !== 'undefined' && window.parent && window.parent !== window) {
+      window.parent.postMessage({ type: 'LIVE_PREVIEW_READY' }, '*')
+    }
+
     return () => window.removeEventListener('message', handleMessage)
   }, [])
 
@@ -55,15 +62,31 @@ export function ThemeInjector({
       full: '9999px'
     }
     const r = tokens.corner_radius || 'lg'
-    root.style.setProperty('--storefront-radius', radiusMap[r])
-    root.style.setProperty('--storefront-radius-inner', radiusMap[r === 'full' ? 'full' : r === 'none' ? 'none' : 'md'])
+    root.style.setProperty('--storefront-radius', radiusMap[r] || '16px')
+    root.style.setProperty('--storefront-radius-inner', radiusMap[r === 'full' ? 'full' : r === 'none' ? 'none' : 'md'] || '8px')
 
     // Apply Density (Gap & Padding)
     const gapMap: Record<string, string> = { airy: '2rem', standard: '1rem', cozy: '0.5rem' }
     const padMap: Record<string, string> = { airy: '2rem', standard: '1rem', cozy: '0.5rem' }
     const d = tokens.density || 'standard'
-    root.style.setProperty('--storefront-gap', gapMap[d])
-    root.style.setProperty('--storefront-padding', padMap[d])
+    root.style.setProperty('--storefront-gap', gapMap[d] || '1rem')
+    root.style.setProperty('--storefront-padding', padMap[d] || '1rem')
+
+    // Apply Typography
+    const fontMap: Record<string, string> = {
+      elegant: 'var(--font-elegant), serif',
+      playful: 'var(--font-playful), sans-serif',
+      industrial: 'var(--font-industrial), monospace',
+      modern: 'var(--font-modern), sans-serif',
+    }
+    const typo = tokens.typography || 'modern'
+    root.style.setProperty('--storefront-font', fontMap[typo] || fontMap.modern)
+    root.classList.remove('font-serif', 'font-mono')
+    if (typo === 'elegant') {
+      root.classList.add('font-serif')
+    } else if (typo === 'industrial') {
+      root.classList.add('font-mono')
+    }
 
     // Apply Surface Style Background
     const surface = tokens.surface_style || 'flat'
