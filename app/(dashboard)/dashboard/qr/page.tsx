@@ -25,7 +25,7 @@ export default async function QRPage() {
 
   const { data: loc } = await supabase
     .from('locations')
-    .select('id, name, slug, portal_display_name, theme_color, organization_id, organizations(logo_url)')
+    .select('id, name, slug, portal_display_name, theme_color, organization_id, organizations(id, logo_url, business_type)')
     .eq('id', activeLocationId)
     .single()
 
@@ -36,7 +36,7 @@ export default async function QRPage() {
   // Fetch location pages
   const { data: pages } = await supabase
     .from('location_pages')
-    .select('id, title, slug')
+    .select('id, title, slug, template_type, business_type_preset')
     .eq('location_id', loc.id)
     .order('created_at')
 
@@ -55,6 +55,7 @@ export default async function QRPage() {
       locationName={loc.portal_display_name || loc.name}
       themeColor={loc.theme_color || '#10b981'}
       logoUrl={orgData?.logo_url}
+      businessType={orgData?.business_type}
       pages={pages || []}
       initialResources={resources || []}
     />

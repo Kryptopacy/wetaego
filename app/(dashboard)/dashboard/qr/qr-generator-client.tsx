@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { QRCodeCanvas } from '@/components/ui/qr-code-canvas'
 import { QrCode, Trash2, Printer, Plus, Download, ToggleLeft, ToggleRight, Sparkles, Utensils, Hotel, Monitor, FileText, Layers, Wifi, Star } from 'lucide-react'
 import { toast } from 'sonner'
@@ -19,6 +19,8 @@ interface PageOption {
   id: string
   title: string
   slug: string
+  template_type?: string | null
+  business_type_preset?: string | null
 }
 
 export function QRGeneratorClient({
@@ -26,6 +28,7 @@ export function QRGeneratorClient({
   locationName,
   themeColor = '#10b981',
   logoUrl,
+  businessType,
   pages = [],
   initialResources = []
 }: {
@@ -33,6 +36,7 @@ export function QRGeneratorClient({
   locationName: string
   themeColor?: string
   logoUrl?: string | null
+  businessType?: string | null
   pages?: PageOption[]
   initialResources?: { id: string; name: string; type: string }[]
 }) {
@@ -52,6 +56,34 @@ export function QRGeneratorClient({
     return `${baseUrl}/m/${locationSlug}?${type}=${encodeURIComponent(num)}`
   }
 
+  // Compute allowed QR types relevant to this venue's business model
+  const allowedTypes = useMemo<QRType[]>(() => {
+    const types: QRType[] = []
+
+    const hasTableResource = initialResources.some(r => r.type === 'table')
+    const hasDiningTemplate = pages.some(p => ['catalog', 'restaurant', 'bar_lounge'].includes(p.template_type || ''))
+    const isFoodBusinessType = ['restaurant', 'bar_lounge', 'food_truck', 'cafe', 'food_drink', 'bakery', 'pub', 'club'].includes(businessType || '')
+    
+    if (hasTableResource || hasDiningTemplate || isFoodBusinessType || (!businessType && initialResources.length === 0 && pages.length === 0)) {
+      types.push('table')
+    }
+
+    const hasRoomResource = initialResources.some(r => r.type === 'room')
+    const hasHotelTemplate = pages.some(p => ['hotel', 'stay', 'listing'].includes(p.template_type || ''))
+    const isHotelBusinessType = ['hotel', 'stay', 'resort', 'shortlet', 'lodging', 'apartment'].includes(businessType || '')
+
+    if (hasRoomResource || hasHotelTemplate || isHotelBusinessType) {
+      types.push('room')
+    }
+
+    // Counter / Desk checkouts, Direct Pages, Feedback always available
+    types.push('desk')
+    types.push('page')
+    types.push('review')
+
+    return types
+  }, [initialResources, pages, businessType])
+
   // Pre-populate with initial items from resources/tables or page
   const [items, setItems] = useState<QRItem[]>(() => {
     if (initialResources.length > 0) {
@@ -63,35 +95,40 @@ export function QRGeneratorClient({
         url: generateURL(res.name.replace(/^(Table|Room|Desk)\s+/i, ''), (res.type as QRType) || 'table')
       }))
     }
-    return [
-      {
-        id: 'init-1',
-        num: '1',
-        section: 'Main Area',
-        type: 'table',
-        url: generateURL('1', 'table')
-      },
-      {
-        id: 'init-2',
-        num: '2',
-        section: 'Main Area',
-        type: 'table',
-        url: generateURL('2', 'table')
-      },
-      {
-        id: 'init-review',
-        num: 'Feedback & Tips',
-        section: 'Guest Reviews',
-        type: 'review',
-        url: generateURL('review', 'review')
-      }
-    ]
+
+    const initialList: QRItem[] = []
+    
+    if (allowedTypes.includes('table')) {
+      initialList.push(
+        { id: 'init-1', num: '1', section: 'Main Area', type: 'table', url: generateURL('1', 'table') },
+        { id: 'init-2', num: '2', section: 'Main Area', type: 'table', url: generateURL('2', 'table') }
+      )
+    } else if (allowedTypes.includes('room')) {
+      initialList.push(
+        { id: 'init-101', num: '101', section: 'Standard Rooms', type: 'room', url: generateURL('101', 'room') },
+        { id: 'init-102', num: '102', section: 'Standard Rooms', type: 'room', url: generateURL('102', 'room') }
+      )
+    } else {
+      initialList.push(
+        { id: 'init-desk-1', num: 'Main Counter', section: 'Checkout', type: 'desk', url: generateURL('Main Counter', 'desk') }
+      )
+    }
+
+    initialList.push({
+      id: 'init-review',
+      num: 'Feedback & Tips',
+      section: 'Guest Reviews',
+      type: 'review',
+      url: generateURL('review', 'review')
+    })
+
+    return initialList
   })
 
   const [activeCategory, setActiveCategory] = useState<'all' | 'table' | 'room' | 'desk' | 'page'>('all')
   const [identifier, setIdentifier] = useState('')
   const [section, setSection] = useState('')
-  const [qrType, setQrType] = useState<QRType>('table')
+  const [qrType, setQrType] = useState<QRType>(() => allowedTypes[0] || 'table')
   const [simpleMode, setSimpleMode] = useState(false)
 
   // Batch generator states
@@ -213,6 +250,29 @@ export function QRGeneratorClient({
     return item.type === activeCategory
   })
 
+  // Dynamic scope tabs based on business types
+  const categoryTabs = useMemo(() => {
+    const list: { id: 'all' | 'table' | 'room' | 'desk' | 'page'; label: string; icon: React.ElementType; count: number }[] = [
+      { id: 'all', label: 'All QR Codes', icon: Layers, count: items.length },
+    ]
+
+    if (allowedTypes.includes('table')) {
+      list.push({ id: 'table', label: 'Tables & Dining', icon: Utensils, count: items.filter(i => i.type === 'table').length })
+    }
+
+    if (allowedTypes.includes('room')) {
+      list.push({ id: 'room', label: 'Rooms & Stays', icon: Hotel, count: items.filter(i => i.type === 'room').length })
+    }
+
+    if (allowedTypes.includes('desk')) {
+      list.push({ id: 'desk', label: 'Counter & POS', icon: Monitor, count: items.filter(i => i.type === 'desk').length })
+    }
+
+    list.push({ id: 'page', label: 'Pages & Reviews', icon: FileText, count: items.filter(i => i.type === 'page' || i.type === 'review').length })
+
+    return list
+  }, [allowedTypes, items])
+
   return (
     <div className="max-w-6xl space-y-8 pb-20">
       {/* ── Dynamic Print CSS ── */}
@@ -248,15 +308,17 @@ export function QRGeneratorClient({
 
         <div className="flex items-center gap-2">
           <button
+            type="button"
             onClick={() => setItems([])}
             disabled={items.length === 0}
-            className="flex items-center gap-2 text-xs bg-white/5 hover:bg-white/10 text-zinc-300 font-bold px-4 py-2.5 rounded-xl border border-white/10 transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+            className="flex items-center gap-2 text-xs bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-4 py-2.5 rounded-xl border border-zinc-700 transition-colors disabled:opacity-40 cursor-pointer"
           >
-            <Trash2 className="w-4 h-4" /> Clear All
+            <Trash2 className="w-3.5 h-3.5" /> Clear All
           </button>
           <button
+            type="button"
             onClick={() => window.print()}
-            disabled={items.length === 0}
+            disabled={filteredItems.length === 0}
             className="flex items-center gap-2 text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-2.5 rounded-xl shadow-lg shadow-emerald-600/20 transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
           >
             <Printer className="w-4 h-4" /> Print Sheet ({filteredItems.length})
@@ -265,14 +327,8 @@ export function QRGeneratorClient({
       </div>
 
       {/* ── Business Type Scope Tabs ── */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 bg-zinc-900/70 p-1.5 rounded-2xl border border-zinc-800 no-print">
-        {[
-          { id: 'all', label: 'All QR Codes', icon: Layers, count: items.length },
-          { id: 'table', label: 'Tables & Dining', icon: Utensils, count: items.filter(i => i.type === 'table').length },
-          { id: 'room', label: 'Rooms & Stays', icon: Hotel, count: items.filter(i => i.type === 'room').length },
-          { id: 'desk', label: 'Counter & POS', icon: Monitor, count: items.filter(i => i.type === 'desk').length },
-          { id: 'page', label: 'Pages & Reviews', icon: FileText, count: items.filter(i => i.type === 'page' || i.type === 'review').length },
-        ].map((tab) => {
+      <div className="flex flex-wrap gap-2 bg-zinc-900/70 p-1.5 rounded-2xl border border-zinc-800 no-print">
+        {categoryTabs.map((tab) => {
           const Icon = tab.icon
           const isActive = activeCategory === tab.id
           return (
@@ -285,7 +341,7 @@ export function QRGeneratorClient({
                   setQrType(tab.id as QRType)
                 }
               }}
-              className={`flex items-center justify-center sm:justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`flex-1 min-w-[120px] flex items-center justify-center sm:justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 isActive
                   ? 'bg-zinc-800 text-white shadow-md border border-zinc-700/60'
                   : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40'
@@ -357,9 +413,9 @@ export function QRGeneratorClient({
                 onChange={(e) => setQrType(e.target.value as QRType)}
                 className="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-3 py-2 text-white font-bold"
               >
-                <option value="table">🍽️ Table</option>
-                <option value="room">🏨 Room</option>
-                <option value="desk">🖥️ Counter / Desk</option>
+                {allowedTypes.includes('table') && <option value="table">🍽️ Table</option>}
+                {allowedTypes.includes('room') && <option value="room">🏨 Room</option>}
+                {allowedTypes.includes('desk') && <option value="desk">🖥️ Counter / Desk</option>}
               </select>
             </div>
             <div>
@@ -418,11 +474,11 @@ export function QRGeneratorClient({
             onChange={(e) => setQrType(e.target.value as QRType)}
             className="w-full bg-zinc-950 border border-zinc-700 focus:border-emerald-500 text-white text-xs font-semibold px-4 py-3 rounded-xl outline-none transition-all cursor-pointer"
           >
-            <option value="table">🍽️ Table</option>
-            <option value="room">🏨 Room</option>
-            <option value="desk">🖥️ Counter / Desk</option>
-            <option value="page">📄 Direct Page</option>
-            <option value="review">⭐ Feedback & Tip</option>
+            {allowedTypes.includes('table') && <option value="table">🍽️ Table</option>}
+            {allowedTypes.includes('room') && <option value="room">🏨 Room</option>}
+            {allowedTypes.includes('desk') && <option value="desk">🖥️ Counter / Desk</option>}
+            {allowedTypes.includes('page') && <option value="page">📄 Direct Page</option>}
+            {allowedTypes.includes('review') && <option value="review">⭐ Feedback & Tip</option>}
           </select>
         </div>
 
@@ -520,29 +576,31 @@ export function QRGeneratorClient({
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </div>
-                <QRCodeCanvas
-                  id={`qr-canvas-${item.id}`}
-                  value={item.url}
-                  size={180}
-                  bgColor="#ffffff"
-                  fgColor={tc}
-                  level="H"
-                  className="w-full aspect-square"
-                />
-                <p className="text-[10px] text-zinc-600 font-mono font-bold truncate w-full text-center">
+                
+                <span className="text-xs font-bold text-zinc-800 truncate max-w-full">
                   {labelFor(item)}
-                </p>
+                </span>
+                
+                <div className="p-2 bg-white rounded-xl">
+                  <QRCodeCanvas
+                    id={`qr-canvas-${item.id}`}
+                    value={item.url}
+                    size={130}
+                    level="H"
+                    fgColor="#000000"
+                    bgColor="#ffffff"
+                  />
+                </div>
+
+                <span className="text-[10px] text-zinc-400 font-mono truncate max-w-full">
+                  {locationSlug}
+                </span>
               </div>
             ) : (
-              <div className="bg-white border-2 border-emerald-500/30 shadow-xl rounded-3xl p-8 flex flex-col items-center justify-center print-break relative group overflow-hidden text-center">
-                {/* Top accent stripe */}
-                <div
-                  className="absolute top-0 left-0 w-full h-2.5"
-                  style={{ background: `linear-gradient(90deg, ${tc}, #059669)` }}
-                />
+              <div className="relative group bg-white text-zinc-900 border-2 border-zinc-200 rounded-3xl p-6 flex flex-col items-center justify-between text-center print-break shadow-md min-h-[360px] overflow-hidden">
+                <div className="absolute top-0 left-0 right-0 h-3" style={{ backgroundColor: tc }} />
 
-                {/* Hover actions */}
-                <div className="absolute top-4 right-4 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity no-print">
+                <div className="absolute top-4 right-4 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity no-print z-20">
                   <button
                     onClick={() => downloadQR(item)}
                     className="p-2 rounded-xl bg-zinc-900 text-white hover:bg-zinc-800 shadow-md cursor-pointer"
@@ -559,68 +617,58 @@ export function QRGeneratorClient({
                   </button>
                 </div>
 
-                {/* Logo or Brand Monogram */}
-                <div className="h-10 mb-2 flex items-center justify-center">
+                <div className="w-full flex flex-col items-center mt-2">
                   {logoUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={logoUrl} alt="Logo" className="h-9 max-w-35 object-contain" />
+                    <img 
+                      src={logoUrl} 
+                      alt={locationName} 
+                      className="h-10 max-w-[140px] object-contain mb-2 rounded"
+                    />
                   ) : (
-                    <span className="font-black text-lg text-zinc-900 tracking-tight">
+                    <h2 className="text-lg font-black text-zinc-900 tracking-tight line-clamp-1 mb-1">
                       {locationName}
+                    </h2>
+                  )}
+
+                  {item.section ? (
+                    <span 
+                      className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full mb-3"
+                      style={{ backgroundColor: `${tc}15`, color: tc }}
+                    >
+                      {item.section}
                     </span>
+                  ) : (
+                    <div className="h-4 mb-2" />
                   )}
                 </div>
 
-                {/* Optional section badge */}
-                {item.section && (
-                  <p
-                    className="text-[10px] font-sans uppercase tracking-widest mb-3 font-bold px-3 py-0.5 rounded-full"
-                    style={{ backgroundColor: `${tc}18`, color: tc }}
-                  >
-                    {item.section}
-                  </p>
-                )}
-
-                {/* QR frame with floating SCAN ME pill */}
-                <div
-                  className="bg-white p-3.5 border-[3px] shadow-md rounded-2xl relative mt-3 mb-4"
-                  style={{ borderColor: tc }}
-                >
-                  <div
-                    className="absolute -top-3 left-1/2 -translate-x-1/2 text-white px-3 py-0.5 rounded-full text-[9px] uppercase tracking-widest font-extrabold whitespace-nowrap shadow-md"
-                    style={{ backgroundColor: tc }}
-                  >
-                    SCAN ME ↓
+                <div className="my-2 p-3 bg-white rounded-2xl border border-zinc-200 shadow-inner flex flex-col items-center">
+                  <div className="mb-1.5 px-3 py-0.5 rounded-full bg-zinc-900 text-white text-[10px] font-black uppercase tracking-widest">
+                    Scan Me ↓
                   </div>
                   <QRCodeCanvas
                     id={`qr-canvas-${item.id}`}
                     value={item.url}
-                    size={192}
-                    bgColor="#ffffff"
-                    fgColor={tc}
+                    size={155}
                     level="H"
-                    includeMargin={false}
-                    imageSettings={
-                      logoUrl
-                        ? {
-                            src: logoUrl,
-                            height: 38,
-                            width: 38,
-                            excavate: true,
-                          }
-                        : undefined
-                    }
+                    fgColor="#000000"
+                    bgColor="#ffffff"
                   />
                 </div>
 
-                {/* Label pill */}
-                <div className="bg-zinc-900 text-emerald-400 px-6 py-2 rounded-full font-bold text-lg shadow-md capitalize text-center w-full max-w-60 truncate">
-                  {labelFor(item)}
+                <div className="w-full flex flex-col items-center mt-2">
+                  <h3 className="text-xl font-black text-zinc-900 tracking-tight">
+                    {labelFor(item)}
+                  </h3>
+                  <p className="text-[11px] font-semibold text-zinc-500 mt-0.5">
+                    {subLabelFor(item)}
+                  </p>
                 </div>
 
-                <p className="text-[11px] text-zinc-500 mt-2 uppercase tracking-wider text-center max-w-55 font-bold">
-                  {subLabelFor(item)}
-                </p>
+                <div className="w-full mt-4 pt-3 border-t border-zinc-100 flex items-center justify-between text-[9px] text-zinc-400 font-medium">
+                  <span>Powered by OurMenu OS</span>
+                  <span className="font-mono">{locationSlug}</span>
+                </div>
               </div>
             )}
           </div>

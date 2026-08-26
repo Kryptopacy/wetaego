@@ -15,6 +15,7 @@ import { PartnerShowcaseCard } from '@/components/native-ad-card'
 import { useTheme } from '../../../theme-injector'
 import { StorefrontHero } from '../../../components/storefront-hero'
 import { EmptyState } from '@/components/ui/empty-state'
+import { ItemImagePlaceholder } from '@/components/ui/item-placeholder'
 
 // The catalog page renderer is a light version for pages created via the pages builder
 // (NOT the main /m/[slug] menu — that stays as is).
@@ -280,8 +281,8 @@ export function CatalogPageRenderer({ location, page, items, locationSlug, payme
                             <Image src={item.images[0]} alt={item.title} fill className="object-cover" />
                           </div>
                         ) : (
-                          <div className="w-14 h-14 shrink-0 rounded-xl bg-linear-to-br from-zinc-800 to-zinc-900 border border-white/5 flex items-center justify-center text-zinc-400 font-bold text-xs shadow-inner">
-                            <span className="uppercase tracking-wider">{item.title.slice(0, 2)}</span>
+                          <div className="w-16 h-16 shrink-0 rounded-2xl overflow-hidden relative shadow-inner border border-white/5">
+                            <ItemImagePlaceholder title={item.title} iconSize="sm" />
                           </div>
                         )}
                         <div className="flex-1 min-w-0">

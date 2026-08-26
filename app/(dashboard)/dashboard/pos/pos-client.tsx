@@ -9,6 +9,7 @@ import { submitPosOrder, unlinkResourceOrder, createRegisterAction } from './act
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
+import { ItemImagePlaceholder } from '@/components/ui/item-placeholder'
 
 interface PageItem {
   id: string
@@ -331,11 +332,11 @@ export function POSClient({ items, pages, currency, locationId, organizationId, 
                     : 'bg-zinc-900/40 border-zinc-800/50 opacity-50 cursor-not-allowed'
                 }`}
               >
-                <div className="aspect-square w-full rounded-lg bg-zinc-800 mb-3 relative overflow-hidden shrink-0">
+                <div className="aspect-square w-full rounded-xl bg-zinc-800 mb-3 relative overflow-hidden shrink-0 border border-zinc-800/80 shadow-inner">
                   {item.images?.[0] ? (
                     <Image src={item.images[0]} alt={item.title} fill className="object-cover" sizes="120px" />
                   ) : (
-                    <div className="absolute inset-0 flex items-center justify-center text-zinc-700">No Img</div>
+                    <ItemImagePlaceholder title={item.title} />
                   )}
                 </div>
                 <div className="font-bold text-sm text-white line-clamp-2 leading-tight mb-1">{item.title}</div>
