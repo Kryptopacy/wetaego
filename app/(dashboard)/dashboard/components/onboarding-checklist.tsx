@@ -75,7 +75,7 @@ export function OnboardingChecklist({ hasOrg, hasLocation, hasMenu, hasQR, templ
   ]
 
   const completedCount = steps.filter((s) => s.isComplete).length
-  const progress = (completedCount / steps.length) * 100
+  const progress = Math.round((completedCount / steps.length) * 100)
 
   // Hide entirely if fully complete, not mounted yet, or user dismissed it (only if they have an org)
   if (!isClient || completedCount === steps.length || (isDismissed && hasOrg)) {

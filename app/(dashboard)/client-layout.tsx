@@ -11,7 +11,7 @@ import { motion } from 'framer-motion'
 import { createClient } from '@/lib/supabase/client'
 import { setActiveLocationCookie } from './layout-actions'
 import {
-  LayoutDashboard, ClipboardList, BarChart3, BookOpen, CreditCard, Menu, MessageSquare, Package, QrCode, Settings, Users, Zap, X, User, FileText, LogOut, TrendingUp, Truck, MapPin, ChevronDown, Check, Clock, Megaphone, Bot, Sparkles, Palette, MonitorSmartphone, MessagesSquare, ExternalLink, Monitor
+  LayoutDashboard, ClipboardList, BarChart3, BookOpen, CreditCard, Menu, MessageSquare, Package, QrCode, Settings, Users, Zap, X, User, FileText, LogOut, TrendingUp, Truck, MapPin, ChevronDown, Check, Clock, Megaphone, Bot, Sparkles, Palette, MonitorSmartphone, MessagesSquare, ExternalLink, Monitor, CornerDownRight
 } from 'lucide-react'
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuGroup, DropdownMenuLabel } from '@/components/ui/dropdown-menu'
 import { GlobalRealtime } from './global-realtime'
@@ -253,12 +253,17 @@ export default function ClientLayout({ children, initialData }: { children: Reac
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="w-full flex items-center justify-between bg-zinc-900 border border-zinc-800 text-zinc-300 text-sm rounded-lg px-3 py-2.5 hover:bg-zinc-800 transition-colors outline-none focus:ring-1 focus:ring-emerald-500">
-                    <span className="truncate">
-                      {activePageId 
-                        ? `↳ ${pages.find(p => p.id === activePageId)?.title || 'Page'}`
-                        : activeLocationId === 'global'
-                          ? '🌐 All Businesses (Global View)'
-                          : `🏢 ${locations.find(l => l.id === activeLocationId)?.portal_display_name || locations.find(l => l.id === activeLocationId)?.name || 'Overview'}`}
+                    <span className="truncate flex items-center gap-1.5">
+                      {activePageId ? (
+                        <>
+                          <CornerDownRight className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+                          <span className="truncate">{pages.find(p => p.id === activePageId)?.title || 'Page'}</span>
+                        </>
+                      ) : activeLocationId === 'global' ? (
+                        <span>🌐 All Businesses (Global View)</span>
+                      ) : (
+                        <span>🏢 {locations.find(l => l.id === activeLocationId)?.portal_display_name || locations.find(l => l.id === activeLocationId)?.name || 'Overview'}</span>
+                      )}
                     </span>
                     <ChevronDown className="w-4 h-4 opacity-50 shrink-0 ml-2" />
                   </button>
@@ -321,7 +326,7 @@ export default function ClientLayout({ children, initialData }: { children: Reac
                               }}
                             >
                               <div className="flex items-center w-full">
-                                <span className="mr-2 text-zinc-500">↳</span>
+                                <CornerDownRight className="w-3.5 h-3.5 mr-2 text-zinc-500 shrink-0" />
                                 <span className="flex-1 truncate">{page.title}</span>
                                 {activePageId === page.id && <Check className="w-4 h-4 text-emerald-500" />}
                               </div>

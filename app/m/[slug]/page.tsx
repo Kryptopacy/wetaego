@@ -8,6 +8,7 @@ import { InvalidQrMessage } from './components/qr-state-messages'
 import { PreviewBanner } from '@/components/preview-banner'
 import { WebMCPProvider } from '@/components/webmcp/webmcp-provider'
 import { unstable_cache } from 'next/cache'
+import { ensureFlagshipDemoLocation } from '@/lib/demo/ensure-flagship-demo'
 
 // Revalidate this page every 60 seconds (Incremental Static Regeneration)
 // This ensures edge caching handles high traffic seamlessly
@@ -97,6 +98,9 @@ export default async function PublicMenuPage({
       .single()
 
     if (!data) {
+      if (slug === 'demo') {
+        await ensureFlagshipDemoLocation()
+      }
       const adminClient = await createAdminClient()
       const { data: adminData } = await adminClient
         .from('locations')
@@ -261,22 +265,37 @@ export default async function PublicMenuPage({
     }
   }
 
-  const pageCount = locationPages?.length ?? 0
+  let activePages = locationPages || []
+  if (activePages.length === 0 && slug === 'demo') {
+    await ensureFlagshipDemoLocation()
+    const adminClient = await createAdminClient()
+    const { data: seededPages } = await adminClient
+      .from('location_pages')
+      .select('*')
+      .eq('location_id', location.id)
+      .eq('is_published', true)
+      .order('sort_order', { ascending: true })
+    if (seededPages && seededPages.length > 0) {
+      activePages = seededPages
+    }
+  }
+
+  const pageCount = activePages.length
   // ── Routing Decision Tree ───────────────────────────────────────────────────
   // 1 page  → redirect directly to it (e.g. a phone store with only one catalog)
   // >1 pages → render the Portal (becomes the business's branded landing page)
   // 0 pages → render empty state
   // ────────────────────────────────────────────────────────────────────────────
 
-  if (pageCount === 1 && locationPages) {
-    const singlePage = locationPages[0]
+  if (pageCount === 1 && activePages) {
+    const singlePage = activePages[0]
     let destination = `/m/${slug}/p/${singlePage.slug}?`
     if (qrId) destination += `qr_id=${qrId}&`
     if (resource) destination += `resource=${resource}&`
     redirect(destination.replace(/[\?&]$/, ''))
   }
 
-  if (pageCount > 1 && locationPages) {
+  if (pageCount > 1 && activePages) {
     const ldJson = location.is_search_visible ? {
       "@context": "https://schema.org",
       "@type": "LocalBusiness",
@@ -296,14 +315,14 @@ export default async function PublicMenuPage({
           />
         )}
         {isPreview && <PreviewBanner />}
-        <PortalRenderer location={location as unknown as Parameters<typeof PortalRenderer>[0]['location']} pages={locationPages} />
+        <PortalRenderer location={location as unknown as Parameters<typeof PortalRenderer>[0]['location']} pages={activePages} />
         <WebMCPProvider
           locationId={location.id}
           locationName={location.portal_display_name || location.name}
           slug={slug}
-          currency="USD"
+          currency="NGN"
           menuItems={[]}
-          categories={locationPages.map(p => p.title)}
+          categories={activePages.map(p => p.title)}
           tableIdentifier="Portal Visitor"
         />
       </>

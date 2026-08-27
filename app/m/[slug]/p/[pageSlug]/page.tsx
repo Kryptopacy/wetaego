@@ -106,6 +106,10 @@ export default async function PublicPageView({
       .single()
 
     if (!data) {
+      if (slug === 'demo') {
+        const { ensureFlagshipDemoLocation } = await import('@/lib/demo/ensure-flagship-demo')
+        await ensureFlagshipDemoLocation()
+      }
       const { createAdminClient } = await import('@/lib/supabase/server')
       const adminClient = await createAdminClient()
       const { data: adminData } = await adminClient
@@ -128,7 +132,7 @@ export default async function PublicPageView({
   if (!loc) notFound()
 
   // Demo mode acts like preview — bypasses KYC and shows unpublished pages
-  let isPreview = isDemoMode
+  let isPreview = isDemoMode || slug === 'demo'
   if (!isPreview && preview === 'true') {
     const { data: userData } = await supabase.auth.getUser()
     if (userData?.user) {
@@ -194,6 +198,19 @@ export default async function PublicPageView({
     }
 
     const { data: rawData } = await query.single()
+    if (!rawData && slug === 'demo') {
+      const { ensureFlagshipDemoLocation } = await import('@/lib/demo/ensure-flagship-demo')
+      await ensureFlagshipDemoLocation()
+      const { createAdminClient } = await import('@/lib/supabase/server')
+      const adminClient = await createAdminClient()
+      const { data: adminRawData } = await adminClient
+        .from('location_pages')
+        .select('id, title, slug, content, template_type, billing_enabled, billing_mode, payment_mode, deposit_percentage, business_type_preset, randomizer_enabled, deals_enabled, template_data, is_published, theme_color, background_color, operating_hours, contact_email, contact_phone, wifi_network, wifi_password, address, upsell_mode, design_tokens, ai_enabled, ai_name, ai_base_personality')
+        .eq('location_id', loc.id)
+        .eq('slug', pageSlug)
+        .single()
+      return adminRawData as Record<string, unknown>
+    }
     const data = rawData as Record<string, unknown>
     return data
   }
