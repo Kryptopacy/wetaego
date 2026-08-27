@@ -5,7 +5,7 @@ import { PerformanceHubClient, StaffPerformanceItem, ReviewItem } from './perfor
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Performance & Feedback | OurMenu OS',
+  title: 'Performance & Feedback | WETAEGO',
   description: 'Business ratings, customer reviews, and staff service leaderboard.',
 }
 

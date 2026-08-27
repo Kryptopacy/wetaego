@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "name": "OurMenu OS",
-  "description": "Universal Digital Operating System & Dynamic Storefronts for Hospitality, Supermarket Fleets, Boutiques, Wellness Spas, Consultants, Real Estate, and Dealerships.",
+  "name": "WETAEGO",
+  "description": "The Commerce & Service Operating System for Modern Brands, their Human Customers, and the AI Agents who serve them.",
   "url": "https://ourmenuos.online",
   "documentation": "https://ourmenuos.online/docs",
   "llms_txt": "https://ourmenuos.online/llms.txt",

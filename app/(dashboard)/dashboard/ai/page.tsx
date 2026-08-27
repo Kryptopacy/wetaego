@@ -5,7 +5,7 @@ import { PageHeader } from '@/components/ui/page-header'
 import { AiSettingsClient } from './ai-settings-client'
 
 export const metadata = {
-  title: 'Storefront AI Concierge & Automation | OurMenu OS',
+  title: 'Storefront AI Concierge & Automation | WETAEGO',
 }
 
 export default async function AiConciergePage() {

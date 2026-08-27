@@ -4,7 +4,7 @@ import DealsManager from './deals-manager'
 import { PageHeader } from '@/components/ui/page-header'
 
 export const metadata = {
-  title: 'Deals & Sales | OurMenu OS',
+  title: 'Deals & Sales | WETAEGO',
 }
 
 export default async function DealsPage({

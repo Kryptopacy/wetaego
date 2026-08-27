@@ -51,11 +51,11 @@ export const Scene2_Reveal: React.FC = () => {
       {/* Typography */}
       <AbsoluteFill style={{ justifyContent: "center", alignItems: "flex-start", paddingLeft: 100 }}>
         <h1 style={{ color: "white", fontSize: 80, fontWeight: 900, opacity: interpolate(t1, [0,1], [0,1]), transform: `translateY(${interpolate(t1, [0,1], [30,0])}px)`, margin: 0, letterSpacing: "-2px" }}>
-          Meet OurMenu OS.
+          Meet WETAEGO.
         </h1>
-        <h2 style={{ color: "#a1a1aa", fontSize: 40, fontWeight: 500, opacity: interpolate(t2, [0,1], [0,1]), transform: `translateY(${interpolate(t2, [0,1], [30,0])}px)`, marginTop: 20 }}>
-          Not just features.<br/>
-          <span style={{ color: "#fff", fontWeight: 700 }}>A complete business suite.</span>
+        <h2 style={{ color: "#a1a1aa", fontSize: 36, fontWeight: 500, opacity: interpolate(t2, [0,1], [0,1]), transform: `translateY(${interpolate(t2, [0,1], [30,0])}px)`, marginTop: 20, maxWidth: 650, lineHeight: 1.2 }}>
+          The Commerce & Service Operating System<br/>
+          <span style={{ color: "#fff", fontWeight: 700 }}>for Modern Brands, Humans & AI Agents.</span>
         </h2>
       </AbsoluteFill>
 

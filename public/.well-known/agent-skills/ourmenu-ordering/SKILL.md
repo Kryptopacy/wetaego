@@ -5,9 +5,9 @@ version: 1.0.0
 type: tool
 ---
 
-# OurMenu OS Ordering Skill
+# WETAEGO Ordering Skill
 
-This skill allows agents to place and track customer transactions at OurMenu OS venues.
+This skill allows agents to place and track customer transactions at WETAEGO venues.
 
 ## Parameters
 - `locationId` (string, required): The target location UUID.

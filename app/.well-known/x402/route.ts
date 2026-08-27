@@ -9,7 +9,7 @@ const x402Config = {
     currency: 'USDC'
   },
   version: '1.0',
-  name: 'OurMenu OS x402 Payment Gateway',
+  name: 'WETAEGO x402 Payment Gateway',
   description: 'Agent-native HTTP 402 micropayment protocol supporting instant automated agent settlement for dining orders, deposits, and AI credits.',
   facilitator: 'https://ourmenuos.online/api/x402',
   supported_networks: ['base', 'solana', 'polygon', 'ethereum'],

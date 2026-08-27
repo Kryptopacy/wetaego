@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Tego AI: Multimodal Voice, Vision & Frontline Concierge | OurMenu OS",
+  title: "Tego AI: Multimodal Voice, Vision & Frontline Concierge | WETAEGO",
   description: "Experience the dual-layer AI engine powered by Gemini 3.1 Flash Live. Ultra-low latency voice dialogue, camera menu parsing, zero-hallucination dining concierge, and staff handoff.",
   keywords: [
     "tego ai",
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     canonical: "https://ourmenuos.online/features/ai-copilot-tego-multimodal",
   },
   openGraph: {
-    title: "Tego AI: Multimodal Voice & Vision Operating System | OurMenu OS",
+    title: "Tego AI: Multimodal Voice & Vision Operating System | WETAEGO",
     description: "Gemini 3.1 Flash Live voice/vision dialogue, smartphone camera menu OCR parsing, zero-hallucination public concierge, and staff handoff.",
     url: "https://ourmenuos.online/features/ai-copilot-tego-multimodal",
     type: "website",
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Tego AI: Multimodal Voice & Vision Operating System | OurMenu OS",
+    title: "Tego AI: Multimodal Voice & Vision Operating System | WETAEGO",
     description: "Gemini 3.1 Flash Live voice/vision dialogue, smartphone camera menu OCR parsing, zero-hallucination public concierge, and staff handoff.",
     images: ["/hero_emerald_gemstone.png"],
   },
@@ -180,7 +180,7 @@ export default function TegoAiFeaturePage() {
               Equip your venue with autonomous intelligence
             </h3>
             <p className="text-zinc-300 text-base max-w-2xl mx-auto mb-8 font-light">
-              Get started with Tego AI on OurMenu OS in under 10 minutes.
+              Get started with Tego AI on WETAEGO in under 10 minutes.
             </p>
             <Link
               href="/login"

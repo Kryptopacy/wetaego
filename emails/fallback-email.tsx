@@ -60,8 +60,8 @@ export const FallbackEmail = ({
             <Hr className="border border-solid border-[#eaeaea] my-6 mx-0 w-full" />
             
             <Section>
-              <Text className="text-gray-500 text-xs text-center m-0">
-                Please check your OurMenu dashboard immediately.
+              <Text className="text-zinc-600 text-sm">
+                Please check your WETAEGO dashboard immediately.
               </Text>
             </Section>
 

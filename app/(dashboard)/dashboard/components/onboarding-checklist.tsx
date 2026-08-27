@@ -105,7 +105,7 @@ export function OnboardingChecklist({ hasOrg, hasLocation, hasMenu, hasQR, templ
           )}
 
           <div className="mb-6 pr-12">
-            <h2 className="text-xl md:text-2xl font-bold text-white mb-2">Welcome to OurMenu OS</h2>
+            <h2 className="text-xl md:text-2xl font-bold text-white mb-2">Welcome to WETAEGO</h2>
             <p className="text-zinc-400">
               {hasOrg 
                 ? `Complete these final steps to launch your digital storefront. You can always dismiss this and finish later.` 

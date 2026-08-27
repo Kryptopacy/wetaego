@@ -40,13 +40,13 @@ export function LandingNavbar() {
         <div className="flex items-center gap-3">
           <Image
             src="/ourmenu-qr-icon.svg"
-            alt="OurMenu Logo"
+            alt="WETAEGO Logo"
             width={28}
             height={28}
             className="object-contain"
           />
           <Link href="/" className="font-semibold text-white tracking-tight">
-            OurMenu OS
+            WETAEGO
           </Link>
         </div>
 
@@ -124,13 +124,13 @@ export function LandingNavbar() {
               <div className="flex items-center gap-3">
                 <Image
                   src="/ourmenu-qr-icon.svg"
-                  alt="OurMenu Logo"
+                  alt="WETAEGO Logo"
                   width={28}
                   height={28}
                   className="object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]"
                 />
                 <span className="font-semibold text-white tracking-tight">
-                  OurMenu OS
+                  WETAEGO
                 </span>
               </div>
               <button

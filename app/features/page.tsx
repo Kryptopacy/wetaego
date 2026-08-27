@@ -22,10 +22,10 @@ import {
 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "All Features & Industry Operating Solutions | OurMenu OS",
+  title: "All Features & Industry Operating Solutions | WETAEGO",
   description: "Explore the comprehensive business operating platform for hospitality, supermarket chains, salons, retail boutiques, consultants, real estate, and automotive dealerships.",
   keywords: [
-    "ourmenu os features",
+    "wetaego features",
     "hospitality operating system",
     "supermarket fleet pos",
     "qr menu ordering software",
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
     canonical: "https://ourmenuos.online/features",
   },
   openGraph: {
-    title: "All Features & Industry Solutions | OurMenu OS",
+    title: "All Features & Industry Solutions | WETAEGO",
     description: "Explore the 9 industry templates, AI copilot, POS hardware drivers, and viral growth tools powering modern physical businesses.",
     url: "https://ourmenuos.online/features",
     type: "website",
@@ -50,7 +50,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "All Features & Industry Solutions | OurMenu OS",
+    title: "All Features & Industry Solutions | WETAEGO",
     description: "Explore the 9 industry templates, AI copilot, POS hardware drivers, and viral growth tools powering modern physical businesses.",
     images: ["/hero_emerald_gemstone.png"],
   },

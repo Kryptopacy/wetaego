@@ -27,7 +27,7 @@ export const InviteEmail = ({
   return (
     <Html>
       <Head />
-      <Preview>Join {organizationName} on OurMenu OS</Preview>
+      <Preview>Join {organizationName} on WETAEGO</Preview>
       <Tailwind>
         <Body className="bg-gray-100 font-sans my-auto mx-auto px-2 pt-5 pb-12">
           <Container className="border border-solid border-[#eaeaea] rounded-xl my-10 mx-auto p-10 max-w-lg bg-white shadow-lg">
@@ -37,7 +37,7 @@ export const InviteEmail = ({
                 You&apos;ve been invited!
               </Heading>
               <Text className="text-gray-600 text-base mt-0">
-                You have been invited to join <strong>{organizationName}</strong> as a <strong>{role}</strong> on OurMenu OS.
+                You have been invited to join <strong>{organizationName}</strong> as a <strong>{role}</strong> on WETAEGO.
               </Text>
             </Section>
 
@@ -54,7 +54,7 @@ export const InviteEmail = ({
             
             <Section>
               <Text className="text-gray-500 text-xs text-center m-0">
-                Powered by OurMenu OS
+                Powered by WETAEGO
               </Text>
             </Section>
 

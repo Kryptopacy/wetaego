@@ -6,7 +6,7 @@ export async function GET() {
       name: 'acp',
       version: '1.0.0'
     },
-    name: 'OurMenu OS Agentic Commerce Protocol',
+    name: 'WETAEGO Agentic Commerce Protocol',
     description: 'Agentic Commerce Protocol (ACP) discovery manifest for autonomous agent browsing, cart building, order placement, and booking.',
     api_base_url: 'https://ourmenuos.online/api',
     transports: ['https', 'mcp', 'websocket'],

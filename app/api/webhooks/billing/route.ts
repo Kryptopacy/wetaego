@@ -106,8 +106,8 @@ export async function POST(req: Request) {
           const { sendEmailNotification } = await import('@/lib/notifications/email')
           await sendEmailNotification(
             event.data.customer.email, 
-            'Your OurMenu OS Subscription Receipt', 
-            `Your subscription has been successfully renewed. You were charged ${amountStr}.\n\nThank you for using OurMenu OS!`
+            'Your WETAEGO Subscription Receipt', 
+            `Your subscription has been successfully renewed. You were charged ${amountStr}.\n\nThank you for using WETAEGO!`
           )
         }
       } else if (metadata && metadata.is_addon && metadata.addon_type === 'extra_page' && metadata.organization_id) {
@@ -133,8 +133,8 @@ export async function POST(req: Request) {
             const { sendEmailNotification } = await import('@/lib/notifications/email')
             await sendEmailNotification(
               event.data.customer.email, 
-              'Receipt for OurMenu OS Add-on', 
-              `Your purchase of 1 Extra Custom Page was successful. You were charged ${amountStr}.\n\nThank you for using OurMenu OS!`
+              'Receipt for WETAEGO Add-on', 
+              `Your purchase of 1 Extra Custom Page was successful. You were charged ${amountStr}.\n\nThank you for using WETAEGO!`
             )
           }
         }
@@ -170,8 +170,8 @@ export async function POST(req: Request) {
           const { sendEmailNotification } = await import('@/lib/notifications/email')
           await sendEmailNotification(
             event.data.customer.email, 
-            'Action Required: Your OurMenu OS Subscription Renewal Failed', 
-            `We attempted to renew your subscription but the charge failed. Please update your payment method to avoid service interruption.\n\nThank you for using OurMenu OS!`
+            'Action Required: Your WETAEGO Subscription Renewal Failed', 
+            `We attempted to renew your subscription but the charge failed. Please update your payment method to avoid service interruption.\n\nThank you for using WETAEGO!`
           )
         }
       }

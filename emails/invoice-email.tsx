@@ -34,7 +34,7 @@ export const InvoiceEmail = ({
             
             <Section className="text-center">
               <Heading className="text-black text-2xl font-bold text-center p-0 mb-4 mt-0 mx-0">
-                OurMenu OS
+                WETAEGO
               </Heading>
               <Text className="text-gray-500 text-sm mt-0">
                 Payment Receipt for {organizationName}

@@ -8,7 +8,7 @@ interface ReceiptTemplateProps {
   businessType?: string
 }
 
-export function ReceiptTemplate({ order, businessName = 'OurMenu OS', businessType = 'restaurant' }: ReceiptTemplateProps) {
+export function ReceiptTemplate({ order, businessName = 'WETAEGO', businessType = 'restaurant' }: ReceiptTemplateProps) {
   // Adapt terminology based on business type
   const isService = ['services', 'consulting', 'salon', 'spa'].includes(businessType)
   const headerText = isService ? 'APPOINTMENT SLIP' : 'STORE RECEIPT'
@@ -77,7 +77,7 @@ export function ReceiptTemplate({ order, businessName = 'OurMenu OS', businessTy
 
       <div style={{ textAlign: 'center', marginTop: '16px' }}>
         <div style={{ fontWeight: 'bold' }}>{order.status === 'paid' ? 'PAID' : 'PENDING PAYMENT'}</div>
-        <div style={{ marginTop: '16px', fontSize: '10px' }}>Powered by OurMenu OS</div>
+        <div style={{ marginTop: '16px', fontSize: '10px' }}>Powered by WETAEGO</div>
       </div>
     </div>
   )

@@ -1,11 +1,11 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "OurMenu OS API",
+    "title": "WETAEGO API",
     "version": "1.0.0",
-    "description": "Public REST API, Webhooks, and AI Agent endpoints for OurMenu OS — the universal operating system for physical and service businesses.",
+    "description": "Public REST API, Webhooks, and AI Agent endpoints for WETAEGO — the commerce & service operating system for modern brands, human customers, and AI agents.",
     "contact": {
-      "name": "OurMenu OS Developer Support",
+      "name": "WETAEGO Developer Support",
       "email": "support@ourmenuos.online",
       "url": "https://ourmenuos.online/docs"
     },

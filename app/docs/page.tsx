@@ -5,7 +5,7 @@ import { Code, Terminal, Bot, Key, Webhook, FileText, CheckCircle2, Download, Cp
 import { LandingNavbar } from '@/components/LandingNavbar'
 
 export const metadata: Metadata = {
-  title: 'Developer Documentation & Extended Capabilities | OurMenu OS',
+  title: 'Developer Documentation & Extended Capabilities | WETAEGO',
   description: 'Comprehensive developer portal, REST API references, Webhooks, Model Context Protocol (MCP), WebMCP, RFC 9727 API Catalog, x402/MPP agent payments, and hardware printing SDK.',
   alternates: {
     canonical: 'https://ourmenuos.online/docs',
@@ -16,12 +16,12 @@ export default function DocsPage() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "TechArticle",
-    "headline": "OurMenu OS Developer Documentation & Extended Capabilities",
-    "description": "Comprehensive developer reference for OurMenu OS APIs, webhooks, MCP tools, WebMCP, x402 payments, and hardware printing.",
+    "headline": "WETAEGO Developer Documentation & Extended Capabilities",
+    "description": "Comprehensive developer reference for WETAEGO APIs, webhooks, MCP tools, WebMCP, x402 payments, and hardware printing.",
     "url": "https://ourmenuos.online/docs",
     "author": {
       "@type": "Organization",
-      "name": "OurMenu OS"
+      "name": "WETAEGO"
     }
   }
 
@@ -40,10 +40,10 @@ export default function DocsPage() {
             <Terminal className="w-3.5 h-3.5" /> Developer Portal & Extended Capabilities
           </div>
           <h1 className="text-4xl md:text-6xl font-black text-white tracking-tight leading-[1.1] mb-6">
-            OurMenu OS Developer Architecture & API Reference
+            WETAEGO Developer Architecture & API Reference
           </h1>
           <p className="text-lg md:text-xl text-zinc-400 max-w-3xl mx-auto font-light leading-relaxed mb-8">
-            Build custom integrations, automate real-time order dispatch, connect ESC/POS hardware peripherals, or equip autonomous AI agents with the OurMenu OS protocol suite.
+            Build custom integrations, automate real-time order dispatch, connect ESC/POS hardware peripherals, or equip autonomous AI agents with the WETAEGO protocol suite.
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-3">
@@ -207,7 +207,7 @@ export default function DocsPage() {
               <h2 className="text-2xl font-bold text-white">3. Extended Hardware & Operational Capabilities</h2>
             </div>
             <p className="text-zinc-300 text-sm leading-relaxed">
-              OurMenu OS bridges web software directly to physical point-of-sale hardware and multi-branch franchise operations:
+              WETAEGO bridges web software directly to physical point-of-sale hardware and multi-branch franchise operations:
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -281,14 +281,14 @@ export default function DocsPage() {
             </div>
           </div>
 
-          {/* Section 4: Webhooks */}
+          {/* Section 4: Webhook Infrastructure */}
           <div className="bg-zinc-900/50 border border-white/10 rounded-3xl p-8 md:p-10 space-y-6">
             <div className="flex items-center gap-3">
               <Webhook className="w-6 h-6 text-emerald-400" />
               <h2 className="text-2xl font-bold text-white">4. Webhook Infrastructure</h2>
             </div>
             <p className="text-zinc-300 text-sm leading-relaxed">
-              OurMenu OS handles real-time payment gateway settlement callbacks from Paystack and Bachs at <code className="bg-black/60 px-2 py-0.5 rounded text-emerald-400 border border-white/10">/api/paystack/webhook</code>. Every webhook payload is verified using HMAC SHA512 signatures via the <code className="bg-black/60 px-2 py-0.5 rounded text-emerald-400 border border-white/10">x-paystack-signature</code> header.
+              WETAEGO handles real-time payment gateway settlement callbacks from Paystack and Bachs at <code className="bg-black/60 px-2 py-0.5 rounded text-emerald-400 border border-white/10">/api/paystack/webhook</code>. Every webhook payload is verified using HMAC SHA512 signatures via the <code className="bg-black/60 px-2 py-0.5 rounded text-emerald-400 border border-white/10">x-paystack-signature</code> header.
             </p>
             <ul className="space-y-2 text-sm text-zinc-400">
               <li className="flex items-center gap-2">
@@ -309,7 +309,7 @@ export default function DocsPage() {
               <h2 className="text-2xl font-bold text-white">5. Supported Machine Standards & Discovery Protocols</h2>
             </div>
             <p className="text-zinc-300 text-sm leading-relaxed">
-              OurMenu OS is engineered for total autonomous agent interoperability, implementing 14 cutting-edge open web and AI agent discovery specifications:
+              WETAEGO is engineered for total autonomous agent interoperability, implementing 14 cutting-edge open web and AI agent discovery specifications:
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono">
               <div className="p-4 rounded-xl bg-black/60 border border-white/5 space-y-1">

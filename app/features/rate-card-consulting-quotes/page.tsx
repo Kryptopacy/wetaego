@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Digital Rate Cards & B2B Dynamic Quote Generator | OurMenu OS",
+  title: "Digital Rate Cards & B2B Dynamic Quote Generator | WETAEGO",
   description: "Create interactive digital rate cards, media sponsorship packages, and custom scope-of-work quote builders for creators, agencies, and consultants.",
   keywords: [
     "digital rate card",
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     canonical: "https://ourmenuos.online/features/rate-card-consulting-quotes",
   },
   openGraph: {
-    title: "Digital Rate Cards & B2B Quotes | OurMenu OS",
+    title: "Digital Rate Cards & B2B Quotes | WETAEGO",
     description: "Interactive pricing tiers, media rate cards, and dynamic scope quote builders with deposit billing.",
     url: "https://ourmenuos.online/features/rate-card-consulting-quotes",
     type: "website",
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Digital Rate Cards & B2B Quotes | OurMenu OS",
+    title: "Digital Rate Cards & B2B Quotes | WETAEGO",
     description: "Interactive pricing tiers, media rate cards, and dynamic scope quote builders with deposit billing.",
     images: ["/hero_emerald_gemstone.png"],
   },
@@ -47,7 +47,7 @@ export default function RateCardQuotesPage() {
       {
         "@type": "SoftwareApplication",
         "@id": "https://ourmenuos.online/features/rate-card-consulting-quotes#software",
-        "name": "OurMenu Digital Rate Card & B2B Quote OS",
+        "name": "WETAEGO Digital Rate Card & B2B Quote OS",
         "applicationCategory": "BusinessApplication, FinanceApplication",
         "operatingSystem": "Web, iOS, Android, PWA",
         "description": "Interactive rate cards and scope quotation platform for digital creators, marketing agencies, and professional consultants.",

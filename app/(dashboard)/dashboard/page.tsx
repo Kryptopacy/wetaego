@@ -141,7 +141,7 @@ export default async function DashboardOverviewPage() {
   return (
     <div className="max-w-6xl space-y-8">
       <PageHeader
-        eyebrow={orgId ? `${greeting}, ${orgName} 👋` : `Welcome to OurMenu OS 👋`}
+        eyebrow={orgId ? `${greeting}, ${orgName} 👋` : `Welcome to WETAEGO 👋`}
         title={orgId ? 'Overview' : 'Get Started'}
         description={
           orgId 

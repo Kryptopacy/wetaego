@@ -216,7 +216,7 @@ export default function ClientLayout({ children, initialData }: { children: Reac
     { href: '/dashboard/marketing', label: 'Marketing Hub', icon: Megaphone, tooltip: 'Broadcasts, Ads, and Deals' },
     { href: '/dashboard/settings', label: 'Settings & Apps', icon: Settings, tooltip: 'Configure business settings and integrations' },
     { href: '/dashboard/billing', label: 'Billing & Plan', icon: CreditCard, tooltip: 'Manage your subscription and credits' },
-    { href: '/dashboard/support', label: 'Help & Support', icon: MessageSquare, tooltip: 'Get help and contact OurMenuOS support' },
+    { href: '/dashboard/support', label: 'Help & Support', icon: MessageSquare, tooltip: 'Get help and contact WETAEGO support' },
   ]
 
   useEffect(() => {
@@ -235,11 +235,11 @@ export default function ClientLayout({ children, initialData }: { children: Reac
         <div className="p-6 pb-2">
           <Link href="/dashboard" className="flex items-center gap-3 group mb-4" onClick={onClose}>
             <div className="w-10 h-10 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
-              <Image src="/ourmenu-qr-icon.svg" alt="OurMenu Logo" width={32} height={32} className="object-contain" />
+              <Image src="/ourmenu-qr-icon.svg" alt="WETAEGO Logo" width={32} height={32} className="object-contain" />
             </div>
             <div className="flex flex-col">
               <div className="flex items-center gap-2">
-                <span className="text-white font-bold tracking-tight leading-tight">OurMenu OS</span>
+                <span className="text-white font-bold tracking-tight leading-tight">WETAEGO</span>
                 {initialData.plan && (
                   <span className="px-1.5 py-0.5 rounded bg-white/10 border border-white/20 text-[10px] font-bold text-zinc-300 uppercase tracking-wider">
                     {initialData.plan}
@@ -468,13 +468,13 @@ export default function ClientLayout({ children, initialData }: { children: Reac
       <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-[#0a0a0a]/90 backdrop-blur-md border-b border-white/5 z-50 flex items-center justify-between px-4 print:hidden">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 flex items-center justify-center">
-            <Image src="/ourmenu-qr-icon.svg" alt="OurMenu Logo" width={24} height={24} className="object-contain" />
+            <Image src="/ourmenu-qr-icon.svg" alt="WETAEGO Logo" width={24} height={24} className="object-contain" />
           </div>
           <div className="flex flex-col">
             <span className="text-white font-bold tracking-tight text-sm leading-tight">
               {activePageId 
                 ? pages.find(p => p.id === activePageId)?.title || 'Page'
-                : locations.find(l => l.id === activeLocationId)?.portal_display_name || locations.find(l => l.id === activeLocationId)?.name || 'OurMenu OS'}
+                : locations.find(l => l.id === activeLocationId)?.portal_display_name || locations.find(l => l.id === activeLocationId)?.name || 'WETAEGO'}
             </span>
             {activePageId && (
               <span className="text-emerald-400 text-[10px] font-semibold uppercase tracking-wider">

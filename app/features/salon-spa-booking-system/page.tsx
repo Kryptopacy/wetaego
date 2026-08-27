@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Salon, Spa & Wellness Appointment Booking System | OurMenu OS",
+  title: "Salon, Spa & Wellness Appointment Booking System | WETAEGO",
   description: "Automate appointment bookings for beauty salons, barbershops, wellness spas, clinics, and tutors. Calendar slots, deposit billing, and WhatsApp reminders.",
   keywords: [
     "salon booking software",
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     canonical: "https://ourmenuos.online/features/salon-spa-booking-system",
   },
   openGraph: {
-    title: "Salon, Spa & Wellness Booking System | OurMenu OS",
+    title: "Salon, Spa & Wellness Booking System | WETAEGO",
     description: "Automated calendar booking, deposit billing, and customer notifications for beauty, wellness, and appointment services.",
     url: "https://ourmenuos.online/features/salon-spa-booking-system",
     type: "website",
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Salon, Spa & Wellness Booking System | OurMenu OS",
+    title: "Salon, Spa & Wellness Booking System | WETAEGO",
     description: "Automated calendar booking, deposit billing, and customer notifications for beauty, wellness, and appointment services.",
     images: ["/hero_emerald_gemstone.png"],
   },
@@ -49,7 +49,7 @@ export default function SalonSpaBookingPage() {
       {
         "@type": "SoftwareApplication",
         "@id": "https://ourmenuos.online/features/salon-spa-booking-system#software",
-        "name": "OurMenu Salon & Spa Appointment Booking OS",
+        "name": "WETAEGO Salon & Spa Appointment Booking OS",
         "applicationCategory": "BusinessApplication, HealthAndBeautyApplication",
         "operatingSystem": "Web, iOS, Android, PWA",
         "description": "Seamless calendar scheduling, tiered service packages, automated deposit billing, and multi-therapist assignments for wellness businesses.",

@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Customer IOU Store Credit & Tab Financing Ledger | OurMenu OS",
+  title: "Customer IOU Store Credit & Tab Financing Ledger | WETAEGO",
   description: "Track customer tabs and offer in-house Buy Now Pay Later credit with risk controls, customer credit limits, and automated SMS/email payment reminders.",
   keywords: [
     "customer iou ledger",
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     canonical: "https://ourmenuos.online/features/customer-iou-financing",
   },
   openGraph: {
-    title: "Customer IOU Store Credit & Tab Financing | OurMenu OS",
+    title: "Customer IOU Store Credit & Tab Financing | WETAEGO",
     description: "Manage in-house customer credit limits, track unpaid tabs, and automate reminder notifications with full risk control.",
     url: "https://ourmenuos.online/features/customer-iou-financing",
     type: "website",
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Customer IOU Store Credit & Tab Financing | OurMenu OS",
+    title: "Customer IOU Store Credit & Tab Financing | WETAEGO",
     description: "Manage in-house customer credit limits, track unpaid tabs, and automate reminder notifications with full risk control.",
     images: ["/hero_emerald_gemstone.png"],
   },
@@ -47,7 +47,7 @@ export default function CustomerIouFeaturePage() {
       {
         "@type": "SoftwareApplication",
         "@id": "https://ourmenuos.online/features/customer-iou-financing#software",
-        "name": "OurMenu Customer IOU Tab Financing Ledger",
+        "name": "WETAEGO Customer IOU Tab Financing Ledger",
         "applicationCategory": "BusinessApplication, FinanceApplication",
         "operatingSystem": "Web, iOS, Android, PWA",
         "description": "Risk-managed customer store credit ledger with automated balance tracking and scheduled payment reminder notifications.",
@@ -155,7 +155,7 @@ export default function CustomerIouFeaturePage() {
               Turn regular customers into loyal VIPs
             </h3>
             <p className="text-zinc-300 text-base max-w-2xl mx-auto mb-8 font-light">
-              Manage in-house store credit with total confidence on OurMenu OS.
+              Manage in-house store credit with total confidence on WETAEGO.
             </p>
             <Link
               href="/login"

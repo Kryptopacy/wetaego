@@ -28,7 +28,7 @@ interface PaymentLinkEmailProps {
 }
 
 export const PaymentLinkEmail = ({
-  organizationName = "OurMenu Partner",
+  organizationName = "WETAEGO Partner",
   orderId = "12345678",
   totalAmountMinor = 1500000,
   paymentUrl = "https://paystack.com/pay/xyz",
@@ -95,7 +95,7 @@ export const PaymentLinkEmail = ({
             
             <Section>
               <Text className="text-gray-500 text-xs text-center m-0">
-                Powered by OurMenu OS
+                Powered by WETAEGO
               </Text>
             </Section>
 

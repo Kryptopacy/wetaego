@@ -5,8 +5,8 @@ import Image from 'next/image'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Register as Affiliate | OurMenu OS',
-  description: 'Join the OurMenu OS Affiliate Program and earn 10% lifetime recurring commissions.',
+  title: 'Register as Affiliate | WETAEGO',
+  description: 'Join the WETAEGO Affiliate Program and earn 10% lifetime recurring commissions.',
   alternates: {
     canonical: 'https://ourmenuos.online/affiliate/register',
   },

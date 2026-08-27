@@ -112,7 +112,7 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
         if (autoPrintReceipts) {
           const order = orders.find(o => o.id === orderId)
           if (order) {
-            printOrder(order, { mode, ipAddress, businessName: 'OurMenu OS' })
+            printOrder(order, { mode, ipAddress, businessName: 'WETAEGO' })
           }
         }
         return true
@@ -253,7 +253,7 @@ export function OrdersClient({ organizationId, locationId, initialOrders, initia
           // Automatically print the oldest active order
           const printOrderObj = orders.find(o => o.status !== 'completed' && o.status !== 'cancelled')
           if (printOrderObj) {
-            printOrder(printOrderObj, { mode, ipAddress, businessName: 'OurMenu OS' })
+            printOrder(printOrderObj, { mode, ipAddress, businessName: 'WETAEGO' })
           }
           break
         case ' ': // Spacebar

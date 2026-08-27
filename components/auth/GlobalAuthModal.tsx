@@ -90,7 +90,7 @@ export function GlobalAuthModal({
               </button>
               
               <div className="mb-6 flex flex-col items-center text-center pt-2">
-                <Image src="/ourmenu-qr-icon.svg" alt="OurMenu Logo" width={40} height={40} className="mb-3 object-contain" />
+                <Image src="/ourmenu-qr-icon.svg" alt="WETAEGO Logo" width={40} height={40} className="mb-3 object-contain" />
                 <h2 className="text-xl font-bold text-white">{title}</h2>
                 <p className="mt-1 text-sm text-zinc-400">{subtitle}</p>
               </div>

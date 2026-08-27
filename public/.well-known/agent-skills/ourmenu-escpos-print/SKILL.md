@@ -5,7 +5,7 @@ version: 1.0.0
 type: tool
 ---
 
-# OurMenu OS ESC/POS Thermal Printing Skill
+# WETAEGO ESC/POS Thermal Printing Skill
 
 This skill allows web-connected agents and browsers to emit raw ESC/POS binary commands directly to hardware receipt printers with hardware paper cuts and drawer kick pulses.
 

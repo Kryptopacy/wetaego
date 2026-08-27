@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server'
 export async function GET() {
   const mppConfig = {
     version: '1.0',
-    name: 'OurMenu OS Machine Payment Protocol',
+    name: 'WETAEGO Machine Payment Protocol',
     description: 'Machine Payment Protocol (MPP) configuration for automated AI agent checkout, live token minting, and deposit settlements.',
     facilitator: 'https://ourmenuos.online/api/x402',
     supported_methods: ['crypto', 'paystack_subaccount', 'tempo', 'card'],

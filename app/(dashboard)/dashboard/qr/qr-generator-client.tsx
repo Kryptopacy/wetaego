@@ -685,7 +685,7 @@ export function QRGeneratorClient({
                 </div>
 
                 <div className="w-full mt-4 pt-3 border-t border-zinc-100 flex items-center justify-between text-[9px] text-zinc-400 font-medium">
-                  <span>Powered by OurMenu OS</span>
+                  <span>Powered by WETAEGO</span>
                   <span className="font-mono">{locationSlug}</span>
                 </div>
               </div>

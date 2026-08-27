@@ -6,7 +6,7 @@ import { AvailabilitySchedule } from '@/lib/utils/availability'
 import { PageHeader } from '@/components/ui/page-header'
 
 export const metadata = {
-  title: 'Availability | OurMenu OS',
+  title: 'Availability | WETAEGO',
 }
 
 const DEFAULT_SCHEDULE = {

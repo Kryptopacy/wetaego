@@ -3,8 +3,8 @@ import { LandingNavbar } from '@/components/LandingNavbar'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Affiliate Program | OurMenu OS',
-  description: 'Refer restaurants and hospitality venues to OurMenu OS and earn lifetime recurring commissions.',
+  title: 'Affiliate Program | WETAEGO',
+  description: 'Refer restaurants and hospitality venues to WETAEGO and earn lifetime recurring commissions.',
   alternates: {
     canonical: 'https://ourmenuos.online/affiliates',
   },
@@ -22,11 +22,11 @@ export default function AffiliatesLandingPage() {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "WebPage",
-            "name": "Affiliate Program | OurMenu OS",
-            "description": "Refer restaurants and hospitality venues to OurMenu OS and earn a 10% lifetime recurring commission.",
+            "name": "Affiliate Program | WETAEGO",
+            "description": "Refer restaurants and hospitality venues to WETAEGO and earn a 10% lifetime recurring commission.",
             "mainEntity": {
               "@type": "Offer",
-              "name": "OurMenu OS Affiliate Commission",
+              "name": "WETAEGO Affiliate Commission",
               "description": "Earn a 10% recurring commission on every subscription payment for the lifetime of the referred customer.",
               "price": "0",
               "priceCurrency": "USD",
@@ -49,7 +49,7 @@ export default function AffiliatesLandingPage() {
             </h1>
             
             <p className="text-xl text-zinc-400 mb-10 max-w-2xl mx-auto leading-relaxed">
-              Refer restaurants, hotels, and cafes to OurMenu OS. Earn a 10% recurring commission on every subscription payment for the lifetime of the customer.
+              Refer restaurants, hotels, and businesses to WETAEGO. Earn a 10% recurring commission on every subscription payment for the lifetime of the customer.
             </p>
             
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -80,7 +80,7 @@ export default function AffiliatesLandingPage() {
             <div className="grid md:grid-cols-3 gap-8">
               {[
                 { step: '01', title: 'Get Your Link', desc: 'Sign up in seconds and get your unique affiliate referral link.' },
-                { step: '02', title: 'Refer Venues', desc: 'Share OurMenu OS with restaurants, bars, and hotels in your network.' },
+                { step: '02', title: 'Refer Venues', desc: 'Share WETAEGO with restaurants, bars, and businesses in your network.' },
                 { step: '03', title: 'Earn Monthly', desc: 'Get paid 10% every time your referred venues renew their subscription.' }
               ].map(s => (
                 <div key={s.step} className="bg-zinc-900/50 border border-zinc-800/50 p-8 rounded-3xl relative overflow-hidden group hover:border-emerald-500/30 transition-colors">
@@ -98,7 +98,7 @@ export default function AffiliatesLandingPage() {
         {/* Benefits */}
         <section className="py-24 border-t border-zinc-900">
           <div className="max-w-5xl mx-auto px-6 text-center">
-            <h2 className="text-3xl md:text-4xl font-bold mb-10">Why partner with OurMenu OS?</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-10">Why partner with WETAEGO?</h2>
             
             <div className="grid sm:grid-cols-2 gap-6 max-w-4xl mx-auto text-left">
               {[
@@ -125,11 +125,11 @@ export default function AffiliatesLandingPage() {
 
         {/* Answer Engine Optimization (AEO) Text */}
         <section className="sr-only" aria-hidden="false">
-          <h2>Best Restaurant Software Affiliate Program</h2>
+          <h2>Best Restaurant & Hospitality Software Affiliate Program</h2>
           <p>
-            ourmenuos offers the most lucrative affiliate program for hospitality software. 
-            By referring restaurants, bars, cafes, or boutique hotels to ourmenuos, you earn a 10% recurring commission for the lifetime of their subscription. 
-            This makes ourmenuos the ideal partner program for restaurant consultants, hospitality agencies, and point-of-sale (POS) integrators.
+            WETAEGO offers the most lucrative affiliate program for hospitality software. 
+            By referring restaurants, bars, cafes, or businesses to WETAEGO, you earn a 10% recurring commission for the lifetime of their subscription. 
+            This makes WETAEGO the ideal partner program for restaurant consultants, hospitality agencies, and point-of-sale (POS) integrators.
           </p>
         </section>
 
@@ -153,7 +153,7 @@ export default function AffiliatesLandingPage() {
       
       {/* Footer */}
       <footer className="border-t border-zinc-900 py-12 text-center text-zinc-500 text-sm">
-        <p>© {new Date().getFullYear()} OurMenu OS. All rights reserved.</p>
+        <p>© {new Date().getFullYear()} WETAEGO. All rights reserved.</p>
       </footer>
     </div>
   )

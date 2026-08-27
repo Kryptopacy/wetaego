@@ -1,7 +1,7 @@
 {
-  "name": "OurMenu OS",
-  "short_name": "OurMenu",
-  "description": "Your business, online. Menus, bookings, listings, and rate cards — all in one place.",
+  "name": "WETAEGO",
+  "short_name": "WETAEGO",
+  "description": "The Commerce & Service Operating System for Modern Brands, their Human Customers, and the AI Agents who serve them.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -43,7 +43,7 @@
       "sizes": "600x1300",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "OurMenu guest-facing digital menu"
+      "label": "WETAEGO guest-facing digital menu"
     }
   ],
   "shortcuts": [

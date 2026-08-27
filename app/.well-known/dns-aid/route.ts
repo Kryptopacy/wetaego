@@ -4,7 +4,7 @@ export async function GET() {
   const dnsAid = {
     protocol: 'dns-aid',
     version: '1.0',
-    name: 'OurMenu OS DNS for AI Discovery (DNS-AID) Configuration',
+    name: 'WETAEGO DNS for AI Discovery (DNS-AID) Configuration',
     zone: 'ourmenuos.online',
     dnssec_status: 'signed',
     records: [

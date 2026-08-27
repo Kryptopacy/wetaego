@@ -22,7 +22,7 @@ export async function GET() {
     },
     protocol: 'ucp',
     version: '1.0.0',
-    name: 'OurMenu OS Universal Commerce Profile',
+    name: 'WETAEGO Universal Commerce Profile',
     description: 'Universal Commerce Protocol profile for automated AI agent commerce across restaurants, supermarkets, salons, and retail.',
     spec_url: 'https://ucp.dev/specification/overview/',
     services: [

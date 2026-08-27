@@ -68,7 +68,7 @@ export function HardwareSettingsView() {
         mode: selectedMode,
         ipAddress,
         baudRate: baudRate || 9600,
-        businessName: 'OurMenu OS Hardware Test',
+        businessName: 'WETAEGO Hardware Test',
         businessType: 'restaurant'
       })
 

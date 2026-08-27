@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Payment Roulette: Gamified Restaurant Bill Randomizer | OurMenu OS",
+  title: "Payment Roulette: Gamified Restaurant Bill Randomizer | WETAEGO",
   description: "Eliminate awkward bill splitting with Payment Roulette. An interactive dining game built into smart QR menus that randomly picks who pays the check.",
   keywords: [
     "payment roulette",
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     canonical: "https://ourmenuos.online/features/payment-roulette",
   },
   openGraph: {
-    title: "Payment Roulette: Gamified Bill Randomizer | OurMenu OS",
+    title: "Payment Roulette: Gamified Bill Randomizer | WETAEGO",
     description: "Built-in interactive game for QR menus that lets dining parties spin to decide who pays the restaurant bill.",
     url: "https://ourmenuos.online/features/payment-roulette",
     type: "website",
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Payment Roulette: Gamified Bill Randomizer | OurMenu OS",
+    title: "Payment Roulette: Gamified Bill Randomizer | WETAEGO",
     description: "Built-in interactive game for QR menus that lets dining parties spin to decide who pays the restaurant bill.",
     images: ["/hero_emerald_gemstone.png"],
   },

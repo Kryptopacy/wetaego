@@ -124,7 +124,7 @@ export function PwaInstallPrompt() {
         
         <div className="flex-1 space-y-2">
           <div>
-            <h3 className="text-sm font-bold text-white">Install OurMenu OS</h3>
+            <h3 className="text-sm font-bold text-white">Install WETAEGO</h3>
             <p className="text-xs text-zinc-400 leading-relaxed">
               Launch faster with offline resilience, push notifications, and zero browser chrome.
             </p>

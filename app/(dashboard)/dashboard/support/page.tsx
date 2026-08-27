@@ -48,7 +48,7 @@ export default async function SupportPage() {
             Feature Request
           </h2>
           <p className="text-zinc-400 text-sm mb-6">
-            Have a great idea for a new feature? We are constantly evolving OurMenu OS to better serve your business needs.
+            Have a great idea for a new feature? We are constantly evolving WETAEGO to better serve your business needs.
           </p>
           <a 
             href="mailto:features@ourmenuos.online?subject=Feature Request"

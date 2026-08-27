@@ -395,7 +395,7 @@ export default async function AdminPage() {
                   />
                   <label htmlFor="enable_platform_ads" className="text-sm font-medium text-white leading-tight cursor-pointer">
                     Enable Platform Ads (Lite Tier)
-                    <span className="block text-xs text-zinc-400 font-normal mt-1">Injects OurMenu OS brokered ads into free accounts.</span>
+                    <span className="block text-xs text-zinc-400 font-normal mt-1">Injects WETAEGO brokered ads into free accounts.</span>
                   </label>
                 </div>
 

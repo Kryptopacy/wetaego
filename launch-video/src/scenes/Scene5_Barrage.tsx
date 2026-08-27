@@ -66,7 +66,7 @@ export const Scene5_Barrage: React.FC = () => {
                WebkitTextFillColor: "transparent"
             }}
           >
-            OURMENU.
+            WETAEGO.
           </h1>
         </AbsoluteFill>
       </Sequence>

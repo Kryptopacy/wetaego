@@ -92,7 +92,7 @@ export default async function BillingPage(props: { searchParams: Promise<{ curre
     <div className="max-w-5xl space-y-6">
       <PageHeader
         title="Billing & Subscription"
-        description="Manage your OurMenu OS subscription tier, buy top-up credits, and view plan limits."
+        description="Manage your WETAEGO subscription tier, buy top-up credits, and view plan limits."
         action={
           <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2">
             {/* Billing Cycle Toggle */}
@@ -166,7 +166,7 @@ export default async function BillingPage(props: { searchParams: Promise<{ curre
 
         {/* Lite Upgrade Card */}
         <div className="bg-linear-to-br from-zinc-900 to-zinc-950 border border-zinc-800 rounded-2xl p-6 relative overflow-hidden">
-          <h2 className="text-2xl font-bold text-white mb-2 relative z-10">OurMenu OS Lite</h2>
+          <h2 className="text-2xl font-bold text-white mb-2 relative z-10">WETAEGO Lite</h2>
           <div className="flex items-baseline gap-2 mb-1 relative z-10">
             <span className="text-4xl font-extrabold text-white">{formatPrice(liteDisplayPrice)}</span>
             <span className="text-zinc-500">/mo</span>
@@ -216,7 +216,7 @@ export default async function BillingPage(props: { searchParams: Promise<{ curre
             </div>
           )}
 
-          <h2 className="text-2xl font-bold text-white mb-2 relative z-10">OurMenu OS Pro</h2>
+          <h2 className="text-2xl font-bold text-white mb-2 relative z-10">WETAEGO Pro</h2>
           <div className="flex items-baseline gap-2 mb-1 relative z-10">
             <span className="text-4xl font-extrabold text-white">{formatPrice(proDisplayPrice)}</span>
             <span className="text-zinc-500">/mo</span>

@@ -84,8 +84,8 @@ export default async function AffiliateDashboardPage() {
             />
             <ShareButton
               url={referralLink}
-              title="Join OurMenu OS - Partner Program"
-              description="Sign up for OurMenu OS using my referral link and transform your restaurant's digital experience."
+              title="Join WETAEGO - Partner Program"
+              description="Sign up for WETAEGO using my referral link and transform your business digital experience."
               className="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 rounded-lg font-medium transition-colors"
             >
               Share Link

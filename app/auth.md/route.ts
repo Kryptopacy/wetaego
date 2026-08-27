@@ -16,7 +16,7 @@ export async function GET() {
       }
     })
   } catch {
-    return new NextResponse('# OurMenu OS Agent Authentication Guide\n\nSee https://ourmenuos.online/docs', {
+    return new NextResponse('# WETAEGO Agent Authentication Guide\n\nSee https://ourmenuos.online/docs', {
       status: 200,
       headers: {
         'Content-Type': 'text/markdown; charset=utf-8',

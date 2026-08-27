@@ -5,8 +5,8 @@ import { LandingNavbar } from '@/components/LandingNavbar'
 import { ShieldCheck, Lock, Globe, FileText, ArrowRight } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy | OurMenu OS',
-  description: 'How we collect, protect, and process data at OurMenu OS in compliance with NDPR and GDPR regulations.',
+  title: 'Privacy Policy | WETAEGO',
+  description: 'How we collect, protect, and process data at WETAEGO in compliance with NDPR and GDPR regulations.',
   alternates: {
     canonical: 'https://ourmenuos.online/privacy',
   },
@@ -16,14 +16,14 @@ export default function PrivacyPage() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    "name": "Privacy Policy — OurMenu OS",
-    "description": "How OurMenu OS protects merchant and customer data under NDPR and GDPR frameworks.",
+    "name": "Privacy Policy — WETAEGO",
+    "description": "How WETAEGO protects merchant and customer data under NDPR and GDPR frameworks.",
     "url": "https://ourmenuos.online/privacy",
     "mainEntity": {
       "@type": "Organization",
       "@id": "https://ourmenuos.online/#organization",
-      "name": "OurMenu OS",
-      "legalName": "OurMenu OS by CRUISEHQ LTD",
+      "name": "WETAEGO",
+      "legalName": "WETAEGO by CRUISEHQ LTD",
       "url": "https://ourmenuos.online",
       "logo": "https://ourmenuos.online/ourmenu-qr-logo.png",
       "email": "privacy@ourmenuos.online",
@@ -79,7 +79,7 @@ export default function PrivacyPage() {
                 1. Introduction & Regulatory Framework
               </h2>
               <p className="text-zinc-300">
-                OurMenu OS (&quot;we&quot;, &quot;us&quot;, &quot;our&quot;) provides a cloud-based operating system and digital storefront platform for restaurants, supermarkets, spas, salons, retail boutiques, and B2B services. We are dedicated to maintaining the highest levels of privacy and data security for both businesses using our platform (Merchants) and guests who interact with digital storefronts (End-Users).
+                WETAEGO (&quot;we&quot;, &quot;us&quot;, &quot;our&quot;) provides a cloud-based operating system and digital storefront platform for restaurants, supermarkets, spas, salons, retail boutiques, and B2B services. We are dedicated to maintaining the highest levels of privacy and data security for both businesses using our platform (Merchants) and guests who interact with digital storefronts (End-Users).
               </p>
               <p className="text-zinc-400 text-base">
                 This Privacy Policy is designed to comply with the <strong>Nigerian Data Protection Act / NDPR</strong> and the international <strong>General Data Protection Regulation (GDPR)</strong>.
@@ -105,7 +105,7 @@ export default function PrivacyPage() {
                 3. Artificial Intelligence & Zero Training on User PII
               </h2>
               <p className="text-zinc-300">
-                OurMenu OS features Tego Multimodal AI (powered by Google Gemini 3.1 Flash Live). We maintain a strict data boundary:
+                WETAEGO features Tego Multimodal AI (powered by Google Gemini 3.1 Flash Live). We maintain a strict data boundary:
               </p>
               <ul className="list-disc pl-6 space-y-2 text-zinc-400 text-base">
                 <li>End-user personal information and payment details are <strong>never</strong> used to train public or commercial foundation models.</li>

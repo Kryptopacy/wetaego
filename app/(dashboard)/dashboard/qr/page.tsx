@@ -4,7 +4,7 @@ import { cookies } from 'next/headers'
 import { QRGeneratorClient } from './qr-generator-client'
 
 export const metadata = {
-  title: 'QR Code Generator & Signage | OurMenu OS',
+  title: 'QR Code Generator & Signage | WETAEGO',
 }
 
 export default async function QRPage() {

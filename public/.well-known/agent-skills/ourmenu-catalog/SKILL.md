@@ -5,9 +5,9 @@ version: 1.0.0
 type: tool
 ---
 
-# OurMenu OS Catalog Discovery Skill
+# WETAEGO Catalog Discovery Skill
 
-This skill allows agents to search and inspect products, dishes, and services hosted on OurMenu OS venues.
+This skill allows agents to search and inspect products, dishes, and services hosted on WETAEGO venues.
 
 ## Parameters
 - `locationId` (string, required): The target location UUID or slug.

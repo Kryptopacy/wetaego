@@ -5,8 +5,8 @@ import { Mail, Phone, MapPin, MessageSquare, Clock, ShieldAlert, ArrowRight } fr
 import { LandingNavbar } from '@/components/LandingNavbar'
 
 export const metadata: Metadata = {
-  title: 'Contact Us & Support | OurMenu OS',
-  description: 'Get in touch with the OurMenu OS team for customer support, enterprise franchise sales, partnership opportunities, and technical developer assistance.',
+  title: 'Contact Us & Support | WETAEGO',
+  description: 'Get in touch with the WETAEGO team for customer support, enterprise franchise sales, partnership opportunities, and technical developer assistance.',
   alternates: {
     canonical: 'https://ourmenuos.online/contact',
   },
@@ -16,14 +16,14 @@ export default function ContactPage() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "ContactPage",
-    "name": "Contact OurMenu OS",
-    "description": "Official contact channels, email addresses, phone lines, and physical office location for OurMenu OS.",
+    "name": "Contact WETAEGO",
+    "description": "Official contact channels, email addresses, phone lines, and physical office location for WETAEGO.",
     "url": "https://ourmenuos.online/contact",
     "mainEntity": {
       "@type": "Organization",
       "@id": "https://ourmenuos.online/#organization",
-      "name": "OurMenu OS",
-      "legalName": "OurMenu OS by CRUISEHQ LTD",
+      "name": "WETAEGO",
+      "legalName": "WETAEGO by CRUISEHQ LTD",
       "url": "https://ourmenuos.online",
       "email": "support@ourmenuos.online",
       "telephone": "+234-800-687-6368",
@@ -73,7 +73,7 @@ export default function ContactPage() {
             We are here to assist your operation.
           </h1>
           <p className="text-lg md:text-xl text-zinc-400 max-w-2xl mx-auto font-light leading-relaxed">
-            Have a question about deploying OurMenu OS, integrating hardware thermal printers, or onboarding an enterprise supermarket fleet? Reach our direct response channels below.
+            Have a question about deploying WETAEGO, integrating hardware thermal printers, or onboarding an enterprise supermarket fleet? Reach our direct response channels below.
           </p>
         </section>
 

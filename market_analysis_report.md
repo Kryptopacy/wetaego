@@ -1,7 +1,7 @@
 # 📈 Market Analysis & Competitive Positioning Report
 
 ## 📌 Executive Summary
-This report analyzes the top industry competitors across OurMenu OS's 6 core feature pillars. The analysis is driven by real-world user feedback (Reddit, Trustpilot, G2) to uncover deep-seated frustrations and friction points. By understanding what operators and diners *hate* about current solutions, OurMenu OS can position itself as the superior, frictionless alternative.
+This report analyzes the top industry competitors across WETAEGO's 6 core feature pillars. The analysis is driven by real-world user feedback (Reddit, Trustpilot, G2) to uncover deep-seated frustrations and friction points. By understanding what operators and diners *hate* about current solutions, WETAEGO can position itself as the superior, frictionless alternative.
 
 ---
 
@@ -14,9 +14,9 @@ This report analyzes the top industry competitors across OurMenu OS's 6 core fea
 - **Workflow Rigidity:** Square for Restaurants struggles with fine-dining workflows (e.g., coursing, grouping by seat number). 
 - **The "Hostage" Situation:** Switching POS systems is terrifying for operators because they risk breaking their third-party delivery integrations (UberEats, DoorDash). Furthermore, Square users often get confused about hardware ownership and termination fees.
 
-### 🟢 Actionable Insights for OurMenu OS
-- **Hardware-Agnostic Superiority:** Lean heavily into OurMenu OS being hardware-agnostic (running on any web-enabled tablet/phone).
-- **Offline Resilience:** The existing `offline-queue-store.ts` in OurMenu is a massive selling point. Market this heavily: "Our system doesn't freeze when the WiFi drops."
+### 🟢 Actionable Insights for WETAEGO
+- **Hardware-Agnostic Superiority:** Lean heavily into WETAEGO being hardware-agnostic (running on any web-enabled tablet/phone).
+- **Offline Resilience:** The existing `offline-queue-store.ts` in WETAEGO is a massive selling point. Market this heavily: "Our system doesn't freeze when the WiFi drops."
 - **Transparent Pricing:** Position against Toast by offering flat, predictable pricing without punishing integration fees.
 
 ---
@@ -28,8 +28,8 @@ This report analyzes the top industry competitors across OurMenu OS's 6 core fea
 - **The Deposit Dilemma:** Operators desperately need deposits to stop no-shows, but enforcing strict cancellation fees (e.g., $25/head) creates guest friction and lowers overall booking volume.
 - **Data Ownership vs. Network:** OpenTable charges high cover fees and essentially "owns" the guest relationship. Diners are also increasingly wary of how OpenTable uses their dining history.
 
-### 🟢 Actionable Insights for OurMenu OS
-- **First-Party Data Ownership:** Emphasize that with OurMenu OS, the restaurant owns 100% of the guest data. We are a white-label engine, not a B2C marketplace trying to steal their brand equity.
+### 🟢 Actionable Insights for WETAEGO
+- **First-Party Data Ownership:** Emphasize that with WETAEGO, the business owns 100% of the guest data. We are a white-label engine, not a B2C marketplace trying to steal their brand equity.
 - **Flexible Deposits:** Build features that allow "Authorization Holds" rather than immediate charges, or allow AI-driven deposit waiving for known VIPs in the CRM.
 
 ---
@@ -42,8 +42,8 @@ This report analyzes the top industry competitors across OurMenu OS's 6 core fea
 - **Technical Glitches (BentoBox):** Users report inventory sync failures, menu items mysteriously disappearing, and changes failing to save. High per-order fees ($0.99 + 3%) eat into margins.
 - **Cookie-Cutter Aesthetics:** Users complain that Popmenu sites look identical and lack true customization.
 
-### 🟢 Actionable Insights for OurMenu OS
-- **Bulletproof Sync:** OurMenu's database and UI hydration must be flawless. Disappearing menu items are a trust-killer.
+### 🟢 Actionable Insights for WETAEGO
+- **Bulletproof Sync:** WETAEGO's database and UI hydration must be flawless. Disappearing menu items are a trust-killer.
 - **Premium, Distinctive UI:** Leverage Next.js to provide stunning, dynamic templates (like the existing `restaurant-renderer.tsx`) that don't look like generic SaaS templates.
 - **Ethical Contracts:** Win on trust. Offer transparent, easily cancellable SaaS tiers.
 
@@ -56,8 +56,8 @@ This report analyzes the top industry competitors across OurMenu OS's 6 core fea
 - **High Merchant Fees:** Traditional BNPL (Klarna) charges high processing fees, which already thin restaurant margins cannot support.
 - **Consumer Friction:** Diners hate signing up for credit-checks just to pay for a meal.
 
-### 🟢 Actionable Insights for OurMenu OS
-- **The "Local Trust" IOU:** OurMenu's internal IOU system is a brilliant differentiator. By allowing restaurants to offer tabs/BNPL to *their own regular VIPs* without third-party credit checks, you eliminate merchant fees and build massive local loyalty. It digitizes the old-school "put it on my tab" culture.
+### 🟢 Actionable Insights for WETAEGO
+- **The "Local Trust" IOU:** WETAEGO's internal IOU system is a brilliant differentiator. By allowing businesses to offer tabs/BNPL to *their own regular VIPs* without third-party credit checks, you eliminate merchant fees and build massive local loyalty. It digitizes the old-school "put it on my tab" culture.
 
 ---
 
@@ -68,8 +68,8 @@ This report analyzes the top industry competitors across OurMenu OS's 6 core fea
 - **Robotic Experiences:** While operators *love* AI for handling 120+ calls an hour during peak rushes, poorly tuned AI frustrates diners.
 - **Escalation Failures:** If a guest has a genuine complaint or complex allergy, the AI failing to hand off to a human gracefully causes rage.
 
-### 🟢 Actionable Insights for OurMenu OS
-- **The "Human Handoff":** Ensure OurMenu's AI features (whether phone, chat, or triage) have a flawless, immediate escalation path to the `service_requests` table or Manager SMS (via Termii).
+### 🟢 Actionable Insights for WETAEGO
+- **The "Human Handoff":** Ensure WETAEGO's AI features (whether phone, chat, or triage) have a flawless, immediate escalation path to the `service_requests` table or Manager SMS (via Termii).
 - **Manager Protection Mode:** Highlight how the AI can act as a shield during peak hours, routing trivial questions (hours, parking) automatically and queuing non-urgent complaints for later review.
 
 ---
@@ -81,6 +81,6 @@ This report analyzes the top industry competitors across OurMenu OS's 6 core fea
 - **Olo's Enterprise Rigidity:** Olo is incredibly complex and expensive. Mid-sized chains find it difficult to execute quick, location-specific menu overrides because the system is too rigid.
 - **BentoBox's Scaling Ceiling:** BentoBox breaks down at scale, lacking the advanced data segmentation needed by multi-location franchises.
 
-### 🟢 Actionable Insights for OurMenu OS
+### 🟢 Actionable Insights for WETAEGO
 - **The "Goldilocks" Architecture:** Use Supabase RLS to provide enterprise-grade multi-tenant security (like Olo), but wrap it in a gorgeous, intuitive Next.js Dashboard (better than BentoBox).
-- **Location Autonomy:** Ensure the `LocationManager` allows franchises to push global menu updates *while* allowing local store managers to toggle specific items out of stock instantly without corporate approval.
+- **Location Autonomy:** Ensure the `LocationManager` allows franchises to push global catalog updates *while* allowing local store managers to toggle specific items out of stock instantly without corporate approval.

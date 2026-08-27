@@ -67,7 +67,7 @@ export const OrderCancellationEmail = ({
             
             <Section>
               <Text className="text-gray-500 text-xs text-center m-0">
-                Powered by OurMenu OS
+                Powered by WETAEGO
               </Text>
             </Section>
 

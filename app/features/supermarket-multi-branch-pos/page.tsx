@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Supermarket POS & Multi-Branch Retail Fleet Management | OurMenu OS",
+  title: "Supermarket POS & Multi-Branch Retail Fleet Management | WETAEGO",
   description: "Enterprise multi-branch fleet management for supermarkets, grocery stores, and retail chains. Top-left branch switcher, 1-second franchise catalog duplication, and native raw ESC/POS thermal printing.",
   keywords: [
     "supermarket pos software",
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     canonical: "https://ourmenuos.online/features/supermarket-multi-branch-pos",
   },
   openGraph: {
-    title: "Supermarket POS & Multi-Branch Retail Fleet Management | OurMenu OS",
+    title: "Supermarket POS & Multi-Branch Retail Fleet Management | WETAEGO",
     description: "Run retail chains and supermarkets with unified branch switching, sub-department aisles, instant franchise cloning, and raw ESC/POS thermal printing.",
     url: "https://ourmenuos.online/features/supermarket-multi-branch-pos",
     type: "website",
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Supermarket POS & Multi-Branch Retail Fleet Management | OurMenu OS",
+    title: "Supermarket POS & Multi-Branch Retail Fleet Management | WETAEGO",
     description: "Run retail chains and supermarkets with unified branch switching, sub-department aisles, instant franchise cloning, and raw ESC/POS thermal printing.",
     images: ["/hero_emerald_gemstone.png"],
   },
@@ -51,7 +51,7 @@ export default function SupermarketFleetPosPage() {
       {
         "@type": "SoftwareApplication",
         "@id": "https://ourmenuos.online/features/supermarket-multi-branch-pos#software",
-        "name": "OurMenu Supermarket & Multi-Branch Retail Fleet OS",
+        "name": "WETAEGO Supermarket & Multi-Branch Retail Fleet OS",
         "applicationCategory": "BusinessApplication, POSApplication",
         "operatingSystem": "Web, Windows, macOS, Linux, Android, iOS",
         "description": "Enterprise retail chain operating system with cross-branch telemetry, sub-department aisle catalogs, 1-click franchise cloning, and zero-daemon raw ESC/POS thermal printing over WebUSB/WebSerial.",

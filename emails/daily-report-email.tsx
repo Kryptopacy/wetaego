@@ -68,8 +68,8 @@ export const DailyReportEmail = ({
             <Hr className="border border-solid border-[#eaeaea] my-6 mx-0 w-full" />
             
             <Section>
-              <Text className="text-gray-500 text-xs text-center m-0">
-                Powered by OurMenu OS
+              <Text className="text-center text-xs text-zinc-500">
+                Powered by WETAEGO
               </Text>
             </Section>
 

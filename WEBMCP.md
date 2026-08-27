@@ -1,4 +1,4 @@
-# WebMCP Specification & Integration Guide — OurMenuOS
+# WebMCP Specification & Integration Guide — WETAEGO
 
 > **OpenAI WebMCP Challenge Entry**  
 > *"The Shopify of the Agentic Web: Enabling every business to expose autonomous, self-describing, transactional WebMCP storefronts."*
@@ -7,9 +7,9 @@
 
 ## 🌟 Overview
 
-**OurMenuOS** brings the **Web Model Context Protocol (WebMCP)** to digital storefronts at the platform level. Rather than manually creating custom MCP endpoints for individual merchants, OurMenuOS automatically synthesizes and registers reactive WebMCP tools onto `document.modelContext` for every merchant storefront, digital menu, catalog, or service booking page hosted on the platform.
+**WETAEGO** brings the **Web Model Context Protocol (WebMCP)** to digital storefronts at the platform level. Rather than manually creating custom MCP endpoints for individual merchants, WETAEGO automatically synthesizes and registers reactive WebMCP tools onto `document.modelContext` for every merchant storefront, digital menu, catalog, or service booking page hosted on the platform.
 
-When an AI browsing agent (such as the **ChatGPT Desktop in-app browser** or **Google Chrome 149+ with `#enable-webmcp-testing`**) navigates to any OurMenuOS storefront, the page immediately presents a standardized, full-lifecycle commerce and interaction tool suite.
+When an AI browsing agent (such as the **ChatGPT Desktop in-app browser** or **Google Chrome 149+ with `#enable-webmcp-testing`**) navigates to any WETAEGO storefront, the page immediately presents a standardized, full-lifecycle commerce and interaction tool suite.
 
 ---
 
@@ -111,7 +111,7 @@ Each storefront registers the following tools via `document.modelContext.registe
 1. Open Google Chrome (v149 or later).
 2. Navigate to `chrome://flags/#enable-webmcp-testing`.
 3. Enable the flag and restart Chrome.
-4. Visit any live OurMenuOS storefront (e.g. `https://ourmenuos.online/m/[slug]`).
+4. Visit any live WETAEGO storefront (e.g. `https://ourmenuos.online/m/[slug]`).
 5. Open Chrome DevTools (`F12`), switch to the **Application** or **Console** tab:
    ```javascript
    // Inspect registered tools
@@ -126,11 +126,11 @@ Each storefront registers the following tools via `document.modelContext.registe
 
 ### Method 2: ChatGPT Desktop App (In-App Browser)
 1. Open the ChatGPT Desktop app.
-2. In chat, browse to your live deployed OurMenuOS storefront URL.
+2. In chat, browse to your live deployed WETAEGO storefront URL.
 3. Prompt ChatGPT:
    > *"Look at this menu, find me a gluten-free main course under \$25, and add it to my cart."*
 4. ChatGPT will invoke the WebMCP tools directly in the browser session.
 
 ### Method 3: In-Browser Interactive Playground
-* Every OurMenuOS storefront includes a floating **"WebMCP Tools"** badge in the lower-left corner.
+* Every WETAEGO storefront includes a floating **"WebMCP Tools"** badge in the lower-left corner.
 * Click to open the **WebMCP Agent Playground** to execute 1-click test scenarios, inspect JSON schemas, and observe real-time visual UI synchronizations.

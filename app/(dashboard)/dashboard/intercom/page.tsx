@@ -5,7 +5,7 @@ import { IntercomHub } from './intercom-hub'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Intercom Hub | OurMenu OS',
+  title: 'Intercom Hub | WETAEGO',
   description: 'Unified customer table calls & internal staff intercom communication hub.',
 }
 

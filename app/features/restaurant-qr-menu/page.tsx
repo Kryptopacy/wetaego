@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Restaurant QR Digital Menu & Table Ordering System | OurMenu OS",
+  title: "Restaurant QR Digital Menu & Table Ordering System | WETAEGO",
   description: "Transform dine-in hospitality with smart QR menus, instant table ordering, split-bill checkouts, live kitchen display boards, and offline PWA reliability.",
   keywords: [
     "restaurant qr menu",
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     canonical: "https://ourmenuos.online/features/restaurant-qr-menu",
   },
   openGraph: {
-    title: "Restaurant QR Digital Menu & Table Ordering | OurMenu OS",
+    title: "Restaurant QR Digital Menu & Table Ordering | WETAEGO",
     description: "Instant contactless ordering, split payments, live kitchen fulfillment, and zero PDF menus.",
     url: "https://ourmenuos.online/features/restaurant-qr-menu",
     type: "website",
@@ -41,7 +41,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Restaurant QR Digital Menu & Table Ordering | OurMenu OS",
+    title: "Restaurant QR Digital Menu & Table Ordering | WETAEGO",
     description: "Instant contactless ordering, split payments, live kitchen fulfillment, and zero PDF menus.",
     images: ["/hero_emerald_gemstone.png"],
   },
@@ -54,7 +54,7 @@ export default function RestaurantQrMenuPage() {
       {
         "@type": "SoftwareApplication",
         "@id": "https://ourmenuos.online/features/restaurant-qr-menu#software",
-        "name": "OurMenu Restaurant QR Menu & Ordering System",
+        "name": "WETAEGO Restaurant QR Menu & POS",
         "applicationCategory": "BusinessApplication, FoodAndDrinkApplication",
         "operatingSystem": "Web, iOS, Android, PWA",
         "description": "Comprehensive hospitality operating layer featuring contactless QR menus, table-service routing, split payments, kitchen sound alerts, and offline reliability.",

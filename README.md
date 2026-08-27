@@ -1,14 +1,14 @@
-# OurMenu OS
+# WETAEGO
 
-![OurMenu OS Logo](./public/apple-touch-icon.png)
+![WETAEGO Logo](./public/apple-touch-icon.png)
 
-> **The Universal Digital Operating Layer for Modern Businesses & Autonomous AI Agents**
+> **The Commerce & Service Operating System for Modern Brands, their Human Customers, and the AI Agents who serve them.**
 
 ---
 
-OurMenu OS is a universal, enterprise-grade **Commerce & Services Operating System** engineered to power the customer-facing digital presence, real-time transactions, appointment bookings, rate cards, inventory catalogs, custom quotes, driverless hardware printing, and autonomous AI agent interoperability for any commercial business model—from independent solopreneurs to multi-location franchises and diverse enterprise conglomerates.
+WETAEGO is a universal, enterprise-grade **Commerce & Services Operating System** engineered to power customer-facing digital presence, real-time transactions, appointment bookings, rate cards, inventory catalogs, custom quotes, driverless hardware printing, and autonomous AI agent interoperability for any commercial business model—from independent solopreneurs to multi-location franchises and diverse enterprise conglomerates.
 
-Designed for high-traffic environments—such as restaurant chains, bustling lounges, hotel resorts, boutique retailers, wellness spas, healthcare clinics, automotive & gadget repair centers, real estate agencies, creative studios, and professional service firms—OurMenu OS delivers instant digital storefronts reachable via direct links (e.g. `ourmenuos.online/m/your-business`), custom QR codes, NFC tags, or custom domains.
+Designed for high-traffic environments—such as restaurant chains, bustling lounges, hotel resorts, boutique retailers, wellness spas, healthcare clinics, automotive & gadget repair centers, real estate agencies, creative studios, and professional service firms—WETAEGO delivers instant digital storefronts reachable via direct links (e.g. `ourmenuos.online/m/your-business`), custom QR codes, NFC tags, or custom domains.
 
 ---
 
@@ -54,7 +54,7 @@ Designed for high-traffic environments—such as restaurant chains, bustling lou
 
 ## 🤖 14 Agent Discovery & Protocol Standards
 
-OurMenu OS leads the industry in autonomous AI agent readiness, implementing 14 open discovery and interoperability standards:
+WETAEGO leads the industry in autonomous AI agent readiness, implementing 14 open discovery and interoperability standards:
 
 1. **RFC 8288 Link Headers**: Emits global HTTP `Link` response headers advertising API catalogs, docs, OpenAPI specs, OAuth servers, and agent skills.
 2. **RFC 9727 API Catalog**: Published at `/.well-known/api-catalog` with `application/linkset+json`.
@@ -89,7 +89,7 @@ OurMenu OS leads the industry in autonomous AI agent readiness, implementing 14 
 ## 💻 Running the Application
 
 ### Live Platform
-**[https://ourmenuos.online](https://ourmenuos.online)**
+**[https://ourmenuos.online](https://ourmenuos.online)** *(Preview domain prior to public TLD rollout)*
 
 ### Running Locally
 ```bash

@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "In-Built CRM, Customer Shadow Profiles & SMS/Email Broadcasts | OurMenu OS",
+  title: "In-Built CRM, Customer Shadow Profiles & SMS/Email Broadcasts | WETAEGO",
   description: "Turn one-off guests into high-LTV regulars with automatic CRM shadow profiles, lifetime spend analytics, and targeted SMS & Email marketing broadcasts.",
   keywords: [
     "hospitality crm",
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     canonical: "https://ourmenuos.online/features/hospitality-crm-customer-broadcasts",
   },
   openGraph: {
-    title: "Hospitality CRM & Customer Broadcasts | OurMenu OS",
+    title: "Hospitality CRM & Customer Broadcasts | WETAEGO",
     description: "Automatic shadow profiles at checkout, LTV tracking, and targeted SMS & Email broadcast marketing for restaurants and physical venues.",
     url: "https://ourmenuos.online/features/hospitality-crm-customer-broadcasts",
     type: "website",
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Hospitality CRM & Customer Broadcasts | OurMenu OS",
+    title: "Hospitality CRM & Customer Broadcasts | WETAEGO",
     description: "Automatic shadow profiles at checkout, LTV tracking, and targeted SMS & Email broadcast marketing for restaurants and physical venues.",
     images: ["/hero_emerald_gemstone.png"],
   },
@@ -51,7 +51,7 @@ export default function HospitalityCrmPage() {
       {
         "@type": "SoftwareApplication",
         "@id": "https://ourmenuos.online/features/hospitality-crm-customer-broadcasts#software",
-        "name": "OurMenu In-Built CRM & Customer Broadcast Engine",
+        "name": "WETAEGO In-Built CRM & Customer Broadcast Engine",
         "applicationCategory": "BusinessApplication, MarketingApplication, CRMApplication",
         "operatingSystem": "Web, iOS, Android, PWA",
         "description": "Comprehensive customer relationship management and broadcast communication suite designed specifically for physical hospitality, retail, and appointment businesses.",

@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Flash Deals, Happy Hour Promotions & AI Upselling Engine | OurMenu OS",
+  title: "Flash Deals, Happy Hour Promotions & AI Upselling Engine | WETAEGO",
   description: "Boost venue revenue with automated time-based happy hours, limited-quantity flash deals, cart upselling recommendations, and global discount banners.",
   keywords: [
     "restaurant flash deals software",
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     canonical: "https://ourmenuos.online/features/flash-deals-upselling-engine",
   },
   openGraph: {
-    title: "Flash Deals & Smart Upselling Engine | OurMenu OS",
+    title: "Flash Deals & Smart Upselling Engine | WETAEGO",
     description: "Automated happy hours, limited-quantity flash deals, and AI cart upselling to maximize average order value.",
     url: "https://ourmenuos.online/features/flash-deals-upselling-engine",
     type: "website",
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Flash Deals & Smart Upselling Engine | OurMenu OS",
+    title: "Flash Deals & Smart Upselling Engine | WETAEGO",
     description: "Automated happy hours, limited-quantity flash deals, and AI cart upselling to maximize average order value.",
     images: ["/hero_emerald_gemstone.png"],
   },
@@ -49,7 +49,7 @@ export default function FlashDealsPage() {
       {
         "@type": "SoftwareApplication",
         "@id": "https://ourmenuos.online/features/flash-deals-upselling-engine#software",
-        "name": "OurMenu Flash Deals & Dynamic Upselling Engine",
+        "name": "WETAEGO Flash Deals & Dynamic Upselling Engine",
         "applicationCategory": "BusinessApplication, MarketingApplication, ECommerceApplication",
         "operatingSystem": "Web, iOS, Android, PWA",
         "description": "Dynamic promotion engine supporting time-based happy hours, quantity-limited flash deals, and contextual cart upselling to maximize basket sizes.",

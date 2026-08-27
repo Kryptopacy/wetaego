@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Staff Intercom, Workstation Dispatch & Floor Communication | OurMenu OS",
+  title: "Staff Intercom, Workstation Dispatch & Floor Communication | WETAEGO",
   description: "Eliminate floor chaos with real-time staff intercom, kitchen-to-server alerts, push-to-talk audio radio, and table escalation dispatching.",
   keywords: [
     "restaurant staff intercom",
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     canonical: "https://ourmenuos.online/features/staff-intercom-kitchen-communication",
   },
   openGraph: {
-    title: "Staff Intercom & Kitchen-Floor Communication | OurMenu OS",
+    title: "Staff Intercom & Kitchen-Floor Communication | WETAEGO",
     description: "Zero-latency WebSocket intercom, push-to-talk radio, and kitchen dispatch for high-traffic restaurants and venues.",
     url: "https://ourmenuos.online/features/staff-intercom-kitchen-communication",
     type: "website",
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Staff Intercom & Kitchen-Floor Communication | OurMenu OS",
+    title: "Staff Intercom & Kitchen-Floor Communication | WETAEGO",
     description: "Zero-latency WebSocket intercom, push-to-talk radio, and kitchen dispatch for high-traffic restaurants and venues.",
     images: ["/hero_emerald_gemstone.png"],
   },
@@ -48,7 +48,7 @@ export default function StaffIntercomPage() {
       {
         "@type": "SoftwareApplication",
         "@id": "https://ourmenuos.online/features/staff-intercom-kitchen-communication#software",
-        "name": "OurMenu Staff Intercom & Workstation Dispatch OS",
+        "name": "WETAEGO Staff Intercom & Workstation Dispatch OS",
         "applicationCategory": "BusinessApplication, CommunicationApplication",
         "operatingSystem": "Web, iOS, Android, PWA",
         "description": "Real-time internal staff intercom and departmental workstation dispatching for kitchens, bars, and floor teams.",

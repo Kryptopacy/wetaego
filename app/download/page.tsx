@@ -2,8 +2,8 @@ import { Smartphone, Monitor, Apple, ArrowRight, ShieldCheck, Zap } from 'lucide
 import Link from 'next/link'
 
 export const metadata = {
-  title: 'Download & Install OurMenu OS',
-  description: 'Install OurMenu OS on your iPad, POS terminal, Android, Mac, or Windows desktop.',
+  title: 'Download & Install WETAEGO',
+  description: 'Install WETAEGO on your iPad, POS terminal, Android, Mac, or Windows desktop.',
 }
 
 export default function DownloadPage() {
@@ -14,9 +14,9 @@ export default function DownloadPage() {
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold uppercase tracking-wider">
             <Zap className="w-3.5 h-3.5" /> Instant App Access
           </div>
-          <h1 className="text-4xl font-extrabold text-white tracking-tight">Install OurMenu OS Anywhere</h1>
+          <h1 className="text-4xl font-extrabold text-white tracking-tight">Install WETAEGO Anywhere</h1>
           <p className="text-zinc-400 max-w-xl mx-auto text-base">
-            No massive downloads or store approvals. OurMenu OS runs as a lightweight, zero-latency desktop and mobile app with full offline queueing and direct thermal printer support.
+            No massive downloads or store approvals. WETAEGO runs as a lightweight, zero-latency desktop and mobile app with full offline queueing and direct thermal printer support.
           </p>
         </div>
 
@@ -47,7 +47,7 @@ export default function DownloadPage() {
               </div>
               <h2 className="text-xl font-bold text-white">Android</h2>
               <ol className="space-y-3 text-sm text-zinc-400 list-decimal list-inside">
-                <li>Open OurMenu in <strong>Chrome</strong>.</li>
+                <li>Open WETAEGO in <strong>Chrome</strong>.</li>
                 <li>Tap the <strong>three dots menu (⋮)</strong> top-right.</li>
                 <li>Select <strong>Install app</strong> or <strong>Add to Home screen</strong>.</li>
               </ol>

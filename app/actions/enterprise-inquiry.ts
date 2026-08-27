@@ -71,7 +71,7 @@ export async function submitEnterpriseInquiryAction(input: EnterpriseInquiryInpu
             </div>
 
             <p style="font-size: 13px; color: #a1a1aa; margin-bottom: 0;">
-              Submitted from OurMenu OS Enterprise Gating Modal • ${new Date().toUTCString()}
+              Submitted from WETAEGO Enterprise Gating Modal • ${new Date().toUTCString()}
             </p>
           </div>
         `

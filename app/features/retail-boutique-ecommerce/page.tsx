@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Retail Boutique & Gadget Store Digital Storefront | OurMenu OS",
+  title: "Retail Boutique & Gadget Store Digital Storefront | WETAEGO",
   description: "Sell retail products, fashion apparel, electronics, and gadgets with instant digital catalogs, inventory variants (size, color, storage), and localized delivery zones.",
   keywords: [
     "boutique ecommerce software",
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     canonical: "https://ourmenuos.online/features/retail-boutique-ecommerce",
   },
   openGraph: {
-    title: "Retail Boutique & Gadget Store E-Commerce | OurMenu OS",
+    title: "Retail Boutique & Gadget Store E-Commerce | WETAEGO",
     description: "Launch your boutique digital catalog with color/size variants, stock counts, and instant payment links.",
     url: "https://ourmenuos.online/features/retail-boutique-ecommerce",
     type: "website",
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Retail Boutique & Gadget Store E-Commerce | OurMenu OS",
+    title: "Retail Boutique & Gadget Store E-Commerce | WETAEGO",
     description: "Launch your boutique digital catalog with color/size variants, stock counts, and instant payment links.",
     images: ["/hero_emerald_gemstone.png"],
   },
@@ -48,7 +48,7 @@ export default function RetailBoutiquePage() {
       {
         "@type": "SoftwareApplication",
         "@id": "https://ourmenuos.online/features/retail-boutique-ecommerce#software",
-        "name": "OurMenu Retail Boutique & Digital Storefront OS",
+        "name": "WETAEGO Retail Boutique & Digital Storefront OS",
         "applicationCategory": "BusinessApplication, ShoppingApplication",
         "operatingSystem": "Web, iOS, Android, PWA",
         "description": "Dynamic digital storefront for retail boutiques, fashion designers, and gadget shops with inventory variant tracking, local delivery pricing, and instant checkout.",

@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Real Estate & Automotive Dealership Digital Showroom | OurMenu OS",
+  title: "Real Estate & Automotive Dealership Digital Showroom | WETAEGO",
   description: "Showcase property listings, luxury apartments, and vehicle dealership inventory with high-resolution specs, virtual tour links, and instant WhatsApp broker routing.",
   keywords: [
     "real estate listing software",
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     canonical: "https://ourmenuos.online/features/real-estate-vehicle-listings",
   },
   openGraph: {
-    title: "Real Estate & Automotive Showroom | OurMenu OS",
+    title: "Real Estate & Automotive Showroom | WETAEGO",
     description: "High-resolution property specs, vehicle mileage/specs galleries, virtual tour links, and instant broker WhatsApp routing.",
     url: "https://ourmenuos.online/features/real-estate-vehicle-listings",
     type: "website",
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Real Estate & Automotive Showroom | OurMenu OS",
+    title: "Real Estate & Automotive Showroom | WETAEGO",
     description: "High-resolution property specs, vehicle mileage/specs galleries, virtual tour links, and instant broker WhatsApp routing.",
     images: ["/hero_emerald_gemstone.png"],
   },
@@ -47,7 +47,7 @@ export default function RealEstateVehiclesPage() {
       {
         "@type": "SoftwareApplication",
         "@id": "https://ourmenuos.online/features/real-estate-vehicle-listings#software",
-        "name": "OurMenu Real Estate & Automotive Showroom OS",
+        "name": "WETAEGO Real Estate & Automotive Showroom OS",
         "applicationCategory": "BusinessApplication, RealEstateApplication",
         "operatingSystem": "Web, iOS, Android, PWA",
         "description": "Comprehensive digital showroom for real estate developers, property managers, and automotive car dealerships.",

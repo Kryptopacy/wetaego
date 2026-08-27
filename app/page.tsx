@@ -18,7 +18,7 @@ import { IouTeaser } from './components/iou-teaser'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'OurMenu OS | Storefronts & Operations for Hospitality, Retail & Services',
+  title: 'WETAEGO | The Autonomous Hospitality & Service Operating System',
   description: 'The complete operating layer for modern businesses. Build your digital storefront, manage operations, and process payments instantly with 9 specialized industry templates and Tego Multimodal AI.',
   alternates: {
     canonical: 'https://ourmenuos.online',
@@ -32,8 +32,8 @@ export default async function HomePage() {
       {
         "@type": "Organization",
         "@id": "https://ourmenuos.online/#organization",
-        "name": "OurMenu OS",
-        "legalName": "OurMenu OS by CRUISEHQ LTD",
+        "name": "WETAEGO",
+        "legalName": "WETAEGO by CRUISEHQ LTD",
         "url": "https://ourmenuos.online",
         "logo": "https://ourmenuos.online/ourmenu-qr-logo.png",
         "email": "support@ourmenuos.online",
@@ -72,8 +72,8 @@ export default async function HomePage() {
       {
         "@type": "SoftwareApplication",
         "@id": "https://ourmenuos.online/#software",
-        "name": "OurMenu OS",
-        "alternateName": ["ourmenuos", "OurMenu", "OurMenu Operating System"],
+        "name": "WETAEGO",
+        "alternateName": ["wetaego", "WETAEGO", "Wetaego"],
         "operatingSystem": "Web, iOS, Android, PWA",
         "applicationCategory": "BusinessApplication",
         "description": "The ultimate operating layer for multi-business operations. Supports dynamic templates for Hospitality, Supermarket Chains, Retail Boutiques, Wellness Services, Real Estate Listings, Consultant Rate Cards, Automotive Dealerships, and Multi-venue Portals.",
@@ -105,7 +105,7 @@ export default async function HomePage() {
         "@type": "WebSite",
         "@id": "https://ourmenuos.online/#website",
         "url": "https://ourmenuos.online",
-        "name": "OurMenu OS",
+        "name": "WETAEGO",
         "description": "Instant multi-template digital presence and operating system for physical and service businesses.",
         "publisher": {
           "@id": "https://ourmenuos.online/#organization"
@@ -122,10 +122,10 @@ export default async function HomePage() {
         "mainEntity": [
           {
             "@type": "Question",
-            "name": "What businesses can use OurMenu OS?",
+            "name": "What businesses can use WETAEGO?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "OurMenu OS supports 9 tailored industry templates: Restaurants & Bars (QR digital menus, split bills, kitchen display), Supermarkets & Retail Chains (multi-branch fleet switcher, sub-department aisles, ESC/POS printing), Salons & Spas (appointment bookings, deposit billing), Retail Boutiques (variants, inventory), Consultants & Agencies (media rate cards, dynamic quotes), Real Estate & Automotive (property/car showrooms), and Multi-venue Portals."
+              "text": "WETAEGO supports 9 tailored industry templates: Restaurants & Bars (QR digital menus, split bills, kitchen display), Supermarkets & Retail Chains (multi-branch fleet switcher, sub-department aisles, ESC/POS printing), Salons & Spas (appointment bookings, deposit billing), Retail Boutiques (variants, inventory), Consultants & Agencies (media rate cards, dynamic quotes), Real Estate & Automotive (property/car showrooms), and Multi-venue Portals."
             }
           },
           {
@@ -138,10 +138,10 @@ export default async function HomePage() {
           },
           {
             "@type": "Question",
-            "name": "Does OurMenu OS support direct thermal receipt printing?",
+            "name": "Does WETAEGO support direct thermal receipt printing?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Yes! OurMenu OS features a native raw ESC/POS bytecode engine that writes direct binary commands over WebUSB, WebSerial (RS232 COM), and WebBluetooth to thermal receipt printers without needing print daemons, third-party software, or print dialogs."
+              "text": "Yes! WETAEGO features a native raw ESC/POS bytecode engine that writes direct binary commands over WebUSB, WebSerial (RS232 COM), and WebBluetooth to thermal receipt printers without needing print daemons, third-party software, or print dialogs."
             }
           },
           {
@@ -149,7 +149,7 @@ export default async function HomePage() {
             "name": "What is the Payment Roulette game?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Payment Roulette is an interactive, gamified bill randomizer built into OurMenu OS that lets dining parties spin a digital wheel to randomly decide who pays the restaurant bill or how the check is split."
+              "text": "Payment Roulette is an interactive, gamified bill randomizer built into WETAEGO that lets dining parties spin a digital wheel to randomly decide who pays the restaurant bill or how the check is split."
             }
           }
         ]
@@ -229,16 +229,19 @@ export default async function HomePage() {
 
           {/* Left — Copy */}
           <FadeIn className="flex flex-col justify-center mt-12 md:mt-0">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold uppercase tracking-wider mb-4 w-fit">
+              <Sparkles className="w-3.5 h-3.5" /> The Commerce & Service Operating System for Modern Brands
+            </div>
 
             <h1 className="text-5xl md:text-7xl font-black text-white tracking-[-0.04em] leading-[1.05] md:leading-[1.02] mb-5 md:mb-6 drop-shadow-md">
-              OurMenu OS: The Ultimate Digital Storefront.
+              Run Your Brand Today.
               <span className="block mt-1 md:mt-2 text-transparent bg-clip-text bg-gradient-to-br from-emerald-300 via-green-200 to-teal-400 drop-shadow-[0_0_15px_rgba(52,211,153,0.3)]">
-                A Complete Operating & Payment Suite.
+                Become AI-Native Tomorrow.
               </span>
             </h1>
             <p className="text-base md:text-xl text-zinc-200 md:text-zinc-300 max-w-xl font-light leading-relaxed mb-8 md:mb-10 drop-shadow-sm">
-              <strong>OurMenu OS is the complete platform to build your online presence, manage operations, and engage clients.</strong><br className="hidden md:block" /><br className="hidden md:block" />
-              <span className="mt-2 md:mt-0 block">Ditch expensive custom websites and terrible PDF links. Whether you are processing restaurant orders, booking salon appointments, selling retail inventory, or quoting consulting retainers, our dynamic templates instantly generate a stunning digital storefront.</span>
+              <strong>The complete operating layer for modern brands, human customers, and the AI agents who serve them.</strong><br className="hidden md:block" /><br className="hidden md:block" />
+              <span className="mt-2 md:mt-0 block">WETAEGO gives your brand a high-converting digital storefront and complete operational backbone—while instantly equipping you for the AI economy with dual actionable AI assistants (Public Concierge + Tego Admin Co-Pilot) and native WebMCP agent discovery.</span>
             </p>
             <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto mt-2">
               <Link href="/login" className="flex items-center justify-center gap-2 w-full sm:w-auto px-8 py-3.5 rounded-full bg-white text-black text-sm font-bold hover:scale-105 transition-all duration-300 shadow-[0_0_30px_rgba(255,255,255,0.2)]">
@@ -269,7 +272,7 @@ export default async function HomePage() {
                   <div className="rounded-[38px] overflow-hidden bg-[#f5f7f5] aspect-[9/19.5] relative">
                     <Image
                       src="/guest_menu_screen.png"
-                      alt="OurMenu guest menu interface"
+                      alt="WETAEGO guest menu interface"
                       fill
                       className="object-cover object-top"
                       sizes="(max-width: 1024px) 100vw, 300px"
@@ -314,7 +317,7 @@ export default async function HomePage() {
             1. Specialized Industry Solutions & Digital Storefronts
           </h2>
           <p className="text-zinc-400 text-base md:text-lg font-light leading-relaxed">
-            From busy restaurant kitchens to multi-location supermarket chains and appointment-based spas, OurMenu OS dynamically adapts its visual tokens, checkout logic, and operations.
+            From busy restaurant kitchens to multi-location supermarket chains and appointment-based spas, WETAEGO dynamically adapts its visual tokens, checkout logic, and operations.
           </p>
         </div>
 
@@ -444,7 +447,7 @@ export default async function HomePage() {
             3. Native Hardware Peripherals & Zero-Daemon ESC/POS Printing
           </h2>
           <p className="text-zinc-400 text-base md:text-lg font-light leading-relaxed">
-            Eliminate bloated print spoolers, external desktop daemons, and OS print popups with OurMenu OS native binary bytecode drivers.
+            Eliminate bloated print spoolers, external desktop daemons, and OS print popups with WETAEGO native binary bytecode drivers.
           </p>
         </div>
 
@@ -508,7 +511,7 @@ export default async function HomePage() {
             <span className="text-transparent bg-clip-text bg-gradient-to-br from-emerald-300 via-white to-zinc-400">better infrastructure.</span>
           </h2>
           <p className="text-zinc-400 text-xl font-light mb-12 max-w-2xl mx-auto">
-            Join forward-thinking venues running on OurMenu. Setup takes under 10 minutes.
+            Join forward-thinking venues running on WETAEGO. Setup takes under 10 minutes.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link href="/login" className="flex items-center gap-2 px-10 py-4 rounded-full bg-white text-black text-base font-bold hover:scale-105 transition-all duration-300 shadow-[0_0_40px_rgba(255,255,255,0.15)]">
@@ -530,22 +533,22 @@ export default async function HomePage() {
             Frequently Asked Questions & Operational Reference
           </h2>
           <p className="text-zinc-400 text-base md:text-lg max-w-2xl mx-auto font-light">
-            Everything you need to know about deploying OurMenu OS, managing branch fleets, and integrating hardware peripherals.
+            Everything you need to know about deploying WETAEGO, managing branch fleets, and integrating hardware peripherals.
           </p>
         </div>
 
         <div className="space-y-6 text-left">
           <div className="p-6 md:p-8 rounded-2xl bg-zinc-900/40 border border-white/5 space-y-2">
-            <h3 className="text-xl font-bold text-white">What physical and service industries does OurMenu OS support?</h3>
+            <h3 className="text-xl font-bold text-white">What physical and service industries does WETAEGO support?</h3>
             <p className="text-zinc-300 text-sm leading-relaxed">
-              OurMenu OS includes 9 tailored industry engines: Restaurants, Bars & Food Trucks (dine-in ordering, split tabs, kitchen display); Supermarkets & Retail Chains (multi-branch fleet switcher, sub-department aisles, ESC/POS printing); Salons, Spas & Wellness (smart booking calendars, upfront deposits); Retail Boutiques & Gadgets (variants, stock alerts); Consultants & Agencies (interactive dynamic rate cards, retainers); Real Estate & Automotive (immersive asset showcases, lead capture); and Multi-Venue Portals.
+              WETAEGO includes 9 tailored industry engines: Restaurants, Bars & Food Trucks (dine-in ordering, split tabs, kitchen display); Supermarkets & Retail Chains (multi-branch fleet switcher, sub-department aisles, ESC/POS printing); Salons, Spas & Wellness (smart booking calendars, upfront deposits); Retail Boutiques & Gadgets (variants, stock alerts); Consultants & Agencies (interactive dynamic rate cards, retainers); Real Estate & Automotive (immersive asset showcases, lead capture); and Multi-Venue Portals.
             </p>
           </div>
 
           <div className="p-6 md:p-8 rounded-2xl bg-zinc-900/40 border border-white/5 space-y-2">
             <h3 className="text-xl font-bold text-white">How does the driverless thermal receipt printing work?</h3>
             <p className="text-zinc-300 text-sm leading-relaxed">
-              OurMenu OS has a built-in native ESC/POS binary command engine. It connects directly from modern web browsers to thermal receipt printers over WebUSB, WebSerial (RS232 COM), and WebBluetooth. It triggers instant hardware paper cuts and cash drawer kick pulses without third-party print drivers, external daemons, or OS print dialogs.
+              WETAEGO has a built-in native ESC/POS binary command engine. It connects directly from modern web browsers to thermal receipt printers over WebUSB, WebSerial (RS232 COM), and WebBluetooth. It triggers instant hardware paper cuts and cash drawer kick pulses without third-party print drivers, external daemons, or OS print dialogs.
             </p>
           </div>
 
@@ -566,7 +569,7 @@ export default async function HomePage() {
           <div className="p-6 md:p-8 rounded-2xl bg-zinc-900/40 border border-white/5 space-y-2">
             <h3 className="text-xl font-bold text-white">What is the Payment Roulette game?</h3>
             <p className="text-zinc-300 text-sm leading-relaxed">
-              Payment Roulette is a viral bill-splitting randomizer game built directly into OurMenu OS. Dining parties spin a digital wheel on their mobile devices to randomly select who pays the restaurant check, turns paying the bill into an engaging social game, and boosts merchant organic social shares.
+              Payment Roulette is a viral bill-splitting randomizer game built directly into WETAEGO. Dining parties spin a digital wheel on their mobile devices to randomly select who pays the restaurant check, turns paying the bill into an engaging social game, and boosts merchant organic social shares.
             </p>
           </div>
         </div>
@@ -578,14 +581,14 @@ export default async function HomePage() {
           {/* Col 1: Brand */}
           <div className="space-y-4 md:col-span-1">
             <div className="flex items-center gap-3">
-              <Image src="/ourmenu-qr-icon.svg" alt="OurMenu Logo" width={24} height={24} className="object-contain" />
-              <span className="font-bold text-white text-base tracking-tight">OurMenu OS</span>
+              <Image src="/ourmenu-qr-icon.svg" alt="WETAEGO Logo" width={24} height={24} className="object-contain" />
+              <span className="font-bold text-white text-base tracking-tight">WETAEGO</span>
             </div>
             <p className="text-zinc-400 text-sm leading-relaxed">
               The universal operating layer for modern hospitality, supermarkets, retail chains, and service businesses.
             </p>
             <p className="text-zinc-600 text-xs">
-              © {new Date().getFullYear()} OurMenu OS. A CRUISEHQ LTD concept.
+              © {new Date().getFullYear()} WETAEGO. A CRUISEHQ LTD concept.
             </p>
           </div>
 

@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Customer Feedback & CSAT Reputation Management | OurMenu OS",
+  title: "Customer Feedback & CSAT Reputation Management | WETAEGO",
   description: "Capture verified post-dining feedback with cryptographic PIN receipts, resolve customer grievances privately before negative reviews hit Google, and track team tip leaderboards.",
   keywords: [
     "restaurant feedback software",
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     canonical: "https://ourmenuos.online/features/customer-feedback-reputation-management",
   },
   openGraph: {
-    title: "Customer Feedback & CSAT Reputation Loop | OurMenu OS",
+    title: "Customer Feedback & CSAT Reputation Loop | WETAEGO",
     description: "PIN-verified customer reviews, private grievance resolution, and gamified staff performance tracking.",
     url: "https://ourmenuos.online/features/customer-feedback-reputation-management",
     type: "website",
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Customer Feedback & CSAT Reputation Loop | OurMenu OS",
+    title: "Customer Feedback & CSAT Reputation Loop | WETAEGO",
     description: "PIN-verified customer reviews, private grievance resolution, and gamified staff performance tracking.",
     images: ["/hero_emerald_gemstone.png"],
   },
@@ -48,7 +48,7 @@ export default function CustomerFeedbackPage() {
       {
         "@type": "SoftwareApplication",
         "@id": "https://ourmenuos.online/features/customer-feedback-reputation-management#software",
-        "name": "OurMenu Customer Feedback & CSAT Engine",
+        "name": "WETAEGO Customer Feedback & CSAT Engine",
         "applicationCategory": "BusinessApplication, ReputationManagementApplication",
         "operatingSystem": "Web, iOS, Android, PWA",
         "description": "Cryptographically verified post-order customer feedback loop, automated private manager alerts, and gamified team performance analytics.",

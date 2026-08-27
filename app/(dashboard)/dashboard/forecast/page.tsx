@@ -6,7 +6,7 @@ import { PageHeader } from '@/components/ui/page-header'
 import { Sparkles } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Demand Forecast | OurMenu OS',
+  title: 'Demand Forecast | WETAEGO',
   description: 'AI-powered demand forecasting and stock alerts for your venue.'
 }
 

@@ -19,18 +19,18 @@ export const metadata: Metadata = {
     canonical: 'https://ourmenuos.online',
   },
   title: {
-    default: "OurMenu OS | Storefronts & Operations for Hospitality, Retail & Services",
-    template: "%s | OurMenu OS"
+    default: "WETAEGO | The Commerce & Service Operating System for Modern Brands",
+    template: "%s | WETAEGO"
   },
-  description: "The complete operating layer for modern businesses. Build your digital storefront, manage operations, and process payments instantly. Tailored for hospitality (restaurants, bars, food trucks), retail boutiques (gadgets, fashion, pharmacies), services (salons, spas, tutors), consultants, agencies, real estate, and automotive dealerships.",
-  keywords: ["ourmenuos", "our menu os", "digital storefront", "restaurant os", "qr menu", "hospitality software", "online ordering", "service booking", "hotel pms", "boutique ecommerce", "spa booking system", "media rate card", "real estate listings", "consulting portal", "food truck pos", "salon scheduling", "omnichannel os", "payment roulette", "digital rate card", "b2b rate cards", "ai demand forecasting", "bill splitting randomizer", "who pays the bill randomizer", "restaurant bill roulette", "split the check game"],
+  description: "The Commerce & Service Operating System for Modern Brands, their Human Customers, and the AI Agents who serve them. Dual-layer actionable AI, instant WebMCP agent commerce, driverless POS printing, customer IOU financing, and 9 industry templates.",
+  keywords: ["wetaego", "ourmenuos", "digital storefront", "commerce operating system", "webmcp", "ai agents", "qr menu", "hospitality software", "online ordering", "service booking", "hotel pms", "boutique ecommerce", "spa booking system", "media rate card", "real estate listings", "consulting portal", "food truck pos", "salon scheduling", "omnichannel os", "payment roulette", "digital rate card", "b2b rate cards", "ai demand forecasting", "bill splitting randomizer", "who pays the bill randomizer", "restaurant bill roulette", "split the check game"],
   authors: [{ name: "KRYPTOPACY" }],
   creator: "KRYPTOPACY",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "OurMenu OS",
+    title: "WETAEGO",
   },
   icons: {
     icon: [
@@ -43,22 +43,22 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_US',
     url: 'https://ourmenuos.online',
-    title: 'OurMenu OS | Storefronts & Operations for Hospitality, Retail & Services',
-    description: 'A complete management suite for hospitality, retail boutiques, wellness spas, consultants, real estate, and automotive. Ditch expensive custom websites and terrible PDF links.',
-    siteName: 'OurMenu OS',
+    title: 'WETAEGO | The Commerce & Service Operating System for Modern Brands',
+    description: 'The Commerce & Service Operating System for Modern Brands, their Human Customers, and the AI Agents who serve them. Dual-layer actionable AI, instant WebMCP agent commerce, and driverless hardware operations.',
+    siteName: 'WETAEGO',
     images: [
       {
         url: '/hero_emerald_gemstone.png',
         width: 1200,
         height: 630,
-        alt: 'OurMenu OS Dashboard and Guest Experience',
+        alt: 'WETAEGO Dashboard and Guest Experience',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'OurMenu OS | Storefronts & Operations for Hospitality, Retail & Services',
-    description: 'The ultimate digital storefront & operations suite for hospitality, retail boutiques, spas, consultants, real estate, and automotive.',
+    title: 'WETAEGO | The Commerce & Service Operating System for Modern Brands',
+    description: 'The Commerce & Service Operating System for Modern Brands, their Human Customers, and the AI Agents who serve them.',
     images: ['/hero_emerald_gemstone.png'],
   },
 };
@@ -102,8 +102,8 @@ export default async function RootLayout({
                 {
                   '@type': 'Organization',
                   '@id': 'https://ourmenuos.online/#organization',
-                  name: 'OurMenu OS',
-                  legalName: 'OurMenu OS by CRUISEHQ LTD',
+                  name: 'WETAEGO',
+                  legalName: 'WETAEGO by CRUISEHQ LTD',
                   url: 'https://ourmenuos.online',
                   logo: 'https://ourmenuos.online/ourmenu-qr-logo.png',
                   description: 'The complete operating layer for modern hospitality, supermarkets, retail, and service businesses.',
@@ -142,10 +142,10 @@ export default async function RootLayout({
                 {
                   '@type': 'SoftwareApplication',
                   '@id': 'https://ourmenuos.online/#software',
-                  name: 'OurMenu OS',
+                  name: 'WETAEGO',
                   applicationCategory: 'BusinessApplication',
                   operatingSystem: 'Web, iOS, Android, PWA',
-                  description: 'Multi-business operating system featuring smart QR portals, AI copilot, POS, inventory management, and multi-gateway billing.',
+                  description: 'Autonomous hospitality & service operating system featuring smart QR portals, AI copilot, POS, inventory management, and multi-gateway billing.',
                   offers: {
                     '@type': 'AggregateOffer',
                     priceCurrency: 'NGN',
@@ -157,7 +157,7 @@ export default async function RootLayout({
                   '@type': 'WebSite',
                   '@id': 'https://ourmenuos.online/#website',
                   url: 'https://ourmenuos.online',
-                  name: 'OurMenu OS',
+                  name: 'WETAEGO',
                   description: 'Instant multi-template digital presence and operating system for physical businesses.',
                   publisher: {
                     '@id': 'https://ourmenuos.online/#organization'

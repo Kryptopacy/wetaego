@@ -5,19 +5,19 @@ export async function GET() {
     specVersion: '1.0',
     host: {
       domain: 'ourmenuos.online',
-      name: 'OurMenu OS',
+      name: 'WETAEGO',
       description: 'Universal Digital Operating System & Dynamic Storefronts for Hospitality, Supermarkets, Boutiques, Wellness, and Services.'
     },
     entries: [
       {
         identifier: 'urn:air:ourmenuos.online:mcp:storefront-server',
         id: 'urn:air:ourmenuos.online:mcp:storefront-server',
-        displayName: 'OurMenu OS MCP Server',
+        displayName: 'WETAEGO MCP Server',
         description: 'Model Context Protocol tools for querying restaurant menus, supermarket catalogs, booking appointments, and placing orders.',
         type: 'application/json',
         url: 'https://ourmenuos.online/.well-known/mcp.json',
         representativeQueries: [
-          'Search dishes on OurMenu OS',
+          'Search dishes on WETAEGO',
           'Place a restaurant table order',
           'Book a spa or salon appointment slot',
           'Check ingredient and allergen info'
@@ -26,25 +26,25 @@ export async function GET() {
       {
         identifier: 'urn:air:ourmenuos.online:openapi:core-api',
         id: 'urn:air:ourmenuos.online:openapi:core-api',
-        displayName: 'OurMenu OS OpenAPI Specification',
+        displayName: 'WETAEGO OpenAPI Specification',
         description: 'Formal OpenAPI 3.1.0 specification for public storefront, OCR parser, and live Gemini AI token APIs.',
         type: 'application/openapi+json',
         url: 'https://ourmenuos.online/openapi.json',
         representativeQueries: [
-          'OurMenu OS API endpoints',
-          'How to authenticate with OurMenu OS REST API',
+          'WETAEGO API endpoints',
+          'How to authenticate with WETAEGO REST API',
           'Parse menu images with AI OCR API'
         ]
       },
       {
         identifier: 'urn:air:ourmenuos.online:skills:catalog-ordering',
         id: 'urn:air:ourmenuos.online:skills:catalog-ordering',
-        displayName: 'OurMenu OS Agent Skills Index',
+        displayName: 'WETAEGO Agent Skills Index',
         description: 'Agent skills discovery manifest detailing catalog search, order dispatch, appointment booking, and ESC/POS thermal printing.',
         type: 'application/json',
         url: 'https://ourmenuos.online/.well-known/agent-skills/index.json',
         representativeQueries: [
-          'OurMenu OS agent skills',
+          'WETAEGO agent skills',
           'How to use raw thermal printing over WebUSB',
           'Dynamic rate cards and B2B proposals'
         ]

@@ -1,4 +1,4 @@
-# OurMenu OS Agent Authentication Guide (Auth.md)
+# WETAEGO Agent Authentication Guide (Auth.md)
 
 > **Specification**: [auth.md](https://workos.com/auth-md)  
 > **Issuer**: `https://ourmenuos.online`  
@@ -10,7 +10,7 @@
 
 ## 1. Agent Authentication Overview
 
-Autonomous AI agents, background task runners, and client applications authenticate with OurMenu OS APIs through three supported credential schemes:
+Autonomous AI agents, background task runners, and client applications authenticate with WETAEGO APIs through three supported credential schemes:
 
 1. **Merchant API Secret Key** (`om_live_...` or `om_test_...`): Recommended for backend server-to-server and merchant agent operations.
 2. **Bearer JWT Token** (`Authorization: Bearer <JWT>`): Standard OAuth2 / Supabase session token obtained via `/api/auth/token` or client authentication.

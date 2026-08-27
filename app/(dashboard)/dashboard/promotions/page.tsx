@@ -4,7 +4,7 @@ import PromoCodesManager, { PromoCode } from './promo-codes-manager'
 import { PageHeader } from '@/components/ui/page-header'
 
 export const metadata = {
-  title: 'Promo Codes | OurMenu OS',
+  title: 'Promo Codes | WETAEGO',
 }
 
 export default async function PromotionsPage({

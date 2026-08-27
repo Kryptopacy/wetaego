@@ -5,10 +5,11 @@ import { AdsManagerClient } from './ads-manager-client'
 import { AlertCircle, Zap } from 'lucide-react'
 import Link from 'next/link'
 import { PageHeader } from '@/components/ui/page-header'
+import { Metadata } from 'next'
 
-export const metadata = {
-  title: 'Ad Manager | OurMenu OS',
-  description: 'Manage your sponsored advertisements and view analytics.',
+export const metadata: Metadata = {
+  title: 'Ad Manager | WETAEGO',
+  description: 'Manage dynamic ads across your digital menus and customer portals.',
 }
 
 export default async function AdsManagerPage() {

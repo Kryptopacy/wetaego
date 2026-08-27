@@ -4,7 +4,7 @@ import { formatCurrency } from '@/lib/utils/currency'
 import { MapPin, Phone, CheckCircle2, Navigation } from 'lucide-react'
 
 export const metadata = {
-  title: 'Order Tracker | OurMenu OS',
+  title: 'Order Tracker | WETAEGO',
   robots: { index: false, follow: false }
 }
 

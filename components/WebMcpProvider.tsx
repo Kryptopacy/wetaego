@@ -28,7 +28,7 @@ export function WebMcpProvider() {
           tools: [
             {
               name: 'ourmenu_search_catalog',
-              description: 'Search products, menu items, or dishes on OurMenu OS with dietary filtering.',
+              description: 'Search products, menu items, or dishes on WETAEGO with dietary filtering.',
               inputSchema: {
                 type: 'object',
                 properties: {

@@ -284,7 +284,7 @@ export function WhoPaysWheel() {
               Want Payment Roulette on your tables?
             </h4>
             <p className="text-xs text-zinc-400 leading-relaxed mb-4">
-              OurMenu OS embeds this gamified roulette directly into your smart QR digital menus, driving viral social shares and boosting average check sizes.
+              WETAEGO embeds this gamified roulette directly into your smart QR digital menus, driving viral social shares and boosting average check sizes.
             </p>
             <Link
               href="/features/restaurant-qr-menu"

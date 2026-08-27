@@ -6,8 +6,8 @@ import { ArrowRight, ShieldCheck, Cpu, Building2, Store, Users, Zap } from 'luci
 import { LandingNavbar } from '@/components/LandingNavbar'
 
 export const metadata: Metadata = {
-  title: 'About Us | OurMenu OS',
-  description: 'Learn about OurMenu OS, our mission, leadership, multi-business operating system architecture, and hardware-native technology for physical commerce.',
+  title: 'About Us | WETAEGO',
+  description: 'Learn about WETAEGO, our mission, leadership, multi-business operating system architecture, and hardware-native technology for modern brands, human customers, and AI agents.',
   alternates: {
     canonical: 'https://ourmenuos.online/about',
   },
@@ -17,14 +17,14 @@ export default function AboutPage() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "AboutPage",
-    "name": "About OurMenu OS",
-    "description": "Comprehensive overview of OurMenu OS mission, architecture, and company background.",
+    "name": "About WETAEGO",
+    "description": "Comprehensive overview of WETAEGO mission, architecture, and company background.",
     "url": "https://ourmenuos.online/about",
     "mainEntity": {
       "@type": "Organization",
       "@id": "https://ourmenuos.online/#organization",
-      "name": "OurMenu OS",
-      "legalName": "OurMenu OS by CRUISEHQ LTD",
+      "name": "WETAEGO",
+      "legalName": "WETAEGO by CRUISEHQ LTD",
       "url": "https://ourmenuos.online",
       "logo": "https://ourmenuos.online/ourmenu-qr-logo.png",
       "email": "support@ourmenuos.online",
@@ -54,7 +54,11 @@ export default function AboutPage() {
         "addressRegion": "Lagos State",
         "postalCode": "105102",
         "addressCountry": "NG"
-      }
+      },
+      "sameAs": [
+        "https://github.com/Kryptopacy/ourmenuos",
+        "https://twitter.com/ourmenuos"
+      ]
     }
   }
 
@@ -73,10 +77,10 @@ export default function AboutPage() {
             <Zap className="w-3.5 h-3.5" /> Our Mission & Architecture
           </div>
           <h1 className="text-4xl md:text-6xl font-black text-white tracking-tight leading-[1.1] mb-6">
-            Building the Operating Layer for Modern Physical Commerce.
+            Building the Commerce & Service Operating System for Modern Brands.
           </h1>
           <p className="text-lg md:text-xl text-zinc-400 max-w-3xl mx-auto font-light leading-relaxed mb-10">
-            OurMenu OS was built on a simple conviction: physical businesses should not have to stitch together five incompatible software vendors to run modern digital ordering, hardware printing, staff coordination, and customer payments.
+            WETAEGO was built on a simple conviction: modern brands should not have to stitch together five incompatible software vendors to run digital ordering, hardware printing, staff coordination, and autonomous AI agents.
           </p>
         </section>
 
@@ -93,7 +97,7 @@ export default function AboutPage() {
               For decades, restaurants, supermarkets, salons, boutiques, and agencies have been trapped between two bad extremes: expensive, rigid custom web development costing thousands of dollars, or clunky legacy POS terminals locked to proprietary desktop hardware.
             </p>
             <p className="text-zinc-400">
-              When a guest scans a QR code, they often encounter terrible unzoomable PDF files or slow apps demanding personal logins. When managers want to replicate catalogs across new branches, it takes weeks of manual re-entry. OurMenu OS eliminates this friction with a unified, browser-native progressive operating system that works instantly on any device.
+              When a guest scans a QR code, they often encounter terrible unzoomable PDF files or slow apps demanding personal logins. When managers want to replicate catalogs across new branches, it takes weeks of manual re-entry. WETAEGO eliminates this friction with a unified, browser-native progressive operating system that works instantly on any device.
             </p>
           </div>
 
@@ -142,7 +146,7 @@ export default function AboutPage() {
               3. Organization, Governance & Security
             </h2>
             <p className="text-zinc-300">
-              OurMenu OS is engineered by CRUISEHQ LTD, a technology venture studio building high-availability cloud and offline-first infrastructure for emerging markets and global commerce.
+              WETAEGO is engineered by CRUISEHQ LTD, a technology venture studio building high-availability cloud and offline-first infrastructure for emerging markets and global commerce.
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 text-sm text-zinc-400">
               <div>

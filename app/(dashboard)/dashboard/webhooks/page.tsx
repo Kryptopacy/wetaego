@@ -5,7 +5,7 @@ import { WebhooksManager } from './webhooks-manager'
 import { PageHeader } from '@/components/ui/page-header'
 
 export const metadata = {
-  title: 'Webhooks | OurMenu OS',
+  title: 'Webhooks | WETAEGO',
 }
 
 export default async function WebhooksPage() {

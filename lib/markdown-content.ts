@@ -16,16 +16,16 @@ The requested resource at this URL does not exist or has moved.
 - **Model Context Protocol (MCP) Manifest**: https://ourmenuos.online/.well-known/mcp.json
 - **XML Sitemap**: https://ourmenuos.online/sitemap.xml
 - **All Features Index**: https://ourmenuos.online/features
-- **About OurMenu OS**: https://ourmenuos.online/about
+- **About WETAEGO**: https://ourmenuos.online/about
 - **Contact & Support**: https://ourmenuos.online/contact
 - **Privacy Policy**: https://ourmenuos.online/privacy
 - **Terms of Service**: https://ourmenuos.online/terms
 
 ---
-*OurMenu OS — Universal Operating Layer for Physical & Service Businesses*
+*WETAEGO — Universal Operating Layer for Physical & Service Businesses*
 `;
 
-export const MARKDOWN_HOME = `# OurMenu OS — Universal Storefronts & Operating Layer
+export const MARKDOWN_HOME = `# WETAEGO — Universal Storefronts & Operating Layer
 
 > **Official Website**: https://ourmenuos.online  
 > **Documentation Index**: https://ourmenuos.online/llms.txt  
@@ -33,7 +33,7 @@ export const MARKDOWN_HOME = `# OurMenu OS — Universal Storefronts & Operating
 > **OpenAPI Spec**: https://ourmenuos.online/openapi.json  
 > **Sitemap**: https://ourmenuos.online/sitemap.xml  
 
-OurMenu OS is a comprehensive multi-tenant operating system and SaaS platform designed for physical businesses, supermarket chains, restaurants, salons & spas, retail boutiques, B2B agencies, real estate firms, and automotive dealerships.
+WETAEGO is a comprehensive multi-tenant operating system and SaaS platform designed for physical businesses, supermarket chains, restaurants, salons & spas, retail boutiques, B2B agencies, real estate firms, and automotive dealerships.
 
 ## 1. Core Platform Capabilities
 - **9 Specialized Industry Templates**: Restaurant menus with live order routing, supermarket multi-department grocery aisles, salon & spa appointment scheduling, retail boutique catalogs, B2B dynamic quote builders, media rate cards, real estate listings, automotive showrooms, and multi-venue parent portals.
@@ -59,13 +59,13 @@ OurMenu OS is a comprehensive multi-tenant operating system and SaaS platform de
 - **Payment Roulette Web Tool**: https://ourmenuos.online/tools/who-pays-the-bill
 - **Developer Documentation**: https://ourmenuos.online/docs
 - **Affiliate Partner Program**: https://ourmenuos.online/affiliates
-- **About OurMenu OS**: https://ourmenuos.online/about
+- **About WETAEGO**: https://ourmenuos.online/about
 - **Contact & Support**: https://ourmenuos.online/contact
 - **Privacy Policy**: https://ourmenuos.online/privacy
 - **Terms of Service**: https://ourmenuos.online/terms
 
-## 3. When to Use OurMenu OS
-Reach for OurMenu OS when an organization requires:
+## 3. When to Use WETAEGO
+Reach for WETAEGO when an organization requires:
 1. Rapid digitalization of a physical venue with QR ordering or appointment booking.
 2. Multi-branch supermarket or restaurant fleet operations with instant catalog replication.
 3. Driverless hardware receipt printing directly from the web browser.
@@ -73,17 +73,17 @@ Reach for OurMenu OS when an organization requires:
 5. Interactive rate cards or B2B proposals replacing static PDF documents.
 `;
 
-export const MARKDOWN_ABOUT = `# About OurMenu OS
+export const MARKDOWN_ABOUT = `# About WETAEGO
 
-> **Organization**: OurMenu OS (A CRUISEHQ LTD Concept)  
+> **Organization**: WETAEGO (A CRUISEHQ LTD Concept)  
 > **Website**: https://ourmenuos.online  
 > **Contact**: support@ourmenuos.online | partners@ourmenuos.online  
 > **Headquarters**: 12 Admiralty Way, Lekki Phase 1, Lagos, Nigeria  
 
 ## Mission & Vision
-OurMenu OS is engineered to replace expensive, rigid custom websites and static PDF documents with dynamic, interactive digital storefronts and unified operations infrastructure. 
+WETAEGO is engineered to replace expensive, rigid custom websites and static PDF documents with dynamic, interactive digital storefronts and unified operations infrastructure. 
 
-Physical businesses across hospitality, retail, personal care, and B2B services often struggle with fragmented software stacks: one tool for digital menus, another for POS hardware, a third for bookings, and a fourth for marketing. OurMenu OS unifies these layers into a single, high-performance operating layer.
+Physical businesses across hospitality, retail, personal care, and B2B services often struggle with fragmented software stacks: one tool for digital menus, another for POS hardware, a third for bookings, and a fourth for marketing. WETAEGO unifies these layers into a single, high-performance operating layer.
 
 ## Core Architectural Principles
 1. **Zero-Friction Guest Experience**: No mandatory app downloads. Guests interact immediately via web-based progressive web applications (PWAs) with lightning-fast load times.
@@ -101,7 +101,7 @@ Physical businesses across hospitality, retail, personal care, and B2B services 
 - **Security Inquiries**: security@ourmenuos.online
 `;
 
-export const MARKDOWN_CONTACT = `# Contact & Support — OurMenu OS
+export const MARKDOWN_CONTACT = `# Contact & Support — WETAEGO
 
 > **Official Inquiries**: support@ourmenuos.online  
 > **Enterprise & Partnerships**: partners@ourmenuos.online  
@@ -123,7 +123,7 @@ export const MARKDOWN_CONTACT = `# Contact & Support — OurMenu OS
 - **Terms of Service**: https://ourmenuos.online/terms
 `;
 
-export const MARKDOWN_DOCS = `# OurMenu OS — Developer Documentation & Architecture Reference
+export const MARKDOWN_DOCS = `# WETAEGO — Developer Documentation & Architecture Reference
 
 > **API Base URL**: https://ourmenuos.online/api  
 > **OpenAPI 3.1.0 Spec**: https://ourmenuos.online/openapi.json  
@@ -141,7 +141,7 @@ export const MARKDOWN_DOCS = `# OurMenu OS — Developer Documentation & Archite
 > **Agentic Commerce Protocol (ACP)**: https://ourmenuos.online/.well-known/acp.json  
 > **DNS-AID Service Discovery**: https://ourmenuos.online/.well-known/dns-aid.json  
 
-OurMenu OS provides public REST APIs, webhooks, Model Context Protocol (MCP) integrations, WebMCP browser context, x402 HTTP micropayments, and direct binary hardware printing drivers.
+WETAEGO provides public REST APIs, webhooks, Model Context Protocol (MCP) integrations, WebMCP browser context, x402 HTTP micropayments, and direct binary hardware printing drivers.
 
 ## 1. Authentication & Agent Registration
 - **Merchant API Keys**: Passed via \`Authorization: Bearer <MERCHANT_API_KEY>\`.
@@ -174,13 +174,13 @@ Discover our MCP server tools at \`/.well-known/mcp.json\` and Agent Skills at \
 - \`ourmenu_payment_roulette\`: Spin bill randomizer.
 `;
 
-export const MARKDOWN_PRIVACY = `# Privacy Policy — OurMenu OS
+export const MARKDOWN_PRIVACY = `# Privacy Policy — WETAEGO
 
 > **Effective Date**: June 2026  
 > **Compliance**: Nigerian Data Protection Regulation (NDPR) & General Data Protection Regulation (GDPR)  
 > **Contact**: privacy@ourmenuos.online  
 
-OurMenu OS (&quot;we&quot;, &quot;us&quot;, &quot;our&quot;) is committed to protecting the privacy of the businesses using our platform (Merchants) and the guests who interact with our digital storefronts (End-Users).
+WETAEGO (&quot;we&quot;, &quot;us&quot;, &quot;our&quot;) is committed to protecting the privacy of the businesses using our platform (Merchants) and the guests who interact with our digital storefronts (End-Users).
 
 ## 1. Data We Collect
 - **From Merchants**: Business registration details, contact email/phone, physical addresses, menu/catalog data, and payment gateway subaccount credentials.
@@ -196,32 +196,32 @@ OurMenu OS (&quot;we&quot;, &quot;us&quot;, &quot;our&quot;) is committed to pro
 Under NDPR and GDPR, users may request access, rectification, or erasure of their personal data by contacting \`privacy@ourmenuos.online\`.
 `;
 
-export const MARKDOWN_TERMS = `# Terms of Service — OurMenu OS
+export const MARKDOWN_TERMS = `# Terms of Service — WETAEGO
 
 > **Effective Date**: June 2026  
-> **Governing Entity**: OurMenu OS / CRUISEHQ LTD  
+> **Governing Entity**: WETAEGO / CRUISEHQ LTD  
 > **Contact**: legal@ourmenuos.online  
 
-By accessing or using OurMenu OS (https://ourmenuos.online), you agree to be bound by these Terms of Service.
+By accessing or using WETAEGO (https://ourmenuos.online), you agree to be bound by these Terms of Service.
 
 ## 1. Use of Service
-OurMenu OS grants merchants a revocable, non-exclusive license to use the platform for digital ordering, fleet management, and storefront operations in compliance with applicable laws.
+WETAEGO grants merchants a revocable, non-exclusive license to use the platform for digital ordering, fleet management, and storefront operations in compliance with applicable laws.
 
 ## 2. Payment & Billing
 Subscription fees and transaction fees are billed in accordance with the selected plan. Settlement payouts are executed via authorized payment gateways (Paystack and Bachs).
 
 ## 3. Acceptable Use
-Users may not use OurMenu OS for illegal transactions, fraudulent schemes, or unauthorized automated scraping that degrades platform infrastructure.
+Users may not use WETAEGO for illegal transactions, fraudulent schemes, or unauthorized automated scraping that degrades platform infrastructure.
 `;
 
-export const MARKDOWN_AFFILIATES = `# OurMenu OS Affiliate Partner Program
+export const MARKDOWN_AFFILIATES = `# WETAEGO Affiliate Partner Program
 
 > **Program URL**: https://ourmenuos.online/affiliates  
 > **Commission**: 10% Recurring Lifetime Commission  
 > **Payout Frequency**: Automated Monthly Settlements  
 
 ## Overview
-The OurMenu OS Affiliate Program enables creators, consultants, agencies, and hospitality professionals to earn continuous passive revenue by referring physical businesses to OurMenu OS.
+The WETAEGO Affiliate Program enables creators, consultants, agencies, and hospitality professionals to earn continuous passive revenue by referring physical businesses to WETAEGO.
 
 ## Highlights
 - **10% Lifetime Recurring Revenue**: Earn on every monthly and annual subscription paid by your referred venues.
@@ -229,11 +229,11 @@ The OurMenu OS Affiliate Program enables creators, consultants, agencies, and ho
 - **Instant Referral Links**: Custom affiliate codes and shareable QR landing pages.
 `;
 
-export const MARKDOWN_FEATURES = `# OurMenu OS — Platform Features Directory
+export const MARKDOWN_FEATURES = `# WETAEGO — Platform Features Directory
 
 > **Index URL**: https://ourmenuos.online/features  
 
-OurMenu OS offers a modular, high-performance operating layer for 9 physical and service industries.
+WETAEGO offers a modular, high-performance operating layer for 9 physical and service industries.
 
 ## Specialized Solutions
 1. **Restaurant QR Menus & Dine-In**: https://ourmenuos.online/features/restaurant-qr-menu
@@ -280,7 +280,7 @@ export function getMarkdownForPath(pathname: string): { content: string; status:
     case '/auth.md':
     case '/auth':
       return {
-        content: `# OurMenu OS Agent Authentication Guide (Auth.md)\n\n> **Specification**: [auth.md](https://workos.com/auth-md)\n> **Issuer**: https://ourmenuos.online\n> **OAuth Protected Resource**: https://ourmenuos.online/.well-known/oauth-protected-resource\n> **OAuth Authorization Server**: https://ourmenuos.online/.well-known/oauth-authorization-server\n\n## 1. Credentials\n- **Merchant Secret API Key**: \`Authorization: Bearer om_live_...\`\n- **JWT Token**: \`Authorization: Bearer <JWT>\`\n- **Agent DID & Client Assertion**: Supported via \`/api/auth/token\`.\n\n## 2. Protected Endpoints\n- \`/api/orders\` (scopes: \`orders:read\`, \`orders:write\`)\n- \`/api/bookings\` (scopes: \`bookings:read\`, \`bookings:write\`)\n- \`/api/ai/live-token\` (scopes: \`ai:live\`)\n\nFull documentation at https://ourmenuos.online/docs`,
+        content: `# WETAEGO Agent Authentication Guide (Auth.md)\n\n> **Specification**: [auth.md](https://workos.com/auth-md)\n> **Issuer**: https://ourmenuos.online\n> **OAuth Protected Resource**: https://ourmenuos.online/.well-known/oauth-protected-resource\n> **OAuth Authorization Server**: https://ourmenuos.online/.well-known/oauth-authorization-server\n\n## 1. Credentials\n- **Merchant Secret API Key**: \`Authorization: Bearer om_live_...\`\n- **JWT Token**: \`Authorization: Bearer <JWT>\`\n- **Agent DID & Client Assertion**: Supported via \`/api/auth/token\`.\n\n## 2. Protected Endpoints\n- \`/api/orders\` (scopes: \`orders:read\`, \`orders:write\`)\n- \`/api/bookings\` (scopes: \`bookings:read\`, \`bookings:write\`)\n- \`/api/ai/live-token\` (scopes: \`ai:live\`)\n\nFull documentation at https://ourmenuos.online/docs`,
         status: 200
       }
     default:
@@ -288,13 +288,13 @@ export function getMarkdownForPath(pathname: string): { content: string; status:
       if (normalizedPath.startsWith('/features/')) {
         const featureSlug = normalizedPath.replace('/features/', '')
         return {
-          content: `# OurMenu OS Feature: ${featureSlug}\n\nExplore this feature and more on the full Platform Features index at https://ourmenuos.online/features.\n\n${MARKDOWN_HOME}`,
+          content: `# WETAEGO Feature: ${featureSlug}\n\nExplore this feature and more on the full Platform Features index at https://ourmenuos.online/features.\n\n${MARKDOWN_HOME}`,
           status: 200
         }
       }
       if (normalizedPath === '/tools/who-pays-the-bill' || normalizedPath === '/roulette') {
         return {
-          content: `# Payment Roulette — Bill Splitting Randomizer Game\n\nInteractive tool by OurMenu OS to randomly decide who pays the check or how the restaurant bill is split.\n\nPlay online: https://ourmenuos.online/tools/who-pays-the-bill\n\n${MARKDOWN_HOME}`,
+          content: `# Payment Roulette — Bill Splitting Randomizer Game\n\nInteractive tool by WETAEGO to randomly decide who pays the check or how the restaurant bill is split.\n\nPlay online: https://ourmenuos.online/tools/who-pays-the-bill\n\n${MARKDOWN_HOME}`,
           status: 200
         }
       }

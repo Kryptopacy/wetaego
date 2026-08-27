@@ -43,8 +43,9 @@ export const FeedbackEmail = ({
 
           <Text style={footer}>
             If you have any immediate concerns, please contact the restaurant directly.
-            <br />
-            Powered by OurMenu OS
+            <Text className="text-gray-500 text-xs text-center m-0">
+              Powered by WETAEGO
+            </Text>
           </Text>
         </Container>
       </Body>

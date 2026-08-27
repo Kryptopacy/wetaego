@@ -4,7 +4,7 @@ import { cookies } from 'next/headers'
 import { KioskDisplay } from '../shifts/kiosk-display'
 
 export const metadata = {
-  title: 'Kiosk Mode | OurMenu OS',
+  title: 'Kiosk Mode | WETAEGO',
   robots: { index: false, follow: false }
 }
 
@@ -18,29 +18,38 @@ export default async function KioskPage() {
   // Only managers/owners can open kiosk mode
   const { data: member } = await supabase
     .from('organization_members')
-    .select('role, organization_id, organizations(name, logo_url)')
+    .select('role, organization_id')
     .eq('user_id', user.id)
-    .in('role', ['owner', 'manager'])
     .single()
 
-  if (!member) redirect('/dashboard')
-
-  const org = member.organizations as { name: string; logo_url: string | null } | null
+  if (!member || (member.role !== 'owner' && member.role !== 'manager')) {
+    redirect('/dashboard')
+  }
 
   const activeLocationId = cookieStore.get('ourmenu_active_location_id')?.value
-  if (!activeLocationId) redirect('/dashboard/settings')
 
-  const { data: location } = await supabase
+  let locationQuery = supabase
     .from('locations')
-    .select('id, name')
-    .eq('id', activeLocationId)
+    .select('id, name, organization_id')
     .eq('organization_id', member.organization_id)
+
+  if (activeLocationId) {
+    locationQuery = locationQuery.eq('id', activeLocationId)
+  }
+
+  const { data: locations } = await locationQuery.limit(1)
+  const location = locations?.[0]
+
+  if (!location) {
+    redirect('/dashboard/settings')
+  }
+
+  const { data: org } = await supabase
+    .from('organizations')
+    .select('name, logo_url')
+    .eq('id', member.organization_id)
     .single()
 
-  if (!location) redirect('/dashboard')
-
-  // Kiosk exit PIN — stored in system settings or fallback to "1234"
-  // In production, the manager configures this in Settings > Team
   const { data: pinSetting } = await supabase
     .from('system_settings')
     .select('value')
@@ -53,7 +62,7 @@ export default async function KioskPage() {
     <KioskDisplay
       locationId={location.id}
       locationName={location.name}
-      businessName={org?.name || 'OurMenu OS'}
+      businessName={org?.name || 'WETAEGO'}
       logoUrl={org?.logo_url}
       exitPin={exitPin}
     />

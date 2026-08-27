@@ -5,7 +5,7 @@ version: 1.0.0
 type: tool
 ---
 
-# OurMenu OS Booking Skill
+# WETAEGO Booking Skill
 
 This skill allows agents to inspect service schedules and book appointment slots.
 
