@@ -155,9 +155,9 @@ export default function DocsPage() {
                   <span className="px-2.5 py-1 rounded-md bg-emerald-500/20 text-emerald-400 font-mono text-xs font-bold">POST</span>
                   <code className="text-white font-mono text-sm">/api/ai/live-token</code>
                 </div>
-                <h3 className="text-lg font-bold text-white">Live Gemini Ephemeral Token Minting</h3>
+                <h3 className="text-lg font-bold text-white">Live Multimodal Ephemeral Token Minting</h3>
                 <p className="text-sm text-zinc-400">
-                  Mints short-lived cryptographic session tokens for direct bidirectional WebAudio (16kHz in / 24kHz out) and 1 FPS camera video streaming via Gemini 3.1 Flash Live.
+                  Mints short-lived cryptographic session tokens for direct bidirectional WebAudio (16kHz in / 24kHz out) and 1 FPS camera video streaming via real-time live AI sessions.
                 </p>
               </div>
 

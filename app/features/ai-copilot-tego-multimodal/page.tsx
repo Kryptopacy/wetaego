@@ -14,14 +14,14 @@ import {
 
 export const metadata: Metadata = {
   title: "Tego AI: Multimodal Voice, Vision & Frontline Concierge | WETAEGO",
-  description: "Experience the dual-layer AI engine powered by Gemini 3.1 Flash Live. Ultra-low latency voice dialogue, camera menu parsing, zero-hallucination dining concierge, and staff handoff.",
+  description: "Experience the dual-layer AI engine with ultra-low latency real-time voice dialogue, camera menu parsing, zero-hallucination dining concierge, and staff handoff.",
   keywords: [
     "tego ai",
     "multimodal restaurant ai",
     "voice ai ordering",
     "camera menu ocr parser",
     "zero hallucination dining ai",
-    "gemini 3.1 flash live preview",
+    "real-time multimodal voice vision",
     "ai copilot physical business",
     "ai concierge hospitality"
   ],
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "Tego AI: Multimodal Voice & Vision Operating System | WETAEGO",
-    description: "Gemini 3.1 Flash Live voice/vision dialogue, smartphone camera menu OCR parsing, zero-hallucination public concierge, and staff handoff.",
+    description: "Real-time multimodal voice/vision dialogue, smartphone camera menu OCR parsing, zero-hallucination public concierge, and staff handoff.",
     url: "https://ourmenuos.online/features/ai-copilot-tego-multimodal",
     type: "website",
     images: ["/hero_emerald_gemstone.png"],
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Tego AI: Multimodal Voice & Vision Operating System | WETAEGO",
-    description: "Gemini 3.1 Flash Live voice/vision dialogue, smartphone camera menu OCR parsing, zero-hallucination public concierge, and staff handoff.",
+    description: "Real-time multimodal voice/vision dialogue, smartphone camera menu OCR parsing, zero-hallucination public concierge, and staff handoff.",
     images: ["/hero_emerald_gemstone.png"],
   },
 };
@@ -53,7 +53,7 @@ export default function TegoAiFeaturePage() {
         "name": "Tego Multimodal Autonomous AI Engine",
         "applicationCategory": "BusinessApplication, ArtificialIntelligenceApplication",
         "operatingSystem": "Web, iOS, Android, PWA",
-        "description": "Dual-layer business AI system powered by Gemini 3.1 Flash Live featuring real-time bidirectional voice streaming, 1 FPS camera video ingestion, and zero-hallucination customer concierges.",
+        "description": "Dual-layer business AI system featuring real-time bidirectional voice streaming, 1 FPS camera video ingestion, and zero-hallucination customer concierges.",
         "offers": {
           "@type": "Offer",
           "price": "0",
@@ -74,10 +74,10 @@ export default function TegoAiFeaturePage() {
           },
           {
             "@type": "Question",
-            "name": "What AI model powers Tego Live?",
+            "name": "What AI architecture powers Tego Live?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Tego Live uses Google's state-of-the-art Gemini 3.1 Flash Live model via secure server-minted ephemeral tokens, supporting 16kHz microphone audio streaming, 24kHz audio playback with instant barge-in interruption, and 1 FPS camera video ingestion."
+              "text": "Tego Live uses a state-of-the-art real-time multimodal live architecture via secure server-minted ephemeral tokens, supporting 16kHz microphone audio streaming, 24kHz audio playback with instant barge-in interruption, and 1 FPS camera video ingestion."
             }
           }
         ]

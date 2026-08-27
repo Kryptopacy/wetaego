@@ -119,7 +119,7 @@ export default function AboutPage() {
               <div className="bg-zinc-900/40 border border-white/5 rounded-2xl p-6 space-y-2">
                 <h3 className="text-xl font-bold text-white">Tego Multimodal Live AI</h3>
                 <p className="text-sm text-zinc-400">
-                  Powered by Gemini 3.1 Flash Live, Tego offers two-way low-latency voice dialogue and 1 FPS camera video ingestion. Store managers point a camera at handwritten menus or store shelves to generate structured catalog databases in seconds.
+                  Powered by real-time multimodal live voice and vision intelligence, Tego offers two-way low-latency voice dialogue and 1 FPS camera video ingestion. Store managers point a camera at handwritten menus or store shelves to generate structured catalog databases in seconds.
                 </p>
               </div>
 

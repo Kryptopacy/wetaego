@@ -11,24 +11,32 @@ import { StaggerContainer, StaggerItem } from './animations'
 
 const categories = [
   {
-    id: 'ai-intelligence',
-    label: 'Tego Live AI & Vision',
+    id: 'ai-webmcp',
+    label: 'Tego AI & WebMCP Agents',
     features: [
       {
         icon: Sparkles,
         color: 'from-emerald-500 via-teal-500 to-cyan-500',
-        tag: 'Gemini Live',
+        tag: 'Real-Time Multimodal Live AI',
         badge: 'Real-time Voice & Vision',
         title: '"Tego, clone our supermarket catalog to Ikeja."',
         description: 'Talk directly with your business operating system using natural two-way voice, instant barge-in interruption, and live camera video to inspect stock or build menus with zero typing.',
       },
       {
-        icon: ChefHat,
+        icon: Cpu,
+        color: 'from-cyan-500 to-blue-600',
+        tag: 'Zero-Config WebMCP',
+        badge: 'Agent Commerce Ready',
+        title: 'Autonomous AI agents browse and buy.',
+        description: 'Every storefront automatically exposes document.modelContext tools. AI browsing agents (ChatGPT Desktop, Chrome 149+) can discover items, customize orders, and checkout on behalf of customers.',
+      },
+      {
+        icon: FileText,
         color: 'from-blue-600 to-indigo-600',
-        tag: 'AI Copywriter + Cover Studio',
-        badge: '3× faster launches',
-        title: 'Studio-grade visuals and sensory descriptions.',
-        description: 'Type an item name. Gemini automatically crafts evocative sensory copy, tags allergens and dietary flags, and renders high-res cover imagery for your catalog.',
+        tag: '1 FPS Camera OCR Menu Importer',
+        badge: 'Zero manual typing',
+        title: 'Snap a picture of a paper menu. We build the store.',
+        description: 'Point your camera at physical menus, handwritten receipts, or vendor invoices. Our vision AI instantly structures items, prices, and dietary tags into your digital catalog in seconds.',
       },
       {
         icon: BarChart3,
@@ -41,24 +49,24 @@ const categories = [
     ]
   },
   {
-    id: 'command-center',
-    label: 'Operations & Hardware',
+    id: 'operations-hardware',
+    label: 'Operations & Hardware POS',
     features: [
-      {
-        icon: ClipboardList,
-        color: 'from-red-600 to-orange-600',
-        tag: 'Live Fulfillment Dashboard',
-        badge: '< 1s delivery',
-        title: '"Order received. Floor notified."',
-        description: 'Realtime order stream powered by Supabase WebSockets. Orders, table service calls, and bookings flash onto your fulfillment dashboard instantly without refresh.',
-      },
       {
         icon: Printer,
         color: 'from-emerald-600 to-teal-600',
-        tag: 'Raw ESC/POS Thermal Printing',
+        tag: 'Zero-Daemon ESC/POS Thermal Printing',
         badge: 'WebUSB / Bluetooth / Serial',
-        title: 'Zero-daemon hardware printing.',
-        description: 'Direct binary printing over WebUSB, Serial COM, and Bluetooth BLE. Print thermal order chits and receipts in < 50ms with automatic cash drawer pulses and zero browser dialogs.',
+        title: 'Direct driverless hardware receipt printing.',
+        description: 'Emits raw binary ESC/POS bytecode directly over WebUSB, RS-232 COM Serial, and WebBluetooth. Prints order chits in < 50ms with automatic cash drawer kicks (ESC p) and hardware paper cuts.',
+      },
+      {
+        icon: ClipboardList,
+        color: 'from-red-600 to-orange-600',
+        tag: 'Live Kitchen Display System (KDS)',
+        badge: '< 1s delivery',
+        title: '"Order received. Kitchen notified."',
+        description: 'Real-time order stream with audio sound chimes. Orders, table service calls, and bookings flash onto your fulfillment dashboard with keyboard hotkeys (Space to complete, P to print).',
       },
       {
         icon: Package,
@@ -71,16 +79,16 @@ const categories = [
     ]
   },
   {
-    id: 'architecture',
-    label: 'Fleet & Design Engine',
+    id: 'fleet-design',
+    label: 'Enterprise Fleet & Design Engine',
     features: [
       {
         icon: Store,
         color: 'from-blue-600 to-teal-600',
-        tag: 'Enterprise Multi-Branch Fleet',
+        tag: 'Multi-Branch Fleet Switcher',
         badge: '1-Click Duplication',
         title: 'One brand. Infinite autonomous branches.',
-        description: 'Replicate 5,000+ item catalogs to new locations in < 1s. Manage supermarket sub-departments (Grocery, Bakery, Deli) with localized staff permissions.',
+        description: 'Replicate 5,000+ item catalogs to new franchise locations in < 1s. Manage supermarket sub-departments (Grocery, Bakery, Deli) with top-left fleet aggregation and localized tax overrides.',
       },
       {
         icon: Globe,
@@ -88,141 +96,37 @@ const categories = [
         tag: '9 Universal Templates & Design Tokens',
         badge: 'Bento, Masonry, Glass',
         title: 'A digital storefront that adapts to you.',
-        description: 'Switch between Bento Grids, Clean Catalogs, Portfolios, Booking Calendars, and Rate Cards with sub-16ms live CSS design token previews.',
-      },
-      {
-        icon: Cpu,
-        color: 'from-amber-600 to-orange-600',
-        tag: '6-Language i18n & Edge Translator',
-        badge: 'en, es, fr, yo, ig, ha',
-        title: 'Localized for global & domestic customers.',
-        description: 'Full multi-language support across English, Spanish, French, Yorùbá, Igbo, and Hausa for seamless customer engagement.',
-      }
-    ]
-  },
-  {
-    id: 'guest-experience',
-    label: 'Client Experience',
-    features: [
-      {
-        icon: QrCode,
-        color: 'from-emerald-600 to-teal-600',
-        tag: 'Dynamic Location Mapping',
-        badge: 'Precision routing',
-        title: 'Every table, room, or desk has an identity.',
-        description: 'Generate individual QR codes per zone. Orders arrive pre-tagged with the exact location. Zero confusion during fulfillment.',
-      },
-      {
-        icon: Bell,
-        color: 'from-emerald-600 to-teal-600',
-        tag: 'WhatsApp Notifications',
-        badge: 'via Termii',
-        title: 'No shouting. Just a ping.',
-        description: 'Guests receive a WhatsApp message the moment their order is ready. Staff spend less time yelling across the floor.',
-      },
-      {
-        icon: Globe,
-        color: 'from-amber-500 to-orange-600',
-        tag: 'Edge Translator',
-        badge: '40+ languages',
-        title: 'Every tourist reads your menu.',
-        description: 'Browser language detected on arrival. The menu auto-translates into French, Mandarin, Yoruba, Arabic, and more in seconds.',
-      }
-    ]
-  },
-  {
-    id: 'ai-intelligence',
-    label: 'AI Intelligence',
-    features: [
-      {
-        icon: ChefHat,
-        color: 'from-emerald-600 to-teal-600',
-        tag: 'AI Copywriter + Cover Studio',
-        badge: '3× faster menu updates',
-        title: 'Studio-quality menus. Zero effort.',
-        description: 'Type a dish name. Gemini generates sensory, appetizing copy — complete with allergen flags, dietary tags, and an AI-generated photo. Your menu becomes your sales pitch.',
-      },
-      {
-        icon: BarChart3,
-        color: 'from-emerald-600 to-teal-600',
-        tag: 'Demand Forecaster',
-        badge: '30-day data window',
-        title: 'Never stock out on your best-sellers.',
-        description: 'Analyses 30 days of sales velocity. Predicts the next 7 days of demand, and fires stock alerts before shelves run dry. Bestsellers trending up? We knew two days ago.',
-      },
-      {
-        icon: MessagesSquare,
-        color: 'from-fuchsia-500 to-pink-600',
-        tag: 'Admin AI Copilot',
-        badge: 'Actionable & Secure',
-        title: 'Manage your business via chat.',
-        description: 'A deeply integrated dashboard assistant with strict role-based access control. Simply ask it to generate financial reports, create menu categories, or instantly add items to your catalog.',
-      },
-      {
-        icon: FileText,
-        color: 'from-cyan-500 to-blue-600',
-        tag: 'Multimodal Menu Importer',
-        badge: 'Zero typing',
-        title: 'Snap a picture. We build the menu.',
-        description: 'Upload a photo of your physical menu. Our vision AI instantly reads and structures it into a beautiful digital catalog, saving you hours of manual data entry.',
-      }
-    ]
-  },
-  {
-    id: 'growth',
-    label: 'Built for Growth',
-    features: [
-      {
-        icon: FileText,
-        color: 'from-blue-600 to-teal-600',
-        tag: 'Custom Pages',
-        badge: 'Unlimited creativity',
-        title: 'More than a menu.',
-        description: 'Build a cocktail guide, event calendar, or brand story page — all hosted on your menu URL. No separate website needed.',
+        description: 'Switch between Bento Grids, Clean Catalogs, Portfolios, Booking Calendars, and Rate Cards with sub-16ms live CSS design token previews and 1-click global revert.',
       },
       {
         icon: ShieldCheck,
         color: 'from-zinc-600 to-zinc-700',
-        tag: 'Team Roles',
-        badge: 'Granular permissions',
-        title: 'Owner. Manager. Viewer.',
-        description: 'Every staff member sees exactly what they need and nothing more. Invite your whole team without losing control.',
+        tag: 'Enterprise Role-Based Access Control',
+        badge: 'Granular Permissions',
+        title: 'Owner. Admin. Manager. Staff. Dispatcher.',
+        description: 'Every team member sees exactly what they need and nothing more. Secure automated email invites with instant join links.',
       }
     ]
   },
   {
-    id: 'payments',
-    label: 'Payments & IOUs',
+    id: 'intercom-staff',
+    label: 'Staff Intercom & Floor Operations',
     features: [
       {
-        icon: Wallet,
-        color: 'from-emerald-600 to-teal-500',
-        tag: 'Store Credit & IOUs',
-        badge: 'Zero-fee BNPL',
-        title: 'The "Local Trust" Tab.',
-        description: 'Approve trusted VIP clients for a Store Credit tab. They bypass card payments at checkout and deduct instantly from their tab. Completely eliminates third-party BNPL merchant fees (like Klarna/Affirm).',
+        icon: MessagesSquare,
+        color: 'from-blue-500 to-teal-500',
+        tag: 'Real-Time Floor Intercom',
+        badge: 'Push-To-Talk Radio',
+        title: 'Internal voice radio & table assistance paging.',
+        description: 'Department-specific internal radio channels (Kitchen, Bar, Floor) plus customer-to-staff table assistance paging chimes with 1-click claim and dismiss.',
       },
-      {
-        icon: CreditCard,
-        color: 'from-green-600 to-emerald-600',
-        tag: 'Instant Payouts',
-        badge: 'Paystack / Bachs',
-        title: 'Get paid when they checkout.',
-        description: 'Revenue lands directly in your account the moment a client completes an order or booking. Your business, your payment routing.',
-      }
-    ]
-  },
-  {
-    id: 'staff-ops',
-    label: 'Staff Operations',
-    features: [
       {
         icon: Star,
         color: 'from-amber-400 to-orange-500',
         tag: 'Staff Performance & Tipping',
         badge: 'Post-service feedback',
         title: 'Reward flawless service.',
-        description: 'Customers leave a 1-5 star rating and an optional tip after their service, giving you powerful HR insights into your top-performing staff.',
+        description: 'Customers leave a 1-5 star rating and an optional tip after their service, giving you powerful HR insights and gamified leaderboards for your top-performing staff.',
       },
       {
         icon: Users,
@@ -230,29 +134,45 @@ const categories = [
         tag: 'Atomic Request Claiming',
         badge: 'Zero race conditions',
         title: 'No double-prep. No hoarding.',
-        description: 'Staff claim requests securely. The system actively limits how many tasks a single associate can hoard, keeping your operations flowing smoothly.',
-      },
-      {
-        icon: MessagesSquare,
-        color: 'from-blue-500 to-teal-500',
-        tag: 'Enterprise Intercom',
-        badge: 'Real-time Comms',
-        title: 'Internal chat. Zero walkie-talkies.',
-        description: 'Department-specific internal channels (e.g. Kitchen, Concierge). Supabase Realtime WebSockets ensure messages propagate across staff dashboards instantly.',
+        description: 'Staff claim requests securely. The system actively limits task hoarding, keeping fulfillment flowing smoothly across busy shifts.',
       }
     ]
   },
   {
-    id: 'crm-gamification',
-    label: 'CRM & Gamification',
+    id: 'crm-financing',
+    label: 'CRM, IOU Tab Financing & Marketing',
     features: [
+      {
+        icon: Wallet,
+        color: 'from-emerald-600 to-teal-500',
+        tag: 'Customer IOU Store Credit Tab',
+        badge: 'Zero-fee In-House BNPL',
+        title: 'The "Local Trust" Tab with automated reminders.',
+        description: 'Approve trusted VIP clients for a Store Credit tab. They bypass card checkout, while automated SMS debt reminders keep balances settled without awkward conversations.',
+      },
       {
         icon: Gamepad2,
         color: 'from-pink-500 to-rose-500',
-        tag: 'Payment Roulette',
+        tag: 'Payment Roulette Game',
         badge: 'Viral Engagement',
         title: 'Who pays the bill? Spin the wheel.',
-        description: 'Transform group payments. A gamified "spin to win" bill-splitting randomizer that turns checkout friction into a highly engaging, viral group experience.',
+        description: 'Transform group payments. A gamified "spin to win" bill-splitting randomizer that turns checkout friction into a viral group experience at /tools/who-pays-the-bill.',
+      },
+      {
+        icon: QrCode,
+        color: 'from-emerald-600 to-teal-600',
+        tag: 'Branded QR Code Generator',
+        badge: 'Dual Output Modes',
+        title: 'Print-ready branded presentation cards & raw QR codes.',
+        description: 'Generate high-res QR codes per table, room, desk, or drive-thru lane. Download per-card PNGs or print directly on sticker sheets with custom logo embeds.',
+      },
+      {
+        icon: CreditCard,
+        color: 'from-green-600 to-emerald-600',
+        tag: 'In-Built CRM & Multi-Channel Broadcasts',
+        badge: 'Email & SMS Campaigns',
+        title: 'Customer shadow profiles with dynamic brand sender.',
+        description: 'Automatic customer profile capture at checkout with LTV tracking. Send broadcast marketing emails that display as your brand name with direct merchant Reply-To.',
       }
     ]
   }

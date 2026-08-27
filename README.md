@@ -24,7 +24,7 @@ Designed for high-traffic environments—such as restaurant chains, bustling lou
 - **Live Visual Builder**: Split-screen desktop and draggable mobile bottom-sheet visual editor with real-time zero-refresh `postMessage` synchronization.
 
 ### 2. Tego Multimodal Live API (Voice & Vision)
-- **Real-Time Gemini Live (`gemini-3.1-flash-live-preview`)**:
+- **Real-Time Multimodal Voice & Vision Streaming**:
   - Ultra-low latency bidirectional voice dialogue (16kHz PCM audio mic in, 24kHz PCM audio playback) with instant barge-in interruption.
   - **Tego Vision**: Continuous 1 FPS camera video ingestion allowing merchants to point their camera at physical menus, handwritten receipts, stockroom inventory, or kitchen dishes.
   - Secure server-minted ephemeral tokens (`/api/ai/live-token`).
@@ -78,7 +78,7 @@ WETAEGO leads the industry in autonomous AI agent readiness, implementing 14 ope
 
 - **Framework:** Next.js (App Router, Server Actions, `proxy.ts` edge proxy)
 - **Database & Auth:** Supabase (PostgreSQL, Row Level Security, Realtime WebSockets)
-- **AI Infrastructure:** `@google/genai` (Gemini Live Audio/Vision) + `@ai-sdk/google` (Vercel AI SDK)
+- **AI Infrastructure:** Real-time Multimodal Live Audio/Vision + Vercel AI SDK
 - **Caching & Rate Limiting:** Upstash Redis (Edge rate-limiting & WAF)
 - **State Management:** Zustand + `idb-keyval` IndexedDB persistence
 - **Styling & UI:** Tailwind CSS v4 + Framer Motion

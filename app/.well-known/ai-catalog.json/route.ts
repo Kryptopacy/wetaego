@@ -27,7 +27,7 @@ export async function GET() {
         identifier: 'urn:air:ourmenuos.online:openapi:core-api',
         id: 'urn:air:ourmenuos.online:openapi:core-api',
         displayName: 'WETAEGO OpenAPI Specification',
-        description: 'Formal OpenAPI 3.1.0 specification for public storefront, OCR parser, and live Gemini AI token APIs.',
+        description: 'Formal OpenAPI 3.1.0 specification for public storefront, OCR parser, and real-time live AI token APIs.',
         type: 'application/openapi+json',
         url: 'https://ourmenuos.online/openapi.json',
         representativeQueries: [

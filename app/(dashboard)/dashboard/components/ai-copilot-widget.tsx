@@ -209,7 +209,7 @@ export function AICopilotWidget({ organizationId }: { organizationId: string }) 
                       ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-[0_0_16px_rgba(16,185,129,0.3)]'
                       : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-800'
                   }`}
-                  title="Toggle Gemini Live Voice & Vision"
+                  title="Toggle Live Voice & Vision Session"
                 >
                   <Radio className={`w-3 h-3 ${mode === 'live' && isLiveConnected ? 'animate-pulse text-emerald-400' : ''}`} />
                   {mode === 'live' ? 'Live Session' : 'Start Live'}
@@ -303,7 +303,7 @@ export function AICopilotWidget({ organizationId }: { organizationId: string }) 
                       {isLiveSpeaking ? 'Tego is speaking…' : isLiveConnected ? (isCameraActive ? 'Watching & listening… Speak naturally' : 'Listening… Ask anything') : isLiveConnecting ? 'Connecting live stream…' : 'Tap to start'}
                     </p>
                     <p className="text-[11px] text-zinc-400 mt-0.5 max-w-64 mx-auto leading-relaxed">
-                      {isLiveConnected ? (isCameraActive ? 'Hold up a menu, dish, screen, or invoice.' : 'Speak freely. Tap "Share Eyes" to show your camera.') : 'Bidirectional real-time Gemini multimodal session.'}
+                      {isLiveConnected ? (isCameraActive ? 'Hold up a menu, dish, screen, or invoice.' : 'Speak freely. Tap "Share Eyes" to show your camera.') : 'Bidirectional real-time multimodal live session.'}
                     </p>
                   </div>
 
@@ -493,7 +493,7 @@ export function AICopilotWidget({ organizationId }: { organizationId: string }) 
                       onClick={startLiveVoice}
                       whileHover={{ scale: 1.08 }}
                       whileTap={{ scale: 0.92 }}
-                      title="Start Gemini Live Voice Session"
+                      title="Start Live Voice Session"
                       className="relative w-10 h-10 rounded-2xl overflow-hidden border border-emerald-500/40 hover:border-emerald-400 flex items-center justify-center shadow-lg shadow-emerald-500/20 shrink-0 cursor-pointer group"
                     >
                       <Image src="/hero_emerald_gemstone.png" alt="Live Voice" fill className="object-cover opacity-85 group-hover:opacity-100 transition-opacity" />

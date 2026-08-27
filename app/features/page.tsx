@@ -111,7 +111,7 @@ const FEATURE_MODULES = [
     icon: Bot,
     color: "emerald",
     tag: "Artificial Intelligence",
-    desc: "Gemini 3.1 Flash Live voice/vision dialogue, smartphone camera menu OCR parsing, zero-hallucination dining AI, and staff handoff.",
+    desc: "Real-time multimodal voice/vision dialogue, smartphone camera menu OCR parsing, zero-hallucination dining AI, and staff handoff.",
   },
   {
     title: "Payment Roulette & Bill Splitting Randomizer",

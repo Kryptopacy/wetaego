@@ -133,7 +133,7 @@ export default async function HomePage() {
             "name": "What is Tego Multimodal AI?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Tego AI is our dual-layer intelligence engine powered by Gemini 3.1 Flash Live. It provides bidirectional low-latency voice dialogue and 1 FPS camera video ingestion for managers to parse physical menus or stock shelves, plus a zero-hallucination frontline concierge on customer storefronts."
+              "text": "Tego AI is our dual-layer real-time intelligence engine. It provides bidirectional low-latency voice dialogue and 1 FPS camera video ingestion for managers to parse physical menus or stock shelves, plus a zero-hallucination frontline concierge on customer storefronts."
             }
           },
           {
@@ -229,19 +229,15 @@ export default async function HomePage() {
 
           {/* Left — Copy */}
           <FadeIn className="flex flex-col justify-center mt-12 md:mt-0">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold uppercase tracking-wider mb-4 w-fit">
-              <Sparkles className="w-3.5 h-3.5" /> The Commerce & Service Operating System for Modern Brands
-            </div>
-
             <h1 className="text-5xl md:text-7xl font-black text-white tracking-[-0.04em] leading-[1.05] md:leading-[1.02] mb-5 md:mb-6 drop-shadow-md">
-              Run Your Brand Today.
+              The Commerce & Service
               <span className="block mt-1 md:mt-2 text-transparent bg-clip-text bg-gradient-to-br from-emerald-300 via-green-200 to-teal-400 drop-shadow-[0_0_15px_rgba(52,211,153,0.3)]">
-                Become AI-Native Tomorrow.
+                Operating System.
               </span>
             </h1>
             <p className="text-base md:text-xl text-zinc-200 md:text-zinc-300 max-w-xl font-light leading-relaxed mb-8 md:mb-10 drop-shadow-sm">
-              <strong>The complete operating layer for modern brands, human customers, and the AI agents who serve them.</strong><br className="hidden md:block" /><br className="hidden md:block" />
-              <span className="mt-2 md:mt-0 block">WETAEGO gives your brand a high-converting digital storefront and complete operational backbone—while instantly equipping you for the AI economy with dual actionable AI assistants (Public Concierge + Tego Admin Co-Pilot) and native WebMCP agent discovery.</span>
+              <strong>Built for modern brands, their human customers, and the AI agents who serve them.</strong><br className="hidden md:block" /><br className="hidden md:block" />
+              <span className="mt-2 md:mt-0 block">WETAEGO powers your digital storefront, live operations, and booking workflows—while instantly equipping your brand with actionable AI assistants and in-browser WebMCP agent discovery.</span>
             </p>
             <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto mt-2">
               <Link href="/login" className="flex items-center justify-center gap-2 w-full sm:w-auto px-8 py-3.5 rounded-full bg-white text-black text-sm font-bold hover:scale-105 transition-all duration-300 shadow-[0_0_30px_rgba(255,255,255,0.2)]">
@@ -253,7 +249,6 @@ export default async function HomePage() {
                 </DemoSubmitButton>
               </ActionForm>
             </div>
-
           </FadeIn>
 
           {/* Right — Phone mockup with actual guest menu screen */}
@@ -284,14 +279,6 @@ export default async function HomePage() {
                   <div className="absolute -left-[3px] top-52 w-[3px] h-12 bg-zinc-700 rounded-l-full" />
                   <div className="absolute -right-[3px] top-32 w-[3px] h-16 bg-zinc-700 rounded-r-full" />
                 </div>
-
-                {/* Floating UI annotation badges */}
-                <div className="absolute -right-20 top-16 bg-black/80 backdrop-blur-md border border-white/10 rounded-2xl px-3 py-2 text-xs text-white whitespace-nowrap shadow-xl">
-                  <span className="text-emerald-400 font-bold">✓</span> Order received
-                </div>
-                <div className="absolute -left-24 bottom-28 bg-black/80 backdrop-blur-md border border-white/10 rounded-2xl px-3 py-2 text-xs text-white whitespace-nowrap shadow-xl">
-                  <span className="text-blue-400 font-bold">AI</span> Table 7 ready to order
-                </div>
               </div>
             </div>
           </FadeIn>
@@ -307,78 +294,10 @@ export default async function HomePage() {
         <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#050505] to-transparent pointer-events-none z-10" />
       </section>
 
-      {/* ── SECTION 1: NINE INDUSTRY TEMPLATES (SSR Semantic Structure) ── */}
-      <section className="py-20 px-6 max-w-7xl mx-auto border-t border-white/[0.04]">
-        <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold uppercase tracking-wider">
-            <Store className="w-3.5 h-3.5" /> 9 Tailored Verticals
-          </div>
-          <h2 className="text-3xl md:text-5xl font-black text-white tracking-tight">
-            1. Specialized Industry Solutions & Digital Storefronts
-          </h2>
-          <p className="text-zinc-400 text-base md:text-lg font-light leading-relaxed">
-            From busy restaurant kitchens to multi-location supermarket chains and appointment-based spas, WETAEGO dynamically adapts its visual tokens, checkout logic, and operations.
-          </p>
-        </div>
+      {/* ── USE CASES: 9 INDUSTRY OPERATING ENGINES ── */}
+      <UseCases />
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-zinc-900/40 border border-white/5 rounded-2xl p-6 space-y-3">
-            <h3 className="text-lg font-bold text-white flex items-center gap-2">
-              <span className="text-emerald-400">🍽️</span> Restaurant & Hospitality QR Menus
-            </h3>
-            <p className="text-zinc-400 text-sm leading-relaxed">
-              Interactive mobile digital menus with dietary filtering (vegan, halal, keto), real-time table assistance chimes, split bill payments, and live kitchen display system (KDS) dispatch.
-            </p>
-          </div>
-
-          <div className="bg-zinc-900/40 border border-white/5 rounded-2xl p-6 space-y-3">
-            <h3 className="text-lg font-bold text-white flex items-center gap-2">
-              <span className="text-blue-400">🛒</span> Supermarket Chains & Fleet Management
-            </h3>
-            <p className="text-zinc-400 text-sm leading-relaxed">
-              Multi-store physical chains with unified HQ reporting, sub-department aisles (Grocery, Bakery, Deli), and 1-second instant franchise catalog replication.
-            </p>
-          </div>
-
-          <div className="bg-zinc-900/40 border border-white/5 rounded-2xl p-6 space-y-3">
-            <h3 className="text-lg font-bold text-white flex items-center gap-2">
-              <span className="text-purple-400">💆‍♀️</span> Salon, Spa & Wellness Appointments
-            </h3>
-            <p className="text-zinc-400 text-sm leading-relaxed">
-              Smart booking calendars with practitioner tier selection, upfront deposit payments, automated SMS reminders, and buffer time controls.
-            </p>
-          </div>
-
-          <div className="bg-zinc-900/40 border border-white/5 rounded-2xl p-6 space-y-3">
-            <h3 className="text-lg font-bold text-white flex items-center gap-2">
-              <span className="text-amber-400">👗</span> Retail Boutiques & Specialty Commerce
-            </h3>
-            <p className="text-zinc-400 text-sm leading-relaxed">
-              Visual product showcases with variant selectors (color, size, material), atomic inventory decrementing, and low-stock alerts.
-            </p>
-          </div>
-
-          <div className="bg-zinc-900/40 border border-white/5 rounded-2xl p-6 space-y-3">
-            <h3 className="text-lg font-bold text-white flex items-center gap-2">
-              <span className="text-cyan-400">💼</span> Consultants, Creators & B2B Proposals
-            </h3>
-            <p className="text-zinc-400 text-sm leading-relaxed">
-              Interactive dynamic rate cards replacing static PDF proposals with 2-tap milestone approvals and instant retainer payments.
-            </p>
-          </div>
-
-          <div className="bg-zinc-900/40 border border-white/5 rounded-2xl p-6 space-y-3">
-            <h3 className="text-lg font-bold text-white flex items-center gap-2">
-              <span className="text-rose-400">🏢</span> Real Estate & Automotive Showrooms
-            </h3>
-            <p className="text-zinc-400 text-sm leading-relaxed">
-              High-resolution asset specification sheets, photo galleries, virtual tour embeds, and direct broker lead routing.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* ── FEATURES: Full Bento Grid ── */}
+      {/* ── FEATURES: Full Bento Grid (AI, Hardware POS, Fleet, Experience) ── */}
       <section id="features" className="py-24 px-6 max-w-7xl mx-auto relative z-10">
         <FadeIn className="text-center mb-20">
           <h2 className="text-4xl md:text-6xl font-black text-white mb-6 tracking-tight">
@@ -388,88 +307,6 @@ export default async function HomePage() {
         </FadeIn>
 
         <FeatureTabs />
-      </section>
-
-      {/* ── SECTION 2: TEGO MULTIMODAL AI (SSR Semantic Structure) ── */}
-      <section className="py-20 px-6 max-w-7xl mx-auto border-t border-white/[0.04]">
-        <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold uppercase tracking-wider">
-            <Cpu className="w-3.5 h-3.5" /> Intelligence Layer
-          </div>
-          <h2 className="text-3xl md:text-5xl font-black text-white tracking-tight">
-            2. Tego Multimodal Live Voice & Vision AI Copilot
-          </h2>
-          <p className="text-zinc-400 text-base md:text-lg font-light leading-relaxed">
-            Powered by Google Gemini 3.1 Flash Live, Tego delivers dual-layer operational intelligence for store managers and zero-hallucination concierges for storefront guests.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-zinc-900/40 border border-white/5 rounded-2xl p-6 space-y-3">
-            <h3 className="text-lg font-bold text-white flex items-center gap-2">
-              <span className="text-emerald-400">🎙️</span> Bidirectional Low-Latency Voice (Gemini Live)
-            </h3>
-            <p className="text-zinc-400 text-sm leading-relaxed">
-              16kHz audio input and 24kHz audio playback with instant barge-in interruption for hands-free manager catalog adjustments and voice ordering.
-            </p>
-          </div>
-
-          <div className="bg-zinc-900/40 border border-white/5 rounded-2xl p-6 space-y-3">
-            <h3 className="text-lg font-bold text-white flex items-center gap-2">
-              <span className="text-blue-400">📷</span> 1 FPS Camera Video Ingestion & Menu OCR
-            </h3>
-            <p className="text-zinc-400 text-sm leading-relaxed">
-              Point your smartphone or tablet camera at handwritten paper menus, vendor invoices, or stock shelves to generate structured catalog records in seconds.
-            </p>
-          </div>
-
-          <div className="bg-zinc-900/40 border border-white/5 rounded-2xl p-6 space-y-3">
-            <h3 className="text-lg font-bold text-white flex items-center gap-2">
-              <span className="text-purple-400">🛡️</span> Zero-Hallucination Frontline Customer Concierge
-            </h3>
-            <p className="text-zinc-400 text-sm leading-relaxed">
-              Conversational assistant strictly bounded to live database items. If a guest asks about unlisted items, Tego automatically alerts human staff.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* ── USE CASES: MULTI-BUSINESS ── */}
-      <UseCases />
-
-      {/* ── SECTION 3: DRIVERLESS ESC/POS PRINTING & HARDWARE ── */}
-      <section className="py-20 px-6 max-w-7xl mx-auto border-t border-white/[0.04]">
-        <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold uppercase tracking-wider">
-            <Printer className="w-3.5 h-3.5" /> Hardware Peripherals
-          </div>
-          <h2 className="text-3xl md:text-5xl font-black text-white tracking-tight">
-            3. Native Hardware Peripherals & Zero-Daemon ESC/POS Printing
-          </h2>
-          <p className="text-zinc-400 text-base md:text-lg font-light leading-relaxed">
-            Eliminate bloated print spoolers, external desktop daemons, and OS print popups with WETAEGO native binary bytecode drivers.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-zinc-900/40 border border-white/5 rounded-2xl p-6 space-y-3">
-            <h3 className="text-lg font-bold text-white flex items-center gap-2">
-              <CheckCircle2 className="w-5 h-5 text-emerald-400" /> Direct Binary Bytecode over WebUSB, WebSerial & WebBluetooth
-            </h3>
-            <p className="text-zinc-400 text-sm leading-relaxed">
-              Connect directly from Google Chrome, Edge, or mobile web browsers to thermal receipt printers over USB, RS232 COM ports, or wireless Bluetooth.
-            </p>
-          </div>
-
-          <div className="bg-zinc-900/40 border border-white/5 rounded-2xl p-6 space-y-3">
-            <h3 className="text-lg font-bold text-white flex items-center gap-2">
-              <CheckCircle2 className="w-5 h-5 text-emerald-400" /> Automated Cash Drawer Kicks & Hardware Paper Cuts
-            </h3>
-            <p className="text-zinc-400 text-sm leading-relaxed">
-              Emits raw binary ESC/POS control pulses (<code className="text-emerald-400 font-mono">ESC p</code>) for cash drawer kicks and partial paper cuts (<code className="text-emerald-400 font-mono">GS V</code>) instantly on checkout confirmation.
-            </p>
-          </div>
-        </div>
       </section>
 
       {/* ── DYNAMIC TRUSTED BY ── */}

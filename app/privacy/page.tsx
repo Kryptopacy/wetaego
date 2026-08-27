@@ -105,12 +105,12 @@ export default function PrivacyPage() {
                 3. Artificial Intelligence & Zero Training on User PII
               </h2>
               <p className="text-zinc-300">
-                WETAEGO features Tego Multimodal AI (powered by Google Gemini 3.1 Flash Live). We maintain a strict data boundary:
+                WETAEGO features Tego Multimodal AI with real-time encrypted voice and vision streaming. We maintain a strict data boundary:
               </p>
               <ul className="list-disc pl-6 space-y-2 text-zinc-400 text-base">
                 <li>End-user personal information and payment details are <strong>never</strong> used to train public or commercial foundation models.</li>
                 <li>Camera video feeds ingested for menu parsing are processed ephemerally in server RAM and immediately discarded once catalog items are extracted.</li>
-                <li>Voice audio streams sent during Gemini Live sessions are transmitted securely over encrypted WebSockets and are not permanently archived.</li>
+                <li>Voice audio streams sent during live AI sessions are transmitted securely over encrypted WebSockets and are not permanently archived.</li>
               </ul>
             </section>
 

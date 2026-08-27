@@ -100,7 +100,7 @@ export async function POST(req: Request) {
          - Design Tokens: 'layout_mode' ('bento_grid', 'masonry', 'list'), 'surface_style' ('flat', 'glassmorphism', 'neumorphism'), 'corner_radius' ('none', 'sm', 'md', 'lg', 'xl', 'full'), 'typography' ('modern', 'elegant', 'playful', 'industrial'), 'density' ('airy', 'standard', 'cozy'), and 'color_theme' ('true_dark', 'dim', 'light', 'tinted').
          - Scopes: Can be applied globally to a location or overridden per specific page ('pageId') with a 1-click 'Revert to Global Settings' fail-safe.
       2. Tego Multimodal Live Voice & Vision:
-         - Real-time bidirectional voice dialogue (16kHz audio in / 24kHz audio out with barge-in interruption) and 1 FPS camera video ingestion via Gemini Live ('gemini-3.1-flash-live-preview').
+         - Real-time bidirectional voice dialogue (16kHz audio in / 24kHz audio out with barge-in interruption) and 1 FPS camera video ingestion.
          - Merchants can show you physical products, packaging, handwritten price lists, receipts, inventory stock, or menus via camera.
       3. Frontline Public Assistant & Human Handoff:
          - The storefront assistant dynamically adapts its role to the merchant's business preset (e.g. 'Dining Assistant', 'Wellness & Booking Specialist', 'Technical Service Advisor', 'Product Guide').

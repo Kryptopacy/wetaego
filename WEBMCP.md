@@ -9,7 +9,7 @@
 
 **WETAEGO** brings the **Web Model Context Protocol (WebMCP)** to digital storefronts at the platform level. Rather than manually creating custom MCP endpoints for individual merchants, WETAEGO automatically synthesizes and registers reactive WebMCP tools onto `document.modelContext` for every merchant storefront, digital menu, catalog, or service booking page hosted on the platform.
 
-When an AI browsing agent (such as the **ChatGPT Desktop in-app browser** or **Google Chrome 149+ with `#enable-webmcp-testing`**) navigates to any WETAEGO storefront, the page immediately presents a standardized, full-lifecycle commerce and interaction tool suite.
+When an AI browsing agent or autonomous web assistant navigates to any WETAEGO storefront, the page immediately presents a standardized, full-lifecycle commerce and interaction tool suite.
 
 ---
 

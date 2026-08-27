@@ -64,10 +64,10 @@ When any merchant or enterprise joins WETAEGO, they are not just getting a websi
    * Direct binary driverless ESC/POS thermal receipt printing over WebUSB/WebSerial/WebBluetooth, real-time push-to-talk staff intercom, built-in CRM with SMS/Email marketing, and customer IOU store credit ledger.
 3. **Pillar 3: AI-Native on Both Customer and Merchant Sides**
    * **Customer-Facing**: Frontline 24/7 AI Concierge (`/api/chat`) with strict zero-hallucination guardrails and automated human staff handoff.
-   * **Merchant-Facing**: Tego Admin AI Co-Pilot with bidirectional Voice and Camera Vision streaming (`gemini-3.1-flash-live-preview`), reading physical products, handwritten notes, and inventory via camera, executing dashboard actions by voice.
+   * **Merchant-Facing**: Tego Admin AI Co-Pilot with bidirectional Voice and Camera Vision streaming, reading physical products, handwritten notes, and inventory via camera, executing dashboard actions by voice.
 4. **Pillar 4: Agent-Native & Machine-Executable via WebMCP**
    * Automatically transforms the storefront into an autonomous, self-describing tool API registered on `document.modelContext`.
-   * AI browsing agents (ChatGPT Desktop, Google Chrome 149+) can discover, filter, customize, and co-browse with the customer in real time with an architectural Human-in-the-Loop safe payment authorization gate.
+   * AI browsing agents and autonomous web assistants can discover, filter, customize, and co-browse with the customer in real time with an architectural Human-in-the-Loop safe payment authorization gate.
 
 ---
 
