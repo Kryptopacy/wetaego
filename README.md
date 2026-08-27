@@ -6,9 +6,11 @@
 
 ---
 
-WETAEGO is a universal, enterprise-grade **Commerce & Services Operating System** engineered to power customer-facing digital presence, real-time transactions, appointment bookings, rate cards, inventory catalogs, custom quotes, driverless hardware printing, and autonomous AI agent interoperability for any commercial business model—from independent solopreneurs to multi-location franchises and diverse enterprise conglomerates.
-
-Designed for high-traffic environments—such as restaurant chains, bustling lounges, hotel resorts, boutique retailers, wellness spas, healthcare clinics, automotive & gadget repair centers, real estate agencies, creative studios, and professional service firms—WETAEGO delivers instant digital storefronts reachable via direct links (e.g. `ourmenuos.online/m/your-business`), custom QR codes, NFC tags, or custom domains.
+### 🌐 Live Demos & Interactive Previews
+* **1. Public Multi-Concept Storefront (Zero Login / WebMCP Agent Ready)**: [https://ourmenuos.online/m/demo](https://ourmenuos.online/m/demo)
+  * *Live multi-concept customer storefront (Pacy Grills & Lounge, Sanctuary Spa, Tech Boutique, Creator Rate Cards) with WebMCP tools registered on `document.modelContext`.*
+* **2. Interactive Merchant Dashboard Sandbox (1-Click Private Workspace)**: [https://ourmenuos.online](https://ourmenuos.online)
+  * *Click **"Experience Demo Mode"** to instantly spin up an isolated merchant workspace (`/dashboard`) to test the catalog manager, live KDS, driverless ESC/POS printing, and Tego AI voice/camera vision.*
 
 ---
 

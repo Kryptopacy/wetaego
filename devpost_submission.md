@@ -6,9 +6,11 @@
 ## Tagline (One-Liner)
 *The Commerce & Service Operating System for Modern Brands, their Human Customers, and the AI Agents who serve them.*
 
-## Live Demo & Preview Notice
-* **Live Demo Link**: [https://ourmenuos.online](https://ourmenuos.online)
-* **Live Multi-Concept Demo Storefront**: [https://ourmenuos.online/m/demo](https://ourmenuos.online/m/demo)
+## Live Demo & Preview Links
+* **1. Public Multi-Concept Storefront (Zero Login / WebMCP Agent Ready)**: [https://ourmenuos.online/m/demo](https://ourmenuos.online/m/demo)
+  * *Instantly browse the live multi-concept guest experience (Pacy Grills & Lounge, Sanctuary Spa, Tech Boutique, Creator Rate Cards) with WebMCP tools exposed on `document.modelContext`.*
+* **2. Interactive Merchant Dashboard Sandbox (1-Click Private Workspace)**: [https://ourmenuos.online](https://ourmenuos.online)
+  * *Click **"Experience Demo Mode"** or **"Try Demo"** to instantly provision an isolated merchant dashboard session to test catalog management, KDS fulfillment, raw ESC/POS thermal printing, and Tego AI voice/camera vision.*
 * *Note: Live Demo hosted at ourmenuos.online (preview domain prior to public TLD rollout).*
 
 ---
