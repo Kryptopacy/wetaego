@@ -222,11 +222,6 @@ export default async function HomePage() {
         {/* Content grid */}
         <div className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-12 pt-28 md:pt-24 pb-16 grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-center min-h-screen">
 
-          {/* Top right Search Bar */}
-          <div className="absolute top-32 right-6 md:right-12 z-50 w-full max-w-sm hidden lg:block">
-            <DirectorySearch />
-          </div>
-
           {/* Left — Copy */}
           <FadeIn className="flex flex-col justify-center">
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black text-white tracking-[-0.04em] leading-[1.05] mb-5 drop-shadow-md">
@@ -253,6 +248,14 @@ export default async function HomePage() {
                   Experience Demo Mode
                 </DemoSubmitButton>
               </ActionForm>
+            </div>
+
+            {/* Live Storefront Search Bar */}
+            <div className="mt-8 pt-6 border-t border-white/10 w-full max-w-md">
+              <p className="text-xs font-semibold text-zinc-400 mb-2.5 flex items-center gap-1.5">
+                <span>Looking for an existing venue or digital menu?</span>
+              </p>
+              <DirectorySearch />
             </div>
           </FadeIn>
 
