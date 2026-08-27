@@ -229,19 +229,18 @@ export default async function HomePage() {
 
           {/* Left — Copy */}
           <FadeIn className="flex flex-col justify-center">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-[-0.04em] leading-[1.08] mb-6 drop-shadow-md">
-              The Commerce & Service Operating System for{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-200 to-green-300">
-                Modern Brands,
-              </span>{' '}
-              their Human Customers, and the{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-200 to-cyan-300">
-                AI Agents
-              </span>{' '}
-              who serve them.
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black text-white tracking-[-0.04em] leading-[1.05] mb-5 drop-shadow-md">
+              The Commerce & Service
+              <span className="block mt-1 text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-200 to-green-300">
+                Operating System.
+              </span>
             </h1>
 
-            <p className="text-base sm:text-lg md:text-xl text-zinc-300 max-w-xl font-light leading-relaxed mb-8 md:mb-10 drop-shadow-sm">
+            <p className="text-lg sm:text-xl md:text-2xl text-zinc-100 font-normal leading-snug mb-4 max-w-xl">
+              Built for <span className="text-white font-semibold">modern brands</span>, their <span className="text-white font-semibold">human customers</span>, and the <span className="text-emerald-300 font-semibold">AI agents</span> who serve them.
+            </p>
+
+            <p className="text-sm sm:text-base text-zinc-400 max-w-lg font-light leading-relaxed mb-8 drop-shadow-sm">
               WETAEGO powers your digital storefront, live operations, and booking workflows—while instantly equipping your brand with actionable AI assistants and in-browser WebMCP agent discovery.
             </p>
 
