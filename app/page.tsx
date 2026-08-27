@@ -228,17 +228,23 @@ export default async function HomePage() {
           </div>
 
           {/* Left — Copy */}
-          <FadeIn className="flex flex-col justify-center mt-12 md:mt-0">
-            <h1 className="text-5xl md:text-7xl font-black text-white tracking-[-0.04em] leading-[1.05] md:leading-[1.02] mb-5 md:mb-6 drop-shadow-md">
-              The Commerce & Service
-              <span className="block mt-1 md:mt-2 text-transparent bg-clip-text bg-gradient-to-br from-emerald-300 via-green-200 to-teal-400 drop-shadow-[0_0_15px_rgba(52,211,153,0.3)]">
-                Operating System.
-              </span>
+          <FadeIn className="flex flex-col justify-center">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-[-0.04em] leading-[1.08] mb-6 drop-shadow-md">
+              The Commerce & Service Operating System for{' '}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-200 to-green-300">
+                Modern Brands,
+              </span>{' '}
+              their Human Customers, and the{' '}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-200 to-cyan-300">
+                AI Agents
+              </span>{' '}
+              who serve them.
             </h1>
-            <p className="text-base md:text-xl text-zinc-200 md:text-zinc-300 max-w-xl font-light leading-relaxed mb-8 md:mb-10 drop-shadow-sm">
-              <strong>Built for modern brands, their human customers, and the AI agents who serve them.</strong><br className="hidden md:block" /><br className="hidden md:block" />
-              <span className="mt-2 md:mt-0 block">WETAEGO powers your digital storefront, live operations, and booking workflows—while instantly equipping your brand with actionable AI assistants and in-browser WebMCP agent discovery.</span>
+
+            <p className="text-base sm:text-lg md:text-xl text-zinc-300 max-w-xl font-light leading-relaxed mb-8 md:mb-10 drop-shadow-sm">
+              WETAEGO powers your digital storefront, live operations, and booking workflows—while instantly equipping your brand with actionable AI assistants and in-browser WebMCP agent discovery.
             </p>
+
             <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto mt-2">
               <Link href="/login" className="flex items-center justify-center gap-2 w-full sm:w-auto px-8 py-3.5 rounded-full bg-white text-black text-sm font-bold hover:scale-105 transition-all duration-300 shadow-[0_0_30px_rgba(255,255,255,0.2)]">
                 Start Building <ArrowRight className="w-4 h-4" />
