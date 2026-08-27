@@ -122,7 +122,6 @@ export async function ensureFlagshipDemoLocation() {
       is_published: true,
       billing_enabled: true,
       randomizer_enabled: true,
-      sort_order: 1
     },
     {
       location_id: locationId,
@@ -132,7 +131,6 @@ export async function ensureFlagshipDemoLocation() {
       is_published: true,
       billing_enabled: true,
       randomizer_enabled: false,
-      sort_order: 2
     },
     {
       location_id: locationId,
@@ -142,7 +140,6 @@ export async function ensureFlagshipDemoLocation() {
       is_published: true,
       billing_enabled: true,
       randomizer_enabled: false,
-      sort_order: 3
     },
     {
       location_id: locationId,
@@ -152,7 +149,6 @@ export async function ensureFlagshipDemoLocation() {
       is_published: true,
       billing_enabled: true,
       randomizer_enabled: false,
-      sort_order: 4
     },
     {
       location_id: locationId,
@@ -162,7 +158,6 @@ export async function ensureFlagshipDemoLocation() {
       is_published: true,
       billing_enabled: true,
       randomizer_enabled: false,
-      sort_order: 5
     },
     {
       location_id: locationId,
@@ -172,14 +167,13 @@ export async function ensureFlagshipDemoLocation() {
       is_published: true,
       billing_enabled: true,
       randomizer_enabled: false,
-      sort_order: 6
     }
   ]
 
   for (const p of pagesData) {
     const { data: pageRecord } = await adminClient
       .from('location_pages')
-      .upsert(p, { onConflict: 'location_id,slug' })
+      .upsert(p as never, { onConflict: 'location_id,slug' })
       .select('id, slug')
       .single()
 

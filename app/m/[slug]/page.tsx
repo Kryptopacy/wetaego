@@ -274,7 +274,7 @@ export default async function PublicMenuPage({
       .select('*')
       .eq('location_id', location.id)
       .eq('is_published', true)
-      .order('sort_order', { ascending: true })
+      .order('created_at', { ascending: true })
     if (seededPages && seededPages.length > 0) {
       activePages = seededPages
     }
