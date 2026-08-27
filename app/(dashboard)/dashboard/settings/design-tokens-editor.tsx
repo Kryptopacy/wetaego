@@ -227,6 +227,17 @@ export function DesignTokensEditor({
         { value: 'tinted', label: 'Brand Tinted', desc: 'Subtle wash of brand color' },
         { value: 'light', label: 'Clean Light', desc: 'Studio white (#fbfbfb)' },
       ]
+    },
+    {
+      title: 'Media & Card Framing',
+      key: 'aspect_ratio',
+      icon: <Layout className="w-4 h-4" />,
+      options: [
+        { value: 'square_1_1', label: '1:1 Square', desc: 'Balanced Grid (Dishes & Goods)' },
+        { value: 'portrait_3_4', label: '3:4 Portrait', desc: 'Tall Lookbook (Fashion & Lifestyle)' },
+        { value: 'wide_16_9', label: '16:9 Wide', desc: 'Cinematic (Venues & Platters)' },
+        { value: 'compact_row', label: 'Row View', desc: 'Compact Thumbnail Rows' },
+      ]
     }
   ]
 

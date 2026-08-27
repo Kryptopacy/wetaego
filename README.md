@@ -6,9 +6,9 @@
 
 ---
 
-OurMenu OS is a comprehensive, enterprise-grade **Business Operating System** engineered to power the customer-facing digital presence, real-time ordering, design customization, driverless hardware printing, autonomous agent interoperability, and deep backend workflows of physical and service businesses across 9 major industry templates.
+OurMenu OS is a universal, enterprise-grade **Commerce & Services Operating System** engineered to power the customer-facing digital presence, real-time transactions, appointment bookings, rate cards, inventory catalogs, custom quotes, driverless hardware printing, and autonomous AI agent interoperability for any commercial business model—from independent solopreneurs to multi-location franchises and diverse enterprise conglomerates.
 
-Designed for high-traffic environments—such as restaurant chains, bustling lounges, hotel resorts, boutique retailers, wellness spas, clinics, real estate agencies, and creative studios—OurMenu OS delivers instant digital storefronts reachable via direct links (e.g. `ourmenuos.online/m/your-business`), custom QR codes, NFC tags, or custom domains.
+Designed for high-traffic environments—such as restaurant chains, bustling lounges, hotel resorts, boutique retailers, wellness spas, healthcare clinics, automotive & gadget repair centers, real estate agencies, creative studios, and professional service firms—OurMenu OS delivers instant digital storefronts reachable via direct links (e.g. `ourmenuos.online/m/your-business`), custom QR codes, NFC tags, or custom domains.
 
 ---
 
@@ -63,7 +63,7 @@ OurMenu OS leads the industry in autonomous AI agent readiness, implementing 14 
 5. **RFC 9728 OAuth Protected Resource**: Metadata at `/.well-known/oauth-protected-resource`.
 6. **WorkOS Auth.md**: Agent onboarding and credential instructions at `/auth.md`.
 7. **Agent Skills Index (RFC v0.2.0)**: Published at `/.well-known/agent-skills/index.json` with SHA-256 digests.
-8. **WebMCP Browser AI Agent API**: In-browser tools registered via `navigator.modelContext.provideContext()`.
+8. **WebMCP Browser AI Agent API**: Standard W3C in-browser commerce tools registered via `document.modelContext.registerTool()` across all storefronts.
 9. **Agentic Resource Discovery (ARD)**: Manifest at `/.well-known/ai-catalog.json` with URNs and embedding queries.
 10. **Coinbase x402 Protocol**: HTTP 402 agent micropayment facilitator at `/.well-known/x402.json` and `/api/x402`.
 11. **Machine Payment Protocol (MPP)**: Manifest at `/.well-known/mpp.json` and `x-payment-info` in `openapi.json`.

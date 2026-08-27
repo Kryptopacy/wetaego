@@ -67,23 +67,36 @@ export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, tem
     return () => clearInterval(interval)
   }, [templateType])
 
+  const [stationFilter, setStationFilter] = useState<'all' | 'kitchen' | 'bar' | 'dispatch'>('all')
+
   const filteredOrders = useMemo(() => {
     return optimisticOrders.filter(order => {
       const matchesStatus = filterStatus === 'all' || order.status === filterStatus
+      
+      // Station filtering
+      let matchesStation = true
+      if (stationFilter === 'kitchen') {
+        matchesStation = order.order_items?.some(i => !i.item_name.toLowerCase().includes('cocktail') && !i.item_name.toLowerCase().includes('drink') && !i.item_name.toLowerCase().includes('wine') && !i.item_name.toLowerCase().includes('beer') && !i.item_name.toLowerCase().includes('juice')) ?? true
+      } else if (stationFilter === 'bar') {
+        matchesStation = order.order_items?.some(i => i.item_name.toLowerCase().includes('cocktail') || i.item_name.toLowerCase().includes('drink') || i.item_name.toLowerCase().includes('wine') || i.item_name.toLowerCase().includes('beer') || i.item_name.toLowerCase().includes('juice') || i.item_name.toLowerCase().includes('beverage') || i.item_name.toLowerCase().includes('coffee') || i.item_name.toLowerCase().includes('tea')) ?? false
+      } else if (stationFilter === 'dispatch') {
+        matchesStation = order.fulfillment_type === 'delivery' || order.status === 'out_for_delivery' || !!order.tracking_code
+      }
+
       const searchLower = searchQuery.toLowerCase()
       const matchesSearch = !searchQuery || 
         (order.table_identifier?.toLowerCase().includes(searchLower)) ||
         (order.customer_name?.toLowerCase().includes(searchLower)) ||
         (order.id.toLowerCase().includes(searchLower)) ||
         (order.order_items?.some(item => item.item_name.toLowerCase().includes(searchLower)))
-      return matchesStatus && matchesSearch
+      return matchesStatus && matchesStation && matchesSearch
     })
-  }, [optimisticOrders, filterStatus, searchQuery])
+  }, [optimisticOrders, filterStatus, stationFilter, searchQuery])
 
   return (
       <div className="col-span-1 lg:col-span-2 border border-zinc-800 rounded-xl bg-zinc-900/30 flex flex-col overflow-hidden min-h-[500px]">
-        <div className="p-4 border-b border-zinc-800 bg-zinc-900">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+        <div className="p-4 border-b border-zinc-800 bg-zinc-900 space-y-3">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <h2 className="font-bold text-white flex items-center gap-3">
               Active Orders
               <span className="px-2 py-0.5 rounded-full bg-zinc-800 text-xs font-medium text-zinc-400">{filteredOrders.length}</span>
@@ -98,13 +111,35 @@ export function ActiveOrdersGrid({ activeOrders, currentUserId, billingMode, tem
               />
             </div>
           </div>
+
+          {/* Station Filter Tabs */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 hide-scrollbar">
+            {[
+              { id: 'all', label: 'All Stations' },
+              { id: 'kitchen', label: '🍳 Kitchen Food' },
+              { id: 'bar', label: '🍸 Bar & Drinks' },
+              { id: 'dispatch', label: '📦 Delivery Dispatch' },
+            ].map((station) => (
+              <button
+                key={station.id}
+                onClick={() => setStationFilter(station.id as any)}
+                className={`px-3 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+                  stationFilter === station.id 
+                    ? 'bg-zinc-800 text-emerald-400 border border-emerald-500/40 shadow-sm' 
+                    : 'bg-zinc-950 text-zinc-400 hover:text-white border border-zinc-800'
+                }`}
+              >
+                {station.label}
+              </button>
+            ))}
+          </div>
           
-          <div className="flex items-center gap-2 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 hide-scrollbar">
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 hide-scrollbar">
             {['all', 'pending', 'paid', 'preparing'].map((status) => (
               <button
                 key={status}
                 onClick={() => setFilterStatus(status as 'all' | 'pending' | 'paid' | 'preparing')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${
+                className={`px-3 py-1 rounded-lg text-xs font-medium whitespace-nowrap transition-colors cursor-pointer ${
                   filterStatus === status 
                     ? 'bg-blue-600 text-white' 
                     : 'bg-zinc-800/50 text-zinc-400 hover:bg-zinc-700 hover:text-white border border-zinc-800'

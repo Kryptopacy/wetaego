@@ -13,6 +13,7 @@ export interface QRItem {
   section: string
   url: string
   type: QRType
+  customSubtext?: string
 }
 
 interface PageOption {
@@ -128,6 +129,7 @@ export function QRGeneratorClient({
   const [activeCategory, setActiveCategory] = useState<'all' | 'table' | 'room' | 'desk' | 'page'>('all')
   const [identifier, setIdentifier] = useState('')
   const [section, setSection] = useState('')
+  const [customCta, setCustomCta] = useState('')
   const [qrType, setQrType] = useState<QRType>(() => allowedTypes[0] || 'table')
   const [simpleMode, setSimpleMode] = useState(false)
 
@@ -160,11 +162,13 @@ export function QRGeneratorClient({
       section: section.trim(),
       url: generatedUrl,
       type: qrType,
+      customSubtext: customCta.trim() || undefined,
     }
 
     setItems(prev => [newItem, ...prev])
     setIdentifier('')
     setSection('')
+    setCustomCta('')
     toast.success(`Generated QR for ${labelFor(newItem)}!`)
   }
 
@@ -234,6 +238,7 @@ export function QRGeneratorClient({
   }
 
   const subLabelFor = (item: QRItem): string => {
+    if (item.customSubtext) return item.customSubtext
     if (item.type === 'page') return 'Scan to view direct catalog'
     if (item.type === 'review') return 'Scan to leave review & tip staff'
     if (item.type === 'desk') return 'Scan to pay or order at counter'
@@ -517,15 +522,29 @@ export function QRGeneratorClient({
         </div>
 
         {/* Section Input */}
-        <div className="w-full md:w-56">
+        <div className="w-full md:w-48">
           <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-2">
-            Section / Area <span className="text-zinc-500 font-normal">(Optional)</span>
+            Section <span className="text-zinc-500 font-normal">(Optional)</span>
           </label>
           <input
             type="text"
             value={section}
             onChange={(e) => setSection(e.target.value)}
-            placeholder="e.g. Rooftop Lounge, Patio"
+            placeholder="e.g. Patio, Rooftop"
+            className="w-full bg-zinc-950 border border-zinc-700 focus:border-emerald-500 text-white text-xs font-semibold px-4 py-3 rounded-xl outline-none transition-all"
+          />
+        </div>
+
+        {/* Custom CTA Headline Input */}
+        <div className="w-full md:w-56">
+          <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-2">
+            Custom Action Text <span className="text-zinc-500 font-normal">(Optional)</span>
+          </label>
+          <input
+            type="text"
+            value={customCta}
+            onChange={(e) => setCustomCta(e.target.value)}
+            placeholder="e.g. Scan for Room Service"
             className="w-full bg-zinc-950 border border-zinc-700 focus:border-emerald-500 text-white text-xs font-semibold px-4 py-3 rounded-xl outline-none transition-all"
           />
         </div>

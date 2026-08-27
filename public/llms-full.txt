@@ -21,7 +21,7 @@
 > **Sitemap**: https://ourmenuos.online/sitemap.xml  
 > **Robots Directives**: https://ourmenuos.online/robots.txt  
 
-OurMenu OS is a universal, multi-tenant operating system and SaaS platform built to unify digital presence, customer ordering, frontline live operations, in-built CRM, staff intercom, customer feedback, inventory management, design customization, multi-branch fleet management, raw hardware ESC/POS thermal printing, and multi-gateway billing across 9 major physical and service industry verticals.
+OurMenu OS is a universal, multi-tenant commercial operating system and SaaS platform built to unify digital presence, customer ordering, frontline live operations, WebMCP agentic co-browsing, in-built CRM, staff intercom, customer feedback, inventory management, design customization, multi-branch fleet management, raw hardware ESC/POS thermal printing, and multi-gateway billing across any arbitrary physical, service, and digital commerce business model.
 
 ---
 

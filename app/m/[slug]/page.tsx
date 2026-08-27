@@ -6,6 +6,7 @@ import { cookies } from 'next/headers'
 import { PortalRenderer } from './portal-renderer'
 import { InvalidQrMessage } from './components/qr-state-messages'
 import { PreviewBanner } from '@/components/preview-banner'
+import { WebMCPProvider } from '@/components/webmcp/webmcp-provider'
 import { unstable_cache } from 'next/cache'
 
 // Revalidate this page every 60 seconds (Incremental Static Regeneration)
@@ -296,6 +297,15 @@ export default async function PublicMenuPage({
         )}
         {isPreview && <PreviewBanner />}
         <PortalRenderer location={location as unknown as Parameters<typeof PortalRenderer>[0]['location']} pages={locationPages} />
+        <WebMCPProvider
+          locationId={location.id}
+          locationName={location.portal_display_name || location.name}
+          slug={slug}
+          currency="USD"
+          menuItems={[]}
+          categories={locationPages.map(p => p.title)}
+          tableIdentifier="Portal Visitor"
+        />
       </>
     )
   }

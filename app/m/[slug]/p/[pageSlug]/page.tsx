@@ -21,6 +21,7 @@ import { PreviewBanner } from '@/components/preview-banner'
 import { getGlobalManualPayment } from '@/lib/utils/settings'
 import { DealsFAB } from '../../components/deals-fab'
 import { PageThemeOverride } from './page-theme-override'
+import { WebMCPProvider } from '@/components/webmcp/webmcp-provider'
 
 export async function generateMetadata({
   params,
@@ -456,6 +457,27 @@ export default async function PublicPageView({
         <PortalNav slug={slug} portalName={loc.portal_display_name || loc.name} />
       )}
       
+      <WebMCPProvider
+        locationId={loc.id}
+        locationName={loc.portal_display_name || loc.name}
+        slug={slug}
+        currency={loc.currency_code || 'USD'}
+        businessTypePreset={page.business_type_preset as string}
+        templateType={page.template_type as string}
+        menuItems={((items as Record<string, any>[]) || []).map(i => ({
+          id: String(i.id),
+          name: String(i.title || i.name || 'Item'),
+          description: (i.description as string) || null,
+          price_minor: Number(i.price_minor || 0),
+          category: (i.category_name || (i.category as any)?.name || (page as any)?.title || 'General') as string,
+          image_url: (i.image_url as string) || null,
+          dietary_tags: (i.dietary_tags as string[]) || (i.tags as string[]) || (i.item_data as any)?.dietary_tags || [],
+          variants: (i.variants as any) || (i.item_data as any)?.variants || [],
+          is_available: i.availability_status !== 'sold_out' && i.is_available !== false
+        }))}
+        tableIdentifier={_resource?.name || "Storefront Guest"}
+      />
+
       <FabGroup>
         {(page.ai_enabled ?? loc.ai_enabled ?? true) && (
           <AIChat

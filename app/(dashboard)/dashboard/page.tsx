@@ -165,7 +165,7 @@ export default async function DashboardOverviewPage() {
               <p className="text-zinc-500 font-medium">Loading metrics...</p>
             </div>
           }>
-            <DashboardStats orgId={orgId} templateType={templateType} />
+            <DashboardStats orgId={orgId} templateType={templateType} businessType={orgBusinessType} />
           </Suspense>
 
       {/* === AI MODULES GRID === */}

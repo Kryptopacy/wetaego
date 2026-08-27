@@ -35,17 +35,20 @@ interface CartState {
 
 const CART_TTL_MS = 24 * 60 * 60 * 1000 // 24 hours
 
-import { createJSONStorage, StateStorage } from 'zustand/middleware'
+import { createJSONStorage, type StateStorage } from 'zustand/middleware'
 import { get, set as idbSet, del } from 'idb-keyval'
 
 const idbStorage: StateStorage = {
   getItem: async (name: string): Promise<string | null> => {
+    if (typeof window === 'undefined' || typeof indexedDB === 'undefined') return null
     return (await get(name)) || null
   },
   setItem: async (name: string, value: string): Promise<void> => {
+    if (typeof window === 'undefined' || typeof indexedDB === 'undefined') return
     await idbSet(name, value)
   },
   removeItem: async (name: string): Promise<void> => {
+    if (typeof window === 'undefined' || typeof indexedDB === 'undefined') return
     await del(name)
   },
 }

@@ -10,6 +10,7 @@ export interface ThemeTokens {
   animation_style?: 'energetic' | 'elegant' | 'instant'
   density?: 'airy' | 'standard' | 'cozy'
   color_theme?: 'true_dark' | 'dim' | 'light' | 'tinted'
+  aspect_ratio?: 'portrait_3_4' | 'square_1_1' | 'wide_16_9' | 'compact_row'
 }
 
 const ThemeContext = createContext<{ tokens: ThemeTokens; themeColor?: string }>({ tokens: {} })
@@ -96,6 +97,16 @@ export function ThemeInjector({
     const surface = tokens.surface_style || 'flat'
     root.style.setProperty('--storefront-surface-mode', surface)
     
+    // Apply Card Aspect Ratio
+    const aspectMap: Record<string, string> = {
+      portrait_3_4: '3/4',
+      square_1_1: '1/1',
+      wide_16_9: '16/9',
+      compact_row: '16/9'
+    }
+    const asp = tokens.aspect_ratio || 'square_1_1'
+    root.style.setProperty('--storefront-card-aspect', aspectMap[asp] || '1/1')
+
     // Apply Theme Color
     if (themeColor) {
       root.style.setProperty('--theme-color', themeColor)

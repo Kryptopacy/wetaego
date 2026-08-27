@@ -461,87 +461,705 @@ export async function startInteractiveDemo() {
   } else {
     // Insert page items for the demo templates
     const pageItems = []
-
     const restaurantPage = pages.find((p: { id: string, slug: string }) => p.slug === 'restaurant')
     if (restaurantPage) {
       pageItems.push(
-        { page_id: restaurantPage.id, title: 'Spicy Asun Rolls', description: 'Smoked goat meat wrapped in crispy pastry, served with pepper sauce.', price_minor: 650000, sort_order: 0, availability_status: 'available', images: ['https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80'], item_data: { category: 'Starters & Bites' } },
-        { page_id: restaurantPage.id, title: 'Truffle Plantain Fries', description: 'Crispy plantain tossed in truffle oil and parmesan.', price_minor: 450000, sort_order: 1, availability_status: 'available', images: ['https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=800&q=80'], item_data: { category: 'Starters & Bites' } },
-        { page_id: restaurantPage.id, title: '24-Hour Suya Steak', description: 'Prime ribeye marinated in our signature suya spice blend, grilled to perfection.', price_minor: 2800000, sort_order: 2, availability_status: 'available', images: ['https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=800&q=80'], item_data: { category: 'Premium Mains' } },
-        { page_id: restaurantPage.id, title: 'Jollof Paella', description: 'Rich, smoky jollof rice mixed with grilled prawns, calamari, and spicy chorizo.', price_minor: 1850000, sort_order: 3, availability_status: 'available', images: ['https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=800&q=80'], item_data: { category: 'Premium Mains' } },
-        { page_id: restaurantPage.id, title: 'Charcoal Grilled Croaker', description: 'Whole croaker fish stuffed with herbs, served with roasted yam.', price_minor: 1500000, sort_order: 4, availability_status: 'sold_out', images: ['https://images.unsplash.com/photo-1482049016688-2d3e1b311543?auto=format&fit=crop&w=800&q=80'], item_data: { category: 'Premium Mains' } },
-        { page_id: restaurantPage.id, title: 'Zobo Margarita', description: 'Tequila, fresh zobo extract, lime, and a spicy salt rim.', price_minor: 550000, sort_order: 5, availability_status: 'available', images: ['https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=800&q=80'], item_data: { category: 'Signature Cocktails' } },
-        { page_id: restaurantPage.id, title: 'Palm Wine Spritz', description: 'Fresh palm wine, prosecco, and a splash of elderflower.', price_minor: 600000, sort_order: 6, availability_status: 'available', images: ['https://images.unsplash.com/photo-1551538827-9c037cb4f32a?auto=format&fit=crop&w=800&q=80'], item_data: { category: 'Signature Cocktails' } },
-        { page_id: restaurantPage.id, title: 'Puff-Puff Beignets', description: 'Warm puff-puff served with rich dark chocolate dipping sauce.', price_minor: 400000, sort_order: 7, availability_status: 'available', images: ['https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=800&q=80'], item_data: { category: 'Desserts' } },
-        { page_id: restaurantPage.id, title: 'Mango Sorbet', description: 'Fresh, icy mango sorbet made in-house.', price_minor: 350000, sort_order: 8, availability_status: 'available', images: ['https://images.unsplash.com/photo-1563805042-7684c8a9e9cb?auto=format&fit=crop&w=800&q=80'], item_data: { category: 'Desserts' } },
-        { page_id: restaurantPage.id, title: 'VVIP Booth (Minimum Spend)', description: 'Exclusive booth seating up to 10 guests. Amount goes towards your tab.', price_minor: 25000000, sort_order: 9, availability_status: 'available', images: ['https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=800&q=80'], item_data: { category: 'VIP Reservations', is_reservation: true, min_guests: 1, max_guests: 10 } },
-        { page_id: restaurantPage.id, title: 'Dom Perignon Luminous (Bottle)', description: 'Vintage champagne with a glowing label, perfect for celebrations.', price_minor: 65000000, sort_order: 10, availability_status: 'available', images: ['https://images.unsplash.com/photo-1599839619722-39751411ea63?auto=format&fit=crop&w=800&q=80'], item_data: { category: 'Bottle Service' } },
-        { page_id: restaurantPage.id, title: 'Premium Mint Shisha', description: 'Smooth, icy mint flavor with a premium Russian pipe.', price_minor: 4500000, sort_order: 11, availability_status: 'available', images: ['https://images.unsplash.com/photo-1510287413697-3f36070a273b?auto=format&fit=crop&w=800&q=80'], item_data: { category: 'Shisha' } }
-      )
-    }
-
-    const mediaPage = pages.find((p: { id: string, slug: string }) => p.slug === 'pacy-media')
-    if (mediaPage) {
-      pageItems.push(
-        { page_id: mediaPage.id, title: 'Dedicated Instagram Reel', description: 'Up to 60 seconds. High-quality editing included.', price_minor: 15000000, sort_order: 0, availability_status: 'available', images: ['https://images.unsplash.com/photo-1616469829581-73993eb86b02?auto=format&fit=crop&w=800&q=80'] },
-        { page_id: mediaPage.id, title: 'TikTok Integration', description: 'Brand integration in a lifestyle TikTok video.', price_minor: 10000000, sort_order: 1, availability_status: 'available', images: ['https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?auto=format&fit=crop&w=800&q=80'] }
+        { 
+          page_id: restaurantPage.id, 
+          title: '24-Hour Suya Ribeye Steak', 
+          description: 'Prime 350g Angus ribeye marinated in artisanal suya spices, flame-grilled over scented charcoal.', 
+          price_minor: 2800000, 
+          sort_order: 0, 
+          availability_status: 'available', 
+          images: ['https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=800&q=80'], 
+          item_data: { 
+            category: 'Chef Specials & Mains',
+            dietary_tags: ['halal', 'gluten_free'],
+            variants: [
+              { name: 'Doneness', options: ['Medium Rare (Recommended)', 'Medium', 'Medium Well', 'Well Done'], required: true },
+              { name: 'Spice Level', options: ['Mild Yaji Dust', 'Classic Lagos Heat (Chef Favorite)', 'Extra Hot Pepper Fire'], required: true },
+              { name: 'Complimentary Side', options: ['Truffle Plantain Fries', 'Smoky Jollof Rice', 'Grilled Sweet Potato Mash', 'Charred Asparagus'], required: true }
+            ]
+          } 
+        },
+        { 
+          page_id: restaurantPage.id, 
+          title: 'Smoked Jollof Paella', 
+          description: 'Firewood smoked jollof rice tossed with jumbo tiger prawns, calamari rings, artisanal chorizo, and saffron aioli.', 
+          price_minor: 1950000, 
+          sort_order: 1, 
+          availability_status: 'available', 
+          images: ['https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=800&q=80'], 
+          item_data: { 
+            category: 'Chef Specials & Mains',
+            dietary_tags: ['pescatarian', 'gluten_free', 'halal'],
+            variants: [
+              { name: 'Seafood Add-on', options: ['Standard Seafood Mix', 'Extra Jumbo Tiger Prawns', 'Whole Grilled Lobster Tail'] }
+            ]
+          } 
+        },
+        { 
+          page_id: restaurantPage.id, 
+          title: 'Wild Mushroom Truffle Tagliatelle', 
+          description: 'Fresh handmade pasta ribbons tossed in silky black truffle cream, sautéed king oyster mushrooms, and parmesan crisp.', 
+          price_minor: 1850000, 
+          sort_order: 2, 
+          availability_status: 'available', 
+          images: ['https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80'], 
+          item_data: { 
+            category: 'Chef Specials & Mains',
+            dietary_tags: ['vegetarian'],
+            variants: [
+              { name: 'Portion Size', options: ['Standard', 'Feast / Large (+25%)'], required: true },
+              { name: 'Cheese Choice', options: ['Aged 24-Month Parmigiano', 'Vegan Truffle Dust (Dairy Free)'], required: true }
+            ]
+          } 
+        },
+        { 
+          page_id: restaurantPage.id, 
+          title: 'Charcoal Grilled Herb Croaker Fish', 
+          description: 'Whole Atlantic croaker stuffed with aromatic lemongrass and scotch bonnet relish, served with charred plantain.', 
+          price_minor: 2200000, 
+          sort_order: 3, 
+          availability_status: 'available', 
+          images: ['https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=800&q=80'], 
+          item_data: { 
+            category: 'Chef Specials & Mains',
+            dietary_tags: ['pescatarian', 'gluten_free', 'halal'],
+            variants: [
+              { name: 'Spice Level', options: ['Mild Herb Butter', 'Medium Pepper Glaze', 'Hot Lagos Fire'], required: true }
+            ]
+          } 
+        },
+        { 
+          page_id: restaurantPage.id, 
+          title: 'Crispy Truffle Plantain Bites', 
+          description: 'Golden sweet plantain cubes tossed in white truffle oil, rosemary flakes, and grated grana padano.', 
+          price_minor: 650000, 
+          sort_order: 4, 
+          availability_status: 'available', 
+          images: ['https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=800&q=80'], 
+          item_data: { 
+            category: 'Starters & Bites',
+            dietary_tags: ['vegetarian', 'gluten_free'],
+            variants: [
+              { name: 'Dipping Sauce', options: ['Smoked Garlic Aioli', 'Spicy Scotch Bonnet Jam', 'Herb Vegan Mayo'] }
+            ]
+          } 
+        },
+        { 
+          page_id: restaurantPage.id, 
+          title: 'Spicy Fire-Baked Asun Rolls', 
+          description: 'Tender smoked goat meat tossed in habanero relish, wrapped in flaky golden pastry crisps.', 
+          price_minor: 750000, 
+          sort_order: 5, 
+          availability_status: 'available', 
+          images: ['https://images.unsplash.com/photo-1541544741938-0af808871cc0?auto=format&fit=crop&w=800&q=80'], 
+          item_data: { 
+            category: 'Starters & Bites',
+            dietary_tags: ['halal'],
+            variants: [
+              { name: 'Pastry Finish', options: ['Crispy Oven-Baked', 'Golden Deep-Fried'] }
+            ]
+          } 
+        },
+        { 
+          page_id: restaurantPage.id, 
+          title: 'Charred Tiger Prawn Skewers', 
+          description: 'Grilled jumbo prawns brushed with garlic-herb and chili butter, served with lime wedges.', 
+          price_minor: 1200000, 
+          sort_order: 6, 
+          availability_status: 'available', 
+          images: ['https://images.unsplash.com/photo-1565680018434-b513d5e5fd47?auto=format&fit=crop&w=800&q=80'], 
+          item_data: { 
+            category: 'Starters & Bites',
+            dietary_tags: ['pescatarian', 'gluten_free', 'halal'],
+            variants: [
+              { name: 'Butter Glaze', options: ['Lemon Garlic Herb', 'Spicy Scotch Bonnet Butter'] }
+            ]
+          } 
+        },
+        { 
+          page_id: restaurantPage.id, 
+          title: 'Smoked Hibiscus Zobo Margarita', 
+          description: 'Reposado tequila, cold-pressed organic hibiscus extract, fresh lime juice, agave, and a spicy yaji salt rim.', 
+          price_minor: 650000, 
+          sort_order: 7, 
+          availability_status: 'available', 
+          images: ['https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=800&q=80'], 
+          item_data: { 
+            category: 'Craft Cocktails & Drinks',
+            dietary_tags: ['vegan', 'gluten_free', 'dairy_free'],
+            variants: [
+              { name: 'Base Spirit', options: ['Reposado Tequila', 'Artisanal Mezcal (Smoky Finish)', 'Seedlip Spice (Zero-Proof / Non-Alcoholic)'], required: true },
+              { name: 'Glass Rim Style', options: ['Spicy Yaji Pepper Salt', 'Sweet Hibiscus Sugar', 'Half-and-Half Rim'], required: true }
+            ]
+          } 
+        },
+        { 
+          page_id: restaurantPage.id, 
+          title: 'Artisanal Palm Wine Spritz', 
+          description: 'Fresh palm wine infused with sparkling Italian prosecco, elderflower liqueur, and fresh mint.', 
+          price_minor: 700000, 
+          sort_order: 8, 
+          availability_status: 'available', 
+          images: ['https://images.unsplash.com/photo-1551538827-9c037cb4f32a?auto=format&fit=crop&w=800&q=80'], 
+          item_data: { 
+            category: 'Craft Cocktails & Drinks',
+            dietary_tags: ['vegan', 'gluten_free'],
+            variants: [
+              { name: 'Garnish', options: ['Fresh Mint & Dehydrated Lime', 'Edible Orchid Flower'] }
+            ]
+          } 
+        },
+        { 
+          page_id: restaurantPage.id, 
+          title: 'Organic Mango Coconut Sorbet', 
+          description: 'Pure Alphonso mango churned with coconut cream, topped with fresh passionfruit coulis and mint leaves.', 
+          price_minor: 450000, 
+          sort_order: 9, 
+          availability_status: 'available', 
+          images: ['https://images.unsplash.com/photo-1563805042-7684c8a9e9cb?auto=format&fit=crop&w=800&q=80'], 
+          item_data: { 
+            category: 'Desserts',
+            dietary_tags: ['vegan', 'gluten_free', 'dairy_free', 'halal'],
+            variants: [
+              { name: 'Topping', options: ['Toasted Coconut Flakes', 'Fresh Mint & Chili Glaze', 'Crushed Pistachios'] }
+            ]
+          } 
+        },
+        { 
+          page_id: restaurantPage.id, 
+          title: 'Warm Puff-Puff Beignets', 
+          description: 'Spiced golden Nigerian puff-puff dusted in cinnamon sugar with warm Belgian dark chocolate dip.', 
+          price_minor: 500000, 
+          sort_order: 10, 
+          availability_status: 'available', 
+          images: ['https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=800&q=80'], 
+          item_data: { 
+            category: 'Desserts',
+            dietary_tags: ['vegetarian', 'halal'],
+            variants: [
+              { name: 'Dipping Sauce', options: ['Belgian Dark Chocolate', 'Salted Spiced Caramel', 'Condensed Milk Glaze'], required: true }
+            ]
+          } 
+        }
       )
     }
 
     const wellnessPage = pages.find((p: { id: string, slug: string }) => p.slug === 'pacy-wellness')
     if (wellnessPage) {
       pageItems.push(
-        { page_id: wellnessPage.id, title: 'Deep Tissue Massage', description: '60-minute intensive muscle therapy.', price_minor: 3500000, sort_order: 0, availability_status: 'available', images: ['https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=800&q=80'] },
-        { page_id: wellnessPage.id, title: 'Signature Facial', description: '45-minute glow restoration facial.', price_minor: 2500000, sort_order: 1, availability_status: 'available', images: ['https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=800&q=80'] }
-      )
-    }
-
-    const staysPage = pages.find((p: { id: string, slug: string }) => p.slug === 'pacy-stays')
-    if (staysPage) {
-      pageItems.push(
-        { page_id: staysPage.id, title: 'Lekki Penthouse', subtitle: '3 Bed / 3.5 Bath', description: 'Stunning ocean views with private chef access.', price_minor: 15000000, price_display: '150,000 / night', sort_order: 0, availability_status: 'available', item_data: { beds: 3, baths: 3.5, sqft: 2500 }, images: ['https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80'] },
-        { page_id: staysPage.id, title: 'Ikoyi Studio', subtitle: '1 Bed / 1 Bath', description: 'Cozy luxury studio in the heart of Ikoyi.', price_minor: 6500000, price_display: '65,000 / night', sort_order: 1, availability_status: 'available', item_data: { beds: 1, baths: 1, sqft: 600 }, images: ['https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=80'] }
+        { 
+          page_id: wellnessPage.id, 
+          title: 'Deep Tissue Recovery Therapy', 
+          description: 'Intensive muscle release therapy targeting chronic tension points, enhanced with therapeutic botanicals.', 
+          price_minor: 3500000, 
+          sort_order: 0, 
+          availability_status: 'available', 
+          images: ['https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=800&q=80'],
+          item_data: {
+            category: 'Massage Therapies',
+            variants: [
+              { name: 'Session Duration', options: ['60 Minutes Full Body', '90 Minutes Extended Focus'], required: true },
+              { name: 'Essential Oil Blend', options: ['Eucalyptus & Peppermint (Muscle Relief)', 'Lavender & Bergamot (Deep Relaxation)', 'Organic Lemongrass (Detox)'], required: true },
+              { name: 'Pressure Preference', options: ['Medium Firm', 'Deep Intense Pressure'], required: true }
+            ]
+          }
+        },
+        { 
+          page_id: wellnessPage.id, 
+          title: 'Swedish Botanical Relaxation Massage', 
+          description: 'Gentle, flowing strokes combined with warm sweet almond oil to dissolve stress and improve circulation.', 
+          price_minor: 2800000, 
+          sort_order: 1, 
+          availability_status: 'available', 
+          images: ['https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?auto=format&fit=crop&w=800&q=80'],
+          item_data: {
+            category: 'Massage Therapies',
+            variants: [
+              { name: 'Duration', options: ['60 Minutes', '90 Minutes Deluxe'], required: true },
+              { name: 'Oil Blend', options: ['Sweet Almond & Rose', 'Calming Chamomile'], required: true }
+            ]
+          }
+        },
+        { 
+          page_id: wellnessPage.id, 
+          title: 'Hot Himalayan Stone Body Therapy', 
+          description: 'Heated volcanic basalt and pink Himalayan salt stones placed along energy meridians to relieve deep tension.', 
+          price_minor: 4200000, 
+          sort_order: 2, 
+          availability_status: 'available', 
+          images: ['https://images.unsplash.com/photo-1519823551278-64ac92734fb1?auto=format&fit=crop&w=800&q=80'],
+          item_data: {
+            category: 'Massage Therapies',
+            variants: [
+              { name: 'Duration', options: ['75 Minutes Standard', '90 Minutes VIP Sanctuary'], required: true }
+            ]
+          }
+        },
+        { 
+          page_id: wellnessPage.id, 
+          title: 'Radiance Glow Vitamin C Facial', 
+          description: '45-minute revitalizing facial treatment using high-potency antioxidants and lymphatic contour massage.', 
+          price_minor: 2500000, 
+          sort_order: 3, 
+          availability_status: 'available', 
+          images: ['https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=800&q=80'],
+          item_data: {
+            category: 'Facial Aesthetics',
+            variants: [
+              { name: 'Skin Booster Treatment', options: ['Pure Vitamin C Glow', 'Hyaluronic Acid Hydration Boost', 'Collagen LED Therapy'], required: true }
+            ]
+          }
+        },
+        { 
+          page_id: wellnessPage.id, 
+          title: 'Hydrafacial Deluxe Deep Pore Refine', 
+          description: 'Vortex-fusion medical grade extraction, gentle chemical peel, and antioxidant infusion.', 
+          price_minor: 4800000, 
+          sort_order: 4, 
+          availability_status: 'available', 
+          images: ['https://images.unsplash.com/photo-1512290900672-1f4a9ce8020e?auto=format&fit=crop&w=800&q=80'],
+          item_data: {
+            category: 'Facial Aesthetics',
+            variants: [
+              { name: 'Serum Infusion', options: ['Peptide Firming Complex', 'Salicylic Clarifying Serum'], required: true }
+            ]
+          }
+        },
+        { 
+          page_id: wellnessPage.id, 
+          title: 'Moroccan Hammam & Coffee Body Polish', 
+          description: 'Full-body exfoliation with authentic black soap, kessa glove scrub, and organic coffee bean polish.', 
+          price_minor: 3800000, 
+          sort_order: 5, 
+          availability_status: 'available', 
+          images: ['https://images.unsplash.com/photo-1507652313519-d4e9174996dd?auto=format&fit=crop&w=800&q=80'],
+          item_data: {
+            category: 'Body Rituals',
+            variants: [
+              { name: 'Scrub Texture', options: ['Organic Arabica Coffee & Shea', 'Dead Sea Salt & Rosemary'], required: true }
+            ]
+          }
+        }
       )
     }
 
     const boutiquePage = pages.find((p: { id: string, slug: string }) => p.slug === 'pacy-boutique')
     if (boutiquePage) {
       pageItems.push(
-        { page_id: boutiquePage.id, title: 'Silk Wrap Dress', description: 'Emerald green 100% silk dress.', price_minor: 4500000, sort_order: 0, availability_status: 'available', images: ['https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&w=800&q=80'], item_data: { variants: [{ name: 'Size', options: ['S', 'M', 'L', 'XL'], required: true }, { name: 'Color', options: ['Emerald Green', 'Navy Blue'], required: true }] } },
-        { page_id: boutiquePage.id, title: 'Leather Tote Bag', description: 'Handcrafted genuine leather tote.', price_minor: 8500000, sort_order: 1, availability_status: 'available', images: ['https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=800&q=80'] },
-        { page_id: boutiquePage.id, title: 'Gold Hoop Earrings', description: '18k gold plated hoops.', price_minor: 1200000, sort_order: 2, availability_status: 'available', images: ['https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=800&q=80'] },
-        { page_id: boutiquePage.id, title: 'Summer Maxi Dress', description: 'Floral pattern maxi dress perfect for the beach.', price_minor: 3500000, sort_order: 3, availability_status: 'available', images: ['https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?auto=format&fit=crop&w=800&q=80'], item_data: { variants: [{ name: 'Size', options: ['S', 'M', 'L'], required: true }] } },
-        { page_id: boutiquePage.id, title: 'Classic Denim Jacket', description: 'Vintage wash denim jacket.', price_minor: 5500000, sort_order: 4, availability_status: 'available', images: ['https://images.unsplash.com/photo-1576995853123-5a10305d93c0?auto=format&fit=crop&w=800&q=80'], item_data: { variants: [{ name: 'Size', options: ['S', 'M', 'L', 'XL'], required: true }] } },
-        { page_id: boutiquePage.id, title: 'Suede Ankle Boots', description: 'Tan suede boots with a small heel.', price_minor: 9500000, sort_order: 5, availability_status: 'available', images: ['https://images.unsplash.com/photo-1520639888713-7851133b1ed0?auto=format&fit=crop&w=800&q=80'], item_data: { variants: [{ name: 'Shoe Size (EU)', options: ['38', '39', '40', '41', '42'], required: true }] } }
+        { 
+          page_id: boutiquePage.id, 
+          title: 'Emerald Silk Wrap Dress', 
+          description: '100% mulberry silk wrap dress tailored with cascading pleats and an adjustable waist tie.', 
+          price_minor: 4500000, 
+          sort_order: 0, 
+          availability_status: 'available', 
+          images: ['https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&w=800&q=80'], 
+          item_data: { 
+            category: 'Womenswear',
+            variants: [
+              { name: 'Size', options: ['XS', 'S', 'M', 'L', 'XL'], required: true }, 
+              { name: 'Color', options: ['Emerald Jewel Green', 'Midnight Navy', 'Champagne Gold'], required: true }
+            ] 
+          } 
+        },
+        { 
+          page_id: boutiquePage.id, 
+          title: 'Tailored Italian Linen Blazer', 
+          description: 'Unstructured single-breasted blazer crafted from breathable Italian flax linen with horn buttons.', 
+          price_minor: 7500000, 
+          sort_order: 1, 
+          availability_status: 'available', 
+          images: ['https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=800&q=80'], 
+          item_data: { 
+            category: 'Menswear & Tailoring',
+            variants: [
+              { name: 'Size', options: ['38R', '40R', '42R', '44R'], required: true }, 
+              { name: 'Color', options: ['Sand Beige', 'Olive Sage', 'Sky Blue'], required: true }
+            ] 
+          } 
+        },
+        { 
+          page_id: boutiquePage.id, 
+          title: 'Artisanal Full-Grain Leather Tote', 
+          description: 'Hand-stitched full grain Italian leather tote featuring reinforced brass hardware and laptop compartment.', 
+          price_minor: 8500000, 
+          sort_order: 2, 
+          availability_status: 'available', 
+          images: ['https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=800&q=80'],
+          item_data: {
+            category: 'Accessories & Bags',
+            variants: [
+              { name: 'Leather Finish', options: ['Cognac Heritage Tan', 'Obsidian Black', 'Oxblood Burgundy'], required: true },
+              { name: 'Monogramming (Gold Foil)', options: ['No Monogram', 'Custom 2-3 Letters (+₦5,000)'] }
+            ]
+          }
+        },
+        { 
+          page_id: boutiquePage.id, 
+          title: 'Cashmere Crewneck Knit Sweater', 
+          description: 'Grade-A 2-ply Mongolian cashmere sweater with ribbed cuffs and hem.', 
+          price_minor: 5800000, 
+          sort_order: 3, 
+          availability_status: 'available', 
+          images: ['https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?auto=format&fit=crop&w=800&q=80'],
+          item_data: {
+            category: 'Knitwear',
+            variants: [
+              { name: 'Size', options: ['S', 'M', 'L', 'XL'], required: true },
+              { name: 'Color', options: ['Oatmeal Heather', 'Charcoal Grey', 'Soft Cream'], required: true }
+            ]
+          }
+        },
+        { 
+          page_id: boutiquePage.id, 
+          title: '18K Gold Hammered Hoop Earrings', 
+          description: 'Handcrafted hollow hoops with a light-catching textured hammered finish.', 
+          price_minor: 1800000, 
+          sort_order: 4, 
+          availability_status: 'available', 
+          images: ['https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=800&q=80'],
+          item_data: {
+            category: 'Jewelry',
+            variants: [
+              { name: 'Diameter', options: ['25mm Medium', '35mm Statement'], required: true }
+            ]
+          }
+        },
+        { 
+          page_id: boutiquePage.id, 
+          title: 'Handmade Suede Chelsea Ankle Boots', 
+          description: 'Supple calfskin suede boots with Goodyear welt construction and durable crepe soles.', 
+          price_minor: 9500000, 
+          sort_order: 5, 
+          availability_status: 'available', 
+          images: ['https://images.unsplash.com/photo-1520639888713-7851133b1ed0?auto=format&fit=crop&w=800&q=80'],
+          item_data: {
+            category: 'Footwear',
+            variants: [
+              { name: 'Shoe Size (EU)', options: ['40', '41', '42', '43', '44', '45'], required: true },
+              { name: 'Suede Shade', options: ['Sandstone Tan', 'Espresso Dark Brown', 'Jet Black'], required: true }
+            ]
+          }
+        }
       )
     }
 
     const gadgetsPage = pages.find((p: { id: string, slug: string }) => p.slug === 'pacy-gadgets')
     if (gadgetsPage) {
       pageItems.push(
-        { page_id: gadgetsPage.id, title: 'iPhone 15 Pro Max', description: 'Titanium design with A17 Pro chip and 5x optical zoom camera system.', price_minor: 185000000, sort_order: 0, availability_status: 'available', images: ['https://images.unsplash.com/photo-1695048065096-749e7b28292c?auto=format&fit=crop&w=800&q=80'], item_data: { variants: [{ name: 'Storage', options: ['256GB', '512GB', '1TB'], required: true }, { name: 'Color', options: ['Natural Titanium', 'Blue Titanium', 'Black Titanium'], required: true }] } },
-        { page_id: gadgetsPage.id, title: 'Samsung Galaxy S24 Ultra', description: 'Galaxy AI is here. Titanium exterior and a 6.8" flat display.', price_minor: 175000000, sort_order: 1, availability_status: 'available', images: ['https://images.unsplash.com/photo-1706691147573-009139fb2b75?auto=format&fit=crop&w=800&q=80'], item_data: { variants: [{ name: 'Storage', options: ['256GB', '512GB', '1TB'], required: true }, { name: 'Color', options: ['Titanium Gray', 'Titanium Black'], required: true }] } },
-        { page_id: gadgetsPage.id, title: 'PlayStation 5 Slim (Disc Edition)', description: 'Next-gen gaming console with ultra-high speed SSD and haptic feedback.', price_minor: 85000000, sort_order: 2, availability_status: 'available', images: ['https://images.unsplash.com/photo-1606813907291-d86efa9b94db?auto=format&fit=crop&w=800&q=80'] },
-        { page_id: gadgetsPage.id, title: 'Apple AirPods Pro (2nd Gen)', description: 'Up to 2x more Active Noise Cancellation with USB-C case.', price_minor: 32000000, sort_order: 3, availability_status: 'available', images: ['https://images.unsplash.com/photo-1600294037681-c80b4cb5b434?auto=format&fit=crop&w=800&q=80'], item_data: { variants: [{ name: 'Case Type', options: ['USB-C', 'Lightning'], required: true }] } },
-        { page_id: gadgetsPage.id, title: 'MacBook Air M3 (13-inch)', description: 'Supercharged by M3, lightweight design, and up to 18 hours of battery life.', price_minor: 165000000, sort_order: 4, availability_status: 'available', images: ['https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=800&q=80'], item_data: { variants: [{ name: 'Unified Memory', options: ['8GB', '16GB', '24GB'], required: true }, { name: 'Color', options: ['Midnight', 'Starlight', 'Space Gray'], required: true }] } },
-        { page_id: gadgetsPage.id, title: 'Sony WH-1000XM5 Wireless Headphones', description: 'Industry leading noise cancellation with two processors controlling 8 microphones.', price_minor: 48000000, sort_order: 5, availability_status: 'available', images: ['https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?auto=format&fit=crop&w=800&q=80'], item_data: { variants: [{ name: 'Color', options: ['Black', 'Silver', 'Midnight Blue'], required: true }] } }
+        { 
+          page_id: gadgetsPage.id, 
+          title: 'iPhone 15 Pro Max', 
+          description: 'Aerospace-grade titanium design with A17 Pro chip, Action button, and 5x optical zoom camera.', 
+          price_minor: 185000000, 
+          sort_order: 0, 
+          availability_status: 'available', 
+          images: ['https://images.unsplash.com/photo-1695048065096-749e7b28292c?auto=format&fit=crop&w=800&q=80'], 
+          item_data: { 
+            category: 'Smartphones & Mobile',
+            variants: [
+              { name: 'Internal Storage', options: ['256GB', '512GB', '1TB'], required: true }, 
+              { name: 'Finish', options: ['Natural Titanium', 'Blue Titanium', 'Black Titanium', 'White Titanium'], required: true },
+              { name: 'Warranty Protection', options: ['Standard 1-Year Apple Warranty', '2-Year AppleCare+ with Accidental Damage'] }
+            ] 
+          } 
+        },
+        { 
+          page_id: gadgetsPage.id, 
+          title: 'Samsung Galaxy S24 Ultra', 
+          description: 'Galaxy AI is here. Titanium exterior, built-in S Pen, and a 6.8" flat Dynamic AMOLED 2X display.', 
+          price_minor: 175000000, 
+          sort_order: 1, 
+          availability_status: 'available', 
+          images: ['https://images.unsplash.com/photo-1706691147573-009139fb2b75?auto=format&fit=crop&w=800&q=80'], 
+          item_data: { 
+            category: 'Smartphones & Mobile',
+            variants: [
+              { name: 'Storage', options: ['256GB', '512GB', '1TB'], required: true }, 
+              { name: 'Color', options: ['Titanium Gray', 'Titanium Black', 'Titanium Violet'], required: true }
+            ] 
+          } 
+        },
+        { 
+          page_id: gadgetsPage.id, 
+          title: 'MacBook Air 15-inch (M3 Chip)', 
+          description: 'Liquid Retina display with 500 nits brightness, MagSafe charging, and 18-hour all-day battery life.', 
+          price_minor: 165000000, 
+          sort_order: 2, 
+          availability_status: 'available', 
+          images: ['https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=800&q=80'], 
+          item_data: { 
+            category: 'Laptops & Computers',
+            variants: [
+              { name: 'Unified Memory (RAM)', options: ['16GB Unified RAM', '24GB High-Speed RAM'], required: true }, 
+              { name: 'Color Finish', options: ['Midnight', 'Starlight', 'Space Gray', 'Silver'], required: true }
+            ] 
+          } 
+        },
+        { 
+          page_id: gadgetsPage.id, 
+          title: 'Sony WH-1000XM5 Wireless Headphones', 
+          description: 'Industry-leading noise cancellation with two processors controlling 8 microphones and 30-hour battery.', 
+          price_minor: 48000000, 
+          sort_order: 3, 
+          availability_status: 'available', 
+          images: ['https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?auto=format&fit=crop&w=800&q=80'], 
+          item_data: { 
+            category: 'Audio & Wearables',
+            variants: [
+              { name: 'Color', options: ['Silver White', 'Black Matte', 'Midnight Blue'], required: true }
+            ] 
+          } 
+        },
+        { 
+          page_id: gadgetsPage.id, 
+          title: 'Apple AirPods Pro (2nd Gen, USB-C)', 
+          description: 'Up to 2x more Active Noise Cancellation, Adaptive Audio, and Personalized Spatial Audio.', 
+          price_minor: 32000000, 
+          sort_order: 4, 
+          availability_status: 'available', 
+          images: ['https://images.unsplash.com/photo-1600294037681-c80b4cb5b434?auto=format&fit=crop&w=800&q=80'],
+          item_data: {
+            category: 'Audio & Wearables',
+            variants: [
+              { name: 'Engraving', options: ['No Engraving', 'Custom Free Emoji / Name Engraving'] }
+            ]
+          }
+        },
+        { 
+          page_id: gadgetsPage.id, 
+          title: 'PlayStation 5 Slim (Disc Edition)', 
+          description: 'Next-gen gaming console with 1TB ultra-high speed SSD, ray tracing, and DualSense haptic feedback.', 
+          price_minor: 85000000, 
+          sort_order: 5, 
+          availability_status: 'available', 
+          images: ['https://images.unsplash.com/photo-1606813907291-d86efa9b94db?auto=format&fit=crop&w=800&q=80'],
+          item_data: {
+            category: 'Gaming',
+            variants: [
+              { name: 'Controller Bundle', options: ['1x DualSense Controller', '2x DualSense Controllers + Charging Dock (+₦35,000)'] }
+            ]
+          }
+        }
       )
     }
 
     const hotelsPage = pages.find((p: { id: string, slug: string }) => p.slug === 'pacy-hotels')
     if (hotelsPage) {
       pageItems.push(
-        { page_id: hotelsPage.id, title: 'Ocean View Suite', subtitle: 'King Bed / Balcony', description: 'Luxury suite with panoramic ocean views and complementary breakfast.', price_minor: 12000000, price_display: '120,000 / night', sort_order: 0, availability_status: 'available', item_data: { beds: 1, occupancy: 2 }, images: ['https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&w=800&q=80'] },
-        { page_id: hotelsPage.id, title: 'Standard Double', subtitle: 'Queen Bed', description: 'Comfortable room perfect for business travelers.', price_minor: 4500000, price_display: '45,000 / night', sort_order: 1, availability_status: 'available', item_data: { beds: 1, occupancy: 2 }, images: ['https://images.unsplash.com/photo-1566665797739-1674de7a421a?auto=format&fit=crop&w=800&q=80'] }
+        { 
+          page_id: hotelsPage.id, 
+          title: 'Penthouse Ocean Panorama Suite', 
+          subtitle: 'King Bed / Private Terrace', 
+          description: 'Luxury 120sqm suite with unobstructed Atlantic Ocean views, soaking tub, and 24/7 dedicated butler service.', 
+          price_minor: 12000000, 
+          price_display: '120,000 / night', 
+          sort_order: 0, 
+          availability_status: 'available', 
+          images: ['https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&w=800&q=80'],
+          item_data: { 
+            beds: 1, 
+            occupancy: 2,
+            category: 'Suites & Penthouses',
+            variants: [
+              { name: 'Breakfast Experience', options: ['Complimentary Continental Breakfast', 'Full Champagne Gourmet Brunch'], required: true },
+              { name: 'Airport VIP Transfer', options: ['Standard Concierge Check-in', 'Private Chauffeur Airport Pickup'] }
+            ]
+          } 
+        },
+        { 
+          page_id: hotelsPage.id, 
+          title: 'Executive Lagoon View King Room', 
+          subtitle: 'King Bed / Work Desk / City Skyline', 
+          description: 'Sophisticated 45sqm room with floor-to-ceiling windows, rain shower, and complimentary executive lounge access.', 
+          price_minor: 6500000, 
+          price_display: '65,000 / night', 
+          sort_order: 1, 
+          availability_status: 'available', 
+          images: ['https://images.unsplash.com/photo-1566665797739-1674de7a421a?auto=format&fit=crop&w=800&q=80'],
+          item_data: { 
+            beds: 1, 
+            occupancy: 2,
+            category: 'Executive Rooms',
+            variants: [
+              { name: 'Floor Level', options: ['High Floor (15+)', 'Mid Floor (8-14)'], required: true }
+            ]
+          } 
+        },
+        { 
+          page_id: hotelsPage.id, 
+          title: 'Deluxe Twin City Room', 
+          subtitle: '2 Queen Beds / Balcony', 
+          description: 'Spacious room designed for colleagues or small families, featuring high-speed WiFi and espresso bar.', 
+          price_minor: 4800000, 
+          price_display: '48,000 / night', 
+          sort_order: 2, 
+          availability_status: 'available', 
+          images: ['https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=800&q=80'],
+          item_data: { 
+            beds: 2, 
+            occupancy: 4,
+            category: 'Deluxe Rooms'
+          } 
+        }
+      )
+    }
+
+    const staysPage = pages.find((p: { id: string, slug: string }) => p.slug === 'pacy-stays')
+    if (staysPage) {
+      pageItems.push(
+        { 
+          page_id: staysPage.id, 
+          title: 'Victoria Island Luxury Waterfront Loft', 
+          subtitle: '2 Bed / 2.5 Bath / High Floor', 
+          description: 'Contemporary designer loft featuring private chef kitchen, smart home automation, and infinity pool access.', 
+          price_minor: 9500000, 
+          price_display: '95,000 / night', 
+          sort_order: 0, 
+          availability_status: 'available', 
+          images: ['https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80'],
+          item_data: { 
+            beds: 2, 
+            baths: 2.5, 
+            sqft: 1800,
+            category: 'Luxury Residences',
+            variants: [
+              { name: 'Housekeeping Frequency', options: ['Daily Morning Turndown', 'On-Demand Service Only'] },
+              { name: 'Private Chef Service', options: ['Self Catering', 'Full-Day In-House Private Chef (+₦35,000/day)'] }
+            ]
+          } 
+        },
+        { 
+          page_id: staysPage.id, 
+          title: 'Lekki Sky Villa Penthouse', 
+          subtitle: '3 Bed / 3.5 Bath / Private Rooftop Pool', 
+          description: 'Unmatched luxury with panoramic skyline views, private plunge pool, and dedicated 24/7 security.', 
+          price_minor: 16500000, 
+          price_display: '165,000 / night', 
+          sort_order: 1, 
+          availability_status: 'available', 
+          images: ['https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80'],
+          item_data: { 
+            beds: 3, 
+            baths: 3.5, 
+            sqft: 3200,
+            category: 'Penthouses',
+            variants: [
+              { name: 'Vehicle & Chauffeur', options: ['No Vehicle', 'Range Rover with Private Driver Included (+₦50,000/day)'] }
+            ]
+          } 
+        },
+        { 
+          page_id: staysPage.id, 
+          title: 'Ikoyi Minimalist Designer Studio', 
+          subtitle: '1 Bed / 1 Bath / Superfast Fiber', 
+          description: 'Modern, quiet studio apartment equipped with dedicated ergonomic workspace, perfect for remote executives.', 
+          price_minor: 5500000, 
+          price_display: '55,000 / night', 
+          sort_order: 2, 
+          availability_status: 'available', 
+          images: ['https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=80'],
+          item_data: { 
+            beds: 1, 
+            baths: 1, 
+            sqft: 650,
+            category: 'Executive Studios'
+          } 
+        }
       )
     }
 
     const repairsPage = pages.find((p: { id: string, slug: string }) => p.slug === 'pacy-repairs')
     if (repairsPage) {
       pageItems.push(
-        { page_id: repairsPage.id, title: 'Screen Replacement', description: 'Original OEM display replacement. TrueTone restored.', price_minor: 4500000, price_display: 'From 45,000', sort_order: 0, availability_status: 'available', item_data: { turnaround: '2-4 hours', category: 'Screen Repairs' }, images: ['https://images.unsplash.com/photo-1597848212624-a19eb35e2651?auto=format&fit=crop&w=800&q=80'] },
-        { page_id: repairsPage.id, title: 'Battery Replacement', description: 'High-capacity battery replacement with 6 months warranty.', price_minor: 2500000, price_display: 'From 25,000', sort_order: 1, availability_status: 'available', item_data: { turnaround: '1-2 hours', category: 'Battery Services' }, images: ['https://images.unsplash.com/photo-1628126235206-5260b9ea6441?auto=format&fit=crop&w=800&q=80'] },
-        { page_id: repairsPage.id, title: 'Water Damage Diagnostic', description: 'Comprehensive ultrasonic cleaning and diagnostic test.', price_minor: 1000000, sort_order: 2, availability_status: 'available', item_data: { turnaround: '24-48 hours', category: 'Diagnostics' }, images: ['https://images.unsplash.com/photo-1590487988256-9ed24133863e?auto=format&fit=crop&w=800&q=80'] }
+        { 
+          page_id: repairsPage.id, 
+          title: 'OEM OLED Screen Replacement', 
+          description: 'Factory-original OLED display replacement with TrueTone color recalibration and water seal restoration.', 
+          price_minor: 4500000, 
+          price_display: 'From 45,000', 
+          sort_order: 0, 
+          availability_status: 'available', 
+          images: ['https://images.unsplash.com/photo-1597848212624-a19eb35e2651?auto=format&fit=crop&w=800&q=80'], 
+          item_data: { 
+            turnaround: '1-2 hours', 
+            category: 'Display & Glass',
+            variants: [
+              { name: 'Device Series', options: ['iPhone 15 Series', 'iPhone 14 Series', 'Samsung Galaxy S24/S23 Ultra'], required: true },
+              { name: 'Tempered Glass Shield', options: ['No Screen Guard', '9H Sapphire Glass Protector Installed (+₦5,000)'] }
+            ]
+          } 
+        },
+        { 
+          page_id: repairsPage.id, 
+          title: 'High-Capacity OEM Battery Replacement', 
+          description: 'Brand new certified battery cell with zero cycle count and 6-month full replacement warranty.', 
+          price_minor: 2500000, 
+          price_display: 'From 25,000', 
+          sort_order: 1, 
+          availability_status: 'available', 
+          images: ['https://images.unsplash.com/photo-1628126235206-5260b9ea6441?auto=format&fit=crop&w=800&q=80'],
+          item_data: {
+            turnaround: '45 mins',
+            category: 'Battery & Power',
+            variants: [
+              { name: 'Device Type', options: ['Apple iPhone / iPad', 'MacBook Air / Pro', 'Samsung Galaxy Series'], required: true }
+            ]
+          }
+        },
+        { 
+          page_id: repairsPage.id, 
+          title: 'Water Damage Ultrasonic Board Diagnostic', 
+          description: 'Complete ultrasonic chemical bath cleaning, micro-corrosion removal, and motherboard circuit diagnostic.', 
+          price_minor: 1200000, 
+          price_display: '12,000', 
+          sort_order: 2, 
+          availability_status: 'available', 
+          images: ['https://images.unsplash.com/photo-1590487988256-9ed24133863e?auto=format&fit=crop&w=800&q=80'],
+          item_data: {
+            turnaround: '24-48 hours',
+            category: 'Motherboard Diagnostics'
+          }
+        }
+      )
+    }
+
+    const mediaPage = pages.find((p: { id: string, slug: string }) => p.slug === 'pacy-media')
+    if (mediaPage) {
+      pageItems.push(
+        { 
+          page_id: mediaPage.id, 
+          title: 'Dedicated 4K Brand Showcase Video', 
+          description: '60-second cinematic video integration with narrative storytelling and professional color grading.', 
+          price_minor: 15000000, 
+          sort_order: 0, 
+          availability_status: 'available', 
+          images: ['https://images.unsplash.com/photo-1616469829581-73993eb86b02?auto=format&fit=crop&w=800&q=80'],
+          item_data: {
+            category: 'Video Productions',
+            variants: [
+              { name: 'Platform Distribution', options: ['Instagram Reel + YouTube Short', 'TikTok + IG Cross-Post', 'Full 4K YouTube Dedicated Video'], required: true }
+            ]
+          }
+        },
+        { 
+          page_id: mediaPage.id, 
+          title: 'Short-Form Viral TikTok / Reel Integration', 
+          description: 'Fast-paced, authentic product integration created specifically for organic algorithmic virality.', 
+          price_minor: 8500000, 
+          sort_order: 1, 
+          availability_status: 'available', 
+          images: ['https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?auto=format&fit=crop&w=800&q=80'],
+          item_data: {
+            category: 'Short-Form Content',
+            variants: [
+              { name: 'Turnaround Time', options: ['Standard 5 Days', 'Rush 48-Hour Delivery (+₦2,500,000)'] }
+            ]
+          }
+        }
       )
     }
 

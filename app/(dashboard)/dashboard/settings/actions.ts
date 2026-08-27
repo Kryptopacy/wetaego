@@ -732,6 +732,7 @@ export const saveLocationDesignTokens = authActionClient
     animation_style: zfd.text(z.string().optional()),
     density: zfd.text(z.string().optional()),
     color_theme: zfd.text(z.string().optional()),
+    aspect_ratio: zfd.text(z.string().optional()),
   }))
   .action(async ({ parsedInput, ctx: { supabase, user } }) => {
     const { cookies } = await import('next/headers')
@@ -773,6 +774,7 @@ export const savePageDesignTokens = authActionClient
     animation_style: zfd.text(z.string().optional()),
     density: zfd.text(z.string().optional()),
     color_theme: zfd.text(z.string().optional()),
+    aspect_ratio: zfd.text(z.string().optional()),
   }))
   .action(async ({ parsedInput, ctx: { supabase, user } }) => {
     const { cookies } = await import('next/headers')

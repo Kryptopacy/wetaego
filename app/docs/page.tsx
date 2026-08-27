@@ -338,7 +338,7 @@ export default function DocsPage() {
               </div>
               <div className="p-4 rounded-xl bg-black/60 border border-white/5 space-y-1">
                 <span className="text-emerald-400 font-bold">WebMCP Browser Agent API</span>
-                <p className="text-zinc-400 font-sans text-xs">Exposed dynamically via <code>navigator.modelContext.provideContext()</code>.</p>
+                <p className="text-zinc-400 font-sans text-xs">Standard W3C in-browser tools registered via <code>document.modelContext.registerTool()</code>.</p>
               </div>
               <div className="p-4 rounded-xl bg-black/60 border border-white/5 space-y-1">
                 <span className="text-emerald-400 font-bold">ARD Manifest (ai-catalog.json)</span>
