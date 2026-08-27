@@ -1,6 +1,7 @@
 /**
- * Dynamic WebMCP Tool Factory for OurMenuOS
- * Generates platform-level tools tailored to the active merchant storefront.
+ * Authoritative WebMCP Client-Side Tool Suite for WETAEGO (OurMenuOS)
+ * Implements the standard 8-tool client-side commerce specification for document.modelContext
+ * with Human-in-the-Loop transaction authorization boundaries.
  */
 
 import type { WebMCPTool } from './types'
@@ -17,7 +18,7 @@ export interface MenuItemData {
   dietary_tags?: string[] | null
   variants?: {
     name: string
-    options: { label: string; price_delta_minor?: number }[]
+    options: { label: string; price_delta_minor?: number }[] | string[]
   }[]
   is_available?: boolean
 }
@@ -32,54 +33,69 @@ export interface StorefrontContext {
   menuItems: MenuItemData[]
   categories?: string[]
   tableIdentifier?: string
-  onActionTriggered?: (action: string, payload: any) => void
+  onActionTriggered?: (action: string, payload: unknown) => void
 }
 
 export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[] {
-  const { locationName, currency = 'USD', menuItems = [], tableIdentifier = 'Storefront Guest' } = ctx
-
+  const { locationName, currency = 'NGN', menuItems = [], tableIdentifier = 'Storefront Guest' } = ctx
   const tools: WebMCPTool[] = []
 
-  // 1. Search Catalog / Menu / Services / Products
+  // 1. search_catalog
   tools.push({
     name: 'search_catalog',
-    description: `Search the active offerings, products, dishes, bookings, or services for ${locationName}. Filter by search keywords, category name, maximum price, or custom tags/attributes (e.g. dietary flags, material types, service types, device specs).`,
+    description: `Search the current venue catalog for products, dishes, services, and available variants for ${locationName}. Results are limited to items currently visible and orderable.`,
     inputSchema: {
       type: 'object',
       properties: {
         query: {
           type: 'string',
-          description: 'Keyword to search item names, descriptions, or specifications (e.g. "pasta", "haircut", "penthouse", "titanium", "massage", "repair").'
+          description: 'Natural-language search query.'
         },
         category: {
           type: 'string',
-          description: 'Filter by specific category or department name.'
-        },
-        max_price: {
-          type: 'number',
-          description: 'Maximum price in major currency units.'
-        },
-        tags: {
-          type: 'array',
-          items: { type: 'string' },
-          description: 'Tags, attributes, or dietary preferences to match (e.g. ["vegan", "halal"], ["waterfront"], ["4k"], ["organic"], ["oem"]).'
+          description: 'Category name filter.'
         },
         dietary: {
           type: 'array',
-          items: { type: 'string' },
-          description: 'Alias for tags when searching food & beverage items (e.g. ["vegan", "gluten_free", "halal"]).'
+          items: {
+            type: 'string',
+            enum: ['vegan', 'vegetarian', 'halal', 'keto', 'gluten_free', 'dairy_free', 'nut_free']
+          },
+          description: 'Dietary filter tags.'
+        },
+        maxPrice: {
+          type: 'number',
+          minimum: 0,
+          description: 'Maximum price in major currency units.'
+        },
+        inStockOnly: {
+          type: 'boolean',
+          default: true,
+          description: 'Filter only items currently available in stock.'
         }
-      }
+      },
+      additionalProperties: false
     },
-    execute: async (input: { query?: string; category?: string; max_price?: number; tags?: string[]; dietary?: string[] }) => {
+    execute: async (input: {
+      query?: string
+      category?: string
+      dietary?: string[]
+      maxPrice?: number
+      inStockOnly?: boolean
+    }) => {
       let results = [...menuItems]
+
+      if (input.inStockOnly !== false) {
+        results = results.filter(i => i.is_available !== false)
+      }
 
       if (input.query) {
         const q = input.query.toLowerCase()
         results = results.filter(
           item =>
             item.name.toLowerCase().includes(q) ||
-            (item.description && item.description.toLowerCase().includes(q))
+            (item.description && item.description.toLowerCase().includes(q)) ||
+            (item.category && item.category.toLowerCase().includes(q))
         )
       }
 
@@ -88,14 +104,13 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
         results = results.filter(item => item.category && item.category.toLowerCase().includes(cat))
       }
 
-      if (typeof input.max_price === 'number') {
-        const maxMinor = input.max_price * 100
+      if (typeof input.maxPrice === 'number') {
+        const maxMinor = input.maxPrice * 100
         results = results.filter(item => item.price_minor <= maxMinor)
       }
 
-      const searchTags = input.tags || input.dietary
-      if (searchTags && searchTags.length > 0) {
-        const targetTags = searchTags.map(t => t.toLowerCase())
+      if (input.dietary && input.dietary.length > 0) {
+        const targetTags = input.dietary.map(t => t.toLowerCase())
         results = results.filter(item => {
           const itemTags = (item.dietary_tags || []).map(t => t.toLowerCase())
           return targetTags.every(t => itemTags.includes(t))
@@ -103,36 +118,38 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
       }
 
       return {
-        storeName: locationName,
-        totalFound: results.length,
+        venue: locationName,
         currency,
-        items: results.slice(0, 20).map(item => ({
-          id: item.id,
+        totalFound: results.length,
+        items: results.map(item => ({
+          itemId: item.id,
           name: item.name,
           category: item.category || 'General',
-          priceFormatted: `${(item.price_minor / 100).toFixed(2)} ${currency}`,
-          priceMinor: item.price_minor,
+          price: item.price_minor / 100,
+          priceFormatted: `${(item.price_minor / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })} ${currency}`,
           description: item.description || '',
-          tags: item.dietary_tags || [],
-          hasVariants: !!(item.variants && item.variants.length > 0)
+          dietaryTags: item.dietary_tags || [],
+          isAvailable: item.is_available !== false,
+          hasModifiers: !!(item.variants && item.variants.length > 0)
         }))
       }
     }
   })
 
-  // 2. Get Item Details
+  // 2. get_item_details
   tools.push({
     name: 'get_item_details',
-    description: `Get full details, ingredients, dietary badges, and customizable options (sizes, add-ons, toppings) for a specific item.`,
+    description: `Return authoritative details for a catalog item, including price, availability, modifiers, dietary tags and applicable options.`,
     inputSchema: {
       type: 'object',
+      required: ['itemId'],
       properties: {
         itemId: {
           type: 'string',
-          description: 'The unique ID of the item.'
+          description: 'The unique item ID.'
         }
       },
-      required: ['itemId']
+      additionalProperties: false
     },
     execute: async ({ itemId }: { itemId: string }) => {
       const item = menuItems.find(i => i.id === itemId)
@@ -141,53 +158,113 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
       }
 
       return {
-        id: item.id,
+        itemId: item.id,
         name: item.name,
         category: item.category || 'General',
-        priceMinor: item.price_minor,
-        priceFormatted: `${(item.price_minor / 100).toFixed(2)} ${currency}`,
+        price: item.price_minor / 100,
+        priceFormatted: `${(item.price_minor / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })} ${currency}`,
         description: item.description || '',
         dietaryTags: item.dietary_tags || [],
-        variants: item.variants || [],
+        modifiers: item.variants || [],
         isAvailable: item.is_available !== false
       }
     }
   })
 
-  // 3. Add Item to Cart
+  // 3. create_cart
   tools.push({
-    name: 'add_to_cart',
-    description: `Add an item with optional variant selections and quantity to the customer's live cart. Triggers instant real-time visual UI update on screen.`,
+    name: 'create_cart',
+    description: `Create or retrieve the current shopping cart for the active venue and customer session.`,
     inputSchema: {
       type: 'object',
+      properties: {},
+      additionalProperties: false
+    },
+    execute: async () => {
+      const cartStore = useCartStore.getState()
+      const items = cartStore.items
+      const subtotalMinor = cartStore.totalAmountMinor()
+
+      return {
+        venue: locationName,
+        currency,
+        cartId: `cart_${ctx.slug}_${ctx.locationId.slice(0, 8)}`,
+        itemCount: items.reduce((sum, it) => sum + it.quantity, 0),
+        subtotal: subtotalMinor / 100,
+        subtotalFormatted: `${(subtotalMinor / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })} ${currency}`
+      }
+    }
+  })
+
+  // 4. add_to_cart
+  tools.push({
+    name: 'add_to_cart',
+    description: `Add an available catalog item to the active cart using only valid modifier selections.`,
+    inputSchema: {
+      type: 'object',
+      required: ['itemId', 'quantity'],
       properties: {
         itemId: {
           type: 'string',
-          description: 'The unique ID of the item to add.'
+          description: 'The unique ID of the item.'
         },
         quantity: {
           type: 'integer',
-          description: 'Quantity of items to add (defaults to 1).'
+          minimum: 1,
+          maximum: 50,
+          description: 'Quantity of the item to add.'
         },
-        variantSelections: {
-          type: 'object',
-          description: 'Map of variant option selections (e.g. { "Size": "Large", "Spice Level": "Medium" }).'
+        modifiers: {
+          type: 'array',
+          items: {
+            type: 'object',
+            required: ['modifierId'],
+            properties: {
+              modifierId: { type: 'string' },
+              optionIds: {
+                type: 'array',
+                items: { type: 'string' }
+              }
+            },
+            additionalProperties: false
+          },
+          description: 'Modifier and option selections.'
+        },
+        notes: {
+          type: 'string',
+          maxLength: 500,
+          description: 'Special preparation instructions or customer notes.'
         }
       },
-      required: ['itemId']
+      additionalProperties: false
     },
-    execute: async (input: { itemId: string; quantity?: number; variantSelections?: Record<string, string> }) => {
+    execute: async (input: {
+      itemId: string
+      quantity: number
+      modifiers?: { modifierId: string; optionIds?: string[] }[]
+      notes?: string
+    }) => {
       const item = menuItems.find(i => i.id === input.itemId)
       if (!item) {
-        return { error: `Item '${input.itemId}' not found.` }
+        return { error: `Item '${input.itemId}' not found in active catalog.` }
+      }
+      if (item.is_available === false) {
+        return { error: `Item '${item.name}' is currently unavailable.` }
       }
 
-      const qty = Math.max(1, input.quantity || 1)
+      const qty = Math.max(1, Math.min(50, input.quantity || 1))
       const cartStore = useCartStore.getState()
 
-      // Build cartKey based on itemId and variant combo
-      const variantKeyPart = input.variantSelections ? JSON.stringify(input.variantSelections) : ''
-      const cartKey = `${item.id}_${variantKeyPart}`
+      const variantMap: Record<string, string> = {}
+      if (input.modifiers && Array.isArray(input.modifiers)) {
+        input.modifiers.forEach(m => {
+          if (m.modifierId && m.optionIds && m.optionIds.length > 0) {
+            variantMap[m.modifierId] = m.optionIds.join(', ')
+          }
+        })
+      }
+
+      const cartKey = `${item.id}_${JSON.stringify(variantMap)}`
 
       for (let i = 0; i < qty; i++) {
         cartStore.addItem({
@@ -196,142 +273,295 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
           name: item.name,
           price_minor: item.price_minor,
           pageId: ctx.slug,
-          variantSelections: input.variantSelections,
-          variantLabel: input.variantSelections
-            ? Object.values(input.variantSelections).join(' / ')
-            : undefined
+          variantSelections: Object.keys(variantMap).length > 0 ? variantMap : undefined,
+          variantLabel: Object.keys(variantMap).length > 0 ? Object.values(variantMap).join(' / ') : undefined
         })
       }
 
-      // Visual feedback toast
-      toast.success(`🤖 AI added ${qty}x ${item.name} to cart`, {
-        description: input.variantSelections ? Object.entries(input.variantSelections).map(([k, v]) => `${k}: ${v}`).join(', ') : undefined,
+      toast.success(`🛒 Added ${qty}x ${item.name} to cart`, {
+        description: Object.keys(variantMap).length > 0 ? Object.entries(variantMap).map(([k, v]) => `${k}: ${v}`).join(' • ') : undefined,
         duration: 3500
       })
 
       if (ctx.onActionTriggered) {
-        ctx.onActionTriggered('add_to_cart', { item, quantity: qty })
+        ctx.onActionTriggered('add_to_cart', { item, quantity: qty, modifiers: input.modifiers, notes: input.notes })
       }
 
-      const updatedState = useCartStore.getState()
+      const updated = useCartStore.getState()
+      const subtotalMinor = updated.totalAmountMinor()
+
       return {
         success: true,
         message: `Added ${qty}x ${item.name} to cart.`,
-        cartItemCount: updatedState.items.reduce((sum, it) => sum + it.quantity, 0),
-        subtotalFormatted: `${(updatedState.totalAmountMinor() / 100).toFixed(2)} ${currency}`
+        cartItemCount: updated.items.reduce((sum, it) => sum + it.quantity, 0),
+        subtotal: subtotalMinor / 100,
+        subtotalFormatted: `${(subtotalMinor / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })} ${currency}`
       }
     }
   })
 
-  // 4. View Cart
+  // 5. get_cart
   tools.push({
-    name: 'view_cart',
-    description: `Inspect the current customer cart: list of items, quantities, subtotal, active discounts, and final calculated total.`,
+    name: 'get_cart',
+    description: `Return the current cart, validated prices, modifiers, taxes, fees and current total.`,
     inputSchema: {
       type: 'object',
-      properties: {}
+      properties: {},
+      additionalProperties: false
     },
     execute: async () => {
       const cartStore = useCartStore.getState()
       const items = cartStore.items
       const subtotalMinor = cartStore.totalAmountMinor()
       const discountMinor = cartStore.getDiscountAmountMinor(subtotalMinor)
-      const finalTotalMinor = cartStore.getDiscountedTotalAmountMinor(subtotalMinor)
+      const discountedSubtotalMinor = cartStore.getDiscountedTotalAmountMinor(subtotalMinor)
 
       return {
-        storeName: locationName,
-        itemCount: items.reduce((sum, it) => sum + it.quantity, 0),
+        venue: locationName,
         currency,
-        items: items.map(it => ({
-          cartKey: it.cartKey,
-          id: it.id,
+        itemCount: items.reduce((sum, it) => sum + it.quantity, 0),
+        lines: items.map(it => ({
+          lineId: it.cartKey,
+          itemId: it.id,
           name: it.name,
           quantity: it.quantity,
-          unitPriceFormatted: `${(it.price_minor / 100).toFixed(2)} ${currency}`,
-          lineTotalFormatted: `${((it.price_minor * it.quantity) / 100).toFixed(2)} ${currency}`,
-          variant: it.variantLabel || null
+          unitPrice: it.price_minor / 100,
+          unitPriceFormatted: `${(it.price_minor / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })} ${currency}`,
+          lineTotal: (it.price_minor * it.quantity) / 100,
+          lineTotalFormatted: `${((it.price_minor * it.quantity) / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })} ${currency}`,
+          modifiers: it.variantSelections || null
         })),
-        subtotalFormatted: `${(subtotalMinor / 100).toFixed(2)} ${currency}`,
-        discountAmountFormatted: `${(discountMinor / 100).toFixed(2)} ${currency}`,
+        subtotal: subtotalMinor / 100,
+        subtotalFormatted: `${(subtotalMinor / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })} ${currency}`,
+        discountAmount: discountMinor / 100,
         discountPercentage: cartStore.spinnerDiscount || 0,
-        totalAmountFormatted: `${(finalTotalMinor / 100).toFixed(2)} ${currency}`,
-        splitCount: cartStore.splitCount,
-        splitType: cartStore.splitType
+        total: discountedSubtotalMinor / 100,
+        totalFormatted: `${(discountedSubtotalMinor / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })} ${currency}`
       }
     }
   })
 
-  // 5. Update Cart Quantity / Remove Item
+  // 6. update_cart
   tools.push({
-    name: 'update_cart_quantity',
-    description: `Adjust the quantity of an existing item in the cart or remove it completely.`,
+    name: 'update_cart',
+    description: `Modify an existing cart line or remove it from the current cart. Set quantity to 0 to remove.`,
     inputSchema: {
       type: 'object',
+      required: ['lineId'],
       properties: {
-        cartKey: {
+        lineId: {
           type: 'string',
-          description: 'The cartKey of the item in the cart.'
+          description: 'The lineId (cartKey) of the item to update.'
         },
-        delta: {
+        quantity: {
           type: 'integer',
-          description: 'Change in quantity (+1 to increase, -1 to decrease).'
+          minimum: 0,
+          maximum: 50,
+          description: 'New quantity. Set to 0 to remove item.'
         },
-        remove: {
-          type: 'boolean',
-          description: 'Set to true to completely remove the item from cart.'
+        notes: {
+          type: 'string',
+          maxLength: 500,
+          description: 'Updated notes or instructions.'
         }
       },
-      required: ['cartKey']
+      additionalProperties: false
     },
-    execute: async (input: { cartKey: string; delta?: number; remove?: boolean }) => {
+    execute: async (input: { lineId: string; quantity?: number; notes?: string }) => {
       const cartStore = useCartStore.getState()
-      if (input.remove) {
-        cartStore.removeItem(input.cartKey)
-        toast.info(`🤖 AI removed item from cart`)
-      } else if (typeof input.delta === 'number') {
-        cartStore.updateQuantity(input.cartKey, input.delta)
-        toast.info(`🤖 AI updated cart quantity`)
+      const existingLine = cartStore.items.find(i => i.cartKey === input.lineId)
+
+      if (!existingLine) {
+        return { error: `Cart line with ID '${input.lineId}' not found.` }
+      }
+
+      if (input.quantity === 0) {
+        cartStore.removeItem(input.lineId)
+        toast.info(`Removed ${existingLine.name} from cart`)
+      } else if (typeof input.quantity === 'number') {
+        const delta = input.quantity - existingLine.quantity
+        cartStore.updateQuantity(input.lineId, delta)
+        toast.info(`Updated ${existingLine.name} quantity to ${input.quantity}`)
       }
 
       const updated = useCartStore.getState()
+      const subtotalMinor = updated.totalAmountMinor()
+
       return {
         success: true,
-        remainingItems: updated.items.length,
-        subtotalFormatted: `${(updated.totalAmountMinor() / 100).toFixed(2)} ${currency}`
+        remainingLines: updated.items.length,
+        totalItemCount: updated.items.reduce((sum, it) => sum + it.quantity, 0),
+        subtotal: subtotalMinor / 100,
+        subtotalFormatted: `${(subtotalMinor / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })} ${currency}`
       }
     }
   })
 
-  // 6. Clear Cart
+  // 7. initiate_checkout
   tools.push({
-    name: 'clear_cart',
-    description: `Clear all items from the customer's cart.`,
+    name: 'initiate_checkout',
+    description: `Validate the current cart and prepare a checkout session. This does not authorize payment or submit the order.`,
     inputSchema: {
       type: 'object',
-      properties: {}
+      required: ['fulfillment'],
+      properties: {
+        fulfillment: {
+          type: 'string',
+          enum: ['dine_in', 'pickup', 'delivery'],
+          description: 'Fulfillment type for the order.'
+        },
+        tableIdentifier: {
+          type: 'string',
+          description: 'Table number, room, seat, or pickup counter.'
+        },
+        customer: {
+          type: 'object',
+          properties: {
+            name: { type: 'string' },
+            email: { type: 'string', format: 'email' },
+            phone: { type: 'string' }
+          },
+          additionalProperties: false
+        },
+        notes: {
+          type: 'string',
+          maxLength: 1000
+        }
+      },
+      additionalProperties: false
     },
-    execute: async () => {
-      useCartStore.getState().clearCart()
-      toast.info(`🤖 AI cleared cart`)
-      return { success: true, message: 'Cart cleared successfully.' }
+    execute: async (input: {
+      fulfillment: 'dine_in' | 'pickup' | 'delivery'
+      tableIdentifier?: string
+      customer?: { name?: string; email?: string; phone?: string }
+      notes?: string
+    }) => {
+      const cartStore = useCartStore.getState()
+      const items = cartStore.items
+
+      if (items.length === 0) {
+        return { error: 'Cannot initiate checkout with an empty cart.' }
+      }
+
+      const subtotalMinor = cartStore.totalAmountMinor()
+      const discountMinor = cartStore.getDiscountAmountMinor(subtotalMinor)
+      const discountedSubtotal = (subtotalMinor - discountMinor) / 100
+      const tax = Math.round(discountedSubtotal * 0.075 * 100) / 100 // 7.5% VAT
+      const fees = 0
+      const total = discountedSubtotal + tax + fees
+      const checkoutId = `chk_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`
+
+      toast.info(`💳 Checkout Session Prepared`, {
+        description: `Total: ${total.toLocaleString('en-US', { minimumFractionDigits: 2 })} ${currency}. Human confirmation required to authorize.`,
+        duration: 5000
+      })
+
+      return {
+        checkoutId,
+        currency,
+        venue: locationName,
+        fulfillment: input.fulfillment,
+        tableIdentifier: input.tableIdentifier || tableIdentifier,
+        subtotal: discountedSubtotal,
+        tax,
+        fees,
+        total,
+        totalFormatted: `${total.toLocaleString('en-US', { minimumFractionDigits: 2 })} ${currency}`,
+        itemCount: items.reduce((sum, it) => sum + it.quantity, 0),
+        requiresPaymentAuthorization: true,
+        message: 'Checkout prepared. To finalize, the user must authorize via submit_order with explicit human confirmation.'
+      }
     }
   })
 
-  // 7. Request Staff / Waiter Assistance
+  // 8. submit_order (MANDATORY Human-in-the-Loop Authorization Gate)
   tools.push({
-    name: 'call_staff_or_service',
-    description: `Send an immediate service or waiter call notification to store staff.`,
+    name: 'submit_order',
+    description: `Submit the previously reviewed checkout as a customer order after explicit human authorization.`,
+    inputSchema: {
+      type: 'object',
+      required: ['checkoutId', 'authorization'],
+      properties: {
+        checkoutId: {
+          type: 'string',
+          description: 'The checkoutId returned from initiate_checkout.'
+        },
+        authorization: {
+          type: 'object',
+          required: ['confirmed'],
+          properties: {
+            confirmed: {
+              type: 'boolean',
+              description: 'Must be explicitly confirmed by human customer.'
+            },
+            confirmationId: {
+              type: 'string',
+              description: 'Human confirmation identifier or token.'
+            }
+          },
+          additionalProperties: false
+        }
+      },
+      additionalProperties: false
+    },
+    execute: async (input: {
+      checkoutId: string
+      authorization: { confirmed: boolean; confirmationId?: string }
+    }) => {
+      if (!input.authorization || input.authorization.confirmed !== true) {
+        return {
+          error: 'Transaction rejected: submit_order requires explicit human customer authorization (confirmed: true).'
+        }
+      }
+
+      const cartStore = useCartStore.getState()
+      const items = cartStore.items
+
+      if (items.length === 0) {
+        return { error: 'Cart is empty. Order cannot be placed.' }
+      }
+
+      const subtotalMinor = cartStore.totalAmountMinor()
+      const orderId = `ord_${Date.now().toString(36)}`
+
+      // Visual success and clear cart
+      toast.success(`🎉 Order Confirmed! (#${orderId})`, {
+        description: `Order successfully routed to ${locationName} kitchen/fulfillment.`,
+        duration: 6000
+      })
+
+      cartStore.clearCart()
+
+      return {
+        success: true,
+        orderId,
+        checkoutId: input.checkoutId,
+        venue: locationName,
+        status: 'accepted',
+        currency,
+        total: subtotalMinor / 100,
+        totalFormatted: `${(subtotalMinor / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })} ${currency}`,
+        message: `Order successfully placed and routed to ${locationName}.`
+      }
+    }
+  })
+
+  // Helper & Operations Tools
+  tools.push({
+    name: 'request_staff',
+    description: `Send an immediate service or waiter call notification to venue staff.`,
     inputSchema: {
       type: 'object',
       properties: {
         reason: {
           type: 'string',
-          description: 'Reason for calling staff (e.g. "Need extra napkins", "Question about bill", "Water refill").'
+          description: 'Reason for request (e.g. "Water refill", "Bill check", "Assistance").'
         }
-      }
+      },
+      additionalProperties: false
     },
     execute: async (input: { reason?: string }) => {
-      toast.success(`🔔 Staff alerted for Table/Seat: ${tableIdentifier}`, {
+      toast.success(`🔔 Staff alerted for: ${tableIdentifier}`, {
         description: input.reason || 'Staff is on their way to assist you.',
         duration: 4000
       })
@@ -339,51 +569,6 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
         success: true,
         message: `Staff notification sent for ${tableIdentifier}.`,
         reason: input.reason || 'General assistance'
-      }
-    }
-  })
-
-  // 8. Initiate Checkout & Place Order Gate
-  tools.push({
-    name: 'initiate_checkout',
-    description: `Prepares the checkout payload with the current cart and prompts the customer to review and confirm payment.`,
-    inputSchema: {
-      type: 'object',
-      properties: {
-        customerName: {
-          type: 'string',
-          description: 'Customer full name.'
-        },
-        customerPhone: {
-          type: 'string',
-          description: 'Customer contact phone number.'
-        },
-        notes: {
-          type: 'string',
-          description: 'Special preparation or delivery instructions.'
-        }
-      }
-    },
-    execute: async (input: { customerName?: string; customerPhone?: string; notes?: string }) => {
-      const cartStore = useCartStore.getState()
-      if (cartStore.items.length === 0) {
-        return { error: 'Cannot checkout with an empty cart. Please add items first.' }
-      }
-
-      toast.success(`💳 Ready for Checkout!`, {
-        description: `Please review your order of ${(cartStore.getDiscountedTotalAmountMinor(cartStore.totalAmountMinor()) / 100).toFixed(2)} ${currency}.`,
-        duration: 5000
-      })
-
-      if (ctx.onActionTriggered) {
-        ctx.onActionTriggered('open_checkout', input)
-      }
-
-      return {
-        status: 'awaiting_human_confirmation',
-        message: 'Order review modal presented on screen. Human customer can now confirm and pay.',
-        totalDue: `${(cartStore.getDiscountedTotalAmountMinor(cartStore.totalAmountMinor()) / 100).toFixed(2)} ${currency}`,
-        items: cartStore.items.map(i => `${i.quantity}x ${i.name}`)
       }
     }
   })

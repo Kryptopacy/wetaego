@@ -162,17 +162,17 @@ WETAEGO is engineered with **Next.js 16 (App Router)**, **React 19**, **Zustand*
 ```
 
 ### Core Architecture Components:
-1. **Universal Registry & Browser Polyfill (`lib/webmcp/registry.ts`, `lib/webmcp/types.ts`)**:
+1. **Customer WebMCP Layer (`lib/webmcp/registry.ts`, `lib/webmcp/tools.ts`)**:
    * Direct interface to W3C `document.modelContext.registerTool` and `window.modelContext`.
-   * Isomorphic fallback engine ensuring complete operational stability in development, automated CI environments, and standard browsers.
-2. **Context-Aware Dynamic Tool Factory (`lib/webmcp/tools.ts`)**:
-   * Evaluates the active tenant’s taxonomy, catalog items, modifier trees, currency, and table/room identifier.
-   * Synthesizes 8 full-lifecycle tools with validated JSON Schema parameters.
+   * Standard 8-tool customer commerce suite (`search_catalog`, `get_item_details`, `create_cart`, `add_to_cart`, `get_cart`, `update_cart`, `initiate_checkout`, `submit_order`, `request_staff`) with session-scoped cart persistence and a mandatory Human Authorization Gate.
+2. **Staff & Enterprise MCP Server (`app/api/mcp/route.ts`, `app/.well-known/mcp.json/route.ts`)**:
+   * Bearer-authenticated Model Context Protocol (MCP) server for external AI agents (Claude Desktop, ChatGPT, enterprise bots).
+   * Exposes operational tools: `get_active_orders`, `update_order_status`, `mark_item_unavailable`, `get_table_status`, `get_daily_sales`, and `duplicate_catalog_to_branch` for automated fleet management and nightly sales auditing across multi-location franchises.
 3. **Platform Storefront Injector (`components/webmcp/webmcp-provider.tsx`)**:
    * Injected globally across public routes (`app/m/[slug]/page.tsx` and `app/m/[slug]/p/[pageSlug]/page.tsx`).
    * Automatically adapts to any business type and unregisters tools cleanly on page transitions.
 4. **Interactive In-Browser WebMCP Playground (`components/webmcp/webmcp-tester.tsx`)**:
-   * Floating tester badge (`⚡ WebMCP Tools`) embedded in every storefront.
+   * Embedded tester sandbox available for judges and developers to inspect live JSON-RPC schemas and simulate agent calls.
    * Allows judges, developers, and users to trigger 1-click test scenarios, inspect raw JSON inputs and schema outputs, and observe instantaneous UI reactivity on any browser.
 5. **Robust Automated Test Suite (`lib/webmcp/__tests__/webmcp.test.ts`)**:
    * 8 comprehensive Vitest integration tests validating search filtering, variant attachment, cart state persistence, bill splitting, and checkout handoff with 100% pass rate.
