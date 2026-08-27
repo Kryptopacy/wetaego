@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Utensils, ShoppingBag, Scissors, Briefcase, Building, Store, ArrowRight, Sparkles } from 'lucide-react'
+import { Utensils, ShoppingBag, Scissors, Briefcase, Building, Store, ArrowRight, Sparkles, Stethoscope, Wrench, Network } from 'lucide-react'
 import Image from 'next/image'
 
 const cases = [
@@ -10,61 +10,91 @@ const cases = [
     id: 'supermarkets',
     icon: Store,
     title: 'Supermarkets & Multi-Branch Chains',
-    subtitle: 'Grocery Chains, Hypermarkets, In-Store Bakeries & Boutiques',
+    subtitle: 'Grocery Chains, Hypermarkets & Department Stores',
     description: 'Manage entire multi-department supermarket fleets with unified HQ reporting, aisle sub-departments (Grocery, Fresh Bakery, Butchery & Deli), and 1-click catalog cloning across branches in < 1s.',
     color: 'from-emerald-500 via-teal-500 to-cyan-600',
-    metrics: ['1-Click Catalog Duplication', 'Sub-Department Aisles', 'Fleet Aggregation', 'Raw Thermal POS'],
+    metrics: ['1-Click Catalog Duplication', 'Sub-Department Aisles', 'Fleet HQ Aggregation', 'Raw ESC/POS Thermal'],
     image: '/hero_emerald_gemstone.png'
   },
   {
     id: 'hospitality',
     icon: Utensils,
-    title: 'Hospitality & Dining',
-    subtitle: 'Restaurants, Cafes, Rooftop Bars & Food Trucks',
-    description: 'Transform operations with live dine-in ordering, split payments, and a real-time fulfillment dashboard. Replace paper menus with dynamic, AI-translated catalogs.',
+    title: 'Hospitality, Dining & Bars',
+    subtitle: 'Restaurants, Cafes, Rooftop Lounges & Food Trucks',
+    description: 'Transform guest operations with table-side QR ordering, zero-hallucination dining AI concierges, split bill payments, and live kitchen display system (KDS) order dispatch.',
     color: 'from-orange-500 to-rose-500',
-    metrics: ['Live Fulfillment', 'Split Payments', 'Table Mapping', 'Roulette Gamification'],
+    metrics: ['Live Kitchen Display (KDS)', 'Split Bill Payments', 'Table Intercom Calling', 'Payment Roulette'],
     image: '/hero_restaurant_bg.png'
   },
   {
     id: 'retail',
     icon: ShoppingBag,
-    title: 'Retail & Fashion Boutiques',
-    subtitle: 'Gadgets, Fashion, Pharmacies & Specialty Stores',
-    description: 'Deploy a high-converting digital storefront in minutes. Track inventory automatically, alert staff on low stock, and offer seamless pickup or delivery checkout.',
+    title: 'Retail Boutiques & Specialty Stores',
+    subtitle: 'Fashion, Gadgets, Beauty & Pharmacies',
+    description: 'Deploy a high-converting digital storefront in minutes. Track inventory automatically across variant matrices (color, size, storage), alert staff on low stock, and offer instant checkout.',
     color: 'from-blue-500 to-indigo-600',
-    metrics: ['Atomic Inventory Sync', 'Low Stock Alerts', 'Omnichannel POS'],
+    metrics: ['Variant Configuration Matrix', 'Atomic Stock Decrementing', 'Low Stock Alerts', 'Omnichannel POS'],
     image: '/hero_emerald_gemstone.png'
   },
   {
     id: 'services',
     icon: Scissors,
     title: 'Salons, Spas & Wellness',
-    subtitle: 'Spas, Therapists, Tutors & Barbers',
-    description: 'Eliminate no-shows with upfront deposits and smart booking calendars. Clients can browse services, select staff, and book slots directly from their phones.',
+    subtitle: 'Spas, Wellness Clinics, Barbers & Tutors',
+    description: 'Eliminate no-shows with upfront deposits and smart booking calendars. Clients browse service menus, choose practitioner tiers, and book time slots directly from their mobile devices.',
     color: 'from-fuchsia-500 to-pink-600',
-    metrics: ['Smart Booking Calendars', 'Upfront Deposits', 'Staff Tier Selection'],
+    metrics: ['Smart Booking Calendars', 'Upfront Deposit Billing', 'Staff Tier Assignment', 'Buffer Time Controls'],
     image: '/hero_restaurant_bg.png'
   },
   {
     id: 'consultants',
     icon: Briefcase,
-    title: 'Consultants & B2B Agencies',
-    subtitle: 'Freelancers, Marketers & Agencies',
-    description: 'Stop sending static PDF proposals and paying for bloated, enterprise CRMs. Share interactive, CRM-Free Rate Cards & Service Catalogs with 2-tap approvals and instant retainers.',
+    title: 'Creators, Consultants & Agencies',
+    subtitle: 'Media Creators, Freelancers & B2B Agencies',
+    description: 'Stop sending static PDF proposals and paying for bloated CRMs. Share interactive, dynamic rate cards and service catalogs with 2-tap client approvals and instant retainer payments.',
     color: 'from-emerald-500 to-teal-600',
-    metrics: ['CRM-Free Rate Cards', '2-Tap Mobile Approvals', 'Instant Retainers'],
+    metrics: ['Dynamic Interactive Rate Cards', '2-Tap Scope Approvals', 'Milestone Deposits', 'Instant Retainers'],
     image: '/hero_emerald_gemstone.png'
   },
   {
     id: 'real-estate',
     icon: Building,
-    title: 'Real Estate & Auto Dealerships',
-    subtitle: 'Property Rentals & Dealerships',
-    description: 'Showcase high-value assets with image-heavy, immersive galleries. Capture leads effortlessly and allow clients to schedule viewings or test drives.',
+    title: 'Real Estate & Dealerships',
+    subtitle: 'Luxury Properties, Rentals & Auto Showrooms',
+    description: 'Showcase high-value physical assets with immersive galleries, virtual tour embeds, and detailed specifications. Capture qualified leads with instant WhatsApp broker routing.',
     color: 'from-amber-500 to-orange-600',
-    metrics: ['Immersive Galleries', 'Automated Lead Capture', 'Viewing Schedule'],
+    metrics: ['High-Res Asset Galleries', 'Virtual Tour Embeds', 'Automated Lead Capture', 'Broker WhatsApp Routing'],
     image: '/hero_restaurant_bg.png'
+  },
+  {
+    id: 'healthcare',
+    icon: Stethoscope,
+    title: 'Healthcare Clinics & Diagnostics',
+    subtitle: 'Medical Practices, Dental & Diagnostic Labs',
+    description: 'Streamline patient intake with medical consultation calendars, pre-appointment intake questionnaires, diagnostic test booking, and secure deposit collections.',
+    color: 'from-teal-500 to-emerald-600',
+    metrics: ['Patient Intake Forms', 'Doctor Scheduling', 'Diagnostic Test Booking', 'Secure Pre-Authorizations'],
+    image: '/hero_emerald_gemstone.png'
+  },
+  {
+    id: 'repair',
+    icon: Wrench,
+    title: 'Technical Repair & Services',
+    subtitle: 'Auto Repair, Device Diagnostics & Contractors',
+    description: 'Build custom diagnostic quote proposals with itemized parts and labor breakdowns. Customers review and authorize scope changes on their phone with 2-tap approvals.',
+    color: 'from-blue-600 to-cyan-600',
+    metrics: ['Itemized SOW Quotes', 'Parts & Labor Breakdown', '2-Tap Customer Approvals', 'Deposit Settlements'],
+    image: '/hero_restaurant_bg.png'
+  },
+  {
+    id: 'portals',
+    icon: Network,
+    title: 'Multi-Venue Enterprise Portals',
+    subtitle: 'Parent Organizations, Resorts & Campus Chains',
+    description: 'Unify diverse multi-concept operations under one parent umbrella. Allow guests to discover dining, wellness, retail, and lodging across your entire franchise network.',
+    color: 'from-purple-600 to-pink-600',
+    metrics: ['Parent Org Aggregation', 'Multi-Concept Directory', 'Cross-Brand Discovery', 'Unified HQ Telemetry'],
+    image: '/hero_emerald_gemstone.png'
   }
 ]
 
@@ -86,7 +116,7 @@ export function UseCases() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
         {/* Navigation List */}
-        <div className="lg:col-span-5 flex flex-col gap-3">
+        <div className="lg:col-span-5 flex flex-col gap-2.5 max-h-[620px] overflow-y-auto pr-1.5 custom-scrollbar">
           {cases.map((c) => {
             const isActive = active.id === c.id
             const Icon = c.icon
@@ -94,8 +124,8 @@ export function UseCases() {
               <button
                 key={c.id}
                 onClick={() => setActive(c)}
-                className={`group relative flex items-center gap-4 p-5 rounded-3xl transition-all duration-500 text-left overflow-hidden ${
-                  isActive ? 'bg-zinc-900 border border-white/10 shadow-2xl' : 'hover:bg-white/5 border border-transparent'
+                className={`group relative flex items-center gap-3.5 p-3.5 md:p-4 rounded-2xl transition-all duration-300 text-left overflow-hidden cursor-pointer ${
+                  isActive ? 'bg-zinc-900 border border-white/10 shadow-xl' : 'hover:bg-white/5 border border-transparent'
                 }`}
               >
                 {isActive && (
@@ -107,23 +137,23 @@ export function UseCases() {
                   />
                 )}
                 
-                <div className={`relative z-10 flex items-center justify-center w-12 h-12 rounded-2xl shrink-0 transition-all duration-500 ${
-                  isActive ? `bg-linear-to-br ${c.color} shadow-lg shadow-black/50` : 'bg-zinc-800'
+                <div className={`relative z-10 flex items-center justify-center w-10 h-10 md:w-11 md:h-11 rounded-xl shrink-0 transition-all duration-300 ${
+                  isActive ? `bg-linear-to-br ${c.color} shadow-md shadow-black/50` : 'bg-zinc-800'
                 }`}>
                   <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-zinc-400 group-hover:text-white transition-colors'}`} />
                 </div>
                 
-                <div className="relative z-10 flex-1">
-                  <h3 className={`font-bold text-lg transition-colors ${isActive ? 'text-white' : 'text-zinc-400 group-hover:text-zinc-200'}`}>
+                <div className="relative z-10 flex-1 min-w-0">
+                  <h3 className={`font-bold text-sm md:text-base truncate transition-colors ${isActive ? 'text-white' : 'text-zinc-400 group-hover:text-zinc-200'}`}>
                     {c.title}
                   </h3>
-                  <p className={`text-xs font-medium transition-colors ${isActive ? 'text-zinc-300' : 'text-zinc-500'}`}>
+                  <p className={`text-xs font-medium truncate transition-colors ${isActive ? 'text-zinc-300' : 'text-zinc-500'}`}>
                     {c.subtitle}
                   </p>
                 </div>
 
-                <div className={`relative z-10 transition-transform duration-500 ${isActive ? 'translate-x-0 opacity-100' : '-translate-x-4 opacity-0'}`}>
-                  <ArrowRight className="w-5 h-5 text-white/50" />
+                <div className={`relative z-10 transition-transform duration-300 shrink-0 ${isActive ? 'translate-x-0 opacity-100' : '-translate-x-3 opacity-0'}`}>
+                  <ArrowRight className="w-4 h-4 text-white/50" />
                 </div>
               </button>
             )
