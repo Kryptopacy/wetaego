@@ -23,12 +23,20 @@ const categories = [
         description: 'Talk directly with your business operating system using natural two-way voice, instant barge-in interruption, and live camera video to inspect stock or build menus with zero typing.',
       },
       {
+        icon: ShieldCheck,
+        color: 'from-purple-500 to-indigo-600',
+        tag: 'Zero-Hallucination Frontline Concierge',
+        badge: 'Staff Escalation Loop',
+        title: 'Customer-facing AI that never invents answers.',
+        description: 'Public conversational concierge strictly bounded to verified database catalog items and dietary tags (vegan, halal, allergies). If an inquiry is unlisted, Tego instantly alerts floor staff on the fulfillment dashboard.',
+      },
+      {
         icon: Cpu,
         color: 'from-cyan-500 to-blue-600',
         tag: 'Zero-Config WebMCP',
         badge: 'Agent Commerce Ready',
         title: 'Autonomous AI agents browse and buy.',
-        description: 'Every storefront automatically exposes document.modelContext tools. AI browsing agents (ChatGPT Desktop, Chrome 149+) can discover items, customize orders, and checkout on behalf of customers.',
+        description: 'Every storefront automatically exposes document.modelContext tools. AI browsing agents and autonomous assistants can discover items, customize orders, and checkout on behalf of customers.',
       },
       {
         icon: FileText,
@@ -58,7 +66,7 @@ const categories = [
         tag: 'Zero-Daemon ESC/POS Thermal Printing',
         badge: 'WebUSB / Bluetooth / Serial',
         title: 'Direct driverless hardware receipt printing.',
-        description: 'Emits raw binary ESC/POS bytecode directly over WebUSB, RS-232 COM Serial, and WebBluetooth. Prints order chits in < 50ms with automatic cash drawer kicks (ESC p) and hardware paper cuts.',
+        description: 'Emits raw binary ESC/POS bytecode directly over WebUSB, RS-232 COM Serial, and WebBluetooth. Prints order chits in < 50ms with automatic cash drawer kicks (ESC p) and hardware paper cuts (GS V).',
       },
       {
         icon: ClipboardList,
