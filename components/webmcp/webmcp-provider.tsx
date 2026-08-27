@@ -28,7 +28,7 @@ export function WebMCPProvider({
   menuItems,
   categories,
   tableIdentifier,
-  showTester = true
+  showTester = false
 }: WebMCPProviderProps) {
   // Ensure document.modelContext exists immediately on client mount
   useEffect(() => {

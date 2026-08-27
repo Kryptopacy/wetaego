@@ -9,6 +9,7 @@ import { PreviewBanner } from '@/components/preview-banner'
 import { WebMCPProvider } from '@/components/webmcp/webmcp-provider'
 import { unstable_cache } from 'next/cache'
 import { ensureFlagshipDemoLocation } from '@/lib/demo/ensure-flagship-demo'
+import { AIChat } from './ai-chat'
 
 // Revalidate this page every 60 seconds (Incremental Static Regeneration)
 // This ensures edge caching handles high traffic seamlessly
@@ -97,10 +98,18 @@ export default async function PublicMenuPage({
       .eq('slug', slug)
       .single()
 
+    if (slug === 'demo') {
+      await ensureFlagshipDemoLocation()
+      const adminClient = await createAdminClient()
+      const { data: adminData } = await adminClient
+        .from('locations')
+        .select('id, slug, name, portal_display_name, organization_id, is_search_visible, ai_enabled, ai_name, theme_color, cover_image_url, operating_hours, wifi_network, wifi_password, instagram_handle, twitter_handle, facebook_handle, whatsapp_number, phone_number, google_maps_url, randomizer_enabled, spinner_enabled, spinner_config, global_discount_enabled, global_discount_banner_text, global_discount_percentage, manual_payment_enabled, manual_payment_bank_name, manual_payment_account_name, manual_payment_account_number, manual_payment_instructions, delivery_enabled, delivery_fee_minor, delivery_minimum_order_minor, delivery_note, fulfillment_location_label, organizations(logo_url, name, status, portal_name, portal_cover_image_url, portal_theme_color, portal_background_color)')
+        .eq('slug', 'demo')
+        .single()
+      return adminData
+    }
+
     if (!data) {
-      if (slug === 'demo') {
-        await ensureFlagshipDemoLocation()
-      }
       const adminClient = await createAdminClient()
       const { data: adminData } = await adminClient
         .from('locations')
@@ -112,7 +121,7 @@ export default async function PublicMenuPage({
     return data;
   }
 
-  const locationData = preview === 'true' || isDemoMode
+  const locationData = preview === 'true' || isDemoMode || slug === 'demo'
     ? await locationFetcher()
     : await unstable_cache(
         locationFetcher,
@@ -316,6 +325,17 @@ export default async function PublicMenuPage({
         )}
         {isPreview && <PreviewBanner />}
         <PortalRenderer location={location as unknown as Parameters<typeof PortalRenderer>[0]['location']} pages={activePages} />
+        {location.ai_enabled && (
+          <AIChat
+            locationId={location.id}
+            organizationId={location.organization_id}
+            aiName={location.ai_name || 'Pacy Concierge'}
+            businessName={location.portal_display_name || location.name}
+            themeColor={location.theme_color || '#0f7b55'}
+            tableIdentifier="Portal Visitor"
+            menuItems={[]}
+          />
+        )}
         <WebMCPProvider
           locationId={location.id}
           locationName={location.portal_display_name || location.name}
