@@ -13,7 +13,6 @@ import { Pricing } from './components/pricing'
 import { LandingNavbar } from '../components/LandingNavbar'
 import { UseCases } from './components/use-cases'
 import { RouletteTeaser } from './components/roulette-teaser'
-import { IouTeaser } from './components/iou-teaser'
 import { FAQSection } from './components/faq-section'
 
 import type { Metadata } from 'next'
@@ -324,8 +323,8 @@ export default async function HomePage() {
       {/* ── ROULETTE GAMIFICATION ── */}
       <RouletteTeaser />
 
-      {/* ── IOU FINANCING ── */}
-      <IouTeaser />
+      {/* ── INTELLIGENCE & OPERATIONAL FAQ SECTION (Answers questions right after seeing features) ── */}
+      <FAQSection />
 
       {/* ── PRICING ── */}
       <Pricing />
@@ -345,9 +344,6 @@ export default async function HomePage() {
           </Link>
         </div>
       </section>
-
-      {/* ── INTELLIGENCE & OPERATIONAL FAQ SECTION ── */}
-      <FAQSection />
 
       {/* ── FINAL CTA ── */}
       <section className="py-32 px-6 bg-[#050505] relative overflow-hidden">
