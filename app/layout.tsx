@@ -145,7 +145,7 @@ export default async function RootLayout({
                   name: 'WETAEGO',
                   applicationCategory: 'BusinessApplication',
                   operatingSystem: 'Web, iOS, Android, PWA',
-                  description: 'Autonomous hospitality & service operating system featuring smart QR portals, AI copilot, POS, inventory management, and multi-gateway billing.',
+                  description: 'The Commerce & Service Operating System for Modern Brands, their Human Customers, and the AI Agents who serve them.',
                   offers: {
                     '@type': 'AggregateOffer',
                     priceCurrency: 'NGN',

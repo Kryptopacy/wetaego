@@ -18,7 +18,7 @@ import { IouTeaser } from './components/iou-teaser'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'WETAEGO | The Autonomous Hospitality & Service Operating System',
+  title: 'WETAEGO | The Commerce & Service Operating System for Modern Brands',
   description: 'The complete operating layer for modern businesses. Build your digital storefront, manage operations, and process payments instantly with 9 specialized industry templates and Tego Multimodal AI.',
   alternates: {
     canonical: 'https://ourmenuos.online',
