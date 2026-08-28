@@ -346,6 +346,9 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* ── INTELLIGENCE & OPERATIONAL FAQ SECTION ── */}
+      <FAQSection />
+
       {/* ── FINAL CTA ── */}
       <section className="py-32 px-6 bg-[#050505] relative overflow-hidden">
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -371,9 +374,6 @@ export default async function HomePage() {
           </div>
         </FadeIn>
       </section>
-
-      {/* ── INTELLIGENCE & OPERATIONAL FAQ SECTION ── */}
-      <FAQSection />
 
       {/* ── FOOTER ── */}
       <footer className="border-t border-white/[0.04] py-16 px-6 bg-zinc-950/80">
