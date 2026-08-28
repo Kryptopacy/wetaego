@@ -1,12 +1,17 @@
 import React from 'react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { Code, Terminal, Bot, Key, Webhook, FileText, CheckCircle2, Download, Cpu, Printer, Radio, CreditCard, Sparkles, Network, ShieldCheck, Zap } from 'lucide-react'
+import { 
+  Code, Terminal, Bot, Key, Webhook, FileText, CheckCircle2, Download, Cpu, 
+  Printer, Radio, CreditCard, Sparkles, Network, ShieldCheck, Zap,
+  MonitorSmartphone, ClipboardList, BookOpen, Truck, Package, Users, 
+  BarChart3, Megaphone, QrCode, Clock, MessagesSquare
+} from 'lucide-react'
 import { LandingNavbar } from '@/components/LandingNavbar'
 
 export const metadata: Metadata = {
   title: 'Developer Documentation & Extended Capabilities | WETAEGO',
-  description: 'Comprehensive developer portal, REST API references, Webhooks, Model Context Protocol (MCP), WebMCP, RFC 9727 API Catalog, x402/MPP agent payments, and hardware printing SDK.',
+  description: 'Comprehensive developer portal, REST API references, Webhooks, Model Context Protocol (MCP), WebMCP, Operations Suite, RFC 9727 API Catalog, x402/MPP agent payments, and hardware printing SDK.',
   alternates: {
     canonical: 'https://ourmenuos.online/docs',
   },
@@ -17,7 +22,7 @@ export default function DocsPage() {
     "@context": "https://schema.org",
     "@type": "TechArticle",
     "headline": "WETAEGO Developer Documentation & Extended Capabilities",
-    "description": "Comprehensive developer reference for WETAEGO APIs, webhooks, MCP tools, WebMCP, x402 payments, and hardware printing.",
+    "description": "Comprehensive developer reference for WETAEGO APIs, webhooks, MCP tools, WebMCP, Operations Suite, x402 payments, and hardware printing.",
     "url": "https://ourmenuos.online/docs",
     "author": {
       "@type": "Organization",
@@ -37,13 +42,13 @@ export default function DocsPage() {
         {/* Hero Section */}
         <section className="pt-36 pb-16 px-6 max-w-6xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold uppercase tracking-widest mb-6">
-            <Terminal className="w-3.5 h-3.5" /> Developer Portal & Extended Capabilities
+            <Terminal className="w-3.5 h-3.5" /> Developer Portal & Architecture Reference
           </div>
           <h1 className="text-4xl md:text-6xl font-black text-white tracking-tight leading-[1.1] mb-6">
-            WETAEGO Developer Architecture & API Reference
+            WETAEGO Operating System Architecture & API Reference
           </h1>
           <p className="text-lg md:text-xl text-zinc-400 max-w-3xl mx-auto font-light leading-relaxed mb-8">
-            Build custom integrations, automate real-time order dispatch, connect ESC/POS hardware peripherals, or equip autonomous AI agents with the WETAEGO protocol suite.
+            The unified digital infrastructure for physical storefronts, multi-concept enterprises, and autonomous AI agents. Integrate REST endpoints, connect hardware peripherals, or automate multi-branch fleets via WebMCP and Staff MCP.
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-3">
@@ -62,6 +67,12 @@ export default function DocsPage() {
             >
               <Bot className="w-4 h-4" /> MCP Manifest
             </a>
+            <Link
+              href="/WEBMCP.md"
+              className="px-5 py-2.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-white font-semibold text-xs md:text-sm transition-all inline-flex items-center gap-2"
+            >
+              <Sparkles className="w-4 h-4" /> WebMCP Spec
+            </Link>
             <a
               href="/.well-known/api-catalog"
               target="_blank"
@@ -69,14 +80,6 @@ export default function DocsPage() {
               className="px-5 py-2.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-white font-semibold text-xs md:text-sm transition-all inline-flex items-center gap-2"
             >
               <Network className="w-4 h-4" /> RFC 9727 Catalog
-            </a>
-            <a
-              href="/.well-known/ai-catalog.json"
-              target="_blank"
-              rel="noreferrer"
-              className="px-5 py-2.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-white font-semibold text-xs md:text-sm transition-all inline-flex items-center gap-2"
-            >
-              <Sparkles className="w-4 h-4" /> ARD Catalog
             </a>
             <Link
               href="/llms.txt"
@@ -116,190 +119,215 @@ export default function DocsPage() {
             </div>
           </div>
 
-          {/* Section 2: Core REST Endpoints */}
+          {/* Section 2: Full-Spectrum Operations & Management Suite */}
           <div className="space-y-6">
             <div className="flex items-center gap-3">
-              <Code className="w-6 h-6 text-emerald-400" />
-              <h2 className="text-2xl font-bold text-white">2. Public & Merchant REST Endpoints</h2>
+              <ClipboardList className="w-6 h-6 text-emerald-400" />
+              <h2 className="text-2xl font-bold text-white">2. Full-Spectrum Operations & Business Management Suite</h2>
             </div>
+            <p className="text-zinc-300 text-sm leading-relaxed">
+              Every merchant account on WETAEGO is equipped with a complete, integrated operations suite powering daily frontline workflows and executive management:
+            </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               
-              {/* Endpoint A: AI Concierge */}
-              <div className="bg-zinc-900/40 border border-white/5 rounded-2xl p-6 space-y-3">
-                <div className="flex items-center gap-3">
-                  <span className="px-2.5 py-1 rounded-md bg-emerald-500/20 text-emerald-400 font-mono text-xs font-bold">POST</span>
-                  <code className="text-white font-mono text-sm">/api/chat</code>
+              {/* Module 1: KDS */}
+              <div className="bg-zinc-900/40 border border-white/5 rounded-2xl p-6 space-y-2.5">
+                <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 w-fit">
+                  <ClipboardList className="w-5 h-5" />
                 </div>
-                <h3 className="text-lg font-bold text-white">Frontline AI Concierge Stream</h3>
-                <p className="text-sm text-zinc-400">
-                  Sends conversational guest queries to the venue-grounded Tego AI concierge. Returns streaming token responses with zero hallucination guarantee and automatic staff handoff routing.
+                <h3 className="text-base font-bold text-white">Live KDS & Order Inbox</h3>
+                <p className="text-xs text-zinc-400 leading-relaxed">
+                  Real-time ticket routing with status progression (<code className="text-emerald-400 font-mono">pending → paid → preparing → ready → out_for_delivery → completed</code>), audio chimes, and automatic thermal kitchen dispatch.
                 </p>
               </div>
 
-              {/* Endpoint B: Menu OCR */}
-              <div className="bg-zinc-900/40 border border-white/5 rounded-2xl p-6 space-y-3">
-                <div className="flex items-center gap-3">
-                  <span className="px-2.5 py-1 rounded-md bg-emerald-500/20 text-emerald-400 font-mono text-xs font-bold">POST</span>
-                  <code className="text-white font-mono text-sm">/api/ai/parse-menu</code>
+              {/* Module 2: POS */}
+              <div className="bg-zinc-900/40 border border-white/5 rounded-2xl p-6 space-y-2.5">
+                <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 w-fit">
+                  <MonitorSmartphone className="w-5 h-5" />
                 </div>
-                <h3 className="text-lg font-bold text-white">Multimodal Menu & Inventory OCR</h3>
-                <p className="text-sm text-zinc-400">
-                  Ingests physical menu pictures, PDF invoices, or camera frames to parse categories, items, prices, dietary tags, and descriptions into structured JSON.
+                <h3 className="text-base font-bold text-white">Point of Sale (POS)</h3>
+                <p className="text-xs text-zinc-400 leading-relaxed">
+                  High-speed counter POS with barcode scanning, custom item add, split bill payments, manual discounts, and automatic ESC/POS cash drawer kick pulses.
                 </p>
               </div>
 
-              {/* Endpoint C: Gemini Live Token */}
-              <div className="bg-zinc-900/40 border border-white/5 rounded-2xl p-6 space-y-3">
-                <div className="flex items-center gap-3">
-                  <span className="px-2.5 py-1 rounded-md bg-emerald-500/20 text-emerald-400 font-mono text-xs font-bold">POST</span>
-                  <code className="text-white font-mono text-sm">/api/ai/live-token</code>
+              {/* Module 3: BMS Bookings */}
+              <div className="bg-zinc-900/40 border border-white/5 rounded-2xl p-6 space-y-2.5">
+                <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 w-fit">
+                  <BookOpen className="w-5 h-5" />
                 </div>
-                <h3 className="text-lg font-bold text-white">Live Multimodal Ephemeral Token Minting</h3>
-                <p className="text-sm text-zinc-400">
-                  Mints short-lived cryptographic session tokens for direct bidirectional WebAudio (16kHz in / 24kHz out) and 1 FPS camera video streaming via real-time live AI sessions.
+                <h3 className="text-base font-bold text-white">Booking Management (BMS)</h3>
+                <p className="text-xs text-zinc-400 leading-relaxed">
+                  Interactive calendar for salons, spas, and clinics with time-slot intervals, staff assignment, appointment duration, and upfront deposit capture.
                 </p>
               </div>
 
-              {/* Endpoint D: Orders API */}
-              <div className="bg-zinc-900/40 border border-white/5 rounded-2xl p-6 space-y-3">
-                <div className="flex items-center gap-3">
-                  <span className="px-2.5 py-1 rounded-md bg-blue-500/20 text-blue-400 font-mono text-xs font-bold">POST / GET</span>
-                  <code className="text-white font-mono text-sm">/api/orders</code>
+              {/* Module 4: PMS Stays */}
+              <div className="bg-zinc-900/40 border border-white/5 rounded-2xl p-6 space-y-2.5">
+                <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 w-fit">
+                  <FileText className="w-5 h-5" />
                 </div>
-                <h3 className="text-lg font-bold text-white">Orders & Transaction Dispatch</h3>
-                <p className="text-sm text-zinc-400">
-                  Submits guest orders with table numbers, variant selections, split bill instructions, and payment tokens. Real-time updates push directly to kitchen display systems via WebSockets.
+                <h3 className="text-base font-bold text-white">Property Management (PMS)</h3>
+                <p className="text-xs text-zinc-400 leading-relaxed">
+                  Listing manager for serviced apartments and lofts with check-in/out calendars, guest verification, and reservation status tracking.
                 </p>
               </div>
 
-              {/* Endpoint E: Bookings */}
-              <div className="bg-zinc-900/40 border border-white/5 rounded-2xl p-6 space-y-3">
-                <div className="flex items-center gap-3">
-                  <span className="px-2.5 py-1 rounded-md bg-purple-500/20 text-purple-400 font-mono text-xs font-bold">POST / GET</span>
-                  <code className="text-white font-mono text-sm">/api/bookings</code>
+              {/* Module 5: Delivery Hub */}
+              <div className="bg-zinc-900/40 border border-white/5 rounded-2xl p-6 space-y-2.5">
+                <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 w-fit">
+                  <Truck className="w-5 h-5" />
                 </div>
-                <h3 className="text-lg font-bold text-white">Appointments & Service Scheduling</h3>
-                <p className="text-sm text-zinc-400">
-                  Queries availability calendars for spas, clinics, salons, and consultants. Confirms booking reservations with deposit processing.
+                <h3 className="text-base font-bold text-white">Delivery Dispatch Hub</h3>
+                <p className="text-xs text-zinc-400 leading-relaxed">
+                  Multi-zone delivery dispatch, courier tracking, distance calculations, and flat or dynamic delivery fee rules.
                 </p>
               </div>
 
-              {/* Endpoint F: Health & Uptime */}
-              <div className="bg-zinc-900/40 border border-white/5 rounded-2xl p-6 space-y-3">
-                <div className="flex items-center gap-3">
-                  <span className="px-2.5 py-1 rounded-md bg-zinc-500/20 text-zinc-300 font-mono text-xs font-bold">GET</span>
-                  <code className="text-white font-mono text-sm">/api/health</code>
+              {/* Module 6: Inventory BOM */}
+              <div className="bg-zinc-900/40 border border-white/5 rounded-2xl p-6 space-y-2.5">
+                <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 w-fit">
+                  <Package className="w-5 h-5" />
                 </div>
-                <h3 className="text-lg font-bold text-white">Platform Health & Status</h3>
-                <p className="text-sm text-zinc-400">
-                  Real-time operational health telemetry for load balancers, orchestrators, and automated agents.
+                <h3 className="text-base font-bold text-white">Inventory & Bill of Materials (BOM)</h3>
+                <p className="text-xs text-zinc-400 leading-relaxed">
+                  Raw ingredient decrement tracking per dish or service sold, low-stock threshold alerts, and supplier reorder sheets.
+                </p>
+              </div>
+
+              {/* Module 7: CRM & IOU Tab */}
+              <div className="bg-zinc-900/40 border border-white/5 rounded-2xl p-6 space-y-2.5">
+                <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 w-fit">
+                  <Users className="w-5 h-5" />
+                </div>
+                <h3 className="text-base font-bold text-white">CRM, Loyalty & IOU Credit</h3>
+                <p className="text-xs text-zinc-400 leading-relaxed">
+                  Automatic customer shadow profiles at checkout, guest LTV tracking, VIP tiers, and customer IOU store credit financing ledger with automated SMS/email debt reminders.
+                </p>
+              </div>
+
+              {/* Module 8: PIN Feedback Loop */}
+              <div className="bg-zinc-900/40 border border-white/5 rounded-2xl p-6 space-y-2.5">
+                <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 w-fit">
+                  <BarChart3 className="w-5 h-5" />
+                </div>
+                <h3 className="text-base font-bold text-white">PIN CSAT & Staff Leaderboard</h3>
+                <p className="text-xs text-zinc-400 leading-relaxed">
+                  Cryptographic PIN receipts for verified customer reviews, private grievance triage before negative reviews hit Google, and gamified staff performance & tip rankings.
+                </p>
+              </div>
+
+              {/* Module 9: Marketing & Flash Deals */}
+              <div className="bg-zinc-900/40 border border-white/5 rounded-2xl p-6 space-y-2.5">
+                <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 w-fit">
+                  <Megaphone className="w-5 h-5" />
+                </div>
+                <h3 className="text-base font-bold text-white">Marketing & Growth Hub</h3>
+                <p className="text-xs text-zinc-400 leading-relaxed">
+                  SMS and Email broadcast campaigns, recurring happy hour flash deals, limited-quantity chef drop pricing, and smart cart cross-sell recommendations.
+                </p>
+              </div>
+
+              {/* Module 10: Staff Intercom */}
+              <div className="bg-zinc-900/40 border border-white/5 rounded-2xl p-6 space-y-2.5">
+                <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 w-fit">
+                  <MessagesSquare className="w-5 h-5" />
+                </div>
+                <h3 className="text-base font-bold text-white">Staff Push-to-Talk Intercom</h3>
+                <p className="text-xs text-zinc-400 leading-relaxed">
+                  Zero-latency push-to-talk voice radio, kitchen-to-server ready alerts, table assistance calls, and live floor team coordination over WebSockets.
+                </p>
+              </div>
+
+              {/* Module 11: Deep Analytics */}
+              <div className="bg-zinc-900/40 border border-white/5 rounded-2xl p-6 space-y-2.5">
+                <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 w-fit">
+                  <BarChart3 className="w-5 h-5" />
+                </div>
+                <h3 className="text-base font-bold text-white">Analytics & ML Demand Forecast</h3>
+                <p className="text-xs text-zinc-400 leading-relaxed">
+                  Revenue velocity, category contribution, hourly peak volume, table turnover, payment breakdown, and ML demand prediction for staffing and prep.
+                </p>
+              </div>
+
+              {/* Module 12: QR Studio */}
+              <div className="bg-zinc-900/40 border border-white/5 rounded-2xl p-6 space-y-2.5">
+                <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 w-fit">
+                  <QrCode className="w-5 h-5" />
+                </div>
+                <h3 className="text-base font-bold text-white">Vector QR & Signage Studio</h3>
+                <p className="text-xs text-zinc-400 leading-relaxed">
+                  Branded QR code generator with embedded logos, room/table/desk routing, per-card PNG download, and print layouts.
                 </p>
               </div>
 
             </div>
           </div>
 
-          {/* Section 3: Extended Hardware & Operational Capabilities */}
+          {/* Section 3: WebMCP & Staff MCP Dual-Layer Standard */}
+          <div className="bg-zinc-900/50 border border-white/10 rounded-3xl p-8 md:p-10 space-y-6">
+            <div className="flex items-center gap-3">
+              <Bot className="w-6 h-6 text-emerald-400" />
+              <h2 className="text-2xl font-bold text-white">3. Model Context Protocol (WebMCP & Staff MCP Server)</h2>
+            </div>
+            <p className="text-zinc-300 text-sm leading-relaxed">
+              WETAEGO implements a dual-layer Model Context Protocol architecture separating in-browser customer co-browsing from server-side enterprise fleet management:
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-black/60 rounded-2xl p-6 border border-white/10 space-y-3">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-400 text-xs font-bold">
+                  Client-Side WebMCP (document.modelContext)
+                </div>
+                <h4 className="text-base font-bold text-white">Customer Storefront Suite</h4>
+                <p className="text-xs text-zinc-400 leading-relaxed">
+                  Auto-registered on all live storefronts with live client state synchronization:
+                </p>
+                <ul className="text-xs text-zinc-300 space-y-1 font-mono">
+                  <li>• search_catalog (query, category, dietary, maxPrice)</li>
+                  <li>• get_item_details (itemId)</li>
+                  <li>• create_cart ()</li>
+                  <li>• add_to_cart (itemId, quantity, modifiers, notes)</li>
+                  <li>• get_cart ()</li>
+                  <li>• update_cart (lineId, quantity, notes)</li>
+                  <li>• initiate_checkout (fulfillment, customer)</li>
+                  <li>• submit_order (checkoutId, authorization: confirmed)</li>
+                  <li>• request_staff (reason)</li>
+                </ul>
+              </div>
+
+              <div className="bg-black/60 rounded-2xl p-6 border border-white/10 space-y-3">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-400 text-xs font-bold">
+                  Server-Side Staff MCP (/api/mcp)
+                </div>
+                <h4 className="text-base font-bold text-white">Staff & Enterprise Fleet Operations</h4>
+                <p className="text-xs text-zinc-400 leading-relaxed">
+                  Bearer-authenticated RFC JSON-RPC 2.0 server for Claude Desktop, ChatGPT, and enterprise bots:
+                </p>
+                <ul className="text-xs text-zinc-300 space-y-1 font-mono">
+                  <li>• get_active_orders (locationId, status)</li>
+                  <li>• get_order (orderId)</li>
+                  <li>• update_order_status (orderId, status)</li>
+                  <li>• mark_item_unavailable (itemId, isAvailable)</li>
+                  <li>• get_table_status (locationId)</li>
+                  <li>• get_daily_sales (locationId, date)</li>
+                  <li>• duplicate_catalog_to_branch (source, target)</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          {/* Section 4: Extended Hardware Capabilities */}
           <div className="bg-zinc-900/50 border border-white/10 rounded-3xl p-8 md:p-10 space-y-6">
             <div className="flex items-center gap-3">
               <Cpu className="w-6 h-6 text-emerald-400" />
-              <h2 className="text-2xl font-bold text-white">3. Extended Hardware & Operational Capabilities</h2>
+              <h2 className="text-2xl font-bold text-white">4. Zero-Daemon ESC/POS Hardware Printing SDK</h2>
             </div>
             <p className="text-zinc-300 text-sm leading-relaxed">
-              WETAEGO bridges web software directly to physical point-of-sale hardware and multi-branch franchise operations:
+              WETAEGO prints binary ESC/POS thermal tickets directly over <strong>WebUSB</strong>, <strong>WebSerial (RS232 COM)</strong>, and <strong>WebBluetooth</strong> without print servers or background software. Sends cash drawer kick pulses (<code className="text-emerald-400 font-mono">ESC p</code>) and hardware paper cuts.
             </p>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              
-              {/* Feature 1: ESC/POS Printing */}
-              <div className="bg-black/60 border border-white/5 rounded-2xl p-6 space-y-3">
-                <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 w-fit">
-                  <Printer className="w-5 h-5" />
-                </div>
-                <h3 className="text-base font-bold text-white">Zero-Daemon ESC/POS Printing</h3>
-                <p className="text-xs text-zinc-400 leading-relaxed">
-                  Direct raw binary ticket printing over <strong>WebUSB</strong>, <strong>WebSerial (RS232)</strong>, and <strong>WebBluetooth</strong>. Sends cash drawer kick pulses (<code className="text-emerald-400 font-mono">ESC p</code>) and hardware paper cuts without background daemons.
-                </p>
-              </div>
-
-              {/* Feature 2: Staff Intercom */}
-              <div className="bg-black/60 border border-white/5 rounded-2xl p-6 space-y-3">
-                <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 w-fit">
-                  <Radio className="w-5 h-5" />
-                </div>
-                <h3 className="text-base font-bold text-white">Real-Time Staff Intercom</h3>
-                <p className="text-xs text-zinc-400 leading-relaxed">
-                  Low-latency push-to-talk voice radio, kitchen-to-server ready chimes, table assistance calls, and live floor dispatch coordination over WebSockets.
-                </p>
-              </div>
-
-              {/* Feature 3: Multi-Branch Replication */}
-              <div className="bg-black/60 border border-white/5 rounded-2xl p-6 space-y-3">
-                <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 w-fit">
-                  <Zap className="w-5 h-5" />
-                </div>
-                <h3 className="text-base font-bold text-white">1-Second Catalog Duplication</h3>
-                <p className="text-xs text-zinc-400 leading-relaxed">
-                  Franchise and supermarket fleet expansion with instant sub-department cloning (<code className="text-emerald-400 font-mono">duplicatePageAction</code>), shared inventory, and localized pricing tiers.
-                </p>
-              </div>
-
-              {/* Feature 4: Customer IOU Tab */}
-              <div className="bg-black/60 border border-white/5 rounded-2xl p-6 space-y-3">
-                <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 w-fit">
-                  <CreditCard className="w-5 h-5" />
-                </div>
-                <h3 className="text-base font-bold text-white">Customer IOU Tab Financing</h3>
-                <p className="text-xs text-zinc-400 leading-relaxed">
-                  In-house Buy Now Pay Later tab ledger, customer credit limits, automated SMS/email debt reminders, and merchant risk controls.
-                </p>
-              </div>
-
-              {/* Feature 5: Payment Roulette */}
-              <div className="bg-black/60 border border-white/5 rounded-2xl p-6 space-y-3">
-                <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 w-fit">
-                  <Sparkles className="w-5 h-5" />
-                </div>
-                <h3 className="text-base font-bold text-white">Payment Roulette Bill Splitter</h3>
-                <p className="text-xs text-zinc-400 leading-relaxed">
-                  Gamified dining checkout randomizer and public web tool at <a href="/tools/who-pays-the-bill" className="text-emerald-400 underline">/tools/who-pays-the-bill</a> to settle table tabs interactively.
-                </p>
-              </div>
-
-              {/* Feature 6: Multi-Gateway Settlement */}
-              <div className="bg-black/60 border border-white/5 rounded-2xl p-6 space-y-3">
-                <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 w-fit">
-                  <ShieldCheck className="w-5 h-5" />
-                </div>
-                <h3 className="text-base font-bold text-white">Multi-Gateway Settlement</h3>
-                <p className="text-xs text-zinc-400 leading-relaxed">
-                  Unified payments supporting Cards, Bank Transfers, USSD, Apple/Google Pay, and crypto (USDC, USDT, SOL) via Paystack, Bachs, and x402.
-                </p>
-              </div>
-
-            </div>
-          </div>
-
-          {/* Section 4: Webhook Infrastructure */}
-          <div className="bg-zinc-900/50 border border-white/10 rounded-3xl p-8 md:p-10 space-y-6">
-            <div className="flex items-center gap-3">
-              <Webhook className="w-6 h-6 text-emerald-400" />
-              <h2 className="text-2xl font-bold text-white">4. Webhook Infrastructure</h2>
-            </div>
-            <p className="text-zinc-300 text-sm leading-relaxed">
-              WETAEGO handles real-time payment gateway settlement callbacks from Paystack and Bachs at <code className="bg-black/60 px-2 py-0.5 rounded text-emerald-400 border border-white/10">/api/paystack/webhook</code>. Every webhook payload is verified using HMAC SHA512 signatures via the <code className="bg-black/60 px-2 py-0.5 rounded text-emerald-400 border border-white/10">x-paystack-signature</code> header.
-            </p>
-            <ul className="space-y-2 text-sm text-zinc-400">
-              <li className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                <span><strong className="text-white">charge.success</strong>: Automatically updates order payment status and triggers thermal kitchen ticket printing.</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                <span><strong className="text-white">transfer.success</strong>: Confirms automated merchant split payouts and affiliate commission disbursements.</span>
-              </li>
-            </ul>
           </div>
 
           {/* Section 5: Standards, Protocols & Agent Payment Discovery */}
@@ -309,7 +337,7 @@ export default function DocsPage() {
               <h2 className="text-2xl font-bold text-white">5. Supported Machine Standards & Discovery Protocols</h2>
             </div>
             <p className="text-zinc-300 text-sm leading-relaxed">
-              WETAEGO is engineered for total autonomous agent interoperability, implementing 14 cutting-edge open web and AI agent discovery specifications:
+              WETAEGO is engineered for total autonomous agent interoperability, implementing 14 open web and AI agent discovery specifications:
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono">
               <div className="p-4 rounded-xl bg-black/60 border border-white/5 space-y-1">
@@ -325,40 +353,16 @@ export default function DocsPage() {
                 <p className="text-zinc-400 font-sans text-xs">Advertised via <code>/.well-known/openid-configuration</code> and <code>/.well-known/oauth-authorization-server</code>.</p>
               </div>
               <div className="p-4 rounded-xl bg-black/60 border border-white/5 space-y-1">
-                <span className="text-emerald-400 font-bold">RFC 9728 Protected Resource</span>
-                <p className="text-zinc-400 font-sans text-xs">Published at <code>/.well-known/oauth-protected-resource</code>.</p>
-              </div>
-              <div className="p-4 rounded-xl bg-black/60 border border-white/5 space-y-1">
-                <span className="text-emerald-400 font-bold">Auth.md Agent Registration</span>
-                <p className="text-zinc-400 font-sans text-xs">Instructions served at <code>/auth.md</code> for programmatic credential onboarding.</p>
-              </div>
-              <div className="p-4 rounded-xl bg-black/60 border border-white/5 space-y-1">
-                <span className="text-emerald-400 font-bold">Agent Skills Index (RFC v0.2.0)</span>
-                <p className="text-zinc-400 font-sans text-xs">Published at <code>/.well-known/agent-skills/index.json</code> with SHA-256 digests.</p>
+                <span className="text-emerald-400 font-bold">Model Context Protocol (MCP)</span>
+                <p className="text-zinc-400 font-sans text-xs">Published at <code>/.well-known/mcp.json</code> and <code>/api/mcp</code>.</p>
               </div>
               <div className="p-4 rounded-xl bg-black/60 border border-white/5 space-y-1">
                 <span className="text-emerald-400 font-bold">WebMCP Browser Agent API</span>
                 <p className="text-zinc-400 font-sans text-xs">Standard W3C in-browser tools registered via <code>document.modelContext.registerTool()</code>.</p>
               </div>
               <div className="p-4 rounded-xl bg-black/60 border border-white/5 space-y-1">
-                <span className="text-emerald-400 font-bold">ARD Manifest (ai-catalog.json)</span>
-                <p className="text-zinc-400 font-sans text-xs">Available at <code>/.well-known/ai-catalog.json</code> with URNs and embedding queries.</p>
-              </div>
-              <div className="p-4 rounded-xl bg-black/60 border border-white/5 space-y-1">
                 <span className="text-emerald-400 font-bold">x402 & MPP Payment Protocol</span>
                 <p className="text-zinc-400 font-sans text-xs">HTTP 402 agent settlement at <code>/.well-known/x402.json</code> and <code>/.well-known/mpp.json</code>.</p>
-              </div>
-              <div className="p-4 rounded-xl bg-black/60 border border-white/5 space-y-1">
-                <span className="text-emerald-400 font-bold">UCP & ACP Commerce Protocols</span>
-                <p className="text-zinc-400 font-sans text-xs">Universal Commerce Profile at <code>/.well-known/ucp</code> and ACP at <code>/.well-known/acp.json</code>.</p>
-              </div>
-              <div className="p-4 rounded-xl bg-black/60 border border-white/5 space-y-1">
-                <span className="text-emerald-400 font-bold">DNS-AID Service Discovery</span>
-                <p className="text-zinc-400 font-sans text-xs">Configured via SVCB/HTTPS records at <code>_index._agents.ourmenuos.online</code> and <code>/.well-known/dns-aid.json</code>.</p>
-              </div>
-              <div className="p-4 rounded-xl bg-black/60 border border-white/5 space-y-1">
-                <span className="text-emerald-400 font-bold">Content Signals</span>
-                <p className="text-zinc-400 font-sans text-xs">Declared in <code>/robots.txt</code> (<code>Content-Signal: ai-train=no, search=yes, ai-input=yes</code>).</p>
               </div>
             </div>
           </div>

@@ -58,18 +58,36 @@ When any merchant or enterprise joins WETAEGO, they are not just getting a websi
 └─────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-1. **Pillar 1: Instant Digital Storefront & Unified Commerce Layer**
-   * Instant deployment of high-performance, responsive storefronts for any business model.
-   * Multi-template aesthetic design token engine (`bento_grid`, `masonry`, `list`, `glassmorphism`, `neumorphism`) with decoupled QR/NFC routing.
-2. **Pillar 2: Full-Spectrum Management Suite & Hardware Operations**
-   * Multi-location fleet switcher, 1-second franchise catalog duplication, and granular team RBAC.
-   * Direct binary driverless ESC/POS thermal receipt printing over WebUSB/WebSerial/WebBluetooth, real-time push-to-talk staff intercom, built-in CRM with SMS/Email marketing, and customer IOU store credit ledger.
+1. **Pillar 1: Instant Digital Storefront & Unified Multi-Model Commerce Layer**
+   * Instant deployment of high-performance, offline-first storefronts tailored to any commercial schema (Restaurant/QR menus, Supermarkets/Retail with aisle navigation, BMS Service Bookings, PMS Apartment/Stay listings, and dynamic B2B rate cards).
+   * Multi-template aesthetic design token engine (`bento_grid`, `masonry`, `list`, `glassmorphism`, `neumorphism`) with decoupled dynamic QR/NFC routing.
+
+2. **Pillar 2: Full-Spectrum Enterprise Operations & Management Suite (Tab-by-Tab Breakdown)**
+   * **Live Order Dispatch & KDS (`/dashboard/orders`)**: Kitchen Display System with live status progression (`pending` → `paid` → `preparing` → `ready` → `out_for_delivery` → `completed`), audio chimes, and automatic ticket routing.
+   * **Point of Sale POS (`/dashboard/pos`)**: High-speed counter POS with barcode scanning, custom item add, split payments, manual discounts, and cash drawer kick.
+   * **Delivery Dispatch Hub (`/dashboard/delivery`)**: Multi-zone delivery dispatch, courier tracking, and flat/dynamic delivery fees.
+   * **Booking Management System BMS (`/dashboard/bookings`)**: Timed appointment calendars, service duration scheduling, staff assignment, and deposit capture.
+   * **Property Management System PMS (`/dashboard/properties`)**: Unit listings, check-in/out calendars, guest verification, and reservation tracking.
+   * **Dynamic Quotes & Inquiries (`/dashboard/quotes`)**: B2B quote generator, scope breakdown, dynamic retainers, and 2-tap customer approvals.
+   * **Enterprise Multi-Branch Fleet Management**: Top-left unified switcher (`🌐 All Businesses` vs individual branch), 1-second franchise catalog duplication (`duplicatePageAction`), localized tax/currencies, and granular RBAC roles (`owner`, `manager`, `staff`).
+   * **Zero-Daemon Hardware Printing**: Direct binary driverless ESC/POS thermal receipt printing over WebUSB, WebSerial (RS232 COM), and WebBluetooth without print daemons, plus automated cash drawer kick (`ESC p`).
+   * **Bill of Materials & Inventory Tracking BOM (`/dashboard/inventory`)**: Raw ingredient decrement tracking per order, low-stock threshold alerts, and supplier reorder sheets.
+   * **CRM & Customer Loyalty Ledger (`/dashboard/customers`)**: Automated customer shadow profiles at checkout, guest Lifetime Value (LTV), visit frequency, loyalty tiers, and customer IOU store credit financing / BNPL tab ledger with automated SMS/email debt reminders.
+   * **PIN-Verified Feedback & CSAT Reputation Loop (`/dashboard/team-performance`)**: Cryptographic PIN receipts for verified customer reviews, private grievance triage before negative reviews hit Google, and gamified staff performance & tip leaderboards.
+   * **Marketing & Growth Hub (`/dashboard/marketing`)**: SMS & Email broadcast campaigns, recurring happy hour flash deals, limited-quantity chef drop pricing, and smart cart cross-sell recommendations.
+   * **Real-Time Staff Intercom & Floor Radio (`/dashboard/intercom`)**: Zero-latency push-to-talk voice radio, kitchen-to-server ready alerts, table assistance chimes, and floor team coordination.
+   * **Deep Analytics & Machine Learning Forecast (`/dashboard/analytics`, `/dashboard/forecast`)**: Revenue velocity, category contribution, hourly peak volume, table turnover, payment method breakdown, and ML demand prediction for staffing and prep.
+   * **QR & Signage Generator Studio (`/dashboard/qr`)**: High-resolution vector QR code generator with branded framing, room/table/desk target routing, per-card PNG download, and print layouts.
+   * **Staff Timeclock Widget**: Persistent sidebar clock-in / clock-out with shift logging and manager audit.
+
 3. **Pillar 3: AI-Native on Both Customer and Merchant Sides**
    * **Customer-Facing**: Frontline 24/7 AI Concierge (`/api/chat`) with strict zero-hallucination guardrails and automated human staff handoff.
    * **Merchant-Facing**: Tego Admin AI Co-Pilot with bidirectional Voice and Camera Vision streaming, reading physical products, handwritten notes, and inventory via camera, executing dashboard actions by voice.
-4. **Pillar 4: Agent-Native & Machine-Executable via WebMCP**
-   * Automatically transforms the storefront into an autonomous, self-describing tool API registered on `document.modelContext`.
+
+4. **Pillar 4: Agent-Native & Machine-Executable via WebMCP & Staff MCP**
+   * Automatically transforms the storefront into an autonomous, self-describing tool API registered on `document.modelContext` (`search_catalog`, `get_item_details`, `create_cart`, `add_to_cart`, `get_cart`, `update_cart`, `initiate_checkout`, `submit_order`, `request_staff`).
    * AI browsing agents and autonomous web assistants can discover, filter, customize, and co-browse with the customer in real time with an architectural Human-in-the-Loop safe payment authorization gate.
+   * Exposes a dedicated Bearer-authenticated **Staff MCP Server (`/api/mcp`)** for external enterprise AI agents (Claude Desktop, ChatGPT, enterprise bots) to automate multi-branch operations, KDS fulfillment, and nightly sales auditing.
 
 ---
 
