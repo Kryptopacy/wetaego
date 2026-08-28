@@ -5,7 +5,7 @@ import {
   Code, Terminal, Bot, Key, Webhook, FileText, CheckCircle2, Download, Cpu, 
   Printer, Radio, CreditCard, Sparkles, Network, ShieldCheck, Zap,
   MonitorSmartphone, ClipboardList, BookOpen, Truck, Package, Users, 
-  BarChart3, Megaphone, QrCode, Clock, MessagesSquare
+  BarChart3, Megaphone, QrCode, Clock, MessagesSquare, RefreshCw
 } from 'lucide-react'
 import { LandingNavbar } from '@/components/LandingNavbar'
 
@@ -363,6 +363,63 @@ export default function DocsPage() {
               <div className="p-4 rounded-xl bg-black/60 border border-white/5 space-y-1">
                 <span className="text-emerald-400 font-bold">x402 & MPP Payment Protocol</span>
                 <p className="text-zinc-400 font-sans text-xs">HTTP 402 agent settlement at <code>/.well-known/x402.json</code> and <code>/.well-known/mpp.json</code>.</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Section 6: Universal POS Telemetry & Legacy Ingestion Gateway */}
+          <div className="bg-zinc-900/50 border border-white/10 rounded-3xl p-8 md:p-10 space-y-6">
+            <div className="flex items-center gap-3">
+              <RefreshCw className="w-6 h-6 text-emerald-400" />
+              <h2 className="text-2xl font-bold text-white">6. Universal POS Telemetry & Legacy Ingestion Gateway</h2>
+            </div>
+            <p className="text-zinc-300 text-sm leading-relaxed">
+              WETAEGO features a co-existence architecture. Businesses running existing legacy POS terminals (Toast, Square, Clover, Odoo, SAP, custom registers) do not need to replace their physical checkout hardware. You can stream in-store counter transactions into WETAEGO via our Telemetry Ingestion API or Webhooks to consolidate 100% of revenue, customer LTV, and ML demand forecasts in one unified dashboard.
+            </p>
+
+            <div className="space-y-4">
+              <div className="bg-black/80 rounded-2xl p-5 border border-white/10 space-y-3 font-mono text-xs">
+                <div className="flex items-center justify-between text-emerald-400 font-bold">
+                  <span>POST /api/v1/pos/ingest</span>
+                  <span className="text-zinc-500 font-normal">Bearer Auth</span>
+                </div>
+                <pre className="text-zinc-300 overflow-x-auto text-[11px] leading-relaxed">
+{`{
+  "locationId": "loc_pacy_supermarket_01",
+  "externalOrderId": "POS-98421",
+  "source": "clover",
+  "channel": "in_store_counter",
+  "terminalId": "Lane_04_Register",
+  "cashierName": "David A.",
+  "currency": "USD",
+  "totalMinor": 4250,
+  "taxMinor": 350,
+  "paymentMethod": "pos_card",
+  "items": [
+    { "name": "Organic Almond Milk", "sku": "ALM-01", "quantity": 2, "priceMinor": 1200 },
+    { "name": "Sourdough Artisanal Loaf", "sku": "BAK-04", "quantity": 1, "priceMinor": 1850 }
+  ],
+  "customer": {
+    "phone": "+1234567890",
+    "name": "Sarah Jenkins"
+  }
+}`}
+                </pre>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                <div className="p-4 rounded-xl bg-black/60 border border-white/5 space-y-1">
+                  <span className="text-emerald-400 font-bold">1. Webhook Adapters</span>
+                  <p className="text-zinc-400 font-sans text-xs">Connect Square, Clover, or Toast webhooks at <code>/api/webhooks/pos/:provider</code> to stream sales automatically.</p>
+                </div>
+                <div className="p-4 rounded-xl bg-black/60 border border-white/5 space-y-1">
+                  <span className="text-emerald-400 font-bold">2. Direct REST API</span>
+                  <p className="text-zinc-400 font-sans text-xs">Send transactions on checkout via <code>POST /api/v1/pos/ingest</code> with instant channel attribution.</p>
+                </div>
+                <div className="p-4 rounded-xl bg-black/60 border border-white/5 space-y-1">
+                  <span className="text-emerald-400 font-bold">3. EOD Batch Sync</span>
+                  <p className="text-zinc-400 font-sans text-xs">Upload daily Z-Report CSVs or automate reconciliation via Staff MCP (<code>sync_external_sales</code>).</p>
+                </div>
               </div>
             </div>
           </div>

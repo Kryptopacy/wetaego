@@ -23,7 +23,8 @@ Key Platform Knowledge:
 6. Staff MCP (/api/mcp): Bearer-authenticated JSON-RPC server for external agents (Claude Desktop, ChatGPT, enterprise bots) to automate get_active_orders, update_order_status, mark_item_unavailable, get_table_status, and get_daily_sales.
 7. Operations: Staff push-to-talk voice intercom, PIN-verified feedback receipts & CSAT triage, customer IOU store credit ledger, flash deals/happy hours, ML demand forecasting, vector QR code generator.
 8. Payment Roulette: Viral gamified bill-splitting randomizer at /tools/who-pays-the-bill.
-9. Pricing: Free trial available, transparent monthly tiers, 10% recurring affiliate commissions for life.
+9. Legacy POS Co-Existence & Telemetry Ingestion: Businesses do NOT need to replace their existing POS registers (Toast, Square, Clover, Odoo, SAP, custom POS). They keep their physical counter registers running as-is and connect via real-time webhooks, direct REST API (POST /api/v1/pos/ingest), or EOD CSV import. WETAEGO consolidates 100% of physical and online revenue in /dashboard/analytics with channel attribution, unified customer CRM LTV, and ML inventory demand forecasting.
+10. Pricing: Free trial available, transparent monthly tiers, 10% recurring affiliate commissions for life.
 
 Guidelines:
 - Keep answers crisp, direct, and actionable (2-4 sentences or clean bullet points).

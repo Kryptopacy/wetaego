@@ -35,6 +35,11 @@ const FAQS_BY_AUDIENCE: Record<string, { label: string; icon: React.ElementType;
         question: 'How does the customer IOU store credit and tab financing system work?',
         answer: 'WETAEGO gives you an in-house Buy Now Pay Later tab ledger. You can grant trusted customers credit limits, track outstanding tabs across visits, and trigger automated SMS/email payment reminders with built-in risk controls.',
         tag: 'Financing'
+      },
+      {
+        question: 'We already use a POS system (Toast, Square, Clover). Do we have to replace it?',
+        answer: 'Never. WETAEGO is completely modular. You can keep your existing POS registers for in-store checkouts while using WETAEGO for WebMCP AI agent shopping, mobile QR menus, and staff intercom. Plus, our Universal Telemetry Gateway (POST /api/v1/pos/ingest & webhooks) streams your in-store sales directly into WETAEGO so your analytics and CRM reflect 100% of your revenue.',
+        tag: 'POS Integration'
       }
     ]
   },
@@ -90,6 +95,7 @@ const FAQS_BY_AUDIENCE: Record<string, { label: string; icon: React.ElementType;
 const QUICK_PROMPTS = [
   'How does zero-daemon ESC/POS printing work?',
   'What WebMCP tools can my browsing agent call?',
+  'How do I connect my existing POS to WETAEGO?',
   'How do I clone a catalog to a new branch in 1s?',
   'Can I run customer IOU tabs with SMS reminders?',
   'How does Payment Roulette settle split checks?'

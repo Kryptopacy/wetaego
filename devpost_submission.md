@@ -121,11 +121,11 @@ The agent executes `search_catalog` with attribute and budget filters, resolves 
 
 ### 👻 Live "Ghost in the Machine" Co-Browsing
 External headless APIs sever the human from the experience. WETAEGO WebMCP provides **true shared context**:
-* As the agent executes `add_to_cart` or `update_cart_quantity`, the human customer watches the browser UI react in real time—animated Sonner toasts appear (*"🤖 AI added 1x 24-Hour Suya Steak (Medium Rare, Truffle Plantain) to cart"*), the cart badge pulses, and the order drawer updates live.
+* As the agent executes `add_to_cart` or `update_cart`, the human customer watches the browser UI react in real time—animated Sonner toasts appear (*"🤖 AI added 1x 24-Hour Suya Steak (Medium Rare, Truffle Plantain) to cart"*), the cart badge pulses, and the order drawer updates live.
 * The human shopper and AI agent browse, curate, and customize the order simultaneously.
 
 ### 🛎️ In-Venue Service & Staff Dispatch
-For physical dine-in, salon, clinic, or hotel guests, WebMCP exposes `call_staff_or_service`. A guest can simply prompt their device: *"Ask our server for extra water and napkins"*, and the page dispatches an immediate service ticket tagged with their exact table, seat, or room identifier.
+For physical dine-in, salon, clinic, or hotel guests, WebMCP exposes `request_staff`. A guest can simply prompt their device: *"Ask our server for extra water and napkins"*, and the page dispatches an immediate service ticket tagged with their exact table, seat, or room identifier.
 
 ---
 
@@ -138,14 +138,14 @@ Navigating complex, multi-tiered variant trees has historically broken AI agents
 * **Wellness & Professional Services**: Duration (*60m vs 90m*), Treatment Boosters, and Essential Oil Infusions.
 * **Hospitality & Dining**: Cooking Doneness (*Medium Rare*), Regional Spice Levels, Dietary Preferences, and Complimentary Side Combinations.
 
-### 2. The Architectural "Human-in-the-Loop" Safe Payment Gate (`initiate_checkout`)
+### 2. The Architectural "Human-in-the-Loop" Safe Payment Gate (`initiate_checkout` & `submit_order`)
 A critical barrier to AI agent adoption in commerce is financial trust—users are hesitant to grant autonomous agents unrestricted access to credit cards.
 
 WETAEGO solves this with a purpose-built **Human Confirmation Gate**:
 * The agent conducts the heavy lifting of discovery, constraint filtering, modifier composition, and discount calculations.
 * When ready, the agent calls `initiate_checkout`.
 * Rather than auto-charging, the storefront presents a clean, pre-filled Order Review & Payment Modal directly in the viewport.
-* The human customer reviews the items, verifies the total, and authorizes payment with a single biometric touch (Apple Pay / Google Pay / Card / Bank Transfer).
+* The human customer reviews the items, verifies the total, and authorizes payment with a single biometric touch (Apple Pay / Google Pay / Card / Bank Transfer), satisfying `submit_order(authorization: { confirmed: true })`.
 
 ### 3. Multi-Concept Enterprise Conglomerates
 Enterprises and multi-location franchises (exemplified by our pre-seeded enterprise demo, **Pacy Group**) frequently operate diverse multi-concept operations: dining, wellness, hospitality, luxury retail, and technical services under one unified brand. 
@@ -171,10 +171,12 @@ WETAEGO is engineered with **Next.js 16 (App Router)**, **React 19**, **Zustand*
 │  │   Dynamic Tool Suite         │   │   Reactive State Bridge   │   │  Human Co-Browsing UI  │  │
 │  │  - search_catalog            │───▶ - useCartStore (Zustand)  │───▶ - Live Sonner Toasts   │  │
 │  │  - get_item_details          │   │ - IndexedDB Persistence   │   │ - Badge Animations     │  │
-│  │  - add_to_cart (with mods)   │   │ - Staff Service Actions   │   │ - Cart Drawer Pop-out  │  │
-│  │  - view_cart / update_cart   │   │ - Table / Seat Scoping    │   │ - Checkout Review Gate │  │
-│  │  - call_staff_or_service     │   │                           │   │                        │  │
+│  │  - create_cart               │   │ - Staff Service Actions   │   │ - Cart Drawer Pop-out  │  │
+│  │  - add_to_cart (with mods)   │   │ - Table / Seat Scoping    │   │ - Checkout Review Gate │  │
+│  │  - get_cart / update_cart    │   │                           │   │                        │  │
 │  │  - initiate_checkout         │   │                           │   │                        │  │
+│  │  - submit_order (Auth Gate)  │   │                           │   │                        │  │
+│  │  - request_staff             │   │                           │   │                        │  │
 │  └──────────────────────────────┘   └───────────────────────────┘   └────────────────────────┘  │
 └─────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```

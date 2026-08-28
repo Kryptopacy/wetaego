@@ -19,11 +19,15 @@ import {
   Zap,
   Users,
   Radio,
+  Package,
+  QrCode,
+  RefreshCw,
+  Server
 } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "All Features & Industry Operating Solutions | WETAEGO",
-  description: "Explore the comprehensive business operating platform for hospitality, supermarket chains, salons, retail boutiques, consultants, real estate, and automotive dealerships.",
+  description: "Explore the comprehensive business operating platform for hospitality, supermarket chains, salons, retail boutiques, consultants, real estate, hardware POS, and WebMCP autonomous agent commerce.",
   keywords: [
     "wetaego features",
     "hospitality operating system",
@@ -35,15 +39,18 @@ export const metadata: Metadata = {
     "real estate showroom",
     "tego multimodal ai",
     "esc pos web printing",
+    "webmcp agent commerce",
+    "staff mcp server",
     "payment roulette",
-    "customer iou financing"
+    "customer iou financing",
+    "pos telemetry ingestion"
   ],
   alternates: {
     canonical: "https://ourmenuos.online/features",
   },
   openGraph: {
     title: "All Features & Industry Solutions | WETAEGO",
-    description: "Explore the 9 industry templates, AI copilot, POS hardware drivers, and viral growth tools powering modern physical businesses.",
+    description: "Explore the 9 industry templates, WebMCP agent commerce suite, POS hardware drivers, and viral growth tools powering modern physical businesses.",
     url: "https://ourmenuos.online/features",
     type: "website",
     images: ["/hero_emerald_gemstone.png"],
@@ -51,18 +58,19 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "All Features & Industry Solutions | WETAEGO",
-    description: "Explore the 9 industry templates, AI copilot, POS hardware drivers, and viral growth tools powering modern physical businesses.",
+    description: "Explore the 9 industry templates, WebMCP agent commerce suite, POS hardware drivers, and viral growth tools powering modern physical businesses.",
     images: ["/hero_emerald_gemstone.png"],
   },
 };
 
 const FEATURE_MODULES = [
+  // ── 1. Commercial Industry Engines ──
   {
     title: "Restaurant QR Digital Menu & Table Ordering",
     slug: "/features/restaurant-qr-menu",
     icon: UtensilsCrossed,
     color: "emerald",
-    tag: "Hospitality",
+    tag: "Hospitality & Dining",
     desc: "Self-ordering QR menus, split bill payments, live kitchen fulfillment boards, offline PWA caching, and waiter call buzzers.",
   },
   {
@@ -86,8 +94,8 @@ const FEATURE_MODULES = [
     slug: "/features/retail-boutique-ecommerce",
     icon: ShoppingBag,
     color: "amber",
-    tag: "Retail & E-Commerce",
-    desc: "Digital product catalogs with color/size variants, real-time stock levels, localized delivery rules, and multi-currency checkouts.",
+    tag: "Retail & Variants",
+    desc: "Digital product catalogs with color/size/spec variant matrices, real-time stock levels, localized delivery rules, and multi-currency checkouts.",
   },
   {
     title: "Digital Rate Cards & B2B Dynamic Quotes",
@@ -95,7 +103,7 @@ const FEATURE_MODULES = [
     icon: FileSpreadsheet,
     color: "purple",
     tag: "Consultants & Creators",
-    desc: "Interactive pricing tiers, media sponsorship cards, custom scope-of-work builders, and milestone deposit invoices.",
+    desc: "Interactive pricing tiers, media sponsorship cards, custom scope-of-work builders, and 2-tap milestone deposit invoices.",
   },
   {
     title: "Real Estate & Automotive Dealership Showrooms",
@@ -105,14 +113,76 @@ const FEATURE_MODULES = [
     tag: "Listings & Dealerships",
     desc: "High-resolution property specs, vehicle mileage/specs galleries, virtual tour links, and instant broker WhatsApp routing.",
   },
+
+  // ── 2. Hardware & Point of Sale Suite ──
+  {
+    title: "Driverless Web ESC/POS Thermal Receipt Printing",
+    slug: "/features/driverless-escpos-thermal-printing",
+    icon: Printer,
+    color: "emerald",
+    tag: "Hardware & POS",
+    desc: "Direct binary printing over WebUSB, WebSerial (RS232 COM), and WebBluetooth. Hardware paper cuts and cash drawer kick (ESC p) with zero daemons.",
+  },
+  {
+    title: "High-Speed Counter POS & Barcode Scanner",
+    slug: "/features/counter-pos-barcode-scanner",
+    icon: Zap,
+    color: "amber",
+    tag: "Point of Sale",
+    desc: "Lightning-fast counter checkout with USB/Camera barcode scanning, custom line items, split cash/card payments, and instant cash drawer kick.",
+  },
+  {
+    title: "Branded Vector QR Code & Table Signage Studio",
+    slug: "/features/qr-code-signage-generator",
+    icon: QrCode,
+    color: "teal",
+    tag: "Signage & QR",
+    desc: "Generate high-resolution vector SVG and PNG QR codes with embedded brand logos, table/room/desk target routing, and print-ready card layouts.",
+  },
+  {
+    title: "Enterprise Multi-Branch Fleet Management",
+    slug: "/features/multi-branch-fleet-management",
+    icon: Layers,
+    color: "blue",
+    tag: "Fleet Management",
+    desc: "Unified switcher across 2 to 100+ branches, 1-second atomic catalog cloning (duplicatePageAction), and localized tax/currency management.",
+  },
+  {
+    title: "Bill of Materials (BOM) & Inventory Tracking",
+    slug: "/features/inventory-bom-tracking",
+    icon: Package,
+    color: "rose",
+    tag: "Inventory & BOM",
+    desc: "Map finished items to raw ingredients. Automatic ingredient decrement per sale, low-stock threshold alerts, and supplier reorder sheets.",
+  },
+
+  // ── 3. AI & Agent-Native Infrastructure ──
+  {
+    title: "WebMCP In-Browser Autonomous Agent Commerce",
+    slug: "/features/webmcp-agentic-commerce",
+    icon: Bot,
+    color: "emerald",
+    tag: "WebMCP Protocol",
+    desc: "Canonical 8-tool client-side commerce suite on document.modelContext with an architectural Human-in-the-Loop Safe Payment Gate.",
+  },
+  {
+    title: "Staff MCP Server & Enterprise Fleet Automation",
+    slug: "/features/staff-mcp-automation",
+    icon: Server,
+    color: "blue",
+    tag: "Staff MCP Server",
+    desc: "Bearer-authenticated JSON-RPC 2.0 endpoint at /api/mcp for Claude Desktop, ChatGPT, and bots to automate orders, KDS, and daily audits.",
+  },
   {
     title: "Tego AI: Multimodal Voice, Vision & Concierge",
     slug: "/features/ai-copilot-tego-multimodal",
-    icon: Bot,
+    icon: Sparkles,
     color: "emerald",
     tag: "Artificial Intelligence",
     desc: "Real-time multimodal voice/vision dialogue, smartphone camera menu OCR parsing, zero-hallucination dining AI, and staff handoff.",
   },
+
+  // ── 4. Growth, Finance & Operations ──
   {
     title: "Payment Roulette & Bill Splitting Randomizer",
     slug: "/features/payment-roulette",
@@ -170,7 +240,7 @@ export default function FeaturesDirectoryPage() {
       {
         "@type": "ItemList",
         "@id": "https://ourmenuos.online/features#itemlist",
-        "name": "OurMenu OS Operating Capabilities & Solutions",
+        "name": "WETAEGO Platform Operating Capabilities & Solutions",
         "itemListElement": FEATURE_MODULES.map((f, i) => ({
           "@type": "ListItem",
           "position": i + 1,
@@ -218,71 +288,71 @@ export default function FeaturesDirectoryPage() {
             <h1 className="text-4xl md:text-6xl font-black text-white tracking-tight mb-6">
               Everything your operation needs. <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-green-400">
-                In one unified OS.
+                In one modular operating system.
               </span>
             </h1>
-            <p className="text-base md:text-xl text-zinc-300 font-light leading-relaxed">
-              Ditch fragile custom websites and expensive disconnected software. Explore our 9 specialized industry templates, AI copilot, hardware drivers, and viral customer tools.
+            <p className="text-zinc-400 text-lg md:text-xl font-light leading-relaxed">
+              Explore 20 specialized engines covering storefront commerce, driverless ESC/POS printing, WebMCP agent protocols, and multi-branch operations.
             </p>
           </div>
 
-          {/* Features Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-20">
-            {FEATURE_MODULES.map((item) => {
+          {/* Grid of All Modules */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {FEATURE_MODULES.map((item, idx) => {
               const Icon = item.icon;
               return (
                 <Link
-                  key={item.slug}
+                  key={idx}
                   href={item.slug}
-                  className="group relative bg-zinc-900/40 hover:bg-zinc-900/80 border border-white/5 hover:border-emerald-500/30 rounded-3xl p-8 transition-all duration-300 flex flex-col justify-between hover:shadow-2xl hover:shadow-emerald-500/5 hover:-translate-y-1"
+                  className="group relative flex flex-col justify-between p-8 rounded-3xl bg-zinc-900/40 border border-white/5 hover:border-emerald-500/30 transition-all duration-300 hover:shadow-2xl hover:shadow-emerald-950/20 hover:-translate-y-1"
                 >
-                  <div>
-                    <div className="flex items-center justify-between mb-6">
-                      <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white group-hover:text-emerald-400 group-hover:bg-emerald-500/10 group-hover:border-emerald-500/20 transition-colors">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
                         <Icon className="w-6 h-6" />
                       </div>
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 px-3 py-1 rounded-full bg-white/5 border border-white/10">
+                      <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[11px] font-semibold text-zinc-300 uppercase tracking-wider">
                         {item.tag}
                       </span>
                     </div>
 
-                    <h3 className="text-xl font-bold text-white mb-3 group-hover:text-emerald-300 transition-colors">
+                    <h3 className="text-xl font-bold text-white group-hover:text-emerald-300 transition-colors">
                       {item.title}
                     </h3>
-                    <p className="text-sm text-zinc-400 leading-relaxed font-light">
+
+                    <p className="text-zinc-400 text-sm font-light leading-relaxed">
                       {item.desc}
                     </p>
                   </div>
 
-                  <div className="mt-8 pt-4 border-t border-white/5 flex items-center justify-between text-xs font-semibold text-zinc-400 group-hover:text-white transition-colors">
-                    <span>Explore Capability</span>
-                    <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
+                  <div className="pt-6 flex items-center gap-2 text-xs font-semibold text-emerald-400 group-hover:text-emerald-300 transition-colors">
+                    Explore Solution <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
                   </div>
                 </Link>
               );
             })}
           </div>
 
-          {/* Bottom CTA */}
-          <div className="bg-gradient-to-r from-emerald-950/60 via-zinc-900 to-teal-950/60 border border-emerald-500/30 rounded-3xl p-8 md:p-12 text-center relative overflow-hidden">
-            <h3 className="text-2xl md:text-4xl font-black text-white mb-4">
-              Ready to modernize your business operations?
-            </h3>
-            <p className="text-zinc-300 text-base max-w-2xl mx-auto mb-8 font-light">
-              Create your branded digital storefront in under 10 minutes. Zero credit card required to get started.
+          {/* CTA Footer */}
+          <div className="mt-24 p-10 md:p-14 rounded-3xl bg-gradient-to-br from-zinc-900/80 via-black to-emerald-950/30 border border-white/10 text-center space-y-6">
+            <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
+              Ready to modernize your business infrastructure?
+            </h2>
+            <p className="text-zinc-400 text-base max-w-xl mx-auto font-light">
+              Launch in under 10 minutes. No specialized hardware required.
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
               <Link
                 href="/login"
-                className="px-8 py-3.5 rounded-full bg-white text-zinc-950 font-bold text-sm hover:scale-105 transition-transform shadow-xl"
+                className="px-8 py-3.5 rounded-full bg-emerald-400 hover:bg-emerald-300 text-black text-sm font-bold transition-all shadow-lg shadow-emerald-500/20 hover:scale-105"
               >
-                Start Free Workspace <ArrowRight className="w-4 h-4 inline ml-1" />
+                Get Started Free
               </Link>
               <Link
-                href="/affiliates"
-                className="px-8 py-3.5 rounded-full bg-white/10 border border-white/15 text-white font-semibold text-sm hover:bg-white/20 transition-colors"
+                href="/m/demo"
+                className="px-6 py-3.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white text-sm font-medium transition-all"
               >
-                Join Affiliate Program (10% Lifetime)
+                Explore Live Demo
               </Link>
             </div>
           </div>
