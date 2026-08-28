@@ -67,12 +67,17 @@ export async function POST(req: NextRequest) {
       .from('orders')
       .insert({
         location_id: data.locationId,
-        order_number: `EXT-${data.externalOrderId}`,
+        organization_id: location.organization_id,
+        payment_reference: `EXT-${data.externalOrderId}`,
         status: 'completed',
-        total_minor: data.totalMinor,
-        currency: data.currency,
+        subtotal_minor: Math.max(0, data.totalMinor - data.taxMinor),
+        total_amount_minor: data.totalMinor,
+        tax_total_minor: data.taxMinor,
         fulfillment_type: 'dine_in',
-        notes: `Ingested via ${data.source} (Terminal: ${data.terminalId || 'Main'}, Cashier: ${data.cashierName || 'Staff'})`,
+        customer_name: data.customer?.name || null,
+        customer_phone: data.customer?.phone || null,
+        customer_email: data.customer?.email || null,
+        customer_note: `Ingested via ${data.source} (Terminal: ${data.terminalId || 'Main'}, Cashier: ${data.cashierName || 'Staff'})`,
         metadata: {
           source: data.source,
           channel: data.channel,
