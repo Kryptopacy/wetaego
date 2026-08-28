@@ -167,7 +167,7 @@ export function FAQSection() {
 
       {/* Audience Filter Tabs */}
       <div className="flex flex-wrap items-center justify-center gap-2 mb-8">
-        {(Object.keys(FAQS_BY_AUDIENCE) as Array<keyof typeof FAQS_BY_AUDIENCE>).map((key) => {
+        {(['business', 'agents', 'customers'] as const).map((key) => {
           const cat = FAQS_BY_AUDIENCE[key]
           const Icon = cat.icon
           const isActive = activeTab === key
