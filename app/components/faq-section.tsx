@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Bot, Store, Cpu, Users, Sparkles, ChevronDown, ArrowRight, MessageSquareCode, Terminal, HelpCircle } from 'lucide-react'
+import { Bot, Store, Users, Sparkles, ChevronDown, MessageSquareCode, Terminal, HelpCircle, Send, Loader2, RotateCcw } from 'lucide-react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -87,9 +87,53 @@ const FAQS_BY_AUDIENCE: Record<string, { label: string; icon: React.ElementType;
   }
 }
 
+const QUICK_PROMPTS = [
+  'How does zero-daemon ESC/POS printing work?',
+  'What WebMCP tools can my browsing agent call?',
+  'How do I clone a catalog to a new branch in 1s?',
+  'Can I run customer IOU tabs with SMS reminders?',
+  'How does Payment Roulette settle split checks?'
+]
+
 export function FAQSection() {
   const [activeTab, setActiveTab] = useState<'business' | 'agents' | 'customers'>('business')
   const [openIndex, setOpenIndex] = useState<number | null>(0)
+
+  // Interactive Live Tego AI State
+  const [inputQuery, setInputQuery] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [liveAnswer, setLiveAnswer] = useState<string | null>(null)
+  const [activeQuestion, setActiveQuestion] = useState<string | null>(null)
+
+  const askTego = async (questionToAsk: string) => {
+    if (!questionToAsk.trim() || loading) return
+
+    setLoading(true)
+    setActiveQuestion(questionToAsk)
+    setLiveAnswer(null)
+
+    try {
+      const res = await fetch('/api/ai/faq-ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question: questionToAsk })
+      })
+
+      const data = await res.json()
+      setLiveAnswer(data.answer || 'WETAEGO is the universal commerce and operations OS for modern brands.')
+    } catch {
+      setLiveAnswer('WETAEGO powers storefronts, live operations, and autonomous WebMCP agents across 9 specialized industries.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleCustomSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (inputQuery.trim()) {
+      askTego(inputQuery)
+    }
+  }
 
   const currentCategory = FAQS_BY_AUDIENCE[activeTab]
 
@@ -108,60 +152,137 @@ export function FAQSection() {
         </p>
       </div>
 
-      {/* ── TEGO AI KNOWLEDGE HERO CALLOUT ── */}
-      <div className="mb-14 p-6 md:p-8 rounded-3xl bg-gradient-to-br from-emerald-950/40 via-zinc-900/60 to-black border border-emerald-500/30 shadow-2xl shadow-emerald-950/30 relative overflow-hidden">
-        <div className="absolute -right-12 -top-12 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+      {/* ── LIVE INTERACTIVE TEGO AI KNOWLEDGE ENGINE ── */}
+      <div className="mb-14 p-6 md:p-8 rounded-3xl bg-gradient-to-br from-emerald-950/40 via-zinc-900/70 to-black border border-emerald-500/30 shadow-2xl shadow-emerald-950/30 relative overflow-hidden ring-1 ring-emerald-500/20">
+        <div className="absolute -right-12 -top-12 w-64 h-64 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
         
-        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          <div className="space-y-2 max-w-xl">
-            <div className="flex items-center gap-2 text-emerald-400 text-xs font-bold uppercase tracking-wider">
-              <Bot className="w-4 h-4" /> Tego AI Knows Everything About WETAEGO
+        <div className="relative z-10 space-y-6">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-emerald-400 text-xs font-bold uppercase tracking-wider">
+                <Sparkles className="w-4 h-4" /> Live AI Knowledge Engine
+              </div>
+              <h3 className="text-xl md:text-2xl font-bold text-white tracking-tight">
+                Tego Knows Everything About WETAEGO. Ask Anything.
+              </h3>
+              <p className="text-zinc-400 text-xs md:text-sm font-light">
+                Type any technical, operational, or pricing question below to get an instant grounded answer.
+              </p>
             </div>
-            <h3 className="text-xl md:text-2xl font-bold text-white tracking-tight">
-              Have a specific question? Just ask Tego.
-            </h3>
-            <p className="text-zinc-300 text-sm leading-relaxed font-light">
-              Tego is fully trained on WETAEGO’s architecture, WebMCP protocols, 9 industry engines, hardware printing, and pricing tiers.
-            </p>
-          </div>
 
-          <div className="flex flex-col sm:flex-row items-stretch md:items-center gap-3 w-full md:w-auto">
-            <Link
-              href="/m/demo"
-              className="px-6 py-3 rounded-full bg-emerald-400 hover:bg-emerald-300 text-black text-xs md:text-sm font-bold transition-all text-center inline-flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 hover:scale-105"
-            >
-              <Sparkles className="w-4 h-4" /> Ask Tego on Live Demo
-            </Link>
-            <Link
-              href="/docs"
-              className="px-5 py-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 text-xs md:text-sm font-medium transition-all text-center inline-flex items-center justify-center gap-2"
-            >
-              <Terminal className="w-4 h-4" /> Developer Portal
-            </Link>
-          </div>
-        </div>
-
-        {/* Interactive Quick Prompts */}
-        <div className="mt-6 pt-5 border-t border-white/5">
-          <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider block mb-3">Popular questions Tego answers instantly:</span>
-          <div className="flex flex-wrap gap-2">
-            {[
-              'How does zero-daemon ESC/POS printing work?',
-              'How do WebMCP agent tools work?',
-              'How do I clone a catalog to a new branch in 1s?',
-              'Can I run customer IOU tabs with SMS reminders?',
-              'How does Payment Roulette settle split checks?'
-            ].map((prompt, i) => (
+            <div className="flex items-center gap-2 shrink-0">
               <Link
-                key={i}
                 href="/m/demo"
-                className="text-xs text-zinc-300 hover:text-emerald-300 bg-white/5 hover:bg-emerald-500/10 border border-white/10 hover:border-emerald-500/30 px-3 py-1.5 rounded-full transition-all flex items-center gap-1.5"
+                className="px-4 py-2 rounded-full bg-emerald-400 hover:bg-emerald-300 text-black text-xs font-bold transition-all inline-flex items-center gap-1.5 shadow-md shadow-emerald-500/20"
               >
-                <MessageSquareCode className="w-3 h-3 text-emerald-400" />
-                <span>&quot;{prompt}&quot;</span>
+                <Bot className="w-3.5 h-3.5" /> Full Demo Storefront
               </Link>
-            ))}
+            </div>
           </div>
+
+          {/* Interactive Search / Ask Input Bar */}
+          <form onSubmit={handleCustomSubmit} className="relative flex items-center">
+            <input
+              type="text"
+              value={inputQuery}
+              onChange={(e) => setInputQuery(e.target.value)}
+              placeholder="e.g. How does ESC/POS receipt printing work without a print daemon?"
+              className="w-full bg-black/70 border border-white/10 focus:border-emerald-500/50 rounded-2xl px-5 py-4 text-sm text-white placeholder-zinc-500 outline-none pr-28 transition-all ring-1 ring-white/5 focus:ring-emerald-500/30 shadow-inner"
+            />
+            <button
+              type="submit"
+              disabled={loading || !inputQuery.trim()}
+              className="absolute right-2 px-5 py-2.5 rounded-xl bg-emerald-400 hover:bg-emerald-300 disabled:opacity-40 disabled:hover:bg-emerald-400 text-black text-xs font-bold transition-all inline-flex items-center gap-1.5 shadow-md shadow-emerald-500/20"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>Thinking...</span>
+                </>
+              ) : (
+                <>
+                  <Send className="w-3.5 h-3.5" />
+                  <span>Ask Tego</span>
+                </>
+              )}
+            </button>
+          </form>
+
+          {/* Quick-Prompt Interactive Chips */}
+          <div className="space-y-2">
+            <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider block">
+              Or click a common prompt to see Tego answer:
+            </span>
+            <div className="flex flex-wrap gap-2">
+              {QUICK_PROMPTS.map((prompt, i) => (
+                <button
+                  key={i}
+                  onClick={() => {
+                    setInputQuery(prompt)
+                    askTego(prompt)
+                  }}
+                  className={`text-xs px-3 py-1.5 rounded-full transition-all flex items-center gap-1.5 text-left ${
+                    activeQuestion === prompt
+                      ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-300 font-medium'
+                      : 'bg-white/5 hover:bg-emerald-500/10 border border-white/10 hover:border-emerald-500/30 text-zinc-300 hover:text-emerald-300'
+                  }`}
+                >
+                  <MessageSquareCode className="w-3 h-3 text-emerald-400 shrink-0" />
+                  <span>&quot;{prompt}&quot;</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Live Answer Container */}
+          <AnimatePresence>
+            {(loading || liveAnswer) && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="mt-4 p-5 md:p-6 rounded-2xl bg-black/80 border border-emerald-500/30 shadow-xl space-y-3"
+              >
+                <div className="flex items-center justify-between gap-4 border-b border-white/5 pb-3">
+                  <div className="flex items-center gap-2 text-emerald-400 text-xs font-bold">
+                    <Bot className="w-4 h-4" />
+                    <span>Tego&apos;s Answer for: &quot;{activeQuestion}&quot;</span>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setLiveAnswer(null)
+                      setActiveQuestion(null)
+                      setInputQuery('')
+                    }}
+                    className="text-zinc-500 hover:text-zinc-300 text-xs flex items-center gap-1 transition-colors"
+                  >
+                    <RotateCcw className="w-3 h-3" /> Clear
+                  </button>
+                </div>
+
+                {loading ? (
+                  <div className="flex items-center gap-3 text-zinc-400 text-sm py-4">
+                    <Loader2 className="w-4 h-4 animate-spin text-emerald-400" />
+                    <span>Consulting WETAEGO platform knowledge graph...</span>
+                  </div>
+                ) : (
+                  <p className="text-sm md:text-base text-zinc-200 font-light leading-relaxed whitespace-pre-line">
+                    {liveAnswer}
+                  </p>
+                )}
+
+                {!loading && liveAnswer && (
+                  <div className="pt-2 flex items-center gap-3 text-xs text-zinc-500">
+                    <span className="text-emerald-400">✓ Grounded in live documentation</span>
+                    <span>•</span>
+                    <Link href="/docs" className="hover:text-emerald-400 underline transition-colors">
+                      View full API reference →
+                    </Link>
+                  </div>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
 
