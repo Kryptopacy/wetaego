@@ -232,7 +232,7 @@ export default async function HomePage() {
             </h1>
 
             <p className="text-lg sm:text-xl md:text-2xl text-zinc-100 font-normal leading-snug mb-4 max-w-xl">
-              Built for <span className="text-white font-semibold">modern brands</span>, their <span className="text-white font-semibold">human customers</span>, and the <span className="text-emerald-300 font-semibold">AI agents</span> who serve them.
+              Built for <span className="text-amber-300 font-semibold">modern brands</span>, their <span className="text-sky-300 font-semibold">human customers</span>, and the <span className="text-emerald-300 font-semibold">AI agents</span> who serve them.
             </p>
 
             <p className="text-sm sm:text-base text-zinc-400 max-w-lg font-light leading-relaxed mb-8 drop-shadow-sm">
