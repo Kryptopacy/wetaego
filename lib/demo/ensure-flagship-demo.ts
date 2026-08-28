@@ -67,7 +67,7 @@ export async function ensureFlagshipDemoLocation() {
       { question: 'What payment methods do you accept?', answer: 'We accept all major debit/credit cards, Apple Pay, and direct bank transfers.' }
     ],
     brand_knowledge: 'Pacy Group is a multi-concept commercial conglomerate in Lagos — spanning fine dining (Pacy Grills & Lounge), wellness spa, luxury short-stays, a fashion boutique, tech gadgets, a creator media studio, luxury hotels, and a gadget repair lab.',
-    publication_status: 'published',
+    publication_status: 'published' as const,
     manual_payment_enabled: true,
     manual_payment_bank_name: 'WETAEGO Demo Bank',
     manual_payment_account_name: 'Pacy Group Flagship Demo',

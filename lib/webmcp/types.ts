@@ -7,17 +7,25 @@
 export interface JSONSchemaProperty {
   type: 'string' | 'number' | 'integer' | 'boolean' | 'array' | 'object';
   description?: string;
-  enum?: string[] | number[];
+  enum?: (string | number)[];
   items?: JSONSchemaProperty;
   properties?: Record<string, JSONSchemaProperty>;
   required?: string[];
-  default?: any;
+  default?: unknown;
+  minimum?: number;
+  maximum?: number;
+  minLength?: number;
+  maxLength?: number;
+  format?: string;
+  additionalProperties?: boolean | JSONSchemaProperty;
+  const?: unknown;
 }
 
 export interface JSONSchema {
   type: 'object';
   properties: Record<string, JSONSchemaProperty>;
   required?: string[];
+  additionalProperties?: boolean | JSONSchemaProperty;
 }
 
 export interface WebMCPTool<TInput = any, TOutput = any> {

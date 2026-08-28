@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
+import { getMCPManifest } from '@/lib/webmcp/manifest'
 
 export const dynamic = 'force-dynamic'
 
@@ -9,9 +10,12 @@ export const dynamic = 'force-dynamic'
  * authenticated via Bearer token.
  */
 export async function GET() {
-  // Return the public MCP discovery manifest
-  const manifestRes = await import('../.well-known/mcp.json/route')
-  return manifestRes.GET()
+  return NextResponse.json(getMCPManifest(), {
+    headers: {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*'
+    }
+  })
 }
 
 export async function POST(req: NextRequest) {
@@ -35,12 +39,12 @@ export async function POST(req: NextRequest) {
       const today = args?.date || new Date().toISOString().split('T')[0]
       const { data: orders } = await adminClient
         .from('orders')
-        .select('id, total_minor, status, created_at')
+        .select('id, total_amount_minor, status, created_at')
         .gte('created_at', `${today}T00:00:00.000Z`)
         .lte('created_at', `${today}T23:59:59.999Z`)
 
       const completed = (orders || []).filter(o => o.status !== 'cancelled')
-      const totalRevenueMinor = completed.reduce((sum, o) => sum + (o.total_minor || 0), 0)
+      const totalRevenueMinor = completed.reduce((sum, o) => sum + (o.total_amount_minor || 0), 0)
 
       return NextResponse.json({
         date: today,
@@ -55,8 +59,8 @@ export async function POST(req: NextRequest) {
     if (name === 'get_active_orders') {
       const { data: orders } = await adminClient
         .from('orders')
-        .select('id, status, table_identifier, customer_name, total_minor, created_at, order_items(id, item_title, quantity, unit_price_minor)')
-        .in('status', ['pending', 'accepted', 'preparing', 'ready'])
+        .select('id, status, table_identifier, customer_name, total_amount_minor, created_at, order_items(id, item_title, quantity, unit_price_minor)')
+        .in('status', ['pending', 'paid', 'preparing'])
         .order('created_at', { ascending: false })
         .limit(50)
 
@@ -67,7 +71,7 @@ export async function POST(req: NextRequest) {
           status: o.status,
           table: o.table_identifier || 'Walk-in',
           customerName: o.customer_name || 'Guest',
-          total: (o.total_minor || 0) / 100,
+          total: (o.total_amount_minor || 0) / 100,
           items: o.order_items || []
         }))
       })
