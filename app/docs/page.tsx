@@ -136,9 +136,9 @@ export default function DocsPage() {
                 <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 w-fit">
                   <ClipboardList className="w-5 h-5" />
                 </div>
-                <h3 className="text-base font-bold text-white">Live KDS & Order Inbox</h3>
+                <h3 className="text-base font-bold text-white">Universal Order Inbox & Fulfillment Board</h3>
                 <p className="text-xs text-zinc-400 leading-relaxed">
-                  Real-time ticket routing with status progression (<code className="text-emerald-400 font-mono">pending → paid → preparing → ready → out_for_delivery → completed</code>), audio chimes, and automatic thermal kitchen dispatch.
+                  Real-time order fulfillment with status progression (<code className="text-emerald-400 font-mono">pending → paid → preparing → ready → out_for_delivery → completed</code>) across all business types—from retail packaging to digital services and kitchen tickets—with audio alerts and thermal printing.
                 </p>
               </div>
 

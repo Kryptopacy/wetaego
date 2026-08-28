@@ -24,7 +24,7 @@ WETAEGO implements a dual-layer MCP architecture:
                          │                                                             │
                          ▼                                                             ▼
            • Public /m/[slug] Storefronts                                • Multi-Branch Fleet Management
-           • Session-Scoped Cart Binding                                 • Live KDS & Kitchen Dispatch
+           • Session-Scoped Cart Binding                                 • Live Order Dispatch & Fulfillment Board
            • Real-time Zustand/IndexedDB Sync                            • Automated Sales Auditing
            • Mandatory Human Authorization Gate                          • 86ing / Inventory Status
 ```
@@ -38,7 +38,7 @@ WETAEGO enforces strict least-privilege security boundaries:
 | Layer | Protocol Surface | Authentication | Scope & Trust Boundary |
 | :--- | :--- | :--- | :--- |
 | **Customer WebMCP** | `document.modelContext` | Browser Session (Anonymous / Customer) | **Zero-Trust**: Session-scoped cart state. Prices, taxes, and availability are server-validated. **Mandatory human confirmation gate** before any order submission. |
-| **Staff MCP** | `/api/mcp` | Bearer Token / Staff Session | **Role-Based (RBAC)**: Scoped to merchant or enterprise franchise organization. Provides access to KDS fulfillment, inventory 86ing, and sales analytics. |
+| **Staff MCP** | `/api/mcp` | Bearer Token / Staff Session | **Role-Based (RBAC)**: Scoped to merchant or enterprise franchise organization. Provides access to order fulfillment, inventory 86ing, and sales analytics across any business model. |
 
 ---
 

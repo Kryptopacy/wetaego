@@ -63,7 +63,7 @@ When any merchant or enterprise joins WETAEGO, they are not just getting a websi
    * Multi-template aesthetic design token engine (`bento_grid`, `masonry`, `list`, `glassmorphism`, `neumorphism`) with decoupled dynamic QR/NFC routing.
 
 2. **Pillar 2: Full-Spectrum Enterprise Operations & Management Suite (Tab-by-Tab Breakdown)**
-   * **Live Order Dispatch & KDS (`/dashboard/orders`)**: Kitchen Display System with live status progression (`pending` → `paid` → `preparing` → `ready` → `out_for_delivery` → `completed`), audio chimes, and automatic ticket routing.
+   * **Universal Order Inbox & Dispatch Board (`/dashboard/orders`)**: Real-time multi-status order fulfillment board (`pending` → `paid` → `preparing` → `ready` → `out_for_delivery` → `completed`) for any industry (retail packaging, tech orders, service packages, or restaurant kitchen tickets), complete with audio chimes and automatic thermal ticket printing.
    * **Point of Sale POS (`/dashboard/pos`)**: High-speed counter POS with barcode scanning, custom item add, split payments, manual discounts, and cash drawer kick.
    * **Delivery Dispatch Hub (`/dashboard/delivery`)**: Multi-zone delivery dispatch, courier tracking, and flat/dynamic delivery fees.
    * **Booking Management System BMS (`/dashboard/bookings`)**: Timed appointment calendars, service duration scheduling, staff assignment, and deposit capture.
