@@ -407,18 +407,22 @@ export default function DocsPage() {
                 </pre>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
                 <div className="p-4 rounded-xl bg-black/60 border border-white/5 space-y-1">
-                  <span className="text-emerald-400 font-bold">1. Webhook Adapters</span>
-                  <p className="text-zinc-400 font-sans text-xs">Connect Square, Clover, or Toast webhooks at <code>/api/webhooks/pos/:provider</code> to stream sales automatically.</p>
+                  <span className="text-emerald-400 font-bold">1. Cloud Webhooks & REST</span>
+                  <p className="text-zinc-400 font-sans text-xs">Connect Square, Clover, or Toast webhooks at <code>/api/webhooks/pos/:provider</code> or stream via <code>POST /api/v1/pos/ingest</code>.</p>
+                </div>
+                <div className="p-4 rounded-xl bg-black/60 border border-emerald-500/30 space-y-1 bg-emerald-950/20">
+                  <span className="text-emerald-300 font-bold">2. Tego Vision Z-Report OCR</span>
+                  <p className="text-zinc-300 font-sans text-xs">Take a 1-second photo of physical cash register paper tape; Tego AI camera vision extracts all totals, taxes, and items automatically.</p>
                 </div>
                 <div className="p-4 rounded-xl bg-black/60 border border-white/5 space-y-1">
-                  <span className="text-emerald-400 font-bold">2. Direct REST API</span>
-                  <p className="text-zinc-400 font-sans text-xs">Send transactions on checkout via <code>POST /api/v1/pos/ingest</code> with instant channel attribution.</p>
+                  <span className="text-emerald-400 font-bold">3. CSV / Excel Drag & Drop</span>
+                  <p className="text-zinc-400 font-sans text-xs">Export daily reports from older Windows POS (Micros, Aloha) and drop into <code>/dashboard/analytics/import</code>.</p>
                 </div>
                 <div className="p-4 rounded-xl bg-black/60 border border-white/5 space-y-1">
-                  <span className="text-emerald-400 font-bold">3. EOD Batch Sync</span>
-                  <p className="text-zinc-400 font-sans text-xs">Upload daily Z-Report CSVs or automate reconciliation via Staff MCP (<code>sync_external_sales</code>).</p>
+                  <span className="text-emerald-400 font-bold">4. 30s Shift Tape Entry</span>
+                  <p className="text-zinc-400 font-sans text-xs">For standalone mechanical registers: type total Cash, Card, and Tax numbers into the closing shift ledger.</p>
                 </div>
               </div>
             </div>

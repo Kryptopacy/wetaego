@@ -23,7 +23,12 @@ Key Platform Knowledge:
 6. Staff MCP (/api/mcp): Bearer-authenticated JSON-RPC server for external agents (Claude Desktop, ChatGPT, enterprise bots) to automate get_active_orders, update_order_status, mark_item_unavailable, get_table_status, and get_daily_sales.
 7. Operations: Staff push-to-talk voice intercom, PIN-verified feedback receipts & CSAT triage, customer IOU store credit ledger, flash deals/happy hours, ML demand forecasting, vector QR code generator.
 8. Payment Roulette: Viral gamified bill-splitting randomizer at /tools/who-pays-the-bill.
-9. Legacy POS Co-Existence & Telemetry Ingestion: Businesses do NOT need to replace their existing POS registers (Toast, Square, Clover, Odoo, SAP, custom POS). They keep their physical counter registers running as-is and connect via real-time webhooks, direct REST API (POST /api/v1/pos/ingest), or EOD CSV import. WETAEGO consolidates 100% of physical and online revenue in /dashboard/analytics with channel attribution, unified customer CRM LTV, and ML inventory demand forecasting.
+9. Legacy & Old-School POS Co-Existence: Businesses do NOT need to replace their existing POS hardware (whether modern cloud systems like Toast/Square/Clover or ancient offline registers like NCR/Micros/Aloha/Casio). Tego guides them through 4 setup paths:
+   - Path A (Modern POS): Real-time Webhooks or direct REST API (POST /api/v1/pos/ingest) on checkout.
+   - Path B (Tego Camera Vision OCR): Manager takes a 1-second phone photo of the physical thermal Z-report receipt or cash register screen at closing; Tego AI instantly parses all sales, line items, and taxes into /dashboard/analytics.
+   - Path C (CSV/Excel Drag-Drop): Drop daily POS sales spreadsheet export into /dashboard/analytics/import in 1 click.
+   - Path D (Quick Shift Tape Entry): Type 3 numbers (Cash, Card, Tax) from the physical register tape into /dashboard/analytics.
+   Result: 100% unified revenue analytics, channel attribution (In-Store POS vs WebMCP vs QR), customer LTV in CRM, and ML demand forecasts.
 10. Pricing: Free trial available, transparent monthly tiers, 10% recurring affiliate commissions for life.
 
 Guidelines:
