@@ -14,6 +14,7 @@ import { LandingNavbar } from '../components/LandingNavbar'
 import { UseCases } from './components/use-cases'
 import { RouletteTeaser } from './components/roulette-teaser'
 import { IouTeaser } from './components/iou-teaser'
+import { FAQSection } from './components/faq-section'
 
 import type { Metadata } from 'next'
 
@@ -371,54 +372,8 @@ export default async function HomePage() {
         </FadeIn>
       </section>
 
-      {/* ── SSR FAQ & ARCHITECTURE SECTION ── */}
-      <section id="faq" className="py-24 px-6 max-w-5xl mx-auto border-t border-white/[0.04]">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-5xl font-black text-white mb-4 tracking-tight">
-            Frequently Asked Questions & Operational Reference
-          </h2>
-          <p className="text-zinc-400 text-base md:text-lg max-w-2xl mx-auto font-light">
-            Everything you need to know about deploying WETAEGO, managing branch fleets, and integrating hardware peripherals.
-          </p>
-        </div>
-
-        <div className="space-y-6 text-left">
-          <div className="p-6 md:p-8 rounded-2xl bg-zinc-900/40 border border-white/5 space-y-2">
-            <h3 className="text-xl font-bold text-white">What physical and service industries does WETAEGO support?</h3>
-            <p className="text-zinc-300 text-sm leading-relaxed">
-              WETAEGO includes 9 tailored industry engines: Restaurants, Bars & Food Trucks (dine-in ordering, split tabs, kitchen display); Supermarkets & Retail Chains (multi-branch fleet switcher, sub-department aisles, ESC/POS printing); Salons, Spas & Wellness (smart booking calendars, upfront deposits); Retail Boutiques & Gadgets (variants, stock alerts); Consultants & Agencies (interactive dynamic rate cards, retainers); Real Estate & Automotive (immersive asset showcases, lead capture); and Multi-Venue Portals.
-            </p>
-          </div>
-
-          <div className="p-6 md:p-8 rounded-2xl bg-zinc-900/40 border border-white/5 space-y-2">
-            <h3 className="text-xl font-bold text-white">How does the driverless thermal receipt printing work?</h3>
-            <p className="text-zinc-300 text-sm leading-relaxed">
-              WETAEGO has a built-in native ESC/POS binary command engine. It connects directly from modern web browsers to thermal receipt printers over WebUSB, WebSerial (RS232 COM), and WebBluetooth. It triggers instant hardware paper cuts and cash drawer kick pulses without third-party print drivers, external daemons, or OS print dialogs.
-            </p>
-          </div>
-
-          <div className="p-6 md:p-8 rounded-2xl bg-zinc-900/40 border border-white/5 space-y-2">
-            <h3 className="text-xl font-bold text-white">What is Tego Multimodal AI and how is it grounded?</h3>
-            <p className="text-zinc-300 text-sm leading-relaxed">
-              Tego AI is powered by Google Gemini 3.1 Flash Live. For store managers, it provides real-time voice control and 1 FPS camera video ingestion to parse physical paper menus or inventory shelves into digital databases in seconds. For storefront guests, Tego acts as a zero-hallucination public concierge strictly bounded by verified database records, triggering live floor staff escalations when queries fall outside known stock.
-            </p>
-          </div>
-
-          <div className="p-6 md:p-8 rounded-2xl bg-zinc-900/40 border border-white/5 space-y-2">
-            <h3 className="text-xl font-bold text-white">How does 1-second franchise catalog duplication work?</h3>
-            <p className="text-zinc-300 text-sm leading-relaxed">
-              When a supermarket brand or restaurant group opens a new branch, our atomic cloning stored procedure recursively duplicates all collections, categories, items, price rules, and modifier groups from the master branch to the new location in under 1 second, saving weeks of manual catalog entry.
-            </p>
-          </div>
-
-          <div className="p-6 md:p-8 rounded-2xl bg-zinc-900/40 border border-white/5 space-y-2">
-            <h3 className="text-xl font-bold text-white">What is the Payment Roulette game?</h3>
-            <p className="text-zinc-300 text-sm leading-relaxed">
-              Payment Roulette is a viral bill-splitting randomizer game built directly into WETAEGO. Dining parties spin a digital wheel on their mobile devices to randomly select who pays the restaurant check, turns paying the bill into an engaging social game, and boosts merchant organic social shares.
-            </p>
-          </div>
-        </div>
-      </section>
+      {/* ── INTELLIGENCE & OPERATIONAL FAQ SECTION ── */}
+      <FAQSection />
 
       {/* ── FOOTER ── */}
       <footer className="border-t border-white/[0.04] py-16 px-6 bg-zinc-950/80">
