@@ -147,9 +147,6 @@ export function FAQSection() {
     <section id="faq" className="py-24 px-6 max-w-5xl mx-auto border-t border-white/[0.04]">
       {/* Header */}
       <div className="text-center mb-12">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold uppercase tracking-widest mb-4">
-          <HelpCircle className="w-3.5 h-3.5" /> Intelligence & Operational FAQ
-        </div>
         <h2 className="text-3xl md:text-5xl font-black text-white mb-4 tracking-tight">
           Everything You Need to Know.
         </h2>
