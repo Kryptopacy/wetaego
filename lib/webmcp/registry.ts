@@ -158,10 +158,25 @@ export function ensureWebMCPContext(): ModelContext {
         ;(window as any).modelContext = ctx
       }
     }
+    if (typeof navigator !== 'undefined') {
+      try {
+        Object.defineProperty(navigator, 'modelContext', {
+          value: ctx,
+          writable: true,
+          configurable: true,
+          enumerable: true,
+        })
+      } catch {
+        ;(navigator as any).modelContext = ctx
+      }
+    }
   } catch {
     ;(document as any).modelContext = ctx
     if (typeof window !== 'undefined') {
       ;(window as any).modelContext = ctx
+    }
+    if (typeof navigator !== 'undefined') {
+      ;(navigator as any).modelContext = ctx
     }
   }
 

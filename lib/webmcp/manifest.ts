@@ -29,7 +29,7 @@ export function getMCPManifest() {
         scope: "customer",
         permission: "public/read-only",
         confirmation: "none",
-        description: "Global merchant directory lookup: Search and discover distinct business storefronts and merchant locations across the WETAEGO network by business name, city query, industry category, or venue slug. Use this to locate different merchant venues.",
+        description: "Find other businesses: Search and discover distinct external merchant venues or branch locations across the WETAEGO network by business name, city query, industry category, or venue slug. (Do NOT use to switch tabs inside the current storefront; use wetaego_open_business_page instead.)",
         inputSchema: {
           type: "object",
           properties: {
@@ -537,7 +537,7 @@ export function getMCPManifest() {
         scope: "customer",
         permission: "public/navigation",
         confirmation: "none",
-        description: "Internal storefront department navigation: Switch the active view to an internal department or category catalog tab (such as 'restaurant', 'spa', 'boutique', 'repairs') within the currently active merchant storefront.",
+        description: "Switch department within active storefront: Switch the active view to an internal department or category catalog tab (such as 'restaurant', 'spa', 'boutique', 'repairs') inside the current venue. (Do NOT use to find external businesses; use wetaego_find_venue instead.)",
         inputSchema: {
           type: "object",
           required: ["conceptSlug"],
