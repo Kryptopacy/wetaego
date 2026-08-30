@@ -37,7 +37,7 @@ export function WebMcpProvider() {
         name: 'wetaego_find_venue',
         page: '/',
         description:
-          'Discover or find any WETAEGO-powered business, storefront, restaurant, salon, boutique, hotel, or service provider by keywords, industry vertical, or exact slug.',
+          'Global merchant directory lookup: Search and discover distinct business storefronts and merchant locations across the WETAEGO network by business name, city query, industry category, or venue slug. Use this to locate different merchant venues.',
         inputSchema: {
           type: 'object',
           properties: {
@@ -503,7 +503,8 @@ export function WebMcpProvider() {
       {
         name: 'wetaego_open_business_page',
         page: '/m/{slug}',
-        description: 'Navigate or switch the active storefront viewport to a specific department or concept page (e.g. "restaurant", "spa", "boutique", "gadgets", "hotel").',
+        description:
+          'Internal storefront department navigation: Switch the active view to an internal department or category catalog tab (such as "restaurant", "spa", "boutique", "repairs") within the currently active merchant storefront.',
         inputSchema: {
           type: 'object',
           required: ['conceptSlug'],

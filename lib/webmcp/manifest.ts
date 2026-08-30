@@ -29,7 +29,7 @@ export function getMCPManifest() {
         scope: "customer",
         permission: "public/read-only",
         confirmation: "none",
-        description: "Discover or find any WETAEGO-powered business, storefront, restaurant, salon, boutique, hotel, or service provider by keywords, industry vertical, or exact slug.",
+        description: "Global merchant directory lookup: Search and discover distinct business storefronts and merchant locations across the WETAEGO network by business name, city query, industry category, or venue slug. Use this to locate different merchant venues.",
         inputSchema: {
           type: "object",
           properties: {
@@ -533,7 +533,7 @@ export function getMCPManifest() {
         scope: "customer",
         permission: "public/navigation",
         confirmation: "none",
-        description: "Navigate or switch the active storefront viewport to a specific department or concept page (e.g. restaurant, spa, boutique, hotel).",
+        description: "Internal storefront department navigation: Switch the active view to an internal department or category catalog tab (such as 'restaurant', 'spa', 'boutique', 'repairs') within the currently active merchant storefront.",
         inputSchema: {
           type: "object",
           required: ["conceptSlug"],
