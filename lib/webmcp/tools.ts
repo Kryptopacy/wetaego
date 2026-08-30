@@ -449,7 +449,11 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
       const tax = Math.round(discountedSubtotal * 0.075 * 100) / 100 // 7.5% VAT
       const fees = 0
       const total = discountedSubtotal + tax + fees
-      const checkoutId = `chk_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`
+      const checkoutId = input.customer?.email
+        ? `chk_${Date.now()}_${Buffer.from(input.customer.email).toString('hex').slice(0, 6)}`
+        : `chk_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`
+
+      const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString()
 
       toast.info(`💳 Checkout Session Prepared`, {
         description: `Total: ${total.toLocaleString('en-US', { minimumFractionDigits: 2 })} ${currency}. Human confirmation required to authorize.`,
@@ -468,6 +472,8 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
         total,
         totalFormatted: `${total.toLocaleString('en-US', { minimumFractionDigits: 2 })} ${currency}`,
         itemCount: items.reduce((sum, it) => sum + it.quantity, 0),
+        expiresAt,
+        priceLockValidMinutes: 15,
         requiresPaymentAuthorization: true,
         message: 'Checkout prepared. To finalize, the user must authorize via submit_order with explicit human confirmation.'
       }

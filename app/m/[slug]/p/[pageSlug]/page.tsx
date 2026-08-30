@@ -102,6 +102,18 @@ export default async function PublicPageView({
   const isDemoMode = cookieStore.get('demo_mode')?.value === '1'
 
   const fetchLocation = async () => {
+    if (slug === 'demo') {
+      const { ensureFlagshipDemoLocation } = await import('@/lib/demo/ensure-flagship-demo')
+      await ensureFlagshipDemoLocation()
+      const adminClient = await createAdminClient()
+      const { data: adminData } = await adminClient
+        .from('locations')
+        .select('id, name, organization_id, is_search_visible, theme_color, cover_image_url, ai_enabled, ai_name, instagram_handle, x_handle, tiktok_handle, facebook_handle, whatsapp_number, phone_number, google_maps_url, operating_hours, wifi_network, wifi_password, organizations(logo_url, status, refund_policy, subscription_plan), manual_payment_enabled, manual_payment_bank_name, manual_payment_account_name, manual_payment_account_number, manual_payment_instructions, delivery_enabled, delivery_fee_minor, delivery_minimum_order_minor, delivery_note, fulfillment_location_label, currency_code, portal_display_name, location_taxes(*)')
+        .eq('slug', 'demo')
+        .single()
+      return adminData
+    }
+
     const anonSupabase = createAnonClient()
     let { data } = await anonSupabase
       .from('locations')
@@ -110,11 +122,6 @@ export default async function PublicPageView({
       .single()
 
     if (!data) {
-      if (slug === 'demo') {
-        const { ensureFlagshipDemoLocation } = await import('@/lib/demo/ensure-flagship-demo')
-        await ensureFlagshipDemoLocation()
-      }
-      const { createAdminClient } = await import('@/lib/supabase/server')
       const adminClient = await createAdminClient()
       const { data: adminData } = await adminClient
         .from('locations')
@@ -164,7 +171,7 @@ export default async function PublicPageView({
   const org = loc.organizations as { status?: string } | null | undefined;
   const orgStatus = org?.status || 'approved';
   
-  if (!isPreview && !isDemoMode && orgStatus !== 'approved') {
+  if (!isPreview && !isDemoMode && slug !== 'demo' && orgStatus !== 'approved') {
     const { getKycSettings } = await import('@/lib/utils/settings')
     const kycSettings = await getKycSettings() as { require_kyc_to_publish?: boolean }
     if (kycSettings?.require_kyc_to_publish) {
@@ -190,6 +197,17 @@ export default async function PublicPageView({
 
   // 2. Page
   const fetchPage = async () => {
+    if (slug === 'demo') {
+      const adminClient = await createAdminClient()
+      const { data: adminRawData } = await adminClient
+        .from('location_pages')
+        .select('id, title, slug, content, template_type, billing_enabled, billing_mode, payment_mode, deposit_percentage, business_type_preset, randomizer_enabled, deals_enabled, template_data, is_published, theme_color, background_color, operating_hours, contact_email, contact_phone, wifi_network, wifi_password, address, upsell_mode, design_tokens, ai_enabled, ai_name, ai_base_personality')
+        .eq('location_id', loc.id)
+        .eq('slug', pageSlug)
+        .maybeSingle()
+      return adminRawData as Record<string, unknown>
+    }
+
     const anonSupabase = createAnonClient()
     let query = anonSupabase
       .from('location_pages')
@@ -202,21 +220,7 @@ export default async function PublicPageView({
     }
 
     const { data: rawData } = await query.single()
-    if (!rawData && slug === 'demo') {
-      const { ensureFlagshipDemoLocation } = await import('@/lib/demo/ensure-flagship-demo')
-      await ensureFlagshipDemoLocation()
-      const { createAdminClient } = await import('@/lib/supabase/server')
-      const adminClient = await createAdminClient()
-      const { data: adminRawData } = await adminClient
-        .from('location_pages')
-        .select('id, title, slug, content, template_type, billing_enabled, billing_mode, payment_mode, deposit_percentage, business_type_preset, randomizer_enabled, deals_enabled, template_data, is_published, theme_color, background_color, operating_hours, contact_email, contact_phone, wifi_network, wifi_password, address, upsell_mode, design_tokens, ai_enabled, ai_name, ai_base_personality')
-        .eq('location_id', loc.id)
-        .eq('slug', pageSlug)
-        .single()
-      return adminRawData as Record<string, unknown>
-    }
-    const data = rawData as Record<string, unknown>
-    return data
+    return rawData as Record<string, unknown>
   }
   const page = isPreview 
     ? await fetchPage()
@@ -259,7 +263,7 @@ export default async function PublicPageView({
 
   // 2.5 Fetch published pages count to determine if we show the PortalNav
   const fetchPublishedPagesCount = async () => {
-    const anonSupabase = createAnonClient()
+    const anonSupabase = slug === 'demo' ? await createAdminClient() : createAnonClient()
     let query = anonSupabase
       .from('location_pages')
       .select('*', { count: 'exact', head: true })
@@ -283,7 +287,7 @@ export default async function PublicPageView({
 
   // 3. Items (for catalog, booking, listing, rate_card)
   const fetchItems = async () => {
-    const anonSupabase = createAnonClient()
+    const anonSupabase = slug === 'demo' ? await createAdminClient() : createAnonClient()
     let query = anonSupabase
       .from('page_items')
       .select('*')
