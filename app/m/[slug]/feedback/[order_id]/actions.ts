@@ -105,20 +105,25 @@ export async function submitFeedbackAndTip(
     }
   }
 
-  // 3. Handle Tip (only possible if tied to an order)
-  if (orderId && tipSelection !== '0') {
-    const tipAmountMinor = tipSelection === 'custom'
-      ? Math.round(parseFloat(customTip || '0') * 100)
-      : Math.round(orderTotalMinor * (parseInt(tipSelection) / 100))
+  // 3. Handle Staff Tip (Supported for both order-linked & general visits)
+  if (tipSelection !== '0') {
+    let tipAmountMinor = 0
+    if (tipSelection === 'custom') {
+      tipAmountMinor = Math.round(parseFloat(customTip || '0') * 100)
+    } else if (orderTotalMinor > 0 && ['10', '15', '20'].includes(tipSelection)) {
+      tipAmountMinor = Math.round(orderTotalMinor * (parseInt(tipSelection) / 100))
+    } else {
+      const parsedFixed = parseFloat(tipSelection)
+      if (!isNaN(parsedFixed)) {
+        tipAmountMinor = Math.round(parsedFixed * 100)
+      }
+    }
 
     if (tipAmountMinor > 0) {
-      // If there's a tip, we need to process a new payment intent
       try {
         let staffSubaccount: string | undefined = undefined
 
         if (assignedStaffId) {
-          
-
           const { data: staffProfile } = await supabase
             .from('user_profiles')
             .select('paystack_subaccount_code')
@@ -134,12 +139,12 @@ export async function submitFeedbackAndTip(
         const result = await processCheckout({
           organizationId, 
           locationId, 
-          items: [{ id: 'tip', name: 'Service Tip', quantity: 1, price_minor: tipAmountMinor }], 
+          items: [{ id: 'tip', name: 'Staff Service Tip & Gratuity', quantity: 1, price_minor: tipAmountMinor }], 
           totalAmountMinor: tipAmountMinor, 
           tipAmountMinor, 
-          tableIdentifier, 
-          customerNote: 'Tip Only',
-          staffSubaccountOverride: staffSubaccount // Pass the staff's subaccount!
+          tableIdentifier: tableIdentifier || 'Feedback Tip', 
+          customerNote: orderId ? `Staff Tip for Order #${orderId.slice(0, 8)}` : 'Direct Staff Gratuity',
+          staffSubaccountOverride: staffSubaccount
         })
         
         if (result?.serverError || result?.validationErrors) {
@@ -150,7 +155,7 @@ export async function submitFeedbackAndTip(
         return { checkoutUrl }
       } catch (err: unknown) {
         console.error('Failed to initialize tip payment:', err)
-        return { error: 'Failed to initialize tip checkout.' }
+        return { error: 'Failed to initialize tip checkout. Please try again.' }
       }
     }
   }

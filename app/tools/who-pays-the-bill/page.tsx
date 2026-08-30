@@ -5,8 +5,8 @@ import Link from "next/link";
 import { ArrowRight, Sparkles, Trophy, Users, ShieldCheck, Zap } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Who Pays The Bill? Free Restaurant Bill Roulette & Randomizer Game | OurMenu OS",
-  description: "Can't decide who pays the restaurant bill or how to split the check? Spin our free Payment Roulette wheel randomizer with your friends, dates, or colleagues.",
+  title: "Who Pays The Bill? Free Restaurant Bill Roulette & Randomizer Game | WETAEGO",
+  description: "Can't decide who pays the restaurant bill or how to split the check? Spin our free Payment Roulette wheel randomizer with your friends, dates, or colleagues on WETAEGO.",
   keywords: [
     "who pays the bill",
     "who pays the bill randomizer",
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     canonical: "https://ourmenuos.online/tools/who-pays-the-bill",
   },
   openGraph: {
-    title: "Who Pays The Bill? Free Restaurant Bill Roulette | OurMenu OS",
+    title: "Who Pays The Bill? Free Restaurant Bill Roulette | WETAEGO",
     description: "Spin the digital Payment Roulette wheel to settle who pays the restaurant check tonight with zero arguments.",
     url: "https://ourmenuos.online/tools/who-pays-the-bill",
     type: "website",
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Who Pays The Bill? Free Restaurant Bill Roulette | OurMenu OS",
+    title: "Who Pays The Bill? Free Restaurant Bill Roulette | WETAEGO",
     description: "Spin the digital Payment Roulette wheel to settle who pays the restaurant check tonight with zero arguments.",
     images: ["/hero_emerald_gemstone.png"],
   },

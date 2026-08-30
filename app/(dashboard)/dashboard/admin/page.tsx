@@ -11,6 +11,7 @@ import { CouponsManager } from './coupons-manager'
 import { isAdminEmail } from '@/lib/utils/admin'
 import { AdminTabs } from './admin-tabs'
 import { AffiliatesRegistry } from './affiliates-registry'
+import { ResetDemoButton } from './reset-demo-button'
 
 export default async function AdminPage() {
   const pricing = await getPricingSettings()
@@ -71,6 +72,7 @@ export default async function AdminPage() {
           <p className="text-zinc-400">Configure global pricing, credits, and AI models in real time.</p>
         </div>
         <div className="mt-4 sm:mt-0 flex gap-3 flex-wrap">
+          <ResetDemoButton variant="header" />
           <a 
             href="/dashboard/admin/tester" 
             className="inline-flex items-center gap-2 px-4 py-2 bg-teal-600/10 text-teal-500 hover:bg-teal-600/20 border border-teal-600/20 rounded-lg text-sm font-medium transition"
@@ -365,6 +367,13 @@ export default async function AdminPage() {
               </div>
               <button type="submit" className="w-full px-4 py-2 bg-red-600/20 text-red-500 border border-red-500/50 rounded-lg text-sm font-medium hover:bg-red-500 hover:text-white transition">Apply Global Override</button>
             </ActionForm>
+
+            <div className="mt-8 pt-6 border-t border-zinc-800">
+              <h3 className="text-sm font-bold text-white mb-3 flex items-center gap-2">
+                Flagship Showcase State Management
+              </h3>
+              <ResetDemoButton variant="danger_zone" />
+            </div>
           </section>
         </div>
 

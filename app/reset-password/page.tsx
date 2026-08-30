@@ -4,8 +4,8 @@ import ResetPasswordForm from './reset-password-form'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Set New Password | OurMenu OS',
-  description: 'Update your account password securely.',
+  title: 'Set New Password | WETAEGO',
+  description: 'Update your account password securely on WETAEGO.',
 }
 
 export default async function ResetPasswordPage() {

@@ -29,12 +29,16 @@ export async function generateMetadata({
   params: Promise<{ slug: string; pageSlug: string }>
 }): Promise<Metadata> {
   const { slug, pageSlug } = await params
+  if (slug === 'demo') {
+    const { ensureFlagshipDemoLocation } = await import('@/lib/demo/ensure-flagship-demo')
+    await ensureFlagshipDemoLocation()
+  }
   
   const getCachedData = unstable_cache(async () => {
-    const supabase = createAnonClient()
+    const supabase = slug === 'demo' ? await createAdminClient() : createAnonClient()
     const { data: loc } = await supabase
       .from('locations')
-      .select('id, name, cover_image_url, is_search_visible')
+      .select('id, name, portal_display_name, cover_image_url, is_search_visible')
       .eq('slug', slug)
       .single()
     if (!loc) return null
@@ -121,7 +125,7 @@ export default async function PublicPageView({
     }
     return data
   }
-  const loc = preview === 'true' || isDemoMode
+  const loc = preview === 'true' || isDemoMode || slug === 'demo'
     ? await fetchLocation()
     : await unstable_cache(
         fetchLocation,

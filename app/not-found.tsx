@@ -3,8 +3,8 @@ import { DirectorySearch } from './components/directory-search';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: '404 - Page Not Found | OurMenu OS',
-  description: 'The requested page does not exist on OurMenu OS. Find platform resources, site map links, and directory search.',
+  title: '404 - Page Not Found | WETAEGO',
+  description: 'The requested page does not exist on WETAEGO. Find platform resources, site map links, and directory search.',
 };
 
 export default function NotFound() {

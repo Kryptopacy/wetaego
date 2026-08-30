@@ -426,6 +426,40 @@ export default async function HomePage() {
             </ul>
           </div>
         </div>
+
+        {/* ── WebMCP & AI Crawler Storefront Discovery ──────────────────────
+          * Visually hidden, crawler-visible. Exposes live storefront links so
+          * WebMCP.com, Googlebot, and AI directories spider into /m/[slug]
+          * pages where the full 10-tool commerce suite registers.
+          * ───────────────────────────────────────────────────────────────── */}
+        <nav aria-label="Live WETAEGO-powered storefront examples" className="sr-only">
+          <h2>Live Interactive Storefront Demos — WETAEGO Platform</h2>
+          <p>
+            Each link below is a fully operational WETAEGO storefront with live WebMCP agent tools
+            including catalog search, cart management, checkout, and order submission.
+            Visit any storefront to interact with add_to_cart, initiate_checkout, submit_order and more.
+          </p>
+          <ul>
+            <li><Link href="/m/demo">Pacy Group — Multi-Concept Portal (Restaurant, Wellness, Boutique, Gadgets, Hotels, Stays, Media, Repairs)</Link></li>
+            <li><Link href="/m/demo/p/restaurant">Pacy Grills &amp; Lounge — Restaurant &amp; Bar with QR ordering, Payment Roulette, and live WebMCP cart checkout</Link></li>
+            <li><Link href="/m/demo/p/pacy-wellness">Pacy Wellness Spa — Salon &amp; Spa appointment booking with 30% deposit billing</Link></li>
+            <li><Link href="/m/demo/p/pacy-boutique">Pacy Fashion — Retail boutique with size &amp; colour variants, full checkout</Link></li>
+            <li><Link href="/m/demo/p/pacy-gadgets">Pacy Gadgets — Consumer electronics store with full cart &amp; payment flow</Link></li>
+            <li><Link href="/m/demo/p/pacy-stays">Pacy Stays — Short-let &amp; serviced apartment booking with 50% deposit</Link></li>
+            <li><Link href="/m/demo/p/pacy-hotels">Pacy Hotels — Hotel room booking with deposit billing &amp; concierge AI</Link></li>
+            <li><Link href="/m/demo/p/pacy-media">Pacy Media &amp; Creators — B2B rate cards, interactive quotes &amp; content packages</Link></li>
+            <li><Link href="/m/demo/p/pacy-repairs">Pacy Gadget Repairs — Service quotes &amp; repair booking system</Link></li>
+          </ul>
+          <p>
+            All storefronts expose <code>document.modelContext</code> WebMCP tools including:
+            ourmenu_search_catalog, ourmenu_get_item_details, ourmenu_create_cart,
+            ourmenu_add_to_cart, ourmenu_get_cart, ourmenu_update_cart,
+            ourmenu_initiate_checkout, ourmenu_submit_order, ourmenu_request_staff,
+            ourmenu_payment_roulette.
+          </p>
+          <p>WebMCP manifest: <Link href="/.well-known/mcp.json">/.well-known/mcp.json</Link></p>
+          <p>Agent docs: <Link href="/llms.txt">/llms.txt</Link> — <Link href="/WEBMCP.md">/WEBMCP.md</Link></p>
+        </nav>
       </footer>
     </main>
     </>

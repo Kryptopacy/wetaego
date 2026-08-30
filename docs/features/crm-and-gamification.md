@@ -48,13 +48,29 @@ Organizations can launch custom point-based reward systems, configurable down to
 
 ---
 
-## 4. PIN-Protected Post-Service Feedback
+## 4. Dual-Track Feedback & Optional Staff Gratuity
 
-To ensure reviews are authentic and actionable:
+The guest feedback engine (`/m/[slug]/feedback/[order_id]`) is built as a high-conversion, dual-channel hospitality system that collects **both venue feedback and staff reviews**, with **optional gratuity**:
 
-- Automated email receipts include a cryptographic 4-digit PIN.
-- Only verified customers can use this PIN to rate staff performance.
-- Results populate the gamified **Team Performance Leaderboard** and the centralized **Feedback Inbox** within the dashboard.
+### A. Completely Optional Tipping
+- Guests can submit **Business Feedback**, **Staff Reviews**, or **Both** with **`None` (0 tip)** by default.
+- Submitting with zero tip records the ratings, operational tags, and comments instantly without requiring payment or card entry.
+- When a tip is optionally selected (10%, 15%, 20%, or custom fixed amounts), the system dynamically routes 100% of the gratuity to the server's linked Paystack subaccount via seamless modal checkout.
+
+### B. Dual-Channel Data Architecture
+- **🏢 Business / Venue Feedback**:
+  - 1–5 Star Rating with dynamic sentiment feedback.
+  - Operational highlights (Food Quality, Fast Service, Music, Cleanliness).
+  - Detailed guest notes for venue operations.
+  - Feeds into Merchant Analytics (`/dashboard/manage/feedback`) with search, date ranges, and category filters.
+- **🤵 Staff Performance & Recognition**:
+  - Staff Attentiveness Star Rating (1–5 Stars).
+  - Server Name shoutout field.
+  - Feeds into the **Team Performance Leaderboard** and individual staff profiles.
+
+### C. Smart Sentiment Routing
+- **🌟 5-Star Rave Reviews (Viral SEO)**: Prompts the guest with a 1-tap *"Copy & Open Google Maps"* action to convert positive private feedback into public Google ranking.
+- **💬 1–2 Star Grievance Recovery**: Offers an immediate *"Chat Directly with General Manager on WhatsApp"* button so management resolves issues before negative reviews reach social media.
 
 ---
 

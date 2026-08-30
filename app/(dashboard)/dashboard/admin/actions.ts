@@ -160,3 +160,61 @@ export const createCoupon = authActionClient
     revalidatePath('/dashboard/admin')
     return { success: true }
   })
+
+export const resetFlagshipDemo = authActionClient
+  .schema(z.object({}))
+  .action(async ({ ctx: { user } }) => {
+    if (!isAdminEmail(user.email)) {
+      throw new Error('Unauthorized')
+    }
+
+    const { createAdminClient } = await import('@/lib/supabase/server')
+    const { ensureFlagshipDemoLocation } = await import('@/lib/demo/ensure-flagship-demo')
+    const adminClient = await createAdminClient()
+
+    const { data: loc } = await adminClient
+      .from('locations')
+      .select('id, slug, name')
+      .eq('slug', 'demo')
+      .maybeSingle()
+
+    let deletedPages = 0
+    let deletedItems = 0
+
+    if (loc) {
+      const { data: pages } = await adminClient
+        .from('location_pages')
+        .select('id')
+        .eq('location_id', loc.id)
+
+      if (pages && pages.length > 0) {
+        const pageIds = pages.map((p: { id: string }) => p.id)
+        await adminClient
+          .from('page_items')
+          .delete()
+          .in('page_id', pageIds)
+        deletedItems = pageIds.length
+
+        await adminClient
+          .from('location_pages')
+          .delete()
+          .eq('location_id', loc.id)
+        deletedPages = pages.length
+      }
+
+      await adminClient.from('locations').delete().eq('id', loc.id)
+    }
+
+    const newLocationId = await ensureFlagshipDemoLocation()
+
+    revalidatePath('/', 'layout')
+    revalidatePath('/m/demo', 'layout')
+    revalidatePath('/dashboard/admin')
+
+    return {
+      success: true,
+      deleted: { pages: deletedPages, items: deletedItems },
+      newLocationId,
+      message: 'Pacy Group flagship showcase reset successfully with 76 curated items across all 9 concepts.'
+    }
+  })

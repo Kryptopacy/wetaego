@@ -17,9 +17,13 @@ export const revalidate = 60;
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const resolvedParams = await params
+  if (resolvedParams.slug === 'demo') {
+    await ensureFlagshipDemoLocation()
+  }
+
   const getCachedMetadata = unstable_cache(async () => {
-    const supabase = createAnonClient()
-    const { data: locationData } = await supabase.from('locations').select('id, name, cover_image_url, is_search_visible').eq('slug', resolvedParams.slug).single()
+    const supabase = resolvedParams.slug === 'demo' ? await createAdminClient() : createAnonClient()
+    const { data: locationData } = await supabase.from('locations').select('id, name, portal_display_name, cover_image_url, is_search_visible').eq('slug', resolvedParams.slug).single()
     if (!locationData) return null
 
     const { data: locationPages } = await supabase
@@ -28,7 +32,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       .eq('location_id', locationData.id)
       .eq('is_published', true)
 
-    let templateName = "Menu"
+    let templateName = "Portal"
     if (locationPages && locationPages.length > 0) {
        const types = locationPages.map(p => p.template_type)
        if (types.some(t => ['services', 'consulting', 'salon', 'spa'].includes(t))) {
@@ -44,8 +48,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!metadata) return { title: 'Not Found' }
   const { locationData, templateName } = metadata
 
-  const title = `${locationData.name} - ${templateName} | OurMenu OS`;
-  const description = `View the live ${templateName.toLowerCase()} and order directly at ${locationData.name}.`;
+  const displayName = locationData.portal_display_name || locationData.name;
+  const title = `${displayName} - ${templateName} | WETAEGO`;
+  const description = `Explore the official digital showcase and interactive services at ${displayName} on WETAEGO.`;
 
   return {
     title,
