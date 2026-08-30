@@ -17,28 +17,36 @@ export async function ensureFlagshipDemoLocation() {
     .eq('slug', 'pacy-group-flagship')
     .maybeSingle()
 
-  const orgPayload = {
-    name: 'Pacy Group',
-    slug: 'pacy-group-flagship',
-    is_demo: false, // Permanent showcase
-    portal_name: 'Pacy Group',
-    portal_theme_color: '#0f7b55',
-    status: 'approved',
-    subscription_plan: 'enterprise'
-  }
-
   if (!org) {
-    const { data: newOrg } = await adminClient
+    const { data: userProfiles } = await adminClient
+      .from('user_profiles')
+      .select('id')
+      .limit(1)
+      .maybeSingle()
+
+    const systemUserId = userProfiles?.id || '00000000-0000-0000-0000-000000000000'
+
+    const orgPayload = {
+      name: 'Pacy Group',
+      slug: 'pacy-group-flagship',
+      created_by: systemUserId,
+      is_demo: false, // Permanent showcase
+      portal_name: 'Pacy Group',
+      portal_theme_color: '#0f7b55',
+      status: 'approved',
+      subscription_plan: 'enterprise'
+    }
+
+    const { data: newOrg, error: orgError } = await adminClient
       .from('organizations')
       .insert(orgPayload as never)
       .select('id, slug, name')
       .single()
+
+    if (orgError) {
+      console.error('[ensureFlagshipDemo] Org creation error:', orgError)
+    }
     org = newOrg
-  } else {
-    await adminClient
-      .from('organizations')
-      .update(orgPayload as never)
-      .eq('id', org.id)
   }
 
   if (!org) return null
@@ -88,11 +96,15 @@ export async function ensureFlagshipDemoLocation() {
   }
 
   if (!loc) {
-    const { data: newLoc } = await adminClient
+    const { data: newLoc, error: locError } = await adminClient
       .from('locations')
       .insert(locationPayload as never)
       .select('id, slug, name, organization_id')
       .single()
+
+    if (locError) {
+      console.error('[ensureFlagshipDemo] Location creation error:', locError)
+    }
     loc = newLoc
   } else {
     await adminClient
@@ -101,7 +113,10 @@ export async function ensureFlagshipDemoLocation() {
       .eq('id', loc.id)
   }
 
-  if (!loc) return null
+  if (!loc) {
+    console.error('[ensureFlagshipDemo] Failed to locate or create demo location row.')
+    return null
+  }
 
   // 3. Verify if all 9 pages exist with the correct Pacy slugs and rich inventory
   const { data: existingPages } = await adminClient
