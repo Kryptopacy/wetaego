@@ -49,6 +49,8 @@ export function CartFAB(props: CartFABProps) {
   const [showCheckoutModal, setShowCheckoutModal] = useState(false)
   const searchParams = useSearchParams()
   const urlResourceId = searchParams.get('resource') || props.resourceId
+  const urlTable = searchParams.get('table') || searchParams.get('t')
+  const effectiveTableIdentifier = props.tableIdentifier || (urlTable ? decodeURIComponent(urlTable) : undefined)
   
   useEffect(() => {
     queueMicrotask(() => setIsMounted(true))
@@ -130,6 +132,7 @@ export function CartFAB(props: CartFABProps) {
         pageBillingMode={props.pageBillingMode}
         refundPolicy={props.refundPolicy}
         {...props}
+        tableIdentifier={effectiveTableIdentifier}
         manualPaymentEnabled={props.globalManualPaymentOverride || props.manualPaymentEnabled}
         locationTaxes={props.locationTaxes || []}
         pagePaymentOptions={props.pagePaymentOptions || []}

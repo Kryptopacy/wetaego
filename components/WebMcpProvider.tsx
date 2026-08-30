@@ -113,20 +113,22 @@ export function WebMcpProvider() {
         },
       },
 
-      // ── 3. find_venue ─────────────────────────────────────────────────────
+      // ── 3. find_venue & discover_businesses ──────────────────────────────
       {
         name: 'ourmenu_find_venue',
         description:
-          'Find a physical store, restaurant, hotel, salon, or any WETAEGO-powered business by slug or name. Returns the live storefront URL.',
+          'Discover or find any WETAEGO-powered business, storefront, restaurant, salon, boutique, hotel, or repair shop by name, industry vertical, or natural keywords.',
         inputSchema: {
           type: 'object',
           properties: {
-            slug: { type: 'string', description: 'URL slug of the venue (e.g. "pacy-grills", "demo").' },
+            slug: { type: 'string', description: 'URL slug of the venue (e.g. "demo", "pacy-group").' },
             name: { type: 'string', description: 'Business name to search for.' },
+            industry: { type: 'string', description: 'Industry filter (e.g. "hospitality", "dining", "spa", "retail", "tech", "hotel", "services").' },
+            query: { type: 'string', description: 'Natural language search query.' },
           },
           additionalProperties: false,
         },
-        execute: async ({ slug, name }: { slug?: string; name?: string }) => {
+        execute: async ({ slug, name, industry, query }: { slug?: string; name?: string; industry?: string; query?: string }) => {
           if (slug) {
             return {
               status: 'ok',
@@ -135,13 +137,57 @@ export function WebMcpProvider() {
               message: `Visit the live storefront at https://ourmenuos.online/m/${slug}`,
             }
           }
+          try {
+            const searchTerm = query || name || ''
+            const params = new URLSearchParams()
+            if (searchTerm) params.set('q', searchTerm)
+            if (industry) params.set('industry', industry)
+            
+            const res = await fetch(`/api/businesses/search?${params.toString()}`)
+            if (res.ok) {
+              const data = await res.json()
+              return data
+            }
+          } catch (e) {
+            console.error('[WebMCP] find_venue search error:', e)
+          }
+
           return {
             status: 'ok',
-            query: name || '',
-            directoryUrl: 'https://ourmenuos.online',
-            _hint: 'Search live venues at https://ourmenuos.online',
+            query: name || query || '',
+            directoryUrl: 'https://ourmenuos.online/m/demo',
+            _hint: 'Explore multi-concept businesses at https://ourmenuos.online/m/demo',
           }
         },
+      },
+      {
+        name: 'wetaego_discover_businesses',
+        description:
+          'Alias for ourmenu_find_venue. Search and discover businesses across all commercial verticals on WETAEGO.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            query: { type: 'string', description: 'Natural language search query (e.g. "massage in lagos", "steakhouse", "laptop repair").' },
+            industry: { type: 'string', description: 'Industry category.' },
+            slug: { type: 'string', description: 'Specific venue slug.' }
+          },
+          additionalProperties: false
+        },
+        execute: async (args: { query?: string; industry?: string; slug?: string }) => {
+          if (args.slug) {
+            return { status: 'ok', slug: args.slug, venueUrl: `https://ourmenuos.online/m/${args.slug}` }
+          }
+          try {
+            const params = new URLSearchParams()
+            if (args.query) params.set('q', args.query)
+            if (args.industry) params.set('industry', args.industry)
+            const res = await fetch(`/api/businesses/search?${params.toString()}`)
+            if (res.ok) return await res.json()
+          } catch (e) {
+            console.error('[WebMCP] discover_businesses error:', e)
+          }
+          return { status: 'ok', directoryUrl: 'https://ourmenuos.online/m/demo' }
+        }
       },
 
       // ── 4. create_cart ────────────────────────────────────────────────────

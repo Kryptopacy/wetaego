@@ -245,78 +245,13 @@ export default function RestaurantQrMenuPage() {
               </p>
               <Link
                 href="/login"
-          {/* Core Pillars */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-24">
-            <div className="bg-zinc-900/40 border border-white/5 p-8 rounded-3xl">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center mb-6">
-                <QrCode className="w-6 h-6" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-3">Dynamic Table QRs</h3>
-              <p className="text-sm text-zinc-400 leading-relaxed font-light">
-                Print generic branded table tents once. Managers can reassign or move tables digitally in 2 taps without reprinting physical QR stickers.
-              </p>
+                className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-white text-zinc-950 font-bold text-sm hover:scale-105 transition-transform shadow-xl"
+              >
+                Get Started Free <ArrowRight className="w-4 h-4" />
+              </Link>
             </div>
-
-            <div className="bg-zinc-900/40 border border-white/5 p-8 rounded-3xl">
-              <div className="w-12 h-12 rounded-2xl bg-teal-500/10 text-teal-400 flex items-center justify-center mb-6">
-                <ChefHat className="w-6 h-6" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-3">Live Kitchen Dispatch</h3>
-              <p className="text-sm text-zinc-400 leading-relaxed font-light">
-                Orders appear instantaneously on the fulfillment dashboard with distinct sound chimes and table identifiers for floor and kitchen staff.
-              </p>
-            </div>
-
-            <div className="bg-zinc-900/40 border border-white/5 p-8 rounded-3xl">
-              <div className="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-400 flex items-center justify-center mb-6">
-                <WifiOff className="w-6 h-6" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-3">Offline-First PWA</h3>
-              <p className="text-sm text-zinc-400 leading-relaxed font-light">
-                Never lose an order to weak venue Wi-Fi. IndexedDB caching preserves carts and mutations sync automatically on reconnection.
-              </p>
-            </div>
-          </div>
-
-          {/* Feature Checklist Comparison */}
-          <div className="bg-zinc-900/50 border border-white/10 rounded-3xl p-8 md:p-12 mb-24">
-            <h2 className="text-2xl md:text-4xl font-black text-white mb-8 text-center">
-              Why Top Restaurants Choose WETAEGO
-            </h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {[
-                "AI Menu Parser: Upload a photo/PDF of your physical menu to generate your storefront in 30 seconds",
-                "Dietary & Allergen Filtering: Instant tags for Halal, Vegan, Gluten-Free, Nut-Free, and Keto",
-                "Instant Waiter & Bill Calling: Guests tap a button to request water, service, or a paper check",
-                "Payment Roulette Gamification: Gamified check randomizer to entertain dining parties",
-                "Direct ESC/POS Receipt Printing: Automatic ticket printing to kitchen and bar printers",
-                "Multi-Gateway Settlement: Receive local cards, bank transfers, and crypto instantly"
-              ].map((text, i) => (
-                <div key={i} className="flex items-start gap-3.5">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
-                  <span className="text-sm text-zinc-300 leading-relaxed">{text}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Bottom CTA */}
-          <div className="bg-gradient-to-r from-emerald-950/60 via-zinc-900 to-teal-950/60 border border-emerald-500/30 rounded-3xl p-8 md:p-12 text-center">
-            <h3 className="text-2xl md:text-4xl font-black text-white mb-4">
-              Modernize your restaurant tables today
-            </h3>
-            <p className="text-zinc-300 text-base max-w-2xl mx-auto mb-8 font-light">
-              Setup takes under 10 minutes. Zero credit card or hardware lock-in required.
-            </p>
-            <Link
-              href="/login"
-              className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-white text-zinc-950 font-bold text-sm hover:scale-105 transition-transform shadow-xl"
-            >
-              Get Started Free <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-        </main>
+          </main>
+        </section>
       </div>
     </>
   );

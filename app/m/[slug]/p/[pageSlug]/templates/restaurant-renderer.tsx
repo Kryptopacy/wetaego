@@ -22,7 +22,7 @@ export async function RestaurantRenderer({
   slug: string
   tableIdentifier?: string
   paymentIsLive: boolean
-  page: { id: string; background_color?: string }
+  page: { id: string; background_color?: string; template_data?: Record<string, any>; billing_mode?: string }
   upsellMode?: string
 }) {
   const fetchMenuCategories = async () => {
@@ -131,6 +131,9 @@ export async function RestaurantRenderer({
         deliveryMinimumOrderMinor={location.delivery_minimum_order_minor}
         deliveryNote={location.delivery_note}
         fulfillmentLocationLabel={location.fulfillment_location_label}
+        pageId={page.id}
+        pageFulfillmentOptions={page.template_data?.fulfillment_options as { pickup: boolean, delivery: boolean, table: boolean } | undefined}
+        pageBillingMode={page.billing_mode}
         refundPolicy={(location as { organizations?: { refund_policy?: string } }).organizations?.refund_policy}
         upsellMode={upsellMode}
       />

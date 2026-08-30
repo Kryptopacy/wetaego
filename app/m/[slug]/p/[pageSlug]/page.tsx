@@ -93,10 +93,10 @@ export default async function PublicPageView({
   searchParams,
 }: {
   params: Promise<{ slug: string; pageSlug: string }>
-  searchParams: Promise<{ qr_id?: string; ref?: string; preview?: string; resource?: string }>
+  searchParams: Promise<{ qr_id?: string; ref?: string; preview?: string; resource?: string; table?: string; t?: string }>
 }) {
   const { slug, pageSlug } = await params
-  const { ref, preview, resource: resourceId } = await searchParams
+  const { ref, preview, resource: resourceId, qr_id: qrId, table: queryTable, t: queryShortTable } = await searchParams
 
   const supabase = await createClient()
   const cookieStore = await cookies()
@@ -373,14 +373,28 @@ export default async function PublicPageView({
     )
   })() : Promise.resolve([])
 
-  const [items, { data: paymentSettings }, globalManualPayment, _resource, activeDeals, sponsoredAds] = await Promise.all([
+  const qrCodePromise = qrId ? adminSupabase
+    .from('qr_codes')
+    .select('table_identifier, is_active')
+    .eq('id', qrId)
+    .eq('location_id', loc.id)
+    .maybeSingle() : Promise.resolve(null)
+
+  const [items, { data: paymentSettings }, globalManualPayment, _resource, qrCodeResult, activeDeals, sponsoredAds] = await Promise.all([
     itemsPromise,
     paymentSettingsPromise,
     getGlobalManualPayment(),
     resourceId ? adminSupabase.from('resources').select('id, name, type').eq('id', resourceId).single().then(r => r.data) : Promise.resolve(null),
+    qrCodePromise,
     dealsPromise,
     adsPromise
   ])
+
+  const resolvedTableIdentifier = (_resource as { name?: string })?.name || 
+    qrCodeResult?.data?.table_identifier || 
+    queryTable || 
+    queryShortTable || 
+    undefined
 
   const pageThemeColor = page.theme_color || loc.theme_color || '#10b981'
   
@@ -407,7 +421,7 @@ export default async function PublicPageView({
     locationSlug: slug,
     referralSource: ref,
     resourceId: resourceId || undefined,
-    tableIdentifier: (_resource as { name?: string })?.name || undefined,
+    tableIdentifier: resolvedTableIdentifier,
     paymentIsLive: paymentSettings?.is_active ?? false,
     globalManualPaymentOverride: (globalManualPayment as { global_manual_payment_override?: boolean })?.global_manual_payment_override === true,
     mapsIntegrationEnabled: infraFlags.maps_integration_enabled !== false,
@@ -418,7 +432,7 @@ export default async function PublicPageView({
   let RendererContent = null
   switch (page.template_type) {
     case 'restaurant':
-      RendererContent = <RestaurantRenderer {...sharedProps} slug={slug} tableIdentifier={(_resource as { name?: string })?.name || undefined} />
+      RendererContent = <RestaurantRenderer {...sharedProps} slug={slug} tableIdentifier={resolvedTableIdentifier} />
       break
     case 'booking':
       RendererContent = <BookingRenderer {...sharedProps} />

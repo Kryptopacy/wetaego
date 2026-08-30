@@ -158,7 +158,7 @@ export function CheckoutModal({
   fulfillmentLocationLabel = 'Table',
   pageId,
   refundPolicy,
-  pageFulfillmentOptions = { pickup: true, delivery: true, table: false },
+  pageFulfillmentOptions,
   locationTaxes = [],
   pagePaymentOptions,
   resourceId,
@@ -180,7 +180,7 @@ export function CheckoutModal({
   const [isRouletteOpen, setIsRouletteOpen] = useState(false)
   const [tableNumber, setTableNumber] = useState(tableIdentifier || '')
   const [isFetchingLocation, setIsFetchingLocation] = useState(false)
-  const [isSummaryExpanded, setIsSummaryExpanded] = useState(false)
+  const [isSummaryExpanded, setIsSummaryExpanded] = useState(true)
 
   const [user, setUser] = useState<any>(null)
   const [showAuthModal, setShowAuthModal] = useState(false)
@@ -219,17 +219,37 @@ export function CheckoutModal({
     }
   }, [isOpen])
   
-  const showTableOption = pageFulfillmentOptions ? pageFulfillmentOptions.table : !['catalog', 'retail'].includes(templateType)
-  const showPickupOption = pageFulfillmentOptions ? pageFulfillmentOptions.pickup : true
-  const showDeliveryOption = pageFulfillmentOptions ? pageFulfillmentOptions.delivery : !!deliveryEnabled
+  const isRestaurant = templateType === 'restaurant'
+  const showTableOption = pageFulfillmentOptions 
+    ? Boolean(pageFulfillmentOptions.table) 
+    : (isRestaurant || Boolean(tableIdentifier) || !['catalog', 'retail', 'services'].includes(templateType))
+  const showPickupOption = pageFulfillmentOptions ? Boolean(pageFulfillmentOptions.pickup) : true
+  const showDeliveryOption = pageFulfillmentOptions ? Boolean(pageFulfillmentOptions.delivery) : Boolean(deliveryEnabled)
 
-  const defaultFulfillment = tableIdentifier 
-    ? 'table' 
-    : (pageFulfillmentOptions 
-        ? (pageFulfillmentOptions.pickup ? 'pickup' : (pageFulfillmentOptions.delivery ? 'delivery' : 'table'))
-        : (deliveryEnabled ? 'delivery' : (showPickupOption ? 'pickup' : 'table')))
+  const defaultFulfillment: 'table' | 'pickup' | 'delivery' = (tableIdentifier && showTableOption)
+    ? 'table'
+    : (isRestaurant && showTableOption
+        ? 'table'
+        : (showTableOption && !showPickupOption
+            ? 'table'
+            : (showPickupOption 
+                ? 'pickup' 
+                : (showDeliveryOption ? 'delivery' : (showTableOption ? 'table' : 'pickup')))))
   
   const [fulfillmentType, setFulfillmentType] = useState<'table' | 'pickup' | 'delivery'>(defaultFulfillment)
+
+  useEffect(() => {
+    if (isOpen) {
+      if (tableIdentifier) {
+        setTableNumber(tableIdentifier)
+        if (showTableOption) {
+          setFulfillmentType('table')
+        }
+      } else if (isRestaurant && showTableOption) {
+        setFulfillmentType('table')
+      }
+    }
+  }, [isOpen, tableIdentifier, showTableOption, isRestaurant])
   
   const [customerName, setCustomerName] = useState('')
   const [customerEmail, setCustomerEmail] = useState('')
@@ -450,6 +470,10 @@ export function CheckoutModal({
       toast.error('Please enter your delivery address')
       return
     }
+    if (fulfillmentType === 'table' && !tableNumber && !tableIdentifier) {
+      toast.error(`Please enter your ${fulfillmentLocationLabel || 'table number'}`)
+      return
+    }
     if ((isDelivery || fulfillmentType === 'pickup') && !customerPhone) {
       toast.error('Please enter your phone number')
       return
@@ -569,24 +593,25 @@ export function CheckoutModal({
 
   // Calculate sliding pill positions based on active options
   const getPillStyle = () => {
-    const activeCount = [showTableOption, showPickupOption, showDeliveryOption].filter(Boolean).length
-    if (activeCount === 0) return { display: 'none' }
-    
-    let left = '6px'
-    let width = '100%'
+    const activeOptions = [
+      showTableOption ? 'table' : null,
+      showPickupOption ? 'pickup' : null,
+      showDeliveryOption ? 'delivery' : null,
+    ].filter(Boolean) as ('table' | 'pickup' | 'delivery')[]
 
-    if (activeCount === 3) {
-      width = 'calc(33.33% - 4px)'
-      if (fulfillmentType === 'pickup') left = 'calc(33.33% + 4px)'
-      else if (fulfillmentType === 'delivery') left = 'calc(66.66% + 2px)'
-    } else if (activeCount === 2) {
-      width = 'calc(50% - 6px)'
-      if (fulfillmentType === 'table' && !showPickupOption) left = '6px' // Table is first
-      else if (fulfillmentType === 'pickup' && !showTableOption) left = '6px' // Pickup is first
-      else if (fulfillmentType !== 'table' && showTableOption) left = 'calc(50% + 3px)' // Second option
-      else if (fulfillmentType === 'delivery') left = 'calc(50% + 3px)'
+    const activeCount = activeOptions.length
+    if (activeCount <= 1) return { display: 'none' }
+
+    const selectedIndex = activeOptions.indexOf(fulfillmentType)
+    const safeIndex = selectedIndex >= 0 ? selectedIndex : 0
+
+    const widthPercent = 100 / activeCount
+    const leftPercent = safeIndex * widthPercent
+
+    return {
+      left: `calc(${leftPercent}% + 4px)`,
+      width: `calc(${widthPercent}% - 8px)`,
     }
-    return { left, width }
   }
 
   return (
@@ -625,6 +650,116 @@ export function CheckoutModal({
             </div>
 
             <div className="overflow-y-auto overflow-x-hidden -mx-6 px-6 pb-6 space-y-6 flex-1">
+              {/* Order Summary Accordion (Topmost) */}
+              <div className="bg-zinc-50 dark:bg-zinc-800/30 rounded-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden">
+                <button 
+                  type="button" 
+                  onClick={() => setIsSummaryExpanded(!isSummaryExpanded)}
+                  className="w-full flex items-center justify-between p-4 sm:p-5 focus:outline-none cursor-pointer"
+                >
+                  <div className="flex items-center gap-3">
+                    <ShoppingBag className="w-5 h-5 text-zinc-500" />
+                    <div className="text-left">
+                      <h3 className="text-sm font-bold text-zinc-900 dark:text-white">Order Summary</h3>
+                      <p className="text-[12px] text-zinc-500">{items.reduce((acc, item) => acc + item.quantity, 0)} items • {formatCurrency(subtotalMinor)}</p>
+                    </div>
+                  </div>
+                  <motion.div animate={{ rotate: isSummaryExpanded ? 180 : 0 }}>
+                    <ChevronDown className="w-5 h-5 text-zinc-400" />
+                  </motion.div>
+                </button>
+                
+                <AnimatePresence>
+                  {isSummaryExpanded && (
+                    <motion.div 
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                      className="px-4 sm:px-5 pb-5 pt-1 space-y-4 border-t border-zinc-200 dark:border-zinc-800"
+                    >
+                      <div className="space-y-3">
+                        <AnimatePresence>
+                          {items.map(item => (
+                            <motion.div 
+                              layout
+                              initial={{ opacity: 0, x: -20, scale: 0.95 }}
+                              animate={{ opacity: 1, x: 0, scale: 1 }}
+                              exit={{ opacity: 0, x: 20, scale: 0.95 }}
+                              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                              key={item.cartKey} 
+                              className="flex justify-between items-center group"
+                            >
+                              <div className="flex-1 min-w-0 pr-4">
+                                <h4 className="text-[14px] font-medium text-zinc-900 dark:text-white truncate">
+                                  {item.name}
+                                  {item.variantLabel && <span className="ml-2 text-[12px] font-normal text-zinc-500">({item.variantLabel})</span>}
+                                </h4>
+                                <span className="text-[13px] text-zinc-500">{formatCurrency(item.price_minor)}</span>
+                              </div>
+                              <div className="flex items-center gap-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-full p-1 shadow-sm opacity-100 transition-opacity">
+                                <button type="button" aria-label={`Decrease quantity of ${item.name}`} onClick={() => updateQuantity(item.cartKey, -1)} className="w-6 h-6 flex items-center justify-center bg-zinc-100 dark:bg-zinc-800 rounded-full text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-95 transition-transform"><Minus className="w-3 h-3" /></button>
+                                <span className="text-zinc-900 dark:text-white font-bold text-[13px] w-3 text-center">{item.quantity}</span>
+                                <button type="button" aria-label={`Increase quantity of ${item.name}`} onClick={() => updateQuantity(item.cartKey, 1)} className="w-6 h-6 flex items-center justify-center bg-zinc-100 dark:bg-zinc-800 rounded-full text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-95 transition-transform"><Plus className="w-3 h-3" /></button>
+                              </div>
+                            </motion.div>
+                          ))}
+                        </AnimatePresence>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+                
+                {discountAmountMinor > 0 && (
+                  <div className="px-4 sm:px-5 pb-5">
+                    <div className="h-px bg-zinc-200 dark:bg-zinc-800 w-full mb-4" />
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center text-zinc-500 text-[14px]">
+                        <span>Subtotal</span>
+                        <span className="line-through">{formatCurrency(subtotalMinor)}</span>
+                      </div>
+                      <div className="flex justify-between items-center text-emerald-600 dark:text-emerald-400 font-medium text-[14px]">
+                        <span>Discount ({Math.max(globalDiscountEnabled && globalDiscountPercentage ? globalDiscountPercentage : 0, spinnerDiscount || 0)}%) {spinnerDiscount === Math.max(globalDiscountEnabled && globalDiscountPercentage ? globalDiscountPercentage : 0, spinnerDiscount || 0) && '🎲'}</span>
+                        <span>-{formatCurrency(discountAmountMinor)}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                <div className="flex justify-between items-end p-4 sm:p-5 bg-zinc-100/50 dark:bg-zinc-800/50">
+                  <span className="text-[15px] font-bold text-zinc-900 dark:text-white">{t('total')}</span>
+                  <span className="text-2xl font-black text-zinc-900 dark:text-white tracking-tight">{formatCurrency(finalTotalMinor)}</span>
+                </div>
+              </div>
+
+              {/* AI Upsell */}
+              <AnimatePresence>
+                {upsellItemDetails && upsellData && (
+                  <motion.div 
+                    initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="bg-linear-to-br from-teal-50 to-emerald-50 dark:from-teal-950/30 dark:to-emerald-950/30 border border-teal-100 dark:border-teal-500/20 rounded-2xl p-4 flex items-center justify-between gap-4">
+                      <div>
+                        <div className="flex items-center gap-1.5 mb-1.5">
+                          <Sparkles className="w-3.5 h-3.5 text-teal-500" />
+                          <span className="text-[10px] font-bold text-teal-600 dark:text-teal-400 uppercase tracking-widest">Pairs well</span>
+                        </div>
+                        <p className="text-[14px] text-zinc-900 dark:text-white font-semibold leading-tight">{upsellData.pitch}</p>
+                        <p className="text-[13px] text-zinc-500 dark:text-zinc-400 mt-1">{upsellItemDetails.name} • {formatCurrency(upsellItemDetails.price_minor)}</p>
+                      </div>
+                      <button 
+                        type="button"
+                        aria-label="Add upsell to cart"
+                        onClick={handleAddUpsell}
+                        className="shrink-0 w-10 h-10 rounded-full bg-white dark:bg-teal-500 hover:scale-105 text-teal-600 dark:text-white flex items-center justify-center transition-transform shadow-sm border border-teal-100 dark:border-teal-600"
+                      >
+                        <Plus className="w-5 h-5" />
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
               {!user && (
                 <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 flex items-center justify-between">
                   <div className="flex flex-col">
@@ -658,7 +793,7 @@ export function CheckoutModal({
                       className={`relative z-10 flex-1 py-2.5 text-[14px] font-bold rounded-xl transition-colors ${fulfillmentType === 'table' ? 'text-zinc-900 dark:text-white' : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'}`}
                       onClick={() => setFulfillmentType('table')}
                     >
-                      {fulfillmentLocationLabel}
+                      {fulfillmentLocationLabel || 'Table'}
                     </button>
                   )}
                   {showPickupOption && (
@@ -714,7 +849,7 @@ export function CheckoutModal({
                     <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">
                       {fulfillmentType === 'delivery' ? 'Delivery Address' : 
                        fulfillmentType === 'pickup' ? 'Pickup Details' : 
-                       fulfillmentLocationLabel}
+                       (fulfillmentLocationLabel || 'Table / Seat')}
                     </label>
                     {fulfillmentType === 'delivery' && (
                       <button
@@ -728,9 +863,9 @@ export function CheckoutModal({
                       </button>
                     )}
                   </div>
-                  {tableIdentifier && templateType !== 'catalog' ? (
+                  {fulfillmentType === 'table' && tableIdentifier && templateType !== 'catalog' ? (
                     <div className="w-full bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 rounded-xl px-4 py-3.5 text-emerald-700 dark:text-emerald-400 font-bold flex items-center justify-between shadow-inner">
-                      <span>{fulfillmentLocationLabel} {tableIdentifier}</span>
+                      <span>{fulfillmentLocationLabel || 'Table'} {tableIdentifier}</span>
                       <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
                     </div>
                   ) : fulfillmentType === 'delivery' ? (
@@ -750,7 +885,7 @@ export function CheckoutModal({
                       onChange={(e) => setTableNumber(e.target.value)}
                       placeholder={
                         fulfillmentType === 'pickup' ? "e.g. 'Pickup at 5pm' or 'Car details'" :
-                        `Enter your ${fulfillmentLocationLabel} (e.g. 12 or 'VIP 1')`
+                        `Enter your ${fulfillmentLocationLabel || 'table number'} (e.g. 12 or 'VIP 1')`
                       }
                       className="w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-3 text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 resize-none placeholder:text-zinc-400 text-[15px] transition-all"
                       rows={1}
@@ -783,116 +918,6 @@ export function CheckoutModal({
                 placeholder="Order notes (e.g. allergies, specific requests)"
                 className="w-full h-16 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-3 text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 resize-none placeholder:text-zinc-400 text-[15px]"
               />
-
-              {/* AI Upsell */}
-              <AnimatePresence>
-                {upsellItemDetails && upsellData && (
-                  <motion.div 
-                    initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
-                    className="overflow-hidden"
-                  >
-                    <div className="bg-linear-to-br from-teal-50 to-emerald-50 dark:from-teal-950/30 dark:to-emerald-950/30 border border-teal-100 dark:border-teal-500/20 rounded-2xl p-4 flex items-center justify-between gap-4 mt-2 mb-2">
-                      <div>
-                        <div className="flex items-center gap-1.5 mb-1.5">
-                          <Sparkles className="w-3.5 h-3.5 text-teal-500" />
-                          <span className="text-[10px] font-bold text-teal-600 dark:text-teal-400 uppercase tracking-widest">Pairs well</span>
-                        </div>
-                        <p className="text-[14px] text-zinc-900 dark:text-white font-semibold leading-tight">{upsellData.pitch}</p>
-                        <p className="text-[13px] text-zinc-500 dark:text-zinc-400 mt-1">{upsellItemDetails.name} • {formatCurrency(upsellItemDetails.price_minor )}</p>
-                      </div>
-                      <button 
-                        type="button"
-                        aria-label="Add upsell to cart"
-                        onClick={handleAddUpsell}
-                        className="shrink-0 w-10 h-10 rounded-full bg-white dark:bg-teal-500 hover:scale-105 text-teal-600 dark:text-white flex items-center justify-center transition-transform shadow-sm border border-teal-100 dark:border-teal-600"
-                      >
-                        <Plus className="w-5 h-5" />
-                      </button>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              {/* Order Summary Accordion */}
-              <div className="bg-zinc-50 dark:bg-zinc-800/30 rounded-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden">
-                <button 
-                  type="button" 
-                  onClick={() => setIsSummaryExpanded(!isSummaryExpanded)}
-                  className="w-full flex items-center justify-between p-5 focus:outline-none"
-                >
-                  <div className="flex items-center gap-3">
-                    <ShoppingBag className="w-5 h-5 text-zinc-500" />
-                    <div className="text-left">
-                      <h3 className="text-sm font-bold text-zinc-900 dark:text-white">Order Summary</h3>
-                      <p className="text-[12px] text-zinc-500">{items.reduce((acc, item) => acc + item.quantity, 0)} items • {formatCurrency(subtotalMinor)}</p>
-                    </div>
-                  </div>
-                  <motion.div animate={{ rotate: isSummaryExpanded ? 180 : 0 }}>
-                    <ChevronDown className="w-5 h-5 text-zinc-400" />
-                  </motion.div>
-                </button>
-                
-                <AnimatePresence>
-                  {isSummaryExpanded && (
-                    <motion.div 
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.3, ease: "easeInOut" }}
-                      className="px-5 pb-5 pt-1 space-y-4 border-t border-zinc-200 dark:border-zinc-800"
-                    >
-                      <div className="space-y-3">
-                        <AnimatePresence>
-                          {items.map(item => (
-                            <motion.div 
-                              layout
-                              initial={{ opacity: 0, x: -20, scale: 0.95 }}
-                              animate={{ opacity: 1, x: 0, scale: 1 }}
-                              exit={{ opacity: 0, x: 20, scale: 0.95 }}
-                              transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                              key={item.cartKey} 
-                              className="flex justify-between items-center group"
-                            >
-                              <div className="flex-1 min-w-0 pr-4">
-                                <h4 className="text-[14px] font-medium text-zinc-900 dark:text-white truncate">
-                                  {item.name}
-                                  {item.variantLabel && <span className="ml-2 text-[12px] font-normal text-zinc-500">({item.variantLabel})</span>}
-                                </h4>
-                                <span className="text-[13px] text-zinc-500">{formatCurrency(item.price_minor )}</span>
-                              </div>
-                              <div className="flex items-center gap-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-full p-1 shadow-sm opacity-100 transition-opacity">
-                                <button type="button" aria-label={`Decrease quantity of ${item.name}`} onClick={() => updateQuantity(item.cartKey, -1)} className="w-6 h-6 flex items-center justify-center bg-zinc-100 dark:bg-zinc-800 rounded-full text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-95 transition-transform"><Minus className="w-3 h-3" /></button>
-                                <span className="text-zinc-900 dark:text-white font-bold text-[13px] w-3 text-center">{item.quantity}</span>
-                                <button type="button" aria-label={`Increase quantity of ${item.name}`} onClick={() => updateQuantity(item.cartKey, 1)} className="w-6 h-6 flex items-center justify-center bg-zinc-100 dark:bg-zinc-800 rounded-full text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-95 transition-transform"><Plus className="w-3 h-3" /></button>
-                              </div>
-                            </motion.div>
-                          ))}
-                        </AnimatePresence>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-                
-                {discountAmountMinor > 0 && (
-                  <div className="px-5 pb-5">
-                    <div className="h-px bg-zinc-200 dark:bg-zinc-800 w-full mb-4" />
-                    <div className="space-y-2">
-                      <div className="flex justify-between items-center text-zinc-500 text-[14px]">
-                        <span>Subtotal</span>
-                        <span className="line-through">{formatCurrency(subtotalMinor )}</span>
-                      </div>
-                      <div className="flex justify-between items-center text-emerald-600 dark:text-emerald-400 font-medium text-[14px]">
-                        <span>Discount ({Math.max(globalDiscountEnabled && globalDiscountPercentage ? globalDiscountPercentage : 0, spinnerDiscount || 0)}%) {spinnerDiscount === Math.max(globalDiscountEnabled && globalDiscountPercentage ? globalDiscountPercentage : 0, spinnerDiscount || 0) && '🎲'}</span>
-                        <span>-{formatCurrency(discountAmountMinor)}</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-                <div className="flex justify-between items-end p-5 bg-zinc-100/50 dark:bg-zinc-800/50">
-                  <span className="text-[15px] font-bold text-zinc-900 dark:text-white">{t('total')}</span>
-                  <span className="text-2xl font-black text-zinc-900 dark:text-white tracking-tight">{formatCurrency(finalTotalMinor)}</span>
-                </div>
-              </div>
 
               {/* Split Bill */}
               <div className="flex flex-col gap-3 p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
