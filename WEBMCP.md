@@ -219,7 +219,24 @@ When any browsing agent (e.g. **ChatGPT Desktop In-App Browser** or **Google Chr
 
 ---
 
-### 9. `request_staff`
+### 9. `recommend_pairings`
+* **Permission**: Public / Read-Only
+* **Description**: Suggest complementary catalog items, sides, drinks, or accessories based on the current cart or a specific item ID.
+* **Input Schema**:
+```json
+{
+  "type": "object",
+  "properties": {
+    "itemId": { "type": "string", "description": "Optional focal item ID." },
+    "maxRecommendations": { "type": "integer", "minimum": 1, "maximum": 10, "default": 3 }
+  },
+  "additionalProperties": false
+}
+```
+
+---
+
+### 10. `request_staff`
 * **Permission**: Session Assistance
 * **Description**: Send an immediate service or waiter call notification to venue staff.
 * **Input Schema**:

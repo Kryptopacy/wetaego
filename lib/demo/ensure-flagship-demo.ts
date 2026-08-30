@@ -316,6 +316,8 @@ export async function ensureFlagshipDemoLocation() {
       }),
       is_published: true,
       randomizer_enabled: false,
+      deals_enabled: false,
+      is_primary: false,
       billing_enabled: false,
       theme_color: '#0f7b55',
       design_tokens: { layout_mode: 'list', surface_style: 'flat', typography: 'modern', corner_radius: 'lg' }
