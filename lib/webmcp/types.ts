@@ -33,7 +33,10 @@ export interface WebMCPTool<TInput = any, TOutput = any> {
   description: string;
   inputSchema: JSONSchema;
   outputSchema?: JSONSchema;
+  /** Mirror of outputSchema — explicit field the WebMCP scanner reads for result type inference. */
   resultSchema?: JSONSchema;
+  /** The page path this tool is registered on (e.g. '/', '/m/{slug}', '/m/{slug}/checkout'). Used by WebMCP directory for per-page tool attribution. */
+  page?: string;
   execute: (input: TInput) => Promise<TOutput> | TOutput;
 }
 
@@ -43,6 +46,7 @@ export interface WebMCPRegisteredTool {
   inputSchema: JSONSchema;
   outputSchema?: JSONSchema;
   resultSchema?: JSONSchema;
+  page?: string;
   unregister: () => void;
 }
 

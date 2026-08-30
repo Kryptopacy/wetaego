@@ -25,6 +25,7 @@ export function getMCPManifest() {
       // ── Customer WebMCP Suite (Client-Side document.modelContext) ──────────
       {
         name: "wetaego_find_venue",
+        page: "/",
         scope: "customer",
         permission: "public/read-only",
         confirmation: "none",
@@ -75,10 +76,39 @@ export function getMCPManifest() {
             message: { type: "string" },
             _hint: { type: "string" }
           }
+        },
+        resultSchema: {
+          type: "object",
+          required: ["status"],
+          properties: {
+            status: { type: "string", enum: ["ok", "error"] },
+            totalFound: { type: "integer" },
+            slug: { type: "string" },
+            venueUrl: { type: "string" },
+            directoryUrl: { type: "string" },
+            venues: {
+              type: "array",
+              items: {
+                type: "object",
+                required: ["slug", "name", "venueUrl"],
+                properties: {
+                  slug: { type: "string" },
+                  name: { type: "string" },
+                  industry: { type: "string" },
+                  currency: { type: "string" },
+                  venueUrl: { type: "string" },
+                  description: { type: "string" }
+                }
+              }
+            },
+            message: { type: "string" },
+            _hint: { type: "string" }
+          }
         }
       },
       {
         name: "wetaego_search_catalog",
+        page: "/",
         scope: "customer",
         permission: "public/read-only",
         confirmation: "none",
@@ -96,8 +126,7 @@ export function getMCPManifest() {
             maxPrice: { type: "number", minimum: 0, description: "Maximum price in major currency units." },
             inStockOnly: { type: "boolean", default: true, description: "Filter only available items." },
             limit: { type: "integer", minimum: 1, maximum: 100, default: 20, description: "Page size limit." },
-            offset: { type: "integer", minimum: 0, default: 0, description: "Offset for pagination." },
-            page: { type: "integer", minimum: 1, default: 1, description: "Page number." }
+            offset: { type: "integer", minimum: 0, default: 0, description: "Offset for pagination." }
           },
           additionalProperties: false
         },
@@ -108,7 +137,35 @@ export function getMCPManifest() {
             venue: { type: "string" },
             currency: { type: "string" },
             totalFound: { type: "integer" },
-            page: { type: "integer" },
+            limit: { type: "integer" },
+            offset: { type: "integer" },
+            items: {
+              type: "array",
+              items: {
+                type: "object",
+                required: ["itemId", "name", "price", "priceFormatted", "isAvailable"],
+                properties: {
+                  itemId: { type: "string" },
+                  name: { type: "string" },
+                  category: { type: "string" },
+                  price: { type: "number" },
+                  priceFormatted: { type: "string" },
+                  description: { type: "string" },
+                  dietaryTags: { type: "array", items: { type: "string" } },
+                  isAvailable: { type: "boolean" },
+                  hasModifiers: { type: "boolean" }
+                }
+              }
+            }
+          }
+        },
+        resultSchema: {
+          type: "object",
+          required: ["venue", "currency", "totalFound", "items"],
+          properties: {
+            venue: { type: "string" },
+            currency: { type: "string" },
+            totalFound: { type: "integer" },
             limit: { type: "integer" },
             offset: { type: "integer" },
             items: {
@@ -134,6 +191,7 @@ export function getMCPManifest() {
       },
       {
         name: "wetaego_get_item_details",
+        page: "/m/{slug}",
         scope: "customer",
         permission: "public/read-only",
         confirmation: "none",
@@ -161,10 +219,27 @@ export function getMCPManifest() {
             isAvailable: { type: "boolean" },
             error: { type: "string" }
           }
+        },
+        resultSchema: {
+          type: "object",
+          properties: {
+            itemId: { type: "string" },
+            name: { type: "string" },
+            category: { type: "string" },
+            price: { type: "number" },
+            priceFormatted: { type: "string" },
+            description: { type: "string" },
+            dietaryTags: { type: "array", items: { type: "string" } },
+            modifiers: { type: "array" },
+            variants: { type: "array" },
+            isAvailable: { type: "boolean" },
+            error: { type: "string" }
+          }
         }
       },
       {
         name: "wetaego_create_cart",
+        page: "/m/{slug}",
         scope: "customer",
         permission: "session-scoped",
         confirmation: "none",
@@ -190,10 +265,25 @@ export function getMCPManifest() {
             subtotalFormatted: { type: "string" },
             tableIdentifier: { type: "string" }
           }
+        },
+        resultSchema: {
+          type: "object",
+          required: ["status", "cartId", "venue", "currency", "itemCount", "subtotal", "subtotalFormatted"],
+          properties: {
+            status: { type: "string", enum: ["ok", "error"] },
+            cartId: { type: "string" },
+            venue: { type: "string" },
+            currency: { type: "string" },
+            itemCount: { type: "integer" },
+            subtotal: { type: "number" },
+            subtotalFormatted: { type: "string" },
+            tableIdentifier: { type: "string" }
+          }
         }
       },
       {
         name: "wetaego_add_to_cart",
+        page: "/m/{slug}",
         scope: "customer",
         permission: "session/cart-write",
         confirmation: "none",
@@ -234,10 +324,25 @@ export function getMCPManifest() {
             lines: { type: "array" },
             error: { type: "string" }
           }
+        },
+        resultSchema: {
+          type: "object",
+          required: ["status", "success", "cartItemCount", "subtotal", "subtotalFormatted"],
+          properties: {
+            status: { type: "string", enum: ["ok", "error"] },
+            success: { type: "boolean" },
+            message: { type: "string" },
+            cartItemCount: { type: "integer" },
+            subtotal: { type: "number" },
+            subtotalFormatted: { type: "string" },
+            lines: { type: "array" },
+            error: { type: "string" }
+          }
         }
       },
       {
         name: "wetaego_get_cart",
+        page: "/m/{slug}",
         scope: "customer",
         permission: "session/read",
         confirmation: "none",
@@ -279,10 +384,44 @@ export function getMCPManifest() {
             total: { type: "number" },
             totalFormatted: { type: "string" }
           }
+        },
+        resultSchema: {
+          type: "object",
+          required: ["venue", "currency", "itemCount", "lines", "subtotal", "subtotalFormatted", "total", "totalFormatted"],
+          properties: {
+            venue: { type: "string" },
+            currency: { type: "string" },
+            itemCount: { type: "integer" },
+            lines: {
+              type: "array",
+              items: {
+                type: "object",
+                required: ["lineId", "itemId", "name", "quantity", "unitPrice", "unitPriceFormatted", "lineTotal", "lineTotalFormatted"],
+                properties: {
+                  lineId: { type: "string" },
+                  itemId: { type: "string" },
+                  name: { type: "string" },
+                  quantity: { type: "integer" },
+                  unitPrice: { type: "number" },
+                  unitPriceFormatted: { type: "string" },
+                  lineTotal: { type: "number" },
+                  lineTotalFormatted: { type: "string" },
+                  modifiers: { type: "object" }
+                }
+              }
+            },
+            subtotal: { type: "number" },
+            subtotalFormatted: { type: "string" },
+            discountAmount: { type: "number" },
+            discountPercentage: { type: "number" },
+            total: { type: "number" },
+            totalFormatted: { type: "string" }
+          }
         }
       },
       {
         name: "wetaego_update_cart",
+        page: "/m/{slug}",
         scope: "customer",
         permission: "session/cart-write",
         confirmation: "none",
@@ -308,10 +447,23 @@ export function getMCPManifest() {
             subtotal: { type: "number" },
             subtotalFormatted: { type: "string" }
           }
+        },
+        resultSchema: {
+          type: "object",
+          required: ["status", "success", "remainingLines", "subtotalFormatted"],
+          properties: {
+            status: { type: "string", enum: ["ok", "error"] },
+            success: { type: "boolean" },
+            remainingLines: { type: "integer" },
+            totalItemCount: { type: "integer" },
+            subtotal: { type: "number" },
+            subtotalFormatted: { type: "string" }
+          }
         }
       },
       {
         name: "wetaego_recommend_pairings",
+        page: "/m/{slug}",
         scope: "customer",
         permission: "public/read-only",
         confirmation: "none",
@@ -348,10 +500,36 @@ export function getMCPManifest() {
               }
             }
           }
+        },
+        resultSchema: {
+          type: "object",
+          required: ["venue", "currency", "count", "recommendations"],
+          properties: {
+            venue: { type: "string" },
+            currency: { type: "string" },
+            count: { type: "integer" },
+            recommendations: {
+              type: "array",
+              items: {
+                type: "object",
+                required: ["itemId", "name", "price", "priceFormatted"],
+                properties: {
+                  itemId: { type: "string" },
+                  name: { type: "string" },
+                  category: { type: "string" },
+                  price: { type: "number" },
+                  priceFormatted: { type: "string" },
+                  description: { type: "string" },
+                  reason: { type: "string" }
+                }
+              }
+            }
+          }
         }
       },
       {
         name: "wetaego_open_business_page",
+        page: "/m/{slug}",
         scope: "customer",
         permission: "public/navigation",
         confirmation: "none",
@@ -373,10 +551,21 @@ export function getMCPManifest() {
             destinationUrl: { type: "string" },
             message: { type: "string" }
           }
+        },
+        resultSchema: {
+          type: "object",
+          required: ["status", "conceptSlug", "destinationUrl"],
+          properties: {
+            status: { type: "string", enum: ["ok", "error"] },
+            conceptSlug: { type: "string" },
+            destinationUrl: { type: "string" },
+            message: { type: "string" }
+          }
         }
       },
       {
         name: "wetaego_initiate_checkout",
+        page: "/m/{slug}/checkout",
         scope: "customer",
         permission: "checkout/prepare",
         confirmation: "required_before_authorization",
@@ -421,10 +610,33 @@ export function getMCPManifest() {
             message: { type: "string" },
             error: { type: "string" }
           }
+        },
+        resultSchema: {
+          type: "object",
+          required: ["checkoutId", "fulfillment", "currency", "total", "totalFormatted", "requiresPaymentAuthorization"],
+          properties: {
+            status: { type: "string", enum: ["ok", "error"] },
+            checkoutId: { type: "string" },
+            fulfillment: { type: "string" },
+            venue: { type: "string" },
+            currency: { type: "string" },
+            subtotal: { type: "number" },
+            tax: { type: "number" },
+            fees: { type: "number" },
+            total: { type: "number" },
+            totalFormatted: { type: "string" },
+            itemCount: { type: "integer" },
+            expiresAt: { type: "string" },
+            priceLockValidMinutes: { type: "integer" },
+            requiresPaymentAuthorization: { type: "boolean" },
+            message: { type: "string" },
+            error: { type: "string" }
+          }
         }
       },
       {
         name: "wetaego_submit_order",
+        page: "/m/{slug}/checkout",
         scope: "customer",
         permission: "high-impact-transaction",
         confirmation: "mandatory_human_authorization",
@@ -461,10 +673,27 @@ export function getMCPManifest() {
             message: { type: "string" },
             error: { type: "string" }
           }
+        },
+        resultSchema: {
+          type: "object",
+          required: ["status"],
+          properties: {
+            status: { type: "string", enum: ["ok", "error"] },
+            success: { type: "boolean" },
+            orderId: { type: "string" },
+            checkoutId: { type: "string" },
+            venue: { type: "string" },
+            currency: { type: "string" },
+            total: { type: "number" },
+            totalFormatted: { type: "string" },
+            message: { type: "string" },
+            error: { type: "string" }
+          }
         }
       },
       {
         name: "wetaego_request_staff",
+        page: "/m/{slug}",
         scope: "customer",
         permission: "session/assistance",
         confirmation: "none",
@@ -484,6 +713,17 @@ export function getMCPManifest() {
           additionalProperties: false
         },
         outputSchema: {
+          type: "object",
+          required: ["status", "success", "message", "reason"],
+          properties: {
+            status: { type: "string", enum: ["ok", "error"] },
+            success: { type: "boolean" },
+            message: { type: "string" },
+            reason: { type: "string" },
+            tableIdentifier: { type: "string" }
+          }
+        },
+        resultSchema: {
           type: "object",
           required: ["status", "success", "message", "reason"],
           properties: {

@@ -14,19 +14,25 @@ class WebMCPRegistry implements ModelContext {
   }
 
   registerTool<TInput = any, TOutput = any>(tool: WebMCPTool<TInput, TOutput>): WebMCPRegisteredTool {
-    this.tools.set(tool.name, tool)
+    // Enrich the tool with resultSchema at store time so getTools() also exposes it
+    const enriched: WebMCPTool<TInput, TOutput> = {
+      ...tool,
+      resultSchema: tool.resultSchema || tool.outputSchema,
+    }
+    this.tools.set(tool.name, enriched)
     this.notifyListeners()
 
     if (process.env.NODE_ENV === 'development') {
-      console.log(`[WebMCP] Registered tool: ${tool.name}`, tool)
+      console.log(`[WebMCP] Registered tool: ${tool.name}`, enriched)
     }
 
     return {
-      name: tool.name,
-      description: tool.description,
-      inputSchema: tool.inputSchema,
-      outputSchema: tool.outputSchema,
-      resultSchema: tool.resultSchema || tool.outputSchema,
+      name: enriched.name,
+      description: enriched.description,
+      inputSchema: enriched.inputSchema,
+      outputSchema: enriched.outputSchema,
+      resultSchema: enriched.resultSchema,
+      page: enriched.page,
       unregister: () => this.unregisterTool(tool.name)
     }
   }

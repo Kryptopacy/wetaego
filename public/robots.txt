@@ -10,8 +10,39 @@ Disallow: /d/
 Disallow: /kiosk-scan/
 Disallow: /invite/
 
+# AI Agents & LLM Crawlers — explicitly welcomed
+# WebMCP tools registered on document.modelContext at /m/[slug] storefronts
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: Amazonbot
+Allow: /
+
 # Content Signals for AI and Search Agents (https://contentsignals.org)
 Content-Signal: ai-train=no, search=yes, ai-input=yes
 
 # Discovery & Sitemap
 Sitemap: https://ourmenuos.online/sitemap.xml
+
+# AI Agent Capability Discovery
+# Full tool surface: https://ourmenuos.online/llms.txt
+# MCP Manifest: https://ourmenuos.online/.well-known/mcp.json
+# Agent Instructions: https://ourmenuos.online/agent-instructions.md

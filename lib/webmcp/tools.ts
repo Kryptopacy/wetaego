@@ -70,11 +70,6 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
           minimum: 0,
           description: 'Maximum price in major currency units.'
         },
-        max_price: {
-          type: 'number',
-          minimum: 0,
-          description: 'Alternative alias for maxPrice in major currency units.'
-        },
         currency: {
           type: 'string',
           description: 'Optional target currency code (e.g. USD, EUR, GBP, NGN) for dynamic rate conversion.'
@@ -104,12 +99,6 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
           minimum: 0,
           default: 0,
           description: 'Pagination offset for skipping items.'
-        },
-        page: {
-          type: 'integer',
-          minimum: 1,
-          default: 1,
-          description: 'Page number (1-indexed).'
         }
       },
       additionalProperties: false
