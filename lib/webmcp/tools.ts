@@ -552,6 +552,54 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
     }
   })
 
+  // 9. recommend_pairings
+  tools.push({
+    name: 'recommend_pairings',
+    description: `Suggest complementary catalog items, sides, drinks, or accessories based on the current cart or a specific item ID.`,
+    inputSchema: {
+      type: 'object',
+      properties: {
+        itemId: {
+          type: 'string',
+          description: 'Optional focal item ID to find pairings for. If omitted, uses current cart items.'
+        },
+        maxRecommendations: {
+          type: 'integer',
+          minimum: 1,
+          maximum: 10,
+          default: 3,
+          description: 'Maximum number of pairing recommendations to return.'
+        }
+      },
+      additionalProperties: false
+    },
+    execute: async (input: { itemId?: string; maxRecommendations?: number }) => {
+      const limit = input?.maxRecommendations || 3
+      const cartStore = useCartStore.getState()
+      const cartItemIds = new Set(cartStore.items.map(i => i.id))
+      if (input?.itemId) cartItemIds.add(input.itemId)
+
+      const recommendations = menuItems
+        .filter(i => !cartItemIds.has(i.id) && i.is_available !== false)
+        .slice(0, limit)
+
+      return {
+        venue: locationName,
+        currency,
+        count: recommendations.length,
+        recommendations: recommendations.map(item => ({
+          itemId: item.id,
+          name: item.name,
+          category: item.category || 'General',
+          price: item.price_minor / 100,
+          priceFormatted: `${(item.price_minor / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })} ${currency}`,
+          description: item.description || '',
+          reason: 'Complementary pairing for your active selection'
+        }))
+      }
+    }
+  })
+
   // Helper & Operations Tools
   tools.push({
     name: 'request_staff',
@@ -579,5 +627,23 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
     }
   })
 
-  return tools
+  // Wrap all tools with real-time UI/UX event dispatch
+  return tools.map(tool => ({
+    ...tool,
+    execute: async (args: any) => {
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(
+          new CustomEvent('webmcp:action', {
+            detail: {
+              tool: tool.name,
+              args,
+              timestamp: Date.now(),
+              locationName
+            }
+          })
+        )
+      }
+      return tool.execute(args)
+    }
+  }))
 }

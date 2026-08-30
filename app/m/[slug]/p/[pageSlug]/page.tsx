@@ -34,7 +34,7 @@ export async function generateMetadata({
     await ensureFlagshipDemoLocation()
   }
   
-  const getCachedData = unstable_cache(async () => {
+  const fetchMetadata = async () => {
     const supabase = slug === 'demo' ? await createAdminClient() : createAnonClient()
     const { data: loc } = await supabase
       .from('locations')
@@ -48,15 +48,17 @@ export async function generateMetadata({
       .select('title, content')
       .eq('location_id', loc.id)
       .eq('slug', pageSlug)
-      .eq('is_published', true)
-      .single()
+      .maybeSingle()
     if (!page) return null
 
     return { loc, page }
-  }, [`metadata_${slug}_${pageSlug}`], { revalidate: 60 })
+  }
 
-  const data = await getCachedData()
-  if (!data) return { title: 'Not Found' }
+  const data = slug === 'demo'
+    ? await fetchMetadata()
+    : await unstable_cache(fetchMetadata, [`metadata_${slug}_${pageSlug}`], { revalidate: 60 })()
+
+  if (!data) return { title: 'Pacy Group | WETAEGO' }
   const { loc, page } = data
 
   const description = page.content

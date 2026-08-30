@@ -2,12 +2,14 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Bot, Play, Sparkles, X, ChevronRight, Code, Terminal, CheckCircle2, ShoppingBag } from 'lucide-react'
+import { Bot, Play, Sparkles, X, ChevronRight, Code, Terminal, CheckCircle2, ShoppingBag, Cpu } from 'lucide-react'
 import { globalWebMCPRegistry } from '@/lib/webmcp/registry'
 import { WebMCPTool } from '@/lib/webmcp/types'
+import { McpConfigModal } from './mcp-config-modal'
 
 export function WebMCPTester({ locationName = 'Storefront' }: { locationName?: string }) {
   const [isOpen, setIsOpen] = useState(false)
+  const [isConfigModalOpen, setIsConfigModalOpen] = useState(false)
   const [tools, setTools] = useState<WebMCPTool[]>([])
   const [selectedToolName, setSelectedToolName] = useState<string>('')
   const [inputJson, setInputJson] = useState<string>('{}')
@@ -150,6 +152,13 @@ export function WebMCPTester({ locationName = 'Storefront' }: { locationName?: s
 
                 <div className="flex items-center gap-2">
                   <button
+                    onClick={() => setIsConfigModalOpen(true)}
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-medium border border-zinc-700/60 transition"
+                  >
+                    <Cpu className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>Export MCP Config</span>
+                  </button>
+                  <button
                     onClick={() => setIsOpen(false)}
                     className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition"
                   >
@@ -275,6 +284,11 @@ export function WebMCPTester({ locationName = 'Storefront' }: { locationName?: s
           </div>
         )}
       </AnimatePresence>
+
+      <McpConfigModal
+        isOpen={isConfigModalOpen}
+        onClose={() => setIsConfigModalOpen(false)}
+      />
     </>
   )
 }
@@ -282,6 +296,9 @@ export function WebMCPTester({ locationName = 'Storefront' }: { locationName?: s
 function getDefaultInputForTool(tool: WebMCPTool): string {
   if (tool.name === 'search_catalog') {
     return JSON.stringify({ query: '', max_price: 50 }, null, 2)
+  }
+  if (tool.name === 'recommend_pairings') {
+    return JSON.stringify({ maxRecommendations: 3 }, null, 2)
   }
   if (tool.name === 'add_to_cart') {
     return JSON.stringify({ itemId: 'replace_with_item_id', quantity: 1 }, null, 2)

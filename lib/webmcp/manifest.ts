@@ -182,6 +182,21 @@ export function getMCPManifest() {
         }
       },
       {
+        name: "recommend_pairings",
+        scope: "customer",
+        permission: "public/read-only",
+        confirmation: "none",
+        description: "Suggest complementary catalog items, sides, drinks, or accessories based on the current cart or a specific item ID.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            itemId: { type: "string", description: "Optional focal item ID to find pairings for. If omitted, uses current cart items." },
+            maxRecommendations: { type: "integer", minimum: 1, maximum: 10, default: 3, description: "Maximum number of pairing recommendations." }
+          },
+          additionalProperties: false
+        }
+      },
+      {
         name: "request_staff",
         scope: "customer",
         permission: "session/assistance",
