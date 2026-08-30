@@ -99,7 +99,7 @@ export default async function PublicMenuPage({
     const anonSupabase = createAnonClient()
     let { data } = await anonSupabase
       .from('locations')
-      .select('id, slug, name, portal_display_name, organization_id, is_search_visible, ai_enabled, ai_name, theme_color, cover_image_url, operating_hours, wifi_network, wifi_password, instagram_handle, twitter_handle, facebook_handle, whatsapp_number, phone_number, google_maps_url, randomizer_enabled, spinner_enabled, spinner_config, global_discount_enabled, global_discount_banner_text, global_discount_percentage, manual_payment_enabled, manual_payment_bank_name, manual_payment_account_name, manual_payment_account_number, manual_payment_instructions, delivery_enabled, delivery_fee_minor, delivery_minimum_order_minor, delivery_note, fulfillment_location_label, organizations(logo_url, name, status, portal_name, portal_cover_image_url, portal_theme_color, portal_background_color)')
+      .select('id, slug, name, portal_display_name, organization_id, is_search_visible, ai_enabled, ai_name, theme_color, cover_image_url, operating_hours, wifi_network, wifi_password, instagram_handle, twitter_handle, facebook_handle, whatsapp_number, phone_number, google_maps_url, randomizer_enabled, spinner_enabled, spinner_config, global_discount_enabled, global_discount_banner_text, global_discount_percentage, manual_payment_enabled, manual_payment_bank_name, manual_payment_account_name, manual_payment_account_number, manual_payment_instructions, delivery_enabled, delivery_fee_minor, delivery_minimum_order_minor, delivery_note, fulfillment_location_label, publication_status, organizations(logo_url, name, status, portal_name, portal_cover_image_url, portal_theme_color, portal_background_color)')
       .eq('slug', slug)
       .single()
 
@@ -108,7 +108,7 @@ export default async function PublicMenuPage({
       const adminClient = await createAdminClient()
       const { data: adminData } = await adminClient
         .from('locations')
-        .select('id, slug, name, portal_display_name, organization_id, is_search_visible, ai_enabled, ai_name, theme_color, cover_image_url, operating_hours, wifi_network, wifi_password, instagram_handle, twitter_handle, facebook_handle, whatsapp_number, phone_number, google_maps_url, randomizer_enabled, spinner_enabled, spinner_config, global_discount_enabled, global_discount_banner_text, global_discount_percentage, manual_payment_enabled, manual_payment_bank_name, manual_payment_account_name, manual_payment_account_number, manual_payment_instructions, delivery_enabled, delivery_fee_minor, delivery_minimum_order_minor, delivery_note, fulfillment_location_label, organizations(logo_url, name, status, portal_name, portal_cover_image_url, portal_theme_color, portal_background_color)')
+        .select('id, slug, name, portal_display_name, organization_id, is_search_visible, ai_enabled, ai_name, theme_color, cover_image_url, operating_hours, wifi_network, wifi_password, instagram_handle, twitter_handle, facebook_handle, whatsapp_number, phone_number, google_maps_url, randomizer_enabled, spinner_enabled, spinner_config, global_discount_enabled, global_discount_banner_text, global_discount_percentage, manual_payment_enabled, manual_payment_bank_name, manual_payment_account_name, manual_payment_account_number, manual_payment_instructions, delivery_enabled, delivery_fee_minor, delivery_minimum_order_minor, delivery_note, fulfillment_location_label, publication_status, organizations(logo_url, name, status, portal_name, portal_cover_image_url, portal_theme_color, portal_background_color)')
         .eq('slug', 'demo')
         .single()
       return adminData
@@ -118,7 +118,7 @@ export default async function PublicMenuPage({
       const adminClient = await createAdminClient()
       const { data: adminData } = await adminClient
         .from('locations')
-        .select('id, slug, name, portal_display_name, organization_id, is_search_visible, ai_enabled, ai_name, theme_color, cover_image_url, operating_hours, wifi_network, wifi_password, instagram_handle, twitter_handle, facebook_handle, whatsapp_number, phone_number, google_maps_url, randomizer_enabled, spinner_enabled, spinner_config, global_discount_enabled, global_discount_banner_text, global_discount_percentage, manual_payment_enabled, manual_payment_bank_name, manual_payment_account_name, manual_payment_account_number, manual_payment_instructions, delivery_enabled, delivery_fee_minor, delivery_minimum_order_minor, delivery_note, fulfillment_location_label, organizations(logo_url, name, status, portal_name, portal_cover_image_url, portal_theme_color, portal_background_color)')
+        .select('id, slug, name, portal_display_name, organization_id, is_search_visible, ai_enabled, ai_name, theme_color, cover_image_url, operating_hours, wifi_network, wifi_password, instagram_handle, twitter_handle, facebook_handle, whatsapp_number, phone_number, google_maps_url, randomizer_enabled, spinner_enabled, spinner_config, global_discount_enabled, global_discount_banner_text, global_discount_percentage, manual_payment_enabled, manual_payment_bank_name, manual_payment_account_name, manual_payment_account_number, manual_payment_instructions, delivery_enabled, delivery_fee_minor, delivery_minimum_order_minor, delivery_note, fulfillment_location_label, publication_status, organizations(logo_url, name, status, portal_name, portal_cover_image_url, portal_theme_color, portal_background_color)')
         .eq('slug', slug)
         .single()
       data = adminData
@@ -141,7 +141,7 @@ export default async function PublicMenuPage({
   const location = locationData;
 
   // Demo mode acts like preview — bypasses KYC and shows all pages
-  let isPreview = isDemoMode
+  let isPreview = isDemoMode || slug === 'demo'
   if (!isPreview && preview === 'true') {
     const { data: userData } = await supabase.auth.getUser()
     if (userData?.user) {
@@ -167,7 +167,7 @@ export default async function PublicMenuPage({
 
   // Check publication and KYC status — preview & demo mode bypass this
   const isPublished = (location as any).publication_status === 'published'
-  if (!isPreview && !isDemoMode && !isPublished) {
+  if (!isPreview && !isDemoMode && slug !== 'demo' && !isPublished) {
     return (
       <main className="min-h-screen bg-[#f5f7f5] dark:bg-zinc-950 font-sans flex flex-col items-center justify-center p-6 text-center">
         <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl p-10 max-w-md w-full shadow-2xl border border-black/5 dark:border-white/10">
@@ -190,7 +190,7 @@ export default async function PublicMenuPage({
   const org = location.organizations as { status?: string } | null;
   const orgStatus = org?.status || 'approved';
   
-  if (!isPreview && !isDemoMode && orgStatus !== 'approved') {
+  if (!isPreview && !isDemoMode && slug !== 'demo' && orgStatus !== 'approved') {
     const { getKycSettings } = await import('@/lib/utils/settings')
     const kycSettings = await getKycSettings() as { require_kyc_to_publish?: boolean }
     if (kycSettings?.require_kyc_to_publish) {
