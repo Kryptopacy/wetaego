@@ -141,6 +141,15 @@ export async function processCheckout(params: {
   const supabase = await createAdminClient()
 
   try {
+    // --- Rate Limiting & Idempotency ---
+    const { checkRateLimit, withIdempotency } = await import('@/lib/upstash');
+    const cookieStore = await cookies();
+    const sessionId = cookieStore.get('session_id')?.value || 'anonymous';
+    const { success } = await checkRateLimit('checkout', sessionId);
+    if (!success) {
+      throw new Error('Too many requests. Please wait a minute before placing another order.');
+    }
+
     const checkoutLogic = async () => {
       if (!items || items.length === 0) {
         throw new Error('Your cart is empty. Please add items before checking out.')

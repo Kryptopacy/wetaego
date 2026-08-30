@@ -163,9 +163,8 @@ describe('processCheckout', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ;(createClient as any).mockResolvedValue(mock)
 
-    await expect(
-      processCheckout({ ...BASE_PARAMS, items: [] })
-    ).rejects.toThrow('cart is empty')
+    const result = await processCheckout({ ...BASE_PARAMS, items: [] })
+    expect(result.serverError).toMatch(/cart is empty/i)
   })
 
   // ------------------------------------------------------------------
@@ -179,7 +178,8 @@ describe('processCheckout', () => {
     const { checkRateLimit } = await import('../lib/upstash')
     vi.mocked(checkRateLimit).mockResolvedValueOnce({ success: false } as never)
 
-    await expect(processCheckout(BASE_PARAMS)).rejects.toThrow('Too many requests')
+    const result = await processCheckout(BASE_PARAMS)
+    expect(result.serverError).toMatch(/Too many requests/i)
   })
 
   // ------------------------------------------------------------------
@@ -190,12 +190,11 @@ describe('processCheckout', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ;(createClient as any).mockResolvedValue(mock)
 
-    await expect(
-      processCheckout({
-        ...BASE_PARAMS,
-        totalAmountMinor: 1000, // real total is 3000 — >5% off
-      })
-    ).rejects.toThrow('Order total mismatch')
+    const result = await processCheckout({
+      ...BASE_PARAMS,
+      totalAmountMinor: 1000, // real total is 3000 — >5% off
+    })
+    expect(result.serverError).toMatch(/Order total mismatch/i)
   })
 
   // ------------------------------------------------------------------
@@ -215,13 +214,12 @@ describe('processCheckout', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ;(createClient as any).mockResolvedValue(mock)
 
-    await expect(
-      processCheckout({
-        ...BASE_PARAMS,
-        fulfillmentType: 'delivery',
-        totalAmountMinor: 3000, // server subtotal is 3000, minimum is 5000
-      })
-    ).rejects.toThrow('Minimum order amount for delivery not met')
+    const result = await processCheckout({
+      ...BASE_PARAMS,
+      fulfillmentType: 'delivery',
+      totalAmountMinor: 3000, // server subtotal is 3000, minimum is 5000
+    })
+    expect(result.serverError).toMatch(/Minimum order amount for delivery not met/i)
   })
 
   // ------------------------------------------------------------------
@@ -274,8 +272,7 @@ describe('processCheckout', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ;(createClient as any).mockResolvedValue(mock)
 
-    await expect(
-      processCheckout({ ...BASE_PARAMS, paymentMethod: 'pay_after_service' })
-    ).rejects.toThrow('Out of stock')
+    const result = await processCheckout({ ...BASE_PARAMS, paymentMethod: 'pay_after_service' })
+    expect(result.serverError).toMatch(/Out of stock/i)
   })
 })
