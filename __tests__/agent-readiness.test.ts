@@ -8,14 +8,14 @@ describe('Agent Readiness (Ora & Is Agentic Compliance)', () => {
     it('serves markdown for the homepage with 200 OK', () => {
       const result = getMarkdownForPath('/')
       expect(result.status).toBe(200)
-      expect(result.content).toContain('OurMenu OS')
+      expect(result.content).toContain('WETAEGO')
       expect(result.content).toContain('Core Platform Capabilities')
     })
 
     it('serves markdown for trust anchor pages (/about, /contact, /privacy)', () => {
       const about = getMarkdownForPath('/about')
       expect(about.status).toBe(200)
-      expect(about.content).toContain('About OurMenu OS')
+      expect(about.content).toContain('About WETAEGO')
 
       const contact = getMarkdownForPath('/contact')
       expect(contact.status).toBe(200)
@@ -53,7 +53,7 @@ describe('Agent Readiness (Ora & Is Agentic Compliance)', () => {
       expect(fs.existsSync(openapiPath)).toBe(true)
       const openapi = JSON.parse(fs.readFileSync(openapiPath, 'utf8'))
       expect(openapi.openapi).toBe('3.1.0')
-      expect(openapi.info.title).toContain('OurMenu OS')
+      expect(openapi.info.title).toContain('WETAEGO')
       expect(openapi.paths['/chat']).toBeDefined()
       expect(openapi.paths['/ai/parse-menu']).toBeDefined()
       expect(openapi.paths['/orders']).toBeDefined()
@@ -79,7 +79,7 @@ describe('Agent Readiness (Ora & Is Agentic Compliance)', () => {
       expect(fs.existsSync(agentJson)).toBe(true)
 
       const llmsText = fs.readFileSync(llmsPath, 'utf8')
-      expect(llmsText).toContain('When to Use OurMenu OS')
+      expect(llmsText).toContain('When to Use WETAEGO')
       expect(llmsText).toContain('https://ourmenuos.online/docs')
       expect(llmsText).toContain('https://ourmenuos.online/about')
       expect(llmsText).toContain('https://ourmenuos.online/contact')

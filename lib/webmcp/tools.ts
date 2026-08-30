@@ -197,6 +197,7 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
         description: item.description || '',
         dietaryTags: item.dietary_tags || [],
         modifiers: item.variants || [],
+        variants: item.variants || [],
         isAvailable: item.is_available !== false
       }
     }
@@ -347,21 +348,24 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
       const discountMinor = cartStore.getDiscountAmountMinor(subtotalMinor)
       const discountedSubtotalMinor = cartStore.getDiscountedTotalAmountMinor(subtotalMinor)
 
+      const lines = items.map(it => ({
+        lineId: it.cartKey,
+        itemId: it.id,
+        name: it.name,
+        quantity: it.quantity,
+        unitPrice: it.price_minor / 100,
+        unitPriceFormatted: `${(it.price_minor / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })} ${currency}`,
+        lineTotal: (it.price_minor * it.quantity) / 100,
+        lineTotalFormatted: `${((it.price_minor * it.quantity) / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })} ${currency}`,
+        modifiers: it.variantSelections || null
+      }))
+
       return {
         venue: locationName,
         currency,
         itemCount: items.reduce((sum, it) => sum + it.quantity, 0),
-        lines: items.map(it => ({
-          lineId: it.cartKey,
-          itemId: it.id,
-          name: it.name,
-          quantity: it.quantity,
-          unitPrice: it.price_minor / 100,
-          unitPriceFormatted: `${(it.price_minor / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })} ${currency}`,
-          lineTotal: (it.price_minor * it.quantity) / 100,
-          lineTotalFormatted: `${((it.price_minor * it.quantity) / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })} ${currency}`,
-          modifiers: it.variantSelections || null
-        })),
+        lines,
+        items: lines,
         subtotal: subtotalMinor / 100,
         subtotalFormatted: `${(subtotalMinor / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })} ${currency}`,
         discountAmount: discountMinor / 100,

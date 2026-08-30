@@ -32,12 +32,13 @@ export async function GET(req: NextRequest) {
     // 2. Query location pages (concepts like Spa, Restaurant, Tech, Stays)
     let pageQuery = supabase
       .from('location_pages')
-      .select('id, title, slug, subtitle, template_type, location_id, locations(slug, name)')
+      .select('id, title, slug, content, template_type, business_type_preset, location_id, locations(slug, name)')
+      .eq('is_published', true)
       .limit(limit)
 
     if (query || industry) {
       const searchTerm = query || industry
-      pageQuery = pageQuery.or(`title.ilike.%${searchTerm}%,subtitle.ilike.%${searchTerm}%,template_type.ilike.%${searchTerm}%`)
+      pageQuery = pageQuery.or(`title.ilike.%${searchTerm}%,content.ilike.%${searchTerm}%,template_type.ilike.%${searchTerm}%`)
     }
 
     const { data: pages, error: pageError } = await pageQuery
@@ -66,16 +67,18 @@ export async function GET(req: NextRequest) {
 
     if (pages) {
       for (const page of pages) {
-        const locSlug = (page.locations as { slug?: string })?.slug || 'demo'
-        const locName = (page.locations as { name?: string })?.name || 'WETAEGO'
+        const rawLoc = page.locations as unknown as { slug?: string; name?: string } | null
+        const locSlug = rawLoc?.slug || 'demo'
+        const locName = rawLoc?.name || 'WETAEGO'
         results.push({
           type: 'concept_page',
           name: page.title,
           business: locName,
           category: page.template_type,
+          preset: page.business_type_preset,
           slug: page.slug,
           url: `https://ourmenuos.online/m/${locSlug}/p/${page.slug}`,
-          subtitle: page.subtitle
+          description: page.content
         })
       }
     }

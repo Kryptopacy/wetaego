@@ -36,9 +36,9 @@ describe('Chat API', () => {
   })
 
   it('enforces session rate limits', async () => {
-    // Mock cookies to simulate 20 queries already
+    // Mock cookies to simulate 30 queries already
     vi.mocked(cookiesModule.cookies).mockResolvedValue({
-      get: () => ({ value: '20' }),
+      get: () => ({ value: '30' }),
       set: vi.fn(),
     } as never)
 
@@ -49,7 +49,7 @@ describe('Chat API', () => {
 
     const res = await POST(req)
     expect(res.status).toBe(429)
-    expect(await res.text()).toContain('maximum limit of 20')
+    expect(await res.text()).toContain('maximum message limit for this session')
   })
 
   it('rejects if AI is disabled for location', async () => {
