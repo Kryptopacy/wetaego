@@ -36,6 +36,19 @@ Any business that sets up on WETAEGO automatically inherits an autonomous, self-
 
 When an AI browsing agent (such as **ChatGPT Desktop In-App Browser** or **Google Chrome 149+ with `#enable-webmcp-testing`**) navigates to any WETAEGO merchant URL, the page instantly presents a live, deterministic, and bidirectional client-side tool API.
 
+### 🧭 How an AI Agent Reaches WETAEGO: 3 Frictionless Ingestion Paths
+
+1. **Path 1: In-Session Human Co-Browsing (URL / QR Code Scan)**:
+   * A human customer opens a WETAEGO link (e.g. `https://ourmenuos.online/m/demo`) or scans a physical table/desk QR code in their browser.
+   * The user prompts their in-browser AI (e.g., *"Find me a gluten-free dinner under $40 and call the waiter"*).
+   * Because the page is active in the browser tab, the agent automatically detects the registered WebMCP tools on `document.modelContext` and executes actions with zero setup.
+2. **Path 2: Natural-Language Intent & Goal Instruction**:
+   * A user prompts an autonomous browsing agent (e.g. OpenAI Operator, Claude Computer Use, or Chrome Assistant):
+     > *"Go to WETAEGO and book a 60-minute massage for Saturday afternoon."*
+   * The agent navigates to the URL and executes `wetaego_discover_businesses(query: "massage")`, which returns direct storefront sub-links (`/m/demo/p/spa`), allowing the agent to transition directly into booking.
+3. **Path 3: Autonomous Web-Scale Discovery (The 14 Agent Protocols Matrix)**:
+   * External search engines and AI crawlers discover WETAEGO via standardized machine endpoints: **RFC 9727 API Catalog** (`/.well-known/api-catalog`), **RFC 8288 Link Headers**, **DNS-AID** (`_index._agents.ourmenuos.online`), **Agentic Resource Discovery Manifest (ARD)** (`/.well-known/ai-catalog.json`), and **llms.txt** (`/llms-full.txt`). Enterprise backend agents connect directly via the Staff MCP Server at `POST /api/mcp`.
+
 ---
 
 ## ⚡ The 4-Pillar Instant Transformation
@@ -60,7 +73,8 @@ When any merchant or enterprise joins WETAEGO, they are not just getting a websi
 
 1. **Pillar 1: Instant Digital Storefront & Unified Multi-Model Commerce Layer**
    * Instant deployment of high-performance, offline-first storefronts tailored to any commercial schema (Restaurant/QR menus, Supermarkets/Retail with aisle navigation, BMS Service Bookings, PMS Apartment/Stay listings, and dynamic B2B rate cards).
-   * Multi-template aesthetic design token engine (`bento_grid`, `masonry`, `list`, `glassmorphism`, `neumorphism`) with decoupled dynamic QR/NFC routing.
+   * **Multi-Rail Omnichannel Settlement**: Lets businesses accept payments via **Credit/Debit Cards, Instant Bank Transfers, or Crypto/Stablecoins (USDC, USDT, SOL via Bachs)**, with automated **Manual Bank Details as offline fallback** and an integrated **Desk/Counter POS system (`/dashboard/pos`)** for in-person walk-in payments.
+   * Multi-template aesthetic design token engine (`bento_grid`, `masonry`, `list`, `glassmorphism`, `neumorphism`) with decoupled dynamic QR/NFC smart routing.
 
 2. **Pillar 2: Full-Spectrum Enterprise Operations & Management Suite (Tab-by-Tab Breakdown)**
    * **Universal Order Inbox & Dispatch Board (`/dashboard/orders`)**: Real-time multi-status order fulfillment board (`pending` → `paid` → `preparing` → `ready` → `out_for_delivery` → `completed`) for any industry (retail packaging, tech orders, service packages, or restaurant kitchen tickets), complete with audio chimes and automatic thermal ticket printing.
