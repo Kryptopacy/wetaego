@@ -320,6 +320,34 @@ export default async function PublicMenuPage({
       "openingHours": location.operating_hours || undefined
     } : null;
 
+    // Fetch all items across all active pages of this portal location
+    const adminSupabase = await createAdminClient()
+    const { data: allPortalItems } = await adminSupabase
+      .from('menu_items')
+      .select('id, name, description, price_minor, category, image_url, dietary_tags, variants, is_available, location_page_id')
+      .eq('location_id', location.id)
+      .eq('is_available', true)
+
+    const pageLookup = new Map<string, { slug: string; title: string }>()
+    activePages.forEach(p => pageLookup.set(p.id, { slug: p.slug, title: p.title }))
+
+    const portalMenuItems = (allPortalItems || []).map(it => {
+      const pageInfo = it.location_page_id ? pageLookup.get(it.location_page_id) : undefined
+      return {
+        id: it.id,
+        name: it.name,
+        description: it.description,
+        price_minor: it.price_minor,
+        category: it.category,
+        image_url: it.image_url,
+        dietary_tags: it.dietary_tags,
+        variants: it.variants as any,
+        is_available: it.is_available,
+        conceptSlug: pageInfo?.slug || null,
+        conceptTitle: pageInfo?.title || null
+      }
+    })
+
     return (
       <>
         {ldJson && (
@@ -328,7 +356,7 @@ export default async function PublicMenuPage({
             dangerouslySetInnerHTML={{ __html: JSON.stringify(ldJson) }}
           />
         )}
-        {isPreview && <PreviewBanner />}
+        {showPreviewBanner && <PreviewBanner />}
         <PortalRenderer location={location as unknown as Parameters<typeof PortalRenderer>[0]['location']} pages={activePages} />
         {location.ai_enabled && (
           <AIChat
@@ -338,15 +366,15 @@ export default async function PublicMenuPage({
             businessName={location.portal_display_name || location.name}
             themeColor={location.theme_color || '#0f7b55'}
             tableIdentifier="Portal Visitor"
-            menuItems={[]}
+            menuItems={portalMenuItems}
           />
         )}
         <WebMCPProvider
           locationId={location.id}
           locationName={location.portal_display_name || location.name}
           slug={slug}
-          currency="NGN"
-          menuItems={[]}
+          currency={location.currency_code || 'NGN'}
+          menuItems={portalMenuItems}
           categories={activePages.map(p => p.title)}
           tableIdentifier="Portal Visitor"
         />

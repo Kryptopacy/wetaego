@@ -21,6 +21,8 @@ export interface MenuItemData {
     options: { label: string; price_delta_minor?: number }[] | string[]
   }[]
   is_available?: boolean
+  conceptSlug?: string | null
+  conceptTitle?: string | null
 }
 
 export interface StorefrontContext {
@@ -160,7 +162,10 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
             description: item.description || '',
             dietaryTags: item.dietary_tags || [],
             isAvailable: item.is_available !== false,
-            hasModifiers: !!(item.variants && item.variants.length > 0)
+            hasModifiers: !!(item.variants && item.variants.length > 0),
+            concept: item.conceptTitle || undefined,
+            conceptSlug: item.conceptSlug || undefined,
+            conceptUrl: item.conceptSlug ? `https://ourmenuos.online/m/${ctx.slug}/p/${item.conceptSlug}` : undefined
           }
         })
       }
@@ -698,13 +703,34 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
     })
   }
 
-  const staffTool = tools.find(t => t.name === 'request_staff')
-  if (staffTool) {
-    tools.push({
-      ...staffTool,
-      name: 'call_staff_or_service'
-    })
-  }
+  // 11. open_business_page
+  tools.push({
+    name: 'open_business_page',
+    description: `Navigate or switch the active storefront viewport to a specific department or concept page under ${locationName} (e.g. "restaurant", "spa", "tech-boutique", "hotel", "creator-rate-card").`,
+    inputSchema: {
+      type: 'object',
+      required: ['conceptSlug'],
+      properties: {
+        conceptSlug: {
+          type: 'string',
+          description: 'The URL slug of the concept/department to navigate to.'
+        }
+      },
+      additionalProperties: false
+    },
+    execute: async ({ conceptSlug }: { conceptSlug: string }) => {
+      const destination = `/m/${ctx.slug}/p/${conceptSlug}`
+      if (typeof window !== 'undefined') {
+        window.location.href = destination
+      }
+      return {
+        status: 'ok',
+        conceptSlug,
+        destinationUrl: `https://ourmenuos.online${destination}`,
+        message: `Navigating to ${conceptSlug}...`
+      }
+    }
+  })
 
   // Wrap all tools with real-time UI/UX event dispatch
   return tools.map(tool => ({
