@@ -65,13 +65,15 @@ export async function ensureFlagshipDemoLocation() {
       console.error('[ensureFlagshipDemo] Org creation error:', orgError)
       if (anyOrg) {
         org = { id: anyOrg.id, slug: 'pacy-group-flagship', name: 'Pacy Group' }
+      } else {
+        throw new Error(`Org insert failed: ${orgError.message} (${orgError.code})`)
       }
     } else {
       org = newOrg
     }
   }
 
-  if (!org) return null
+  if (!org) throw new Error('Could not find or create demo organization in Supabase')
 
   // 2. Fetch or create Location with slug 'demo'
   let { data: loc } = await adminClient
@@ -126,6 +128,7 @@ export async function ensureFlagshipDemoLocation() {
 
     if (locError) {
       console.error('[ensureFlagshipDemo] Location creation error:', locError)
+      throw new Error(`Location insert failed: ${locError.message} (${locError.code})`)
     }
     loc = newLoc
   } else {
@@ -136,8 +139,7 @@ export async function ensureFlagshipDemoLocation() {
   }
 
   if (!loc) {
-    console.error('[ensureFlagshipDemo] Failed to locate or create demo location row.')
-    return null
+    throw new Error('Failed to locate or create demo location row in Supabase')
   }
 
   // 3. Verify if all 9 pages exist with the correct Pacy slugs and rich inventory
