@@ -18,18 +18,36 @@ export async function ensureFlagshipDemoLocation() {
     .maybeSingle()
 
   if (!org) {
-    const { data: userProfiles } = await adminClient
-      .from('user_profiles')
-      .select('id')
+    const { data: anyOrg } = await adminClient
+      .from('organizations')
+      .select('id, created_by')
       .limit(1)
       .maybeSingle()
 
-    const systemUserId = userProfiles?.id || '00000000-0000-0000-0000-000000000000'
+    let creatorId = anyOrg?.created_by
+
+    if (!creatorId) {
+      try {
+        const { data: authUsers } = await adminClient.auth.admin.listUsers({ perPage: 1 })
+        creatorId = authUsers?.users?.[0]?.id
+      } catch (authErr) {
+        console.error('[ensureFlagshipDemo] listUsers error:', authErr)
+      }
+    }
+
+    if (!creatorId) {
+      const { data: userProfiles } = await adminClient
+        .from('user_profiles')
+        .select('id')
+        .limit(1)
+        .maybeSingle()
+      creatorId = userProfiles?.id || '00000000-0000-0000-0000-000000000000'
+    }
 
     const orgPayload = {
       name: 'Pacy Group',
       slug: 'pacy-group-flagship',
-      created_by: systemUserId,
+      created_by: creatorId,
       is_demo: false, // Permanent showcase
       portal_name: 'Pacy Group',
       portal_theme_color: '#0f7b55',
@@ -45,8 +63,12 @@ export async function ensureFlagshipDemoLocation() {
 
     if (orgError) {
       console.error('[ensureFlagshipDemo] Org creation error:', orgError)
+      if (anyOrg) {
+        org = { id: anyOrg.id, slug: 'pacy-group-flagship', name: 'Pacy Group' }
+      }
+    } else {
+      org = newOrg
     }
-    org = newOrg
   }
 
   if (!org) return null
