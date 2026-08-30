@@ -151,18 +151,51 @@ describe('WebMCP Storefront Tool Suite', () => {
     expect(res.message).toContain('Table 7')
   })
 
-  it('should initiate checkout and present human confirmation payload', async () => {
+  it('should recommend complementary pairings based on active cart', async () => {
+    await globalWebMCPRegistry.executeTool('add_to_cart', {
+      itemId: 'item_pasta',
+      quantity: 1
+    })
+
+    const res = await globalWebMCPRegistry.executeTool('recommend_pairings', {
+      maxRecommendations: 2
+    })
+
+    expect(res.count).toBeLessThanOrEqual(2)
+    expect(res.recommendations.length).toBeGreaterThan(0)
+    expect(res.recommendations[0].itemId).not.toBe('item_pasta')
+  })
+
+  it('should initiate checkout and present human confirmation payload with price-lock', async () => {
     await globalWebMCPRegistry.executeTool('add_to_cart', {
       itemId: 'item_pasta',
       quantity: 1
     })
 
     const res = await globalWebMCPRegistry.executeTool('initiate_checkout', {
-      customerName: 'Sam Taylor',
+      fulfillment: 'dine_in',
+      customer: { name: 'Sam Taylor', email: 'sam@example.com' },
       notes: 'No napkins needed'
     })
 
-    expect(res.status).toBe('awaiting_human_confirmation')
-    expect(res.items).toContain('1x Truffle Tagliatelle')
+    expect(res.requiresPaymentAuthorization).toBe(true)
+    expect(res.checkoutId).toBeDefined()
+    expect(res.expiresAt).toBeDefined()
+    expect(res.priceLockValidMinutes).toBe(15)
+
+    // Test submit_order requires human confirmation
+    const rejected = await globalWebMCPRegistry.executeTool('submit_order', {
+      checkoutId: res.checkoutId,
+      authorization: { confirmed: false }
+    })
+    expect(rejected.error).toContain('Transaction rejected')
+
+    // Test submit_order succeeds with human confirmation
+    const approved = await globalWebMCPRegistry.executeTool('submit_order', {
+      checkoutId: res.checkoutId,
+      authorization: { confirmed: true, confirmationId: 'conf_123' }
+    })
+    expect(approved.success).toBe(true)
+    expect(approved.orderId).toBeDefined()
   })
 })

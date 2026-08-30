@@ -627,6 +627,50 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
     }
   })
 
+  // Aliases for seamless compatibility
+  const getCartTool = tools.find(t => t.name === 'get_cart')
+  if (getCartTool) {
+    tools.push({
+      ...getCartTool,
+      name: 'view_cart'
+    })
+  }
+
+  const updateCartTool = tools.find(t => t.name === 'update_cart')
+  if (updateCartTool) {
+    tools.push({
+      name: 'update_cart_quantity',
+      description: 'Update the quantity of an item in the cart or remove it.',
+      inputSchema: {
+        type: 'object',
+        required: ['cartKey'],
+        properties: {
+          cartKey: { type: 'string' },
+          delta: { type: 'integer' },
+          remove: { type: 'boolean' }
+        },
+        additionalProperties: false
+      },
+      execute: async (input: { cartKey: string; delta?: number; remove?: boolean }) => {
+        const cartStore = useCartStore.getState()
+        if (input.remove) {
+          cartStore.removeItem(input.cartKey)
+        } else if (typeof input.delta === 'number') {
+          cartStore.updateQuantity(input.cartKey, input.delta)
+        }
+        return { success: true }
+      }
+    })
+  }
+
+  const staffTool = tools.find(t => t.name === 'request_staff')
+  if (staffTool) {
+    tools.push({
+      ...staffTool,
+      name: 'call_staff_or_service'
+    })
+  }
+
   // Wrap all tools with real-time UI/UX event dispatch
   return tools.map(tool => ({
     ...tool,

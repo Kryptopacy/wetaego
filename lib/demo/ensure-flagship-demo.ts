@@ -322,12 +322,19 @@ export async function ensureFlagshipDemoLocation() {
     }
   ]
 
-  const { data: createdPages } = await adminClient
+  const { data: createdPages, error: pagesError } = await adminClient
     .from('location_pages')
     .insert(pagesConfig as never)
     .select('id, slug')
 
-  if (!createdPages) return loc.id
+  if (pagesError) {
+    console.error('[ensureFlagshipDemo] Location pages insert error:', pagesError)
+    throw new Error(`Location pages insert failed: ${pagesError.message} (${pagesError.code})`)
+  }
+
+  if (!createdPages || createdPages.length === 0) {
+    throw new Error('Failed to create location pages in Supabase')
+  }
 
   // 5. Seed Complete Rich Items for All Concepts
   const pageItems: Record<string, unknown>[] = []
@@ -1491,7 +1498,11 @@ export async function ensureFlagshipDemoLocation() {
 
   // 6. Insert all 75+ curated items in batches
   if (pageItems.length > 0) {
-    await adminClient.from('page_items').insert(pageItems as never)
+    const { error: itemsError } = await adminClient.from('page_items').insert(pageItems as never)
+    if (itemsError) {
+      console.error('[ensureFlagshipDemo] page_items insert error:', itemsError)
+      throw new Error(`Page items insert failed: ${itemsError.message} (${itemsError.code})`)
+    }
   }
 
   return loc.id
