@@ -167,11 +167,10 @@ WETAEGO provides public REST APIs, webhooks, Model Context Protocol (MCP) integr
 
 ## 4. Autonomous Agent Tools & Model Context Protocol
 Discover our MCP server tools at \`/.well-known/mcp.json\` and Agent Skills at \`/.well-known/agent-skills/index.json\`:
-- \`ourmenu_query_catalog\`: Search dishes, retail stock, and menu items with dietary (vegan, halal, keto) filters.
-- \`ourmenu_create_order\`: Submit validated guest orders.
-- \`ourmenu_check_availability\`: Query open booking calendar slots.
-- \`ourmenu_request_staff\`: Trigger floor staff call chimes.
-- \`ourmenu_payment_roulette\`: Spin bill randomizer.
+- \`wetaego_query_catalog\`: Search dishes, retail stock, and menu items with dietary (vegan, halal, keto) filters.
+- \`wetaego_create_order\`: Submit validated guest orders.
+- \`wetaego_check_availability\`: Query open booking calendar slots.
+- \`wetaego_request_staff\`: Trigger floor staff call chimes.
 `;
 
 export const MARKDOWN_PRIVACY = `# Privacy Policy — WETAEGO

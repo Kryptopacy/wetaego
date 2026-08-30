@@ -12,10 +12,10 @@ Autonomous AI agents and LLM orchestration frameworks connect directly to WETAEG
 
 | Tool Name | Description | Parameters |
 |---|---|---|
-| `ourmenu_query_catalog` | Search products, services, appointments, or dishes with attribute, specification, and stock filters. | `locationId` (string), `query` (string), `category` (string), `tags` (array) |
-| `ourmenu_create_order` | Submit customer order with location ID, seat/table identifier, and customized variant selections. | `locationId` (string), `tableIdentifier` (string), `items` (array) |
-| `ourmenu_check_availability` | Query appointment calendar slots for services, hospitality suites, or dining reservations. | `locationId` (string), `date` (string), `serviceId` (string) |
-| `ourmenu_request_staff` | Page floor staff or trigger table/room assistance alerts. | `locationId` (string), `tableIdentifier` (string), `reason` (string) |
+| `wetaego_query_catalog` | Search products, services, appointments, or dishes with attribute, specification, and stock filters. | `locationId` (string), `query` (string), `category` (string), `tags` (array) |
+| `wetaego_create_order` | Submit customer order with location ID, seat/table identifier, and customized variant selections. | `locationId` (string), `tableIdentifier` (string), `items` (array) |
+| `wetaego_check_availability` | Query appointment calendar slots for services, hospitality suites, or dining reservations. | `locationId` (string), `date` (string), `serviceId` (string) |
+| `wetaego_request_staff` | Page floor staff or trigger table/room assistance alerts. | `locationId` (string), `tableIdentifier` (string), `reason` (string) |
 
 ---
 
@@ -25,7 +25,7 @@ WETAEGO implements the **W3C WebMCP standard** across both the global root platf
 
 ### Layer A: Global Platform Discovery (`/`)
 When an AI agent visits the platform, it registers:
-- `ourmenu_find_venue` / `wetaego_discover_businesses` — Real-time search across all registered businesses, multi-concept pages, locations, and industries via `/api/businesses/search`.
+- `wetaego_find_venue` — Real-time search across all registered businesses, multi-concept pages, locations, and industries via `/api/businesses/search`.
 
 ### Layer B: Contextual Storefront Tools (`/m/[slug]`)
 When an AI browsing agent (such as **ChatGPT Desktop In-App Browser** or **Google Chrome 149+ with `#enable-webmcp-testing`**) navigates to any WETAEGO tenant URL, the page automatically synthesizes and registers context-aware tools:

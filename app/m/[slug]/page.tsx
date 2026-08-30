@@ -321,28 +321,30 @@ export default async function PublicMenuPage({
     } : null;
 
     // Fetch all items across all active pages of this portal location
+    const activePageIds = activePages.map(p => p.id)
     const adminSupabase = await createAdminClient()
     const { data: allPortalItems } = await adminSupabase
-      .from('menu_items')
-      .select('id, name, description, price_minor, category, image_url, dietary_tags, variants, is_available, location_page_id')
-      .eq('location_id', location.id)
-      .eq('is_available', true)
+      .from('page_items')
+      .select('id, title, description, price_minor, department, images, item_data, is_published, availability_status, page_id')
+      .in('page_id', activePageIds)
+      .eq('is_published', true)
 
     const pageLookup = new Map<string, { slug: string; title: string }>()
     activePages.forEach(p => pageLookup.set(p.id, { slug: p.slug, title: p.title }))
 
     const portalMenuItems = (allPortalItems || []).map(it => {
-      const pageInfo = it.location_page_id ? pageLookup.get(it.location_page_id) : undefined
+      const pageInfo = it.page_id ? pageLookup.get(it.page_id) : undefined
+      const itemData = (it.item_data as Record<string, unknown>) || {}
       return {
         id: it.id,
-        name: it.name,
+        name: it.title,
         description: it.description,
-        price_minor: it.price_minor,
-        category: it.category,
-        image_url: it.image_url,
-        dietary_tags: it.dietary_tags,
-        variants: it.variants as any,
-        is_available: it.is_available,
+        price_minor: it.price_minor || 0,
+        category: it.department || 'General',
+        image_url: it.images && it.images.length > 0 ? it.images[0] : null,
+        dietary_tags: (itemData.dietary_tags as string[]) || [],
+        variants: (itemData.variants as any) || [],
+        is_available: it.availability_status !== 'sold_out',
         conceptSlug: pageInfo?.slug || null,
         conceptTitle: pageInfo?.title || null
       }

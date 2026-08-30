@@ -1,7 +1,7 @@
 /**
  * Authoritative WebMCP Client-Side Tool Suite for WETAEGO (OurMenuOS)
- * Implements the standard 8-tool client-side commerce specification for document.modelContext
- * with Human-in-the-Loop transaction authorization boundaries.
+ * Implements the standard client-side commerce specification for document.modelContext
+ * with Human-in-the-Loop transaction authorization boundaries and exhaustive output schemas.
  */
 
 import type { WebMCPTool } from './types'
@@ -42,10 +42,10 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
   const { locationName, currency = 'NGN', menuItems = [], tableIdentifier = 'Storefront Guest' } = ctx
   const tools: WebMCPTool[] = []
 
-  // 1. search_catalog
+  // ── 1. search_catalog ─────────────────────────────────────────────────────
   tools.push({
     name: 'search_catalog',
-    description: `Search the current venue catalog for products, dishes, services, and available variants for ${locationName}. Results are limited to items currently visible and orderable.`,
+    description: `Search the current venue catalog for products, dishes, services, and available variants for ${locationName}. Supports dietary filtering and pagination.`,
     inputSchema: {
       type: 'object',
       properties: {
@@ -70,6 +70,11 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
           minimum: 0,
           description: 'Maximum price in major currency units.'
         },
+        max_price: {
+          type: 'number',
+          minimum: 0,
+          description: 'Alternative alias for maxPrice in major currency units.'
+        },
         currency: {
           type: 'string',
           description: 'Optional target currency code (e.g. USD, EUR, GBP, NGN) for dynamic rate conversion.'
@@ -86,18 +91,74 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
           type: 'boolean',
           default: true,
           description: 'Filter only items currently available in stock.'
+        },
+        limit: {
+          type: 'integer',
+          minimum: 1,
+          maximum: 100,
+          default: 20,
+          description: 'Maximum number of items to return (1-100).'
+        },
+        offset: {
+          type: 'integer',
+          minimum: 0,
+          default: 0,
+          description: 'Pagination offset for skipping items.'
+        },
+        page: {
+          type: 'integer',
+          minimum: 1,
+          default: 1,
+          description: 'Page number (1-indexed).'
         }
       },
       additionalProperties: false
+    },
+    outputSchema: {
+      type: 'object',
+      required: ['venue', 'currency', 'totalFound', 'items'],
+      properties: {
+        venue: { type: 'string', description: 'Active venue name' },
+        currency: { type: 'string', description: 'Currency code' },
+        totalFound: { type: 'integer', description: 'Total matching items' },
+        page: { type: 'integer', description: 'Current page' },
+        limit: { type: 'integer', description: 'Page size limit' },
+        offset: { type: 'integer', description: 'Offset applied' },
+        items: {
+          type: 'array',
+          items: {
+            type: 'object',
+            required: ['itemId', 'name', 'price', 'priceFormatted', 'isAvailable'],
+            properties: {
+              itemId: { type: 'string' },
+              name: { type: 'string' },
+              category: { type: 'string' },
+              price: { type: 'number' },
+              priceFormatted: { type: 'string' },
+              description: { type: 'string' },
+              dietaryTags: { type: 'array', items: { type: 'string' } },
+              isAvailable: { type: 'boolean' },
+              hasModifiers: { type: 'boolean' },
+              concept: { type: 'string' },
+              conceptSlug: { type: 'string' },
+              conceptUrl: { type: 'string' }
+            }
+          }
+        }
+      }
     },
     execute: async (input: {
       query?: string
       category?: string
       dietary?: string[]
       maxPrice?: number
+      max_price?: number
       currency?: string
       userLocation?: { lat: number; lng: number }
       inStockOnly?: boolean
+      limit?: number
+      offset?: number
+      page?: number
     }) => {
       let results = [...menuItems]
 
@@ -120,8 +181,9 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
         results = results.filter(item => item.category && item.category.toLowerCase().includes(cat))
       }
 
-      if (typeof input.maxPrice === 'number') {
-        const maxMinor = input.maxPrice * 100
+      const effectiveMaxPrice = typeof input.maxPrice === 'number' ? input.maxPrice : input.max_price
+      if (typeof effectiveMaxPrice === 'number') {
+        const maxMinor = effectiveMaxPrice * 100
         results = results.filter(item => item.price_minor <= maxMinor)
       }
 
@@ -133,11 +195,16 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
         })
       }
 
+      const totalFound = results.length
+      const pageLimit = input.limit || 20
+      const pageOffset = typeof input.offset === 'number' ? input.offset : ((input.page || 1) - 1) * pageLimit
+      const paginatedResults = results.slice(pageOffset, pageOffset + pageLimit)
+
       // Dynamic currency conversion rate table
       const targetCurrency = (input.currency || currency).toUpperCase()
       const fxRates: Record<string, number> = {
         NGN: 1,
-        USD: 0.00067, // 1 USD ~ 1500 NGN
+        USD: 0.00067,
         EUR: 0.00062,
         GBP: 0.00053
       }
@@ -150,8 +217,11 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
         venue: locationName,
         currency: targetCurrency,
         geofencedLocation: input.userLocation ? { ...input.userLocation, branch: locationName, distanceKm: 0.8 } : undefined,
-        totalFound: results.length,
-        items: results.map(item => {
+        totalFound,
+        page: input.page || Math.floor(pageOffset / pageLimit) + 1,
+        limit: pageLimit,
+        offset: pageOffset,
+        items: paginatedResults.map(item => {
           const convertedPrice = (item.price_minor / 100) * conversionFactor
           return {
             itemId: item.id,
@@ -172,7 +242,7 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
     }
   })
 
-  // 2. get_item_details
+  // ── 2. get_item_details ───────────────────────────────────────────────────
   tools.push({
     name: 'get_item_details',
     description: `Return authoritative details for a catalog item, including price, availability, modifiers, dietary tags and applicable options.`,
@@ -182,10 +252,27 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
       properties: {
         itemId: {
           type: 'string',
+          minLength: 1,
           description: 'The unique item ID.'
         }
       },
       additionalProperties: false
+    },
+    outputSchema: {
+      type: 'object',
+      properties: {
+        itemId: { type: 'string' },
+        name: { type: 'string' },
+        category: { type: 'string' },
+        price: { type: 'number' },
+        priceFormatted: { type: 'string' },
+        description: { type: 'string' },
+        dietaryTags: { type: 'array', items: { type: 'string' } },
+        modifiers: { type: 'array' },
+        variants: { type: 'array' },
+        isAvailable: { type: 'boolean' },
+        error: { type: 'string' }
+      }
     },
     execute: async ({ itemId }: { itemId: string }) => {
       const item = menuItems.find(i => i.id === itemId)
@@ -208,41 +295,69 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
     }
   })
 
-  // 3. create_cart
+  // ── 3. create_cart ────────────────────────────────────────────────────────
   tools.push({
     name: 'create_cart',
-    description: `Create or retrieve the current shopping cart for the active venue and customer session.`,
+    description: `Initialize a new shopping cart session or retrieve the existing active cart for the customer session.`,
     inputSchema: {
       type: 'object',
-      properties: {},
+      properties: {
+        tableIdentifier: {
+          type: 'string',
+          maxLength: 50,
+          description: 'Optional table number, room, or seat identifier.'
+        },
+        customerNote: {
+          type: 'string',
+          maxLength: 300,
+          description: 'Optional initial note.'
+        }
+      },
       additionalProperties: false
     },
-    execute: async () => {
+    outputSchema: {
+      type: 'object',
+      required: ['status', 'cartId', 'venue', 'currency', 'itemCount', 'subtotal', 'subtotalFormatted'],
+      properties: {
+        status: { type: 'string', enum: ['ok', 'error'] },
+        cartId: { type: 'string' },
+        venue: { type: 'string' },
+        currency: { type: 'string' },
+        itemCount: { type: 'integer' },
+        subtotal: { type: 'number' },
+        subtotalFormatted: { type: 'string' },
+        tableIdentifier: { type: 'string' }
+      }
+    },
+    execute: async (input?: { tableIdentifier?: string; customerNote?: string }) => {
       const cartStore = useCartStore.getState()
       const items = cartStore.items
       const subtotalMinor = cartStore.totalAmountMinor()
 
       return {
+        status: 'ok',
         venue: locationName,
         currency,
         cartId: `cart_${ctx.slug}_${ctx.locationId.slice(0, 8)}`,
         itemCount: items.reduce((sum, it) => sum + it.quantity, 0),
         subtotal: subtotalMinor / 100,
-        subtotalFormatted: `${(subtotalMinor / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })} ${currency}`
+        subtotalFormatted: `${(subtotalMinor / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })} ${currency}`,
+        tableIdentifier: input?.tableIdentifier || tableIdentifier
       }
     }
   })
 
-  // 4. add_to_cart
+  // ── 4. add_to_cart ────────────────────────────────────────────────────────
   tools.push({
     name: 'add_to_cart',
-    description: `Add an available catalog item to the active cart using only valid modifier selections.`,
+    description: `Add an available catalog item to the active cart using valid modifier selections. Returns updated cart summary.`,
     inputSchema: {
       type: 'object',
       required: ['itemId', 'quantity'],
       properties: {
         itemId: {
           type: 'string',
+          minLength: 1,
           description: 'The unique ID of the item.'
         },
         quantity: {
@@ -267,6 +382,10 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
           },
           description: 'Modifier and option selections.'
         },
+        variantSelections: {
+          type: 'object',
+          description: 'Key-value map of variant names to selected option labels (e.g. { Portion: "Large" }).'
+        },
         notes: {
           type: 'string',
           maxLength: 500,
@@ -275,24 +394,38 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
       },
       additionalProperties: false
     },
+    outputSchema: {
+      type: 'object',
+      required: ['status', 'success', 'cartItemCount', 'subtotal', 'subtotalFormatted'],
+      properties: {
+        status: { type: 'string', enum: ['ok', 'error'] },
+        success: { type: 'boolean' },
+        message: { type: 'string' },
+        cartItemCount: { type: 'integer' },
+        subtotal: { type: 'number' },
+        subtotalFormatted: { type: 'string' },
+        error: { type: 'string' }
+      }
+    },
     execute: async (input: {
       itemId: string
       quantity: number
       modifiers?: { modifierId: string; optionIds?: string[] }[]
+      variantSelections?: Record<string, string>
       notes?: string
     }) => {
       const item = menuItems.find(i => i.id === input.itemId)
       if (!item) {
-        return { error: `Item '${input.itemId}' not found in active catalog.` }
+        return { status: 'error', success: false, error: `Item '${input.itemId}' not found in active catalog.` }
       }
       if (item.is_available === false) {
-        return { error: `Item '${item.name}' is currently unavailable.` }
+        return { status: 'error', success: false, error: `Item '${item.name}' is currently unavailable.` }
       }
 
       const qty = Math.max(1, Math.min(50, input.quantity || 1))
       const cartStore = useCartStore.getState()
 
-      const variantMap: Record<string, string> = {}
+      const variantMap: Record<string, string> = { ...(input.variantSelections || {}) }
       if (input.modifiers && Array.isArray(input.modifiers)) {
         input.modifiers.forEach(m => {
           if (m.modifierId && m.optionIds && m.optionIds.length > 0) {
@@ -328,6 +461,7 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
       const subtotalMinor = updated.totalAmountMinor()
 
       return {
+        status: 'ok',
         success: true,
         message: `Added ${qty}x ${item.name} to cart.`,
         cartItemCount: updated.items.reduce((sum, it) => sum + it.quantity, 0),
@@ -337,14 +471,48 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
     }
   })
 
-  // 5. get_cart
+  // ── 5. get_cart ───────────────────────────────────────────────────────────
   tools.push({
     name: 'get_cart',
-    description: `Return the current cart, validated prices, modifiers, taxes, fees and current total.`,
+    description: `Return the current cart, line items, validated prices, modifiers, taxes, and authoritative total.`,
     inputSchema: {
       type: 'object',
       properties: {},
       additionalProperties: false
+    },
+    outputSchema: {
+      type: 'object',
+      required: ['venue', 'currency', 'itemCount', 'lines', 'subtotal', 'subtotalFormatted', 'total', 'totalFormatted'],
+      properties: {
+        venue: { type: 'string' },
+        currency: { type: 'string' },
+        itemCount: { type: 'integer' },
+        lines: {
+          type: 'array',
+          items: {
+            type: 'object',
+            required: ['lineId', 'itemId', 'name', 'quantity', 'unitPrice', 'unitPriceFormatted', 'lineTotal', 'lineTotalFormatted'],
+            properties: {
+              lineId: { type: 'string' },
+              itemId: { type: 'string' },
+              name: { type: 'string' },
+              quantity: { type: 'integer' },
+              unitPrice: { type: 'number' },
+              unitPriceFormatted: { type: 'string' },
+              lineTotal: { type: 'number' },
+              lineTotalFormatted: { type: 'string' },
+              modifiers: { type: 'object' }
+            }
+          }
+        },
+        items: { type: 'array' },
+        subtotal: { type: 'number' },
+        subtotalFormatted: { type: 'string' },
+        discountAmount: { type: 'number' },
+        discountPercentage: { type: 'number' },
+        total: { type: 'number' },
+        totalFormatted: { type: 'string' }
+      }
     },
     execute: async () => {
       const cartStore = useCartStore.getState()
@@ -381,7 +549,7 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
     }
   })
 
-  // 6. update_cart
+  // ── 6. update_cart ────────────────────────────────────────────────────────
   tools.push({
     name: 'update_cart',
     description: `Modify an existing cart line or remove it from the current cart. Set quantity to 0 to remove.`,
@@ -391,6 +559,7 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
       properties: {
         lineId: {
           type: 'string',
+          minLength: 1,
           description: 'The lineId (cartKey) of the item to update.'
         },
         quantity: {
@@ -407,12 +576,24 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
       },
       additionalProperties: false
     },
+    outputSchema: {
+      type: 'object',
+      required: ['success'],
+      properties: {
+        success: { type: 'boolean' },
+        remainingLines: { type: 'integer' },
+        totalItemCount: { type: 'integer' },
+        subtotal: { type: 'number' },
+        subtotalFormatted: { type: 'string' },
+        error: { type: 'string' }
+      }
+    },
     execute: async (input: { lineId: string; quantity?: number; notes?: string }) => {
       const cartStore = useCartStore.getState()
       const existingLine = cartStore.items.find(i => i.cartKey === input.lineId)
 
       if (!existingLine) {
-        return { error: `Cart line with ID '${input.lineId}' not found.` }
+        return { success: false, error: `Cart line with ID '${input.lineId}' not found.` }
       }
 
       if (input.quantity === 0) {
@@ -437,10 +618,10 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
     }
   })
 
-  // 7. initiate_checkout
+  // ── 7. initiate_checkout ──────────────────────────────────────────────────
   tools.push({
     name: 'initiate_checkout',
-    description: `Validate the current cart and prepare a checkout session. This does not authorize payment or submit the order.`,
+    description: `Validate the current cart and prepare a checkout session. Locks pricing for 15 minutes. Does not authorize payment or charge customer.`,
     inputSchema: {
       type: 'object',
       required: ['fulfillment'],
@@ -452,6 +633,7 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
         },
         tableIdentifier: {
           type: 'string',
+          maxLength: 50,
           description: 'Table number, room, seat, or pickup counter.'
         },
         customer: {
@@ -469,6 +651,27 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
         }
       },
       additionalProperties: false
+    },
+    outputSchema: {
+      type: 'object',
+      required: ['checkoutId', 'fulfillment', 'currency', 'total', 'totalFormatted', 'requiresPaymentAuthorization'],
+      properties: {
+        checkoutId: { type: 'string' },
+        fulfillment: { type: 'string' },
+        currency: { type: 'string' },
+        venue: { type: 'string' },
+        subtotal: { type: 'number' },
+        tax: { type: 'number' },
+        fees: { type: 'number' },
+        total: { type: 'number' },
+        totalFormatted: { type: 'string' },
+        itemCount: { type: 'integer' },
+        expiresAt: { type: 'string' },
+        priceLockValidMinutes: { type: 'integer' },
+        requiresPaymentAuthorization: { type: 'boolean' },
+        message: { type: 'string' },
+        error: { type: 'string' }
+      }
     },
     execute: async (input: {
       fulfillment: 'dine_in' | 'pickup' | 'delivery'
@@ -520,16 +723,17 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
     }
   })
 
-  // 8. submit_order (MANDATORY Human-in-the-Loop Authorization Gate)
+  // ── 8. submit_order (MANDATORY Human-in-the-Loop Authorization Gate) ─────
   tools.push({
     name: 'submit_order',
-    description: `Submit the previously reviewed checkout as a customer order after explicit human authorization.`,
+    description: `Submit the previously reviewed checkout as a customer order after explicit human authorization. High-Impact Sensitive Action.`,
     inputSchema: {
       type: 'object',
       required: ['checkoutId', 'authorization'],
       properties: {
         checkoutId: {
           type: 'string',
+          minLength: 1,
           description: 'The checkoutId returned from initiate_checkout.'
         },
         authorization: {
@@ -550,12 +754,29 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
       },
       additionalProperties: false
     },
+    outputSchema: {
+      type: 'object',
+      required: ['success'],
+      properties: {
+        success: { type: 'boolean' },
+        orderId: { type: 'string' },
+        checkoutId: { type: 'string' },
+        venue: { type: 'string' },
+        status: { type: 'string' },
+        currency: { type: 'string' },
+        total: { type: 'number' },
+        totalFormatted: { type: 'string' },
+        message: { type: 'string' },
+        error: { type: 'string' }
+      }
+    },
     execute: async (input: {
       checkoutId: string
       authorization: { confirmed: boolean; confirmationId?: string }
     }) => {
       if (!input.authorization || input.authorization.confirmed !== true) {
         return {
+          success: false,
           error: 'Transaction rejected: submit_order requires explicit human customer authorization (confirmed: true).'
         }
       }
@@ -564,13 +785,12 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
       const items = cartStore.items
 
       if (items.length === 0) {
-        return { error: 'Cart is empty. Order cannot be placed.' }
+        return { success: false, error: 'Cart is empty. Order cannot be placed.' }
       }
 
       const subtotalMinor = cartStore.totalAmountMinor()
       const orderId = `ord_${Date.now().toString(36)}`
 
-      // Visual success and clear cart
       toast.success(`🎉 Order Confirmed! (#${orderId})`, {
         description: `Order successfully routed to ${locationName} kitchen/fulfillment.`,
         duration: 6000
@@ -592,7 +812,7 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
     }
   })
 
-  // 9. recommend_pairings
+  // ── 9. recommend_pairings ─────────────────────────────────────────────────
   tools.push({
     name: 'recommend_pairings',
     description: `Suggest complementary catalog items, sides, drinks, or accessories based on the current cart or a specific item ID.`,
@@ -612,6 +832,31 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
         }
       },
       additionalProperties: false
+    },
+    outputSchema: {
+      type: 'object',
+      required: ['venue', 'currency', 'count', 'recommendations'],
+      properties: {
+        venue: { type: 'string' },
+        currency: { type: 'string' },
+        count: { type: 'integer' },
+        recommendations: {
+          type: 'array',
+          items: {
+            type: 'object',
+            required: ['itemId', 'name', 'price', 'priceFormatted'],
+            properties: {
+              itemId: { type: 'string' },
+              name: { type: 'string' },
+              category: { type: 'string' },
+              price: { type: 'number' },
+              priceFormatted: { type: 'string' },
+              description: { type: 'string' },
+              reason: { type: 'string' }
+            }
+          }
+        }
+      }
     },
     execute: async (input: { itemId?: string; maxRecommendations?: number }) => {
       const limit = input?.maxRecommendations || 3
@@ -640,34 +885,65 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
     }
   })
 
-  // Helper & Operations Tools
+  // ── 10. request_staff ─────────────────────────────────────────────────────
   tools.push({
     name: 'request_staff',
-    description: `Send an immediate service or waiter call notification to venue staff.`,
+    description: `Send an immediate service or waiter call notification to venue floor staff.`,
     inputSchema: {
       type: 'object',
+      required: ['reason'],
       properties: {
         reason: {
           type: 'string',
-          description: 'Reason for request (e.g. "Water refill", "Bill check", "Assistance").'
+          enum: [
+            'water_refill',
+            'bill_check',
+            'table_cleanup',
+            'waiter_assistance',
+            'order_inquiry',
+            'manager_escalation'
+          ],
+          description: 'Structured reason for request.'
+        },
+        details: {
+          type: 'string',
+          maxLength: 300,
+          description: 'Optional additional details.'
+        },
+        tableIdentifier: {
+          type: 'string',
+          maxLength: 50,
+          description: 'Table or room identifier.'
         }
       },
       additionalProperties: false
     },
-    execute: async (input: { reason?: string }) => {
-      toast.success(`🔔 Staff alerted for: ${tableIdentifier}`, {
-        description: input.reason || 'Staff is on their way to assist you.',
+    outputSchema: {
+      type: 'object',
+      required: ['success', 'message', 'reason'],
+      properties: {
+        success: { type: 'boolean' },
+        message: { type: 'string' },
+        reason: { type: 'string' },
+        tableIdentifier: { type: 'string' }
+      }
+    },
+    execute: async (input: { reason: string; details?: string; tableIdentifier?: string }) => {
+      const activeTable = input.tableIdentifier || tableIdentifier
+      toast.success(`🔔 Staff alerted for: ${activeTable}`, {
+        description: input.details || `Staff notified for: ${input.reason}`,
         duration: 4000
       })
       return {
         success: true,
-        message: `Staff notification sent for ${tableIdentifier}.`,
-        reason: input.reason || 'General assistance'
+        message: `Staff notification sent for ${activeTable}.`,
+        reason: input.reason,
+        tableIdentifier: activeTable
       }
     }
   })
 
-  // Aliases for seamless compatibility
+  // Aliases for backward compatibility
   const getCartTool = tools.find(t => t.name === 'get_cart')
   if (getCartTool) {
     tools.push({
@@ -691,6 +967,13 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
         },
         additionalProperties: false
       },
+      outputSchema: {
+        type: 'object',
+        required: ['success'],
+        properties: {
+          success: { type: 'boolean' }
+        }
+      },
       execute: async (input: { cartKey: string; delta?: number; remove?: boolean }) => {
         const cartStore = useCartStore.getState()
         if (input.remove) {
@@ -713,10 +996,21 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
       properties: {
         conceptSlug: {
           type: 'string',
+          minLength: 1,
           description: 'The URL slug of the concept/department to navigate to.'
         }
       },
       additionalProperties: false
+    },
+    outputSchema: {
+      type: 'object',
+      required: ['status', 'conceptSlug', 'destinationUrl'],
+      properties: {
+        status: { type: 'string' },
+        conceptSlug: { type: 'string' },
+        destinationUrl: { type: 'string' },
+        message: { type: 'string' }
+      }
     },
     execute: async ({ conceptSlug }: { conceptSlug: string }) => {
       const destination = `/m/${ctx.slug}/p/${conceptSlug}`

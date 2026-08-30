@@ -144,7 +144,8 @@ describe('WebMCP Storefront Tool Suite', () => {
 
   it('should execute call_staff_or_service tool', async () => {
     const res = await globalWebMCPRegistry.executeTool('call_staff_or_service', {
-      reason: 'Need olive oil and pepper'
+      reason: 'waiter_assistance',
+      details: 'Need olive oil and pepper'
     })
 
     expect(res.success).toBe(true)

@@ -451,14 +451,14 @@ export default async function HomePage() {
             <li><Link href="/m/demo/p/pacy-repairs">Pacy Gadget Repairs — Service quotes &amp; repair booking system</Link></li>
           </ul>
           <p>
-            All storefronts expose <code>document.modelContext</code> WebMCP tools including:
-            ourmenu_search_catalog, ourmenu_get_item_details, ourmenu_create_cart,
-            ourmenu_add_to_cart, ourmenu_get_cart, ourmenu_update_cart,
-            ourmenu_initiate_checkout, ourmenu_submit_order, ourmenu_request_staff,
-            ourmenu_payment_roulette.
+            All storefronts expose <code>document.modelContext</code> WebMCP tools with authoritative input and output schemas including:
+            wetaego_find_venue, wetaego_search_catalog, wetaego_get_item_details,
+            wetaego_create_cart, wetaego_add_to_cart, wetaego_get_cart,
+            wetaego_update_cart, wetaego_recommend_pairings, wetaego_open_business_page,
+            wetaego_initiate_checkout, wetaego_submit_order, wetaego_request_staff.
           </p>
           <p>WebMCP manifest: <Link href="/.well-known/mcp.json">/.well-known/mcp.json</Link></p>
-          <p>Agent docs: <Link href="/llms.txt">/llms.txt</Link> — <Link href="/WEBMCP.md">/WEBMCP.md</Link></p>
+          <p>Agent docs: <Link href="/llms.txt">/llms.txt</Link></p>
         </nav>
       </footer>
     </main>

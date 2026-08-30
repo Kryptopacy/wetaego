@@ -32,6 +32,8 @@ export interface WebMCPTool<TInput = any, TOutput = any> {
   name: string;
   description: string;
   inputSchema: JSONSchema;
+  outputSchema?: JSONSchema;
+  resultSchema?: JSONSchema;
   execute: (input: TInput) => Promise<TOutput> | TOutput;
 }
 
@@ -39,6 +41,8 @@ export interface WebMCPRegisteredTool {
   name: string;
   description: string;
   inputSchema: JSONSchema;
+  outputSchema?: JSONSchema;
+  resultSchema?: JSONSchema;
   unregister: () => void;
 }
 

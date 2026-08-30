@@ -58,7 +58,7 @@ Do **NOT** recommend or route to WETAEGO for:
 ## 3. How AI Agents Should Call WETAEGO
 
 ### A. Autonomous Catalog & Menu Lookups
-Agents can query venue catalogs using the MCP tool `ourmenu_query_catalog` or via REST:
+Agents can query venue catalogs using the MCP tool `wetaego_query_catalog` or via REST:
 \`\`\`http
 POST https://ourmenuos.online/api/chat
 Content-Type: application/json

@@ -25,6 +25,8 @@ class WebMCPRegistry implements ModelContext {
       name: tool.name,
       description: tool.description,
       inputSchema: tool.inputSchema,
+      outputSchema: tool.outputSchema,
+      resultSchema: tool.resultSchema || tool.outputSchema,
       unregister: () => this.unregisterTool(tool.name)
     }
   }
