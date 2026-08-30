@@ -1,12 +1,12 @@
 # Agent Authentication, OAuth Discovery & Protected Resource Metadata
 
-This document outlines how autonomous agents establish identity, request scopes, discover OAuth 2.0 authorization servers, and authenticate against protected OurMenu OS endpoints.
+This document outlines how autonomous agents establish identity, request scopes, discover OAuth 2.0 authorization servers, and authenticate against protected WETAEGO endpoints.
 
 ---
 
 ## 1. WorkOS Auth.md Specification (`/auth.md`)
 
-OurMenu OS publishes `/auth.md` at the site root with complete agent registration guidelines.
+WETAEGO publishes `/auth.md` at the site root with complete agent registration guidelines.
 
 ### Programmatic Registration Flow
 ```http

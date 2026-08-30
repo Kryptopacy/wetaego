@@ -1,6 +1,6 @@
 # Industry Use Case: Services & Consulting (Salons, Spas, Tutors)
 
-OurMenuOS utilizes a **Polymorphic Orders Engine** capable of treating time slots and abstract services with the exact same checkout resilience as physical retail goods.
+WETAEGO utilizes a **Polymorphic Orders Engine** capable of treating time slots and abstract services with the exact same checkout resilience as physical retail goods.
 
 ## Data Flow: Deep Availability Engine
 
@@ -14,7 +14,7 @@ graph TD
         PayDeposit[Pay Upfront Deposit<br>via Paystack]
     end
 
-    subgraph Backend [OurMenuOS Core]
+    subgraph Backend [WETAEGO Core]
         Validation{Availability Engine<br>Is Slot Free?}
         DB[(PostgreSQL)]
         Milestones[Fulfillment Milestones<br>Draft -> Confirmed -> In Session]

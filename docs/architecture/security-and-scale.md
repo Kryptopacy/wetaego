@@ -1,6 +1,6 @@
 # Security & Scale
 
-OurMenu OS passes the strictest enterprise security audits. The platform's architecture is engineered to protect tenant data, scale dynamically under viral load, and seamlessly execute background processing.
+WETAEGO passes the strictest enterprise security audits. The platform's architecture is engineered to protect tenant data, scale dynamically under viral load, and seamlessly execute background processing.
 
 ---
 
@@ -72,7 +72,7 @@ Data-heavy dashboards (like CRM and Order History) employ strict **cursor-based 
 
 ## 6. AI-Native Operations: Fail-Safe Architecture
 
-OurMenu OS runs businesses through AI. To ensure 100% uptime:
+WETAEGO runs businesses through AI. To ensure 100% uptime:
 
 - All Vercel AI SDK integrations (`generateObject`, `generateText`, `streamText`) and Gemini Live WebSocket streams are wrapped in rigorous exception handlers.
 - AI provider timeouts, overloads, or rate limits are gracefully caught and mapped to fallback modes or polite assistance messages, guaranteeing edge functions never silently crash.

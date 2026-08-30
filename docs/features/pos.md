@@ -1,6 +1,6 @@
 # Visual Resource Manager & POS
 
-The **Visual Resource Manager (VRM)** is the bridge between OurMenu OS's digital ordering system and the physical reality of a business location. Whether mapping tables in a restaurant, bays in an auto shop, or rooms in a hotel, the VRM allows for a dynamic connection between physical space and digital transactions.
+The **Visual Resource Manager (VRM)** is the bridge between WETAEGO's digital ordering system and the physical reality of a business location. Whether mapping tables in a restaurant, bays in an auto shop, or rooms in a hotel, the VRM allows for a dynamic connection between physical space and digital transactions.
 
 ---
 
@@ -55,7 +55,7 @@ flowchart TD
 
 ## 2. Unified Resource & QR Architecture
 
-In OurMenu OS, physical resources and their tracking mechanisms are tightly integrated:
+In WETAEGO, physical resources and their tracking mechanisms are tightly integrated:
 
 ### The Philosophy of Dynamic QRs
 
@@ -80,7 +80,7 @@ We do not charge for physical printouts or static storefront links. Merchants ca
 
 ### Dynamic QR Fleet (Credit-Based)
 
-To solve the common problem of "QR tents moving around," OurMenu OS supports a dynamic QR fleet:
+To solve the common problem of "QR tents moving around," WETAEGO supports a dynamic QR fleet:
 
 - Businesses can generate a batch of unassigned dynamic QRs (deducting 1 credit each).
 - These are printed and placed on tables.
@@ -100,7 +100,7 @@ A resource of type `register` can be used to lock a POS terminal:
 
 ## 5. Native Raw Hardware ESC/POS Binary Printing
 
-OurMenu OS contains a zero-dependency, native ESC/POS bytecode engine (`lib/utils/escpos-driver.ts`) that writes raw binary bytes directly to thermal receipt printers from modern browsers:
+WETAEGO contains a zero-dependency, native ESC/POS bytecode engine (`lib/utils/escpos-driver.ts`) that writes raw binary bytes directly to thermal receipt printers from modern browsers:
 
 - **WebUSB (`navigator.usb`):** Direct USB endpoint communication with thermal printers. Zero print dialogs, zero desktop daemons, instant hardware paper cuts, and cash drawer kick pulses (`ESC p`).
 - **WebSerial / COM (`navigator.serial`):** RS-232 and virtual COM port support with configurable baud rates (9600 to 115200).

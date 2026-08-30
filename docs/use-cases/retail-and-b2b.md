@@ -1,6 +1,6 @@
 # Industry Use Case: Retail & B2B (Boutiques, Tech Stores, Agencies)
 
-Physical retail and B2B wholesale demand incredibly rigid inventory tracking, customer profiling, and specialized product states. OurMenuOS delivers this via a dedicated Catalog Template.
+Physical retail and B2B wholesale demand incredibly rigid inventory tracking, customer profiling, and specialized product states. WETAEGO delivers this via a dedicated Catalog Template.
 
 ## Data Flow: Inventory & Store Credit
 

@@ -1,6 +1,6 @@
 # Tego AI: Real-Time Multimodal Voice, Vision & Frontline Public Assistant
 
-OurMenu OS features a dual-layer AI architecture designed to streamline business operations and automate frontline customer interactions with zero hallucinations.
+WETAEGO features a dual-layer AI architecture designed to streamline business operations and automate frontline customer interactions with zero hallucinations.
 
 ---
 

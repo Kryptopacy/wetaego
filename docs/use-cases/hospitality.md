@@ -1,6 +1,6 @@
 # Industry Use Case: Hospitality (Restaurants, Cafes, Bars)
 
-OurMenuOS originated as a hospitality solution before evolving into a universal operating layer. It completely bypasses legacy Point of Sale constraints by delivering a frictionless, QR-driven ordering experience coupled with an immensely powerful backend Fulfillment Hub.
+WETAEGO originated as a hospitality solution before evolving into a universal operating layer. It completely bypasses legacy Point of Sale constraints by delivering a frictionless, QR-driven ordering experience coupled with an immensely powerful backend Fulfillment Hub.
 
 ## Data Flow: From Customer to Kitchen
 

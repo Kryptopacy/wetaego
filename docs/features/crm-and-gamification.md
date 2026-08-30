@@ -76,7 +76,7 @@ The guest feedback engine (`/m/[slug]/feedback/[order_id]`) is built as a high-c
 
 ## 5. Affiliate & Referral System (B2B Growth)
 
-OurMenu OS features a built-in Affiliate system designed for aggressive B2B scaling:
+WETAEGO features a built-in Affiliate system designed for aggressive B2B scaling:
 
 - **Affiliate Dashboard:** Partners register to generate unique referral codes.
 - **Hard-Linked Organizations:** New tenants that register via referral links are permanently cryptographically tied to their affiliate.

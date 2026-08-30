@@ -1,4 +1,4 @@
-# OurMenu OS — Architecture & Documentation Structure
+# WETAEGO — Architecture & Documentation Structure
 
 ```text
 .

@@ -1,12 +1,12 @@
 # API Catalog, Link Headers & DNS-Based Discovery
 
-This document details how autonomous agents discover OurMenu OS endpoints, documentation, OpenAPI schemas, and authoritative DNS zones.
+This document details how autonomous agents discover WETAEGO endpoints, documentation, OpenAPI schemas, and authoritative DNS zones.
 
 ---
 
 ## 1. RFC 9727 API Catalog (`/.well-known/api-catalog`)
 
-OurMenu OS implements **RFC 9727** (Advertising API Catalogs in Linksets) using the **RFC 9264** `application/linkset+json` media type.
+WETAEGO implements **RFC 9727** (Advertising API Catalogs in Linksets) using the **RFC 9264** `application/linkset+json` media type.
 
 ### Endpoint: `GET /.well-known/api-catalog`
 
@@ -48,7 +48,7 @@ OurMenu OS implements **RFC 9727** (Advertising API Catalogs in Linksets) using 
 
 ## 2. RFC 8288 Link Response Headers
 
-Every public HTTP response from OurMenu OS includes standardized `Link` headers pointing to machine-readable resources:
+Every public HTTP response from WETAEGO includes standardized `Link` headers pointing to machine-readable resources:
 
 ```http
 Link: </.well-known/api-catalog>; rel="api-catalog",
@@ -69,7 +69,7 @@ Link: </.well-known/api-catalog>; rel="api-catalog",
 
 ## 3. DNS for AI Discovery (DNS-AID)
 
-OurMenu OS implements the **DNS-AID** draft specification (`draft-mozleywilliams-dnsop-dnsaid` & **RFC 9460**) enabling DNS-based agent discovery.
+WETAEGO implements the **DNS-AID** draft specification (`draft-mozleywilliams-dnsop-dnsaid` & **RFC 9460**) enabling DNS-based agent discovery.
 
 ### BIND Zone File Configuration
 ```zone

@@ -1,6 +1,6 @@
 # Enterprise Fleet & Multi-Branch Pricing Guide
 
-This document outlines the standardized pricing algorithm and contract formulation methodology for multi-location businesses, supermarket chains, and franchise venues on OurMenu OS.
+This document outlines the standardized pricing algorithm and contract formulation methodology for multi-location businesses, supermarket chains, and franchise venues on WETAEGO.
 
 ---
 
@@ -80,7 +80,7 @@ Hi [Contact Name],
 
 Thank you for requesting an Enterprise Fleet proposal for [Company Name] ([Branch Count] locations).
 
-Based on your team size and operational needs across [Branch Count] branches, here is your customized OurMenu OS Enterprise breakdown:
+Based on your team size and operational needs across [Branch Count] branches, here is your customized WETAEGO Enterprise breakdown:
 
 • Global HQ Executive Dashboard & Fleet-Wide Analytics
 • 1-Click Master Catalog Cloning (instantly deploy 5,000+ items across new branches)
@@ -95,5 +95,5 @@ Custom Enterprise Rate:
 Would you like to schedule a 10-minute onboarding walkthrough or shall we provision your Enterprise organization credentials today?
 
 Best regards,
-OurMenu OS Enterprise Team
+WETAEGO Enterprise Team
 ```

@@ -1,6 +1,6 @@
 # Agent Readiness & Autonomous Discovery Architecture (100/100 Score)
 
-OurMenu OS implements the world's most comprehensive agentic interoperability stack, enabling autonomous AI agents (such as OpenAI Operator, Anthropic Claude Computer Use, Google Gemini, and Cursor/Windsurf agents) to discover, authenticate, navigate, interact with, and pay for services programmatically.
+WETAEGO implements the world's most comprehensive agentic interoperability stack, enabling autonomous AI agents (such as OpenAI Operator, Anthropic Claude Computer Use, Google Gemini, and Cursor/Windsurf agents) to discover, authenticate, navigate, interact with, and pay for services programmatically.
 
 ---
 

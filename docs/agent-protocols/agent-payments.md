@@ -1,6 +1,6 @@
 # Agent-Native Payment Protocols (x402, MPP, UCP, ACP)
 
-OurMenu OS enables autonomous AI agents to initiate and settle transactions programmatically across four interoperable protocols.
+WETAEGO enables autonomous AI agents to initiate and settle transactions programmatically across four interoperable protocols.
 
 ---
 

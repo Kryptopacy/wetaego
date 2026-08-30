@@ -1,8 +1,8 @@
 # The 5 Pillars of Self-Service "Human-Proof" UX
 
-OurMenu OS is engineered with a strict design philosophy: **A business software platform is only truly finished when non-technical operators can configure, launch, manage, and scale their business without ever needing to contact or pester the software developer.**
+WETAEGO is engineered with a strict design philosophy: **A business software platform is only truly finished when non-technical operators can configure, launch, manage, and scale their business without ever needing to contact or pester the software developer.**
 
-This document details the architectural mechanisms, fail-safes, and self-guiding layers that make OurMenu OS completely autonomous and human-proof.
+This document details the architectural mechanisms, fail-safes, and self-guiding layers that make WETAEGO completely autonomous and human-proof.
 
 ---
 
@@ -56,7 +56,7 @@ flowchart TD
 ### Pillar 2: Self-Healing State & Auto-Provisioning Pipeline
 
 - **Implementation**: [`app/(dashboard)/dashboard/menu/page.tsx`](file:///d:/pacy_labs/ourmenu/app/(dashboard)/dashboard/menu/page.tsx#L57-L74)
-- **Mechanism**: Traditional software breaks or shows cryptic empty screens when a user navigates to a sub-manager before completing prerequisite steps. In OurMenu OS:
+- **Mechanism**: Traditional software breaks or shows cryptic empty screens when a user navigates to a sub-manager before completing prerequisite steps. In WETAEGO:
   - If a user visits the **Catalog Manager** before explicitly creating a page in the wizard, the backend server detects the missing relation and **automatically provisions a default Primary Catalog page** (`location_pages`) on the fly.
   - The merchant never encounters a blank screen, a 404 error, or a disabled interface.
 

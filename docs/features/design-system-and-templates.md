@@ -1,6 +1,6 @@
 # Universal Design System, Design Tokens & Multi-Template Architecture
 
-OurMenu OS features a decoupled design system where the visual presentation of a storefront is independent of its underlying product catalog. A merchant can transform a luxury spa booking page into a minimalist list or a vibrant bento grid in seconds, without restructuring their database records.
+WETAEGO features a decoupled design system where the visual presentation of a storefront is independent of its underlying product catalog. A merchant can transform a luxury spa booking page into a minimalist list or a vibrant bento grid in seconds, without restructuring their database records.
 
 ---
 

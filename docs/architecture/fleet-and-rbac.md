@@ -1,6 +1,6 @@
 # Enterprise Fleet Management, Franchise Autonomy & RBAC
 
-OurMenu OS provides intentional architectural boundaries for massive scale, allowing organizations to cleanly manage multiple venues, franchise branches, and isolated sub-businesses from a single pane of glass.
+WETAEGO provides intentional architectural boundaries for massive scale, allowing organizations to cleanly manage multiple venues, franchise branches, and isolated sub-businesses from a single pane of glass.
 
 ---
 

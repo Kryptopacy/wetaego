@@ -1,6 +1,6 @@
 # Integrations & Fleet Management
 
-OurMenu OS seamlessly interfaces with the outside world, acting as a true enterprise hub for multi-location brands.
+WETAEGO seamlessly interfaces with the outside world, acting as a true enterprise hub for multi-location brands.
 
 ---
 
@@ -9,7 +9,7 @@ OurMenu OS seamlessly interfaces with the outside world, acting as a true enterp
 ```mermaid
 sequenceDiagram
     autonumber
-    participant App as OurMenu OS Core
+    participant App as WETAEGO Core
     participant DB as Supabase (webhook_logs)
     participant Edge as Dispatch Engine (HMAC whsec_)
     participant Dest as Merchant Destination (POS / CRM / Zapier)
@@ -35,7 +35,7 @@ sequenceDiagram
 
 ## 2. Inbound API Gateway
 
-Legacy point-of-sale systems and third-party CRMs can programmatically push inventory and orders *into* OurMenu OS via mathematically rate-limited, Bearer-token protected REST API endpoints.
+Legacy point-of-sale systems and third-party CRMs can programmatically push inventory and orders *into* WETAEGO via mathematically rate-limited, Bearer-token protected REST API endpoints.
 
 ---
 
@@ -65,7 +65,7 @@ Integrated automated email sequences (powered by Resend and Vercel Cron) autonom
 
 ## 6. Payment Infrastructure & Bachs Payments Platform
 
-OurMenu OS utilizes a multi-gateway abstraction layer (`lib/payments/provider.ts`) that enables frictionless switching between payment processors (Paystack, Flutterwave, and Bachs).
+WETAEGO utilizes a multi-gateway abstraction layer (`lib/payments/provider.ts`) that enables frictionless switching between payment processors (Paystack, Flutterwave, and Bachs).
 
 - **Bachs Payments Integration (`lib/payments/bachs.ts`)**:
   - **Dynamic Environment Routing**: Inspects Bearer token prefixes (`sk_sandbox_` vs. `sk_live_`) to route requests to `sandbox-api.bachs.io/v1` or `api.bachs.io/v1` automatically.

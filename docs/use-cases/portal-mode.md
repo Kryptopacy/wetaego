@@ -19,7 +19,7 @@ graph TD
         LobbyBar(Lobby Bar Orders)
     end
 
-    subgraph Core [OurMenuOS CRM]
+    subgraph Core [WETAEGO CRM]
         DB[(PostgreSQL)]
         RBAC[Staff RBAC Filter]
     end

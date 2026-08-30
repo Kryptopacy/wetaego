@@ -1,12 +1,12 @@
 # Model Context Protocol (MCP) & WebMCP In-Browser Integration
 
-OurMenu OS supports both server-to-server MCP connections and client-side in-browser WebMCP tool execution at the platform infrastructure layer.
+WETAEGO supports both server-to-server MCP connections and client-side in-browser WebMCP tool execution at the platform infrastructure layer.
 
 ---
 
-## 1. Model Context Protocol Server (`/.well-known/mcp.json`)
+## 1. Model Context Protocol Server (`/.well-known/mcp.json` & `/api/mcp`)
 
-Autonomous AI agents and LLM orchestration frameworks connect directly to OurMenu OS as an MCP server.
+Autonomous AI agents and LLM orchestration frameworks connect directly to WETAEGO as an MCP server.
 
 ### Available Server Tools
 
@@ -21,9 +21,14 @@ Autonomous AI agents and LLM orchestration frameworks connect directly to OurMen
 
 ## 2. Universal WebMCP In-Browser Client Integration (`document.modelContext`)
 
-OurMenu OS implements the **W3C WebMCP standard** via `components/webmcp/webmcp-provider.tsx` across all storefronts. 
+WETAEGO implements the **W3C WebMCP standard** across both the global root platform (`components/WebMcpProvider.tsx`) and all storefronts (`components/webmcp/webmcp-provider.tsx`). 
 
-When an AI browsing agent (such as **ChatGPT Desktop In-App Browser** or **Google Chrome 149+ with `#enable-webmcp-testing`**) navigates to any OurMenuOS tenant URL, the page automatically synthesizes and registers 9 context-aware tools:
+### Layer A: Global Platform Discovery (`/`)
+When an AI agent visits the platform, it registers:
+- `ourmenu_find_venue` / `wetaego_discover_businesses` — Real-time search across all registered businesses, multi-concept pages, locations, and industries via `/api/businesses/search`.
+
+### Layer B: Contextual Storefront Tools (`/m/[slug]`)
+When an AI browsing agent (such as **ChatGPT Desktop In-App Browser** or **Google Chrome 149+ with `#enable-webmcp-testing`**) navigates to any WETAEGO tenant URL, the page automatically synthesizes and registers context-aware tools:
 
 ```javascript
 document.modelContext.registerTool({

@@ -1,6 +1,6 @@
 # Back-of-House Operations Engine
 
-OurMenu OS extends far beyond the customer-facing frontend into deep backend workflows designed for enterprise administrators and platform owners.
+WETAEGO extends far beyond the customer-facing frontend into deep backend workflows designed for enterprise administrators and platform owners.
 
 ---
 

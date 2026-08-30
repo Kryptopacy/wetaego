@@ -1,6 +1,6 @@
 # Industry Use Case: Supermarkets & Multi-Branch Retail Chains
 
-OurMenu OS provides an enterprise operating layer engineered for large-scale grocery stores, supermarket franchises, and multi-branch retail networks.
+WETAEGO provides an enterprise operating layer engineered for large-scale grocery stores, supermarket franchises, and multi-branch retail networks.
 
 ---
 

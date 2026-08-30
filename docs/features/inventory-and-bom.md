@@ -1,6 +1,6 @@
 # Inventory Manager & Component Breakdown (BOM)
 
-OurMenu OS provides a purpose-built, real-time stock management system designed for any physical business—from roadside grills and bustling cafes to high-volume tech retailers—that needs to track tangible assets without the friction of a legacy ERP.
+WETAEGO provides a purpose-built, real-time stock management system designed for any physical business—from roadside grills and bustling cafes to high-volume tech retailers—that needs to track tangible assets without the friction of a legacy ERP.
 
 ---
 

@@ -1,6 +1,6 @@
 # Industry Use Case: Real Estate & Automotive
 
-OurMenuOS seamlessly adapts to high-ticket, inquiry-based industries where physical catalogs serve as lead-generation tools rather than instant-checkout endpoints.
+WETAEGO seamlessly adapts to high-ticket, inquiry-based industries where physical catalogs serve as lead-generation tools rather than instant-checkout endpoints.
 
 ## Data Flow: Inquiry-Based Catalogs
 
@@ -12,7 +12,7 @@ graph TD
         Inquire[Clicks 'Request Viewing' / 'Submit Offer']
     end
 
-    subgraph Backend [OurMenuOS CRM]
+    subgraph Backend [WETAEGO CRM]
         Validation{Zod Payload Validation}
         DB[(PostgreSQL)]
         AgentQueue[Property Agent Dashboard]

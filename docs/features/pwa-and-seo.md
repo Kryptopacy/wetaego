@@ -1,6 +1,6 @@
 # True Native App Experience, SEO & Communications
 
-OurMenu OS utilizes cutting-edge web capabilities to deliver a completely frictionless experience that rivals, and often surpasses, native mobile applications.
+WETAEGO utilizes cutting-edge web capabilities to deliver a completely frictionless experience that rivals, and often surpasses, native mobile applications.
 
 ---
 

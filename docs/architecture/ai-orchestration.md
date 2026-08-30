@@ -1,6 +1,6 @@
 # AI-Native Operations & Tool Calls
 
-OurMenu OS is structurally designed to be run *by* AI. We do not use AI as a novelty chatbot; it is deeply embedded into the operational workflows of both the merchant and the consumer.
+WETAEGO is structurally designed to be run *by* AI. We do not use AI as a novelty chatbot; it is deeply embedded into the operational workflows of both the merchant and the consumer.
 
 ---
 

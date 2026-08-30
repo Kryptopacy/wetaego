@@ -1,6 +1,6 @@
 # Industry Use Case: Consultants & Agencies (B2B)
 
-For knowledge workers, freelancers, design agencies, and legal consultants, OurMenuOS replaces fragmented invoicing tools with an integrated Rate Card and Quotes engine.
+For knowledge workers, freelancers, design agencies, and legal consultants, WETAEGO replaces fragmented invoicing tools with an integrated Rate Card and Quotes engine.
 
 ## Data Flow: Rate Cards & Quotes
 

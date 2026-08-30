@@ -1,6 +1,6 @@
 # Agent Skills Index (RFC v0.2.0) & Agentic Resource Discovery (ARD)
 
-This document details how agents inspect specialized skills and semantic capability embeddings on OurMenu OS.
+This document details how agents inspect specialized skills and semantic capability embeddings on WETAEGO.
 
 ---
 
@@ -56,18 +56,18 @@ Complies with the **ARD Spec** (`https://agenticresourcediscovery.org`):
   "specVersion": "1.0",
   "host": {
     "domain": "ourmenuos.online",
-    "name": "OurMenu OS"
+    "name": "WETAEGO"
   },
   "entries": [
     {
       "identifier": "urn:air:ourmenuos.online:mcp:storefront-server",
       "id": "urn:air:ourmenuos.online:mcp:storefront-server",
-      "displayName": "OurMenu OS MCP Server",
+      "displayName": "WETAEGO MCP Server",
       "description": "Model Context Protocol tools for querying restaurant menus, supermarket catalogs, booking appointments, and placing orders.",
       "type": "application/json",
       "url": "https://ourmenuos.online/.well-known/mcp.json",
       "representativeQueries": [
-        "Search dishes on OurMenu OS",
+        "Search dishes on WETAEGO",
         "Place a restaurant table order",
         "Book a spa or salon appointment slot",
         "Check ingredient and allergen info"

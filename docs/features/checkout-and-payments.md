@@ -1,6 +1,6 @@
 # Omnichannel Checkout & Payments
 
-OurMenu OS utilizes a deeply unified checkout engine capable of seamlessly merging multi-item physical retail carts (Catalogs) and calendar-based reservations (Bookings) into the exact same checkout flow.
+WETAEGO utilizes a deeply unified checkout engine capable of seamlessly merging multi-item physical retail carts (Catalogs) and calendar-based reservations (Bookings) into the exact same checkout flow.
 
 ---
 
@@ -94,7 +94,7 @@ Bypasses ad-blockers by natively injecting "Bring Your Own" (BYO) sponsors or pl
 
 ## 7. Autonomous Agent-Native Payments (x402, MPP, UCP, ACP)
 
-OurMenu OS introduces direct machine settlement channels allowing autonomous AI agents to pay for orders and services without human intervention:
+WETAEGO introduces direct machine settlement channels allowing autonomous AI agents to pay for orders and services without human intervention:
 
 - **Coinbase x402 Protocol**: Programmatic settlement over HTTP 402 Payment Required via \`/.well-known/x402.json\` and \`/api/x402\`.
 - **Machine Payment Protocol (MPP)**: Declares payment metadata in \`openapi.json\` (\`x-payment-info\`) for automated checkout routing.
