@@ -27,7 +27,7 @@ export async function POST(req: Request) {
         status: 401,
         headers: {
           'Content-Type': 'application/json',
-          'WWW-Authenticate': 'Bearer realm="OurMenu OS", resource_metadata="https://ourmenuos.online/.well-known/oauth-protected-resource", resource="https://ourmenuos.online/api"',
+          'WWW-Authenticate': 'Bearer realm="WETAEGO", resource_metadata="https://ourmenuos.online/.well-known/oauth-protected-resource", resource="https://ourmenuos.online/api"',
           'Access-Control-Allow-Origin': '*'
         }
       })

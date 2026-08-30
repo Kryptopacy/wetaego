@@ -288,7 +288,7 @@ export function QuoteNegotiateClient({
 
       <div className="flex items-center justify-center gap-1.5 pt-2 opacity-40">
         <Lock className="w-3 h-3 text-zinc-500" />
-        <span className="text-[11px] text-zinc-500">Secured by OurMenu OS</span>
+        <span className="text-[11px] text-zinc-500">Secured by WETAEGO</span>
       </div>
     </div>
   )

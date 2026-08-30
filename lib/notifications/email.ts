@@ -53,7 +53,7 @@ export async function sendEmailNotification(toEmail: string, subject: string, me
                   </tr>
                   <tr>
                     <td style="padding:20px 36px;background-color:#0c0c0e;border-top:1px solid #1e1e24;text-align:center;">
-                      <p style="margin:0;font-size:12px;color:#52525b;">This is an automated operational notification from OurMenu OS.</p>
+                      <p style="margin:0;font-size:12px;color:#52525b;">This is an automated operational notification from WETAEGO.</p>
                     </td>
                   </tr>
                 </table>
@@ -91,9 +91,9 @@ export async function sendWelcomeEmail(toEmail: string, name?: string) {
 
   try {
     const { error } = await resend.emails.send({
-      from: 'OurMenu OS <welcome@ourmenuos.online>',
+      from: 'WETAEGO <welcome@ourmenuos.online>',
       to: [toEmail],
-      subject: 'Welcome to OurMenu OS! 🚀',
+      subject: 'Welcome to WETAEGO! 🚀',
       html: `
         <!DOCTYPE html>
         <html>
@@ -114,7 +114,7 @@ export async function sendWelcomeEmail(toEmail: string, name?: string) {
                   <tr>
                     <td style="padding:32px 36px;">
                       <p style="margin:0 0 16px 0;font-size:15px;line-height:1.6;color:#e4e4e7;">
-                        We're thrilled to have you join OurMenu OS. You now have complete autonomy over your QR menus, booking schedules, live order dispatch, and payment collections without middleman commissions.
+                        We're thrilled to have you join WETAEGO. You now have complete autonomy over your QR menus, booking schedules, live order dispatch, and payment collections without middleman commissions.
                       </p>
                       
                       <div style="background-color:#18181b;border:1px solid #27272a;border-radius:12px;padding:20px;margin:24px 0;">
@@ -130,20 +130,20 @@ export async function sendWelcomeEmail(toEmail: string, name?: string) {
                         <tr>
                           <td align="center">
                             <a href="${siteUrl}/dashboard" style="display:inline-block;background-color:#10b981;color:#ffffff;font-size:15px;font-weight:600;text-decoration:none;padding:14px 32px;border-radius:10px;box-shadow:0 4px 14px 0 rgba(16,185,129,0.39);">
-                              Open Merchant Dashboard →
+                              Launch Your First Storefront →
                             </a>
                           </td>
                         </tr>
                       </table>
 
-                      <p style="margin:20px 0 0 0;font-size:13px;color:#71717a;line-height:1.6;">
+                      <p style="margin:0;font-size:13px;color:#71717a;line-height:1.5;">
                         Need assistance? Simply reply to this email or chat with our Tego AI Copilot inside your dashboard.
                       </p>
                     </td>
                   </tr>
                   <tr>
                     <td style="padding:20px 36px;background-color:#0c0c0e;border-top:1px solid #1e1e24;text-align:center;">
-                      <p style="margin:0;font-size:12px;color:#52525b;">© ${new Date().getFullYear()} OurMenu OS. All rights reserved.</p>
+                      <p style="margin:0;font-size:12px;color:#52525b;">© ${new Date().getFullYear()} WETAEGO. All rights reserved.</p>
                     </td>
                   </tr>
                 </table>
@@ -178,9 +178,9 @@ export async function sendPasswordResetEmail(toEmail: string, resetLink: string,
 
   try {
     const { error } = await resend.emails.send({
-      from: 'OurMenu Security <security@ourmenuos.online>',
+      from: 'WETAEGO Security <security@ourmenuos.online>',
       to: [toEmail],
-      subject: 'Reset Your OurMenu OS Password 🔐',
+      subject: 'Reset Your WETAEGO Password 🔐',
       html: `
         <!DOCTYPE html>
         <html>
@@ -200,7 +200,7 @@ export async function sendPasswordResetEmail(toEmail: string, resetLink: string,
                         <span style="font-size:24px;">🔐</span>
                       </div>
                       <h1 style="margin:0;font-size:22px;font-weight:700;color:#ffffff;letter-spacing:-0.02em;">Password Reset Request</h1>
-                      <p style="margin:6px 0 0 0;font-size:13px;color:#71717a;">OurMenu OS Security & Identity</p>
+                      <p style="margin:6px 0 0 0;font-size:13px;color:#71717a;">WETAEGO Security & Identity</p>
                     </td>
                   </tr>
                   <tr>
@@ -241,7 +241,7 @@ export async function sendPasswordResetEmail(toEmail: string, resetLink: string,
                   <tr>
                     <td style="padding:20px 36px;background-color:#0c0c0e;border-top:1px solid #1e1e24;text-align:center;">
                       <p style="margin:0;font-size:12px;color:#52525b;">
-                        © ${new Date().getFullYear()} OurMenu OS. All rights reserved.
+                        © ${new Date().getFullYear()} WETAEGO. All rights reserved.
                       </p>
                     </td>
                   </tr>
@@ -273,7 +273,7 @@ export async function sendSubscriptionActivated(toEmail: string, planName: strin
 
   try {
     const { error } = await resend.emails.send({
-      from: 'OurMenu Billing <billing@ourmenuos.online>',
+      from: 'WETAEGO Billing <billing@ourmenuos.online>',
       to: [toEmail],
       subject: 'Your Subscription is Active! 🎉',
       html: `
@@ -290,7 +290,7 @@ export async function sendSubscriptionActivated(toEmail: string, planName: strin
                         <span style="font-size:24px;">⚡</span>
                       </div>
                       <h1 style="margin:0;font-size:22px;font-weight:700;color:#ffffff;">Subscription Activated</h1>
-                      <p style="margin:6px 0 0 0;font-size:13px;color:#71717a;">OurMenu OS Pro Platform</p>
+                      <p style="margin:6px 0 0 0;font-size:13px;color:#71717a;">WETAEGO Pro Platform</p>
                     </td>
                   </tr>
                   <tr>
@@ -314,7 +314,7 @@ export async function sendSubscriptionActivated(toEmail: string, planName: strin
                   </tr>
                   <tr>
                     <td style="padding:20px 36px;background-color:#0c0c0e;border-top:1px solid #1e1e24;text-align:center;">
-                      <p style="margin:0;font-size:12px;color:#52525b;">© ${new Date().getFullYear()} OurMenu OS. All rights reserved.</p>
+                      <p style="margin:0;font-size:12px;color:#52525b;">© ${new Date().getFullYear()} WETAEGO. All rights reserved.</p>
                     </td>
                   </tr>
                 </table>
@@ -338,9 +338,9 @@ export async function sendInvoice(toEmail: string, amount: string, reference: st
   if (!process.env.RESEND_API_KEY) return true;
   try {
     const { error } = await resend.emails.send({
-      from: 'OurMenu Billing <billing@ourmenuos.online>',
+      from: 'WETAEGO Billing <billing@ourmenuos.online>',
       to: [toEmail],
-      subject: 'Payment Receipt - OurMenu OS 🧾',
+      subject: 'Payment Receipt - WETAEGO 🧾',
       html: `
         <!DOCTYPE html>
         <html>
@@ -375,7 +375,7 @@ export async function sendInvoice(toEmail: string, amount: string, reference: st
                   </tr>
                   <tr>
                     <td style="padding:20px 36px;background-color:#0c0c0e;border-top:1px solid #1e1e24;text-align:center;">
-                      <p style="margin:0;font-size:12px;color:#52525b;">© ${new Date().getFullYear()} OurMenu OS. All rights reserved.</p>
+                      <p style="margin:0;font-size:12px;color:#52525b;">© ${new Date().getFullYear()} WETAEGO. All rights reserved.</p>
                     </td>
                   </tr>
                 </table>
@@ -402,7 +402,7 @@ export async function sendTrialExpirationReminder(toEmail: string, daysLeft: num
 
   try {
     const { error } = await resend.emails.send({
-      from: 'OurMenu OS <support@ourmenuos.online>',
+      from: 'WETAEGO <support@ourmenuos.online>',
       to: [toEmail],
       subject: `Your free trial expires in ${daysLeft} days ⏳`,
       html: `
@@ -425,7 +425,7 @@ export async function sendTrialExpirationReminder(toEmail: string, daysLeft: num
                         Hi ${name ? escapeHTML(name) : 'there'},
                       </p>
                       <p style="margin:0 0 24px 0;font-size:15px;line-height:1.6;color:#a1a1aa;">
-                        We hope you're enjoying OurMenu OS. Your trial period is ending in exactly <strong>${daysLeft} days</strong>. Choose a plan to ensure continuous live orders and customer checkout.
+                        We hope you're enjoying WETAEGO. Your trial period is ending in exactly <strong>${daysLeft} days</strong>. Choose a plan to ensure continuous live orders and customer checkout.
                       </p>
                       <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:28px 0;">
                         <tr>
@@ -440,7 +440,7 @@ export async function sendTrialExpirationReminder(toEmail: string, daysLeft: num
                   </tr>
                   <tr>
                     <td style="padding:20px 36px;background-color:#0c0c0e;border-top:1px solid #1e1e24;text-align:center;">
-                      <p style="margin:0;font-size:12px;color:#52525b;">© ${new Date().getFullYear()} OurMenu OS. All rights reserved.</p>
+                      <p style="margin:0;font-size:12px;color:#52525b;">© ${new Date().getFullYear()} WETAEGO. All rights reserved.</p>
                     </td>
                   </tr>
                 </table>

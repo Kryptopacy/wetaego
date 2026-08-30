@@ -57,7 +57,7 @@ async function printViaEpsonEpos(order: UIOrder, settings: PrintSettings): Promi
           <text lang="en"/>
           <text align="center"/>
           <text font="font_a" double_width="true" double_height="true"/>
-          <text>${settings.businessName || 'OurMenu OS'}\n</text>
+          <text>${settings.businessName || 'WETAEGO'}\n</text>
           <text font="font_a" double_width="false" double_height="false"/>
           <text>Order #${order.id.split('-')[0]}\n</text>
           <text>----------------------------------------\n</text>

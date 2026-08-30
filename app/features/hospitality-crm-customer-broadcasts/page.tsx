@@ -70,7 +70,7 @@ export default function HospitalityCrmPage() {
             "name": "How are customer shadow profiles created automatically?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Every time a customer places an order, books an appointment, or requests an e-receipt, OurMenu OS automatically aggregates their visit history, average check size, dietary preferences, and total lifetime spend into a unified shadow profile without requiring friction-filled app downloads."
+              "text": "Every time a customer places an order, books an appointment, or requests an e-receipt, WETAEGO automatically aggregates their visit history, average check size, dietary preferences, and total lifetime spend into a unified shadow profile without requiring friction-filled app downloads."
             }
           },
           {

@@ -122,7 +122,7 @@ function LoginFormInner() {
           <Image src="/ourmenu-qr-icon.svg" alt="OurMenu Logo" width={48} height={48} className="mb-4 object-contain" />
         )}
         <h1 className="text-3xl font-bold tracking-tight text-white">
-          {authMode === 'forgot_password' ? 'Reset Password' : 'OurMenu OS'}
+          {authMode === 'forgot_password' ? 'Reset Password' : 'WETAEGO'}
         </h1>
         <p className="mt-2 text-sm text-zinc-400">
           {authMode === 'login' && 'Sign in to your dashboard'}

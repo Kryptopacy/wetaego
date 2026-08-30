@@ -108,7 +108,7 @@ export default function WhoPaysTheBillPage() {
             "name": "Can restaurants embed Payment Roulette on their QR menus?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Yes! Payment Roulette is a native feature in OurMenu OS. Restaurants, bars, and lounges can enable Payment Roulette directly on their table QR digital storefronts to entertain guests and drive viral social media buzz."
+              "text": "Yes! Payment Roulette is a native feature in WETAEGO. Restaurants, bars, and lounges can enable Payment Roulette directly on their table QR digital storefronts to entertain guests and drive viral social media buzz."
             }
           }
         ]
@@ -213,7 +213,7 @@ export default function WhoPaysTheBillPage() {
                 Run a restaurant, bar, or physical venue?
               </h3>
               <p className="text-zinc-300 text-base max-w-2xl mx-auto mb-8 font-light">
-                OurMenu OS gives you smart QR menus with built-in Payment Roulette, instant POS orders, split payments, AI voice ordering, and kitchen display dashboards in under 10 minutes.
+                WETAEGO gives you smart QR menus with built-in Payment Roulette, instant POS orders, split payments, AI voice ordering, and kitchen display dashboards in under 10 minutes.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link

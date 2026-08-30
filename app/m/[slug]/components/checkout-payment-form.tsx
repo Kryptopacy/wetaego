@@ -439,7 +439,7 @@ export function CheckoutPaymentForm({
 
         <div className="mt-3 flex items-center justify-center gap-1.5 opacity-40">
           {isOffline ? (
-            <><Shield className="w-3 h-3 text-zinc-500" /><span className="text-[11px] text-zinc-500 font-medium">Order confirmed by OurMenu OS</span></>
+            <><Shield className="w-3 h-3 text-zinc-500" /><span className="text-[11px] text-zinc-500 font-medium">Order confirmed by WETAEGO</span></>
           ) : (
             <><Lock className="w-3 h-3 text-zinc-500" /><span className="text-[11px] text-zinc-500 font-medium">Payments secured by Paystack</span></>
           )}

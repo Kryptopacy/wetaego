@@ -42,7 +42,7 @@ export const sendBroadcastAction = authActionClient
       throw new Error('Not authorized to send broadcasts')
     }
 
-    const businessName = org?.name || 'OurMenu OS Partner'
+    const businessName = org?.name || 'WETAEGO Partner'
     const logoUrl = org?.logo_url || null
     const slug = org?.slug || null
 

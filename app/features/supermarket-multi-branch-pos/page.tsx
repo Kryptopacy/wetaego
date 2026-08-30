@@ -217,7 +217,7 @@ export default function SupermarketFleetPosPage() {
           {/* Bottom CTA */}
           <div className="bg-gradient-to-r from-blue-950/60 via-zinc-900 to-indigo-950/60 border border-blue-500/30 rounded-3xl p-8 md:p-12 text-center">
             <h3 className="text-2xl md:text-4xl font-black text-white mb-4">
-              Scale your retail footprint with OurMenu OS
+              Scale your retail footprint with WETAEGO
             </h3>
             <p className="text-zinc-300 text-base max-w-2xl mx-auto mb-8 font-light">
               Experience the multi-branch operating layer trusted by forward-thinking supermarkets and retail chains.

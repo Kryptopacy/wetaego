@@ -156,7 +156,7 @@ export default function RetailBoutiquePage() {
               Start selling your retail inventory today
             </h3>
             <p className="text-zinc-300 text-base max-w-2xl mx-auto mb-8 font-light">
-              Transform your physical boutique or online shop with OurMenu OS.
+              Transform your physical boutique or online shop with WETAEGO.
             </p>
             <Link
               href="/login"

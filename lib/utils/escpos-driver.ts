@@ -98,7 +98,7 @@ export function buildOrderReceiptBytes(order: UIOrder, businessName?: string): U
     .align('center')
     .size(2, 2)
     .bold(true)
-    .line(businessName || 'OurMenu OS')
+    .line(businessName || 'WETAEGO')
     .size(1, 1)
     .bold(false)
     .line('Official Order Receipt')

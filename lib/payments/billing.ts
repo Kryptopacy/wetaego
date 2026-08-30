@@ -11,7 +11,7 @@ export async function getOrCreateBillingPlan(
   currency: string = 'NGN',
   billingCycle: 'monthly' | 'annually' = 'monthly'
 ): Promise<string> {
-  const planDisplayName = planType === 'lite' ? 'OurMenu OS Lite' : 'OurMenu OS Pro'
+  const planDisplayName = planType === 'lite' ? 'WETAEGO Lite' : 'WETAEGO Pro'
   const supabase = await createClient()
 
   // For annual plans, use a separate column so monthly and annual plans coexist

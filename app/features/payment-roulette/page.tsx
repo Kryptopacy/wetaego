@@ -107,7 +107,7 @@ export default function PaymentRouletteFeaturePage() {
               </span>
             </h1>
             <p className="text-lg md:text-xl text-zinc-300 font-light leading-relaxed mb-8">
-              Payment Roulette is the viral interactive wheel built into OurMenu OS that lets dinner tables, bar parties, and dates spin to decide who pays the check.
+              Payment Roulette is the viral interactive wheel built into WETAEGO that lets dinner tables, bar parties, and dates spin to decide who pays the check.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link

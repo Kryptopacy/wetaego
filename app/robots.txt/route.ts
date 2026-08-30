@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 
 export async function GET() {
-  const robotsTxt = `# robots.txt for OurMenu OS (https://ourmenuos.online)
+  const robotsTxt = `# robots.txt for WETAEGO (https://ourmenuos.online)
 
 User-agent: *
 Allow: /

@@ -4,7 +4,7 @@ export async function GET() {
   return NextResponse.json(
     {
       status: 'ok',
-      service: 'OurMenu OS API',
+      service: 'WETAEGO API',
       version: '1.0.0',
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),

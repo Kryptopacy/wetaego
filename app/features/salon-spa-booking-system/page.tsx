@@ -68,7 +68,7 @@ export default function SalonSpaBookingPage() {
             "name": "Can I require deposit payments to stop no-shows?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Yes! OurMenu OS allows configuring customized deposit percentages (e.g. 20%, 50%, or full upfront payment) to lock in client bookings securely."
+              "text": "Yes! WETAEGO allows configuring customized deposit percentages (e.g. 20%, 50%, or full upfront payment) to lock in client bookings securely."
             }
           },
           {
