@@ -324,9 +324,18 @@ export async function ensureFlagshipDemoLocation() {
     }
   ]
 
+  const sanitizedPagesConfig = pagesConfig.map(p => ({
+    ...p,
+    deals_enabled: Boolean(p.deals_enabled),
+    randomizer_enabled: Boolean(p.randomizer_enabled),
+    billing_enabled: Boolean(p.billing_enabled),
+    is_published: p.is_published !== false,
+    is_primary: Boolean(p.is_primary)
+  }))
+
   const { data: createdPages, error: pagesError } = await adminClient
     .from('location_pages')
-    .insert(pagesConfig as never)
+    .insert(sanitizedPagesConfig as never)
     .select('id, slug')
 
   if (pagesError) {
