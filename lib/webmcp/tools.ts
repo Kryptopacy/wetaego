@@ -732,6 +732,15 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
     }
   })
 
+  // 12. call_staff_or_service (alias for request_staff)
+  const staffTool = tools.find(t => t.name === 'request_staff')
+  if (staffTool) {
+    tools.push({
+      ...staffTool,
+      name: 'call_staff_or_service'
+    })
+  }
+
   // Wrap all tools with real-time UI/UX event dispatch
   return tools.map(tool => ({
     ...tool,
