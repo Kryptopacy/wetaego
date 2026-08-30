@@ -317,6 +317,7 @@ export function WebMcpProvider() {
           type: 'object',
           required: ['itemId','quantity'],
           properties: {
+            cartId: { type: 'string', description: 'Optional unique cart session ID. If omitted, uses the active session cart.' },
             itemId: { type: 'string', minLength: 1, description: 'The unique ID of the item from wetaego_search_catalog.' },
             quantity: { type: 'integer', minimum: 1, maximum: 50, description: 'Quantity to add (1-50).' },
             modifiers: {
@@ -352,7 +353,7 @@ export function WebMcpProvider() {
             lines: { type: 'array' }, error: { type: 'string' }, _hint: { type: 'string' },
           },
         },
-        execute: async (input: { itemId: string; quantity: number; modifiers?: unknown[]; notes?: string }) => ({
+        execute: async (input: { itemId: string; quantity: number; cartId?: string; modifiers?: unknown[]; notes?: string }) => ({
           status: 'ok', success: true,
           message: `${input.quantity}x item queued. Full cart ordering active on live storefronts.`,
           cartItemCount: input.quantity, subtotal: 0,
@@ -367,7 +368,13 @@ export function WebMcpProvider() {
         name: 'wetaego_get_cart',
         page: '/m/{slug}',
         description: 'Return the current cart with line items, validated prices, modifiers, discount breakdown, taxes, and authoritative total.',
-        inputSchema: { type: 'object', properties: {}, additionalProperties: false },
+        inputSchema: {
+          type: 'object',
+          properties: {
+            cartId: { type: 'string', description: 'Optional unique cart session ID to retrieve. If omitted, returns the active session cart.' },
+          },
+          additionalProperties: false
+        },
         outputSchema: {
           type: 'object',
           required: ['venue','currency','itemCount','lines','subtotal','subtotalFormatted','total','totalFormatted'],
@@ -388,7 +395,7 @@ export function WebMcpProvider() {
             tax: { type: 'number' }, total: { type: 'number' }, totalFormatted: { type: 'string' }, _hint: { type: 'string' },
           },
         },
-        execute: async () => ({
+        execute: async (_input?: { cartId?: string }) => ({
           venue: PLATFORM_DEMO_CONTEXT.venue, currency: PLATFORM_DEMO_CONTEXT.currency, itemCount: 0,
           lines: [], subtotal: 0, subtotalFormatted: `0.00 ${PLATFORM_DEMO_CONTEXT.currency}`,
           discountAmount: 0, discountPercentage: 0, tax: 0, total: 0,
@@ -406,6 +413,7 @@ export function WebMcpProvider() {
           type: 'object',
           required: ['lineId'],
           properties: {
+            cartId: { type: 'string', description: 'Optional unique cart session ID. If omitted, updates the active session cart.' },
             lineId: { type: 'string', minLength: 1, description: 'The unique lineId of the cart item to update.' },
             quantity: { type: 'integer', minimum: 0, maximum: 50, description: 'New quantity. Set to 0 to remove.' },
             notes: { type: 'string', maxLength: 500, description: 'Updated preparation notes.' },
@@ -432,7 +440,7 @@ export function WebMcpProvider() {
             subtotalFormatted: { type: 'string' }, error: { type: 'string' },
           },
         },
-        execute: async (input: { lineId: string; quantity?: number; notes?: string }) => ({
+        execute: async (input: { lineId: string; quantity?: number; cartId?: string; notes?: string }) => ({
           status: 'ok', success: true, message: `Cart line ${input.lineId} updated.`,
           remainingLines: 0, totalItemCount: input.quantity || 0, subtotal: 0,
           subtotalFormatted: `0.00 ${PLATFORM_DEMO_CONTEXT.currency}`,
@@ -544,6 +552,7 @@ export function WebMcpProvider() {
           type: 'object',
           required: ['fulfillment'],
           properties: {
+            cartId: { type: 'string', description: 'Optional cart session ID to prepare checkout for. If omitted, uses the active session cart.' },
             fulfillment: { type: 'string', enum: ['dine_in','pickup','delivery'], description: 'Fulfillment method.' },
             tableIdentifier: { type: 'string', maxLength: 50, description: 'Table number, room, seat, or pickup counter.' },
             customer: {
@@ -579,7 +588,7 @@ export function WebMcpProvider() {
             requiresPaymentAuthorization: { type: 'boolean' }, message: { type: 'string' }, error: { type: 'string' }, _hint: { type: 'string' },
           },
         },
-        execute: async (input: { fulfillment: string; tableIdentifier?: string; customer?: unknown; notes?: string }) => ({
+        execute: async (input: { fulfillment: string; cartId?: string; tableIdentifier?: string; customer?: unknown; notes?: string }) => ({
           status: 'ok', checkoutId: `chk_platform_${Date.now().toString(36)}`, fulfillment: input.fulfillment,
           venue: PLATFORM_DEMO_CONTEXT.venue, currency: PLATFORM_DEMO_CONTEXT.currency,
           subtotal: 0, tax: 0, fees: 0, total: 0, totalFormatted: `0.00 ${PLATFORM_DEMO_CONTEXT.currency}`, itemCount: 0,

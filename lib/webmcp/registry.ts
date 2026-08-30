@@ -13,11 +13,18 @@ class WebMCPRegistry implements ModelContext {
     return this.tools
   }
 
+  get tools(): WebMCPTool[] {
+    return this.getTools()
+  }
+
   registerTool<TInput = any, TOutput = any>(tool: WebMCPTool<TInput, TOutput>): WebMCPRegisteredTool {
-    // Enrich the tool with resultSchema at store time so getTools() also exposes it
+    const schema = tool.resultSchema || tool.outputSchema || (tool as any).responseSchema
+    // Enrich the tool with resultSchema, outputSchema, and responseSchema
     const enriched: WebMCPTool<TInput, TOutput> = {
       ...tool,
-      resultSchema: tool.resultSchema || tool.outputSchema,
+      outputSchema: tool.outputSchema || schema,
+      resultSchema: tool.resultSchema || schema,
+      ...((schema ? { responseSchema: schema } : {}) as any),
     }
     this.tools.set(tool.name, enriched)
     this.notifyListeners()
@@ -85,51 +92,78 @@ export function ensureWebMCPContext(): ModelContext {
     return globalWebMCPRegistry
   }
 
-  // If browser natively supports document.modelContext, wrap it to allow dual access
-  if (document.modelContext && typeof document.modelContext.registerTool === 'function') {
-    const nativeContext = document.modelContext
-    return {
-      registerTool: (tool) => {
-        globalWebMCPRegistry.registerTool(tool)
-        return nativeContext.registerTool(tool)
-      },
-      unregisterTool: (name) => {
-        globalWebMCPRegistry.unregisterTool(name)
-        if (nativeContext.unregisterTool) {
-          nativeContext.unregisterTool(name)
+  const ctx = globalWebMCPRegistry
+
+  try {
+    const existing = (document as any).modelContext
+    if (existing && typeof existing.registerTool === 'function' && existing !== ctx) {
+      const originalRegister = existing.registerTool.bind(existing)
+      existing.registerTool = (tool: any) => {
+        const schema = tool.resultSchema || tool.outputSchema || tool.responseSchema
+        const enriched = {
+          ...tool,
+          outputSchema: tool.outputSchema || schema,
+          resultSchema: tool.resultSchema || schema,
+          responseSchema: tool.responseSchema || schema,
         }
-      },
-      getTools: () => {
-        return globalWebMCPRegistry.getTools()
-      },
-      executeTool: (name, input) => {
-        if (nativeContext.executeTool) {
-          return nativeContext.executeTool(name, input)
+        ctx.registerTool(enriched)
+        try {
+          return originalRegister(enriched)
+        } catch {
+          return {
+            name: enriched.name,
+            description: enriched.description,
+            inputSchema: enriched.inputSchema,
+            outputSchema: enriched.outputSchema,
+            resultSchema: enriched.resultSchema,
+            unregister: () => ctx.unregisterTool(enriched.name),
+          }
         }
-        return globalWebMCPRegistry.executeTool(name, input)
-      },
-      get registeredTools() {
-        return globalWebMCPRegistry.registeredTools
       }
+      if (!existing.getTools) {
+        existing.getTools = () => ctx.getTools()
+      }
+      if (!('tools' in existing)) {
+        Object.defineProperty(existing, 'tools', {
+          get: () => ctx.getTools(),
+          configurable: true,
+          enumerable: true,
+        })
+      }
+      if (!('registeredTools' in existing)) {
+        Object.defineProperty(existing, 'registeredTools', {
+          get: () => ctx.registeredTools,
+          configurable: true,
+          enumerable: true,
+        })
+      }
+      return existing
+    }
+
+    Object.defineProperty(document, 'modelContext', {
+      value: ctx,
+      writable: true,
+      configurable: true,
+      enumerable: true,
+    })
+    if (typeof window !== 'undefined') {
+      try {
+        Object.defineProperty(window, 'modelContext', {
+          value: ctx,
+          writable: true,
+          configurable: true,
+          enumerable: true,
+        })
+      } catch {
+        ;(window as any).modelContext = ctx
+      }
+    }
+  } catch {
+    ;(document as any).modelContext = ctx
+    if (typeof window !== 'undefined') {
+      ;(window as any).modelContext = ctx
     }
   }
 
-  // Polyfill on document and window
-  try {
-    Object.defineProperty(document, 'modelContext', {
-      value: globalWebMCPRegistry,
-      writable: true,
-      configurable: true,
-    })
-    Object.defineProperty(window, 'modelContext', {
-      value: globalWebMCPRegistry,
-      writable: true,
-      configurable: true,
-    })
-  } catch {
-    ;(document as any).modelContext = globalWebMCPRegistry
-    ;(window as any).modelContext = globalWebMCPRegistry
-  }
-
-  return globalWebMCPRegistry
+  return ctx
 }

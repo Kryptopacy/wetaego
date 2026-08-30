@@ -292,6 +292,7 @@ export function getMCPManifest() {
           type: "object",
           required: ["itemId", "quantity"],
           properties: {
+            cartId: { type: "string", description: "Optional unique cart session ID. If omitted, uses the active session cart." },
             itemId: { type: "string", minLength: 1, description: "The unique ID of the item." },
             quantity: { type: "integer", minimum: 1, maximum: 50, description: "Quantity to add." },
             modifiers: {
@@ -349,7 +350,9 @@ export function getMCPManifest() {
         description: "Return the current cart, line items, validated prices, modifiers, taxes, fees and current authoritative total.",
         inputSchema: {
           type: "object",
-          properties: {},
+          properties: {
+            cartId: { type: "string", description: "Optional unique cart session ID to retrieve. If omitted, returns active session cart." }
+          },
           additionalProperties: false
         },
         outputSchema: {
@@ -430,6 +433,7 @@ export function getMCPManifest() {
           type: "object",
           required: ["lineId"],
           properties: {
+            cartId: { type: "string", description: "Optional unique cart session ID. If omitted, updates active session cart." },
             lineId: { type: "string", minLength: 1, description: "The line item cartKey." },
             quantity: { type: "integer", minimum: 0, maximum: 50, description: "New quantity (0 = remove)." },
             notes: { type: "string", maxLength: 500, description: "Updated notes." }
@@ -574,6 +578,7 @@ export function getMCPManifest() {
           type: "object",
           required: ["fulfillment"],
           properties: {
+            cartId: { type: "string", description: "Optional cart session ID to prepare checkout for. If omitted, uses the active session cart." },
             fulfillment: { type: "string", enum: ["dine_in", "pickup", "delivery"] },
             tableIdentifier: { type: "string", maxLength: 50, description: "Table, room, or seat identifier." },
             customer: {
