@@ -1,5 +1,4 @@
-
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
 import { createClient, createAnonClient, createAdminClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'

@@ -11,9 +11,7 @@ import { unstable_cache } from 'next/cache'
 import { ensureFlagshipDemoLocation } from '@/lib/demo/ensure-flagship-demo'
 import { AIChat } from './ai-chat'
 
-// Revalidate this page every 60 seconds (Incremental Static Regeneration)
-// This ensures edge caching handles high traffic seamlessly
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const resolvedParams = await params
