@@ -140,19 +140,11 @@ export async function processCheckout(params: {
   } = params;
   const supabase = await createAdminClient()
 
-  // --- Rate Limiting & Idempotency ---
-  const { checkRateLimit, withIdempotency } = await import('@/lib/upstash');
-  const cookieStore = await cookies();
-  const sessionId = cookieStore.get('session_id')?.value || 'anonymous';
-  const { success } = await checkRateLimit('checkout', sessionId);
-  if (!success) {
-    throw new Error('Too many requests. Please wait a minute before placing another order.');
-  }
-
-  const checkoutLogic = async () => {
-    if (!items || items.length === 0) {
-      throw new Error('Your cart is empty. Please add items before checking out.')
-    }
+  try {
+    const checkoutLogic = async () => {
+      if (!items || items.length === 0) {
+        throw new Error('Your cart is empty. Please add items before checking out.')
+      }
 
     // 1. Server-side price verification — never trust client-supplied totals
     const itemIds = items.map(i => i.id as string).filter(Boolean)
@@ -697,10 +689,16 @@ export async function processCheckout(params: {
   return { data: { orderId: order.id, paymentMethod: finalPaymentMethod } };
 };
 
-  if (idempotencyKey) {
-    return await withIdempotency(`checkout_${idempotencyKey}`, checkoutLogic);
-  } else {
-    return await checkoutLogic();
+    if (idempotencyKey) {
+      return await withIdempotency(`checkout_${idempotencyKey}`, checkoutLogic);
+    } else {
+      return await checkoutLogic();
+    }
+  } catch (err: unknown) {
+    console.error('[processCheckout error]:', err)
+    return {
+      serverError: err instanceof Error ? err.message : 'Unable to complete checkout. Please try again.'
+    }
   }
 }
 

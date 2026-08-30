@@ -9,13 +9,15 @@ const upsellRequestSchema = z.object({
   cartItems: z.array(z.object({
     id: z.string(),
     name: z.string(),
-    quantity: z.number().optional()
+    quantity: z.number().optional(),
+    category: z.string().optional()
   })).min(1, 'Cart is empty'),
   availableItems: z.array(z.object({
     id: z.string(),
     name: z.string(),
     price_minor: z.number().optional(),
     description: z.string().nullable().optional(),
+    category: z.string().optional(),
     is_upsell_eligible: z.boolean().optional()
   })).min(1, 'No available items to upsell'),
   templateType: z.string().optional().default('catalog'),
@@ -23,7 +25,7 @@ const upsellRequestSchema = z.object({
 })
 
 export async function POST(req: Request) {
-  let body: { availableItems?: { id: string; name: string; is_upsell_eligible?: boolean }[]; upsellMode?: string } | null = null
+  let body: { availableItems?: { id: string; name: string; category?: string; is_upsell_eligible?: boolean }[]; upsellMode?: string } | null = null
   try {
     body = await req.json()
     const parsed = upsellRequestSchema.safeParse(body)
@@ -42,23 +44,35 @@ export async function POST(req: Request) {
       }
     }
 
-    const prompt = `
-You are an expert sales assistant powering the checkout flow for a business.
-The business is using a "${templateType}" template (e.g., if catalog -> restaurant/store, if booking -> services/hotel, if rate-card -> professional services).
+    const cartItemIds = new Set(cartItems.map(i => i.id))
+    const eligibleItems = finalAvailableItems.filter(i => !cartItemIds.has(i.id))
 
-Here is the current guest's cart:
+    if (eligibleItems.length === 0) {
+      return new Response('No valid upsell items available', { status: 200 })
+    }
+
+    const prompt = `
+You are an expert, highly intelligent sales concierge powering the checkout upsell modal.
+Business Template: "${templateType}"
+
+Customer's Current Cart:
 ${JSON.stringify(cartItems, null, 2)}
 
-Here are the available items/services they could add:
-${JSON.stringify(finalAvailableItems, null, 2)}
+Available Store Catalog Items to Suggest:
+${JSON.stringify(eligibleItems, null, 2)}
 
-Your goal: Suggest EXACTLY ONE available item that perfectly complements their cart but is NOT already in it.
-Provide a short, enticing 1-sentence pitch (max 10 words) encouraging them to add it.
+STRICT CROSS-CATEGORY PAIRING RULES:
+1. CROSS-CATEGORY COMPANION (CRITICAL):
+   - NEVER suggest an item from the exact same category as what is already in their cart!
+   - If the guest only ordered drinks: DO NOT suggest another drink. Suggest an appetizer, suya, snack, burger, or dessert!
+   - If the guest ordered food/mains/steak/suya: Suggest a signature cocktail, chilled beverage, side dish, or artisanal dessert.
+   - If the guest ordered a dessert: Suggest a hot coffee, digestif, or refreshing soda (NOT another dessert!).
+   - If the guest booked a massage/spa: Suggest an aromatherapy upgrade, hot oil, or foot treatment.
+   - If the guest requested gadget repairs: Suggest a protective case, tempered glass, or power bank.
+2. NO CART DUPLICATES: Never suggest an item that is already in their cart.
+3. NATURAL TONE: The pitch must be maximum 10 words, witty, conversational, and direct.
 
-Examples:
-- (Restaurant) "Add a chilled Sprite with your Suya?"
-- (Booking) "Add an extra 30mins to your session?"
-- (Rate Card) "Add drone coverage for your shoot?"
+Pick the single best item ID and write a 1-sentence punchy pitch.
 `
 
     const aiModels = await getAiModels() as Record<string, string>
@@ -67,7 +81,7 @@ Examples:
     const { object } = await generateObject({
       model: google(modelName),
       schema: z.object({
-        suggestedItemId: z.string().describe('The ID of the suggested item from availableItems'),
+        suggestedItemId: z.string().describe('The ID of the suggested item from eligibleItems'),
         pitch: z.string().describe('A short, enticing 1-sentence pitch (max 10 words)')
       }),
       prompt,

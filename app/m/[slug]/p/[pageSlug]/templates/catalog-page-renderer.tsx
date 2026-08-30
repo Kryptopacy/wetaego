@@ -265,29 +265,29 @@ export function CatalogPageRenderer({ location, page, items, locationSlug, payme
                     ? sponsoredAds[((idx + 1) / 4 - 1) % sponsoredAds.length] 
                     : null;
                     
-                  const bentoClass = (layoutMode === 'bento_grid' && idx === 0 && catItems.length > 1) ? 'sm:col-span-2' : ''
+                  const bentoClass = (layoutMode === 'bento_grid' && idx === 0 && catItems.length > 3) ? 'sm:col-span-2' : ''
                   const masonryClass = layoutMode === 'masonry' ? 'break-inside-avoid' : ''
 
                   return (
                     <Fragment key={item.id}>
                     <motion.div 
                       variants={{ hidden: { opacity: 0, scale: 0.95 }, show: { opacity: 1, scale: 1 } }}
-                      whileHover={isAvail ? { scale: 1.02, boxShadow: "0 10px 30px -10px rgba(0,0,0,0.5)" } : {}}
-                      className={`rounded-2xl border p-4 transition-all ${isAvail ? 'border-zinc-800 bg-zinc-900/50 hover:border-zinc-700 backdrop-blur-sm' : 'border-zinc-800/40 bg-zinc-900/20 opacity-60'} ${bentoClass} ${masonryClass}`}
+                      whileHover={isAvail ? { scale: 1.015, boxShadow: "0 10px 30px -10px rgba(0,0,0,0.5)" } : {}}
+                      className={`rounded-2xl border p-4 transition-all h-full flex flex-col justify-between ${isAvail ? 'border-zinc-800 bg-zinc-900/50 hover:border-zinc-700 backdrop-blur-sm' : 'border-zinc-800/40 bg-zinc-900/20 opacity-60'} ${bentoClass} ${masonryClass}`}
                     >
-                      <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-start justify-between gap-3 flex-1">
                         {item.images?.[0] ? (
                           <div className="w-18 h-18 shrink-0 rounded-xl overflow-hidden bg-zinc-800 relative block">
                             <Image src={item.images[0]} alt={item.title} fill className="object-cover" />
                           </div>
                         ) : (
-                          <div className="w-16 h-16 shrink-0 rounded-2xl overflow-hidden relative shadow-inner border border-white/5">
+                          <div className="w-18 h-18 shrink-0 rounded-xl overflow-hidden relative shadow-inner border border-white/5 bg-zinc-800">
                             <ItemImagePlaceholder title={item.title} size="sm" />
                           </div>
                         )}
                         <div className="flex-1 min-w-0">
                           <div className="flex flex-wrap items-center gap-2">
-                            <h3 className="font-bold text-white text-sm capitalize">{item.title}</h3>
+                            <h3 className="font-bold text-white text-sm capitalize line-clamp-2">{item.title}</h3>
                             {item.item_data?.variants?.find(v => v.name.toLowerCase() === 'condition') && (
                               <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full border ${getConditionBadgeStyles(item.item_data.variants.find(v => v.name.toLowerCase() === 'condition')!.options[0] || '')}`}>
                                 {item.item_data.variants.find(v => v.name.toLowerCase() === 'condition')!.options[0]}
@@ -398,7 +398,7 @@ export function CatalogPageRenderer({ location, page, items, locationSlug, payme
           paymentIsLive={paymentIsLive}
           tableIdentifier={tableIdentifier}
           templateType="catalog"
-          menuItems={items.map(i => ({ id: i.id, name: i.title, price_minor: i.price_minor || 0, is_upsell_eligible: i.is_upsell_eligible }))}
+          menuItems={items.map(i => ({ id: i.id, name: i.title, price_minor: i.price_minor || 0, is_upsell_eligible: i.is_upsell_eligible, category: (i as any).category_name || (i as any).category?.name || 'General' }))}
           hideAddressField={page.template_data?.hide_delivery === true}
           deliveryEnabled={location.delivery_enabled ?? false}
           deliveryFeeMinor={location.delivery_fee_minor ?? 0}

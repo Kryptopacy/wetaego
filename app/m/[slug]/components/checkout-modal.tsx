@@ -67,6 +67,7 @@ export interface CheckoutCartItem {
   variantLabel?: string;
   variantSelections?: Record<string, string>;
   image_url?: string;
+  category?: string;
 }
 
 export interface CheckoutMenuItem {
@@ -75,6 +76,7 @@ export interface CheckoutMenuItem {
   price_minor: number;
   image_url?: string;
   description?: string;
+  category?: string;
   is_upsell_eligible?: boolean;
 }
 
@@ -308,7 +310,24 @@ export function CheckoutModal({
           const res = await fetch('/api/upsell', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ cartItems: items, availableItems: menuItems, templateType, upsellMode }),
+            body: JSON.stringify({ 
+              cartItems: items.map(i => ({ 
+                id: i.id, 
+                name: i.name, 
+                quantity: i.quantity,
+                category: i.category || menuItems.find(m => m.id === i.id)?.category
+              })), 
+              availableItems: menuItems.map(m => ({
+                id: m.id,
+                name: m.name,
+                price_minor: m.price_minor,
+                description: m.description,
+                category: m.category,
+                is_upsell_eligible: m.is_upsell_eligible
+              })), 
+              templateType, 
+              upsellMode 
+            }),
             signal: controller.signal
           })
           if (res.ok) {
