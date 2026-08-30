@@ -230,8 +230,8 @@ export default async function PublicMenuPage({
     .single() : Promise.resolve(null)
 
   const fetchLocationPages = async () => {
-    const anonSupabase = createAnonClient()
-    let query = anonSupabase
+    const supabaseClient = slug === 'demo' ? await createAdminClient() : createAnonClient()
+    let query = supabaseClient
       .from('location_pages')
       .select('id, slug, title, template_type, is_published')
       .eq('location_id', location.id)
@@ -245,7 +245,7 @@ export default async function PublicMenuPage({
     return data
   }
 
-  const locationPagesPromise = isPreview
+  const locationPagesPromise = isPreview || slug === 'demo'
     ? fetchLocationPages()
     : unstable_cache(
         fetchLocationPages,
