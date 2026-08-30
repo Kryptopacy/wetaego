@@ -168,6 +168,8 @@ export default async function PublicPageView({
     }
   }
 
+  const showPreviewBanner = preview === 'true' && slug !== 'demo' && !isDemoMode
+
   // Check KYC status — demo mode always bypasses this
   const org = loc.organizations as { status?: string } | null | undefined;
   const orgStatus = org?.status || 'approved';
@@ -489,7 +491,7 @@ export default async function PublicPageView({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(ldJson) }}
         />
       )}
-      {isPreview && <PreviewBanner />}
+      {showPreviewBanner && <PreviewBanner />}
       <PageThemeOverride pageTokens={page.design_tokens as any || undefined} />
       {RendererContent}
       

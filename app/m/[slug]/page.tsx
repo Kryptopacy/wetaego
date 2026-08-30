@@ -163,6 +163,8 @@ export default async function PublicMenuPage({
     }
   }
 
+  const showPreviewBanner = preview === 'true' && slug !== 'demo' && !isDemoMode
+
   // Check publication and KYC status — preview & demo mode bypass this
   const isPublished = (location as any).publication_status === 'published'
   if (!isPreview && !isDemoMode && slug !== 'demo' && !isPublished) {
@@ -355,7 +357,7 @@ export default async function PublicMenuPage({
   // 0 pages → Empty State
   return (
     <main className="min-h-screen bg-[#f5f7f5] dark:bg-zinc-950 font-sans flex flex-col items-center justify-center p-6 text-center">
-      {isPreview && <PreviewBanner />}
+      {showPreviewBanner && <PreviewBanner />}
       <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl p-10 max-w-md w-full shadow-2xl border border-black/5 dark:border-white/10">
         <div className="w-16 h-16 bg-zinc-100 dark:bg-zinc-900 rounded-2xl mx-auto flex items-center justify-center mb-6">
           <svg className="w-8 h-8 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
