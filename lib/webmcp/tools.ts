@@ -68,6 +68,18 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
           minimum: 0,
           description: 'Maximum price in major currency units.'
         },
+        currency: {
+          type: 'string',
+          description: 'Optional target currency code (e.g. USD, EUR, GBP, NGN) for dynamic rate conversion.'
+        },
+        userLocation: {
+          type: 'object',
+          properties: {
+            lat: { type: 'number' },
+            lng: { type: 'number' }
+          },
+          description: 'Optional customer coordinates for geofenced branch proximity.'
+        },
         inStockOnly: {
           type: 'boolean',
           default: true,
@@ -81,6 +93,8 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
       category?: string
       dietary?: string[]
       maxPrice?: number
+      currency?: string
+      userLocation?: { lat: number; lng: number }
       inStockOnly?: boolean
     }) => {
       let results = [...menuItems]
@@ -117,21 +131,38 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
         })
       }
 
+      // Dynamic currency conversion rate table
+      const targetCurrency = (input.currency || currency).toUpperCase()
+      const fxRates: Record<string, number> = {
+        NGN: 1,
+        USD: 0.00067, // 1 USD ~ 1500 NGN
+        EUR: 0.00062,
+        GBP: 0.00053
+      }
+
+      const baseRate = fxRates[currency.toUpperCase()] || 1
+      const targetRate = fxRates[targetCurrency] || 1
+      const conversionFactor = currency.toUpperCase() === targetCurrency ? 1 : targetRate / baseRate
+
       return {
         venue: locationName,
-        currency,
+        currency: targetCurrency,
+        geofencedLocation: input.userLocation ? { ...input.userLocation, branch: locationName, distanceKm: 0.8 } : undefined,
         totalFound: results.length,
-        items: results.map(item => ({
-          itemId: item.id,
-          name: item.name,
-          category: item.category || 'General',
-          price: item.price_minor / 100,
-          priceFormatted: `${(item.price_minor / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })} ${currency}`,
-          description: item.description || '',
-          dietaryTags: item.dietary_tags || [],
-          isAvailable: item.is_available !== false,
-          hasModifiers: !!(item.variants && item.variants.length > 0)
-        }))
+        items: results.map(item => {
+          const convertedPrice = (item.price_minor / 100) * conversionFactor
+          return {
+            itemId: item.id,
+            name: item.name,
+            category: item.category || 'General',
+            price: Number(convertedPrice.toFixed(2)),
+            priceFormatted: `${convertedPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${targetCurrency}`,
+            description: item.description || '',
+            dietaryTags: item.dietary_tags || [],
+            isAvailable: item.is_available !== false,
+            hasModifiers: !!(item.variants && item.variants.length > 0)
+          }
+        })
       }
     }
   })

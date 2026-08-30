@@ -534,7 +534,7 @@ export async function sendMarketingBroadcastEmail({
                         You received this email because you opted into updates and special offers when placing an order or registering at <strong style="color:#a1a1aa;">${escapeHTML(businessName)}</strong>.
                       </p>
                       <p style="margin:0;font-size:11px;color:#52525b;">
-                        Powered by OurMenu OS • Privacy Protected under NDPR & GDPR
+                        Powered by WETAEGO • Privacy Protected under NDPR & GDPR
                       </p>
                     </td>
                   </tr>

@@ -2,14 +2,46 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { getMCPManifest } from '@/lib/webmcp/manifest'
 
+import { checkRateLimit } from '@/lib/upstash'
+
 export const dynamic = 'force-dynamic'
 
 /**
- * Staff & Enterprise MCP Server Endpoint (RFC JSON-RPC 2.0)
- * Handles tool execution for external agents (Claude Desktop, ChatGPT, enterprise bots)
- * authenticated via Bearer token.
+ * Staff & Enterprise MCP Server Endpoint (RFC JSON-RPC 2.0 & SSE Transport)
+ * Handles tool execution and streaming event transport for external agents (Claude Desktop, Cursor, ChatGPT).
  */
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const isSSE = req.headers.get('accept')?.includes('text/event-stream') || req.nextUrl.searchParams.get('transport') === 'sse'
+
+  if (isSSE) {
+    const encoder = new TextEncoder()
+    const manifest = getMCPManifest()
+    const customReadable = new ReadableStream({
+      start(controller) {
+        controller.enqueue(encoder.encode(`event: endpoint\ndata: ${JSON.stringify({ endpoint: '/api/mcp' })}\n\n`))
+        controller.enqueue(encoder.encode(`event: manifest\ndata: ${JSON.stringify(manifest)}\n\n`))
+        // Keep-alive heartbeat comment
+        const interval = setInterval(() => {
+          controller.enqueue(encoder.encode(`: ping\n\n`))
+        }, 15000)
+
+        req.signal.addEventListener('abort', () => {
+          clearInterval(interval)
+          controller.close()
+        })
+      }
+    })
+
+    return new Response(customReadable, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache, no-transform',
+        'Connection': 'keep-alive',
+        'Access-Control-Allow-Origin': '*'
+      }
+    })
+  }
+
   return NextResponse.json(getMCPManifest(), {
     headers: {
       'Content-Type': 'application/json',
@@ -20,6 +52,15 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
+    // Upstash Rate Limiting: 60 requests per minute
+    const rateLimit = await checkRateLimit('mcp_api')
+    if (!rateLimit.success) {
+      return NextResponse.json(
+        { error: 'Rate limit exceeded: Maximum 60 Staff MCP requests per minute.' },
+        { status: 429 }
+      )
+    }
+
     const authHeader = req.headers.get('authorization')
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return NextResponse.json(

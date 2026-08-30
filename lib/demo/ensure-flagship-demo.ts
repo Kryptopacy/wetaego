@@ -338,7 +338,9 @@ export async function ensureFlagshipDemoLocation() {
     randomizer_enabled: Boolean(p.randomizer_enabled),
     billing_enabled: Boolean(p.billing_enabled),
     is_published: p.is_published !== false,
-    is_primary: Boolean(p.is_primary)
+    is_primary: Boolean(p.is_primary),
+    ai_enabled: true,
+    ai_name: 'Pacy Concierge AI'
   }))
 
   const { data: createdPages, error: pagesError } = await adminClient

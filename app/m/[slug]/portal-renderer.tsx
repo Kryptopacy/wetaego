@@ -255,7 +255,7 @@ export function PortalRenderer({location,pages}:{
         )}
 
         <div className="mt-10 mb-8 text-center">
-          <a href="https://ourmenuos.online" className="text-[11px] text-zinc-700 hover:text-zinc-500 transition-colors font-medium tracking-wide">Powered by OurMenu OS</a>
+          <a href="https://ourmenuos.online" className="text-[11px] text-zinc-700 hover:text-zinc-500 transition-colors font-medium tracking-wide">Powered by WETAEGO</a>
         </div>
       </div>
     </div>

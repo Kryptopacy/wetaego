@@ -185,7 +185,7 @@ export const ReceiptDocument = ({
 
       <View style={styles.footer}>
         <Text>Thank you for your order!</Text>
-        <Text style={{ marginTop: 4 }}>Powered by OurMenu OS</Text>
+        <Text style={{ marginTop: 4 }}>Powered by WETAEGO</Text>
       </View>
     </Page>
   </Document>

@@ -130,7 +130,7 @@ export function buildOrderReceiptBytes(order: UIOrder, businessName?: string): U
     .separator('=')
     .align('center')
     .line('Thank you for your business!')
-    .line('Powered by OurMenu OS')
+    .line('Powered by WETAEGO')
     .cut()
 
   return encoder.getUint8Array()

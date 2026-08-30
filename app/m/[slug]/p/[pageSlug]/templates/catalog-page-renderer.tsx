@@ -385,8 +385,8 @@ export function CatalogPageRenderer({ location, page, items, locationSlug, payme
         )}
 
         <div className="mt-12 text-center">
-          <a href="https://ourmenuos.online" className="text-xs text-zinc-700 hover:text-zinc-500 transition-colors">
-            Powered by OurMenu OS
+          <a href="https://ourmenuos.online" className="text-xs text-zinc-400 dark:text-zinc-600 hover:text-zinc-600 dark:hover:text-zinc-400 transition-colors font-medium">
+            Powered by WETAEGO
           </a>
         </div>
       </div>

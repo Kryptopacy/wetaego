@@ -506,7 +506,7 @@ export default async function PublicPageView({
       />
 
       <FabGroup>
-        {(page.ai_enabled ?? loc.ai_enabled ?? true) && (
+        {(page.ai_enabled === true || loc.ai_enabled === true || slug === 'demo' || (page.ai_enabled !== false && loc.ai_enabled !== false)) && (
           <AIChat
             locationId={loc.id}
             organizationId={loc.organization_id}

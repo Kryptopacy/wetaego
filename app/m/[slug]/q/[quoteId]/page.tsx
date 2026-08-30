@@ -167,8 +167,8 @@ export default async function PublicQuotePage({
         )}
 
         <div className="text-center pt-2">
-          <Link href={`/m/${slug}`} className="text-xs text-zinc-700 hover:text-zinc-500 transition-colors">
-            Powered by OurMenu OS
+          <Link href={`/m/${slug}`} className="text-xs text-zinc-600 dark:text-zinc-500">
+            Powered by WETAEGO
           </Link>
         </div>
       </div>

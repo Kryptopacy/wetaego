@@ -515,8 +515,8 @@ export function RateCardRenderer({ location, page, items, locationSlug, paymentI
         </AnimatePresence>
 
         <div className="mt-10 text-center">
-          <a href="https://ourmenuos.online" className="text-xs text-zinc-700 hover:text-zinc-500 transition-colors">
-            Powered by OurMenu OS
+          <a href="https://ourmenuos.online" className="text-xs text-zinc-400 dark:text-zinc-600 hover:text-zinc-600 dark:hover:text-zinc-400 transition-colors font-medium">
+            Powered by WETAEGO
           </a>
         </div>
       </div>

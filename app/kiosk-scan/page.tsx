@@ -148,7 +148,7 @@ export default function KioskScanPage() {
         </div>
 
         {/* OurMenu branding */}
-        <p className="text-zinc-600 text-xs text-center mt-6">Powered by OurMenu OS</p>
+        <p className="text-zinc-600 text-xs text-center mt-6">Powered by WETAEGO</p>
       </motion.div>
     </div>
   )
