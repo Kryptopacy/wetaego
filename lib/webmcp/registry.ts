@@ -6,11 +6,11 @@
 import type { WebMCPTool, ModelContext, WebMCPRegisteredTool } from './types'
 
 class WebMCPRegistry implements ModelContext {
-  private tools: Map<string, WebMCPTool> = new Map()
+  private _toolsMap: Map<string, WebMCPTool> = new Map()
   private listeners: Set<() => void> = new Set()
 
   get registeredTools(): Map<string, WebMCPTool> {
-    return this.tools
+    return this._toolsMap
   }
 
   get tools(): WebMCPTool[] {
@@ -26,7 +26,7 @@ class WebMCPRegistry implements ModelContext {
       resultSchema: tool.resultSchema || schema,
       ...((schema ? { responseSchema: schema } : {}) as any),
     }
-    this.tools.set(tool.name, enriched)
+    this._toolsMap.set(tool.name, enriched)
     this.notifyListeners()
 
     if (process.env.NODE_ENV === 'development') {
@@ -45,8 +45,8 @@ class WebMCPRegistry implements ModelContext {
   }
 
   unregisterTool(name: string): void {
-    if (this.tools.has(name)) {
-      this.tools.delete(name)
+    if (this._toolsMap.has(name)) {
+      this._toolsMap.delete(name)
       this.notifyListeners()
       if (process.env.NODE_ENV === 'development') {
         console.log(`[WebMCP] Unregistered tool: ${name}`)
@@ -55,13 +55,13 @@ class WebMCPRegistry implements ModelContext {
   }
 
   getTools(): WebMCPTool[] {
-    return Array.from(this.tools.values())
+    return Array.from(this._toolsMap.values())
   }
 
   async executeTool(name: string, input: any): Promise<any> {
-    const tool = this.tools.get(name)
+    const tool = this._toolsMap.get(name)
     if (!tool) {
-      throw new Error(`[WebMCP] Tool '${name}' not found. Available tools: ${Array.from(this.tools.keys()).join(', ')}`)
+      throw new Error(`[WebMCP] Tool '${name}' not found. Available tools: ${Array.from(this._toolsMap.keys()).join(', ')}`)
     }
     return await tool.execute(input)
   }
