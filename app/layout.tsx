@@ -167,63 +167,6 @@ export default async function RootLayout({
             })
           }}
         />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                try {
-                  var toolsMap = new Map();
-                  var registry = {
-                    get registeredTools() { return toolsMap; },
-                    get tools() { return Array.from(toolsMap.values()); },
-                    registerTool: function(t) {
-                      var s = t.resultSchema || t.outputSchema || t.responseSchema;
-                      var enriched = Object.assign({}, t, {
-                        outputSchema: t.outputSchema || s,
-                        resultSchema: t.resultSchema || s,
-                        responseSchema: t.responseSchema || s
-                      });
-                      toolsMap.set(t.name, enriched);
-                      return {
-                        name: enriched.name,
-                        description: enriched.description,
-                        inputSchema: enriched.inputSchema,
-                        outputSchema: enriched.outputSchema,
-                        resultSchema: enriched.resultSchema,
-                        unregister: function() { toolsMap.delete(t.name); }
-                      };
-                    },
-                    provideContext: function(opt) {
-                      var list = Array.isArray(opt) ? opt : (opt && opt.tools ? opt.tools : []);
-                      list.forEach(function(tool) { registry.registerTool(tool); });
-                      return {
-                        unregister: function() {
-                          list.forEach(function(tool) { toolsMap.delete(tool.name); });
-                        }
-                      };
-                    },
-                    unregisterTool: function(n) { toolsMap.delete(n); },
-                    getTools: function() { return Array.from(toolsMap.values()); },
-                    executeTool: function(n, input) {
-                      var t = toolsMap.get(n);
-                      if (!t) return Promise.reject(new Error("Tool " + n + " not found"));
-                      return Promise.resolve(t.execute(input));
-                    }
-                  };
-                  if (typeof navigator !== 'undefined') {
-                    try { Object.defineProperty(navigator, 'modelContext', { value: registry, writable: true, configurable: true, enumerable: true }); } catch(e) { navigator.modelContext = registry; }
-                  }
-                  if (typeof document !== 'undefined') {
-                    try { Object.defineProperty(document, 'modelContext', { value: registry, writable: true, configurable: true, enumerable: true }); } catch(e) { document.modelContext = registry; }
-                  }
-                  if (typeof window !== 'undefined') {
-                    try { Object.defineProperty(window, 'modelContext', { value: registry, writable: true, configurable: true, enumerable: true }); } catch(e) { window.modelContext = registry; }
-                  }
-                } catch(e) {}
-              })();
-            `
-          }}
-        />
       </head>
       <body className="min-h-full flex flex-col bg-zinc-950 text-zinc-50">
         <PostHogProvider>

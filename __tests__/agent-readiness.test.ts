@@ -105,4 +105,45 @@ describe('Agent Readiness (Ora & Is Agentic Compliance)', () => {
       expect(privacyContent.length).toBeGreaterThan(1000)
     })
   })
+
+  describe('WebMCP Browser API & Tool Registry', () => {
+    it('initializes document.modelContext, navigator.modelContext, and window.modelContext with all 12 tools and resultSchemas', async () => {
+      const { ensureWebMCPContext } = await import('@/lib/webmcp/registry')
+      const { WEBMCP_TOOLS } = await import('@/components/WebMcpProvider')
+
+      const ctx = ensureWebMCPContext()
+      expect(ctx).toBeDefined()
+      expect(typeof ctx.registerTool).toBe('function')
+      expect(typeof ctx.provideContext).toBe('function')
+
+      ctx.provideContext({ tools: WEBMCP_TOOLS })
+      WEBMCP_TOOLS.forEach(tool => ctx.registerTool(tool))
+
+      const tools = ctx.getTools ? ctx.getTools() : []
+      expect(tools.length).toBeGreaterThanOrEqual(12)
+
+      const toolNames = tools.map(t => t.name)
+      expect(toolNames).toContain('wetaego_find_venue')
+      expect(toolNames).toContain('wetaego_search_catalog')
+      expect(toolNames).toContain('wetaego_get_item_details')
+      expect(toolNames).toContain('wetaego_create_cart')
+      expect(toolNames).toContain('wetaego_add_to_cart')
+      expect(toolNames).toContain('wetaego_get_cart')
+      expect(toolNames).toContain('wetaego_update_cart')
+      expect(toolNames).toContain('wetaego_recommend_pairings')
+      expect(toolNames).toContain('wetaego_open_business_page')
+      expect(toolNames).toContain('wetaego_initiate_checkout')
+      expect(toolNames).toContain('wetaego_submit_order')
+      expect(toolNames).toContain('wetaego_request_staff')
+
+      for (const t of tools) {
+        expect(t.name).toBeDefined()
+        expect(t.description).toBeDefined()
+        expect(t.inputSchema).toBeDefined()
+        expect(t.outputSchema).toBeDefined()
+        expect(t.resultSchema).toBeDefined()
+        expect(typeof t.execute).toBe('function')
+      }
+    })
+  })
 })

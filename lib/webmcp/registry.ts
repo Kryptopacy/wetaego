@@ -1,7 +1,7 @@
 /**
  * WebMCP Tool Registry & Browser Polyfill Engine
- * Ensures navigator.modelContext, document.modelContext, and window.modelContext
- * are always available across Chrome EPP, AI agent headless browsers, and dev environments.
+ * Ensures document.modelContext, navigator.modelContext, and window.modelContext
+ * are always available across Chrome 149+, ChatGPT Desktop, AI agent crawlers, and dev environments.
  */
 
 import type { WebMCPTool, ModelContext, WebMCPRegisteredTool, ProvideContextOptions } from './types'
@@ -16,12 +16,6 @@ class WebMCPRegistry implements ModelContext {
 
   get tools(): WebMCPTool[] {
     return this.getTools()
-  }
-
-  set tools(newTools: WebMCPTool[]) {
-    if (Array.isArray(newTools)) {
-      newTools.forEach(t => this.registerTool(t))
-    }
   }
 
   registerTool<TInput = any, TOutput = any>(tool: WebMCPTool<TInput, TOutput>): WebMCPRegisteredTool {
@@ -117,79 +111,82 @@ class WebMCPRegistry implements ModelContext {
 export const globalWebMCPRegistry = new WebMCPRegistry()
 
 /**
- * Initializes navigator.modelContext and document.modelContext polyfill safely in browser environments.
+ * Initializes document.modelContext and navigator.modelContext polyfills safely in browser environments.
  */
 export function ensureWebMCPContext(): ModelContext {
-  if (typeof window === 'undefined' && typeof document === 'undefined') {
+  if (typeof document === 'undefined' && typeof window === 'undefined') {
     return globalWebMCPRegistry
   }
 
   const ctx = globalWebMCPRegistry
 
   try {
-    // 1. Polyfill / bind on navigator
-    if (typeof navigator !== 'undefined') {
-      const existingNav = (navigator as any).modelContext
-      if (existingNav && existingNav !== ctx) {
-        if (typeof existingNav.registerTool === 'function') {
-          const orig = existingNav.registerTool.bind(existingNav)
-          existingNav.registerTool = (t: any) => {
-            ctx.registerTool(t)
-            try { return orig(t) } catch { return { unregister: () => ctx.unregisterTool(t.name) } }
+    const existing = (document as any)?.modelContext
+    if (existing && typeof existing.registerTool === 'function' && existing !== ctx) {
+      const originalRegister = existing.registerTool.bind(existing)
+      existing.registerTool = (tool: any) => {
+        const schema = tool.resultSchema || tool.outputSchema || tool.responseSchema
+        const enriched = {
+          ...tool,
+          outputSchema: tool.outputSchema || schema,
+          resultSchema: tool.resultSchema || schema,
+          responseSchema: tool.responseSchema || schema,
+        }
+        ctx.registerTool(enriched)
+        try {
+          return originalRegister(enriched)
+        } catch {
+          return {
+            name: enriched.name,
+            description: enriched.description,
+            inputSchema: enriched.inputSchema,
+            outputSchema: enriched.outputSchema,
+            resultSchema: enriched.resultSchema,
+            unregister: () => ctx.unregisterTool(enriched.name),
           }
         }
-        if (typeof existingNav.provideContext !== 'function') {
-          existingNav.provideContext = (opt: any) => ctx.provideContext(opt)
-        }
-        if (typeof existingNav.getTools !== 'function') {
-          existingNav.getTools = () => ctx.getTools()
-        }
-      } else {
+      }
+      if (!existing.provideContext) {
+        existing.provideContext = (options: any) => ctx.provideContext(options)
+      }
+      if (!existing.getTools) {
+        existing.getTools = () => ctx.getTools()
+      }
+      if (!('tools' in existing)) {
+        Object.defineProperty(existing, 'tools', {
+          get: () => ctx.getTools(),
+          configurable: true,
+          enumerable: true,
+        })
+      }
+      if (!('registeredTools' in existing)) {
+        Object.defineProperty(existing, 'registeredTools', {
+          get: () => ctx.registeredTools,
+          configurable: true,
+          enumerable: true,
+        })
+      }
+      if (typeof navigator !== 'undefined' && !(navigator as any).modelContext) {
         try {
           Object.defineProperty(navigator, 'modelContext', {
-            value: ctx,
+            value: existing,
             writable: true,
             configurable: true,
             enumerable: true,
           })
         } catch {
-          ;(navigator as any).modelContext = ctx
+          ;(navigator as any).modelContext = existing
         }
       }
+      return existing
     }
 
-    // 2. Polyfill / bind on document
-    if (typeof document !== 'undefined') {
-      const existingDoc = (document as any).modelContext
-      if (existingDoc && existingDoc !== ctx) {
-        if (typeof existingDoc.registerTool === 'function') {
-          const orig = existingDoc.registerTool.bind(existingDoc)
-          existingDoc.registerTool = (t: any) => {
-            ctx.registerTool(t)
-            try { return orig(t) } catch { return { unregister: () => ctx.unregisterTool(t.name) } }
-          }
-        }
-        if (typeof existingDoc.provideContext !== 'function') {
-          existingDoc.provideContext = (opt: any) => ctx.provideContext(opt)
-        }
-        if (typeof existingDoc.getTools !== 'function') {
-          existingDoc.getTools = () => ctx.getTools()
-        }
-      } else {
-        try {
-          Object.defineProperty(document, 'modelContext', {
-            value: ctx,
-            writable: true,
-            configurable: true,
-            enumerable: true,
-          })
-        } catch {
-          ;(document as any).modelContext = ctx
-        }
-      }
-    }
-
-    // 3. Polyfill / bind on window
+    Object.defineProperty(document, 'modelContext', {
+      value: ctx,
+      writable: true,
+      configurable: true,
+      enumerable: true,
+    })
     if (typeof window !== 'undefined') {
       try {
         Object.defineProperty(window, 'modelContext', {
@@ -202,9 +199,27 @@ export function ensureWebMCPContext(): ModelContext {
         ;(window as any).modelContext = ctx
       }
     }
-  } catch (err) {
-    if (process.env.NODE_ENV === 'development') {
-      console.warn('[WebMCP] Polyfill initialization warning:', err)
+    if (typeof navigator !== 'undefined') {
+      try {
+        Object.defineProperty(navigator, 'modelContext', {
+          value: ctx,
+          writable: true,
+          configurable: true,
+          enumerable: true,
+        })
+      } catch {
+        ;(navigator as any).modelContext = ctx
+      }
+    }
+  } catch {
+    if (typeof document !== 'undefined') {
+      ;(document as any).modelContext = ctx
+    }
+    if (typeof window !== 'undefined') {
+      ;(window as any).modelContext = ctx
+    }
+    if (typeof navigator !== 'undefined') {
+      ;(navigator as any).modelContext = ctx
     }
   }
 
