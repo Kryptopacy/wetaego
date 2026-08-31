@@ -57,13 +57,30 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
           type: 'string',
           description: 'Category name filter.'
         },
+        size: {
+          type: 'string',
+          description: 'Size filter for apparel, shoes, or portions (e.g. "S", "M", "L", "XL", "42", "14-inch").'
+        },
+        color: {
+          type: 'string',
+          description: 'Color filter for retail & boutique merchandise (e.g. "black", "emerald", "navy", "white").'
+        },
+        condition: {
+          type: 'string',
+          enum: ['new', 'refurbished', 'pre_owned'],
+          description: 'Product condition filter for retail, electronics, and devices.'
+        },
+        brand: {
+          type: 'string',
+          description: 'Brand or manufacturer filter.'
+        },
         dietary: {
           type: 'array',
           items: {
             type: 'string',
-            enum: ['vegan', 'vegetarian', 'halal', 'keto', 'gluten_free', 'dairy_free', 'nut_free']
+            enum: ['vegan', 'vegetarian', 'halal', 'kosher', 'gluten_free', 'dairy_free', 'nut_free', 'keto']
           },
-          description: 'Dietary filter tags.'
+          description: 'Dietary filter tags for dining and food venues.'
         },
         maxPrice: {
           type: 'number',
@@ -126,6 +143,16 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
               priceFormatted: { type: 'string' },
               description: { type: 'string' },
               dietaryTags: { type: 'array', items: { type: 'string' } },
+              attributes: {
+                type: 'object',
+                description: 'Product attributes for retail, electronics, apparel, and services',
+                properties: {
+                  sizes: { type: 'array', items: { type: 'string' } },
+                  colors: { type: 'array', items: { type: 'string' } },
+                  condition: { type: 'string', enum: ['new', 'refurbished', 'pre_owned'] },
+                  brand: { type: 'string' }
+                }
+              },
               isAvailable: { type: 'boolean' },
               hasModifiers: { type: 'boolean' },
               concept: { type: 'string' },
