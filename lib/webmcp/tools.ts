@@ -82,6 +82,22 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
           },
           description: 'Dietary filter tags for dining and food venues.'
         },
+        durationMinutes: {
+          type: 'integer',
+          minimum: 5,
+          maximum: 480,
+          description: 'Service duration filter in minutes for spas, salons, and consulting.'
+        },
+        guestCapacity: {
+          type: 'integer',
+          minimum: 1,
+          maximum: 500,
+          description: 'Minimum guest capacity for rooms, suites, and event spaces.'
+        },
+        roomType: {
+          type: 'string',
+          description: 'Room or accommodation type (e.g. "single", "double", "suite", "villa", "hall").'
+        },
         maxPrice: {
           type: 'number',
           minimum: 0,
@@ -145,12 +161,16 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
               dietaryTags: { type: 'array', items: { type: 'string' } },
               attributes: {
                 type: 'object',
-                description: 'Product attributes for retail, electronics, apparel, and services',
+                description: 'Product and service attributes across dining, retail, tech, wellness, hospitality',
                 properties: {
                   sizes: { type: 'array', items: { type: 'string' } },
                   colors: { type: 'array', items: { type: 'string' } },
                   condition: { type: 'string', enum: ['new', 'refurbished', 'pre_owned'] },
-                  brand: { type: 'string' }
+                  brand: { type: 'string' },
+                  durationMinutes: { type: 'integer' },
+                  guestCapacity: { type: 'integer' },
+                  roomType: { type: 'string' },
+                  amenities: { type: 'array', items: { type: 'string' } }
                 }
               },
               isAvailable: { type: 'boolean' },

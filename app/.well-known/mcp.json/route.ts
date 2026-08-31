@@ -12,7 +12,7 @@ const METADATA = {
   "tools": [
     {
       "name": "wetaego_query_catalog",
-      "description": "Search dishes, menu items, products, or services at a WETAEGO venue with size, color, condition, brand, dietary, price, and stock filters.",
+      "description": "Search dishes, menu items, retail goods, tech devices, wellness treatments, or hospitality stays at a WETAEGO venue with size, color, condition, brand, duration, guest capacity, dietary, price, and stock filters.",
       "parameters": {
         "type": "object",
         "properties": {
@@ -24,6 +24,9 @@ const METADATA = {
           "condition": { "type": "string", "enum": ["new", "refurbished", "pre_owned"], "description": "Product condition for retail and devices" },
           "brand": { "type": "string", "description": "Brand or manufacturer filter" },
           "dietary": { "type": "string", "enum": ["vegan", "vegetarian", "halal", "kosher", "gluten_free", "dairy_free", "nut_free", "keto"], "description": "Dietary filter for dining" },
+          "durationMinutes": { "type": "integer", "description": "Service duration in minutes for wellness/consulting" },
+          "guestCapacity": { "type": "integer", "description": "Guest capacity for stays, hotel rooms, and event venues" },
+          "roomType": { "type": "string", "description": "Room or accommodation type (e.g. single, double, suite, villa)" },
           "limit": { "type": "integer", "minimum": 1, "maximum": 100, "default": 20 }
         },
         "required": ["locationId"]
@@ -52,7 +55,11 @@ const METADATA = {
                     "sizes": { "type": "array", "items": { "type": "string" } },
                     "colors": { "type": "array", "items": { "type": "string" } },
                     "condition": { "type": "string", "enum": ["new", "refurbished", "pre_owned"] },
-                    "brand": { "type": "string" }
+                    "brand": { "type": "string" },
+                    "durationMinutes": { "type": "integer" },
+                    "guestCapacity": { "type": "integer" },
+                    "roomType": { "type": "string" },
+                    "amenities": { "type": "array", "items": { "type": "string" } }
                   }
                 },
                 "isAvailable": { "type": "boolean" }
@@ -85,7 +92,11 @@ const METADATA = {
                     "sizes": { "type": "array", "items": { "type": "string" } },
                     "colors": { "type": "array", "items": { "type": "string" } },
                     "condition": { "type": "string", "enum": ["new", "refurbished", "pre_owned"] },
-                    "brand": { "type": "string" }
+                    "brand": { "type": "string" },
+                    "durationMinutes": { "type": "integer" },
+                    "guestCapacity": { "type": "integer" },
+                    "roomType": { "type": "string" },
+                    "amenities": { "type": "array", "items": { "type": "string" } }
                   }
                 },
                 "isAvailable": { "type": "boolean" }
