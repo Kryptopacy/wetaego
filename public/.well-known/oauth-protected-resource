@@ -14,5 +14,11 @@
   "bearer_methods_supported": [
     "header"
   ],
-  "resource_documentation": "https://ourmenuos.online/docs"
+  "resource_documentation": "https://ourmenuos.online/docs",
+  "agent_discovery": {
+    "mcp_endpoint": "https://ourmenuos.online/.well-known/mcp.json",
+    "ai_catalog": "https://ourmenuos.online/.well-known/ai-catalog.json",
+    "llms_txt": "https://ourmenuos.online/llms.txt",
+    "agent_skills": "https://ourmenuos.online/.well-known/agent-skills/index.json"
+  }
 }

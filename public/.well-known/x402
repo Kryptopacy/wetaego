@@ -1,4 +1,9 @@
 {
+  "protocol": "x402",
+  "version": "1.0",
+  "name": "OurMenu OS x402 Payment Gateway",
+  "description": "Agent-native HTTP 402 micropayment protocol supporting instant automated agent settlement for dining orders, deposits, and AI credits.",
+  "facilitator": "https://ourmenuos.online/api/x402",
   "x402": {
     "version": "1.0",
     "facilitator": "https://ourmenuos.online/api/x402",
@@ -6,10 +11,6 @@
     "network": "base",
     "currency": "USDC"
   },
-  "version": "1.0",
-  "name": "OurMenu OS x402 Payment Gateway",
-  "description": "Agent-native HTTP 402 micropayment protocol supporting instant automated agent settlement for dining orders, deposits, and AI credits.",
-  "facilitator": "https://ourmenuos.online/api/x402",
   "supported_networks": ["base", "solana", "polygon", "ethereum"],
   "supported_tokens": ["USDC", "USDT", "SOL", "ETH"],
   "receiver_addresses": {

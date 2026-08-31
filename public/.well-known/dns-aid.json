@@ -38,5 +38,10 @@
         "format": "application/json"
       }
     }
+  ],
+  "dns_records_bind_format": [
+    "_index._agents.ourmenuos.online. 3600 IN HTTPS 1 ourmenuos.online. alpn=\"h2,h3\" key65300=\"https://ourmenuos.online/.well-known/ai-catalog.json\"",
+    "_a2a._agents.ourmenuos.online. 3600 IN HTTPS 1 ourmenuos.online. alpn=\"h2,h3\" key65300=\"https://ourmenuos.online/api/chat\"",
+    "_mcp._agents.ourmenuos.online. 3600 IN HTTPS 1 ourmenuos.online. alpn=\"h2,h3\" key65300=\"https://ourmenuos.online/.well-known/mcp.json\""
   ]
 }

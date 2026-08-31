@@ -1,17 +1,144 @@
 import { NextResponse } from 'next/server'
-import { getMCPManifest } from '@/lib/webmcp/manifest'
 
 export const dynamic = 'force-static'
-export const revalidate = 3600
+export const revalidate = 86400
+
+const METADATA = {
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "name": "ourmenuos-mcp",
+  "version": "1.0.0",
+  "description": "Model Context Protocol (MCP) server manifest for WETAEGO — Digital Storefronts & Physical Operations Layer",
+  "homepage": "https://ourmenuos.online/docs",
+  "tools": [
+    {
+      "name": "wetaego_query_catalog",
+      "description": "Search dishes, menu items, products, or services at a WETAEGO venue with dietary, price, and stock filters.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "locationId": { "type": "string", "description": "Venue location UUID" },
+          "query": { "type": "string", "description": "Search keywords" },
+          "dietary": { "type": "string", "enum": ["vegan", "halal", "gluten_free", "nut_free", "keto"] },
+          "limit": { "type": "integer", "minimum": 1, "maximum": 100, "default": 20 }
+        },
+        "required": ["locationId"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": ["items", "totalFound"],
+        "properties": {
+          "totalFound": { "type": "integer" },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["itemId", "name", "price", "isAvailable"],
+              "properties": {
+                "itemId": { "type": "string" },
+                "name": { "type": "string" },
+                "category": { "type": "string" },
+                "price": { "type": "number" },
+                "priceFormatted": { "type": "string" },
+                "isAvailable": { "type": "boolean" }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "wetaego_create_order",
+      "description": "Submit a validated customer order with line items, modifier selections, and table number.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "locationId": { "type": "string", "description": "Venue location UUID" },
+          "tableIdentifier": { "type": "string", "description": "Table or room number" },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "itemId": { "type": "string" },
+                "quantity": { "type": "integer" },
+                "notes": { "type": "string" }
+              },
+              "required": ["itemId", "quantity"]
+            }
+          }
+        },
+        "required": ["locationId", "items"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": ["orderId", "status", "total"],
+        "properties": {
+          "orderId": { "type": "string" },
+          "status": { "type": "string" },
+          "total": { "type": "number" },
+          "totalFormatted": { "type": "string" }
+        }
+      }
+    },
+    {
+      "name": "wetaego_check_availability",
+      "description": "Query available appointment booking slots for salon, spa, wellness, or consulting services.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "locationId": { "type": "string" },
+          "date": { "type": "string", "format": "date", "description": "YYYY-MM-DD date" },
+          "serviceId": { "type": "string" }
+        },
+        "required": ["locationId", "date"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": ["availableSlots"],
+        "properties": {
+          "date": { "type": "string" },
+          "availableSlots": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    },
+    {
+      "name": "wetaego_request_staff",
+      "description": "Trigger floor staff call chime (water_refill, bill_check, table_cleanup, waiter_assistance, order_inquiry, manager_escalation) at a WETAEGO venue.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "locationId": { "type": "string" },
+          "tableIdentifier": { "type": "string" },
+          "reason": { "type": "string", "enum": ["water_refill", "bill_check", "table_cleanup", "waiter_assistance", "order_inquiry", "manager_escalation"] }
+        },
+        "required": ["locationId", "tableIdentifier", "reason"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": ["success", "message"],
+        "properties": {
+          "success": { "type": "boolean" },
+          "message": { "type": "string" }
+        }
+      }
+    }
+  ]
+}
+
+const HEADERS = {
+  'Content-Type': 'application/json; charset=utf-8',
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, OPTIONS, HEAD',
+  'Cache-Control': 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=86400'
+}
 
 export async function GET() {
-  const manifest = getMCPManifest()
+  return NextResponse.json(METADATA, { status: 200, headers: HEADERS })
+}
 
-  return NextResponse.json(manifest, {
-    headers: {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*',
-      'Cache-Control': 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400'
-    }
-  })
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 204, headers: HEADERS })
 }

@@ -63,6 +63,8 @@ export const AGENT_LINK_HEADERS = [
   '</llms.txt>; rel="describedby"',
   '</.well-known/oauth-authorization-server>; rel="oauth-authorization-server"',
   '</.well-known/oauth-protected-resource>; rel="oauth-protected-resource"',
+  '</.well-known/x402>; rel="payment"',
+  '</.well-known/dns-aid>; rel="dns-aid"',
   '</.well-known/ai-catalog.json>; rel="ai-catalog"',
   '</.well-known/agent-skills/index.json>; rel="agent-skills"',
   '</.well-known/mcp.json>; rel="mcp"',
@@ -92,9 +94,11 @@ export async function proxy(request: NextRequest) {
     response.headers.set('Vary', 'Accept, Accept-Encoding')
     response.headers.set('Access-Control-Allow-Origin', '*')
     if (path.includes('x402')) {
+      const treasuryWallet = process.env.X402_TREASURY_WALLET || process.env.NEXT_PUBLIC_TREASURY_WALLET || '0x87A8f8303e339F091F8402D3b934789518d6e9d6'
       response.headers.set('X-402-Payment-Required', 'true')
       response.headers.set('X-402-Facilitator', 'https://ourmenuos.online/api/x402')
-      response.headers.set('WWW-Authenticate', 'X402 token="USDC", network="base", address="0x87A8f8303e339F091F8402D3b934789518d6e9d6", amount="0.05", facilitator="https://ourmenuos.online/api/x402"')
+      response.headers.set('X-402-Address', treasuryWallet)
+      response.headers.set('WWW-Authenticate', `X402 token="USDC", network="base", address="${treasuryWallet}", amount="0.05", facilitator="https://ourmenuos.online/api/x402"`)
     }
     return response
   }

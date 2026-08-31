@@ -35,6 +35,8 @@ export interface WebMCPTool<TInput = any, TOutput = any> {
   outputSchema?: JSONSchema;
   /** Mirror of outputSchema — explicit field the WebMCP scanner reads for result type inference. */
   resultSchema?: JSONSchema;
+  /** Additional alias for response schema */
+  responseSchema?: JSONSchema;
   /** The page path this tool is registered on (e.g. '/', '/m/{slug}', '/m/{slug}/checkout'). Used by WebMCP directory for per-page tool attribution. */
   page?: string;
   execute: (input: TInput) => Promise<TOutput> | TOutput;
@@ -46,16 +48,25 @@ export interface WebMCPRegisteredTool {
   inputSchema: JSONSchema;
   outputSchema?: JSONSchema;
   resultSchema?: JSONSchema;
+  responseSchema?: JSONSchema;
   page?: string;
   unregister: () => void;
 }
 
+export interface ProvideContextOptions {
+  tools?: WebMCPTool[];
+  signal?: AbortSignal;
+  [key: string]: any;
+}
+
 export interface ModelContext {
   registerTool: <TInput = any, TOutput = any>(tool: WebMCPTool<TInput, TOutput>) => WebMCPRegisteredTool | void;
+  provideContext?: (options: ProvideContextOptions | WebMCPTool[]) => { unregister: () => void } | void;
   unregisterTool?: (name: string) => void;
   getTools?: () => WebMCPTool[];
   executeTool?: (name: string, input: any) => Promise<any>;
   readonly registeredTools?: Map<string, WebMCPTool>;
+  tools?: WebMCPTool[];
 }
 
 declare global {
@@ -63,6 +74,9 @@ declare global {
     modelContext?: ModelContext;
   }
   interface Window {
+    modelContext?: ModelContext;
+  }
+  interface Navigator {
     modelContext?: ModelContext;
   }
 }

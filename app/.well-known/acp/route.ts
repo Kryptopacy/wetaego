@@ -1,49 +1,37 @@
 import { NextResponse } from 'next/server'
 
-export async function GET() {
-  const acpConfig = {
-    protocol: {
-      name: 'acp',
-      version: '1.0.0'
-    },
-    name: 'WETAEGO Agentic Commerce Protocol',
-    description: 'Agentic Commerce Protocol (ACP) discovery manifest for autonomous agent browsing, cart building, order placement, and booking.',
-    api_base_url: 'https://ourmenuos.online/api',
-    transports: ['https', 'mcp', 'websocket'],
-    capabilities: {
-      services: [
-        'catalog_search',
-        'cart_management',
-        'order_checkout',
-        'service_booking',
-        'receipt_printing',
-        'payment_roulette'
-      ],
-      settlement_methods: [
-        'paystack',
-        'bachs',
-        'x402',
-        'mpp',
-        'crypto_usdc'
-      ]
-    },
-    endpoints: {
-      catalog: 'https://ourmenuos.online/api/chat',
-      orders: 'https://ourmenuos.online/api/orders',
-      bookings: 'https://ourmenuos.online/api/bookings',
-      ocr: 'https://ourmenuos.online/api/ai/parse-menu',
-      mcp_server: 'https://ourmenuos.online/.well-known/mcp.json',
-      skills_index: 'https://ourmenuos.online/.well-known/agent-skills/index.json'
-    }
-  }
+export const dynamic = 'force-static'
+export const revalidate = 86400
 
-  return NextResponse.json(acpConfig, {
-    status: 200,
-    headers: {
-      'Content-Type': 'application/json; charset=utf-8',
-      'Access-Control-Allow-Origin': '*',
-      'Cache-Control': 'public, max-age=3600, s-maxage=86400',
-      'Vary': 'Accept, Accept-Encoding'
-    }
-  })
+const METADATA = {
+  "acp": {
+    "version": "1.0",
+    "supported_protocols": ["mcp", "ucp", "x402", "openapi"],
+    "name": "OurMenu OS Agent Commerce Profile",
+    "description": "Agent Commerce Profile linking storefront tools, settlement gateways, and live catalog APIs for autonomous agents."
+  },
+  "endpoints": {
+    "mcp": "https://ourmenuos.online/.well-known/mcp.json",
+    "ucp": "https://ourmenuos.online/.well-known/ucp",
+    "x402": "https://ourmenuos.online/api/x402",
+    "oauth_metadata": "https://ourmenuos.online/.well-known/oauth-protected-resource",
+    "dns_aid": "https://ourmenuos.online/.well-known/dns-aid",
+    "openapi": "https://ourmenuos.online/openapi.json",
+    "llms": "https://ourmenuos.online/llms.txt"
+  }
+}
+
+const HEADERS = {
+  'Content-Type': 'application/json; charset=utf-8',
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, OPTIONS, HEAD',
+  'Cache-Control': 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=86400'
+}
+
+export async function GET() {
+  return NextResponse.json(METADATA, { status: 200, headers: HEADERS })
+}
+
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 204, headers: HEADERS })
 }

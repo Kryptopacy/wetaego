@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "name": "wetaego-mcp",
+  "name": "ourmenuos-mcp",
   "version": "1.0.0",
   "description": "Model Context Protocol (MCP) server manifest for WETAEGO — Digital Storefronts & Physical Operations Layer",
   "homepage": "https://ourmenuos.online/docs",
