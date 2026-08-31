@@ -166,7 +166,8 @@ export default async function RootLayout({
               ]
             })
           }}
-        />
+        <link rel="webmcp" href="/.well-known/mcp.json" />
+        <link rel="model-context-protocol" href="/.well-known/mcp.json" />
       </head>
       <body className="min-h-full flex flex-col bg-zinc-950 text-zinc-50">
         <PostHogProvider>

@@ -18,14 +18,20 @@ class WebMCPRegistry implements ModelContext {
     return this.getTools()
   }
 
-  registerTool<TInput = any, TOutput = any>(tool: WebMCPTool<TInput, TOutput>): WebMCPRegisteredTool {
-    const schema = tool.resultSchema || tool.outputSchema || (tool as any).responseSchema
-    // Enrich the tool with resultSchema, outputSchema, and responseSchema
+  registerTool<TInput = any, TOutput = any>(tool: WebMCPTool<TInput, TOutput>, handler?: (input: TInput) => Promise<TOutput>): WebMCPRegisteredTool {
+    const schema = tool.resultSchema || tool.outputSchema || (tool as any).responseSchema || (tool as any).returns || (tool as any).output
+    const execFn = handler || tool.execute
+    // Enrich the tool with resultSchema, outputSchema, responseSchema, returns, and aliases
     const enriched: WebMCPTool<TInput, TOutput> = {
       ...tool,
       outputSchema: tool.outputSchema || schema,
       resultSchema: tool.resultSchema || schema,
       responseSchema: (tool as any).responseSchema || tool.resultSchema || schema,
+      returns: (tool as any).returns || tool.resultSchema || schema,
+      returnSchema: (tool as any).returnSchema || tool.resultSchema || schema,
+      output: (tool as any).output || tool.resultSchema || schema,
+      result: (tool as any).result || tool.resultSchema || schema,
+      execute: execFn,
     }
     this._toolsMap.set(tool.name, enriched)
     this.notifyListeners()
@@ -41,6 +47,7 @@ class WebMCPRegistry implements ModelContext {
       outputSchema: enriched.outputSchema,
       resultSchema: enriched.resultSchema,
       responseSchema: enriched.responseSchema,
+      returns: (enriched as any).returns,
       page: enriched.page,
       unregister: () => this.unregisterTool(tool.name)
     }
@@ -53,7 +60,7 @@ class WebMCPRegistry implements ModelContext {
 
     const registeredNames: string[] = []
     toolList.forEach(tool => {
-      this.registerTool(tool)
+      this.registerTool(tool, tool.execute)
       registeredNames.push(tool.name)
     })
 
@@ -124,25 +131,37 @@ export function ensureWebMCPContext(): ModelContext {
     const existing = (document as any)?.modelContext
     if (existing && typeof existing.registerTool === 'function' && existing !== ctx) {
       const originalRegister = existing.registerTool.bind(existing)
-      existing.registerTool = (tool: any) => {
-        const schema = tool.resultSchema || tool.outputSchema || tool.responseSchema
+      existing.registerTool = (tool: any, handler?: any) => {
+        const schema = tool.resultSchema || tool.outputSchema || tool.responseSchema || tool.returns || tool.output
+        const execFn = handler || tool.execute
         const enriched = {
           ...tool,
           outputSchema: tool.outputSchema || schema,
           resultSchema: tool.resultSchema || schema,
           responseSchema: tool.responseSchema || schema,
+          returns: tool.returns || schema,
+          returnSchema: tool.returnSchema || schema,
+          output: tool.output || schema,
+          result: tool.result || schema,
+          execute: execFn,
         }
-        ctx.registerTool(enriched)
+        ctx.registerTool(enriched, execFn)
         try {
-          return originalRegister(enriched)
+          return originalRegister(enriched, execFn)
         } catch {
-          return {
-            name: enriched.name,
-            description: enriched.description,
-            inputSchema: enriched.inputSchema,
-            outputSchema: enriched.outputSchema,
-            resultSchema: enriched.resultSchema,
-            unregister: () => ctx.unregisterTool(enriched.name),
+          try {
+            return originalRegister(enriched)
+          } catch {
+            return {
+              name: enriched.name,
+              description: enriched.description,
+              inputSchema: enriched.inputSchema,
+              outputSchema: enriched.outputSchema,
+              resultSchema: enriched.resultSchema,
+              responseSchema: enriched.responseSchema,
+              returns: enriched.returns,
+              unregister: () => ctx.unregisterTool(enriched.name),
+            }
           }
         }
       }
