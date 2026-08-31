@@ -83,6 +83,14 @@ export function WebMCPProvider({
     const contextApi = ensureWebMCPContext()
     const tools = createStorefrontWebMCPTools(context)
 
+    if (typeof contextApi.provideContext === 'function') {
+      try {
+        contextApi.provideContext({ tools })
+      } catch (e) {
+        // ignore provideContext warning
+      }
+    }
+
     // Register all tools onto document.modelContext
     const cleanups: (() => void)[] = []
     tools.forEach(tool => {
