@@ -18,7 +18,7 @@ class WebMCPRegistry implements ModelContext {
     return this.getTools()
   }
 
-  registerTool<TInput = any, TOutput = any>(tool: WebMCPTool<TInput, TOutput>, handler?: (input: TInput) => Promise<TOutput>): WebMCPRegisteredTool {
+  registerTool<TInput = any, TOutput = any>(tool: WebMCPTool<TInput, TOutput>, handler?: (input: TInput) => Promise<TOutput> | TOutput): WebMCPRegisteredTool {
     const schema = tool.resultSchema || tool.outputSchema || (tool as any).responseSchema || (tool as any).returns || (tool as any).output
     const execFn = handler || tool.execute
     // Enrich the tool with resultSchema, outputSchema, responseSchema, returns, and aliases

@@ -26,6 +26,7 @@ export interface JSONSchema {
   properties: Record<string, JSONSchemaProperty>;
   required?: string[];
   additionalProperties?: boolean | JSONSchemaProperty;
+  [key: string]: any;
 }
 
 export interface WebMCPTool<TInput = any, TOutput = any> {
@@ -37,9 +38,15 @@ export interface WebMCPTool<TInput = any, TOutput = any> {
   resultSchema?: JSONSchema;
   /** Additional alias for response schema */
   responseSchema?: JSONSchema;
+  /** Schema aliases for multi-protocol compatibility */
+  returns?: JSONSchema;
+  returnSchema?: JSONSchema;
+  output?: JSONSchema;
+  result?: JSONSchema;
   /** The page path this tool is registered on (e.g. '/', '/m/{slug}', '/m/{slug}/checkout'). Used by WebMCP directory for per-page tool attribution. */
   page?: string;
   execute: (input: TInput) => Promise<TOutput> | TOutput;
+  [key: string]: any;
 }
 
 export interface WebMCPRegisteredTool {
@@ -49,8 +56,13 @@ export interface WebMCPRegisteredTool {
   outputSchema?: JSONSchema;
   resultSchema?: JSONSchema;
   responseSchema?: JSONSchema;
+  returns?: JSONSchema;
+  returnSchema?: JSONSchema;
+  output?: JSONSchema;
+  result?: JSONSchema;
   page?: string;
   unregister: () => void;
+  [key: string]: any;
 }
 
 export interface ProvideContextOptions {
@@ -60,7 +72,7 @@ export interface ProvideContextOptions {
 }
 
 export interface ModelContext {
-  registerTool: <TInput = any, TOutput = any>(tool: WebMCPTool<TInput, TOutput>) => WebMCPRegisteredTool | void;
+  registerTool: <TInput = any, TOutput = any>(tool: WebMCPTool<TInput, TOutput>, handler?: (input: TInput) => Promise<TOutput> | TOutput) => WebMCPRegisteredTool | void;
   provideContext?: (options: ProvideContextOptions | WebMCPTool[]) => { unregister: () => void } | void;
   unregisterTool?: (name: string) => void;
   getTools?: () => WebMCPTool[];
