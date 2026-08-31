@@ -37,12 +37,8 @@ export function getMCPManifest() {
             name: { type: "string", description: "Specific business or brand name." },
             industry: {
               type: "string",
-              enum: [
-                "hospitality", "dining", "restaurant", "wellness", "spa", "salon",
-                "retail", "boutique", "electronics", "gadgets", "hotel", "shortlet",
-                "services", "creator", "repairs"
-              ],
-              description: "Industry vertical filter."
+              enum: ["dining", "hospitality", "wellness", "retail", "services", "creator"],
+              description: "Non-overlapping industry vertical filter: 'dining', 'hospitality', 'wellness', 'retail', 'services', 'creator'."
             },
             slug: { type: "string", description: "Direct URL slug of the venue." },
             limit: { type: "integer", minimum: 1, maximum: 50, default: 10, description: "Maximum number of venues to return." }

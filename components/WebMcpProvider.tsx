@@ -33,12 +33,8 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
         name: { type: 'string', description: 'Exact or partial business name (e.g. "Pacy Group", "Emerald Cafe").' },
         industry: {
           type: 'string',
-          enum: [
-            'hospitality', 'dining', 'restaurant', 'wellness', 'spa', 'salon',
-            'retail', 'boutique', 'electronics', 'gadgets', 'hotel', 'shortlet',
-            'services', 'creator', 'repairs'
-          ],
-          description: 'Industry vertical filter.',
+          enum: ['dining', 'hospitality', 'wellness', 'retail', 'services', 'creator'],
+          description: 'Non-overlapping industry vertical filter: "dining" (restaurants, cafes, bars), "hospitality" (hotels, stays, resorts), "wellness" (spas, salons, beauty), "retail" (boutiques, electronics, supermarkets), "services" (repairs, consulting), "creator" (media, studios, rate cards).',
         },
         slug: { type: 'string', description: 'Exact venue slug identifier (e.g. "demo", "ocean-basket").' },
         limit: { type: 'integer', minimum: 1, maximum: 50, default: 10, description: 'Max venues to return (1-50).' },

@@ -18,12 +18,34 @@ const METADATA = {
         "properties": {
           "locationId": { "type": "string", "description": "Venue location UUID" },
           "query": { "type": "string", "description": "Search keywords" },
-          "dietary": { "type": "string", "enum": ["vegan", "halal", "gluten_free", "nut_free", "keto"] },
+          "dietary": { "type": "string", "enum": ["vegan", "vegetarian", "halal", "kosher", "gluten_free", "dairy_free", "nut_free", "keto"] },
           "limit": { "type": "integer", "minimum": 1, "maximum": 100, "default": 20 }
         },
         "required": ["locationId"]
       },
       "outputSchema": {
+        "type": "object",
+        "required": ["items", "totalFound"],
+        "properties": {
+          "totalFound": { "type": "integer" },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["itemId", "name", "price", "isAvailable"],
+              "properties": {
+                "itemId": { "type": "string" },
+                "name": { "type": "string" },
+                "category": { "type": "string" },
+                "price": { "type": "number" },
+                "priceFormatted": { "type": "string" },
+                "isAvailable": { "type": "boolean" }
+              }
+            }
+          }
+        }
+      },
+      "resultSchema": {
         "type": "object",
         "required": ["items", "totalFound"],
         "properties": {
@@ -78,6 +100,16 @@ const METADATA = {
           "total": { "type": "number" },
           "totalFormatted": { "type": "string" }
         }
+      },
+      "resultSchema": {
+        "type": "object",
+        "required": ["orderId", "status", "total"],
+        "properties": {
+          "orderId": { "type": "string" },
+          "status": { "type": "string" },
+          "total": { "type": "number" },
+          "totalFormatted": { "type": "string" }
+        }
       }
     },
     {
@@ -102,6 +134,17 @@ const METADATA = {
             "items": { "type": "string" }
           }
         }
+      },
+      "resultSchema": {
+        "type": "object",
+        "required": ["availableSlots"],
+        "properties": {
+          "date": { "type": "string" },
+          "availableSlots": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
       }
     },
     {
@@ -117,6 +160,14 @@ const METADATA = {
         "required": ["locationId", "tableIdentifier", "reason"]
       },
       "outputSchema": {
+        "type": "object",
+        "required": ["success", "message"],
+        "properties": {
+          "success": { "type": "boolean" },
+          "message": { "type": "string" }
+        }
+      },
+      "resultSchema": {
         "type": "object",
         "required": ["success", "message"],
         "properties": {

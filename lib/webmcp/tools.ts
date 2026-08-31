@@ -1024,23 +1024,30 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
     })
   }
 
-  // Wrap all tools with real-time UI/UX event dispatch
-  return tools.map(tool => ({
-    ...tool,
-    execute: async (args: any) => {
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(
-          new CustomEvent('webmcp:action', {
-            detail: {
-              tool: tool.name,
-              args,
-              timestamp: Date.now(),
-              locationName
-            }
-          })
-        )
+  // Wrap all tools with real-time UI/UX event dispatch and explicit schema guarantees
+  return tools.map(tool => {
+    const schema = tool.resultSchema || tool.outputSchema
+    return {
+      ...tool,
+      outputSchema: tool.outputSchema || schema,
+      resultSchema: tool.resultSchema || schema,
+      responseSchema: (tool as any).responseSchema || schema,
+      returns: (tool as any).returns || schema,
+      execute: async (args: any) => {
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(
+            new CustomEvent('webmcp:action', {
+              detail: {
+                tool: tool.name,
+                args,
+                timestamp: Date.now(),
+                locationName
+              }
+            })
+          )
+        }
+        return tool.execute(args)
       }
-      return tool.execute(args)
     }
-  }))
+  })
 }
