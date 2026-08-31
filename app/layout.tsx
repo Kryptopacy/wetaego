@@ -166,6 +166,7 @@ export default async function RootLayout({
               ]
             })
           }}
+        />
         <link rel="webmcp" href="/.well-known/mcp.json" />
         <link rel="model-context-protocol" href="/.well-known/mcp.json" />
       </head>
