@@ -546,8 +546,17 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
               lineTotalFormatted: { type: 'string' },
               modifiers: {
                 type: 'array',
-                description: 'Applied modifier and option labels for this line item',
-                items: { type: 'string' }
+                description: 'Applied modifier and option selections for this line item',
+                items: {
+                  type: 'object',
+                  required: ['name', 'value'],
+                  properties: {
+                    modifierId: { type: 'string' },
+                    name: { type: 'string' },
+                    value: { type: 'string' },
+                    priceDelta: { type: 'number' }
+                  }
+                }
               }
             }
           }

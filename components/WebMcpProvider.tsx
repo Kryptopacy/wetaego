@@ -557,6 +557,20 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
               unitPriceFormatted: { type: 'string', description: 'Formatted unit price' },
               lineTotal: { type: 'number', description: 'Total price for this line' },
               lineTotalFormatted: { type: 'string', description: 'Formatted total price for this line' },
+              modifiers: {
+                type: 'array',
+                description: 'Selected modifier options for this line item',
+                items: {
+                  type: 'object',
+                  required: ['name', 'value'],
+                  properties: {
+                    modifierId: { type: 'string', description: 'Modifier identifier' },
+                    name: { type: 'string', description: 'Modifier category or group name' },
+                    value: { type: 'string', description: 'Selected option value' },
+                    priceDelta: { type: 'number', description: 'Price adjustment' },
+                  },
+                },
+              },
             },
           },
         },
@@ -589,6 +603,20 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
               unitPriceFormatted: { type: 'string', description: 'Formatted unit price' },
               lineTotal: { type: 'number', description: 'Total price for this line' },
               lineTotalFormatted: { type: 'string', description: 'Formatted total price for this line' },
+              modifiers: {
+                type: 'array',
+                description: 'Selected modifier options for this line item',
+                items: {
+                  type: 'object',
+                  required: ['name', 'value'],
+                  properties: {
+                    modifierId: { type: 'string', description: 'Modifier identifier' },
+                    name: { type: 'string', description: 'Modifier category or group name' },
+                    value: { type: 'string', description: 'Selected option value' },
+                    priceDelta: { type: 'number', description: 'Price adjustment' },
+                  },
+                },
+              },
             },
           },
         },
@@ -656,8 +684,17 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
               lineTotalFormatted: { type: 'string', description: 'Formatted total price for this line' },
               modifiers: {
                 type: 'array',
-                description: 'Applied modifier and option labels for this line item',
-                items: { type: 'string', description: 'Selected modifier option name' },
+                description: 'Applied modifier and option selections for this line item',
+                items: {
+                  type: 'object',
+                  required: ['name', 'value'],
+                  properties: {
+                    modifierId: { type: 'string', description: 'Modifier identifier' },
+                    name: { type: 'string', description: 'Modifier group name' },
+                    value: { type: 'string', description: 'Selected option value' },
+                    priceDelta: { type: 'number', description: 'Price adjustment' },
+                  },
+                },
               },
             },
           },
@@ -697,8 +734,17 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
               lineTotalFormatted: { type: 'string' },
               modifiers: {
                 type: 'array',
-                description: 'Applied modifier and option labels for this line item',
-                items: { type: 'string', description: 'Selected modifier option name' },
+                description: 'Applied modifier and option selections for this line item',
+                items: {
+                  type: 'object',
+                  required: ['name', 'value'],
+                  properties: {
+                    modifierId: { type: 'string', description: 'Modifier identifier' },
+                    name: { type: 'string', description: 'Modifier group name' },
+                    value: { type: 'string', description: 'Selected option value' },
+                    priceDelta: { type: 'number', description: 'Price adjustment' },
+                  },
+                },
               },
             },
           },
