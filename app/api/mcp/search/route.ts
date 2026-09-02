@@ -1,100 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
+import { DEMO_ITEMS } from '@/lib/mcp/catalog'
 
 export const dynamic = 'force-dynamic'
-
-export const DEFAULT_FALLBACK_ITEMS = [
-  {
-    itemId: 'item_vegan_avocado',
-    name: 'Avocado Tartine & Microgreens',
-    category: 'Starters',
-    price: 11.0,
-    priceMinor: 1650000,
-    priceFormatted: '$11.00 USD',
-    description: 'Sourdough toast with crushed Hass avocado, lemon oil, chili flakes, and organic microgreens.',
-    dietaryTags: ['vegan', 'vegetarian', 'dairy_free'],
-    isAvailable: true,
-    hasModifiers: true,
-    attributes: { brand: 'Pacy Grills & Lounge' },
-    conceptSlug: 'restaurant',
-    conceptUrl: 'https://ourmenuos.online/m/demo/p/restaurant',
-  },
-  {
-    itemId: 'item_green_salad',
-    name: 'Green Goddess Harvest Bowl',
-    category: 'Mains',
-    price: 12.0,
-    priceMinor: 1800000,
-    priceFormatted: '$12.00 USD',
-    description: 'Baby kale, shaved fennel, cucumber ribbons, toasted pumpkin seeds, and green herb vinaigrette.',
-    dietaryTags: ['vegan', 'vegetarian', 'gluten_free', 'dairy_free'],
-    isAvailable: true,
-    hasModifiers: false,
-    attributes: { brand: 'Pacy Grills & Lounge' },
-    conceptSlug: 'restaurant',
-    conceptUrl: 'https://ourmenuos.online/m/demo/p/restaurant',
-  },
-  {
-    itemId: 'item_vegan_tofu_bowl',
-    name: 'Spicy Sesame Tofu Bowl',
-    category: 'Mains',
-    price: 14.5,
-    priceMinor: 2175000,
-    priceFormatted: '$14.50 USD',
-    description: 'Crispy marinated organic tofu, steamed brown rice, edamame, pickled cucumber, and toasted sesame tahini glaze.',
-    dietaryTags: ['vegan', 'vegetarian', 'gluten_free', 'dairy_free', 'halal'],
-    isAvailable: true,
-    hasModifiers: true,
-    attributes: { brand: 'Pacy Grills & Lounge' },
-    conceptSlug: 'restaurant',
-    conceptUrl: 'https://ourmenuos.online/m/demo/p/restaurant',
-  },
-  {
-    itemId: 'item_truffle_fries',
-    name: 'Crispy Truffle Herb Fries',
-    category: 'Sides',
-    price: 8.5,
-    priceMinor: 1275000,
-    priceFormatted: '$8.50 USD',
-    description: 'Hand-cut russet potatoes tossed with white truffle oil, sea salt, and fresh parsley.',
-    dietaryTags: ['vegan', 'vegetarian', 'gluten_free'],
-    isAvailable: true,
-    hasModifiers: false,
-    attributes: { brand: 'Pacy Grills & Lounge' },
-    conceptSlug: 'restaurant',
-    conceptUrl: 'https://ourmenuos.online/m/demo/p/restaurant',
-  },
-  {
-    itemId: 'item_artisan_matcha',
-    name: 'Iced Ceremonial Matcha Latte',
-    category: 'Beverages',
-    price: 6.5,
-    priceMinor: 975000,
-    priceFormatted: '$6.50 USD',
-    description: 'First-harvest Uji ceremonial matcha whisked with organic oat milk and a touch of agave.',
-    dietaryTags: ['vegan', 'vegetarian', 'dairy_free', 'gluten_free'],
-    isAvailable: true,
-    hasModifiers: false,
-    attributes: { brand: 'Pacy Grills & Lounge' },
-    conceptSlug: 'restaurant',
-    conceptUrl: 'https://ourmenuos.online/m/demo/p/restaurant',
-  },
-  {
-    itemId: 'item_grilled_salmon',
-    name: 'Pan-Seared Atlantic Salmon',
-    category: 'Mains',
-    price: 26.0,
-    priceMinor: 3900000,
-    priceFormatted: '$26.00 USD',
-    description: 'Fresh wild-caught Atlantic salmon filet with roasted asparagus and lemon herb butter.',
-    dietaryTags: ['gluten_free', 'halal'],
-    isAvailable: true,
-    hasModifiers: false,
-    attributes: { brand: 'Pacy Grills & Lounge' },
-    conceptSlug: 'restaurant',
-    conceptUrl: 'https://ourmenuos.online/m/demo/p/restaurant',
-  },
-]
 
 export async function GET(req: NextRequest) {
   try {
@@ -114,7 +22,7 @@ export async function GET(req: NextRequest) {
     const targetCurrency = isNairaMode ? 'NGN' : 'USD'
     const FX_RATE = 1500
 
-    let items = [...DEFAULT_FALLBACK_ITEMS]
+    let items = [...DEMO_ITEMS]
 
     // Attempt live Supabase query
     try {
@@ -202,7 +110,7 @@ export async function GET(req: NextRequest) {
     const paged = results.slice(offset, offset + limit)
 
     return NextResponse.json({
-      venue: 'Pacy Grills & Lounge (Pacy Group)',
+      venue: 'Pacy Group Multi-Concept Enterprise',
       currency: targetCurrency,
       totalFound: results.length,
       limit,
@@ -215,6 +123,3 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Search failed' }, { status: 500 })
   }
 }
-
-export { DEFAULT_FALLBACK_ITEMS as DEMO_ITEMS }
-
