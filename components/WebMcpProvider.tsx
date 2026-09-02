@@ -27,14 +27,16 @@ export const DEMO_VENUES = [
     currency: 'USD',
     venueUrl: 'https://ourmenuos.online/m/demo/p/restaurant',
     description: 'Premier dining and multi-concept enterprise featuring Pacy Grills & Lounge (Gourmet Grills, Artisanal Vegan & Gluten-Free Specialties, Cocktails), Pacy Wellness Spa, Pacy Boutique, and Serviced Stays.',
-  },
-  {
-    slug: 'pacy-grills',
-    name: 'Pacy Grills & Lounge',
-    industry: 'dining',
-    currency: 'USD',
-    venueUrl: 'https://ourmenuos.online/m/demo/p/restaurant',
-    description: 'Gourmet fine dining steakhouse, flame-grilled specialties, vegan bowls, artisan starters, and craft cocktails.',
+    concepts: [
+      { slug: 'restaurant', title: 'Pacy Grills & Lounge', preset: 'restaurant', templateType: 'catalog' },
+      { slug: 'pacy-wellness', title: 'Pacy Wellness Spa', preset: 'spa_wellness', templateType: 'booking' },
+      { slug: 'pacy-boutique', title: 'Pacy Fashion', preset: 'boutique', templateType: 'catalog' },
+      { slug: 'pacy-gadgets', title: 'Pacy Gadgets', preset: 'tech', templateType: 'catalog' },
+      { slug: 'pacy-stays', title: 'Pacy Stays', preset: 'short_stay', templateType: 'listing' },
+      { slug: 'pacy-hotels', title: 'Pacy Hotels', preset: 'hotel', templateType: 'booking' },
+      { slug: 'pacy-repairs', title: 'Pacy Gadget Repairs', preset: 'repair_services', templateType: 'quote' },
+      { slug: 'pacy-media', title: 'Pacy Media Studio', preset: 'creator_rate_card', templateType: 'booking' },
+    ],
   },
   {
     slug: 'emerald-cafe',
@@ -43,6 +45,7 @@ export const DEMO_VENUES = [
     currency: 'USD',
     venueUrl: 'https://ourmenuos.online/m/emerald-cafe',
     description: 'Casual organic bistro and espresso bar with fresh plant-based meals and pastries.',
+    concepts: [{ slug: 'menu', title: 'Bistro Menu', preset: 'restaurant', templateType: 'catalog' }],
   },
   {
     slug: 'ocean-ember',
@@ -51,6 +54,7 @@ export const DEMO_VENUES = [
     currency: 'USD',
     venueUrl: 'https://ourmenuos.online/m/ocean-ember',
     description: 'Fine dining steakhouse and fresh seafood grill.',
+    concepts: [{ slug: 'menu', title: 'Steak & Grill Menu', preset: 'restaurant', templateType: 'catalog' }],
   },
   {
     slug: 'lotus-spa',
@@ -59,8 +63,53 @@ export const DEMO_VENUES = [
     currency: 'USD',
     venueUrl: 'https://ourmenuos.online/m/lotus-spa',
     description: 'Holistic day spa treatments, massages, aromatherapy, and wellness packages.',
+    concepts: [{ slug: 'treatments', title: 'Spa & Wellness Treatments', preset: 'spa_wellness', templateType: 'booking' }],
   },
 ]
+
+/**
+ * Calculates a semantic similarity score between an agent query and a business concept.
+ * Dynamically resolves fuzzy keywords, tokens, presets, and titles across any merchant domain.
+ */
+export function calculateConceptMatchScore(inputQuery: string, concept: { slug: string; title: string; preset?: string; templateType?: string }) {
+  const query = inputQuery.toLowerCase().trim()
+  const slug = concept.slug.toLowerCase()
+  const title = concept.title.toLowerCase()
+  const preset = (concept.preset || '').toLowerCase()
+
+  if (slug === query || title === query) return 100
+  if (slug.includes(query) || title.includes(query)) return 80
+
+  const diningKeywords = ['restaurant', 'dining', 'grill', 'grills', 'food', 'steakhouse', 'kitchen', 'eatery', 'bistro', 'cafe', 'bar', 'lounge', 'meal', 'dishes']
+  const spaKeywords = ['spa', 'wellness', 'massage', 'therapy', 'relaxation', 'skincare', 'beauty', 'holistic']
+  const boutiqueKeywords = ['boutique', 'fashion', 'clothing', 'apparel', 'wear', 'outfit', 'style', 'dress']
+  const techKeywords = ['gadgets', 'tech', 'electronics', 'phones', 'devices', 'hardware']
+  const staysKeywords = ['stays', 'apartments', 'lofts', 'shortlet', 'rooms', 'rentals', 'accommodations']
+  const hotelsKeywords = ['hotel', 'hotels', 'suites', 'resort', 'lodge']
+  const repairsKeywords = ['repairs', 'repair', 'fix', 'service', 'diagnostics', 'screen', 'soldering']
+  const mediaKeywords = ['media', 'creators', 'studio', 'photography', 'production', 'video', 'rate_card']
+
+  const queryTokens = query.split(/[\s\-_]+/).filter(Boolean)
+  let score = 0
+
+  for (const token of queryTokens) {
+    if (slug.includes(token)) score += 30
+    if (title.includes(token)) score += 30
+    if (preset.includes(token)) score += 20
+
+    if (diningKeywords.includes(token) && (preset === 'restaurant' || slug.includes('restaurant') || title.includes('grill') || title.includes('lounge'))) score += 50
+    if (spaKeywords.includes(token) && (preset === 'spa_wellness' || slug.includes('wellness') || title.includes('spa'))) score += 50
+    if (boutiqueKeywords.includes(token) && (preset === 'boutique' || slug.includes('boutique') || title.includes('fashion'))) score += 50
+    if (techKeywords.includes(token) && (preset === 'tech' || slug.includes('gadgets'))) score += 50
+    if (staysKeywords.includes(token) && (preset === 'short_stay' || slug.includes('stays'))) score += 50
+    if (hotelsKeywords.includes(token) && (preset === 'hotel' || slug.includes('hotel'))) score += 50
+    if (repairsKeywords.includes(token) && (preset === 'repair_services' || slug.includes('repairs'))) score += 50
+    if (mediaKeywords.includes(token) && (preset === 'creator_rate_card' || slug.includes('media'))) score += 50
+  }
+
+  return score
+}
+
 
 export const DEMO_CATALOG_ITEMS = [
   {
@@ -1218,31 +1267,29 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
       },
     },
     execute: async ({ conceptSlug }: { conceptSlug: string }) => {
-      let normalized = (conceptSlug || 'restaurant').toLowerCase().trim()
-      if (['pacy-grill', 'pacy-grills', 'dining', 'grill', 'grills', 'food', 'restaurant'].includes(normalized)) {
-        normalized = 'restaurant'
-      } else if (['spa', 'wellness', 'pacy-wellness'].includes(normalized)) {
-        normalized = 'pacy-wellness'
-      } else if (['boutique', 'fashion', 'pacy-boutique'].includes(normalized)) {
-        normalized = 'pacy-boutique'
-      } else if (['gadgets', 'tech', 'pacy-gadgets'].includes(normalized)) {
-        normalized = 'pacy-gadgets'
-      } else if (['stays', 'apartments', 'pacy-stays'].includes(normalized)) {
-        normalized = 'pacy-stays'
-      } else if (['hotels', 'hotel', 'pacy-hotels'].includes(normalized)) {
-        normalized = 'pacy-hotels'
-      } else if (['repairs', 'repair', 'pacy-repairs'].includes(normalized)) {
-        normalized = 'pacy-repairs'
-      } else if (['media', 'creators', 'pacy-media'].includes(normalized)) {
-        normalized = 'pacy-media'
+      const activeVenue = DEMO_VENUES[0]
+      const availableConcepts = activeVenue.concepts || [
+        { slug: 'restaurant', title: 'Pacy Grills & Lounge', preset: 'restaurant', templateType: 'catalog' },
+      ]
+
+      // Dynamically score all available concepts against the agent query
+      let bestMatch = availableConcepts[0]
+      let highestScore = -1
+
+      for (const concept of availableConcepts) {
+        const score = calculateConceptMatchScore(conceptSlug, concept)
+        if (score > highestScore) {
+          highestScore = score
+          bestMatch = concept
+        }
       }
-      const destination = `/m/${PLATFORM_DEMO_CONTEXT.demoSlug}/p/${normalized}`
-      const conceptName = normalized === 'restaurant' ? 'Pacy Grills & Lounge' : normalized
+
+      const destination = `/m/${PLATFORM_DEMO_CONTEXT.demoSlug}/p/${bestMatch.slug}`
       return {
         status: 'ok',
-        conceptSlug: normalized,
+        conceptSlug: bestMatch.slug,
         destinationUrl: `https://ourmenuos.online${destination}`,
-        message: `Navigated to ${conceptName} (${normalized}) department catalog.`,
+        message: `Navigated to ${bestMatch.title} (${bestMatch.slug}) department catalog.`,
       }
     },
   },
