@@ -424,8 +424,24 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
         _hint: { type: 'string', description: 'Agent instruction note' },
       },
     },
-    execute: async (input: { query?: string; category?: string; dietary?: string[]; maxPrice?: number; inStockOnly?: boolean; limit?: number; offset?: number }) => {
-      let results = [...DEMO_CATALOG_ITEMS]
+    execute: async (input: { query?: string; category?: string; dietary?: string[]; maxPrice?: number; inStockOnly?: boolean; limit?: number; offset?: number; currency?: string }) => {
+      // Dynamic currency detection: if maxPrice > 500 or currency is NGN, treat as NGN, otherwise USD
+      const isNairaSearch = input.currency?.toUpperCase() === 'NGN' || (typeof input.maxPrice === 'number' && input.maxPrice > 500)
+      const targetCurrency = isNairaSearch ? 'NGN' : 'USD'
+      const NGN_RATE = 1500
+
+      let results = DEMO_CATALOG_ITEMS.map(it => {
+        const price = isNairaSearch ? it.price * NGN_RATE : it.price
+        const priceFormatted = isNairaSearch 
+          ? `₦${price.toLocaleString('en-NG', { minimumFractionDigits: 2 })} NGN`
+          : `$${price.toFixed(2)} USD`
+        return {
+          ...it,
+          price,
+          priceFormatted,
+        }
+      })
+
       if (input.query) {
         const q = input.query.toLowerCase()
         results = results.filter(it => it.name.toLowerCase().includes(q) || it.description.toLowerCase().includes(q) || it.category.toLowerCase().includes(q))
@@ -452,7 +468,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
       const paged = results.slice(pageOffset, pageOffset + pageLimit)
       return {
         venue: 'Pacy Group Dining & Restaurant',
-        currency: 'USD',
+        currency: targetCurrency,
         totalFound: results.length,
         limit: pageLimit,
         offset: pageOffset,
