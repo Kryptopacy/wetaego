@@ -1013,6 +1013,8 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
         name: 'Avocado Tartine & Microgreens',
         price: 11.0,
         priceFormatted: '$11.00 USD',
+        attributes: undefined,
+        conceptUrl: undefined,
       }
       const qty = input.quantity || 1
       const lineTotal = Number((item.price * qty).toFixed(2))
@@ -1038,9 +1040,10 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
         modifiers: newModifiers,
       })
 
-      if (item.attributes?.brand) {
-        inMemoryCart.venue = item.attributes.brand
-      } else if (item.conceptUrl && item.conceptUrl.includes('velvet')) {
+      const itemObj = item as any
+      if (itemObj.attributes?.brand) {
+        inMemoryCart.venue = itemObj.attributes.brand
+      } else if (itemObj.conceptUrl && itemObj.conceptUrl.includes('velvet')) {
         inMemoryCart.venue = 'Velvet & Vine Cocktail Lounge'
       } else {
         inMemoryCart.venue = 'Pacy Grills & Lounge (Pacy Group)'
