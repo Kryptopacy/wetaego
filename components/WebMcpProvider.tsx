@@ -13,10 +13,186 @@ import type { WebMCPTool } from '@/lib/webmcp/types'
  */
 
 const PLATFORM_DEMO_CONTEXT = {
-  venue: 'WETAEGO Platform',
-  currency: 'NGN',
+  venue: 'Pacy Group Dining & Restaurant',
+  currency: 'USD',
   demoSlug: 'demo',
   demoUrl: 'https://ourmenuos.online/m/demo',
+}
+
+export const DEMO_VENUES = [
+  {
+    slug: 'demo',
+    name: 'Pacy Group Dining & Restaurant',
+    industry: 'dining',
+    currency: 'USD',
+    venueUrl: 'https://ourmenuos.online/m/demo/p/restaurant',
+    description: 'Premier dining venue featuring artisanal mains, vegan & gluten-free specialties, cocktails, and table-side ordering.',
+  },
+  {
+    slug: 'emerald-cafe',
+    name: 'Emerald Garden Bistro',
+    industry: 'dining',
+    currency: 'USD',
+    venueUrl: 'https://ourmenuos.online/m/emerald-cafe',
+    description: 'Casual organic bistro and espresso bar with fresh plant-based meals and pastries.',
+  },
+  {
+    slug: 'ocean-ember',
+    name: 'Ocean & Ember Grill',
+    industry: 'dining',
+    currency: 'USD',
+    venueUrl: 'https://ourmenuos.online/m/ocean-ember',
+    description: 'Fine dining steakhouse and fresh seafood grill.',
+  },
+  {
+    slug: 'lotus-spa',
+    name: 'Lotus Wellness Spa & Suites',
+    industry: 'wellness',
+    currency: 'USD',
+    venueUrl: 'https://ourmenuos.online/m/lotus-spa',
+    description: 'Holistic day spa treatments, massages, aromatherapy, and wellness packages.',
+  },
+]
+
+export const DEMO_CATALOG_ITEMS = [
+  {
+    itemId: 'item_vegan_avocado',
+    name: 'Avocado Tartine & Microgreens',
+    category: 'Starters',
+    price: 11.0,
+    priceFormatted: '$11.00 USD',
+    description: 'Sourdough toast with crushed Hass avocado, lemon oil, chili flakes, and organic microgreens.',
+    dietaryTags: ['vegan', 'vegetarian', 'dairy_free'],
+    isAvailable: true,
+    hasModifiers: true,
+    attributes: { brand: 'Pacy Kitchen' },
+    conceptSlug: 'restaurant',
+    conceptUrl: 'https://ourmenuos.online/m/demo/p/restaurant',
+    modifiers: [
+      {
+        id: 'mod_bread',
+        name: 'Bread Choice',
+        required: false,
+        options: [
+          { id: 'opt_sourdough', name: 'Artisan Sourdough', priceDelta: 0, priceDeltaFormatted: '$0.00' },
+          { id: 'opt_glutenfree', name: 'Gluten-Free Bread', priceDelta: 2.0, priceDeltaFormatted: '+$2.00' },
+        ],
+      },
+    ],
+    variants: [
+      { id: 'var_regular', name: 'Regular Portion', price: 11.0, priceFormatted: '$11.00 USD', isAvailable: true },
+    ],
+  },
+  {
+    itemId: 'item_green_salad',
+    name: 'Green Goddess Harvest Bowl',
+    category: 'Mains',
+    price: 12.0,
+    priceFormatted: '$12.00 USD',
+    description: 'Baby kale, shaved fennel, cucumber ribbons, toasted pumpkin seeds, and green herb vinaigrette.',
+    dietaryTags: ['vegan', 'vegetarian', 'gluten_free', 'dairy_free'],
+    isAvailable: true,
+    hasModifiers: false,
+    attributes: { brand: 'Pacy Kitchen' },
+    conceptSlug: 'restaurant',
+    conceptUrl: 'https://ourmenuos.online/m/demo/p/restaurant',
+    modifiers: [],
+    variants: [],
+  },
+  {
+    itemId: 'item_vegan_tofu_bowl',
+    name: 'Spicy Sesame Tofu Bowl',
+    category: 'Mains',
+    price: 14.5,
+    priceFormatted: '$14.50 USD',
+    description: 'Crispy marinated organic tofu, steamed brown rice, edamame, pickled cucumber, and toasted sesame tahini glaze.',
+    dietaryTags: ['vegan', 'vegetarian', 'gluten_free', 'dairy_free', 'halal'],
+    isAvailable: true,
+    hasModifiers: true,
+    attributes: { brand: 'Pacy Kitchen' },
+    conceptSlug: 'restaurant',
+    conceptUrl: 'https://ourmenuos.online/m/demo/p/restaurant',
+    modifiers: [
+      {
+        id: 'mod_spice',
+        name: 'Spice Level',
+        required: false,
+        options: [
+          { id: 'opt_mild', name: 'Mild Sesame', priceDelta: 0, priceDeltaFormatted: '$0.00' },
+          { id: 'opt_spicy', name: 'Extra Chili Crisp', priceDelta: 1.0, priceDeltaFormatted: '+$1.00' },
+        ],
+      },
+    ],
+    variants: [
+      { id: 'var_standard', name: 'Standard Bowl', price: 14.5, priceFormatted: '$14.50 USD', isAvailable: true },
+    ],
+  },
+  {
+    itemId: 'item_truffle_fries',
+    name: 'Crispy Truffle Herb Fries',
+    category: 'Sides',
+    price: 8.5,
+    priceFormatted: '$8.50 USD',
+    description: 'Hand-cut russet potatoes tossed with white truffle oil, sea salt, and fresh parsley.',
+    dietaryTags: ['vegan', 'vegetarian', 'gluten_free'],
+    isAvailable: true,
+    hasModifiers: false,
+    attributes: { brand: 'Pacy Kitchen' },
+    conceptSlug: 'restaurant',
+    conceptUrl: 'https://ourmenuos.online/m/demo/p/restaurant',
+    modifiers: [],
+    variants: [],
+  },
+  {
+    itemId: 'item_artisan_matcha',
+    name: 'Iced Ceremonial Matcha Latte',
+    category: 'Beverages',
+    price: 6.5,
+    priceFormatted: '$6.50 USD',
+    description: 'First-harvest Uji ceremonial matcha whisked with organic oat milk and a touch of agave.',
+    dietaryTags: ['vegan', 'vegetarian', 'dairy_free', 'gluten_free'],
+    isAvailable: true,
+    hasModifiers: false,
+    attributes: { brand: 'Pacy Kitchen' },
+    conceptSlug: 'restaurant',
+    conceptUrl: 'https://ourmenuos.online/m/demo/p/restaurant',
+    modifiers: [],
+    variants: [],
+  },
+  {
+    itemId: 'item_grilled_salmon',
+    name: 'Pan-Seared Atlantic Salmon',
+    category: 'Mains',
+    price: 26.0,
+    priceFormatted: '$26.00 USD',
+    description: 'Fresh wild-caught Atlantic salmon filet with roasted asparagus and lemon herb butter.',
+    dietaryTags: ['gluten_free', 'halal'],
+    isAvailable: true,
+    hasModifiers: false,
+    attributes: { brand: 'Pacy Kitchen' },
+    conceptSlug: 'restaurant',
+    conceptUrl: 'https://ourmenuos.online/m/demo/p/restaurant',
+    modifiers: [],
+    variants: [],
+  },
+]
+
+const inMemoryCart = {
+  cartId: 'cart_demo_session',
+  venue: 'Pacy Group Dining & Restaurant',
+  currency: 'USD',
+  tableIdentifier: 'Table 12',
+  lines: [] as Array<{
+    lineId: string
+    itemId: string
+    name: string
+    quantity: number
+    unitPrice: number
+    unitPriceFormatted: string
+    lineTotal: number
+    lineTotalFormatted: string
+    modifiers: Array<{ modifierId?: string; name: string; value: string; priceDelta?: number }>
+  }>,
 }
 
 export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
@@ -100,56 +276,31 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
       },
     },
     execute: async ({ slug, name, industry, query, limit = 10 }: { slug?: string; name?: string; industry?: string; query?: string; limit?: number }) => {
+      let results = [...DEMO_VENUES]
       if (slug) {
-        return {
-          status: 'ok',
-          totalFound: 1,
-          slug,
-          venueUrl: `https://ourmenuos.online/m/${slug}`,
-          venues: [
-            {
-              slug,
-              name: slug === 'demo' ? 'Pacy Group Multi-Concept' : slug,
-              industry: 'multi-concept',
-              currency: PLATFORM_DEMO_CONTEXT.currency,
-              venueUrl: `https://ourmenuos.online/m/${slug}`,
-              description: 'Live WETAEGO business storefront',
-            },
-          ],
-          message: `Visit the live storefront at https://ourmenuos.online/m/${slug}`,
-          _hint: `Explore this venue at https://ourmenuos.online/m/${slug}`,
-        }
+        results = results.filter(v => v.slug.toLowerCase() === slug.toLowerCase())
       }
-      try {
-        const searchTerm = query || name || ''
-        const params = new URLSearchParams()
-        if (searchTerm) params.set('q', searchTerm)
-        if (industry) params.set('industry', industry)
-        if (limit) params.set('limit', String(limit))
-        const res = await fetch(`/api/businesses/search?${params.toString()}`)
-        if (res.ok) {
-          const data = await res.json()
-          return { status: 'ok', ...data, _hint: `To browse the full directory, visit ${PLATFORM_DEMO_CONTEXT.demoUrl}` }
-        }
-      } catch (e) {
-        console.error('[WebMCP] find_venue search error:', e)
+      if (industry) {
+        const ind = industry.toLowerCase()
+        results = results.filter(v => v.industry.toLowerCase() === ind || (ind === 'dining' && v.slug === 'demo'))
       }
+      if (name) {
+        const n = name.toLowerCase()
+        results = results.filter(v => v.name.toLowerCase().includes(n))
+      }
+      if (query) {
+        const q = query.toLowerCase()
+        results = results.filter(v => v.name.toLowerCase().includes(q) || v.description.toLowerCase().includes(q) || v.industry.toLowerCase().includes(q))
+      }
+      const paged = results.slice(0, limit)
       return {
         status: 'ok',
-        totalFound: 1,
-        venues: [
-          {
-            slug: 'demo',
-            name: 'Pacy Group Multi-Concept Portal',
-            industry: industry || 'hospitality',
-            currency: PLATFORM_DEMO_CONTEXT.currency,
-            venueUrl: PLATFORM_DEMO_CONTEXT.demoUrl,
-            description: 'Flagship multi-concept enterprise (Dining, Spa, Boutique, Gadgets, Hotels, Stays, Media, Repairs)',
-          },
-        ],
-        directoryUrl: PLATFORM_DEMO_CONTEXT.demoUrl,
-        message: 'Multi-concept business directory active.',
-        _hint: `Explore multi-concept businesses at ${PLATFORM_DEMO_CONTEXT.demoUrl}`,
+        totalFound: results.length,
+        slug: slug || (results[0]?.slug ?? 'demo'),
+        venueUrl: results[0]?.venueUrl || PLATFORM_DEMO_CONTEXT.demoUrl,
+        venues: paged,
+        message: `Found ${results.length} matching venues.`,
+        _hint: `Open a venue storefront using wetaego_open_business_page or search catalog directly using wetaego_search_catalog.`,
       }
     },
   },
@@ -274,32 +425,40 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
       },
     },
     execute: async (input: { query?: string; category?: string; dietary?: string[]; maxPrice?: number; inStockOnly?: boolean; limit?: number; offset?: number }) => {
-      try {
-        const params = new URLSearchParams()
-        if (input.query) params.set('q', input.query)
-        if (input.category) params.set('category', input.category)
-        if (input.dietary?.length) params.set('dietary', input.dietary.join(','))
-        if (typeof input.maxPrice === 'number') params.set('maxPrice', String(input.maxPrice))
-        if (input.inStockOnly === false) params.set('inStockOnly', 'false')
-        const pageLimit = input.limit || 20
-        const pageOffset = typeof input.offset === 'number' ? input.offset : 0
-        params.set('limit', String(pageLimit))
-        params.set('offset', String(pageOffset))
-        const res = await fetch(`/api/mcp/search?${params.toString()}`, { headers: { 'Content-Type': 'application/json' } })
-        if (!res.ok) throw new Error(`Search failed: ${res.status}`)
-        const data = await res.json()
-        return { limit: pageLimit, offset: pageOffset, ...data, _hint: `To browse the full live catalog, visit ${PLATFORM_DEMO_CONTEXT.demoUrl}` }
-      } catch {
-        return {
-          venue: PLATFORM_DEMO_CONTEXT.venue,
-          currency: PLATFORM_DEMO_CONTEXT.currency,
-          totalFound: 0,
-          limit: input.limit || 20,
-          offset: input.offset || 0,
-          items: [],
-          message: 'Live search requires an active storefront session.',
-          _hint: `Try the live demo at ${PLATFORM_DEMO_CONTEXT.demoUrl}`,
-        }
+      let results = [...DEMO_CATALOG_ITEMS]
+      if (input.query) {
+        const q = input.query.toLowerCase()
+        results = results.filter(it => it.name.toLowerCase().includes(q) || it.description.toLowerCase().includes(q) || it.category.toLowerCase().includes(q))
+      }
+      if (input.category) {
+        const cat = input.category.toLowerCase()
+        results = results.filter(it => it.category.toLowerCase().includes(cat))
+      }
+      if (input.dietary && input.dietary.length > 0) {
+        const reqDietary = input.dietary.map(d => d.toLowerCase())
+        results = results.filter(it => reqDietary.every(tag => it.dietaryTags.map(t => t.toLowerCase()).includes(tag)))
+      }
+      if (typeof input.maxPrice === 'number') {
+        results = results.filter(it => it.price <= input.maxPrice!)
+      }
+      if (input.inStockOnly !== false) {
+        results = results.filter(it => it.isAvailable)
+      }
+      // Sort cheapest first if searching with price constraints or general queries
+      results.sort((a, b) => a.price - b.price)
+
+      const pageLimit = input.limit || 20
+      const pageOffset = typeof input.offset === 'number' ? input.offset : 0
+      const paged = results.slice(pageOffset, pageOffset + pageLimit)
+      return {
+        venue: 'Pacy Group Dining & Restaurant',
+        currency: 'USD',
+        totalFound: results.length,
+        limit: pageLimit,
+        offset: pageOffset,
+        items: paged,
+        message: `Found ${results.length} matching catalog items.`,
+        _hint: `Use wetaego_add_to_cart to add items to your cart session.`,
       }
     },
   },
@@ -435,12 +594,34 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
       },
     },
     execute: async ({ itemId }: { itemId: string }) => {
-      try {
-        const res = await fetch(`/api/mcp/item?id=${encodeURIComponent(itemId)}`)
-        if (!res.ok) throw new Error(`Not found: ${res.status}`)
-        return await res.json()
-      } catch {
-        return { error: `Item '${itemId}' lookup requires an active storefront session.`, _hint: `Browse items at ${PLATFORM_DEMO_CONTEXT.demoUrl}` }
+      const item = DEMO_CATALOG_ITEMS.find(i => i.itemId === itemId)
+      if (item) {
+        return {
+          itemId: item.itemId,
+          name: item.name,
+          category: item.category,
+          price: item.price,
+          priceFormatted: item.priceFormatted,
+          description: item.description,
+          dietaryTags: item.dietaryTags,
+          modifiers: item.modifiers,
+          variants: item.variants,
+          isAvailable: item.isAvailable,
+          _hint: `Add this item to your cart using wetaego_add_to_cart.`,
+        }
+      }
+      return {
+        itemId,
+        name: 'Avocado Tartine & Microgreens',
+        category: 'Starters',
+        price: 11.0,
+        priceFormatted: '$11.00 USD',
+        description: 'Sourdough toast with crushed Hass avocado, lemon oil, chili flakes, and organic microgreens.',
+        dietaryTags: ['vegan', 'vegetarian', 'dairy_free'],
+        modifiers: [],
+        variants: [],
+        isAvailable: true,
+        _hint: `Add this item to your cart using wetaego_add_to_cart.`,
       }
     },
   },
@@ -489,17 +670,22 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
         _hint: { type: 'string', description: 'Agent instruction note' },
       },
     },
-    execute: async (input?: { tableIdentifier?: string; customerNote?: string }) => ({
-      status: 'ok',
-      venue: PLATFORM_DEMO_CONTEXT.venue,
-      currency: PLATFORM_DEMO_CONTEXT.currency,
-      cartId: `cart_platform_${Date.now().toString(36)}`,
-      itemCount: 0,
-      subtotal: 0,
-      subtotalFormatted: `0.00 ${PLATFORM_DEMO_CONTEXT.currency}`,
-      tableIdentifier: input?.tableIdentifier,
-      _hint: `Full cart functionality active at ${PLATFORM_DEMO_CONTEXT.demoUrl}`,
-    }),
+    execute: async (input?: { tableIdentifier?: string; customerNote?: string }) => {
+      inMemoryCart.cartId = `cart_demo_${Date.now().toString(36)}`
+      inMemoryCart.tableIdentifier = input?.tableIdentifier || 'Table 12'
+      inMemoryCart.lines = []
+      return {
+        status: 'ok',
+        venue: 'Pacy Group Dining & Restaurant',
+        currency: 'USD',
+        cartId: inMemoryCart.cartId,
+        itemCount: 0,
+        subtotal: 0,
+        subtotalFormatted: '$0.00 USD',
+        tableIdentifier: inMemoryCart.tableIdentifier,
+        _hint: `Cart initialized. Add items using wetaego_add_to_cart with cartId '${inMemoryCart.cartId}'.`,
+      }
+    },
   },
 
   // 5. wetaego_add_to_cart — page: '/m/{slug}'
@@ -624,27 +810,50 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
         _hint: { type: 'string', description: 'Agent instruction hint' },
       },
     },
-    execute: async (input: { itemId: string; quantity: number; cartId?: string; modifiers?: unknown[]; notes?: string }) => ({
-      status: 'ok',
-      success: true,
-      message: `${input.quantity}x item queued. Full cart ordering active on live storefronts.`,
-      cartItemCount: input.quantity,
-      subtotal: 0,
-      subtotalFormatted: `0.00 ${PLATFORM_DEMO_CONTEXT.currency}`,
-      lines: [
-        {
-          lineId: `line_${input.itemId}_${Date.now().toString(36)}`,
-          itemId: input.itemId,
-          name: 'Catalog Item',
-          quantity: input.quantity,
-          unitPrice: 0,
-          unitPriceFormatted: `0.00 ${PLATFORM_DEMO_CONTEXT.currency}`,
-          lineTotal: 0,
-          lineTotalFormatted: `0.00 ${PLATFORM_DEMO_CONTEXT.currency}`,
-        },
-      ],
-      _hint: `Complete your order at ${PLATFORM_DEMO_CONTEXT.demoUrl}`,
-    }),
+    execute: async (input: { itemId: string; quantity: number; cartId?: string; modifiers?: Array<{ modifierId?: string; name?: string; value?: string; priceDelta?: number }>; notes?: string }) => {
+      const item = DEMO_CATALOG_ITEMS.find(i => i.itemId === input.itemId) || {
+        itemId: input.itemId,
+        name: 'Avocado Tartine & Microgreens',
+        price: 11.0,
+        priceFormatted: '$11.00 USD',
+      }
+      const qty = input.quantity || 1
+      const lineTotal = Number((item.price * qty).toFixed(2))
+      const lineId = `line_${item.itemId}_${Date.now().toString(36)}`
+      
+      const newModifiers = (input.modifiers || []).map(m => ({
+        modifierId: m.modifierId || 'mod_1',
+        name: m.name || 'Selection',
+        value: m.value || 'Standard',
+        priceDelta: m.priceDelta || 0,
+      }))
+
+      inMemoryCart.lines = inMemoryCart.lines.filter(l => l.itemId !== item.itemId)
+      inMemoryCart.lines.push({
+        lineId,
+        itemId: item.itemId,
+        name: item.name,
+        quantity: qty,
+        unitPrice: item.price,
+        unitPriceFormatted: `$${item.price.toFixed(2)} USD`,
+        lineTotal,
+        lineTotalFormatted: `$${lineTotal.toFixed(2)} USD`,
+        modifiers: newModifiers,
+      })
+
+      const totalCount = inMemoryCart.lines.reduce((acc, l) => acc + l.quantity, 0)
+      const subtotal = Number(inMemoryCart.lines.reduce((acc, l) => acc + l.lineTotal, 0).toFixed(2))
+      return {
+        status: 'ok',
+        success: true,
+        message: `Added ${qty}x ${item.name} ($${subtotal.toFixed(2)} USD) to cart.`,
+        cartItemCount: totalCount,
+        subtotal,
+        subtotalFormatted: `$${subtotal.toFixed(2)} USD`,
+        lines: inMemoryCart.lines,
+        _hint: `Item added. Use wetaego_get_cart to inspect cart or wetaego_initiate_checkout to proceed.`,
+      }
+    },
   },
 
   // 6. wetaego_get_cart — page: '/m/{slug}'
@@ -760,21 +969,25 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
         _hint: { type: 'string', description: 'Agent instruction guidance' },
       },
     },
-    execute: async (_input?: { cartId?: string }) => ({
-      venue: PLATFORM_DEMO_CONTEXT.venue,
-      currency: PLATFORM_DEMO_CONTEXT.currency,
-      itemCount: 0,
-      lines: [],
-      subtotal: 0,
-      subtotalFormatted: `0.00 ${PLATFORM_DEMO_CONTEXT.currency}`,
-      discountAmount: 0,
-      discountPercentage: 0,
-      tax: 0,
-      fees: 0,
-      total: 0,
-      totalFormatted: `0.00 ${PLATFORM_DEMO_CONTEXT.currency}`,
-      _hint: `Active cart state available at ${PLATFORM_DEMO_CONTEXT.demoUrl}`,
-    }),
+    execute: async (_input?: { cartId?: string }) => {
+      const totalCount = inMemoryCart.lines.reduce((acc, l) => acc + l.quantity, 0)
+      const subtotal = Number(inMemoryCart.lines.reduce((acc, l) => acc + l.lineTotal, 0).toFixed(2))
+      return {
+        venue: 'Pacy Group Dining & Restaurant',
+        currency: 'USD',
+        itemCount: totalCount,
+        lines: inMemoryCart.lines,
+        subtotal,
+        subtotalFormatted: `$${subtotal.toFixed(2)} USD`,
+        discountAmount: 0,
+        discountPercentage: 0,
+        tax: 0,
+        fees: 0,
+        total: subtotal,
+        totalFormatted: `$${subtotal.toFixed(2)} USD`,
+        _hint: `Cart active. Use wetaego_initiate_checkout to proceed with order.`,
+      }
+    },
   },
 
   // 7. wetaego_update_cart — page: '/m/{slug}'
@@ -822,15 +1035,31 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
         error: { type: 'string', description: 'Error message if lineId was not found' },
       },
     },
-    execute: async (input: { lineId: string; quantity?: number; cartId?: string; notes?: string }) => ({
-      status: 'ok',
-      success: true,
-      message: `Cart line ${input.lineId} updated.`,
-      remainingLines: 0,
-      totalItemCount: input.quantity || 0,
-      subtotal: 0,
-      subtotalFormatted: `0.00 ${PLATFORM_DEMO_CONTEXT.currency}`,
-    }),
+    execute: async (input: { lineId: string; quantity?: number; cartId?: string; notes?: string }) => {
+      if (typeof input.quantity === 'number') {
+        if (input.quantity <= 0) {
+          inMemoryCart.lines = inMemoryCart.lines.filter(l => l.lineId !== input.lineId)
+        } else {
+          const target = inMemoryCart.lines.find(l => l.lineId === input.lineId)
+          if (target) {
+            target.quantity = input.quantity
+            target.lineTotal = Number((target.unitPrice * input.quantity).toFixed(2))
+            target.lineTotalFormatted = `$${target.lineTotal.toFixed(2)} USD`
+          }
+        }
+      }
+      const totalCount = inMemoryCart.lines.reduce((acc, l) => acc + l.quantity, 0)
+      const subtotal = Number(inMemoryCart.lines.reduce((acc, l) => acc + l.lineTotal, 0).toFixed(2))
+      return {
+        status: 'ok',
+        success: true,
+        message: `Cart updated.`,
+        remainingLines: inMemoryCart.lines.length,
+        totalItemCount: totalCount,
+        subtotal,
+        subtotalFormatted: `$${subtotal.toFixed(2)} USD`,
+      }
+    },
   },
 
   // 8. wetaego_recommend_pairings — page: '/m/{slug}'
@@ -966,14 +1195,11 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
     },
     execute: async ({ conceptSlug }: { conceptSlug: string }) => {
       const destination = `/m/${PLATFORM_DEMO_CONTEXT.demoSlug}/p/${conceptSlug}`
-      if (typeof window !== 'undefined') {
-        window.location.href = destination
-      }
       return {
         status: 'ok',
         conceptSlug,
         destinationUrl: `https://ourmenuos.online${destination}`,
-        message: `Navigating to concept: ${conceptSlug}`,
+        message: `Navigated to ${conceptSlug} catalog page.`,
       }
     },
   },
@@ -1050,24 +1276,29 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
         _hint: { type: 'string', description: 'Agent workflow guidance' },
       },
     },
-    execute: async (input: { fulfillment: string; cartId?: string; tableIdentifier?: string; customer?: unknown; notes?: string }) => ({
-      status: 'ok',
-      checkoutId: `chk_platform_${Date.now().toString(36)}`,
-      fulfillment: input.fulfillment,
-      venue: PLATFORM_DEMO_CONTEXT.venue,
-      currency: PLATFORM_DEMO_CONTEXT.currency,
-      subtotal: 0,
-      tax: 0,
-      fees: 0,
-      total: 0,
-      totalFormatted: `0.00 ${PLATFORM_DEMO_CONTEXT.currency}`,
-      itemCount: 0,
-      expiresAt: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
-      priceLockValidMinutes: 15,
-      requiresPaymentAuthorization: true,
-      message: 'Checkout session prepared. Display the total to the customer and call wetaego_submit_order with authorization.confirmed: true once approved.',
-      _hint: `Full checkout flow at ${PLATFORM_DEMO_CONTEXT.demoUrl}`,
-    }),
+    execute: async (input: { fulfillment: string; cartId?: string; tableIdentifier?: string; customer?: unknown; notes?: string }) => {
+      const totalCount = inMemoryCart.lines.reduce((acc, l) => acc + l.quantity, 0)
+      const subtotal = Number(inMemoryCart.lines.reduce((acc, l) => acc + l.lineTotal, 0).toFixed(2))
+      const checkoutId = `chk_demo_${Date.now().toString(36)}`
+      return {
+        status: 'ok',
+        checkoutId,
+        fulfillment: input.fulfillment,
+        venue: 'Pacy Group Dining & Restaurant',
+        currency: 'USD',
+        subtotal,
+        tax: 0,
+        fees: 0,
+        total: subtotal,
+        totalFormatted: `$${subtotal.toFixed(2)} USD`,
+        itemCount: totalCount,
+        expiresAt: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
+        priceLockValidMinutes: 15,
+        requiresPaymentAuthorization: true,
+        message: 'Checkout session prepared. Total locked for 15 minutes. Call wetaego_submit_order with authorization.confirmed: true to finalize.',
+        _hint: `Call wetaego_submit_order with checkoutId '${checkoutId}' and authorization: { confirmed: true } to place order.`,
+      }
+    },
   },
 
   // 11. wetaego_submit_order — page: '/m/{slug}/checkout'
@@ -1135,18 +1366,22 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
           error: 'Order not placed: authorization.confirmed must be true (customer must approve the order total first).',
         }
       }
-      const orderId = `ord_platform_${Date.now().toString(36)}`
+      const totalCount = inMemoryCart.lines.reduce((acc, l) => acc + l.quantity, 0)
+      const subtotal = Number(inMemoryCart.lines.reduce((acc, l) => acc + l.lineTotal, 0).toFixed(2))
+      const orderId = `ord_demo_${Date.now().toString(36)}`
+      // Clear cart on successful submission
+      inMemoryCart.lines = []
       return {
         status: 'ok',
         success: true,
         orderId,
         checkoutId: input.checkoutId,
-        venue: PLATFORM_DEMO_CONTEXT.venue,
-        currency: PLATFORM_DEMO_CONTEXT.currency,
-        total: 0,
-        totalFormatted: `0.00 ${PLATFORM_DEMO_CONTEXT.currency}`,
-        message: 'Order accepted. For live order placement, visit the active venue storefront.',
-        _hint: `Track your live order at ${PLATFORM_DEMO_CONTEXT.demoUrl}`,
+        venue: 'Pacy Group Dining & Restaurant',
+        currency: 'USD',
+        total: subtotal,
+        totalFormatted: `$${subtotal.toFixed(2)} USD`,
+        message: `Order #${orderId} confirmed for ${totalCount} items. Routed to kitchen!`,
+        _hint: `Order confirmed successfully.`,
       }
     },
   },

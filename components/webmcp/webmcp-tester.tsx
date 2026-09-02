@@ -62,7 +62,7 @@ export function WebMCPTester({ locationName = 'Storefront' }: { locationName?: s
         const tool = tools.find(t => t.name === 'search_catalog')
         if (tool) {
           handleSelectTool(tool)
-          const input = { query: '', max_price: 30 }
+          const input = { query: '', maxPrice: 50, inStockOnly: true }
           setInputJson(JSON.stringify(input, null, 2))
           const res = await globalWebMCPRegistry.executeTool('search_catalog', input)
           setOutputJson(res)
@@ -74,32 +74,57 @@ export function WebMCPTester({ locationName = 'Storefront' }: { locationName?: s
           const tool = tools.find(t => t.name === 'add_to_cart')
           if (tool) {
             handleSelectTool(tool)
-            const input = { itemId: firstItem.id, quantity: 1 }
+            const input = { itemId: firstItem.itemId || firstItem.id, quantity: 1 }
             setInputJson(JSON.stringify(input, null, 2))
             const res = await globalWebMCPRegistry.executeTool('add_to_cart', input)
             setOutputJson(res)
           }
+        } else {
+          setOutputJson({ message: 'No items found in active catalog to add.' })
         }
       } else if (scenario === 'view_cart') {
-        const tool = tools.find(t => t.name === 'view_cart')
+        const tool = tools.find(t => t.name === 'get_cart' || t.name === 'view_cart')
         if (tool) {
           handleSelectTool(tool)
           setInputJson('{}')
-          const res = await globalWebMCPRegistry.executeTool('view_cart', {})
+          const res = await globalWebMCPRegistry.executeTool(tool.name, {})
           setOutputJson(res)
         }
       } else if (scenario === 'checkout') {
         const tool = tools.find(t => t.name === 'initiate_checkout')
         if (tool) {
           handleSelectTool(tool)
-          const input = { customerName: 'Alex Smith', notes: 'Please add cutlery' }
+          const input = {
+            fulfillment: 'dine_in',
+            tableIdentifier: 'Table 4',
+            customer: { name: 'Alex Smith', email: 'alex@example.com' },
+            notes: 'Please include extra cutlery'
+          }
           setInputJson(JSON.stringify(input, null, 2))
           const res = await globalWebMCPRegistry.executeTool('initiate_checkout', input)
           setOutputJson(res)
         }
+      } else if (scenario === 'call_staff') {
+        const tool = tools.find(t => t.name === 'request_staff' || t.name === 'call_staff_or_service')
+        if (tool) {
+          handleSelectTool(tool)
+          const input = { reason: 'Guest requested water refill & table napkin' }
+          setInputJson(JSON.stringify(input, null, 2))
+          const res = await globalWebMCPRegistry.executeTool(tool.name, input)
+          setOutputJson(res)
+        }
+      } else if (scenario === 'pairings') {
+        const tool = tools.find(t => t.name === 'recommend_pairings')
+        if (tool) {
+          handleSelectTool(tool)
+          const input = { maxRecommendations: 3 }
+          setInputJson(JSON.stringify(input, null, 2))
+          const res = await globalWebMCPRegistry.executeTool('recommend_pairings', input)
+          setOutputJson(res)
+        }
       }
     } catch (e: any) {
-      setOutputJson({ error: e.message })
+      setOutputJson({ error: e.message || 'Execution failed' })
     } finally {
       setIsRunning(false)
     }
@@ -115,18 +140,20 @@ export function WebMCPTester({ locationName = 'Storefront' }: { locationName?: s
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => setIsOpen(true)}
-          className="flex items-center gap-2 px-3.5 py-2 rounded-full bg-emerald-600/90 hover:bg-emerald-500 text-white font-medium text-xs shadow-lg shadow-emerald-950/40 backdrop-blur border border-emerald-400/30 transition-all"
+          className="flex items-center gap-2 px-3.5 py-2 rounded-full bg-emerald-600/95 hover:bg-emerald-500 text-white font-medium text-xs shadow-lg shadow-emerald-950/50 backdrop-blur-md border border-emerald-400/40 transition-all cursor-pointer"
         >
           <Bot className="w-4 h-4 text-emerald-200 animate-pulse" />
-          <span>WebMCP Tools ({tools.length})</span>
-          <span className="bg-emerald-700/80 px-1.5 py-0.5 rounded-full text-[10px] font-mono">Chrome 149 & AI Ready</span>
+          <span>WebMCP Agent Tester ({tools.length})</span>
+          <span className="bg-emerald-950/80 text-emerald-300 px-2 py-0.5 rounded-full text-[10px] font-mono border border-emerald-500/30">
+            Chrome 149 & AI Ready
+          </span>
         </motion.button>
       </div>
 
       {/* Interactive Modal / Drawer */}
       <AnimatePresence>
         {isOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md">
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 15 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -134,15 +161,15 @@ export function WebMCPTester({ locationName = 'Storefront' }: { locationName?: s
               className="w-full max-w-2xl bg-zinc-950 border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] text-zinc-100"
             >
               {/* Header */}
-              <div className="flex items-center justify-between px-5 py-3.5 border-b border-zinc-800 bg-zinc-900/60">
+              <div className="flex items-center justify-between px-5 py-3.5 border-b border-zinc-800 bg-zinc-900/70">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center text-emerald-400 shadow-inner">
                     <Bot className="w-4 h-4" />
                   </div>
                   <div>
                     <h3 className="font-semibold text-sm flex items-center gap-2">
                       WebMCP Agent Playground
-                      <span className="text-[10px] font-normal text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded-full border border-emerald-800/40">
+                      <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/90 px-2 py-0.5 rounded-full border border-emerald-800/50">
                         document.modelContext
                       </span>
                     </h3>
@@ -153,7 +180,7 @@ export function WebMCPTester({ locationName = 'Storefront' }: { locationName?: s
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setIsConfigModalOpen(true)}
-                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-medium border border-zinc-700/60 transition"
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-zinc-800/80 hover:bg-zinc-700 text-zinc-200 text-xs font-medium border border-zinc-700/60 transition"
                   >
                     <Cpu className="w-3.5 h-3.5 text-emerald-400" />
                     <span>Export MCP Config</span>
@@ -168,9 +195,9 @@ export function WebMCPTester({ locationName = 'Storefront' }: { locationName?: s
               </div>
 
               {/* Quick Scenarios Bar */}
-              <div className="px-5 py-2.5 bg-zinc-900/30 border-b border-zinc-800/60 flex items-center gap-2 overflow-x-auto text-xs">
-                <span className="text-zinc-500 shrink-0 flex items-center gap-1 font-mono text-[11px]">
-                  <Sparkles className="w-3 h-3 text-amber-400" /> 1-Click Tests:
+              <div className="px-5 py-2.5 bg-zinc-900/40 border-b border-zinc-800/70 flex items-center gap-2 overflow-x-auto text-xs no-scrollbar">
+                <span className="text-zinc-400 shrink-0 flex items-center gap-1 font-mono text-[11px]">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-400" /> 1-Click Tests:
                 </span>
                 <button
                   onClick={() => handleQuickScenario('search_dishes')}
@@ -180,7 +207,7 @@ export function WebMCPTester({ locationName = 'Storefront' }: { locationName?: s
                 </button>
                 <button
                   onClick={() => handleQuickScenario('order_first_item')}
-                  className="px-2.5 py-1 rounded-md bg-emerald-950/60 hover:bg-emerald-900/80 text-emerald-300 border border-emerald-800/40 shrink-0 transition flex items-center gap-1"
+                  className="px-2.5 py-1 rounded-md bg-emerald-950/70 hover:bg-emerald-900 text-emerald-300 border border-emerald-800/50 shrink-0 transition flex items-center gap-1"
                 >
                   <ShoppingBag className="w-3 h-3" /> Auto Add to Cart
                 </button>
@@ -192,9 +219,21 @@ export function WebMCPTester({ locationName = 'Storefront' }: { locationName?: s
                 </button>
                 <button
                   onClick={() => handleQuickScenario('checkout')}
-                  className="px-2.5 py-1 rounded-md bg-indigo-950/60 hover:bg-indigo-900/80 text-indigo-300 border border-indigo-800/40 shrink-0 transition"
+                  className="px-2.5 py-1 rounded-md bg-indigo-950/70 hover:bg-indigo-900 text-indigo-300 border border-indigo-800/50 shrink-0 transition"
                 >
                   💳 Test Checkout Gate
+                </button>
+                <button
+                  onClick={() => handleQuickScenario('call_staff')}
+                  className="px-2.5 py-1 rounded-md bg-amber-950/70 hover:bg-amber-900 text-amber-300 border border-amber-800/50 shrink-0 transition"
+                >
+                  🛎️ Call Staff
+                </button>
+                <button
+                  onClick={() => handleQuickScenario('pairings')}
+                  className="px-2.5 py-1 rounded-md bg-purple-950/70 hover:bg-purple-900 text-purple-300 border border-purple-800/50 shrink-0 transition"
+                >
+                  ✨ Pairings
                 </button>
               </div>
 
@@ -295,25 +334,53 @@ export function WebMCPTester({ locationName = 'Storefront' }: { locationName?: s
 
 function getDefaultInputForTool(tool: WebMCPTool): string {
   if (tool.name === 'search_catalog') {
-    return JSON.stringify({ query: '', max_price: 50 }, null, 2)
+    return JSON.stringify({ query: '', maxPrice: 50, inStockOnly: true }, null, 2)
+  }
+  if (tool.name === 'get_item_details') {
+    return JSON.stringify({ itemId: 'item_sample_id' }, null, 2)
+  }
+  if (tool.name === 'create_cart' || tool.name === 'get_cart' || tool.name === 'view_cart') {
+    return '{}'
+  }
+  if (tool.name === 'add_to_cart') {
+    return JSON.stringify({ itemId: 'item_sample_id', quantity: 1, notes: 'Special instructions' }, null, 2)
+  }
+  if (tool.name === 'update_cart') {
+    return JSON.stringify({ lineId: 'cart_item_sample_id', quantity: 2 }, null, 2)
+  }
+  if (tool.name === 'update_cart_quantity') {
+    return JSON.stringify({ cartKey: 'cart_item_key', delta: 1 }, null, 2)
+  }
+  if (tool.name === 'initiate_checkout') {
+    return JSON.stringify(
+      {
+        fulfillment: 'dine_in',
+        tableIdentifier: 'Table 4',
+        customer: { name: 'Alex Smith', email: 'alex@example.com', phone: '+1234567890' },
+        notes: 'Extra napkins and quick service please'
+      },
+      null,
+      2
+    )
+  }
+  if (tool.name === 'submit_order') {
+    return JSON.stringify(
+      {
+        checkoutId: 'chk_sample_123456',
+        authorization: { confirmed: true, confirmationId: 'auth_usr_9981' }
+      },
+      null,
+      2
+    )
   }
   if (tool.name === 'recommend_pairings') {
     return JSON.stringify({ maxRecommendations: 3 }, null, 2)
   }
-  if (tool.name === 'add_to_cart') {
-    return JSON.stringify({ itemId: 'replace_with_item_id', quantity: 1 }, null, 2)
+  if (tool.name === 'request_staff' || tool.name === 'call_staff_or_service') {
+    return JSON.stringify({ reason: 'Guest requested bill and water refill' }, null, 2)
   }
-  if (tool.name === 'get_item_details') {
-    return JSON.stringify({ itemId: 'replace_with_item_id' }, null, 2)
-  }
-  if (tool.name === 'update_cart_quantity') {
-    return JSON.stringify({ cartKey: 'replace_with_cartKey', delta: 1 }, null, 2)
-  }
-  if (tool.name === 'call_staff_or_service') {
-    return JSON.stringify({ reason: 'Need water refill' }, null, 2)
-  }
-  if (tool.name === 'initiate_checkout') {
-    return JSON.stringify({ customerName: 'Alex Smith', notes: 'Extra sauce please' }, null, 2)
+  if (tool.name === 'open_business_page') {
+    return JSON.stringify({ pageSlug: 'dining' }, null, 2)
   }
   return '{}'
 }

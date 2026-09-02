@@ -762,7 +762,7 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
         checkoutId,
         currency,
         venue: locationName,
-        fulfillment: input.fulfillment,
+        fulfillment: input.fulfillment || 'dine_in',
         tableIdentifier: input.tableIdentifier || tableIdentifier,
         subtotal: discountedSubtotal,
         tax,
