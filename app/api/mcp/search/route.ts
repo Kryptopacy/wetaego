@@ -3,7 +3,7 @@ import { createAdminClient } from '@/lib/supabase/server'
 
 export const dynamic = 'force-dynamic'
 
-const DEFAULT_FALLBACK_ITEMS = [
+export const DEFAULT_FALLBACK_ITEMS = [
   {
     itemId: 'item_vegan_avocado',
     name: 'Avocado Tartine & Microgreens',
@@ -215,3 +215,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Search failed' }, { status: 500 })
   }
 }
+
+export { DEFAULT_FALLBACK_ITEMS as DEMO_ITEMS }
+
