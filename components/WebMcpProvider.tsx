@@ -22,11 +22,19 @@ const PLATFORM_DEMO_CONTEXT = {
 export const DEMO_VENUES = [
   {
     slug: 'demo',
-    name: 'Pacy Group Dining & Restaurant',
+    name: 'Pacy Group (Pacy Grills & Lounge)',
     industry: 'dining',
     currency: 'USD',
     venueUrl: 'https://ourmenuos.online/m/demo/p/restaurant',
-    description: 'Premier dining venue featuring artisanal mains, vegan & gluten-free specialties, cocktails, and table-side ordering.',
+    description: 'Premier dining and multi-concept enterprise featuring Pacy Grills & Lounge (Gourmet Grills, Artisanal Vegan & Gluten-Free Specialties, Cocktails), Pacy Wellness Spa, Pacy Boutique, and Serviced Stays.',
+  },
+  {
+    slug: 'pacy-grills',
+    name: 'Pacy Grills & Lounge',
+    industry: 'dining',
+    currency: 'USD',
+    venueUrl: 'https://ourmenuos.online/m/demo/p/restaurant',
+    description: 'Gourmet fine dining steakhouse, flame-grilled specialties, vegan bowls, artisan starters, and craft cocktails.',
   },
   {
     slug: 'emerald-cafe',
@@ -65,7 +73,7 @@ export const DEMO_CATALOG_ITEMS = [
     dietaryTags: ['vegan', 'vegetarian', 'dairy_free'],
     isAvailable: true,
     hasModifiers: true,
-    attributes: { brand: 'Pacy Kitchen' },
+    attributes: { brand: 'Pacy Grills & Lounge' },
     conceptSlug: 'restaurant',
     conceptUrl: 'https://ourmenuos.online/m/demo/p/restaurant',
     modifiers: [
@@ -93,7 +101,7 @@ export const DEMO_CATALOG_ITEMS = [
     dietaryTags: ['vegan', 'vegetarian', 'gluten_free', 'dairy_free'],
     isAvailable: true,
     hasModifiers: false,
-    attributes: { brand: 'Pacy Kitchen' },
+    attributes: { brand: 'Pacy Grills & Lounge' },
     conceptSlug: 'restaurant',
     conceptUrl: 'https://ourmenuos.online/m/demo/p/restaurant',
     modifiers: [],
@@ -109,7 +117,7 @@ export const DEMO_CATALOG_ITEMS = [
     dietaryTags: ['vegan', 'vegetarian', 'gluten_free', 'dairy_free', 'halal'],
     isAvailable: true,
     hasModifiers: true,
-    attributes: { brand: 'Pacy Kitchen' },
+    attributes: { brand: 'Pacy Grills & Lounge' },
     conceptSlug: 'restaurant',
     conceptUrl: 'https://ourmenuos.online/m/demo/p/restaurant',
     modifiers: [
@@ -137,7 +145,7 @@ export const DEMO_CATALOG_ITEMS = [
     dietaryTags: ['vegan', 'vegetarian', 'gluten_free'],
     isAvailable: true,
     hasModifiers: false,
-    attributes: { brand: 'Pacy Kitchen' },
+    attributes: { brand: 'Pacy Grills & Lounge' },
     conceptSlug: 'restaurant',
     conceptUrl: 'https://ourmenuos.online/m/demo/p/restaurant',
     modifiers: [],
@@ -153,7 +161,7 @@ export const DEMO_CATALOG_ITEMS = [
     dietaryTags: ['vegan', 'vegetarian', 'dairy_free', 'gluten_free'],
     isAvailable: true,
     hasModifiers: false,
-    attributes: { brand: 'Pacy Kitchen' },
+    attributes: { brand: 'Pacy Grills & Lounge' },
     conceptSlug: 'restaurant',
     conceptUrl: 'https://ourmenuos.online/m/demo/p/restaurant',
     modifiers: [],
@@ -169,7 +177,7 @@ export const DEMO_CATALOG_ITEMS = [
     dietaryTags: ['gluten_free', 'halal'],
     isAvailable: true,
     hasModifiers: false,
-    attributes: { brand: 'Pacy Kitchen' },
+    attributes: { brand: 'Pacy Grills & Lounge' },
     conceptSlug: 'restaurant',
     conceptUrl: 'https://ourmenuos.online/m/demo/p/restaurant',
     modifiers: [],
@@ -1210,12 +1218,31 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
       },
     },
     execute: async ({ conceptSlug }: { conceptSlug: string }) => {
-      const destination = `/m/${PLATFORM_DEMO_CONTEXT.demoSlug}/p/${conceptSlug}`
+      let normalized = (conceptSlug || 'restaurant').toLowerCase().trim()
+      if (['pacy-grill', 'pacy-grills', 'dining', 'grill', 'grills', 'food', 'restaurant'].includes(normalized)) {
+        normalized = 'restaurant'
+      } else if (['spa', 'wellness', 'pacy-wellness'].includes(normalized)) {
+        normalized = 'pacy-wellness'
+      } else if (['boutique', 'fashion', 'pacy-boutique'].includes(normalized)) {
+        normalized = 'pacy-boutique'
+      } else if (['gadgets', 'tech', 'pacy-gadgets'].includes(normalized)) {
+        normalized = 'pacy-gadgets'
+      } else if (['stays', 'apartments', 'pacy-stays'].includes(normalized)) {
+        normalized = 'pacy-stays'
+      } else if (['hotels', 'hotel', 'pacy-hotels'].includes(normalized)) {
+        normalized = 'pacy-hotels'
+      } else if (['repairs', 'repair', 'pacy-repairs'].includes(normalized)) {
+        normalized = 'pacy-repairs'
+      } else if (['media', 'creators', 'pacy-media'].includes(normalized)) {
+        normalized = 'pacy-media'
+      }
+      const destination = `/m/${PLATFORM_DEMO_CONTEXT.demoSlug}/p/${normalized}`
+      const conceptName = normalized === 'restaurant' ? 'Pacy Grills & Lounge' : normalized
       return {
         status: 'ok',
-        conceptSlug,
+        conceptSlug: normalized,
         destinationUrl: `https://ourmenuos.online${destination}`,
-        message: `Navigated to ${conceptSlug} catalog page.`,
+        message: `Navigated to ${conceptName} (${normalized}) department catalog.`,
       }
     },
   },
