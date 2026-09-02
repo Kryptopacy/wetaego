@@ -653,8 +653,15 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
               unitPrice: { type: 'number' },
               unitPriceFormatted: { type: 'string' },
               lineTotal: { type: 'number' },
-              lineTotalFormatted: { type: 'string' },
-              modifiers: { type: 'object' },
+              lineTotalFormatted: { type: 'string', description: 'Formatted total price for this line' },
+              modifiers: {
+                type: 'object',
+                description: 'Selected modifier options mapped by name',
+                properties: {
+                  name: { type: 'string', description: 'Modifier name' },
+                  priceDelta: { type: 'number', description: 'Price difference' },
+                },
+              },
             },
           },
         },
@@ -691,7 +698,14 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
               unitPriceFormatted: { type: 'string' },
               lineTotal: { type: 'number' },
               lineTotalFormatted: { type: 'string' },
-              modifiers: { type: 'object' },
+              modifiers: {
+                type: 'object',
+                description: 'Selected modifier options mapped by name',
+                properties: {
+                  name: { type: 'string', description: 'Modifier name' },
+                  priceDelta: { type: 'number', description: 'Price difference' },
+                },
+              },
             },
           },
         },

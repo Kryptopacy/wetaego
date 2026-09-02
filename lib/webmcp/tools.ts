@@ -544,7 +544,14 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
               unitPriceFormatted: { type: 'string' },
               lineTotal: { type: 'number' },
               lineTotalFormatted: { type: 'string' },
-              modifiers: { type: 'object' }
+              modifiers: {
+                type: 'object',
+                description: 'Selected modifier options mapped by name',
+                properties: {
+                  name: { type: 'string' },
+                  priceDelta: { type: 'number' }
+                }
+              }
             }
           }
         },
