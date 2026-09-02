@@ -7,21 +7,16 @@
   "tools": [
     {
       "name": "wetaego_query_catalog",
-      "description": "Search dishes, menu items, retail goods, tech devices, wellness treatments, or hospitality stays at a WETAEGO venue with size, color, condition, brand, duration, guest capacity, dietary, price, and stock filters.",
+      "description": "Search dishes, menu items, products, and services at a WETAEGO venue with category, dietary, price, and stock filters.",
       "parameters": {
         "type": "object",
         "properties": {
           "locationId": { "type": "string", "description": "Venue location UUID" },
           "query": { "type": "string", "description": "Search keywords" },
           "category": { "type": "string", "description": "Category name filter" },
-          "size": { "type": "string", "description": "Size filter for apparel, shoes, or portions (e.g. S, M, L, XL, 42)" },
-          "color": { "type": "string", "description": "Color filter for retail merchandise (e.g. black, white, navy)" },
-          "condition": { "type": "string", "enum": ["new", "refurbished", "pre_owned"], "description": "Product condition for retail and devices" },
-          "brand": { "type": "string", "description": "Brand or manufacturer filter" },
           "dietary": { "type": "string", "enum": ["vegan", "vegetarian", "halal", "kosher", "gluten_free", "dairy_free", "nut_free", "keto"], "description": "Dietary filter for dining" },
-          "durationMinutes": { "type": "integer", "description": "Service duration in minutes for wellness/consulting" },
-          "guestCapacity": { "type": "integer", "description": "Guest capacity for stays, hotel rooms, and event venues" },
-          "roomType": { "type": "string", "description": "Room or accommodation type (e.g. single, double, suite, villa)" },
+          "maxPrice": { "type": "number", "minimum": 0, "description": "Maximum price in currency units" },
+          "inStockOnly": { "type": "boolean", "default": true, "description": "Return only available items" },
           "limit": { "type": "integer", "minimum": 1, "maximum": 100, "default": 20 }
         },
         "required": ["locationId"]

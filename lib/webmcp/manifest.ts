@@ -108,16 +108,12 @@ export function getMCPManifest() {
         scope: "customer",
         permission: "public/read-only",
         confirmation: "none",
-        description: "Search products, dishes, services, and multi-industry inventory (dining, retail, boutique, electronics, wellness, hospitality) on WETAEGO. Supports size, color, condition, brand, and dietary filtering.",
+        description: "Search catalog items, products, dishes, and services with category and price filters. Returns item details, prices, and availability.",
         inputSchema: {
           type: "object",
           properties: {
             query: { type: "string", description: "Natural-language search query." },
             category: { type: "string", description: "Category name filter." },
-            size: { type: "string", description: "Size filter for apparel, footwear, or portions (e.g. 'S', 'M', 'L', 'XL', '42')." },
-            color: { type: "string", description: "Color filter for retail merchandise (e.g. 'black', 'white', 'navy')." },
-            condition: { type: "string", enum: ["new", "refurbished", "pre_owned"], description: "Condition filter for electronics and retail." },
-            brand: { type: "string", description: "Brand or manufacturer filter." },
             dietary: {
               type: "array",
               items: { type: "string", enum: ["vegan", "vegetarian", "halal", "kosher", "gluten_free", "dairy_free", "nut_free", "keto"] },

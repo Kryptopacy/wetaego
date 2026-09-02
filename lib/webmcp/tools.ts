@@ -57,46 +57,13 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
           type: 'string',
           description: 'Category name filter.'
         },
-        size: {
-          type: 'string',
-          description: 'Size filter for apparel, shoes, or portions (e.g. "S", "M", "L", "XL", "42", "14-inch").'
-        },
-        color: {
-          type: 'string',
-          description: 'Color filter for retail & boutique merchandise (e.g. "black", "emerald", "navy", "white").'
-        },
-        condition: {
-          type: 'string',
-          enum: ['new', 'refurbished', 'pre_owned'],
-          description: 'Product condition filter for retail, electronics, and devices.'
-        },
-        brand: {
-          type: 'string',
-          description: 'Brand or manufacturer filter.'
-        },
         dietary: {
           type: 'array',
           items: {
             type: 'string',
             enum: ['vegan', 'vegetarian', 'halal', 'kosher', 'gluten_free', 'dairy_free', 'nut_free', 'keto']
           },
-          description: 'Dietary filter tags for dining and food venues.'
-        },
-        durationMinutes: {
-          type: 'integer',
-          minimum: 5,
-          maximum: 480,
-          description: 'Service duration filter in minutes for spas, salons, and consulting.'
-        },
-        guestCapacity: {
-          type: 'integer',
-          minimum: 1,
-          maximum: 500,
-          description: 'Minimum guest capacity for rooms, suites, and event spaces.'
-        },
-        roomType: {
-          type: 'string',
-          description: 'Room or accommodation type (e.g. "single", "double", "suite", "villa", "hall").'
+          description: 'Dietary classification filter tags for dining and food venues.'
         },
         maxPrice: {
           type: 'number',
