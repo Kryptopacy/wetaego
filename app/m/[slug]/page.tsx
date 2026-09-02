@@ -344,6 +344,7 @@ export default async function PublicMenuPage({
         image_url: it.images && it.images.length > 0 ? it.images[0] : null,
         dietary_tags: (itemData.dietary_tags as string[]) || [],
         variants: (itemData.variants as any) || [],
+        modifiers: (itemData.modifiers as any) || [],
         is_available: it.availability_status !== 'sold_out',
         conceptSlug: pageInfo?.slug || null,
         conceptTitle: pageInfo?.title || null

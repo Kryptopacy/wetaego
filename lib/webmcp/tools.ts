@@ -20,6 +20,12 @@ export interface MenuItemData {
     name: string
     options: { label: string; price_delta_minor?: number }[] | string[]
   }[]
+  modifiers?: {
+    id: string
+    name: string
+    required?: boolean
+    options?: { id?: string; name: string; price_delta_minor?: number }[]
+  }[]
   is_available?: boolean
   conceptSlug?: string | null
   conceptTitle?: string | null
@@ -473,13 +479,14 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
       }
 
       // 1. Validate mandatory modifier groups
-      if (item.modifiers && Array.isArray(item.modifiers)) {
-        for (const mod of item.modifiers) {
+      const itemModifiers = item.modifiers || (item as any).variants
+      if (itemModifiers && Array.isArray(itemModifiers)) {
+        for (const mod of itemModifiers as any[]) {
           if (mod.required) {
             const hasModSelection = (input.modifiers && input.modifiers.some(m => m.modifierId === mod.id && m.optionIds && m.optionIds.length > 0)) ||
               (input.variantSelections && Boolean(input.variantSelections[mod.id] || input.variantSelections[mod.name]))
             if (!hasModSelection) {
-              const optionNames = mod.options?.map(o => o.name).join(', ') || 'Select an option'
+              const optionNames = mod.options?.map((o: any) => typeof o === 'string' ? o : o.name || o.label).join(', ') || 'Select an option'
               return {
                 status: 'error',
                 success: false,

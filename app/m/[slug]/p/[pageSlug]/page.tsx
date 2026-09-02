@@ -515,6 +515,7 @@ export default async function PublicPageView({
           image_url: (i.image_url as string) || null,
           dietary_tags: (i.dietary_tags as string[]) || (i.tags as string[]) || (i.item_data as any)?.dietary_tags || [],
           variants: (i.variants as any) || (i.item_data as any)?.variants || [],
+          modifiers: (i.modifiers as any) || (i.item_data as any)?.modifiers || [],
           is_available: i.availability_status !== 'sold_out' && i.is_available !== false
         }))}
         tableIdentifier={_resource?.name || "Storefront Guest"}
