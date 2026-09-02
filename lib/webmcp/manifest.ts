@@ -467,12 +467,9 @@ export function getMCPManifest() {
                   lineTotal: { type: "number" },
                   lineTotalFormatted: { type: "string" },
                   modifiers: {
-                    type: "object",
-                    description: "Selected modifier options mapped by name",
-                    properties: {
-                      name: { type: "string" },
-                      priceDelta: { type: "number" }
-                    }
+                    type: "array",
+                    description: "Applied modifier and option labels for this line item",
+                    items: { type: "string" }
                   }
                 }
               }

@@ -655,12 +655,9 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
               lineTotal: { type: 'number' },
               lineTotalFormatted: { type: 'string', description: 'Formatted total price for this line' },
               modifiers: {
-                type: 'object',
-                description: 'Selected modifier options mapped by name',
-                properties: {
-                  name: { type: 'string', description: 'Modifier name' },
-                  priceDelta: { type: 'number', description: 'Price difference' },
-                },
+                type: 'array',
+                description: 'Applied modifier and option labels for this line item',
+                items: { type: 'string', description: 'Selected modifier option name' },
               },
             },
           },
@@ -699,12 +696,9 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
               lineTotal: { type: 'number' },
               lineTotalFormatted: { type: 'string' },
               modifiers: {
-                type: 'object',
-                description: 'Selected modifier options mapped by name',
-                properties: {
-                  name: { type: 'string', description: 'Modifier name' },
-                  priceDelta: { type: 'number', description: 'Price difference' },
-                },
+                type: 'array',
+                description: 'Applied modifier and option labels for this line item',
+                items: { type: 'string', description: 'Selected modifier option name' },
               },
             },
           },
