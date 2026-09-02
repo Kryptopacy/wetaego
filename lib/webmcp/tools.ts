@@ -433,6 +433,10 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
           type: 'string',
           maxLength: 500,
           description: 'Special preparation instructions or customer notes.'
+        },
+        clearExisting: {
+          type: 'boolean',
+          description: 'Clear existing cart items before adding, ensuring clean cross-venue isolation.'
         }
       },
       additionalProperties: false
@@ -456,6 +460,7 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
       modifiers?: { modifierId: string; optionIds?: string[] }[]
       variantSelections?: Record<string, string>
       notes?: string
+      clearExisting?: boolean
     }) => {
       const item = menuItems.find(i => i.id === input.itemId)
       if (!item) {
@@ -465,8 +470,39 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
         return { status: 'error', success: false, error: `Item '${item.name}' is currently unavailable.` }
       }
 
-      const qty = Math.max(1, Math.min(50, input.quantity || 1))
+      // 1. Validate mandatory modifier groups
+      if (item.modifiers && Array.isArray(item.modifiers)) {
+        for (const mod of item.modifiers) {
+          if (mod.required) {
+            const hasModSelection = (input.modifiers && input.modifiers.some(m => m.modifierId === mod.id && m.optionIds && m.optionIds.length > 0)) ||
+              (input.variantSelections && Boolean(input.variantSelections[mod.id] || input.variantSelections[mod.name]))
+            if (!hasModSelection) {
+              const optionNames = mod.options?.map(o => o.name).join(', ') || 'Select an option'
+              return {
+                status: 'error',
+                success: false,
+                error: `Missing required modifier selection for '${mod.name}'. Available options: [${optionNames}].`
+              }
+            }
+          }
+        }
+      }
+
+      // 2. Cross-venue cart partition check
       const cartStore = useCartStore.getState()
+      const existingDifferentVenueItem = cartStore.items.find(it => it.pageId && it.pageId !== ctx.slug)
+      if (existingDifferentVenueItem && !input.clearExisting) {
+        return {
+          status: 'error',
+          success: false,
+          error: `Cart already contains items from venue '${existingDifferentVenueItem.pageId}'. Pass clearExisting: true to start a new cart for '${ctx.slug}', or checkout the existing cart first.`
+        }
+      }
+      if (input.clearExisting && existingDifferentVenueItem) {
+        cartStore.clearCart()
+      }
+
+      const qty = Math.max(1, Math.min(50, input.quantity || 1))
 
       const variantMap: Record<string, string> = { ...(input.variantSelections || {}) }
       if (input.modifiers && Array.isArray(input.modifiers)) {

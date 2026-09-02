@@ -902,6 +902,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
           description: 'Selected modifier groups and option IDs.',
         },
         notes: { type: 'string', maxLength: 500, description: 'Special preparation instructions or customer preferences.' },
+        clearExisting: { type: 'boolean', description: 'Clear existing cart items before adding, ensuring clean cross-venue isolation.' },
       },
       additionalProperties: false,
     },
@@ -997,7 +998,11 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
         _hint: { type: 'string', description: 'Agent instruction hint' },
       },
     },
-    execute: async (input: { itemId: string; quantity: number; cartId?: string; modifiers?: Array<{ modifierId?: string; name?: string; value?: string; priceDelta?: number }>; notes?: string }) => {
+    execute: async (input: { itemId: string; quantity: number; cartId?: string; modifiers?: Array<{ modifierId?: string; name?: string; value?: string; priceDelta?: number }>; notes?: string; clearExisting?: boolean }) => {
+      if (input.clearExisting) {
+        inMemoryCart.lines = []
+      }
+
       const item = DEMO_CATALOG_ITEMS.find(i => i.itemId === input.itemId) || {
         itemId: input.itemId,
         name: 'Avocado Tartine & Microgreens',
