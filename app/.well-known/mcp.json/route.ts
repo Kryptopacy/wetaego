@@ -11,6 +11,74 @@ const METADATA = {
   "homepage": "https://ourmenuos.online/docs",
   "tools": [
     {
+      "name": "wetaego_find_venue",
+      "description": "Discover and search merchant venues, multi-concept enterprises, and branches across the WETAEGO commerce network by industry vertical, keyword query, or slug identifier.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "industry": { "type": "string", "description": "Industry vertical (e.g. dining, wellness, retail, tech, lodging, services, creative)" },
+          "query": { "type": "string", "description": "Keyword search query for business name, description, or offering" },
+          "name": { "type": "string", "description": "Exact or partial business display name" },
+          "slug": { "type": "string", "description": "Direct venue slug" },
+          "limit": { "type": "integer", "minimum": 1, "maximum": 25, "default": 10 }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": ["status", "totalFound", "venues"],
+        "properties": {
+          "status": { "type": "string" },
+          "totalFound": { "type": "integer" },
+          "venues": { "type": "array" }
+        }
+      },
+      "resultSchema": {
+        "type": "object",
+        "required": ["status", "totalFound", "venues"],
+        "properties": {
+          "status": { "type": "string" },
+          "totalFound": { "type": "integer" },
+          "venues": { "type": "array" }
+        }
+      }
+    },
+    {
+      "name": "wetaego_search_catalog",
+      "description": "Universal multi-industry catalog, product, service, and booking search with multi-category filters (sizes, condition, dietary, capacity, duration, and budget).",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "query": { "type": "string", "description": "Keyword search query" },
+          "category": { "type": "string", "description": "Category name filter" },
+          "venueSlug": { "type": "string", "description": "Optional venue slug to scope search to a single merchant" },
+          "dietary": { "type": "array", "items": { "type": "string" }, "description": "Dietary tags" },
+          "maxPrice": { "type": "number", "minimum": 0, "description": "Maximum budget in currency units" },
+          "inStockOnly": { "type": "boolean", "default": true, "description": "Filter in-stock items only" },
+          "limit": { "type": "integer", "minimum": 1, "maximum": 100, "default": 20 }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": ["venue", "currency", "totalFound", "items"],
+        "properties": {
+          "venue": { "type": "string" },
+          "currency": { "type": "string" },
+          "totalFound": { "type": "integer" },
+          "items": { "type": "array" }
+        }
+      },
+      "resultSchema": {
+        "type": "object",
+        "required": ["venue", "currency", "totalFound", "items"],
+        "properties": {
+          "venue": { "type": "string" },
+          "currency": { "type": "string" },
+          "totalFound": { "type": "integer" },
+          "items": { "type": "array" }
+        }
+      }
+    },
+    {
       "name": "wetaego_query_catalog",
       "description": "Search dishes, menu items, products, and services at a WETAEGO venue with category, dietary, price, and stock filters.",
       "parameters": {
