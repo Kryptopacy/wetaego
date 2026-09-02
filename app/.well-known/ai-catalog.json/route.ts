@@ -14,15 +14,16 @@ const METADATA = {
     {
       identifier: "urn:air:ourmenuos.online:mcp:storefront-server",
       id: "urn:air:ourmenuos.online:mcp:storefront-server",
-      displayName: "WETAEGO MCP Server",
-      description: "Model Context Protocol tools for querying restaurant menus, supermarket catalogs, booking appointments, and placing orders.",
+      displayName: "WETAEGO Multi-Concept Commerce MCP Server",
+      description: "Model Context Protocol tools for querying multi-concept catalogs (dining, boutique fashion, gadgets, serviced stays, spas, repairs, media rate cards), booking appointments, and placing orders.",
       type: "application/json",
       url: "https://ourmenuos.online/.well-known/mcp.json",
       representativeQueries: [
-        "Search dishes on WETAEGO",
-        "Place a restaurant table order",
-        "Book a spa or salon appointment slot",
-        "Check ingredient and allergen info"
+        "Search catalog items, apparel, gadgets, and dishes across WETAEGO",
+        "Book a wellness spa appointment, serviced loft, or hotel suite",
+        "Request a device repair quote or creator media package",
+        "Place an in-venue order or retail storefront checkout",
+        "Check specifications, sizing, warranties, and dietary attributes"
       ]
     },
     {

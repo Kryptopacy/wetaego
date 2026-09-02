@@ -8,21 +8,21 @@ export async function GET() {
       {
         name: 'ourmenu-catalog',
         type: 'tool',
-        description: 'Search, browse, and filter physical store catalogs, restaurant menus, and retail inventories with dietary and stock attributes.',
+        description: 'Search, browse, and filter multi-industry catalogs across dining, retail fashion, electronics, serviced stays, spas, gadget repairs, and media.',
         url: 'https://ourmenuos.online/.well-known/agent-skills/ourmenu-catalog/SKILL.md',
         sha256: 'c1312a14d37b8e38a32109ab17a7fdbb63c4a9bb4db27acd99140fba44ae79d4'
       },
       {
         name: 'ourmenu-ordering',
         type: 'tool',
-        description: 'Submit and validate customer orders for restaurant dine-in, takeaway, or boutique retail pickup with item modifiers.',
+        description: 'Submit and validate customer orders across table service, storefront retail checkout, delivery, and instant commerce.',
         url: 'https://ourmenuos.online/.well-known/agent-skills/ourmenu-ordering/SKILL.md',
         sha256: 'aa1bbf0d2630b8c681374880b4ef51d058f1c21d82cdf3828001b2c36cd402a0'
       },
       {
         name: 'ourmenu-booking',
         type: 'tool',
-        description: 'Query availability calendars and schedule appointment bookings for salons, spas, clinics, and consultants with deposit processing.',
+        description: 'Query availability calendars and schedule appointment bookings, hotel/stay reservations, and service slots with deposit processing.',
         url: 'https://ourmenuos.online/.well-known/agent-skills/ourmenu-booking/SKILL.md',
         sha256: '11923144ba565d3462d4495feb2d51f8568e3e7b56da6cba3173ddf1980598d2'
       },

@@ -49,16 +49,16 @@ document.modelContext.registerTool({
 ```
 
 ### Full In-Browser Tool Suite:
-1. `search_catalog` — Universal attribute, dietary, budget, and department search.
-2. `get_item_details` — Authoritative item inspection with modifiers, options, and dietary tags.
+1. `search_catalog` — Universal multi-industry catalog, product, service, stay, and booking search with multi-category filters (sizes, condition, dietary, capacity, duration).
+2. `get_item_details` — Authoritative item inspection with variants, modifiers, specifications, sizing, warranties, and attributes across all commerce verticals.
 3. `create_cart` — Initialize or fetch session-scoped cart state.
-4. `add_to_cart` — Dispatches item with custom modifier selections into the active Zustand/IndexedDB cart and triggers real-time visual UI feedback (ambient HUD beacon, Sonner toasts, badge animations).
+4. `add_to_cart` — Dispatches items, bookings, or services with custom modifier selections into the active Zustand/IndexedDB cart and triggers real-time visual UI feedback (ambient HUD beacon, Sonner toasts, badge animations).
 5. `get_cart` (alias `view_cart`) — Real-time cart audit with itemized line totals, discounts, and validated pricing.
 6. `update_cart` (alias `update_cart_quantity`) — Atomic quantity adjustments or item removal.
-7. `recommend_pairings` — Contextual AI up-sell recommendations (sides, drinks, accessories) based on current cart contents.
-8. `initiate_checkout` — Pre-fills order details and returns a **15-minute price lock guarantee (`expiresAt`)** while presenting the **Human-in-the-Loop Safe Payment Gate**.
-9. `submit_order` — Mandatory human authorization gate requiring explicit customer confirmation (`confirmed: true`) before charging or finalizing the order.
-10. `request_staff` (alias `call_staff_or_service`) — Immediate in-venue service dispatch for active table, seat, or room identifiers.
+7. `recommend_pairings` — Contextual AI up-sell recommendations (sides, accessories, add-ons, complementary treatments) based on current cart contents.
+8. `initiate_checkout` — Pre-fills order/booking details and returns a **15-minute price lock guarantee (`expiresAt`)** while presenting the **Human-in-the-Loop Safe Payment Gate**.
+9. `submit_order` — Mandatory human authorization gate requiring explicit customer confirmation (`confirmed: true`) before charging or finalizing the order or booking.
+10. `request_staff` (alias `call_staff_or_service`) — Immediate in-venue service dispatch for active table, seat, suite, or room identifiers.
 
 ---
 
