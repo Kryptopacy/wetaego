@@ -15,6 +15,7 @@ export async function GET(req: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '20', 10)
     const offset = parseInt(searchParams.get('offset') || '0', 10)
     const reqCurrency = searchParams.get('currency')?.toUpperCase()
+    const venueSlug = (searchParams.get('venueSlug') || searchParams.get('slug') || '').trim().toLowerCase()
 
     // Determine target currency: if maxPrice > 500 or currency is NGN, default to NGN; otherwise USD
     const maxPriceNum = maxPriceParam ? parseFloat(maxPriceParam) : undefined
@@ -85,6 +86,9 @@ export async function GET(req: NextRequest) {
       }
     })
 
+    if (venueSlug) {
+      results = results.filter(it => it.conceptUrl.toLowerCase().includes(`/m/${venueSlug}/`) || (it.attributes?.brand && String(it.attributes.brand).toLowerCase().includes(venueSlug)))
+    }
     if (q) {
       results = results.filter(it => it.name.toLowerCase().includes(q) || it.description.toLowerCase().includes(q) || it.category.toLowerCase().includes(q))
     }

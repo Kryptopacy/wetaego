@@ -482,6 +482,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
       properties: {
         query: { type: 'string', description: 'Keyword search query for products, dishes, or services.' },
         category: { type: 'string', description: 'Category name filter (e.g. "Mains", "Apparel", "Spa Services").' },
+        venueSlug: { type: 'string', description: 'Optional venue slug (e.g. "demo", "lounge") to scope search to a specific merchant.' },
         dietary: {
           type: 'array',
           items: { type: 'string', enum: ['vegan', 'vegetarian', 'halal', 'kosher', 'gluten_free', 'dairy_free', 'nut_free', 'keto'] },
@@ -590,7 +591,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
         _hint: { type: 'string', description: 'Agent instruction note' },
       },
     },
-    execute: async (input: { query?: string; category?: string; dietary?: string[]; maxPrice?: number; inStockOnly?: boolean; limit?: number; offset?: number; currency?: string }) => {
+    execute: async (input: { query?: string; category?: string; dietary?: string[]; maxPrice?: number; inStockOnly?: boolean; limit?: number; offset?: number; currency?: string; venueSlug?: string }) => {
       // Dynamic currency detection: if maxPrice > 500 or currency is NGN, treat as NGN, otherwise USD
       const isNairaSearch = input.currency?.toUpperCase() === 'NGN' || (typeof input.maxPrice === 'number' && input.maxPrice > 500)
       const targetCurrency = isNairaSearch ? 'NGN' : 'USD'
@@ -608,6 +609,10 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
         }
       })
 
+      if (input.venueSlug) {
+        const vSlug = input.venueSlug.toLowerCase()
+        results = results.filter(it => it.conceptUrl.toLowerCase().includes(`/m/${vSlug}/`) || (it.attributes?.brand && String(it.attributes.brand).toLowerCase().includes(vSlug)))
+      }
       if (input.query) {
         const q = input.query.toLowerCase()
         results = results.filter(it => it.name.toLowerCase().includes(q) || it.description.toLowerCase().includes(q) || it.category.toLowerCase().includes(q))
