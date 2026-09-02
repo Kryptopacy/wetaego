@@ -35,6 +35,8 @@ export interface StorefrontContext {
   menuItems: MenuItemData[]
   categories?: string[]
   tableIdentifier?: string
+  taxes?: { id?: string; name: string; percentage: number; is_active: boolean }[]
+  taxRate?: number
   onActionTriggered?: (action: string, payload: unknown) => void
 }
 
@@ -780,7 +782,12 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
       const subtotalMinor = cartStore.totalAmountMinor()
       const discountMinor = cartStore.getDiscountAmountMinor(subtotalMinor)
       const discountedSubtotal = (subtotalMinor - discountMinor) / 100
-      const tax = Math.round(discountedSubtotal * 0.075 * 100) / 100 // 7.5% VAT
+      
+      const activeTaxRate = Array.isArray(ctx.taxes) && ctx.taxes.length > 0
+        ? ctx.taxes.filter(t => t.is_active).reduce((sum, t) => sum + (t.percentage / 100), 0)
+        : (typeof ctx.taxRate === 'number' ? ctx.taxRate : 0.075)
+
+      const tax = Math.round(discountedSubtotal * activeTaxRate * 100) / 100
       const fees = 0
       const total = discountedSubtotal + tax + fees
       const checkoutId = input.customer?.email
