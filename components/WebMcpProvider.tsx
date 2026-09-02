@@ -1165,7 +1165,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
       const totalCount = inMemoryCart.lines.reduce((acc, l) => acc + l.quantity, 0)
       const subtotal = Number(inMemoryCart.lines.reduce((acc, l) => acc + l.lineTotal, 0).toFixed(2))
       return {
-        venue: 'Pacy Group Dining & Restaurant',
+        venue: 'Pacy Grills & Lounge (Pacy Group)',
         currency: 'USD',
         itemCount: totalCount,
         lines: inMemoryCart.lines,
@@ -1496,7 +1496,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
         status: 'ok',
         checkoutId,
         fulfillment: input.fulfillment,
-        venue: 'Pacy Group Dining & Restaurant',
+        venue: 'Pacy Grills & Lounge (Pacy Group)',
         currency: 'USD',
         subtotal,
         tax: 0,
@@ -1588,7 +1588,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
         success: true,
         orderId,
         checkoutId: input.checkoutId,
-        venue: 'Pacy Group Dining & Restaurant',
+        venue: 'Pacy Grills & Lounge (Pacy Group)',
         currency: 'USD',
         total: subtotal,
         totalFormatted: `$${subtotal.toFixed(2)} USD`,
