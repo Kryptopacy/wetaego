@@ -320,6 +320,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
     },
     outputSchema: {
       type: 'object',
+      required: ['itemId', 'name', 'price', 'priceFormatted', 'isAvailable'],
       properties: {
         itemId: { type: 'string', description: 'Unique item identifier' },
         name: { type: 'string', description: 'Item name' },
@@ -333,13 +334,43 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
           description: 'Customization option groups and price deltas',
           items: {
             type: 'object',
+            required: ['name', 'options'],
             properties: {
-              name: { type: 'string' },
-              options: { type: 'array' },
+              id: { type: 'string', description: 'Modifier group ID' },
+              name: { type: 'string', description: 'Modifier group name' },
+              required: { type: 'boolean', description: 'Whether selection is mandatory' },
+              options: {
+                type: 'array',
+                description: 'List of modifier options',
+                items: {
+                  type: 'object',
+                  required: ['name', 'priceDelta'],
+                  properties: {
+                    id: { type: 'string', description: 'Option ID' },
+                    name: { type: 'string', description: 'Option name' },
+                    priceDelta: { type: 'number', description: 'Price difference in currency units' },
+                    priceDeltaFormatted: { type: 'string', description: 'Formatted price difference' },
+                  },
+                },
+              },
             },
           },
         },
-        variants: { type: 'array', description: 'Item variant specifications' },
+        variants: {
+          type: 'array',
+          description: 'Item variant specifications',
+          items: {
+            type: 'object',
+            required: ['name', 'price', 'isAvailable'],
+            properties: {
+              id: { type: 'string', description: 'Variant ID' },
+              name: { type: 'string', description: 'Variant name' },
+              price: { type: 'number', description: 'Variant price' },
+              priceFormatted: { type: 'string', description: 'Formatted variant price' },
+              isAvailable: { type: 'boolean', description: 'In-stock status' },
+            },
+          },
+        },
         isAvailable: { type: 'boolean', description: 'In-stock availability flag' },
         error: { type: 'string', description: 'Error message if item was not found' },
         _hint: { type: 'string', description: 'Guidance note for agent' },
@@ -347,6 +378,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
     },
     resultSchema: {
       type: 'object',
+      required: ['itemId', 'name', 'price', 'priceFormatted', 'isAvailable'],
       properties: {
         itemId: { type: 'string', description: 'Unique item identifier' },
         name: { type: 'string', description: 'Item name' },
@@ -360,13 +392,43 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
           description: 'Customization option groups and price deltas',
           items: {
             type: 'object',
+            required: ['name', 'options'],
             properties: {
-              name: { type: 'string' },
-              options: { type: 'array' },
+              id: { type: 'string', description: 'Modifier group ID' },
+              name: { type: 'string', description: 'Modifier group name' },
+              required: { type: 'boolean', description: 'Whether selection is mandatory' },
+              options: {
+                type: 'array',
+                description: 'List of modifier options',
+                items: {
+                  type: 'object',
+                  required: ['name', 'priceDelta'],
+                  properties: {
+                    id: { type: 'string', description: 'Option ID' },
+                    name: { type: 'string', description: 'Option name' },
+                    priceDelta: { type: 'number', description: 'Price difference in currency units' },
+                    priceDeltaFormatted: { type: 'string', description: 'Formatted price difference' },
+                  },
+                },
+              },
             },
           },
         },
-        variants: { type: 'array', description: 'Item variant specifications' },
+        variants: {
+          type: 'array',
+          description: 'Item variant specifications',
+          items: {
+            type: 'object',
+            required: ['name', 'price', 'isAvailable'],
+            properties: {
+              id: { type: 'string', description: 'Variant ID' },
+              name: { type: 'string', description: 'Variant name' },
+              price: { type: 'number', description: 'Variant price' },
+              priceFormatted: { type: 'string', description: 'Formatted variant price' },
+              isAvailable: { type: 'boolean', description: 'In-stock status' },
+            },
+          },
+        },
         isAvailable: { type: 'boolean', description: 'In-stock availability flag' },
         error: { type: 'string', description: 'Error message if item was not found' },
         _hint: { type: 'string', description: 'Guidance note for agent' },

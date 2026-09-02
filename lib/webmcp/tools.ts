@@ -263,16 +263,56 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
     },
     outputSchema: {
       type: 'object',
+      required: ['itemId', 'name', 'price', 'priceFormatted', 'isAvailable'],
       properties: {
-        itemId: { type: 'string' },
-        name: { type: 'string' },
-        category: { type: 'string' },
-        price: { type: 'number' },
-        priceFormatted: { type: 'string' },
-        description: { type: 'string' },
-        dietaryTags: { type: 'array', items: { type: 'string' } },
-        modifiers: { type: 'array' },
-        variants: { type: 'array' },
+        itemId: { type: 'string', description: 'Unique item ID' },
+        name: { type: 'string', description: 'Item name' },
+        category: { type: 'string', description: 'Category name' },
+        price: { type: 'number', description: 'Price in major currency units' },
+        priceFormatted: { type: 'string', description: 'Formatted price with currency' },
+        description: { type: 'string', description: 'Detailed description' },
+        dietaryTags: { type: 'array', items: { type: 'string' }, description: 'Dietary classification tags' },
+        modifiers: {
+          type: 'array',
+          description: 'Customization modifier groups',
+          items: {
+            type: 'object',
+            required: ['name', 'options'],
+            properties: {
+              id: { type: 'string' },
+              name: { type: 'string' },
+              required: { type: 'boolean' },
+              options: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  required: ['name', 'priceDelta'],
+                  properties: {
+                    id: { type: 'string' },
+                    name: { type: 'string' },
+                    priceDelta: { type: 'number' },
+                    priceDeltaFormatted: { type: 'string' }
+                  }
+                }
+              }
+            }
+          }
+        },
+        variants: {
+          type: 'array',
+          description: 'Item variant choices',
+          items: {
+            type: 'object',
+            required: ['name', 'price', 'isAvailable'],
+            properties: {
+              id: { type: 'string' },
+              name: { type: 'string' },
+              price: { type: 'number' },
+              priceFormatted: { type: 'string' },
+              isAvailable: { type: 'boolean' }
+            }
+          }
+        },
         isAvailable: { type: 'boolean' },
         error: { type: 'string' }
       }

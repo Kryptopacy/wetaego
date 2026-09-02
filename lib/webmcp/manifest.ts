@@ -220,6 +220,7 @@ export function getMCPManifest() {
         },
         outputSchema: {
           type: "object",
+          required: ["itemId", "name", "price", "priceFormatted", "isAvailable"],
           properties: {
             itemId: { type: "string" },
             name: { type: "string" },
@@ -228,14 +229,52 @@ export function getMCPManifest() {
             priceFormatted: { type: "string" },
             description: { type: "string" },
             dietaryTags: { type: "array", items: { type: "string" } },
-            modifiers: { type: "array" },
-            variants: { type: "array" },
+            modifiers: {
+              type: "array",
+              items: {
+                type: "object",
+                required: ["name", "options"],
+                properties: {
+                  id: { type: "string" },
+                  name: { type: "string" },
+                  required: { type: "boolean" },
+                  options: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      required: ["name", "priceDelta"],
+                      properties: {
+                        id: { type: "string" },
+                        name: { type: "string" },
+                        priceDelta: { type: "number" },
+                        priceDeltaFormatted: { type: "string" }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            variants: {
+              type: "array",
+              items: {
+                type: "object",
+                required: ["name", "price", "isAvailable"],
+                properties: {
+                  id: { type: "string" },
+                  name: { type: "string" },
+                  price: { type: "number" },
+                  priceFormatted: { type: "string" },
+                  isAvailable: { type: "boolean" }
+                }
+              }
+            },
             isAvailable: { type: "boolean" },
             error: { type: "string" }
           }
         },
         resultSchema: {
           type: "object",
+          required: ["itemId", "name", "price", "priceFormatted", "isAvailable"],
           properties: {
             itemId: { type: "string" },
             name: { type: "string" },
@@ -244,8 +283,45 @@ export function getMCPManifest() {
             priceFormatted: { type: "string" },
             description: { type: "string" },
             dietaryTags: { type: "array", items: { type: "string" } },
-            modifiers: { type: "array" },
-            variants: { type: "array" },
+            modifiers: {
+              type: "array",
+              items: {
+                type: "object",
+                required: ["name", "options"],
+                properties: {
+                  id: { type: "string" },
+                  name: { type: "string" },
+                  required: { type: "boolean" },
+                  options: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      required: ["name", "priceDelta"],
+                      properties: {
+                        id: { type: "string" },
+                        name: { type: "string" },
+                        priceDelta: { type: "number" },
+                        priceDeltaFormatted: { type: "string" }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            variants: {
+              type: "array",
+              items: {
+                type: "object",
+                required: ["name", "price", "isAvailable"],
+                properties: {
+                  id: { type: "string" },
+                  name: { type: "string" },
+                  price: { type: "number" },
+                  priceFormatted: { type: "string" },
+                  isAvailable: { type: "boolean" }
+                }
+              }
+            },
             isAvailable: { type: "boolean" },
             error: { type: "string" }
           }
