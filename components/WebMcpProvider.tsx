@@ -345,7 +345,7 @@ export const DEMO_CATALOG_ITEMS = [
 
 const inMemoryCart = {
   cartId: 'cart_demo_session',
-  venue: 'Pacy Group Dining & Restaurant',
+  venue: 'Pacy Grills & Lounge (Pacy Group)',
   currency: 'USD',
   tableIdentifier: 'Table 12',
   lines: [] as Array<{
@@ -637,8 +637,13 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
       const pageLimit = input.limit || 20
       const pageOffset = typeof input.offset === 'number' ? input.offset : 0
       const paged = results.slice(pageOffset, pageOffset + pageLimit)
+      const resolvedVenue = input.venueSlug
+        ? (input.venueSlug.toLowerCase().includes('velvet')
+            ? 'Velvet & Vine Cocktail Lounge'
+            : input.venueSlug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()))
+        : 'Pacy Grills & Lounge (Pacy Group)'
       return {
-        venue: 'Pacy Grills & Lounge (Pacy Group)',
+        venue: resolvedVenue,
         currency: targetCurrency,
         totalFound: results.length,
         limit: pageLimit,
@@ -1033,6 +1038,14 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
         modifiers: newModifiers,
       })
 
+      if (item.attributes?.brand) {
+        inMemoryCart.venue = item.attributes.brand
+      } else if (item.conceptUrl && item.conceptUrl.includes('velvet')) {
+        inMemoryCart.venue = 'Velvet & Vine Cocktail Lounge'
+      } else {
+        inMemoryCart.venue = 'Pacy Grills & Lounge (Pacy Group)'
+      }
+
       const totalCount = inMemoryCart.lines.reduce((acc, l) => acc + l.quantity, 0)
       const subtotal = Number(inMemoryCart.lines.reduce((acc, l) => acc + l.lineTotal, 0).toFixed(2))
       return {
@@ -1165,7 +1178,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
       const totalCount = inMemoryCart.lines.reduce((acc, l) => acc + l.quantity, 0)
       const subtotal = Number(inMemoryCart.lines.reduce((acc, l) => acc + l.lineTotal, 0).toFixed(2))
       return {
-        venue: 'Pacy Grills & Lounge (Pacy Group)',
+        venue: inMemoryCart.venue || 'Pacy Grills & Lounge (Pacy Group)',
         currency: 'USD',
         itemCount: totalCount,
         lines: inMemoryCart.lines,
@@ -1496,7 +1509,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
         status: 'ok',
         checkoutId,
         fulfillment: input.fulfillment,
-        venue: 'Pacy Grills & Lounge (Pacy Group)',
+        venue: inMemoryCart.venue || 'Pacy Grills & Lounge (Pacy Group)',
         currency: 'USD',
         subtotal,
         tax: 0,
@@ -1588,7 +1601,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
         success: true,
         orderId,
         checkoutId: input.checkoutId,
-        venue: 'Pacy Grills & Lounge (Pacy Group)',
+        venue: inMemoryCart.venue || 'Pacy Grills & Lounge (Pacy Group)',
         currency: 'USD',
         total: subtotal,
         totalFormatted: `$${subtotal.toFixed(2)} USD`,
