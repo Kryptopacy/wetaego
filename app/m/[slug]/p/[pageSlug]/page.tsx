@@ -518,6 +518,7 @@ export default async function PublicPageView({
           is_available: i.availability_status !== 'sold_out' && i.is_available !== false
         }))}
         tableIdentifier={_resource?.name || "Storefront Guest"}
+        taxes={(loc as any).location_taxes || []}
       />
 
       <FabGroup>

@@ -15,6 +15,8 @@ interface WebMCPProviderProps {
   menuItems: MenuItemData[]
   categories?: string[]
   tableIdentifier?: string
+  taxes?: { id?: string; name: string; percentage: number; is_active: boolean }[]
+  taxRate?: number
   showTester?: boolean
 }
 
@@ -34,6 +36,8 @@ export function WebMCPProvider({
   menuItems,
   categories,
   tableIdentifier,
+  taxes,
+  taxRate,
   showTester = false
 }: WebMCPProviderProps) {
   const [activeAction, setActiveAction] = useState<AgentActionState | null>(null)
@@ -74,9 +78,11 @@ export function WebMCPProvider({
       templateType,
       menuItems,
       categories,
-      tableIdentifier
+      tableIdentifier,
+      taxes,
+      taxRate
     }),
-    [locationId, locationName, slug, currency, businessTypePreset, templateType, menuItems, categories, tableIdentifier]
+    [locationId, locationName, slug, currency, businessTypePreset, templateType, menuItems, categories, tableIdentifier, taxes, taxRate]
   )
 
   useEffect(() => {

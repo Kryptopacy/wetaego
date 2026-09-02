@@ -783,9 +783,9 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
       const discountMinor = cartStore.getDiscountAmountMinor(subtotalMinor)
       const discountedSubtotal = (subtotalMinor - discountMinor) / 100
       
-      const activeTaxRate = Array.isArray(ctx.taxes) && ctx.taxes.length > 0
+      const activeTaxRate = Array.isArray(ctx.taxes)
         ? ctx.taxes.filter(t => t.is_active).reduce((sum, t) => sum + (t.percentage / 100), 0)
-        : (typeof ctx.taxRate === 'number' ? ctx.taxRate : 0.075)
+        : (typeof ctx.taxRate === 'number' ? ctx.taxRate : 0)
 
       const tax = Math.round(discountedSubtotal * activeTaxRate * 100) / 100
       const fees = 0
