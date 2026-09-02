@@ -18,19 +18,27 @@ function getPresetsForIndustry(industryQuery: string): string[] {
     const label = preset.label.toLowerCase()
     const description = preset.description.toLowerCase()
 
+    const isDiningMatch = ['dining', 'food', 'restaurant', 'restaurants', 'grill', 'grills', 'eatery', 'cafe', 'bistro', 'bar', 'lounge', 'catering'].includes(query)
+    const isWellnessMatch = ['wellness', 'spa', 'massage', 'salon', 'beauty', 'skincare', 'hair', 'relaxation'].includes(query)
+    const isFashionMatch = ['fashion', 'boutique', 'clothing', 'apparel', 'retail', 'clothes', 'shoes'].includes(query)
+    const isTechMatch = ['tech', 'gadgets', 'electronics', 'phones', 'devices', 'hardware'].includes(query)
+    const isLodgingMatch = ['lodging', 'stays', 'hotel', 'hotels', 'suites', 'apartments', 'lofts', 'short_stay', 'resort'].includes(query)
+    const isCreativeMatch = ['creative', 'media', 'creator', 'influencer', 'photographer', 'video', 'studio', 'agency'].includes(query)
+    const isRepairsMatch = ['repairs', 'repair', 'fix', 'services', 'service', 'maintenance'].includes(query)
+
     if (
       presetKey === query ||
       group === query ||
       templateType === query ||
       label.includes(query) ||
       description.includes(query) ||
-      (query === 'dining' && (group === 'food_drink' || presetKey === 'restaurant' || presetKey === 'bar_lounge')) ||
-      (query === 'wellness' && (group === 'hospitality' || presetKey === 'spa_wellness' || presetKey === 'salon')) ||
-      (query === 'fashion' && (group === 'retail' || presetKey === 'boutique')) ||
-      (query === 'tech' && (group === 'retail' || presetKey === 'phone_store' || presetKey === 'it_services')) ||
-      (query === 'lodging' && (group === 'property' || presetKey === 'hotel' || presetKey === 'short_stay')) ||
-      (query === 'creative' && (group === 'creative' || presetKey === 'influencer' || presetKey === 'photographer')) ||
-      (query === 'repairs' && (group === 'services' || presetKey === 'repair_services'))
+      (isDiningMatch && (group === 'food_drink' || presetKey === 'restaurant' || presetKey === 'bar_lounge')) ||
+      (isWellnessMatch && (group === 'hospitality' || presetKey === 'spa_wellness' || presetKey === 'salon')) ||
+      (isFashionMatch && (group === 'retail' || presetKey === 'boutique')) ||
+      (isTechMatch && (group === 'retail' || presetKey === 'phone_store' || presetKey === 'it_services')) ||
+      (isLodgingMatch && (group === 'property' || presetKey === 'hotel' || presetKey === 'short_stay')) ||
+      (isCreativeMatch && (group === 'creative' || presetKey === 'influencer' || presetKey === 'photographer')) ||
+      (isRepairsMatch && (group === 'services' || presetKey === 'repair_services'))
     ) {
       matchedPresets.add(presetKey)
     }
@@ -49,6 +57,22 @@ export async function GET(req: NextRequest) {
 
     const supabase = await createAdminClient()
 
+    // Resolve target presets if industry is specified
+    const targetPresets = industry ? getPresetsForIndustry(industry) : []
+    let industryLocationIds: string[] | null = null
+
+    if (industry && targetPresets.length > 0) {
+      const { data: matchedPresetPages } = await supabase
+        .from('location_pages')
+        .select('location_id')
+        .in('business_type_preset', targetPresets)
+        .eq('is_published', true)
+
+      if (matchedPresetPages && matchedPresetPages.length > 0) {
+        industryLocationIds = Array.from(new Set(matchedPresetPages.map(p => p.location_id)))
+      }
+    }
+
     // 1. Fetch published locations
     let locQuery = supabase
       .from('locations')
@@ -58,6 +82,8 @@ export async function GET(req: NextRequest) {
 
     if (slug) {
       locQuery = locQuery.eq('slug', slug)
+    } else if (industryLocationIds && industryLocationIds.length > 0) {
+      locQuery = locQuery.in('id', industryLocationIds)
     } else if (query) {
       locQuery = locQuery.or(`name.ilike.%${query}%,brand_knowledge.ilike.%${query}%,address.ilike.%${query}%,slug.ilike.%${query}%`)
     }
