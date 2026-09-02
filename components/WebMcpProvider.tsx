@@ -1349,8 +1349,11 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
       properties: {
         conceptSlug: {
           type: 'string',
-          enum: ['restaurant', 'spa', 'tech-boutique', 'hotel', 'creator-rate-card', 'repairs', 'services'],
-          description: 'The slug of the internal department/concept to open within the active venue.',
+          description: 'The slug or keyword of the internal department/concept to open (e.g. "restaurant", "spa", "boutique", "gadgets", "stays", "hotels", "repairs", "media").',
+        },
+        venueSlug: {
+          type: 'string',
+          description: 'Optional venue slug (e.g. "demo", "lounge"). If omitted, uses the active venue.',
         },
       },
       additionalProperties: false,
@@ -1375,8 +1378,8 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
         message: { type: 'string', description: 'Navigation status description' },
       },
     },
-    execute: async ({ conceptSlug }: { conceptSlug: string }) => {
-      const activeVenue = DEMO_VENUES[0]
+    execute: async ({ conceptSlug, venueSlug }: { conceptSlug: string; venueSlug?: string }) => {
+      const activeVenue = (venueSlug ? DEMO_VENUES.find(v => v.slug.toLowerCase() === venueSlug.toLowerCase()) : null) || DEMO_VENUES[0]
       const availableConcepts = activeVenue.concepts || [
         { slug: 'restaurant', title: 'Pacy Grills & Lounge', preset: 'restaurant', templateType: 'catalog' },
       ]
@@ -1393,12 +1396,12 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
         }
       }
 
-      const destination = `/m/${PLATFORM_DEMO_CONTEXT.demoSlug}/p/${bestMatch.slug}`
+      const destination = `/m/${activeVenue.slug}/p/${bestMatch.slug}`
       return {
         status: 'ok',
         conceptSlug: bestMatch.slug,
         destinationUrl: `https://ourmenuos.online${destination}`,
-        message: `Navigated to ${bestMatch.title} (${bestMatch.slug}) department catalog.`,
+        message: `Navigated to ${bestMatch.title} (${bestMatch.slug}) department catalog at ${activeVenue.name}.`,
       }
     },
   },
