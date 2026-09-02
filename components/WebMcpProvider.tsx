@@ -3,17 +3,18 @@
 import { useEffect } from 'react'
 import { ensureWebMCPContext } from '@/lib/webmcp/registry'
 import type { WebMCPTool } from '@/lib/webmcp/types'
+import { BUSINESS_TYPE_PRESETS } from '@/lib/templates/presets'
 
 /**
  * Authoritative WebMCP Client Provider for WETAEGO (OurMenuOS)
  * Registers the 12-tool client commerce & discovery suite onto navigator.modelContext
  * and document.modelContext using both navigator.modelContext.provideContext() and registerTool().
  *
- * Full compliance with WebMCP specifications and exhaustive result schemas across all tools.
+ * Full multi-concept coverage spanning Dining, Wellness, Retail/Boutique, Electronics, Stays, Gadget Repairs, and Media.
  */
 
 const PLATFORM_DEMO_CONTEXT = {
-  venue: 'Pacy Group Dining & Restaurant',
+  venue: 'Pacy Group (Multi-Concept Enterprise)',
   currency: 'USD',
   demoSlug: 'demo',
   demoUrl: 'https://ourmenuos.online/m/demo',
@@ -22,20 +23,20 @@ const PLATFORM_DEMO_CONTEXT = {
 export const DEMO_VENUES = [
   {
     slug: 'demo',
-    name: 'Pacy Group (Pacy Grills & Lounge)',
-    industry: 'dining',
+    name: 'Pacy Group (Multi-Concept Conglomerate)',
+    industry: 'hospitality',
     currency: 'USD',
-    venueUrl: 'https://ourmenuos.online/m/demo/p/restaurant',
-    description: 'Premier dining and multi-concept enterprise featuring Pacy Grills & Lounge (Gourmet Grills, Artisanal Vegan & Gluten-Free Specialties, Cocktails), Pacy Wellness Spa, Pacy Boutique, and Serviced Stays.',
+    venueUrl: 'https://ourmenuos.online/m/demo',
+    description: 'Premier enterprise conglomerate featuring Pacy Grills & Lounge (Dining), Pacy Wellness Spa, Pacy Fashion Boutique, Pacy Gadgets, Pacy Stays (Serviced Lofts), Pacy Hotels, Pacy Gadget Repairs, and Pacy Media Studio.',
     concepts: [
       { slug: 'restaurant', title: 'Pacy Grills & Lounge', preset: 'restaurant', templateType: 'catalog' },
       { slug: 'pacy-wellness', title: 'Pacy Wellness Spa', preset: 'spa_wellness', templateType: 'booking' },
       { slug: 'pacy-boutique', title: 'Pacy Fashion', preset: 'boutique', templateType: 'catalog' },
-      { slug: 'pacy-gadgets', title: 'Pacy Gadgets', preset: 'tech', templateType: 'catalog' },
+      { slug: 'pacy-gadgets', title: 'Pacy Gadgets', preset: 'phone_store', templateType: 'catalog' },
       { slug: 'pacy-stays', title: 'Pacy Stays', preset: 'short_stay', templateType: 'listing' },
       { slug: 'pacy-hotels', title: 'Pacy Hotels', preset: 'hotel', templateType: 'booking' },
       { slug: 'pacy-repairs', title: 'Pacy Gadget Repairs', preset: 'repair_services', templateType: 'quote' },
-      { slug: 'pacy-media', title: 'Pacy Media Studio', preset: 'creator_rate_card', templateType: 'booking' },
+      { slug: 'pacy-media', title: 'Pacy Media Studio', preset: 'influencer', templateType: 'rate_card' },
     ],
   },
   {
@@ -69,49 +70,65 @@ export const DEMO_VENUES = [
 
 /**
  * Calculates a semantic similarity score between an agent query and a business concept.
- * Dynamically resolves fuzzy keywords, tokens, presets, and titles across any merchant domain.
+ * Dynamically resolves fuzzy keywords, tokens, presets, and titles using the canonical BUSINESS_TYPE_PRESETS.
  */
 export function calculateConceptMatchScore(inputQuery: string, concept: { slug: string; title: string; preset?: string; templateType?: string }) {
   const query = inputQuery.toLowerCase().trim()
   const slug = concept.slug.toLowerCase()
   const title = concept.title.toLowerCase()
-  const preset = (concept.preset || '').toLowerCase()
+  const presetKey = (concept.preset || '').toLowerCase()
 
   if (slug === query || title === query) return 100
   if (slug.includes(query) || title.includes(query)) return 80
 
-  const diningKeywords = ['restaurant', 'dining', 'grill', 'grills', 'food', 'steakhouse', 'kitchen', 'eatery', 'bistro', 'cafe', 'bar', 'lounge', 'meal', 'dishes']
-  const spaKeywords = ['spa', 'wellness', 'massage', 'therapy', 'relaxation', 'skincare', 'beauty', 'holistic']
-  const boutiqueKeywords = ['boutique', 'fashion', 'clothing', 'apparel', 'wear', 'outfit', 'style', 'dress']
-  const techKeywords = ['gadgets', 'tech', 'electronics', 'phones', 'devices', 'hardware']
-  const staysKeywords = ['stays', 'apartments', 'lofts', 'shortlet', 'rooms', 'rentals', 'accommodations']
-  const hotelsKeywords = ['hotel', 'hotels', 'suites', 'resort', 'lodge']
-  const repairsKeywords = ['repairs', 'repair', 'fix', 'service', 'diagnostics', 'screen', 'soldering']
-  const mediaKeywords = ['media', 'creators', 'studio', 'photography', 'production', 'video', 'rate_card']
-
   const queryTokens = query.split(/[\s\-_]+/).filter(Boolean)
   let score = 0
+
+  const presetMeta = BUSINESS_TYPE_PRESETS[presetKey]
+  const presetLabel = (presetMeta?.label || '').toLowerCase()
+  const presetGroup = (presetMeta?.group || '').toLowerCase()
+  const presetDescription = (presetMeta?.description || '').toLowerCase()
 
   for (const token of queryTokens) {
     if (slug.includes(token)) score += 30
     if (title.includes(token)) score += 30
-    if (preset.includes(token)) score += 20
+    if (presetKey.includes(token)) score += 25
+    if (presetLabel.includes(token)) score += 25
+    if (presetGroup.includes(token)) score += 20
+    if (presetDescription.includes(token)) score += 15
 
-    if (diningKeywords.includes(token) && (preset === 'restaurant' || slug.includes('restaurant') || title.includes('grill') || title.includes('lounge'))) score += 50
-    if (spaKeywords.includes(token) && (preset === 'spa_wellness' || slug.includes('wellness') || title.includes('spa'))) score += 50
-    if (boutiqueKeywords.includes(token) && (preset === 'boutique' || slug.includes('boutique') || title.includes('fashion'))) score += 50
-    if (techKeywords.includes(token) && (preset === 'tech' || slug.includes('gadgets'))) score += 50
-    if (staysKeywords.includes(token) && (preset === 'short_stay' || slug.includes('stays'))) score += 50
-    if (hotelsKeywords.includes(token) && (preset === 'hotel' || slug.includes('hotel'))) score += 50
-    if (repairsKeywords.includes(token) && (preset === 'repair_services' || slug.includes('repairs'))) score += 50
-    if (mediaKeywords.includes(token) && (preset === 'creator_rate_card' || slug.includes('media'))) score += 50
+    // Multi-industry intent clusters
+    if (['restaurant', 'dining', 'grill', 'grills', 'food', 'steakhouse', 'kitchen', 'eatery', 'bistro', 'cafe', 'bar', 'lounge'].includes(token)) {
+      if (presetGroup === 'food_drink' || presetKey === 'restaurant' || slug.includes('restaurant') || title.includes('grill')) score += 50
+    }
+    if (['spa', 'wellness', 'massage', 'therapy', 'relaxation', 'skincare', 'beauty', 'holistic', 'facial'].includes(token)) {
+      if (presetKey === 'spa_wellness' || slug.includes('wellness') || title.includes('spa')) score += 50
+    }
+    if (['boutique', 'fashion', 'clothing', 'apparel', 'wear', 'outfit', 'style', 'dress', 'shirt'].includes(token)) {
+      if (presetKey === 'boutique' || slug.includes('boutique') || title.includes('fashion')) score += 50
+    }
+    if (['gadgets', 'tech', 'electronics', 'phones', 'devices', 'hardware', 'store'].includes(token)) {
+      if (presetKey === 'phone_store' || presetKey === 'tech' || slug.includes('gadgets')) score += 50
+    }
+    if (['stays', 'apartments', 'lofts', 'shortlet', 'rooms', 'rentals', 'accommodations'].includes(token)) {
+      if (presetKey === 'short_stay' || slug.includes('stays')) score += 50
+    }
+    if (['hotel', 'hotels', 'suites', 'resort', 'lodge'].includes(token)) {
+      if (presetKey === 'hotel' || slug.includes('hotel')) score += 50
+    }
+    if (['repairs', 'repair', 'fix', 'service', 'diagnostics', 'screen', 'soldering'].includes(token)) {
+      if (presetKey === 'repair_services' || slug.includes('repairs')) score += 50
+    }
+    if (['media', 'creators', 'studio', 'photography', 'production', 'video', 'rate_card', 'rates'].includes(token)) {
+      if (presetKey === 'influencer' || presetKey === 'photographer' || slug.includes('media')) score += 50
+    }
   }
 
   return score
 }
 
-
 export const DEMO_CATALOG_ITEMS = [
+  // ── 1. DINING: Pacy Grills & Lounge ──────────────────────────────────────────
   {
     itemId: 'item_vegan_avocado',
     name: 'Avocado Tartine & Microgreens',
@@ -122,7 +139,7 @@ export const DEMO_CATALOG_ITEMS = [
     dietaryTags: ['vegan', 'vegetarian', 'dairy_free'],
     isAvailable: true,
     hasModifiers: true,
-    attributes: { brand: 'Pacy Grills & Lounge' },
+    attributes: { brand: 'Pacy Grills & Lounge', industry: 'dining' },
     conceptSlug: 'restaurant',
     conceptUrl: 'https://ourmenuos.online/m/demo/p/restaurant',
     modifiers: [
@@ -150,7 +167,7 @@ export const DEMO_CATALOG_ITEMS = [
     dietaryTags: ['vegan', 'vegetarian', 'gluten_free', 'dairy_free'],
     isAvailable: true,
     hasModifiers: false,
-    attributes: { brand: 'Pacy Grills & Lounge' },
+    attributes: { brand: 'Pacy Grills & Lounge', industry: 'dining' },
     conceptSlug: 'restaurant',
     conceptUrl: 'https://ourmenuos.online/m/demo/p/restaurant',
     modifiers: [],
@@ -166,7 +183,7 @@ export const DEMO_CATALOG_ITEMS = [
     dietaryTags: ['vegan', 'vegetarian', 'gluten_free', 'dairy_free', 'halal'],
     isAvailable: true,
     hasModifiers: true,
-    attributes: { brand: 'Pacy Grills & Lounge' },
+    attributes: { brand: 'Pacy Grills & Lounge', industry: 'dining' },
     conceptSlug: 'restaurant',
     conceptUrl: 'https://ourmenuos.online/m/demo/p/restaurant',
     modifiers: [
@@ -194,23 +211,7 @@ export const DEMO_CATALOG_ITEMS = [
     dietaryTags: ['vegan', 'vegetarian', 'gluten_free'],
     isAvailable: true,
     hasModifiers: false,
-    attributes: { brand: 'Pacy Grills & Lounge' },
-    conceptSlug: 'restaurant',
-    conceptUrl: 'https://ourmenuos.online/m/demo/p/restaurant',
-    modifiers: [],
-    variants: [],
-  },
-  {
-    itemId: 'item_artisan_matcha',
-    name: 'Iced Ceremonial Matcha Latte',
-    category: 'Beverages',
-    price: 6.5,
-    priceFormatted: '$6.50 USD',
-    description: 'First-harvest Uji ceremonial matcha whisked with organic oat milk and a touch of agave.',
-    dietaryTags: ['vegan', 'vegetarian', 'dairy_free', 'gluten_free'],
-    isAvailable: true,
-    hasModifiers: false,
-    attributes: { brand: 'Pacy Grills & Lounge' },
+    attributes: { brand: 'Pacy Grills & Lounge', industry: 'dining' },
     conceptSlug: 'restaurant',
     conceptUrl: 'https://ourmenuos.online/m/demo/p/restaurant',
     modifiers: [],
@@ -226,9 +227,117 @@ export const DEMO_CATALOG_ITEMS = [
     dietaryTags: ['gluten_free', 'halal'],
     isAvailable: true,
     hasModifiers: false,
-    attributes: { brand: 'Pacy Grills & Lounge' },
+    attributes: { brand: 'Pacy Grills & Lounge', industry: 'dining' },
     conceptSlug: 'restaurant',
     conceptUrl: 'https://ourmenuos.online/m/demo/p/restaurant',
+    modifiers: [],
+    variants: [],
+  },
+
+  // ── 2. WELLNESS & SPA: Pacy Wellness Spa ─────────────────────────────────────
+  {
+    itemId: 'item_spa_massage_60',
+    name: '60-Min Aromatherapy Swedish Massage',
+    category: 'Spa Treatments',
+    price: 65.0,
+    priceFormatted: '$65.00 USD',
+    description: 'Full-body relaxation massage using essential eucalyptus and lavender oils to ease tension.',
+    dietaryTags: [],
+    isAvailable: true,
+    hasModifiers: true,
+    attributes: { brand: 'Pacy Wellness Spa', industry: 'wellness', durationMinutes: 60, therapistGender: 'any' },
+    conceptSlug: 'pacy-wellness',
+    conceptUrl: 'https://ourmenuos.online/m/demo/p/pacy-wellness',
+    modifiers: [],
+    variants: [],
+  },
+
+  // ── 3. RETAIL / FASHION: Pacy Fashion Boutique ───────────────────────────────
+  {
+    itemId: 'item_fashion_blazer',
+    name: 'Structured Linen Minimalist Blazer',
+    category: 'Apparel',
+    price: 85.0,
+    priceFormatted: '$85.00 USD',
+    description: 'Tailored oversized organic linen blazer in charcoal and neutral oatmeal tones.',
+    dietaryTags: [],
+    isAvailable: true,
+    hasModifiers: true,
+    attributes: { brand: 'Pacy Fashion', industry: 'retail', sizes: ['S', 'M', 'L', 'XL'], colors: ['Charcoal', 'Oatmeal'] },
+    conceptSlug: 'pacy-boutique',
+    conceptUrl: 'https://ourmenuos.online/m/demo/p/pacy-boutique',
+    modifiers: [],
+    variants: [],
+  },
+
+  // ── 4. TECH & GADGETS: Pacy Gadgets ──────────────────────────────────────────
+  {
+    itemId: 'item_tech_smartphone',
+    name: 'Flagship Pro Smartphone 256GB',
+    category: 'Smartphones',
+    price: 799.0,
+    priceFormatted: '$799.00 USD',
+    description: 'Next-gen flagship smartphone with OLED display, triple lens camera system, and 2-year warranty.',
+    dietaryTags: [],
+    isAvailable: true,
+    hasModifiers: true,
+    attributes: { brand: 'Pacy Gadgets', industry: 'retail', condition: 'new', warrantyMonths: 24 },
+    conceptSlug: 'pacy-gadgets',
+    conceptUrl: 'https://ourmenuos.online/m/demo/p/pacy-gadgets',
+    modifiers: [],
+    variants: [],
+  },
+
+  // ── 5. SHORT STAYS & HOTELS: Pacy Stays ───────────────────────────────────────
+  {
+    itemId: 'item_stay_penthouse',
+    name: 'Serviced Executive Penthouse Loft',
+    category: 'Accommodations',
+    price: 180.0,
+    priceFormatted: '$180.00 USD/night',
+    description: 'Luxury high-rise serviced loft with panoramic city skyline view, dedicated workspace, and fast fiber WiFi.',
+    dietaryTags: [],
+    isAvailable: true,
+    hasModifiers: false,
+    attributes: { brand: 'Pacy Stays', industry: 'lodging', roomCapacity: 4, amenities: ['WiFi', 'Kitchenette', 'Balcony'] },
+    conceptSlug: 'pacy-stays',
+    conceptUrl: 'https://ourmenuos.online/m/demo/p/pacy-stays',
+    modifiers: [],
+    variants: [],
+  },
+
+  // ── 6. REPAIRS: Pacy Gadget Repairs ──────────────────────────────────────────
+  {
+    itemId: 'item_repair_screen',
+    name: 'Precision OLED Display Screen Replacement',
+    category: 'Repair Services',
+    price: 55.0,
+    priceFormatted: '$55.00 USD',
+    description: 'OEM-grade OLED display assembly installation with 90-day comprehensive repair warranty.',
+    dietaryTags: [],
+    isAvailable: true,
+    hasModifiers: true,
+    attributes: { brand: 'Pacy Gadget Repairs', industry: 'services', turnaroundHours: 2, warrantyDays: 90 },
+    conceptSlug: 'pacy-repairs',
+    conceptUrl: 'https://ourmenuos.online/m/demo/p/pacy-repairs',
+    modifiers: [],
+    variants: [],
+  },
+
+  // ── 7. MEDIA: Pacy Media Studio ──────────────────────────────────────────────
+  {
+    itemId: 'item_media_reel_package',
+    name: 'Sponsored 60s Reel & Story Campaign Package',
+    category: 'Creator Packages',
+    price: 250.0,
+    priceFormatted: '$250.00 USD',
+    description: 'High-production 4K vertical video commercial, 3x story posts, usage rights, and performance analytics.',
+    dietaryTags: [],
+    isAvailable: true,
+    hasModifiers: false,
+    attributes: { brand: 'Pacy Media Studio', industry: 'creative', turnaroundDays: 3, deliverables: '1x 4K Reel + 3x Stories' },
+    conceptSlug: 'pacy-media',
+    conceptUrl: 'https://ourmenuos.online/m/demo/p/pacy-media',
     modifiers: [],
     variants: [],
   },

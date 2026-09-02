@@ -1,18 +1,42 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
+import { BUSINESS_TYPE_PRESETS } from '@/lib/templates/presets'
 
 export const dynamic = 'force-dynamic'
 
-const INDUSTRY_PRESET_MAP: Record<string, string[]> = {
-  dining: ['restaurant', 'cafe', 'bar', 'food', 'bakery', 'grill'],
-  food: ['restaurant', 'cafe', 'bar', 'food', 'bakery', 'grill'],
-  hospitality: ['restaurant', 'hotel', 'short_stay', 'spa_wellness', 'bar'],
-  wellness: ['spa_wellness', 'salon', 'fitness'],
-  retail: ['boutique', 'fashion', 'tech', 'retail'],
-  lodging: ['hotel', 'short_stay'],
-  services: ['repair_services', 'creator_rate_card', 'consulting'],
-  media: ['creator_rate_card', 'media_production'],
-  repairs: ['repair_services', 'tech_repair']
+/**
+ * Universal Industry to Preset Mapping derived directly from BUSINESS_TYPE_PRESETS.
+ * Automatically adapts whenever new presets or business verticals are added.
+ */
+function getPresetsForIndustry(industryQuery: string): string[] {
+  const query = industryQuery.toLowerCase().trim()
+  const matchedPresets = new Set<string>()
+
+  for (const [presetKey, preset] of Object.entries(BUSINESS_TYPE_PRESETS)) {
+    const group = preset.group.toLowerCase()
+    const templateType = preset.template_type.toLowerCase()
+    const label = preset.label.toLowerCase()
+    const description = preset.description.toLowerCase()
+
+    if (
+      presetKey === query ||
+      group === query ||
+      templateType === query ||
+      label.includes(query) ||
+      description.includes(query) ||
+      (query === 'dining' && (group === 'food_drink' || presetKey === 'restaurant' || presetKey === 'bar_lounge')) ||
+      (query === 'wellness' && (group === 'hospitality' || presetKey === 'spa_wellness' || presetKey === 'salon')) ||
+      (query === 'fashion' && (group === 'retail' || presetKey === 'boutique')) ||
+      (query === 'tech' && (group === 'retail' || presetKey === 'phone_store' || presetKey === 'it_services')) ||
+      (query === 'lodging' && (group === 'property' || presetKey === 'hotel' || presetKey === 'short_stay')) ||
+      (query === 'creative' && (group === 'creative' || presetKey === 'influencer' || presetKey === 'photographer')) ||
+      (query === 'repairs' && (group === 'services' || presetKey === 'repair_services'))
+    ) {
+      matchedPresets.add(presetKey)
+    }
+  }
+
+  return Array.from(matchedPresets)
 }
 
 export async function GET(req: NextRequest) {
@@ -75,16 +99,26 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    // 4. Build rich venue results with semantic scoring
-    const targetPresets = industry ? (INDUSTRY_PRESET_MAP[industry] || [industry]) : []
+    // 4. Match industry presets dynamically
+    const targetPresets = industry ? getPresetsForIndustry(industry) : []
 
     const venues = matchedLocations.map(loc => {
       const locPages = pagesByLocation[loc.id] || []
       
-      // Determine primary industry dynamically from concepts or brand knowledge
       let primaryIndustry = 'hospitality'
-      const hasDining = locPages.some(p => targetPresets.includes(p.preset) || ['restaurant', 'cafe', 'bar'].includes(p.preset))
-      if (hasDining) primaryIndustry = 'dining'
+      if (locPages.some(p => ['restaurant', 'bar_lounge', 'food_truck', 'catering', 'other_food'].includes(p.preset))) {
+        primaryIndustry = 'dining'
+      } else if (locPages.some(p => ['spa_wellness', 'salon'].includes(p.preset))) {
+        primaryIndustry = 'wellness'
+      } else if (locPages.some(p => ['boutique', 'phone_store', 'furniture'].includes(p.preset))) {
+        primaryIndustry = 'retail'
+      } else if (locPages.some(p => ['hotel', 'short_stay'].includes(p.preset))) {
+        primaryIndustry = 'lodging'
+      } else if (locPages.some(p => ['repair_services', 'other_services'].includes(p.preset))) {
+        primaryIndustry = 'services'
+      } else if (locPages.some(p => ['influencer', 'photographer', 'agency', 'freelancer', 'portfolio'].includes(p.preset))) {
+        primaryIndustry = 'creative'
+      }
 
       return {
         slug: loc.slug,
@@ -105,11 +139,15 @@ export async function GET(req: NextRequest) {
     if (industry) {
       filteredVenues = venues.filter(v => {
         if (v.industry === industry) return true
-        return v.concepts.some(c => targetPresets.includes(c.preset) || c.title.toLowerCase().includes(industry) || c.slug.toLowerCase().includes(industry))
+        return v.concepts.some(c => 
+          targetPresets.includes(c.preset) || 
+          c.title.toLowerCase().includes(industry) || 
+          c.slug.toLowerCase().includes(industry)
+        )
       })
     }
 
-    // Fallback default if database empty
+    // Fallback default if database empty or initializing
     if (filteredVenues.length === 0 && (industry === 'dining' || query.includes('pacy') || !query)) {
       filteredVenues = [
         {
@@ -123,6 +161,11 @@ export async function GET(req: NextRequest) {
             { slug: 'restaurant', title: 'Pacy Grills & Lounge', preset: 'restaurant', templateType: 'catalog', url: 'https://ourmenuos.online/m/demo/p/restaurant' },
             { slug: 'pacy-wellness', title: 'Pacy Wellness Spa', preset: 'spa_wellness', templateType: 'booking', url: 'https://ourmenuos.online/m/demo/p/pacy-wellness' },
             { slug: 'pacy-boutique', title: 'Pacy Fashion', preset: 'boutique', templateType: 'catalog', url: 'https://ourmenuos.online/m/demo/p/pacy-boutique' },
+            { slug: 'pacy-gadgets', title: 'Pacy Gadgets', preset: 'phone_store', templateType: 'catalog', url: 'https://ourmenuos.online/m/demo/p/pacy-gadgets' },
+            { slug: 'pacy-stays', title: 'Pacy Stays', preset: 'short_stay', templateType: 'listing', url: 'https://ourmenuos.online/m/demo/p/pacy-stays' },
+            { slug: 'pacy-hotels', title: 'Pacy Hotels', preset: 'hotel', templateType: 'booking', url: 'https://ourmenuos.online/m/demo/p/pacy-hotels' },
+            { slug: 'pacy-repairs', title: 'Pacy Gadget Repairs', preset: 'repair_services', templateType: 'quote', url: 'https://ourmenuos.online/m/demo/p/pacy-repairs' },
+            { slug: 'pacy-media', title: 'Pacy Media Studio', preset: 'influencer', templateType: 'rate_card', url: 'https://ourmenuos.online/m/demo/p/pacy-media' },
           ]
         }
       ]
