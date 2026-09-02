@@ -633,7 +633,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
       const pageOffset = typeof input.offset === 'number' ? input.offset : 0
       const paged = results.slice(pageOffset, pageOffset + pageLimit)
       return {
-        venue: 'Pacy Group Dining & Restaurant',
+        venue: 'Pacy Grills & Lounge (Pacy Group)',
         currency: targetCurrency,
         totalFound: results.length,
         limit: pageLimit,
