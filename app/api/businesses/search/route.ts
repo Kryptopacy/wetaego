@@ -126,8 +126,6 @@ export async function GET(req: NextRequest) {
     }
 
     // 4. Match industry presets dynamically
-    const targetPresets = industry ? getPresetsForIndustry(industry) : []
-
     const venues = matchedLocations.map(loc => {
       const locPages = pagesByLocation[loc.id] || []
       
