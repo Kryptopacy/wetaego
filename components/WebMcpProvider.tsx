@@ -320,6 +320,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
     },
     outputSchema: {
       type: 'object',
+      required: ['itemId', 'name', 'price', 'priceFormatted', 'isAvailable'],
       properties: {
         itemId: { type: 'string', description: 'Unique item identifier' },
         name: { type: 'string', description: 'Item name' },
@@ -333,13 +334,47 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
           description: 'Customization option groups and price deltas',
           items: {
             type: 'object',
+            required: ['modifierId', 'name', 'options'],
             properties: {
-              name: { type: 'string' },
-              options: { type: 'array' },
+              modifierId: { type: 'string', description: 'Unique modifier group identifier' },
+              name: { type: 'string', description: 'Modifier group title' },
+              required: { type: 'boolean', description: 'Whether selection is mandatory' },
+              minSelections: { type: 'integer', description: 'Minimum number of selections' },
+              maxSelections: { type: 'integer', description: 'Maximum number of selections' },
+              options: {
+                type: 'array',
+                description: 'Available options within this group',
+                items: {
+                  type: 'object',
+                  required: ['id', 'name', 'priceDelta', 'priceDeltaFormatted'],
+                  properties: {
+                    id: { type: 'string', description: 'Option identifier' },
+                    name: { type: 'string', description: 'Option display name' },
+                    priceDelta: { type: 'number', description: 'Price delta in major currency units' },
+                    priceDeltaFormatted: { type: 'string', description: 'Formatted price difference' },
+                    isDefault: { type: 'boolean', description: 'Whether option is selected by default' },
+                  },
+                },
+              },
             },
           },
         },
-        variants: { type: 'array', description: 'Item variant specifications' },
+        variants: {
+          type: 'array',
+          description: 'Item variant specifications',
+          items: {
+            type: 'object',
+            required: ['variantId', 'name', 'price', 'priceFormatted', 'isAvailable'],
+            properties: {
+              variantId: { type: 'string', description: 'Unique variant identifier' },
+              name: { type: 'string', description: 'Variant display name' },
+              price: { type: 'number', description: 'Variant price' },
+              priceFormatted: { type: 'string', description: 'Formatted price' },
+              sku: { type: 'string', description: 'Stock keeping unit code' },
+              isAvailable: { type: 'boolean', description: 'Stock status' },
+            },
+          },
+        },
         isAvailable: { type: 'boolean', description: 'In-stock availability flag' },
         error: { type: 'string', description: 'Error message if item was not found' },
         _hint: { type: 'string', description: 'Guidance note for agent' },
@@ -347,6 +382,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
     },
     resultSchema: {
       type: 'object',
+      required: ['itemId', 'name', 'price', 'priceFormatted', 'isAvailable'],
       properties: {
         itemId: { type: 'string', description: 'Unique item identifier' },
         name: { type: 'string', description: 'Item name' },
@@ -360,13 +396,47 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
           description: 'Customization option groups and price deltas',
           items: {
             type: 'object',
+            required: ['modifierId', 'name', 'options'],
             properties: {
-              name: { type: 'string' },
-              options: { type: 'array' },
+              modifierId: { type: 'string', description: 'Unique modifier group identifier' },
+              name: { type: 'string', description: 'Modifier group title' },
+              required: { type: 'boolean', description: 'Whether selection is mandatory' },
+              minSelections: { type: 'integer', description: 'Minimum number of selections' },
+              maxSelections: { type: 'integer', description: 'Maximum number of selections' },
+              options: {
+                type: 'array',
+                description: 'Available options within this group',
+                items: {
+                  type: 'object',
+                  required: ['id', 'name', 'priceDelta', 'priceDeltaFormatted'],
+                  properties: {
+                    id: { type: 'string', description: 'Option identifier' },
+                    name: { type: 'string', description: 'Option display name' },
+                    priceDelta: { type: 'number', description: 'Price delta in major currency units' },
+                    priceDeltaFormatted: { type: 'string', description: 'Formatted price difference' },
+                    isDefault: { type: 'boolean', description: 'Whether option is selected by default' },
+                  },
+                },
+              },
             },
           },
         },
-        variants: { type: 'array', description: 'Item variant specifications' },
+        variants: {
+          type: 'array',
+          description: 'Item variant specifications',
+          items: {
+            type: 'object',
+            required: ['variantId', 'name', 'price', 'priceFormatted', 'isAvailable'],
+            properties: {
+              variantId: { type: 'string', description: 'Unique variant identifier' },
+              name: { type: 'string', description: 'Variant display name' },
+              price: { type: 'number', description: 'Variant price' },
+              priceFormatted: { type: 'string', description: 'Formatted price' },
+              sku: { type: 'string', description: 'Stock keeping unit code' },
+              isAvailable: { type: 'boolean', description: 'Stock status' },
+            },
+          },
+        },
         isAvailable: { type: 'boolean', description: 'In-stock availability flag' },
         error: { type: 'string', description: 'Error message if item was not found' },
         _hint: { type: 'string', description: 'Guidance note for agent' },

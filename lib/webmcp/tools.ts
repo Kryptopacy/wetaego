@@ -263,16 +263,56 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
     },
     outputSchema: {
       type: 'object',
+      required: ['itemId', 'name', 'price', 'priceFormatted', 'isAvailable'],
       properties: {
-        itemId: { type: 'string' },
-        name: { type: 'string' },
-        category: { type: 'string' },
-        price: { type: 'number' },
-        priceFormatted: { type: 'string' },
-        description: { type: 'string' },
-        dietaryTags: { type: 'array', items: { type: 'string' } },
-        modifiers: { type: 'array' },
-        variants: { type: 'array' },
+        itemId: { type: 'string', description: 'Unique item ID' },
+        name: { type: 'string', description: 'Item name' },
+        category: { type: 'string', description: 'Category name' },
+        price: { type: 'number', description: 'Price in major currency units' },
+        priceFormatted: { type: 'string', description: 'Formatted price with currency' },
+        description: { type: 'string', description: 'Detailed description' },
+        dietaryTags: { type: 'array', items: { type: 'string' }, description: 'Dietary classification tags' },
+        modifiers: {
+          type: 'array',
+          description: 'Customization modifier groups',
+          items: {
+            type: 'object',
+            required: ['modifierId', 'name', 'options'],
+            properties: {
+              modifierId: { type: 'string' },
+              name: { type: 'string' },
+              required: { type: 'boolean' },
+              options: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  required: ['id', 'name', 'priceDelta', 'priceDeltaFormatted'],
+                  properties: {
+                    id: { type: 'string' },
+                    name: { type: 'string' },
+                    priceDelta: { type: 'number' },
+                    priceDeltaFormatted: { type: 'string' }
+                  }
+                }
+              }
+            }
+          }
+        },
+        variants: {
+          type: 'array',
+          description: 'Item variant choices',
+          items: {
+            type: 'object',
+            required: ['variantId', 'name', 'price', 'priceFormatted', 'isAvailable'],
+            properties: {
+              variantId: { type: 'string' },
+              name: { type: 'string' },
+              price: { type: 'number' },
+              priceFormatted: { type: 'string' },
+              isAvailable: { type: 'boolean' }
+            }
+          }
+        },
         isAvailable: { type: 'boolean' },
         error: { type: 'string' }
       }
@@ -504,11 +544,32 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
               unitPriceFormatted: { type: 'string' },
               lineTotal: { type: 'number' },
               lineTotalFormatted: { type: 'string' },
-              modifiers: { type: 'object' }
+              modifiers: {
+                type: 'object',
+                description: 'Selected modifier options mapped by name to option values',
+                additionalProperties: { type: 'string' }
+              }
             }
           }
         },
-        items: { type: 'array' },
+        items: {
+          type: 'array',
+          description: 'Alias for lines in cart',
+          items: {
+            type: 'object',
+            required: ['lineId', 'itemId', 'name', 'quantity', 'unitPrice', 'unitPriceFormatted', 'lineTotal', 'lineTotalFormatted'],
+            properties: {
+              lineId: { type: 'string' },
+              itemId: { type: 'string' },
+              name: { type: 'string' },
+              quantity: { type: 'integer' },
+              unitPrice: { type: 'number' },
+              unitPriceFormatted: { type: 'string' },
+              lineTotal: { type: 'number' },
+              lineTotalFormatted: { type: 'string' }
+            }
+          }
+        },
         subtotal: { type: 'number' },
         subtotalFormatted: { type: 'string' },
         discountAmount: { type: 'number' },
