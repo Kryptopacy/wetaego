@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { getMCPManifest } from '@/lib/webmcp/manifest'
+import { authenticateApiRequest } from '@/lib/auth/api-key'
 
 import { checkRateLimit } from '@/lib/upstash'
 
@@ -61,26 +62,23 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const authHeader = req.headers.get('authorization')
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json(
-        { error: 'Unauthorized: Bearer token is required to execute Staff MCP tools.' },
-        { status: 401 }
-      )
+    // Validate the Bearer token against api_keys (SHA-256 hash lookup).
+    const auth = await authenticateApiRequest(req)
+    if ('error' in auth) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status })
     }
+    const { adminClient, apiKey } = auth
 
-    const token = authHeader.replace('Bearer ', '').trim()
     const body = await req.json()
     const { name, arguments: args } = body
-
-    const adminClient = await createAdminClient()
 
     // 1. get_daily_sales
     if (name === 'get_daily_sales') {
       const today = args?.date || new Date().toISOString().split('T')[0]
       const { data: orders } = await adminClient
         .from('orders')
-        .select('id, total_amount_minor, status, created_at')
+        .select('id, total_amount_minor, status, created_at, organization_id')
+        .eq('organization_id', apiKey.organization_id)
         .gte('created_at', `${today}T00:00:00.000Z`)
         .lte('created_at', `${today}T23:59:59.999Z`)
 
@@ -101,6 +99,7 @@ export async function POST(req: NextRequest) {
       const { data: orders } = await adminClient
         .from('orders')
         .select('id, status, table_identifier, customer_name, total_amount_minor, created_at, order_items(id, item_title, quantity, unit_price_minor)')
+        .eq('organization_id', apiKey.organization_id)
         .in('status', ['pending', 'paid', 'preparing'])
         .order('created_at', { ascending: false })
         .limit(50)
@@ -125,6 +124,18 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'itemId is required' }, { status: 400 })
       }
 
+      // Ownership check: only allow the update if the item's page belongs to the key's organization.
+      const { data: item } = await adminClient
+        .from('page_items')
+        .select('id, page_id, location_pages!inner(id, location_id, locations!inner(organization_id))')
+        .eq('id', itemId)
+        .maybeSingle()
+
+      const itemOrgId = (item as unknown as { location_pages?: { locations?: { organization_id?: string } } })?.location_pages?.locations?.organization_id
+      if (!item || itemOrgId !== apiKey.organization_id) {
+        return NextResponse.json({ error: 'Item not found or not accessible' }, { status: 404 })
+      }
+
       await adminClient
         .from('page_items')
         .update({ availability_status: isAvailable ? 'available' : 'sold_out' })
@@ -143,6 +154,16 @@ export async function POST(req: NextRequest) {
       const { orderId, status } = args || {}
       if (!orderId || !status) {
         return NextResponse.json({ error: 'orderId and status are required' }, { status: 400 })
+      }
+
+      const { data: order } = await adminClient
+        .from('orders')
+        .select('id, organization_id')
+        .eq('id', orderId)
+        .maybeSingle()
+
+      if (!order || order.organization_id !== apiKey.organization_id) {
+        return NextResponse.json({ error: 'Order not found or not accessible' }, { status: 404 })
       }
 
       await adminClient

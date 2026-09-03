@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
+import { authenticateApiRequest } from '@/lib/auth/api-key'
+import { checkRateLimit } from '@/lib/upstash'
 import { z } from 'zod'
 
 export const dynamic = 'force-dynamic'
@@ -31,12 +33,16 @@ const PosIngestSchema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
-    const authHeader = req.headers.get('authorization')
-    if (!authHeader?.startsWith('Bearer ')) {
-      return NextResponse.json(
-        { error: 'Unauthorized. Bearer token required for POS telemetry ingestion.' },
-        { status: 401 }
-      )
+    // Validate the Bearer token against api_keys (SHA-256 hash lookup).
+    const auth = await authenticateApiRequest(req)
+    if ('error' in auth) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status })
+    }
+    const { adminClient, apiKey } = auth
+
+    const rateLimit = await checkRateLimit('inbound_api', apiKey.id)
+    if (rateLimit && !rateLimit.success) {
+      return NextResponse.json({ error: 'Rate limit exceeded. Please try again later.' }, { status: 429 })
     }
 
     const body = await req.json()
@@ -49,13 +55,13 @@ export async function POST(req: NextRequest) {
     }
 
     const data = parsed.data
-    const supabase = await createAdminClient()
 
-    // 1. Verify location exists
-    const { data: location, error: locErr } = await supabase
+    // 1. Verify location exists AND belongs to the API key's organization
+    const { data: location, error: locErr } = await adminClient
       .from('locations')
       .select('id, organization_id, name')
       .eq('id', data.locationId)
+      .eq('organization_id', apiKey.organization_id)
       .maybeSingle()
 
     if (locErr || !location) {
@@ -63,7 +69,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 2. Insert order with channel attribution metadata
-    const { data: order, error: orderErr } = await supabase
+    const { data: order, error: orderErr } = await adminClient
       .from('orders')
       .insert({
         location_id: data.locationId,

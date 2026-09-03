@@ -29,7 +29,7 @@ export function getMCPManifest() {
         scope: "customer",
         permission: "public/read-only",
         confirmation: "none",
-        description: "Find other businesses: Search and discover distinct external merchant venues or branch locations across the WETAEGO network by business name, city query, industry category, or venue slug. (Do NOT use to switch tabs inside the current storefront; use open_business_page instead.)",
+        description: "Discover external merchant venues or franchise branch locations across the WETAEGO directory by keyword, city, or business name. Returns venue profiles and URLs. Does NOT switch internal department tabs within an active storefront (use open_business_page for department switching).",
         inputSchema: {
           type: "object",
           required: ["query"],
@@ -786,7 +786,7 @@ export function getMCPManifest() {
         scope: "customer",
         permission: "public/navigation",
         confirmation: "none",
-        description: "Switch department within active storefront: Switch the active view to an internal department or category catalog tab (such as 'dining', 'wellness', 'boutique', 'stays', 'repairs', 'media', 'menu') inside the current venue. (Do NOT use to find external businesses; use find_venue instead.)",
+        description: "Switch between internal departments or category tabs (dining, spa, boutique, stays, repairs, media) within the active merchant storefront. Does NOT search or navigate external merchant venues (use find_venue for venue discovery).",
         inputSchema: {
           type: "object",
           required: ["conceptSlug"],
@@ -819,16 +819,8 @@ export function getMCPManifest() {
                 "studio",
                 "rate-card"
               ],
-              description: "The URL slug or name of the concept to navigate to across Wetaego's 6 verticals (e.g. 'dining', 'wellness', 'boutique', 'stays', 'repairs', 'media', 'menu').",
+              description: "The URL slug or name of the internal concept tab to navigate to across Wetaego's 6 verticals (e.g. 'dining', 'wellness', 'boutique', 'stays', 'repairs', 'media', 'menu').",
               examples: ["menu", "dining", "spa", "treatments", "shop", "apparel", "electronics", "rooms", "suites", "repairs", "diagnostics", "rate-card", "studio"]
-            },
-            venueSlug: {
-              type: "string",
-              minLength: 2,
-              maxLength: 64,
-              pattern: "^[A-Za-z0-9_/-]+$",
-              description: "Optional venue slug.",
-              examples: ["demo", "emerald-cafe", "ocean-ember", "lotus-spa"]
             }
           },
           additionalProperties: false

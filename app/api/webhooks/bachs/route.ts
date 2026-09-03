@@ -22,17 +22,30 @@ export async function POST(req: Request) {
     const rawBody = await req.text()
     const signature =
       req.headers.get('x-bachs-signature') ||
-      req.headers.get('x-signature') ||
-      req.headers.get('authorization')
+      req.headers.get('x-signature')
     const timestamp =
       req.headers.get('x-bachs-timestamp') ||
       req.headers.get('x-timestamp')
 
-    // Validate signature (bypasses in local test mode if configured)
-    if (signature && !bachsProvider.validateWebhookSignature(rawBody, signature, timestamp)) {
-      if (process.env.NODE_ENV === 'production') {
+    // Signature is REQUIRED in production: reject missing, malformed, or invalid signatures.
+    // A signature header with a missing timestamp allows indefinite replay, so a timestamp
+    // is also required in production.
+    if (process.env.NODE_ENV === 'production' && process.env.BACHS_ALLOW_UNSIGNED_WEBHOOKS !== 'true') {
+      if (!signature) {
+        console.warn('Bachs webhook rejected: missing signature header')
+        return NextResponse.json({ error: 'Missing signature header' }, { status: 400 })
+      }
+      if (!timestamp) {
+        console.warn('Bachs webhook rejected: missing timestamp header')
+        return NextResponse.json({ error: 'Missing timestamp header' }, { status: 400 })
+      }
+      if (!bachsProvider.validateWebhookSignature(rawBody, signature, timestamp)) {
+        console.warn('Bachs webhook rejected: invalid signature')
         return NextResponse.json({ error: 'Invalid signature' }, { status: 400 })
       }
+    } else if (signature && !bachsProvider.validateWebhookSignature(rawBody, signature, timestamp)) {
+      // Dev/test: reject invalid signatures when provided, but allow unsigned local testing.
+      return NextResponse.json({ error: 'Invalid signature' }, { status: 400 })
     }
 
     const event = JSON.parse(rawBody)

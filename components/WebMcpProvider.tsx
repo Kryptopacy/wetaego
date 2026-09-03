@@ -372,7 +372,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
     name: 'find_venue',
     page: '/',
     description:
-      'Search and discover distinct external merchant venues or branch locations across the WETAEGO network. Use "query" for keyword or city search, with optional name, industry, or slug filters. (To switch tabs or departments inside the current venue, use open_business_page instead.)',
+      'Search and discover distinct external merchant venues or franchise branch locations across the WETAEGO network directory by keyword, city, or business name. Returns venue profiles and URLs. Does NOT switch internal department tabs within an active venue (use open_business_page for department switching).',
     inputSchema: {
       type: 'object',
       required: ['query'],
@@ -1727,7 +1727,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
     name: 'open_business_page',
     page: '/m/{slug}',
     description:
-      'Switch the active storefront viewport to a specific department or concept page under the current venue across WETAEGO\'s 6 core verticals: Dining (menu, dining, bar), Wellness & Spas (spa, treatments), Retail & Boutiques (shop, apparel, electronics), Hospitality & Stays (rooms, suites, stays), Services & Repairs (repairs, diagnostics, quotes), or Media & Studios (rate-card, studio, services). Use find_venue to search external venues.',
+      'Switch the active storefront viewport to an internal department or category tab within the current merchant venue across Wetaego\'s 6 core verticals (dining, spa, boutique, stays, repairs, media). Does NOT search or navigate external merchant venues (use find_venue for venue discovery).',
     inputSchema: {
       type: 'object',
       required: ['conceptSlug'],
@@ -1760,16 +1760,8 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
             'studio',
             'rate-card'
           ],
-          description: 'Standardized kebab-case URL slug or department identifier matching the venue\'s concept pages (e.g. "menu", "dining", "spa", "treatments", "shop", "apparel", "electronics", "rooms", "suites", "repairs", "diagnostics", "rate-card", "studio").',
+          description: 'Standardized kebab-case URL slug or department identifier matching the venue\'s internal concept pages (e.g. "menu", "dining", "spa", "treatments", "shop", "apparel", "electronics", "rooms", "suites", "repairs", "diagnostics", "rate-card", "studio").',
           examples: ['menu', 'dining', 'spa', 'treatments', 'shop', 'apparel', 'electronics', 'rooms', 'suites', 'repairs', 'diagnostics', 'rate-card', 'studio'],
-        },
-        venueSlug: {
-          type: 'string',
-          minLength: 2,
-          maxLength: 64,
-          pattern: '^[A-Za-z0-9_/-]+$',
-          description: 'Optional venue slug (e.g. "demo", "emerald-cafe", "ocean-ember", "lotus-spa"). If omitted, uses active venue.',
-          examples: ['demo', 'emerald-cafe', 'ocean-ember', 'lotus-spa'],
         },
       },
       additionalProperties: false,

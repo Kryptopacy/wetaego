@@ -1282,7 +1282,7 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
   // ── 11. find_venue ───────────────────────────────────────────────────────
   tools.push({
     name: 'find_venue',
-    description: `Search and discover merchant venues, branch locations, or multi-concept enterprises across the WETAEGO network. Use "query" for keyword or city search, with optional name, industry, or slug filters.`,
+    description: `Search and discover distinct external merchant venues or franchise branch locations across the WETAEGO network directory by keyword, city, or business name. Returns venue profiles and URLs. Does NOT switch internal department tabs within an active venue (use open_business_page for department switching).`,
     inputSchema: {
       type: 'object',
       required: ['query'],
@@ -1356,7 +1356,7 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
   // 11. open_business_page
   tools.push({
     name: 'open_business_page',
-    description: `Navigate or switch the active storefront viewport to a specific department or concept page under ${locationName} (e.g. "restaurant", "spa", "tech-boutique", "hotel", "creator-rate-card").`,
+    description: `Switch between internal departments or category tabs (dining, spa, boutique, stays, repairs, media) within the active merchant storefront. Does NOT search or navigate external merchant venues (use find_venue for venue discovery).`,
     inputSchema: {
       type: 'object',
       required: ['conceptSlug'],
