@@ -493,12 +493,12 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
         venueUrl: results[0]?.venueUrl || PLATFORM_DEMO_CONTEXT.demoUrl,
         venues: paged,
         message: `Found ${results.length} matching venues.`,
-        _hint: `Open a venue storefront using wetaego_open_business_page or search catalog directly using wetaego_search_catalog.`,
+        _hint: `Open a venue storefront using open_business_page or search catalog directly using search_catalog.`,
       }
     },
   },
 
-  // 2. wetaego_search_catalog — page: '/'
+  // 2. search_catalog — page: '/'
   {
     name: 'search_catalog',
     page: '/',
@@ -764,12 +764,12 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
         offset: pageOffset,
         items: paged,
         message: `Found ${results.length} matching catalog items.`,
-        _hint: `Use wetaego_add_to_cart to add items to your cart session.`,
+        _hint: `Use add_to_cart to add items to your cart session.`,
       }
     },
   },
 
-  // 3. wetaego_get_item_details — page: '/m/{slug}'
+  // 3. get_item_details — page: '/m/{slug}'
   {
     name: 'get_item_details',
     page: '/m/{slug}',
@@ -779,7 +779,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
       type: 'object',
       required: ['itemId'],
       properties: {
-        itemId: { type: 'string', minLength: 1, description: 'The unique itemId from wetaego_search_catalog results.' },
+        itemId: { type: 'string', minLength: 1, description: 'The unique itemId from search_catalog results.' },
       },
       additionalProperties: false,
     },
@@ -918,7 +918,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
           modifiers: item.modifiers,
           variants: item.variants,
           isAvailable: item.isAvailable,
-          _hint: `Add this item to your cart using wetaego_add_to_cart.`,
+          _hint: `Add this item to your cart using add_to_cart.`,
         }
       }
       return {
@@ -932,12 +932,12 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
         modifiers: [],
         variants: [],
         isAvailable: true,
-        _hint: `Add this item to your cart using wetaego_add_to_cart.`,
+        _hint: `Add this item to your cart using add_to_cart.`,
       }
     },
   },
 
-  // 4. wetaego_create_cart — page: '/m/{slug}'
+  // 4. create_cart — page: '/m/{slug}'
   {
     name: 'create_cart',
     page: '/m/{slug}',
@@ -1009,12 +1009,12 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
         subtotal: 0,
         subtotalFormatted: '$0.00 USD',
         tableIdentifier: inMemoryCart.tableIdentifier,
-        _hint: `Cart initialized. Add items using wetaego_add_to_cart with cartId '${inMemoryCart.cartId}'.`,
+        _hint: `Cart initialized. Add items using add_to_cart with cartId '${inMemoryCart.cartId}'.`,
       }
     },
   },
 
-  // 5. wetaego_add_to_cart — page: '/m/{slug}'
+  // 5. add_to_cart — page: '/m/{slug}'
   {
     name: 'add_to_cart',
     page: '/m/{slug}',
@@ -1025,7 +1025,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
       required: ['itemId', 'quantity'],
       properties: {
         cartId: { type: 'string', description: 'Optional unique cart session ID. If omitted, uses active session cart.' },
-        itemId: { type: 'string', minLength: 1, description: 'The unique ID of the item from wetaego_search_catalog.' },
+        itemId: { type: 'string', minLength: 1, description: 'The unique ID of the item from search_catalog.' },
         quantity: { type: 'integer', minimum: 1, maximum: 50, description: 'Quantity of items to add (1-50).' },
         modifiers: {
           type: 'array',
@@ -1198,12 +1198,12 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
         subtotal,
         subtotalFormatted: `$${subtotal.toFixed(2)} USD`,
         lines: inMemoryCart.lines,
-        _hint: `Item added. Use wetaego_get_cart to inspect cart or wetaego_initiate_checkout to proceed.`,
+        _hint: `Item added. Use get_cart to inspect cart or initiate_checkout to proceed.`,
       }
     },
   },
 
-  // 6. wetaego_get_cart — page: '/m/{slug}'
+  // 6. get_cart — page: '/m/{slug}'
   {
     name: 'get_cart',
     page: '/m/{slug}',
@@ -1355,13 +1355,13 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
         total,
         totalFormatted: `$${total.toFixed(2)} USD`,
         _hint: inMemoryCart.appliedCoupon
-          ? `Cart active with coupon '${inMemoryCart.appliedCoupon.code}' (${discountPercentage}% OFF). Use wetaego_initiate_checkout to proceed with order.`
-          : `Cart active. Use wetaego_apply_coupon to add promo codes or wetaego_initiate_checkout to proceed with order.`,
+          ? `Cart active with coupon '${inMemoryCart.appliedCoupon.code}' (${discountPercentage}% OFF). Use initiate_checkout to proceed with order.`
+          : `Cart active. Use apply_coupon to add promo codes or initiate_checkout to proceed with order.`,
       }
     },
   },
 
-  // 7. wetaego_update_cart — page: '/m/{slug}'
+  // 7. update_cart — page: '/m/{slug}'
   {
     name: 'update_cart',
     page: '/m/{slug}',
@@ -1433,7 +1433,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
     },
   },
 
-  // 8. wetaego_apply_coupon — page: '/m/{slug}'
+  // 8. apply_coupon — page: '/m/{slug}'
   {
     name: 'apply_coupon',
     page: '/m/{slug}',
@@ -1610,12 +1610,12 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
         totalFormatted: `$${total.toFixed(2)} USD`,
         currency: 'USD',
         message,
-        _hint: 'Coupon verified and applied. Use wetaego_initiate_checkout to proceed to checkout with discounted total.',
+        _hint: 'Coupon verified and applied. Use initiate_checkout to proceed to checkout with discounted total.',
       }
     },
   },
 
-  // 9. wetaego_recommend_pairings — page: '/m/{slug}'
+  // 9. recommend_pairings — page: '/m/{slug}'
   {
     name: 'recommend_pairings',
     page: '/m/{slug}',
@@ -1722,7 +1722,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
     }),
   },
 
-  // 10. wetaego_open_business_page — page: '/m/{slug}'
+  // 10. open_business_page — page: '/m/{slug}'
   {
     name: 'open_business_page',
     page: '/m/{slug}',
@@ -1824,12 +1824,12 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
     },
   },
 
-  // 11. wetaego_initiate_checkout — page: '/m/{slug}/checkout'
+  // 11. initiate_checkout — page: '/m/{slug}/checkout'
   {
     name: 'initiate_checkout',
     page: '/m/{slug}/checkout',
     description:
-      'Validate the current cart and generate a locked checkout session with computed taxes, fulfillment options, and totals. Locks prices for 15 minutes. Does NOT charge the customer — call wetaego_submit_order with customer confirmation to finalize.',
+      'Validate the current cart and generate a locked checkout session with computed taxes, fulfillment options, and totals. Locks prices for 15 minutes. Does NOT charge the customer — call submit_order with customer confirmation to finalize.',
     inputSchema: {
       type: 'object',
       required: ['fulfillment'],
@@ -1837,14 +1837,6 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
         cartId: { type: 'string', description: 'Optional cart session ID to checkout. If omitted, uses active session cart.' },
         fulfillment: { type: 'string', enum: ['dine_in', 'pickup', 'delivery'], description: 'Fulfillment method.' },
         tableIdentifier: { type: 'string', maxLength: 50, description: 'Table number, room, seat, or pickup counter.' },
-        couponCode: {
-          type: 'string',
-          minLength: 3,
-          maxLength: 30,
-          pattern: '^[A-Za-z0-9_-]+$',
-          description: 'Optional promotional coupon or discount voucher code to apply before price locking.',
-          examples: ['SAVE10', 'WELCOME20', 'PACY50'],
-        },
         customer: {
           type: 'object',
           properties: {
@@ -1871,7 +1863,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
       required: ['status', 'checkoutId', 'fulfillment', 'currency', 'total', 'totalFormatted', 'requiresPaymentAuthorization'],
       properties: {
         status: { type: 'string', enum: ['ok', 'error'] },
-        checkoutId: { type: 'string', description: 'Unique checkout session identifier required for wetaego_submit_order' },
+        checkoutId: { type: 'string', description: 'Unique checkout session identifier required for submit_order' },
         fulfillment: { type: 'string', description: 'Selected fulfillment method' },
         venue: { type: 'string', description: 'Active venue name' },
         currency: {
@@ -1904,7 +1896,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
       required: ['status', 'checkoutId', 'fulfillment', 'currency', 'total', 'totalFormatted', 'requiresPaymentAuthorization'],
       properties: {
         status: { type: 'string', enum: ['ok', 'error'] },
-        checkoutId: { type: 'string', description: 'Unique checkout session identifier required for wetaego_submit_order' },
+        checkoutId: { type: 'string', description: 'Unique checkout session identifier required for submit_order' },
         fulfillment: { type: 'string', description: 'Selected fulfillment method' },
         venue: { type: 'string', description: 'Active venue name' },
         currency: {
@@ -1972,13 +1964,13 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
         expiresAt: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
         priceLockValidMinutes: 15,
         requiresPaymentAuthorization: true,
-        message: 'Checkout session prepared. Total locked for 15 minutes. Call wetaego_submit_order with authorization.confirmed: true to finalize.',
-        _hint: `Call wetaego_submit_order with checkoutId '${checkoutId}' and authorization: { confirmed: true } to place order.`,
+        message: 'Checkout session prepared. Total locked for 15 minutes. Call submit_order with authorization.confirmed: true to finalize.',
+        _hint: `Call submit_order with checkoutId '${checkoutId}' and authorization: { confirmed: true } to place order.`,
       }
     },
   },
 
-  // 12. wetaego_submit_order — page: '/m/{slug}/checkout'
+  // 12. submit_order — page: '/m/{slug}/checkout'
   {
     name: 'submit_order',
     page: '/m/{slug}/checkout',
@@ -1988,7 +1980,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
       type: 'object',
       required: ['checkoutId', 'authorization'],
       properties: {
-        checkoutId: { type: 'string', minLength: 1, description: 'The checkoutId returned from wetaego_initiate_checkout.' },
+        checkoutId: { type: 'string', minLength: 1, description: 'The checkoutId returned from initiate_checkout.' },
         authorization: {
           type: 'object',
           required: ['confirmed'],
@@ -2090,7 +2082,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
     },
   },
 
-  // 13. wetaego_request_staff — page: '/m/{slug}'
+  // 13. request_staff — page: '/m/{slug}'
   {
     name: 'request_staff',
     page: '/m/{slug}',

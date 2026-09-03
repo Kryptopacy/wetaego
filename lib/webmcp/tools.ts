@@ -907,12 +907,6 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
           maxLength: 100,
           description: 'Table number, room, suite, seat, or pickup counter (e.g. "Table 12" or "12").'
         },
-        couponCode: {
-          type: 'string',
-          maxLength: 60,
-          description: 'Optional promotional coupon or discount voucher code to apply before price locking.',
-          examples: ['SAVE10', 'WELCOME20', 'PACY50'],
-        },
         customer: {
           type: 'object',
           properties: {

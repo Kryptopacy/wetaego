@@ -24,7 +24,7 @@ export function getMCPManifest() {
     tools: [
       // ── Customer WebMCP Suite (Client-Side document.modelContext) ──────────
       {
-        name: "wetaego_find_venue",
+        name: "find_venue",
         page: "/",
         scope: "customer",
         permission: "public/read-only",
@@ -125,7 +125,7 @@ export function getMCPManifest() {
         }
       },
       {
-        name: "wetaego_search_catalog",
+        name: "search_catalog",
         page: "/",
         scope: "customer",
         permission: "public/read-only",
@@ -271,7 +271,7 @@ export function getMCPManifest() {
         }
       },
       {
-        name: "wetaego_get_item_details",
+        name: "get_item_details",
         page: "/m/{slug}",
         scope: "customer",
         permission: "public/read-only",
@@ -395,7 +395,7 @@ export function getMCPManifest() {
         }
       },
       {
-        name: "wetaego_create_cart",
+        name: "create_cart",
         page: "/m/{slug}",
         scope: "customer",
         permission: "session-scoped",
@@ -439,7 +439,7 @@ export function getMCPManifest() {
         }
       },
       {
-        name: "wetaego_add_to_cart",
+        name: "add_to_cart",
         page: "/m/{slug}",
         scope: "customer",
         permission: "session/cart-write",
@@ -499,7 +499,7 @@ export function getMCPManifest() {
         }
       },
       {
-        name: "wetaego_get_cart",
+        name: "get_cart",
         page: "/m/{slug}",
         scope: "customer",
         permission: "session/read",
@@ -593,7 +593,7 @@ export function getMCPManifest() {
         }
       },
       {
-        name: "wetaego_update_cart",
+        name: "update_cart",
         page: "/m/{slug}",
         scope: "customer",
         permission: "session/cart-write",
@@ -636,7 +636,7 @@ export function getMCPManifest() {
         }
       },
       {
-        name: "wetaego_apply_coupon",
+        name: "apply_coupon",
         page: "/m/{slug}",
         scope: "customer",
         permission: "session/cart-write",
@@ -715,7 +715,7 @@ export function getMCPManifest() {
         }
       },
       {
-        name: "wetaego_recommend_pairings",
+        name: "recommend_pairings",
         page: "/m/{slug}",
         scope: "customer",
         permission: "public/read-only",
@@ -781,7 +781,7 @@ export function getMCPManifest() {
         }
       },
       {
-        name: "wetaego_open_business_page",
+        name: "open_business_page",
         page: "/m/{slug}",
         scope: "customer",
         permission: "public/navigation",
@@ -855,7 +855,7 @@ export function getMCPManifest() {
         }
       },
       {
-        name: "wetaego_initiate_checkout",
+        name: "initiate_checkout",
         page: "/m/{slug}/checkout",
         scope: "customer",
         permission: "checkout/prepare",
@@ -868,14 +868,6 @@ export function getMCPManifest() {
             cartId: { type: "string", description: "Optional cart session ID to prepare checkout for. If omitted, uses the active session cart." },
             fulfillment: { type: "string", enum: ["dine_in", "pickup", "delivery"] },
             tableIdentifier: { type: "string", maxLength: 50, description: "Table, room, or seat identifier." },
-            couponCode: {
-              type: "string",
-              minLength: 3,
-              maxLength: 30,
-              pattern: "^[A-Za-z0-9_-]+$",
-              description: "Optional promotional coupon or discount voucher code to apply before price locking.",
-              examples: ["SAVE10", "WELCOME20", "PACY50"]
-            },
             customer: {
               type: "object",
               properties: {
@@ -963,7 +955,7 @@ export function getMCPManifest() {
         }
       },
       {
-        name: "wetaego_submit_order",
+        name: "submit_order",
         page: "/m/{slug}/checkout",
         scope: "customer",
         permission: "high-impact-transaction",
@@ -1038,7 +1030,7 @@ export function getMCPManifest() {
         }
       },
       {
-        name: "wetaego_request_staff",
+        name: "request_staff",
         page: "/m/{slug}",
         scope: "customer",
         permission: "session/assistance",
@@ -1084,7 +1076,7 @@ export function getMCPManifest() {
 
       // ── Staff & Operations MCP Suite (Server-Side Bearer Authenticated) ──
       {
-        name: "wetaego_get_active_orders",
+        name: "get_active_orders",
         scope: "staff",
         permission: "staff/orders-read",
         description: "Retrieve all active orders across a venue or franchise branch with real-time status and line items.",
@@ -1120,7 +1112,7 @@ export function getMCPManifest() {
         }
       },
       {
-        name: "wetaego_get_order",
+        name: "get_order",
         scope: "staff",
         permission: "staff/orders-read",
         description: "Retrieve complete authoritative details for a specific customer order.",
@@ -1147,7 +1139,7 @@ export function getMCPManifest() {
         }
       },
       {
-        name: "wetaego_update_order_status",
+        name: "update_order_status",
         scope: "staff",
         permission: "staff/orders-write",
         confirmation: "required_for_cancellation",
@@ -1173,7 +1165,7 @@ export function getMCPManifest() {
         }
       },
       {
-        name: "wetaego_mark_item_unavailable",
+        name: "mark_item_unavailable",
         scope: "staff",
         permission: "staff/catalog-write",
         description: "Instantly toggle an item to sold out or unavailable across all storefronts and KDS screens.",
@@ -1198,7 +1190,7 @@ export function getMCPManifest() {
         }
       },
       {
-        name: "wetaego_get_table_status",
+        name: "get_table_status",
         scope: "staff",
         permission: "staff/floor-read",
         description: "Inspect live occupancy, active tabs, and unfulfilled service requests for venue tables.",
@@ -1229,7 +1221,7 @@ export function getMCPManifest() {
         }
       },
       {
-        name: "wetaego_get_daily_sales",
+        name: "get_daily_sales",
         scope: "staff",
         permission: "staff/analytics-read",
         description: "Retrieve aggregated gross revenue, order volume, average ticket size, and top selling items for a location.",
@@ -1254,7 +1246,7 @@ export function getMCPManifest() {
         }
       },
       {
-        name: "wetaego_duplicate_catalog_to_branch",
+        name: "duplicate_catalog_to_branch",
         scope: "staff",
         permission: "staff/fleet-admin",
         confirmation: "mandatory",
