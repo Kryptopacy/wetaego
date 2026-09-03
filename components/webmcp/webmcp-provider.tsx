@@ -86,33 +86,42 @@ export function WebMCPProvider({
   )
 
   useEffect(() => {
-    const contextApi = ensureWebMCPContext()
-    const tools = createStorefrontWebMCPTools(context)
-
-    if (typeof contextApi.provideContext === 'function') {
-      try {
-        contextApi.provideContext({ tools })
-      } catch (e) {
-        // ignore provideContext warning
-      }
-    }
-
-    // Register all tools onto document.modelContext
     const cleanups: (() => void)[] = []
-    tools.forEach(tool => {
-      const reg = contextApi.registerTool(tool)
-      if (reg && typeof reg.unregister === 'function') {
-        cleanups.push(reg.unregister)
-      } else {
-        cleanups.push(() => contextApi.unregisterTool && contextApi.unregisterTool(tool.name))
+
+    try {
+      const contextApi = ensureWebMCPContext()
+      const tools = createStorefrontWebMCPTools(context)
+
+      if (typeof contextApi.provideContext === 'function') {
+        try {
+          contextApi.provideContext({ tools })
+        } catch (e) {
+          // ignore provideContext warning
+        }
       }
-    })
+
+      // Register all tools onto document.modelContext / navigator.modelContext
+      tools.forEach(tool => {
+        try {
+          const reg = contextApi.registerTool(tool)
+          if (reg && typeof reg.unregister === 'function') {
+            cleanups.push(reg.unregister)
+          } else {
+            cleanups.push(() => contextApi.unregisterTool && contextApi.unregisterTool(tool.name))
+          }
+        } catch {
+          // ignore registration errors
+        }
+      })
+    } catch {
+      // ignore context setup errors
+    }
 
     return () => {
       cleanups.forEach(fn => {
         try {
           fn()
-        } catch (e) {
+        } catch {
           // ignore cleanup errors
         }
       })

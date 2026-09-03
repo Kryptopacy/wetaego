@@ -2081,42 +2081,49 @@ export function WebMcpProvider() {
   useEffect(() => {
     if (typeof window === 'undefined') return
 
-    const ctx = ensureWebMCPContext()
+    const cleanups: (() => void)[] = []
 
-    // Create unprefixed aliases (e.g. 'apply_coupon' alongside 'wetaego_apply_coupon')
-    const aliasTools = WEBMCP_TOOLS.map((t) => ({
-      ...t,
-      name: t.name.replace(/^wetaego_/, ''),
-    }))
-    const allTools = [...WEBMCP_TOOLS, ...aliasTools]
+    try {
+      const ctx = ensureWebMCPContext()
 
-    // 1. Call provideContext({ tools: allTools })
-    if (typeof ctx.provideContext === 'function') {
-      try {
-        ctx.provideContext({ tools: allTools })
-      } catch (e) {
-        if (process.env.NODE_ENV === 'development') {
-          console.warn('[WebMCP] provideContext call warning:', e)
+      // Create unprefixed aliases (e.g. 'apply_coupon' alongside 'wetaego_apply_coupon')
+      const aliasTools = WEBMCP_TOOLS.map((t) => ({
+        ...t,
+        name: t.name.replace(/^wetaego_/, ''),
+      }))
+      const allTools = [...WEBMCP_TOOLS, ...aliasTools]
+
+      // 1. Call provideContext({ tools: allTools })
+      if (typeof ctx.provideContext === 'function') {
+        try {
+          ctx.provideContext({ tools: allTools })
+        } catch (e) {
+          if (process.env.NODE_ENV === 'development') {
+            console.warn('[WebMCP] provideContext call warning:', e)
+          }
         }
+      }
+
+      // 2. Call registerTool on each tool individually
+      allTools.forEach((tool) => {
+        try {
+          const reg = ctx.registerTool(tool)
+          if (reg && typeof reg.unregister === 'function') {
+            cleanups.push(reg.unregister)
+          } else {
+            cleanups.push(() => ctx.unregisterTool && ctx.unregisterTool(tool.name))
+          }
+        } catch (e) {
+          if (process.env.NODE_ENV === 'development') {
+            console.warn('[WebMCP Root] Failed to register tool:', tool.name, e)
+          }
+        }
+      })
+    } catch (err) {
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('[WebMCP Provider] Registration error:', err)
       }
     }
-
-    // 2. Call registerTool on each tool individually
-    const cleanups: (() => void)[] = []
-    allTools.forEach((tool) => {
-      try {
-        const reg = ctx.registerTool(tool)
-        if (reg && typeof reg.unregister === 'function') {
-          cleanups.push(reg.unregister)
-        } else {
-          cleanups.push(() => ctx.unregisterTool && ctx.unregisterTool(tool.name))
-        }
-      } catch (e) {
-        if (process.env.NODE_ENV === 'development') {
-          console.warn('[WebMCP Root] Failed to register tool:', tool.name, e)
-        }
-      }
-    })
 
     return () => {
       cleanups.forEach((fn) => {

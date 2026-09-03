@@ -128,117 +128,146 @@ export function ensureWebMCPContext(): ModelContext {
   const ctx = globalWebMCPRegistry
 
   try {
-    const existing = (document as any)?.modelContext
+    const existing =
+      (typeof navigator !== 'undefined' && (navigator as any)?.modelContext) ||
+      (typeof document !== 'undefined' && (document as any)?.modelContext) ||
+      (typeof window !== 'undefined' && (window as any)?.modelContext)
+
     if (existing && typeof existing.registerTool === 'function' && existing !== ctx) {
-      const originalRegister = existing.registerTool.bind(existing)
-      existing.registerTool = (tool: any, handler?: any) => {
-        const schema = tool.resultSchema || tool.outputSchema || tool.responseSchema || tool.returns || tool.output
-        const execFn = handler || tool.execute
-        const enriched = {
-          ...tool,
-          outputSchema: tool.outputSchema || schema,
-          resultSchema: tool.resultSchema || schema,
-          responseSchema: tool.responseSchema || schema,
-          returns: tool.returns || schema,
-          returnSchema: tool.returnSchema || schema,
-          output: tool.output || schema,
-          result: tool.result || schema,
-          execute: execFn,
-        }
-        ctx.registerTool(enriched, execFn)
-        try {
-          return originalRegister(enriched, execFn)
-        } catch {
+      try {
+        const originalRegister = existing.registerTool.bind(existing)
+        existing.registerTool = (tool: any, handler?: any) => {
+          const schema = tool.resultSchema || tool.outputSchema || tool.responseSchema || tool.returns || tool.output
+          const execFn = handler || tool.execute
+          const enriched = {
+            ...tool,
+            outputSchema: tool.outputSchema || schema,
+            resultSchema: tool.resultSchema || schema,
+            responseSchema: tool.responseSchema || schema,
+            returns: tool.returns || schema,
+            returnSchema: tool.returnSchema || schema,
+            output: tool.output || schema,
+            result: tool.result || schema,
+            execute: execFn,
+          }
+          ctx.registerTool(enriched, execFn)
           try {
-            return originalRegister(enriched)
+            return originalRegister(enriched, execFn)
           } catch {
-            return {
-              name: enriched.name,
-              description: enriched.description,
-              inputSchema: enriched.inputSchema,
-              outputSchema: enriched.outputSchema,
-              resultSchema: enriched.resultSchema,
-              responseSchema: enriched.responseSchema,
-              returns: enriched.returns,
-              unregister: () => ctx.unregisterTool(enriched.name),
+            try {
+              return originalRegister(enriched)
+            } catch {
+              return {
+                name: enriched.name,
+                description: enriched.description,
+                inputSchema: enriched.inputSchema,
+                outputSchema: enriched.outputSchema,
+                resultSchema: enriched.resultSchema,
+                responseSchema: enriched.responseSchema,
+                returns: enriched.returns,
+                unregister: () => ctx.unregisterTool(enriched.name),
+              }
             }
           }
         }
+      } catch {
+        // Native property might be non-writable in some host runtimes; ignore
       }
-      if (!existing.provideContext) {
-        existing.provideContext = (options: any) => ctx.provideContext(options)
-      }
-      if (!existing.getTools) {
-        existing.getTools = () => ctx.getTools()
-      }
-      if (!('tools' in existing)) {
-        Object.defineProperty(existing, 'tools', {
-          get: () => ctx.getTools(),
-          configurable: true,
-          enumerable: true,
-        })
-      }
-      if (!('registeredTools' in existing)) {
-        Object.defineProperty(existing, 'registeredTools', {
-          get: () => ctx.registeredTools,
-          configurable: true,
-          enumerable: true,
-        })
-      }
-      if (typeof navigator !== 'undefined' && !(navigator as any).modelContext) {
-        try {
-          Object.defineProperty(navigator, 'modelContext', {
-            value: existing,
-            writable: true,
+
+      try {
+        if (!existing.provideContext) {
+          existing.provideContext = (options: any) => ctx.provideContext(options)
+        }
+      } catch { /* ignore */ }
+
+      try {
+        if (!existing.getTools) {
+          existing.getTools = () => ctx.getTools()
+        }
+      } catch { /* ignore */ }
+
+      try {
+        if (!('tools' in existing)) {
+          Object.defineProperty(existing, 'tools', {
+            get: () => ctx.getTools(),
             configurable: true,
             enumerable: true,
           })
-        } catch {
+        }
+      } catch { /* ignore */ }
+
+      try {
+        if (!('registeredTools' in existing)) {
+          Object.defineProperty(existing, 'registeredTools', {
+            get: () => ctx.registeredTools,
+            configurable: true,
+            enumerable: true,
+          })
+        }
+      } catch { /* ignore */ }
+
+      try {
+        if (typeof document !== 'undefined' && (document as any).modelContext !== existing) {
+          ;(document as any).modelContext = existing
+        }
+      } catch { /* ignore */ }
+
+      try {
+        if (typeof window !== 'undefined' && (window as any).modelContext !== existing) {
+          ;(window as any).modelContext = existing
+        }
+      } catch { /* ignore */ }
+
+      try {
+        if (typeof navigator !== 'undefined' && (navigator as any).modelContext !== existing) {
           ;(navigator as any).modelContext = existing
         }
-      }
+      } catch { /* ignore */ }
+
       return existing
     }
 
-    Object.defineProperty(document, 'modelContext', {
-      value: ctx,
-      writable: true,
-      configurable: true,
-      enumerable: true,
-    })
-    if (typeof window !== 'undefined') {
-      try {
+    try {
+      if (typeof document !== 'undefined') {
+        Object.defineProperty(document, 'modelContext', {
+          value: ctx,
+          writable: true,
+          configurable: true,
+          enumerable: true,
+        })
+      }
+    } catch {
+      try { if (typeof document !== 'undefined') (document as any).modelContext = ctx } catch {}
+    }
+
+    try {
+      if (typeof window !== 'undefined') {
         Object.defineProperty(window, 'modelContext', {
           value: ctx,
           writable: true,
           configurable: true,
           enumerable: true,
         })
-      } catch {
-        ;(window as any).modelContext = ctx
       }
+    } catch {
+      try { if (typeof window !== 'undefined') (window as any).modelContext = ctx } catch {}
     }
-    if (typeof navigator !== 'undefined') {
-      try {
+
+    try {
+      if (typeof navigator !== 'undefined') {
         Object.defineProperty(navigator, 'modelContext', {
           value: ctx,
           writable: true,
           configurable: true,
           enumerable: true,
         })
-      } catch {
-        ;(navigator as any).modelContext = ctx
       }
+    } catch {
+      try { if (typeof navigator !== 'undefined') (navigator as any).modelContext = ctx } catch {}
     }
-  } catch {
-    if (typeof document !== 'undefined') {
-      ;(document as any).modelContext = ctx
-    }
-    if (typeof window !== 'undefined') {
-      ;(window as any).modelContext = ctx
-    }
-    if (typeof navigator !== 'undefined') {
-      ;(navigator as any).modelContext = ctx
+  } catch (err) {
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('[WebMCP] ensureWebMCPContext error suppressed:', err)
     }
   }
 
