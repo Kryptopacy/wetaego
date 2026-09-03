@@ -372,17 +372,12 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
     name: 'find_venue',
     page: '/',
     description:
-      'Search and discover distinct external merchant venues or branch locations across the WETAEGO network. Requires at least one search filter: "query" for keyword/city search, "name" for business matching, "industry" for vertical category, or "slug" for direct venue URL lookup. (To switch tabs or departments inside the current venue, use open_business_page instead.)',
+      'Search and discover distinct external merchant venues or branch locations across the WETAEGO network. Use "query" for keyword or city search, with optional name, industry, or slug filters. (To switch tabs or departments inside the current venue, use open_business_page instead.)',
     inputSchema: {
       type: 'object',
-      anyOf: [
-        { required: ['query'] },
-        { required: ['name'] },
-        { required: ['industry'] },
-        { required: ['slug'] },
-      ],
+      required: ['query'],
       properties: {
-        query: { type: 'string', minLength: 1, description: 'Free-text keyword or location search (e.g. "Lagos sushi", "spa Lekki").' },
+        query: { type: 'string', minLength: 1, description: 'Search query, keyword, business name, or city (e.g. "sushi", "spa", "Emerald Cafe", "Lagos").' },
         name: { type: 'string', minLength: 1, description: 'Exact or partial business name (e.g. "Pacy Group", "Emerald Cafe").' },
         industry: {
           type: 'string',
@@ -1732,7 +1727,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
     name: 'open_business_page',
     page: '/m/{slug}',
     description:
-      'Switch the active storefront viewport to an internal department or category catalog tab (such as "dining", "menu", "spa", "wellness", "boutique", "retail", "stays", "hotel", "repairs", "media") inside the current merchant venue. (To search for other businesses or branches, use find_venue.)',
+      'Switch the active storefront viewport to a specific department or concept page under the current venue across WETAEGO\'s 6 core verticals: Dining (menu, dining, bar), Wellness & Spas (spa, treatments), Retail & Boutiques (shop, apparel, electronics), Hospitality & Stays (rooms, suites, stays), Services & Repairs (repairs, diagnostics, quotes), or Media & Studios (rate-card, studio, services). Use find_venue to search external venues.',
     inputSchema: {
       type: 'object',
       required: ['conceptSlug'],
@@ -1742,8 +1737,31 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
           minLength: 2,
           maxLength: 64,
           pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$',
-          description: 'The standardized kebab-case URL slug of the internal department or concept to open (e.g. "dining", "menu", "spa", "wellness", "boutique", "retail", "stays", "hotel", "repairs", "services", "media").',
-          examples: ['restaurant', 'dining', 'wellness', 'spa', 'boutique', 'stays', 'hotel', 'repairs', 'media', 'menu'],
+          enum: [
+            'dining',
+            'menu',
+            'restaurant',
+            'bar',
+            'spa',
+            'wellness',
+            'treatments',
+            'boutique',
+            'retail',
+            'apparel',
+            'electronics',
+            'stays',
+            'hotel',
+            'rooms',
+            'suites',
+            'repairs',
+            'services',
+            'quotes',
+            'media',
+            'studio',
+            'rate-card'
+          ],
+          description: 'Standardized kebab-case URL slug or department identifier matching the venue\'s concept pages (e.g. "menu", "dining", "spa", "treatments", "shop", "apparel", "electronics", "rooms", "suites", "repairs", "diagnostics", "rate-card", "studio").',
+          examples: ['menu', 'dining', 'spa', 'treatments', 'shop', 'apparel', 'electronics', 'rooms', 'suites', 'repairs', 'diagnostics', 'rate-card', 'studio'],
         },
         venueSlug: {
           type: 'string',

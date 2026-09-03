@@ -29,15 +29,10 @@ export function getMCPManifest() {
         scope: "customer",
         permission: "public/read-only",
         confirmation: "none",
-        description: "Find other businesses: Search and discover distinct external merchant venues or branch locations across the WETAEGO network by business name, city query, industry category, or venue slug. Requires at least one search filter. (Do NOT use to switch tabs inside the current storefront; use open_business_page instead.)",
+        description: "Find other businesses: Search and discover distinct external merchant venues or branch locations across the WETAEGO network by business name, city query, industry category, or venue slug. (Do NOT use to switch tabs inside the current storefront; use open_business_page instead.)",
         inputSchema: {
           type: "object",
-          anyOf: [
-            { required: ["query"] },
-            { required: ["name"] },
-            { required: ["industry"] },
-            { required: ["slug"] }
-          ],
+          required: ["query"],
           properties: {
             query: { type: "string", description: "Natural-language search query." },
             name: { type: "string", description: "Specific business or brand name." },
@@ -801,8 +796,31 @@ export function getMCPManifest() {
               minLength: 2,
               maxLength: 64,
               pattern: "^[A-Za-z0-9_/-]+$",
-              description: "The URL slug or name of the concept to navigate to (e.g. 'dining', 'wellness', 'boutique', 'stays', 'repairs', 'media', 'menu').",
-              examples: ["restaurant", "dining", "wellness", "spa", "boutique", "apparel", "stays", "hotel", "repairs", "media"]
+              enum: [
+                "dining",
+                "menu",
+                "restaurant",
+                "bar",
+                "spa",
+                "wellness",
+                "treatments",
+                "boutique",
+                "retail",
+                "apparel",
+                "electronics",
+                "stays",
+                "hotel",
+                "rooms",
+                "suites",
+                "repairs",
+                "services",
+                "quotes",
+                "media",
+                "studio",
+                "rate-card"
+              ],
+              description: "The URL slug or name of the concept to navigate to across Wetaego's 6 verticals (e.g. 'dining', 'wellness', 'boutique', 'stays', 'repairs', 'media', 'menu').",
+              examples: ["menu", "dining", "spa", "treatments", "shop", "apparel", "electronics", "rooms", "suites", "repairs", "diagnostics", "rate-card", "studio"]
             },
             venueSlug: {
               type: "string",

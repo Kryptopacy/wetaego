@@ -1288,15 +1288,10 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
   // ── 11. find_venue ───────────────────────────────────────────────────────
   tools.push({
     name: 'find_venue',
-    description: `Search and discover merchant venues, branch locations, or multi-concept enterprises across the WETAEGO network. Requires at least one search filter: "query" for keyword/city search, "name" for business matching, "industry" for vertical category, or "slug" for direct venue URL lookup.`,
+    description: `Search and discover merchant venues, branch locations, or multi-concept enterprises across the WETAEGO network. Use "query" for keyword or city search, with optional name, industry, or slug filters.`,
     inputSchema: {
       type: 'object',
-      anyOf: [
-        { required: ['query'] },
-        { required: ['name'] },
-        { required: ['industry'] },
-        { required: ['slug'] },
-      ],
+      required: ['query'],
       properties: {
         query: { type: 'string', minLength: 1, description: 'Free-text keyword or location search (e.g. "Lagos sushi", "spa Lekki").' },
         name: { type: 'string', minLength: 1, description: 'Exact or partial business name.' },
@@ -1370,13 +1365,37 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
     description: `Navigate or switch the active storefront viewport to a specific department or concept page under ${locationName} (e.g. "restaurant", "spa", "tech-boutique", "hotel", "creator-rate-card").`,
     inputSchema: {
       type: 'object',
+      required: ['conceptSlug'],
       properties: {
         conceptSlug: {
           type: 'string',
           minLength: 1,
           maxLength: 64,
-          description: 'The slug or natural name of the department/concept to navigate to (e.g. "spa", "massage", "wellness", "restaurant", "boutique", "stays", "hotel").',
-          examples: ['dining', 'wellness', 'spa', 'restaurant', 'boutique', 'stays', 'hotel', 'repairs', 'media'],
+          enum: [
+            'dining',
+            'menu',
+            'restaurant',
+            'bar',
+            'spa',
+            'wellness',
+            'treatments',
+            'boutique',
+            'retail',
+            'apparel',
+            'electronics',
+            'stays',
+            'hotel',
+            'rooms',
+            'suites',
+            'repairs',
+            'services',
+            'quotes',
+            'media',
+            'studio',
+            'rate-card'
+          ],
+          description: 'The slug or natural name of the department/concept to navigate to across Wetaego\'s 6 verticals (e.g. "dining", "spa", "boutique", "stays", "repairs", "media").',
+          examples: ['menu', 'dining', 'spa', 'treatments', 'shop', 'apparel', 'electronics', 'rooms', 'suites', 'repairs', 'diagnostics', 'rate-card', 'studio'],
         },
       },
       additionalProperties: true
