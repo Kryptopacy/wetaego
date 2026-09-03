@@ -97,15 +97,15 @@ export function WebMCPProvider({
         try {
           const reg = contextApi.registerTool(tool)
           if (reg && typeof (reg as any).then === 'function') {
-            (reg as Promise<any>)
-              .then((resolved) => {
+            ;(reg as any)
+              .then((resolved: any) => {
                 if (resolved && typeof resolved.unregister === 'function') {
                   cleanups.push(() => {
                     try { resolved.unregister() } catch {}
                   })
                 }
               })
-              .catch((err) => {
+              .catch((err: any) => {
                 if (process.env.NODE_ENV === 'development') {
                   console.warn('[WebMCP Storefront] Tool registration resolved with notice:', tool.name, err)
                 }

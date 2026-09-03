@@ -5,8 +5,11 @@
  */
 
 import type { WebMCPTool } from './types'
+import { resolveCatalogItem } from './resolver'
 import { useCartStore } from '../store/cart'
 import { toast } from 'sonner'
+
+const pendingStorefrontCheckouts = new Map<string, any>()
 
 export interface MenuItemData {
   id: string
@@ -383,9 +386,9 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
       }
     },
     execute: async ({ itemId }: { itemId: string }) => {
-      const item = menuItems.find(i => i.id === itemId)
+      const item = resolveCatalogItem(menuItems, itemId)
       if (!item) {
-        return { error: `Item with ID '${itemId}' not found in ${locationName} catalog.` }
+        return { error: `Item with ID or name '${itemId}' not found in ${locationName} catalog.` }
       }
 
       return {
@@ -528,32 +531,8 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
       notes?: string
       clearExisting?: boolean
     }) => {
-      const rawTarget = (input.itemId || (input as any).itemName || (input as any).name || (input as any).query || '').toString().trim().toLowerCase()
-      let item = menuItems.find(i => i.id === input.itemId || i.id.toLowerCase() === rawTarget)
-
-      if (!item && rawTarget) {
-        // Case-insensitive exact name
-        item = menuItems.find(i => i.name.toLowerCase() === rawTarget)
-      }
-
-      if (!item && rawTarget) {
-        // Slugified name (e.g. "avocado-toast" or "avocado-tartine")
-        item = menuItems.find(i => i.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') === rawTarget.replace(/[^a-z0-9]+/g, '-'))
-      }
-
-      if (!item && rawTarget.length >= 3) {
-        // Token match: check if all query tokens appear in name or description
-        const words = rawTarget.split(/\s+/).filter(Boolean)
-        item = menuItems.find(i => {
-          const hay = `${i.name} ${i.description || ''}`.toLowerCase()
-          return words.every(w => hay.includes(w))
-        })
-      }
-
-      if (!item && rawTarget.length >= 3) {
-        // Partial substring match on name
-        item = menuItems.find(i => i.name.toLowerCase().includes(rawTarget) || rawTarget.includes(i.name.toLowerCase()))
-      }
+      const rawTarget = (input.itemId || (input as any).itemName || (input as any).name || (input as any).query || '').toString().trim()
+      const item = resolveCatalogItem(menuItems, rawTarget)
 
       if (!item) {
         return { status: 'error', success: false, error: `Item '${input.itemId || (input as any).itemName}' not found in active catalog. Available items: ${menuItems.slice(0, 5).map(i => i.name).join(', ')}.` }
@@ -1038,7 +1017,7 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
       const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString()
 
       // Track locked checkout session
-      pendingCheckouts.set(checkoutId, {
+      pendingStorefrontCheckouts.set(checkoutId, {
         id: checkoutId,
         items: [...items],
         subtotal: discountedSubtotal,
@@ -1052,8 +1031,7 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
         expiresAt,
       })
 
-      ctx.onActionTriggered?.({
-        type: 'checkout_initiated',
+      ctx.onActionTriggered?.('checkout_initiated', {
         checkoutId,
         total,
         itemCount: items.length

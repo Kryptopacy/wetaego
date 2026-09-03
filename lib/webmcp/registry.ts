@@ -165,12 +165,70 @@ class WebMCPRegistry implements ModelContext {
     return unique
   }
 
+  /**
+   * Coerces and normalizes agent input based on the tool's JSON Schema.
+   * Eliminates formatting fragility (numbers passed as strings, boolean strings,
+   * spaced coupon codes, whitespace trimming) architecturally across all tools.
+   */
+  private coerceInput(schema: any, input: any): any {
+    if (!input || typeof input !== 'object') return input
+    const properties = schema?.properties || {}
+    const coerced: Record<string, any> = Array.isArray(input) ? [...input] : { ...input }
+
+    for (const [key, propSchema] of Object.entries(properties) as [string, any][]) {
+      if (coerced[key] === undefined) {
+        const kebab = key.replace(/[A-Z]/g, m => `-${m.toLowerCase()}`)
+        const snake = key.replace(/[A-Z]/g, m => `_${m.toLowerCase()}`)
+        if (coerced[kebab] !== undefined) coerced[key] = coerced[kebab]
+        else if (coerced[snake] !== undefined) coerced[key] = coerced[snake]
+      }
+
+      if (coerced[key] === undefined || coerced[key] === null) continue
+
+      const val = coerced[key]
+      const expectedType = propSchema?.type
+
+      if (expectedType === 'integer') {
+        const num = Math.floor(Number(val))
+        if (!isNaN(num)) {
+          let clamped = num
+          if (typeof propSchema.minimum === 'number') clamped = Math.max(propSchema.minimum, clamped)
+          if (typeof propSchema.maximum === 'number') clamped = Math.min(propSchema.maximum, clamped)
+          coerced[key] = clamped
+        }
+      } else if (expectedType === 'number') {
+        const num = Number(val)
+        if (!isNaN(num)) {
+          let clamped = num
+          if (typeof propSchema.minimum === 'number') clamped = Math.max(propSchema.minimum, clamped)
+          if (typeof propSchema.maximum === 'number') clamped = Math.min(propSchema.maximum, clamped)
+          coerced[key] = clamped
+        }
+      } else if (expectedType === 'boolean') {
+        if (typeof val === 'string') {
+          coerced[key] = val.toLowerCase() === 'true' || val === '1'
+        }
+      } else if (expectedType === 'string') {
+        if (typeof val === 'string') {
+          let str = val.trim()
+          if (key === 'couponCode' || key === 'coupon' || key === 'code') {
+            str = str.replace(/\s+/g, '').toUpperCase()
+          }
+          coerced[key] = str
+        }
+      }
+    }
+
+    return coerced
+  }
+
   async executeTool(name: string, input: any): Promise<any> {
     const tool = this.findTool(name)
     if (!tool) {
       throw new Error(`[WebMCP] Tool '${name}' not found. Available tools: ${this.getTools().map(t => t.name).join(', ')}`)
     }
-    return await tool.execute(input)
+    const normalizedInput = this.coerceInput(tool.inputSchema, input)
+    return await tool.execute(normalizedInput)
   }
 
   subscribe(listener: () => void): () => void {

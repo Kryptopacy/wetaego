@@ -708,12 +708,12 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
             it.category,
             ...itemDietary,
             it.conceptSlug,
-            it.attributes?.brand,
-            it.attributes?.industry,
-            it.attributes?.roomType,
-            ...(it.attributes?.amenities || []),
-            ...(it.attributes?.sizes || []),
-            ...(it.attributes?.colors || [])
+            (it.attributes as any)?.brand,
+            (it.attributes as any)?.industry,
+            (it.attributes as any)?.roomType,
+            ...((it.attributes as any)?.amenities || []),
+            ...((it.attributes as any)?.sizes || []),
+            ...((it.attributes as any)?.colors || [])
           ].filter(Boolean).join(' ').toLowerCase()
 
           if (corpus.includes(rawQ)) return true
@@ -2147,15 +2147,15 @@ export function WebMcpProvider() {
         try {
           const reg = ctx.registerTool(tool)
           if (reg && typeof (reg as any).then === 'function') {
-            (reg as Promise<any>)
-              .then((resolved) => {
+            ;(reg as any)
+              .then((resolved: any) => {
                 if (resolved && typeof resolved.unregister === 'function') {
                   cleanups.push(() => {
                     try { resolved.unregister() } catch {}
                   })
                 }
               })
-              .catch((e) => {
+              .catch((e: any) => {
                 if (process.env.NODE_ENV === 'development') {
                   console.warn('[WebMCP Root] Tool registration resolved with notice:', tool.name, e)
                 }
