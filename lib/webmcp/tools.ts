@@ -1372,10 +1372,6 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
           description: 'The slug or natural name of the department/concept to navigate to (e.g. "spa", "massage", "wellness", "restaurant", "boutique", "stays", "hotel").',
           examples: ['spa', 'wellness', 'restaurant', 'pacy-wellness', 'pacy-boutique', 'pacy-stays'],
         },
-        'concept-slug': {
-          type: 'string',
-          description: 'Kebab-case alias for conceptSlug.',
-        },
       },
       additionalProperties: true
     },

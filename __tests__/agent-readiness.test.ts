@@ -209,7 +209,6 @@ describe('Agent Readiness (Ora & Is Agentic Compliance)', () => {
       expect(conceptSlugProp.pattern).toBe('^[a-z0-9]+(?:-[a-z0-9]+)*$')
       expect(conceptSlugProp.minLength).toBe(2)
       expect(conceptSlugProp.enum).toContain('restaurant')
-      expect(openPageTool.inputSchema.properties['concept-slug']).toBeDefined()
 
       // Phone constraint check
       const phoneProp = (checkoutTool.inputSchema.properties.customer as any).properties.phone

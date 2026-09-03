@@ -1726,7 +1726,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
     name: 'open_business_page',
     page: '/m/{slug}',
     description:
-      'Switch the active storefront viewport to an internal department or category catalog tab (such as "restaurant", "pacy-wellness", "pacy-boutique", "pacy-gadgets", "pacy-stays", "pacy-hotels", "pacy-repairs", "pacy-media") inside the current merchant venue. (To search for other businesses or branches, use wetaego_find_venue.)',
+      'Switch the active storefront viewport to an internal department or category catalog tab (such as "restaurant", "pacy-wellness", "pacy-boutique", "pacy-gadgets", "pacy-stays", "pacy-hotels", "pacy-repairs", "pacy-media") inside the current merchant venue. (To search for other businesses or branches, use find_venue.)',
     inputSchema: {
       type: 'object',
       required: ['conceptSlug'],
@@ -1739,14 +1739,6 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
           enum: ['restaurant', 'pacy-wellness', 'pacy-boutique', 'pacy-gadgets', 'pacy-stays', 'pacy-hotels', 'pacy-repairs', 'pacy-media', 'menu', 'treatments'],
           description: 'The standardized kebab-case URL slug of the internal department or concept to open (e.g. "restaurant", "pacy-wellness", "pacy-boutique", "pacy-gadgets", "pacy-stays", "pacy-hotels", "pacy-repairs", "pacy-media").',
           examples: ['restaurant', 'pacy-wellness', 'pacy-boutique', 'pacy-gadgets', 'pacy-stays', 'pacy-repairs'],
-        },
-        'concept-slug': {
-          type: 'string',
-          minLength: 2,
-          maxLength: 64,
-          pattern: '^[A-Za-z0-9_/-]+$',
-          description: 'Kebab-case alias for conceptSlug.',
-          examples: ['restaurant', 'pacy-wellness', 'pacy-boutique'],
         },
         venueSlug: {
           type: 'string',

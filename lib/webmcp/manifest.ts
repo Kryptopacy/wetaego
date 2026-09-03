@@ -798,14 +798,6 @@ export function getMCPManifest() {
               description: "The URL slug or name of the concept to navigate to (e.g. 'restaurant', 'pacy-wellness', 'pacy-boutique', 'pacy-gadgets', 'pacy-stays', 'pacy-repairs', 'spa', 'menu').",
               examples: ["restaurant", "pacy-wellness", "pacy-boutique", "pacy-gadgets", "pacy-stays", "pacy-repairs"]
             },
-            "concept-slug": {
-              type: "string",
-              minLength: 2,
-              maxLength: 64,
-              pattern: "^[A-Za-z0-9_/-]+$",
-              description: "Kebab-case alias for conceptSlug.",
-              examples: ["restaurant", "pacy-wellness", "pacy-boutique"]
-            },
             venueSlug: {
               type: "string",
               minLength: 2,
