@@ -367,17 +367,23 @@ const inMemoryCart = {
 }
 
 export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
-  // 1. wetaego_find_venue — page: '/' (Global Discovery)
+  // 1. find_venue — page: '/' (Global Discovery)
   {
     name: 'find_venue',
     page: '/',
     description:
-      'Search and discover distinct external merchant venues or branch locations across the WETAEGO network. Use "query" for keyword/city search, "name" for exact business matching, or "slug" for direct venue URL lookup. (To switch tabs or departments inside the current venue, use wetaego_open_business_page instead.)',
+      'Search and discover distinct external merchant venues or branch locations across the WETAEGO network. Requires at least one search filter: "query" for keyword/city search, "name" for business matching, "industry" for vertical category, or "slug" for direct venue URL lookup. (To switch tabs or departments inside the current venue, use open_business_page instead.)',
     inputSchema: {
       type: 'object',
+      anyOf: [
+        { required: ['query'] },
+        { required: ['name'] },
+        { required: ['industry'] },
+        { required: ['slug'] },
+      ],
       properties: {
-        query: { type: 'string', description: 'Free-text keyword or location search (e.g. "Lagos sushi", "spa Lekki").' },
-        name: { type: 'string', description: 'Exact or partial business name (e.g. "Pacy Group", "Emerald Cafe").' },
+        query: { type: 'string', minLength: 1, description: 'Free-text keyword or location search (e.g. "Lagos sushi", "spa Lekki").' },
+        name: { type: 'string', minLength: 1, description: 'Exact or partial business name (e.g. "Pacy Group", "Emerald Cafe").' },
         industry: {
           type: 'string',
           enum: ['dining', 'hospitality', 'wellness', 'retail', 'services', 'creator'],
@@ -589,7 +595,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
                 maxLength: 64,
                 pattern: '^[A-Za-z0-9_/-]+$',
                 description: 'Department or concept slug if part of a multi-concept venue',
-                examples: ['restaurant', 'pacy-wellness', 'pacy-boutique', 'pacy-gadgets', 'pacy-stays', 'pacy-repairs'],
+                examples: ['restaurant', 'dining', 'wellness', 'spa', 'boutique', 'apparel', 'stays', 'hotel', 'repairs', 'media'],
               },
               conceptUrl: { type: 'string', description: 'Direct URL to this concept department' },
             },
@@ -651,7 +657,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
                 maxLength: 64,
                 pattern: '^[A-Za-z0-9_/-]+$',
                 description: 'Department or concept slug',
-                examples: ['restaurant', 'pacy-wellness', 'pacy-boutique', 'pacy-gadgets', 'pacy-stays', 'pacy-repairs'],
+                examples: ['restaurant', 'dining', 'wellness', 'spa', 'boutique', 'apparel', 'stays', 'hotel', 'repairs', 'media'],
               },
               conceptUrl: { type: 'string', description: 'Direct URL to concept department' },
             },
@@ -1726,7 +1732,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
     name: 'open_business_page',
     page: '/m/{slug}',
     description:
-      'Switch the active storefront viewport to an internal department or category catalog tab (such as "restaurant", "pacy-wellness", "pacy-boutique", "pacy-gadgets", "pacy-stays", "pacy-hotels", "pacy-repairs", "pacy-media") inside the current merchant venue. (To search for other businesses or branches, use find_venue.)',
+      'Switch the active storefront viewport to an internal department or category catalog tab (such as "dining", "menu", "spa", "wellness", "boutique", "retail", "stays", "hotel", "repairs", "media") inside the current merchant venue. (To search for other businesses or branches, use find_venue.)',
     inputSchema: {
       type: 'object',
       required: ['conceptSlug'],
@@ -1736,9 +1742,8 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
           minLength: 2,
           maxLength: 64,
           pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$',
-          enum: ['restaurant', 'pacy-wellness', 'pacy-boutique', 'pacy-gadgets', 'pacy-stays', 'pacy-hotels', 'pacy-repairs', 'pacy-media', 'menu', 'treatments'],
-          description: 'The standardized kebab-case URL slug of the internal department or concept to open (e.g. "restaurant", "pacy-wellness", "pacy-boutique", "pacy-gadgets", "pacy-stays", "pacy-hotels", "pacy-repairs", "pacy-media").',
-          examples: ['restaurant', 'pacy-wellness', 'pacy-boutique', 'pacy-gadgets', 'pacy-stays', 'pacy-repairs'],
+          description: 'The standardized kebab-case URL slug of the internal department or concept to open (e.g. "dining", "menu", "spa", "wellness", "boutique", "retail", "stays", "hotel", "repairs", "services", "media").',
+          examples: ['restaurant', 'dining', 'wellness', 'spa', 'boutique', 'stays', 'hotel', 'repairs', 'media', 'menu'],
         },
         venueSlug: {
           type: 'string',

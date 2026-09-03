@@ -1288,12 +1288,18 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
   // ── 11. find_venue ───────────────────────────────────────────────────────
   tools.push({
     name: 'find_venue',
-    description: `Search and discover merchant venues, branch locations, or multi-concept enterprises across the WETAEGO network. Use "query" for keyword/city search, "name" for exact business matching, or "slug" for direct venue URL lookup.`,
+    description: `Search and discover merchant venues, branch locations, or multi-concept enterprises across the WETAEGO network. Requires at least one search filter: "query" for keyword/city search, "name" for business matching, "industry" for vertical category, or "slug" for direct venue URL lookup.`,
     inputSchema: {
       type: 'object',
+      anyOf: [
+        { required: ['query'] },
+        { required: ['name'] },
+        { required: ['industry'] },
+        { required: ['slug'] },
+      ],
       properties: {
-        query: { type: 'string', description: 'Free-text keyword or location search (e.g. "Lagos sushi", "spa Lekki").' },
-        name: { type: 'string', description: 'Exact or partial business name.' },
+        query: { type: 'string', minLength: 1, description: 'Free-text keyword or location search (e.g. "Lagos sushi", "spa Lekki").' },
+        name: { type: 'string', minLength: 1, description: 'Exact or partial business name.' },
         industry: {
           type: 'string',
           enum: ['dining', 'hospitality', 'wellness', 'retail', 'services', 'creator'],
@@ -1370,7 +1376,7 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
           minLength: 1,
           maxLength: 64,
           description: 'The slug or natural name of the department/concept to navigate to (e.g. "spa", "massage", "wellness", "restaurant", "boutique", "stays", "hotel").',
-          examples: ['spa', 'wellness', 'restaurant', 'pacy-wellness', 'pacy-boutique', 'pacy-stays'],
+          examples: ['dining', 'wellness', 'spa', 'restaurant', 'boutique', 'stays', 'hotel', 'repairs', 'media'],
         },
       },
       additionalProperties: true

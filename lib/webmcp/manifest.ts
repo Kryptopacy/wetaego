@@ -29,9 +29,15 @@ export function getMCPManifest() {
         scope: "customer",
         permission: "public/read-only",
         confirmation: "none",
-        description: "Find other businesses: Search and discover distinct external merchant venues or branch locations across the WETAEGO network by business name, city query, industry category, or venue slug. (Do NOT use to switch tabs inside the current storefront; use wetaego_open_business_page instead.)",
+        description: "Find other businesses: Search and discover distinct external merchant venues or branch locations across the WETAEGO network by business name, city query, industry category, or venue slug. Requires at least one search filter. (Do NOT use to switch tabs inside the current storefront; use open_business_page instead.)",
         inputSchema: {
           type: "object",
+          anyOf: [
+            { required: ["query"] },
+            { required: ["name"] },
+            { required: ["industry"] },
+            { required: ["slug"] }
+          ],
           properties: {
             query: { type: "string", description: "Natural-language search query." },
             name: { type: "string", description: "Specific business or brand name." },
@@ -785,7 +791,7 @@ export function getMCPManifest() {
         scope: "customer",
         permission: "public/navigation",
         confirmation: "none",
-        description: "Switch department within active storefront: Switch the active view to an internal department or category catalog tab (such as 'restaurant', 'pacy-wellness', 'pacy-boutique', 'pacy-gadgets', 'pacy-stays', 'pacy-repairs') inside the current venue. (Do NOT use to find external businesses; use wetaego_find_venue instead.)",
+        description: "Switch department within active storefront: Switch the active view to an internal department or category catalog tab (such as 'dining', 'wellness', 'boutique', 'stays', 'repairs', 'media', 'menu') inside the current venue. (Do NOT use to find external businesses; use find_venue instead.)",
         inputSchema: {
           type: "object",
           required: ["conceptSlug"],
@@ -795,8 +801,8 @@ export function getMCPManifest() {
               minLength: 2,
               maxLength: 64,
               pattern: "^[A-Za-z0-9_/-]+$",
-              description: "The URL slug or name of the concept to navigate to (e.g. 'restaurant', 'pacy-wellness', 'pacy-boutique', 'pacy-gadgets', 'pacy-stays', 'pacy-repairs', 'spa', 'menu').",
-              examples: ["restaurant", "pacy-wellness", "pacy-boutique", "pacy-gadgets", "pacy-stays", "pacy-repairs"]
+              description: "The URL slug or name of the concept to navigate to (e.g. 'dining', 'wellness', 'boutique', 'stays', 'repairs', 'media', 'menu').",
+              examples: ["restaurant", "dining", "wellness", "spa", "boutique", "apparel", "stays", "hotel", "repairs", "media"]
             },
             venueSlug: {
               type: "string",

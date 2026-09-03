@@ -207,8 +207,8 @@ describe('Agent Readiness (Ora & Is Agentic Compliance)', () => {
       // Concept-slug constraint check
       const conceptSlugProp = openPageTool.inputSchema.properties.conceptSlug
       expect(conceptSlugProp.pattern).toBe('^[a-z0-9]+(?:-[a-z0-9]+)*$')
-      expect(conceptSlugProp.minLength).toBe(2)
-      expect(conceptSlugProp.enum).toContain('restaurant')
+      expect(conceptSlugProp.examples).toContain('restaurant')
+      expect(conceptSlugProp.enum).toBeUndefined()
 
       // Phone constraint check
       const phoneProp = (checkoutTool.inputSchema.properties.customer as any).properties.phone
