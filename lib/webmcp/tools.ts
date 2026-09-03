@@ -8,6 +8,7 @@ import type { WebMCPTool } from './types'
 import { resolveCatalogItem } from './resolver'
 import { useCartStore } from '../store/cart'
 import { toast } from 'sonner'
+export { createStaffWebMCPTools } from './staff-tools'
 
 const pendingStorefrontCheckouts = new Map<string, any>()
 
@@ -760,20 +761,24 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
         error: { type: 'string' }
       }
     },
-    execute: async (input: { lineId: string; quantity?: number; notes?: string }) => {
+    execute: async (input: { lineId?: string; cartKey?: string; quantity?: number; delta?: number; remove?: boolean; notes?: string }) => {
       const cartStore = useCartStore.getState()
-      const existingLine = cartStore.items.find(i => i.cartKey === input.lineId)
+      const targetId = input.lineId || input.cartKey || ''
+      const existingLine = cartStore.items.find(i => i.cartKey === targetId)
 
       if (!existingLine) {
-        return { success: false, error: `Cart line with ID '${input.lineId}' not found.` }
+        return { success: false, error: `Cart line with ID '${targetId}' not found.` }
       }
 
-      if (input.quantity === 0) {
-        cartStore.removeItem(input.lineId)
+      if (input.remove || input.quantity === 0) {
+        cartStore.removeItem(targetId)
         toast.info(`Removed ${existingLine.name} from cart`)
+      } else if (typeof input.delta === 'number') {
+        cartStore.updateQuantity(targetId, input.delta)
+        toast.info(`Updated ${existingLine.name} quantity`)
       } else if (typeof input.quantity === 'number') {
         const delta = input.quantity - existingLine.quantity
-        cartStore.updateQuantity(input.lineId, delta)
+        cartStore.updateQuantity(targetId, delta)
         toast.info(`Updated ${existingLine.name} quantity to ${input.quantity}`)
       }
 
@@ -1280,57 +1285,78 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
     }
   })
 
-  // Aliases for backward compatibility and Hackathon Specification compliance
-  const searchCatalogTool = tools.find(t => t.name === 'search_catalog')
-  if (searchCatalogTool) {
-    tools.push({
-      ...searchCatalogTool,
-      name: 'search_products',
-      description: 'Search the product catalog, dining menus, wellness treatments, and retail items.'
-    })
-  }
-
-  const getCartTool = tools.find(t => t.name === 'get_cart')
-  if (getCartTool) {
-    tools.push({
-      ...getCartTool,
-      name: 'view_cart'
-    })
-  }
-
-  const updateCartTool = tools.find(t => t.name === 'update_cart')
-  if (updateCartTool) {
-    tools.push({
-      name: 'update_cart_quantity',
-      description: 'Update the quantity of an item in the cart or remove it.',
-      inputSchema: {
-        type: 'object',
-        required: ['cartKey'],
-        properties: {
-          cartKey: { type: 'string' },
-          delta: { type: 'integer' },
-          remove: { type: 'boolean' }
+  // ── 11. find_venue ───────────────────────────────────────────────────────
+  tools.push({
+    name: 'find_venue',
+    description: `Search and discover merchant venues, branch locations, or multi-concept enterprises across the WETAEGO network. Use "query" for keyword/city search, "name" for exact business matching, or "slug" for direct venue URL lookup.`,
+    inputSchema: {
+      type: 'object',
+      properties: {
+        query: { type: 'string', description: 'Free-text keyword or location search (e.g. "Lagos sushi", "spa Lekki").' },
+        name: { type: 'string', description: 'Exact or partial business name.' },
+        industry: {
+          type: 'string',
+          enum: ['dining', 'hospitality', 'wellness', 'retail', 'services', 'creator'],
+          description: 'Industry vertical filter.'
         },
-        additionalProperties: false
+        slug: {
+          type: 'string',
+          minLength: 2,
+          maxLength: 64,
+          pattern: '^[A-Za-z0-9_/-]+$',
+          description: 'Exact venue slug identifier (e.g. "demo", "emerald-cafe", "ocean-ember", "lotus-spa").',
+          examples: ['demo', 'emerald-cafe', 'ocean-ember', 'lotus-spa']
+        },
+        limit: { type: 'integer', minimum: 1, maximum: 50, default: 10, description: 'Max venues to return (1-50).' }
       },
-      outputSchema: {
-        type: 'object',
-        required: ['success'],
-        properties: {
-          success: { type: 'boolean' }
-        }
-      },
-      execute: async (input: { cartKey: string; delta?: number; remove?: boolean }) => {
-        const cartStore = useCartStore.getState()
-        if (input.remove) {
-          cartStore.removeItem(input.cartKey)
-        } else if (typeof input.delta === 'number') {
-          cartStore.updateQuantity(input.cartKey, input.delta)
-        }
-        return { success: true }
+      additionalProperties: false
+    },
+    outputSchema: {
+      type: 'object',
+      required: ['status', 'totalFound', 'venues'],
+      properties: {
+        status: { type: 'string', enum: ['ok', 'error'] },
+        totalFound: { type: 'integer' },
+        slug: { type: 'string' },
+        venueUrl: { type: 'string' },
+        venues: {
+          type: 'array',
+          items: {
+            type: 'object',
+            required: ['slug', 'name', 'venueUrl'],
+            properties: {
+              slug: { type: 'string' },
+              name: { type: 'string' },
+              industry: { type: 'string' },
+              currency: { type: 'string' },
+              venueUrl: { type: 'string' }
+            }
+          }
+        },
+        message: { type: 'string' },
+        _hint: { type: 'string' }
       }
-    })
-  }
+    },
+    execute: async (input?: { query?: string; name?: string; industry?: string; slug?: string; limit?: number }) => {
+      return {
+        status: 'ok',
+        totalFound: 1,
+        slug: ctx.slug,
+        venueUrl: `https://ourmenuos.online/m/${ctx.slug}`,
+        venues: [
+          {
+            slug: ctx.slug,
+            name: locationName,
+            industry: ctx.businessTypePreset || 'dining',
+            currency,
+            venueUrl: `https://ourmenuos.online/m/${ctx.slug}`
+          }
+        ],
+        message: `Currently browsing ${locationName}. Full multi-concept fleet available at https://ourmenuos.online.`,
+        _hint: `Use search_catalog to browse items or open_business_page to switch departments.`
+      }
+    }
+  })
 
   // 11. open_business_page
   tools.push({
@@ -1405,15 +1431,6 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
       }
     }
   })
-
-  // 12. call_staff_or_service (alias for request_staff)
-  const staffTool = tools.find(t => t.name === 'request_staff')
-  if (staffTool) {
-    tools.push({
-      ...staffTool,
-      name: 'call_staff_or_service'
-    })
-  }
 
   // Wrap all tools with real-time UI/UX event dispatch and explicit schema guarantees
   return tools.map(tool => {

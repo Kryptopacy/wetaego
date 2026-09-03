@@ -369,7 +369,7 @@ const inMemoryCart = {
 export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
   // 1. wetaego_find_venue — page: '/' (Global Discovery)
   {
-    name: 'wetaego_find_venue',
+    name: 'find_venue',
     page: '/',
     description:
       'Search and discover distinct external merchant venues or branch locations across the WETAEGO network. Use "query" for keyword/city search, "name" for exact business matching, or "slug" for direct venue URL lookup. (To switch tabs or departments inside the current venue, use wetaego_open_business_page instead.)',
@@ -499,7 +499,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
 
   // 2. wetaego_search_catalog — page: '/'
   {
-    name: 'wetaego_search_catalog',
+    name: 'search_catalog',
     page: '/',
     description:
       'Search catalog items, products, dishes, and services with category and price filters. Returns item details, prices, and availability.',
@@ -770,7 +770,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
 
   // 3. wetaego_get_item_details — page: '/m/{slug}'
   {
-    name: 'wetaego_get_item_details',
+    name: 'get_item_details',
     page: '/m/{slug}',
     description:
       'Return authoritative details for a specific catalog item using its unique itemId, including price, stock status, customizable modifier groups, dietary tags, and variant options.',
@@ -938,7 +938,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
 
   // 4. wetaego_create_cart — page: '/m/{slug}'
   {
-    name: 'wetaego_create_cart',
+    name: 'create_cart',
     page: '/m/{slug}',
     description:
       'Initialize a new shopping cart session or retrieve the existing active cart. Returns a structured "cartId" (e.g. "cart_demo_abc123") that can be passed to subsequent cart and checkout calls.',
@@ -1015,7 +1015,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
 
   // 5. wetaego_add_to_cart — page: '/m/{slug}'
   {
-    name: 'wetaego_add_to_cart',
+    name: 'add_to_cart',
     page: '/m/{slug}',
     description:
       'Add an available catalog item to the active shopping cart with optional modifier selections. Returns the updated cart line items, total item count, and recalculated subtotal.',
@@ -1204,7 +1204,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
 
   // 6. wetaego_get_cart — page: '/m/{slug}'
   {
-    name: 'wetaego_get_cart',
+    name: 'get_cart',
     page: '/m/{slug}',
     description:
       'Return the current cart contents, line items, validated unit prices, modifiers, discount breakdown, applied taxes, and authoritative final total.',
@@ -1362,7 +1362,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
 
   // 7. wetaego_update_cart — page: '/m/{slug}'
   {
-    name: 'wetaego_update_cart',
+    name: 'update_cart',
     page: '/m/{slug}',
     description:
       'Modify the quantity of an existing line item in the cart or remove it completely by setting quantity to 0.',
@@ -1434,7 +1434,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
 
   // 8. wetaego_apply_coupon — page: '/m/{slug}'
   {
-    name: 'wetaego_apply_coupon',
+    name: 'apply_coupon',
     page: '/m/{slug}',
     description:
       'Apply a promotional coupon code or discount voucher to the active shopping cart session. Validates the code, recalculates discounts, and updates the cart subtotal and final total.',
@@ -1616,7 +1616,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
 
   // 9. wetaego_recommend_pairings — page: '/m/{slug}'
   {
-    name: 'wetaego_recommend_pairings',
+    name: 'recommend_pairings',
     page: '/m/{slug}',
     description:
       'Suggest complementary catalog items, sides, drinks, or accessories. If itemId is omitted, recommendations are generated based on the active cart items or top venue specialties; if itemId is provided, recommendations specifically complement that item.',
@@ -1723,7 +1723,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
 
   // 10. wetaego_open_business_page — page: '/m/{slug}'
   {
-    name: 'wetaego_open_business_page',
+    name: 'open_business_page',
     page: '/m/{slug}',
     description:
       'Switch the active storefront viewport to an internal department or category catalog tab (such as "restaurant", "pacy-wellness", "pacy-boutique", "pacy-gadgets", "pacy-stays", "pacy-hotels", "pacy-repairs", "pacy-media") inside the current merchant venue. (To search for other businesses or branches, use wetaego_find_venue.)',
@@ -1811,7 +1811,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
 
   // 11. wetaego_initiate_checkout — page: '/m/{slug}/checkout'
   {
-    name: 'wetaego_initiate_checkout',
+    name: 'initiate_checkout',
     page: '/m/{slug}/checkout',
     description:
       'Validate the current cart and generate a locked checkout session with computed taxes, fulfillment options, and totals. Locks prices for 15 minutes. Does NOT charge the customer — call wetaego_submit_order with customer confirmation to finalize.',
@@ -1965,7 +1965,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
 
   // 12. wetaego_submit_order — page: '/m/{slug}/checkout'
   {
-    name: 'wetaego_submit_order',
+    name: 'submit_order',
     page: '/m/{slug}/checkout',
     description:
       'Submit a prepared checkout session as an authoritative live customer order. Requires authorization.confirmed: true indicating the customer reviewed and approved the order total.',
@@ -2077,7 +2077,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
 
   // 13. wetaego_request_staff — page: '/m/{slug}'
   {
-    name: 'wetaego_request_staff',
+    name: 'request_staff',
     page: '/m/{slug}',
     description:
       'Send an immediate service or waiter call notification to venue floor staff for a specific table or room.',

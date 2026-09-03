@@ -31,7 +31,30 @@ class WebMCPRegistry implements ModelContext {
     const prepended = `wetaego_${clean}`
     if (this._toolsMap.has(prepended)) return this._toolsMap.get(prepended)
 
-    // 4. Case-insensitive and trimmed lookup
+    // 4. Semantic aliases (e.g. call_staff_or_service -> request_staff, search_products -> search_catalog)
+    const aliasMap: Record<string, string> = {
+      search_products: 'search_catalog',
+      wetaego_search_products: 'search_catalog',
+      view_cart: 'get_cart',
+      wetaego_view_cart: 'get_cart',
+      update_cart_quantity: 'update_cart',
+      wetaego_update_cart_quantity: 'update_cart',
+      update_cart_item: 'update_cart',
+      wetaego_update_cart_item: 'update_cart',
+      remove_from_cart: 'update_cart',
+      wetaego_remove_from_cart: 'update_cart',
+      call_staff_or_service: 'request_staff',
+      wetaego_call_staff_or_service: 'request_staff',
+      call_staff: 'request_staff',
+      wetaego_call_staff: 'request_staff',
+    }
+    const aliased = aliasMap[clean.toLowerCase()] || aliasMap[clean.toLowerCase().replace(/^wetaego_/, '')]
+    if (aliased && aliased !== clean) {
+      const tool = this.findTool(aliased)
+      if (tool) return tool
+    }
+
+    // 5. Case-insensitive and trimmed lookup
     const lowerClean = clean.toLowerCase()
     const lowerStripped = lowerClean.replace(/^wetaego_/, '')
     for (const [key, val] of this._toolsMap.entries()) {

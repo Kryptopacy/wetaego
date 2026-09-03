@@ -122,19 +122,23 @@ describe('Agent Readiness (Ora & Is Agentic Compliance)', () => {
       expect(tools.length).toBeGreaterThanOrEqual(13)
 
       const toolNames = tools.map(t => t.name)
-      expect(toolNames).toContain('wetaego_find_venue')
-      expect(toolNames).toContain('wetaego_search_catalog')
-      expect(toolNames).toContain('wetaego_get_item_details')
-      expect(toolNames).toContain('wetaego_create_cart')
-      expect(toolNames).toContain('wetaego_add_to_cart')
-      expect(toolNames).toContain('wetaego_get_cart')
-      expect(toolNames).toContain('wetaego_update_cart')
-      expect(toolNames).toContain('wetaego_apply_coupon')
-      expect(toolNames).toContain('wetaego_recommend_pairings')
-      expect(toolNames).toContain('wetaego_open_business_page')
-      expect(toolNames).toContain('wetaego_initiate_checkout')
-      expect(toolNames).toContain('wetaego_submit_order')
-      expect(toolNames).toContain('wetaego_request_staff')
+      expect(toolNames).toContain('find_venue')
+      expect(toolNames).toContain('search_catalog')
+      expect(toolNames).toContain('get_item_details')
+      expect(toolNames).toContain('create_cart')
+      expect(toolNames).toContain('add_to_cart')
+      expect(toolNames).toContain('get_cart')
+      expect(toolNames).toContain('update_cart')
+      expect(toolNames).toContain('apply_coupon')
+      expect(toolNames).toContain('recommend_pairings')
+      expect(toolNames).toContain('open_business_page')
+      expect(toolNames).toContain('initiate_checkout')
+      expect(toolNames).toContain('submit_order')
+      expect(toolNames).toContain('request_staff')
+
+      // Multi-protocol transparent lookup
+      expect((ctx as any).findTool?.('wetaego_search_catalog') || (ctx as any).registeredTools?.get('wetaego_search_catalog')).toBeDefined()
+      expect((ctx as any).findTool?.('wetaego_submit_order') || (ctx as any).registeredTools?.get('wetaego_submit_order')).toBeDefined()
 
       for (const t of tools) {
         expect(t.name).toBeDefined()
@@ -146,14 +150,14 @@ describe('Agent Readiness (Ora & Is Agentic Compliance)', () => {
       }
     })
 
-    it('validates wetaego_apply_coupon applies discount and recalculates cart & checkout totals', async () => {
+    it('validates apply_coupon applies discount and recalculates cart & checkout totals', async () => {
       const { WEBMCP_TOOLS } = await import('@/components/WebMcpProvider')
 
-      const createCartTool = WEBMCP_TOOLS.find(t => t.name === 'wetaego_create_cart')!
-      const addToCartTool = WEBMCP_TOOLS.find(t => t.name === 'wetaego_add_to_cart')!
-      const applyCouponTool = WEBMCP_TOOLS.find(t => t.name === 'wetaego_apply_coupon')!
-      const getCartTool = WEBMCP_TOOLS.find(t => t.name === 'wetaego_get_cart')!
-      const checkoutTool = WEBMCP_TOOLS.find(t => t.name === 'wetaego_initiate_checkout')!
+      const createCartTool = WEBMCP_TOOLS.find(t => t.name === 'create_cart')!
+      const addToCartTool = WEBMCP_TOOLS.find(t => t.name === 'add_to_cart')!
+      const applyCouponTool = WEBMCP_TOOLS.find(t => t.name === 'apply_coupon')!
+      const getCartTool = WEBMCP_TOOLS.find(t => t.name === 'get_cart')!
+      const checkoutTool = WEBMCP_TOOLS.find(t => t.name === 'initiate_checkout')!
 
       expect(applyCouponTool).toBeDefined()
 
@@ -188,9 +192,9 @@ describe('Agent Readiness (Ora & Is Agentic Compliance)', () => {
     it('enforces strict currency, phone, and concept-slug schemas', async () => {
       const { WEBMCP_TOOLS } = await import('@/components/WebMcpProvider')
 
-      const searchTool = WEBMCP_TOOLS.find(t => t.name === 'wetaego_search_catalog')!
-      const openPageTool = WEBMCP_TOOLS.find(t => t.name === 'wetaego_open_business_page')!
-      const checkoutTool = WEBMCP_TOOLS.find(t => t.name === 'wetaego_initiate_checkout')!
+      const searchTool = WEBMCP_TOOLS.find(t => t.name === 'search_catalog')!
+      const openPageTool = WEBMCP_TOOLS.find(t => t.name === 'open_business_page')!
+      const checkoutTool = WEBMCP_TOOLS.find(t => t.name === 'initiate_checkout')!
 
       // Currency constraint check
       const currencyProp = searchTool.inputSchema.properties.currency
