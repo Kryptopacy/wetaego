@@ -16,9 +16,13 @@ export interface JSONSchemaProperty {
   maximum?: number;
   minLength?: number;
   maxLength?: number;
+  pattern?: string;
   format?: string;
+  examples?: unknown[];
+  nullable?: boolean;
   additionalProperties?: boolean | JSONSchemaProperty;
   const?: unknown;
+  [key: string]: any;
 }
 
 export interface JSONSchema {
