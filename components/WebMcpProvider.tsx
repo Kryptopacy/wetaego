@@ -387,7 +387,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
           type: 'string',
           minLength: 2,
           maxLength: 64,
-          pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$',
+          pattern: '^[A-Za-z0-9_/-]+$',
           description: 'Exact venue slug identifier (e.g. "demo", "emerald-cafe", "ocean-ember", "lotus-spa").',
           examples: ['demo', 'emerald-cafe', 'ocean-ember', 'lotus-spa'],
         },
@@ -401,7 +401,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
       properties: {
         status: { type: 'string', enum: ['ok', 'error'], description: 'Execution status' },
         totalFound: { type: 'integer', description: 'Total number of matching venues' },
-        slug: { type: 'string', minLength: 2, maxLength: 64, pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$', description: 'Matched direct slug if provided' },
+        slug: { type: 'string', minLength: 2, maxLength: 64, pattern: '^[A-Za-z0-9_/-]+$', description: 'Matched direct slug if provided' },
         venueUrl: { type: 'string', description: 'Direct URL to access the matched venue' },
         directoryUrl: { type: 'string', description: 'URL to the full business directory' },
         venues: {
@@ -411,14 +411,14 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
             type: 'object',
             required: ['slug', 'name', 'venueUrl'],
             properties: {
-              slug: { type: 'string', minLength: 2, maxLength: 64, pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$', description: 'Unique slug identifier for the venue' },
+              slug: { type: 'string', minLength: 2, maxLength: 64, pattern: '^[A-Za-z0-9_/-]+$', description: 'Unique slug identifier for the venue' },
               name: { type: 'string', description: 'Business display name' },
               industry: { type: 'string', description: 'Industry vertical' },
               currency: {
                 type: 'string',
                 minLength: 3,
                 maxLength: 3,
-                pattern: '^[A-Z]{3}$',
+                pattern: '^[A-Za-z]{3}$',
                 description: 'Default 3-letter ISO 4217 currency code (e.g. USD, NGN)',
                 examples: ['USD', 'NGN'],
               },
@@ -437,7 +437,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
       properties: {
         status: { type: 'string', enum: ['ok', 'error'], description: 'Execution status' },
         totalFound: { type: 'integer', description: 'Total number of matching venues' },
-        slug: { type: 'string', minLength: 2, maxLength: 64, pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$', description: 'Matched direct slug if provided' },
+        slug: { type: 'string', minLength: 2, maxLength: 64, pattern: '^[A-Za-z0-9_/-]+$', description: 'Matched direct slug if provided' },
         venueUrl: { type: 'string', description: 'Direct URL to access the matched venue' },
         directoryUrl: { type: 'string', description: 'URL to the full business directory' },
         venues: {
@@ -447,14 +447,14 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
             type: 'object',
             required: ['slug', 'name', 'venueUrl'],
             properties: {
-              slug: { type: 'string', minLength: 2, maxLength: 64, pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$', description: 'Unique slug identifier for the venue' },
+              slug: { type: 'string', minLength: 2, maxLength: 64, pattern: '^[A-Za-z0-9_/-]+$', description: 'Unique slug identifier for the venue' },
               name: { type: 'string', description: 'Business display name' },
               industry: { type: 'string', description: 'Industry vertical' },
               currency: {
                 type: 'string',
                 minLength: 3,
                 maxLength: 3,
-                pattern: '^[A-Z]{3}$',
+                pattern: '^[A-Za-z]{3}$',
                 description: 'Default 3-letter ISO 4217 currency code (e.g. USD, NGN)',
                 examples: ['USD', 'NGN'],
               },
@@ -512,7 +512,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
           type: 'string',
           minLength: 2,
           maxLength: 64,
-          pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$',
+          pattern: '^[A-Za-z0-9_/-]+$',
           description: 'Optional venue slug (e.g. "demo", "emerald-cafe", "ocean-ember", "lotus-spa") to scope search to a specific merchant.',
           examples: ['demo', 'emerald-cafe', 'ocean-ember', 'lotus-spa'],
         },
@@ -522,7 +522,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
           maxLength: 3,
           pattern: '^[A-Z]{3}$',
           enum: ['USD', 'EUR', 'GBP', 'NGN', 'CAD', 'AUD', 'JPY', 'KES', 'GHS', 'ZAR'],
-          description: '3-letter ISO 4217 target currency code (e.g. USD, EUR, GBP, NGN) for dynamic rate conversion.',
+          description: 'Optional target currency code (e.g. USD, EUR, GBP, NGN) for dynamic rate conversion.',
           examples: ['USD', 'NGN', 'EUR', 'GBP'],
         },
         dietary: {
@@ -546,7 +546,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
           type: 'string',
           minLength: 3,
           maxLength: 3,
-          pattern: '^[A-Z]{3}$',
+          pattern: '^[A-Za-z]{3}$',
           description: 'Authoritative 3-letter ISO 4217 currency code (e.g. USD, NGN)',
           examples: ['USD', 'NGN'],
         },
@@ -587,7 +587,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
                 type: 'string',
                 minLength: 2,
                 maxLength: 64,
-                pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$',
+                pattern: '^[A-Za-z0-9_/-]+$',
                 description: 'Department or concept slug if part of a multi-concept venue',
                 examples: ['restaurant', 'pacy-wellness', 'pacy-boutique', 'pacy-gadgets', 'pacy-stays', 'pacy-repairs'],
               },
@@ -608,7 +608,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
           type: 'string',
           minLength: 3,
           maxLength: 3,
-          pattern: '^[A-Z]{3}$',
+          pattern: '^[A-Za-z]{3}$',
           description: 'Authoritative 3-letter ISO 4217 currency code (e.g. USD, NGN)',
           examples: ['USD', 'NGN'],
         },
@@ -649,7 +649,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
                 type: 'string',
                 minLength: 2,
                 maxLength: 64,
-                pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$',
+                pattern: '^[A-Za-z0-9_/-]+$',
                 description: 'Department or concept slug',
                 examples: ['restaurant', 'pacy-wellness', 'pacy-boutique', 'pacy-gadgets', 'pacy-stays', 'pacy-repairs'],
               },
@@ -684,16 +684,59 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
         results = results.filter(it => it.conceptUrl.toLowerCase().includes(`/m/${vSlug}/`) || (it.attributes?.brand && String(it.attributes.brand).toLowerCase().includes(vSlug)))
       }
       if (input.query) {
-        const q = input.query.toLowerCase()
-        results = results.filter(it => it.name.toLowerCase().includes(q) || it.description.toLowerCase().includes(q) || it.category.toLowerCase().includes(q))
+        const rawQ = input.query.toLowerCase().trim()
+        const tokens = rawQ.split(/\s+/).filter(Boolean)
+
+        const dietaryAliases: Record<string, string> = {
+          vegan: 'vegan',
+          vegetarian: 'vegetarian',
+          veg: 'vegetarian',
+          halal: 'halal',
+          kosher: 'kosher',
+          glutenfree: 'gluten_free',
+          'gluten-free': 'gluten_free',
+          dairyfree: 'dairy_free',
+          'dairy-free': 'dairy_free',
+          keto: 'keto'
+        }
+
+        results = results.filter(it => {
+          const itemDietary = (it.dietaryTags || []).map(t => t.toLowerCase())
+          const corpus = [
+            it.name,
+            it.description,
+            it.category,
+            ...itemDietary,
+            it.conceptSlug,
+            it.attributes?.brand,
+            it.attributes?.industry,
+            it.attributes?.roomType,
+            ...(it.attributes?.amenities || []),
+            ...(it.attributes?.sizes || []),
+            ...(it.attributes?.colors || [])
+          ].filter(Boolean).join(' ').toLowerCase()
+
+          if (corpus.includes(rawQ)) return true
+          if (tokens.every(token => corpus.includes(token))) return true
+
+          for (const token of tokens) {
+            const mapped = dietaryAliases[token] || dietaryAliases[token.replace(/[-_]/g, '')]
+            if (mapped && itemDietary.includes(mapped)) return true
+          }
+
+          return false
+        })
       }
       if (input.category) {
-        const cat = input.category.toLowerCase()
+        const cat = input.category.toLowerCase().trim()
         results = results.filter(it => it.category.toLowerCase().includes(cat))
       }
       if (input.dietary && input.dietary.length > 0) {
-        const reqDietary = input.dietary.map(d => d.toLowerCase())
-        results = results.filter(it => reqDietary.every(tag => it.dietaryTags.map(t => t.toLowerCase()).includes(tag)))
+        const reqDietary = input.dietary.map(d => d.toLowerCase().replace(/[-_ ]/g, ''))
+        results = results.filter(it => {
+          const itemTags = (it.dietaryTags || []).map(t => t.toLowerCase().replace(/[-_ ]/g, ''))
+          return reqDietary.every(tag => itemTags.includes(tag))
+        })
       }
       if (typeof input.maxPrice === 'number') {
         results = results.filter(it => it.price <= input.maxPrice!)
@@ -711,7 +754,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
         ? (input.venueSlug.toLowerCase().includes('velvet')
             ? 'Velvet & Vine Cocktail Lounge'
             : input.venueSlug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()))
-        : 'Pacy Grills & Lounge (Pacy Group)'
+        : 'Pacy Group (Multi-Concept Enterprise)'
       return {
         venue: resolvedVenue,
         currency: targetCurrency,
@@ -856,7 +899,12 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
       },
     },
     execute: async ({ itemId }: { itemId: string }) => {
-      const item = DEMO_CATALOG_ITEMS.find(i => i.itemId === itemId)
+      const cleanId = String(itemId || '').trim().toLowerCase()
+      const item = DEMO_CATALOG_ITEMS.find(i => 
+        i.itemId.toLowerCase() === cleanId || 
+        i.name.toLowerCase() === cleanId ||
+        i.name.toLowerCase().includes(cleanId)
+      )
       if (item) {
         return {
           itemId: item.itemId,
@@ -913,7 +961,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
           type: 'string',
           minLength: 3,
           maxLength: 3,
-          pattern: '^[A-Z]{3}$',
+          pattern: '^[A-Za-z]{3}$',
           description: 'Authoritative 3-letter ISO 4217 currency code (e.g. USD, NGN)',
           examples: ['USD', 'NGN'],
         },
@@ -935,7 +983,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
           type: 'string',
           minLength: 3,
           maxLength: 3,
-          pattern: '^[A-Z]{3}$',
+          pattern: '^[A-Za-z]{3}$',
           description: 'Authoritative 3-letter ISO 4217 currency code (e.g. USD, NGN)',
           examples: ['USD', 'NGN'],
         },
@@ -1093,7 +1141,12 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
         inMemoryCart.lines = []
       }
 
-      const item = DEMO_CATALOG_ITEMS.find(i => i.itemId === input.itemId) || {
+      const cleanId = String(input.itemId || '').trim().toLowerCase()
+      const item = DEMO_CATALOG_ITEMS.find(i => 
+        i.itemId.toLowerCase() === cleanId || 
+        i.name.toLowerCase() === cleanId ||
+        i.name.toLowerCase().includes(cleanId)
+      ) || {
         itemId: input.itemId,
         name: 'Avocado Tartine & Microgreens',
         price: 11.0,
@@ -1101,7 +1154,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
         attributes: undefined,
         conceptUrl: undefined,
       }
-      const qty = input.quantity || 1
+      const qty = Math.max(1, Math.min(50, Math.floor(Number(input.quantity) || 1)))
       const lineTotal = Number((item.price * qty).toFixed(2))
       const lineId = `line_${item.itemId}_${Date.now().toString(36)}`
       
@@ -1171,7 +1224,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
           type: 'string',
           minLength: 3,
           maxLength: 3,
-          pattern: '^[A-Z]{3}$',
+          pattern: '^[A-Za-z]{3}$',
           description: 'Authoritative 3-letter ISO 4217 currency code (e.g. USD, NGN)',
           examples: ['USD', 'NGN'],
         },
@@ -1229,7 +1282,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
           type: 'string',
           minLength: 3,
           maxLength: 3,
-          pattern: '^[A-Z]{3}$',
+          pattern: '^[A-Za-z]{3}$',
           description: 'Authoritative 3-letter ISO 4217 currency code (e.g. USD, NGN)',
           examples: ['USD', 'NGN'],
         },
@@ -1441,7 +1494,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
           type: 'string',
           minLength: 3,
           maxLength: 3,
-          pattern: '^[A-Z]{3}$',
+          pattern: '^[A-Za-z]{3}$',
           description: 'Authoritative 3-letter ISO 4217 currency code (e.g. USD, NGN)',
           examples: ['USD', 'NGN'],
         },
@@ -1485,7 +1538,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
           type: 'string',
           minLength: 3,
           maxLength: 3,
-          pattern: '^[A-Z]{3}$',
+          pattern: '^[A-Za-z]{3}$',
           description: 'Authoritative 3-letter ISO 4217 currency code (e.g. USD, NGN)',
           examples: ['USD', 'NGN'],
         },
@@ -1494,7 +1547,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
       },
     },
     execute: async (input: { couponCode: string; cartId?: string }) => {
-      const code = (input.couponCode || '').trim().toUpperCase()
+      const code = (input.couponCode || '').trim().replace(/\s+/g, '').toUpperCase()
       if (!code || !/^[A-Za-z0-9_-]{3,30}$/.test(code)) {
         return {
           status: 'error',
@@ -1584,7 +1637,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
           type: 'string',
           minLength: 3,
           maxLength: 3,
-          pattern: '^[A-Z]{3}$',
+          pattern: '^[A-Za-z]{3}$',
           description: 'Authoritative 3-letter ISO 4217 currency code (e.g. USD, NGN)',
           examples: ['USD', 'NGN'],
         },
@@ -1617,7 +1670,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
           type: 'string',
           minLength: 3,
           maxLength: 3,
-          pattern: '^[A-Z]{3}$',
+          pattern: '^[A-Za-z]{3}$',
           description: 'Authoritative 3-letter ISO 4217 currency code (e.g. USD, NGN)',
           examples: ['USD', 'NGN'],
         },
@@ -1691,7 +1744,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
           type: 'string',
           minLength: 2,
           maxLength: 64,
-          pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$',
+          pattern: '^[A-Za-z0-9_/-]+$',
           description: 'Kebab-case alias for conceptSlug.',
           examples: ['restaurant', 'pacy-wellness', 'pacy-boutique'],
         },
@@ -1699,7 +1752,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
           type: 'string',
           minLength: 2,
           maxLength: 64,
-          pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$',
+          pattern: '^[A-Za-z0-9_/-]+$',
           description: 'Optional venue slug (e.g. "demo", "emerald-cafe", "ocean-ember", "lotus-spa"). If omitted, uses active venue.',
           examples: ['demo', 'emerald-cafe', 'ocean-ember', 'lotus-spa'],
         },
@@ -1711,7 +1764,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
       required: ['status', 'conceptSlug', 'destinationUrl'],
       properties: {
         status: { type: 'string', enum: ['ok', 'error'] },
-        conceptSlug: { type: 'string', minLength: 2, maxLength: 64, pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$', description: 'The opened concept slug' },
+        conceptSlug: { type: 'string', minLength: 2, maxLength: 64, pattern: '^[A-Za-z0-9_/-]+$', description: 'The opened concept slug' },
         destinationUrl: { type: 'string', description: 'Full URL of the destination department page' },
         message: { type: 'string', description: 'Navigation status description' },
       },
@@ -1721,7 +1774,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
       required: ['status', 'conceptSlug', 'destinationUrl'],
       properties: {
         status: { type: 'string', enum: ['ok', 'error'] },
-        conceptSlug: { type: 'string', minLength: 2, maxLength: 64, pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$', description: 'The opened concept slug' },
+        conceptSlug: { type: 'string', minLength: 2, maxLength: 64, pattern: '^[A-Za-z0-9_/-]+$', description: 'The opened concept slug' },
         destinationUrl: { type: 'string', description: 'Full URL of the destination department page' },
         message: { type: 'string', description: 'Navigation status description' },
       },
@@ -1810,7 +1863,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
           type: 'string',
           minLength: 3,
           maxLength: 3,
-          pattern: '^[A-Z]{3}$',
+          pattern: '^[A-Za-z]{3}$',
           description: 'Authoritative 3-letter ISO 4217 currency code (e.g. USD, NGN)',
           examples: ['USD', 'NGN'],
         },
@@ -1843,7 +1896,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
           type: 'string',
           minLength: 3,
           maxLength: 3,
-          pattern: '^[A-Z]{3}$',
+          pattern: '^[A-Za-z]{3}$',
           description: 'Authoritative 3-letter ISO 4217 currency code (e.g. USD, NGN)',
           examples: ['USD', 'NGN'],
         },
@@ -1946,7 +1999,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
           type: 'string',
           minLength: 3,
           maxLength: 3,
-          pattern: '^[A-Z]{3}$',
+          pattern: '^[A-Za-z]{3}$',
           description: 'Authoritative 3-letter ISO 4217 currency code (e.g. USD, NGN)',
           examples: ['USD', 'NGN'],
         },
@@ -1972,7 +2025,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
           type: 'string',
           minLength: 3,
           maxLength: 3,
-          pattern: '^[A-Z]{3}$',
+          pattern: '^[A-Za-z]{3}$',
           description: 'Authoritative 3-letter ISO 4217 currency code (e.g. USD, NGN)',
           examples: ['USD', 'NGN'],
         },
@@ -2086,30 +2139,31 @@ export function WebMcpProvider() {
     try {
       const ctx = ensureWebMCPContext()
 
-      // Create unprefixed aliases (e.g. 'apply_coupon' alongside 'wetaego_apply_coupon')
-      const aliasTools = WEBMCP_TOOLS.map((t) => ({
-        ...t,
-        name: t.name.replace(/^wetaego_/, ''),
-      }))
-      const allTools = [...WEBMCP_TOOLS, ...aliasTools]
+      // Register the 13 canonical tools (registry transparently resolves both wetaego_* and bare names)
+      const allTools = WEBMCP_TOOLS
 
-      // 1. Call provideContext({ tools: allTools })
-      if (typeof ctx.provideContext === 'function') {
-        try {
-          ctx.provideContext({ tools: allTools })
-        } catch (e) {
-          if (process.env.NODE_ENV === 'development') {
-            console.warn('[WebMCP] provideContext call warning:', e)
-          }
-        }
-      }
-
-      // 2. Call registerTool on each tool individually
+      // Register each canonical tool individually onto document.modelContext / navigator.modelContext
       allTools.forEach((tool) => {
         try {
           const reg = ctx.registerTool(tool)
-          if (reg && typeof reg.unregister === 'function') {
-            cleanups.push(reg.unregister)
+          if (reg && typeof (reg as any).then === 'function') {
+            (reg as Promise<any>)
+              .then((resolved) => {
+                if (resolved && typeof resolved.unregister === 'function') {
+                  cleanups.push(() => {
+                    try { resolved.unregister() } catch {}
+                  })
+                }
+              })
+              .catch((e) => {
+                if (process.env.NODE_ENV === 'development') {
+                  console.warn('[WebMCP Root] Tool registration resolved with notice:', tool.name, e)
+                }
+              })
+          } else if (reg && typeof reg.unregister === 'function') {
+            cleanups.push(() => {
+              try { reg.unregister() } catch {}
+            })
           } else {
             cleanups.push(() => ctx.unregisterTool && ctx.unregisterTool(tool.name))
           }

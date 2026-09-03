@@ -199,4 +199,40 @@ describe('WebMCP Storefront Tool Suite', () => {
     expect(approved.success).toBe(true)
     expect(approved.orderId).toBeDefined()
   })
+
+  it('should transparently execute tools with or without wetaego_ prefix', async () => {
+    // Both wetaego_search_catalog and search_catalog must resolve to the exact same tool
+    const bareRes = await globalWebMCPRegistry.executeTool('search_catalog', { query: 'pasta' })
+    const prefixedRes = await globalWebMCPRegistry.executeTool('wetaego_search_catalog', { query: 'pasta' })
+
+    expect(bareRes.totalFound).toBe(1)
+    expect(prefixedRes.totalFound).toBe(1)
+    expect(bareRes.items[0].name).toBe(prefixedRes.items[0].name)
+  })
+
+  it('should deduplicate tools in getTools() and registeredTools.size to prevent 26-tool bloat', () => {
+    // Registering duplicate prefixed versions should not increase canonical tool count
+    const toolsBefore = globalWebMCPRegistry.getTools().length
+    globalWebMCPRegistry.registerTool({
+      name: 'wetaego_search_catalog',
+      description: 'Prefixed version',
+      inputSchema: { type: 'object', properties: {} },
+      execute: async () => ({ status: 'ok' })
+    })
+
+    const toolsAfter = globalWebMCPRegistry.getTools().length
+    expect(toolsAfter).toBe(toolsBefore)
+    expect(globalWebMCPRegistry.registeredTools.size).toBe(toolsBefore)
+
+    // Proxy must report both prefixed and unprefixed as true
+    expect(globalWebMCPRegistry.registeredTools.has('search_catalog')).toBe(true)
+    expect(globalWebMCPRegistry.registeredTools.has('wetaego_search_catalog')).toBe(true)
+  })
+
+  it('should gracefully handle case-insensitive and trimmed tool names', async () => {
+    const res = await globalWebMCPRegistry.executeTool('  WETAEGO_SEARCH_CATALOG  ', { query: 'pasta' })
+    expect(res).toBeDefined()
+    expect(res.totalFound).toBe(1)
+  })
 })
+

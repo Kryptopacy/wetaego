@@ -82,7 +82,7 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
           type: 'string',
           minLength: 3,
           maxLength: 3,
-          pattern: '^[A-Z]{3}$',
+          pattern: '^[A-Za-z]{3}$',
           enum: ['USD', 'EUR', 'GBP', 'NGN', 'CAD', 'AUD', 'JPY', 'KES', 'GHS', 'ZAR'],
           description: 'Optional target currency code (e.g. USD, EUR, GBP, NGN) for dynamic rate conversion.',
           examples: ['USD', 'NGN', 'EUR', 'GBP'],
@@ -125,7 +125,7 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
           type: 'string',
           minLength: 3,
           maxLength: 3,
-          pattern: '^[A-Z]{3}$',
+          pattern: '^[A-Za-z]{3}$',
           description: 'Authoritative 3-letter ISO 4217 currency code',
           examples: ['USD', 'NGN'],
         },
@@ -167,7 +167,7 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
                 type: 'string',
                 minLength: 2,
                 maxLength: 64,
-                pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$',
+                pattern: '^[A-Za-z0-9_/-]+$',
                 description: 'Department or concept slug',
                 examples: ['restaurant', 'pacy-wellness', 'pacy-boutique', 'pacy-gadgets', 'pacy-stays', 'pacy-repairs'],
               },
@@ -197,17 +197,52 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
       }
 
       if (input.query) {
-        const q = input.query.toLowerCase()
-        results = results.filter(
-          item =>
-            item.name.toLowerCase().includes(q) ||
-            (item.description && item.description.toLowerCase().includes(q)) ||
-            (item.category && item.category.toLowerCase().includes(q))
-        )
+        const rawQ = input.query.toLowerCase().trim()
+        const tokens = rawQ.split(/\s+/).filter(Boolean)
+
+        const dietaryAliases: Record<string, string> = {
+          vegan: 'vegan',
+          vegetarian: 'vegetarian',
+          veg: 'vegetarian',
+          halal: 'halal',
+          kosher: 'kosher',
+          glutenfree: 'gluten_free',
+          'gluten-free': 'gluten_free',
+          dairyfree: 'dairy_free',
+          'dairy-free': 'dairy_free',
+          keto: 'keto'
+        }
+
+        results = results.filter(item => {
+          const itemDietary = [
+            ...(item.dietary_tags || []),
+            ...((item as any).dietaryTags || [])
+          ].map(t => t.toLowerCase())
+
+          const corpus = [
+            item.name,
+            item.description,
+            item.category,
+            ...itemDietary,
+            item.conceptSlug,
+            item.conceptTitle,
+            (item as any).brand
+          ].filter(Boolean).join(' ').toLowerCase()
+
+          if (corpus.includes(rawQ)) return true
+          if (tokens.every(token => corpus.includes(token))) return true
+
+          for (const token of tokens) {
+            const mapped = dietaryAliases[token] || dietaryAliases[token.replace(/[-_]/g, '')]
+            if (mapped && itemDietary.includes(mapped)) return true
+          }
+
+          return false
+        })
       }
 
       if (input.category) {
-        const cat = input.category.toLowerCase()
+        const cat = input.category.toLowerCase().trim()
         results = results.filter(item => item.category && item.category.toLowerCase().includes(cat))
       }
 
@@ -218,9 +253,12 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
       }
 
       if (input.dietary && input.dietary.length > 0) {
-        const targetTags = input.dietary.map(t => t.toLowerCase())
+        const targetTags = input.dietary.map(t => t.toLowerCase().replace(/[-_ ]/g, ''))
         results = results.filter(item => {
-          const itemTags = (item.dietary_tags || []).map(t => t.toLowerCase())
+          const itemTags = [
+            ...(item.dietary_tags || []),
+            ...((item as any).dietaryTags || [])
+          ].map(t => t.toLowerCase().replace(/[-_ ]/g, ''))
           return targetTags.every(t => itemTags.includes(t))
         })
       }
@@ -423,17 +461,18 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
     description: `Add an available catalog item to the active cart using valid modifier selections. Returns updated cart summary.`,
     inputSchema: {
       type: 'object',
-      required: ['itemId', 'quantity'],
+      required: ['itemId'],
       properties: {
         itemId: {
           type: 'string',
           minLength: 1,
-          description: 'The unique ID of the item.'
+          description: 'The unique ID or natural name of the item to add (e.g. "Avocado Tartine", "Swedish Massage", or "item_vegan_avocado").'
         },
         quantity: {
           type: 'integer',
           minimum: 1,
           maximum: 50,
+          default: 1,
           description: 'Quantity of the item to add.'
         },
         modifiers: {
@@ -489,9 +528,35 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
       notes?: string
       clearExisting?: boolean
     }) => {
-      const item = menuItems.find(i => i.id === input.itemId)
+      const rawTarget = (input.itemId || (input as any).itemName || (input as any).name || (input as any).query || '').toString().trim().toLowerCase()
+      let item = menuItems.find(i => i.id === input.itemId || i.id.toLowerCase() === rawTarget)
+
+      if (!item && rawTarget) {
+        // Case-insensitive exact name
+        item = menuItems.find(i => i.name.toLowerCase() === rawTarget)
+      }
+
+      if (!item && rawTarget) {
+        // Slugified name (e.g. "avocado-toast" or "avocado-tartine")
+        item = menuItems.find(i => i.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') === rawTarget.replace(/[^a-z0-9]+/g, '-'))
+      }
+
+      if (!item && rawTarget.length >= 3) {
+        // Token match: check if all query tokens appear in name or description
+        const words = rawTarget.split(/\s+/).filter(Boolean)
+        item = menuItems.find(i => {
+          const hay = `${i.name} ${i.description || ''}`.toLowerCase()
+          return words.every(w => hay.includes(w))
+        })
+      }
+
+      if (!item && rawTarget.length >= 3) {
+        // Partial substring match on name
+        item = menuItems.find(i => i.name.toLowerCase().includes(rawTarget) || rawTarget.includes(i.name.toLowerCase()))
+      }
+
       if (!item) {
-        return { status: 'error', success: false, error: `Item '${input.itemId}' not found in active catalog.` }
+        return { status: 'error', success: false, error: `Item '${input.itemId || (input as any).itemName}' not found in active catalog. Available items: ${menuItems.slice(0, 5).map(i => i.name).join(', ')}.` }
       }
       if (item.is_available === false) {
         return { status: 'error', success: false, error: `Item '${item.name}' is currently unavailable.` }
@@ -596,7 +661,7 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
           type: 'string',
           minLength: 3,
           maxLength: 3,
-          pattern: '^[A-Z]{3}$',
+          pattern: '^[A-Za-z]{3}$',
           description: 'Authoritative 3-letter ISO 4217 currency code',
           examples: ['USD', 'NGN'],
         },
@@ -756,14 +821,13 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
       properties: {
         couponCode: {
           type: 'string',
-          minLength: 3,
-          maxLength: 30,
-          pattern: '^[A-Za-z0-9_-]+$',
+          minLength: 2,
+          maxLength: 60,
           description: 'The promotional discount or coupon code to apply (e.g. SAVE10, WELCOME20, PACY50).',
           examples: ['SAVE10', 'WELCOME20', 'PACY50', 'VIP15', 'SUMMER20'],
         },
       },
-      additionalProperties: false,
+      additionalProperties: true,
     },
     outputSchema: {
       type: 'object',
@@ -771,7 +835,7 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
       properties: {
         status: { type: 'string', enum: ['ok', 'error'] },
         success: { type: 'boolean' },
-        couponCode: { type: 'string', minLength: 3, maxLength: 30, pattern: '^[A-Za-z0-9_-]+$' },
+        couponCode: { type: 'string', minLength: 2, maxLength: 60 },
         discountAmount: { type: 'number', minimum: 0 },
         discountPercentage: { type: 'number', minimum: 0, maximum: 100 },
         subtotal: { type: 'number' },
@@ -782,26 +846,28 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
           type: 'string',
           minLength: 3,
           maxLength: 3,
-          pattern: '^[A-Z]{3}$',
+          pattern: '^[A-Za-z]{3}$',
           description: 'Authoritative 3-letter ISO 4217 currency code',
           examples: ['USD', 'NGN'],
         },
         message: { type: 'string' },
       },
     },
-    execute: async ({ couponCode }: { couponCode: string }) => {
-      const code = (couponCode || '').trim().toUpperCase()
-      if (!code || !/^[A-Za-z0-9_-]{3,30}$/.test(code)) {
+    execute: async (input: { couponCode?: string; code?: string }) => {
+      const raw = (input?.couponCode || input?.code || '').toString().trim()
+      const match = raw.match(/[A-Za-z0-9_-]{3,30}/)
+      const code = (match ? match[0] : raw).toUpperCase()
+      if (!code) {
         return {
           status: 'error',
           success: false,
-          couponCode: code,
+          couponCode: raw,
           discountAmount: 0,
           discountPercentage: 0,
           subtotal: 0,
           total: 0,
           currency,
-          message: `Invalid coupon format '${code}'.`,
+          message: `Invalid coupon format '${raw}'.`,
         }
       }
 
@@ -839,7 +905,6 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
   }
 
   tools.push(applyCouponTool)
-  tools.push({ ...applyCouponTool, name: 'wetaego_apply_coupon' })
 
   // ── 7. initiate_checkout ──────────────────────────────────────────────────
   tools.push({
@@ -847,23 +912,20 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
     description: `Validate the current cart and prepare a checkout session. Locks pricing for 15 minutes. Does not authorize payment or charge customer.`,
     inputSchema: {
       type: 'object',
-      required: ['fulfillment'],
       properties: {
         fulfillment: {
           type: 'string',
-          enum: ['dine_in', 'pickup', 'delivery'],
-          description: 'Fulfillment type for the order.'
+          description: 'Fulfillment type for the order (e.g. "dine_in", "dine in", "pickup", "delivery"). Defaults to dine_in.',
+          default: 'dine_in',
         },
         tableIdentifier: {
           type: 'string',
-          maxLength: 50,
-          description: 'Table number, room, seat, or pickup counter.'
+          maxLength: 100,
+          description: 'Table number, room, suite, seat, or pickup counter (e.g. "Table 12" or "12").'
         },
         couponCode: {
           type: 'string',
-          minLength: 3,
-          maxLength: 30,
-          pattern: '^[A-Za-z0-9_-]+$',
+          maxLength: 60,
           description: 'Optional promotional coupon or discount voucher code to apply before price locking.',
           examples: ['SAVE10', 'WELCOME20', 'PACY50'],
         },
@@ -875,7 +937,7 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
             phone: {
               type: 'string',
               format: 'tel',
-              pattern: '^\\+?[0-9\\s\\-().]{7,20}$',
+              pattern: '^\\+?[0-9A-Za-z\\s\\-().]{3,30}$',
               minLength: 7,
               maxLength: 20,
               description: 'Customer contact phone number in standard international E.164 format.',
@@ -901,7 +963,7 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
           type: 'string',
           minLength: 3,
           maxLength: 3,
-          pattern: '^[A-Z]{3}$',
+          pattern: '^[A-Za-z]{3}$',
           description: 'Authoritative 3-letter ISO 4217 currency code',
           examples: ['USD', 'NGN'],
         },
@@ -923,7 +985,7 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
       }
     },
     execute: async (input: {
-      fulfillment: 'dine_in' | 'pickup' | 'delivery'
+      fulfillment?: string
       tableIdentifier?: string
       couponCode?: string
       customer?: { name?: string; email?: string; phone?: string }
@@ -936,12 +998,28 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
         return { error: 'Cannot initiate checkout with an empty cart.' }
       }
 
+      // Normalize fulfillment
+      const rawFulfill = (input?.fulfillment || 'dine_in').toString().toLowerCase()
+      let resolvedFulfillment: 'dine_in' | 'pickup' | 'delivery' = 'dine_in'
+      if (rawFulfill.includes('pick') || rawFulfill.includes('take') || rawFulfill.includes('counter')) {
+        resolvedFulfillment = 'pickup'
+      } else if (rawFulfill.includes('deliver') || rawFulfill.includes('room')) {
+        resolvedFulfillment = 'delivery'
+      }
+
+      // Normalize table identifier
+      let resolvedTable = (input?.tableIdentifier || (input as any)?.table || tableIdentifier || '').toString().trim()
+      if (resolvedTable && /^\d+$/.test(resolvedTable)) {
+        resolvedTable = `Table ${resolvedTable}`
+      }
+
       if (input.couponCode && !cartStore.spinnerDiscount) {
         const code = input.couponCode.trim().toUpperCase()
         let pct = 10
         if (code.includes('20') || code.includes('SUMMER') || code.includes('WELCOME20')) pct = 20
         else if (code.includes('50') || code.includes('HALF') || code.includes('PACY50')) pct = 50
         else if (code.includes('15') || code.includes('VIP')) pct = 15
+        else if (code.includes('25')) pct = 25
         cartStore.setSpinnerDiscount(pct)
       }
 
@@ -951,28 +1029,42 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
       
       const activeTaxRate = Array.isArray(ctx.taxes)
         ? ctx.taxes.filter(t => t.is_active).reduce((sum, t) => sum + (t.percentage / 100), 0)
-        : (typeof ctx.taxRate === 'number' ? ctx.taxRate : 0)
-
-      const tax = Math.round(discountedSubtotal * activeTaxRate * 100) / 100
+        : 0
+      const tax = discountedSubtotal * activeTaxRate
       const fees = 0
       const total = discountedSubtotal + tax + fees
-      const checkoutId = input.customer?.email
-        ? `chk_${Date.now()}_${Buffer.from(input.customer.email).toString('hex').slice(0, 6)}`
-        : `chk_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`
 
+      const checkoutId = `chk_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`
       const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString()
 
-      toast.info(`💳 Checkout Session Prepared`, {
-        description: `Total: ${total.toLocaleString('en-US', { minimumFractionDigits: 2 })} ${currency}. Human confirmation required to authorize.`,
-        duration: 5000
+      // Track locked checkout session
+      pendingCheckouts.set(checkoutId, {
+        id: checkoutId,
+        items: [...items],
+        subtotal: discountedSubtotal,
+        discount: discountMinor / 100,
+        tax,
+        fees,
+        total,
+        fulfillment: resolvedFulfillment,
+        tableIdentifier: resolvedTable || (resolvedFulfillment === 'dine_in' ? 'Storefront Guest' : undefined),
+        customer: input.customer,
+        expiresAt,
+      })
+
+      ctx.onActionTriggered?.({
+        type: 'checkout_initiated',
+        checkoutId,
+        total,
+        itemCount: items.length
       })
 
       return {
         checkoutId,
         currency,
         venue: locationName,
-        fulfillment: input.fulfillment || 'dine_in',
-        tableIdentifier: input.tableIdentifier || tableIdentifier,
+        fulfillment: resolvedFulfillment,
+        tableIdentifier: resolvedTable || (resolvedFulfillment === 'dine_in' ? 'Storefront Guest' : undefined),
         subtotal: discountedSubtotal,
         appliedCoupon: cartStore.spinnerDiscount ? `PROMO${cartStore.spinnerDiscount}` : null,
         discountAmount: discountMinor / 100,
@@ -1210,7 +1302,16 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
     }
   })
 
-  // Aliases for backward compatibility
+  // Aliases for backward compatibility and Hackathon Specification compliance
+  const searchCatalogTool = tools.find(t => t.name === 'search_catalog')
+  if (searchCatalogTool) {
+    tools.push({
+      ...searchCatalogTool,
+      name: 'search_products',
+      description: 'Search the product catalog, dining menus, wellness treatments, and retail items.'
+    })
+  }
+
   const getCartTool = tools.find(t => t.name === 'get_cart')
   if (getCartTool) {
     tools.push({
@@ -1259,27 +1360,20 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
     description: `Navigate or switch the active storefront viewport to a specific department or concept page under ${locationName} (e.g. "restaurant", "spa", "tech-boutique", "hotel", "creator-rate-card").`,
     inputSchema: {
       type: 'object',
-      required: ['conceptSlug'],
       properties: {
         conceptSlug: {
           type: 'string',
-          minLength: 2,
+          minLength: 1,
           maxLength: 64,
-          pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$',
-          enum: ['restaurant', 'pacy-wellness', 'pacy-boutique', 'pacy-gadgets', 'pacy-stays', 'pacy-hotels', 'pacy-repairs', 'pacy-media', 'menu', 'treatments'],
-          description: 'The URL slug of the concept/department to navigate to.',
-          examples: ['restaurant', 'pacy-wellness', 'pacy-boutique', 'pacy-gadgets', 'pacy-stays', 'pacy-repairs'],
+          description: 'The slug or natural name of the department/concept to navigate to (e.g. "spa", "massage", "wellness", "restaurant", "boutique", "stays", "hotel").',
+          examples: ['spa', 'wellness', 'restaurant', 'pacy-wellness', 'pacy-boutique', 'pacy-stays'],
         },
         'concept-slug': {
           type: 'string',
-          minLength: 2,
-          maxLength: 64,
-          pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$',
           description: 'Kebab-case alias for conceptSlug.',
-          examples: ['restaurant', 'pacy-wellness', 'pacy-boutique'],
         },
       },
-      additionalProperties: false
+      additionalProperties: true
     },
     outputSchema: {
       type: 'object',
@@ -1288,16 +1382,39 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
         status: { type: 'string' },
         conceptSlug: {
           type: 'string',
-          minLength: 2,
-          maxLength: 64,
-          pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$',
         },
         destinationUrl: { type: 'string' },
         message: { type: 'string' }
       }
     },
     execute: async (input: { conceptSlug?: string; 'concept-slug'?: string }) => {
-      const slug = input.conceptSlug || input['concept-slug'] || 'restaurant'
+      const raw = (input?.conceptSlug || input?.['concept-slug'] || (input as any)?.concept || (input as any)?.department || '').toString().trim().toLowerCase()
+      
+      const conceptAliases: Record<string, string> = {
+        spa: 'pacy-wellness',
+        wellness: 'pacy-wellness',
+        massage: 'pacy-wellness',
+        massages: 'pacy-wellness',
+        treatment: 'pacy-wellness',
+        treatments: 'pacy-wellness',
+        dining: 'restaurant',
+        food: 'restaurant',
+        grill: 'restaurant',
+        restaurant: 'restaurant',
+        menu: 'restaurant',
+        boutique: 'pacy-boutique',
+        fashion: 'pacy-boutique',
+        clothes: 'pacy-boutique',
+        gadgets: 'pacy-gadgets',
+        tech: 'pacy-gadgets',
+        stays: 'pacy-stays',
+        hotel: 'pacy-stays',
+        rooms: 'pacy-stays',
+        repairs: 'pacy-repairs',
+        media: 'pacy-media'
+      }
+
+      const slug = conceptAliases[raw] || raw || 'restaurant'
       const destination = `/m/${ctx.slug}/p/${slug}`
       if (typeof window !== 'undefined') {
         window.location.href = destination

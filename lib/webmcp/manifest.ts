@@ -44,7 +44,7 @@ export function getMCPManifest() {
               type: "string",
               minLength: 2,
               maxLength: 64,
-              pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+              pattern: "^[A-Za-z0-9_/-]+$",
               description: "Direct URL slug of the venue (e.g. 'demo', 'emerald-cafe', 'ocean-ember', 'lotus-spa').",
               examples: ["demo", "emerald-cafe", "ocean-ember", "lotus-spa"]
             },
@@ -58,7 +58,7 @@ export function getMCPManifest() {
           properties: {
             status: { type: "string", enum: ["ok", "error"] },
             totalFound: { type: "integer" },
-            slug: { type: "string", minLength: 2, maxLength: 64, pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+            slug: { type: "string", minLength: 2, maxLength: 64, pattern: "^[A-Za-z0-9_/-]+$" },
             venueUrl: { type: "string" },
             directoryUrl: { type: "string" },
             venues: {
@@ -67,14 +67,14 @@ export function getMCPManifest() {
                 type: "object",
                 required: ["slug", "name", "venueUrl"],
                 properties: {
-                  slug: { type: "string", minLength: 2, maxLength: 64, pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+                  slug: { type: "string", minLength: 2, maxLength: 64, pattern: "^[A-Za-z0-9_/-]+$" },
                   name: { type: "string" },
                   industry: { type: "string" },
                   currency: {
                     type: "string",
                     minLength: 3,
                     maxLength: 3,
-                    pattern: "^[A-Z]{3}$",
+                    pattern: "^[A-Za-z]{3}$",
                     description: "3-letter ISO 4217 currency code",
                     examples: ["USD", "NGN"]
                   },
@@ -93,7 +93,7 @@ export function getMCPManifest() {
           properties: {
             status: { type: "string", enum: ["ok", "error"] },
             totalFound: { type: "integer" },
-            slug: { type: "string", minLength: 2, maxLength: 64, pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+            slug: { type: "string", minLength: 2, maxLength: 64, pattern: "^[A-Za-z0-9_/-]+$" },
             venueUrl: { type: "string" },
             directoryUrl: { type: "string" },
             venues: {
@@ -102,14 +102,14 @@ export function getMCPManifest() {
                 type: "object",
                 required: ["slug", "name", "venueUrl"],
                 properties: {
-                  slug: { type: "string", minLength: 2, maxLength: 64, pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+                  slug: { type: "string", minLength: 2, maxLength: 64, pattern: "^[A-Za-z0-9_/-]+$" },
                   name: { type: "string" },
                   industry: { type: "string" },
                   currency: {
                     type: "string",
                     minLength: 3,
                     maxLength: 3,
-                    pattern: "^[A-Z]{3}$",
+                    pattern: "^[A-Za-z]{3}$",
                     description: "3-letter ISO 4217 currency code",
                     examples: ["USD", "NGN"]
                   },
@@ -139,7 +139,7 @@ export function getMCPManifest() {
               type: "string",
               minLength: 2,
               maxLength: 64,
-              pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+              pattern: "^[A-Za-z0-9_/-]+$",
               description: "Optional venue slug to scope search to a single merchant.",
               examples: ["demo", "emerald-cafe", "ocean-ember", "lotus-spa"]
             },
@@ -147,7 +147,7 @@ export function getMCPManifest() {
               type: "string",
               minLength: 3,
               maxLength: 3,
-              pattern: "^[A-Z]{3}$",
+              pattern: "^[A-Za-z]{3}$",
               enum: ["USD", "EUR", "GBP", "NGN", "CAD", "AUD", "JPY", "KES", "GHS", "ZAR"],
               description: "3-letter ISO 4217 target currency code.",
               examples: ["USD", "NGN", "EUR", "GBP"]
@@ -173,7 +173,7 @@ export function getMCPManifest() {
               type: "string",
               minLength: 3,
               maxLength: 3,
-              pattern: "^[A-Z]{3}$",
+              pattern: "^[A-Za-z]{3}$",
               description: "3-letter ISO 4217 currency code",
               examples: ["USD", "NGN"]
             },
@@ -208,7 +208,7 @@ export function getMCPManifest() {
                     type: "string",
                     minLength: 2,
                     maxLength: 64,
-                    pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+                    pattern: "^[A-Za-z0-9_/-]+$",
                     description: "Concept or department slug"
                   }
                 }
@@ -225,7 +225,7 @@ export function getMCPManifest() {
               type: "string",
               minLength: 3,
               maxLength: 3,
-              pattern: "^[A-Z]{3}$",
+              pattern: "^[A-Za-z]{3}$",
               description: "3-letter ISO 4217 currency code",
               examples: ["USD", "NGN"]
             },
@@ -260,7 +260,7 @@ export function getMCPManifest() {
                     type: "string",
                     minLength: 2,
                     maxLength: 64,
-                    pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+                    pattern: "^[A-Za-z0-9_/-]+$",
                     description: "Concept or department slug"
                   }
                 }
@@ -678,7 +678,7 @@ export function getMCPManifest() {
               type: "string",
               minLength: 3,
               maxLength: 3,
-              pattern: "^[A-Z]{3}$",
+              pattern: "^[A-Za-z]{3}$",
               description: "3-letter ISO 4217 currency code",
               examples: ["USD", "NGN"]
             },
@@ -704,7 +704,7 @@ export function getMCPManifest() {
               type: "string",
               minLength: 3,
               maxLength: 3,
-              pattern: "^[A-Z]{3}$",
+              pattern: "^[A-Za-z]{3}$",
               description: "3-letter ISO 4217 currency code",
               examples: ["USD", "NGN"]
             },
@@ -794,16 +794,15 @@ export function getMCPManifest() {
               type: "string",
               minLength: 2,
               maxLength: 64,
-              pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$",
-              enum: ["restaurant", "pacy-wellness", "pacy-boutique", "pacy-gadgets", "pacy-stays", "pacy-hotels", "pacy-repairs", "pacy-media", "menu", "treatments"],
-              description: "The URL slug of the concept to navigate to.",
+              pattern: "^[A-Za-z0-9_/-]+$",
+              description: "The URL slug or name of the concept to navigate to (e.g. 'restaurant', 'pacy-wellness', 'pacy-boutique', 'pacy-gadgets', 'pacy-stays', 'pacy-repairs', 'spa', 'menu').",
               examples: ["restaurant", "pacy-wellness", "pacy-boutique", "pacy-gadgets", "pacy-stays", "pacy-repairs"]
             },
             "concept-slug": {
               type: "string",
               minLength: 2,
               maxLength: 64,
-              pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+              pattern: "^[A-Za-z0-9_/-]+$",
               description: "Kebab-case alias for conceptSlug.",
               examples: ["restaurant", "pacy-wellness", "pacy-boutique"]
             },
@@ -811,7 +810,7 @@ export function getMCPManifest() {
               type: "string",
               minLength: 2,
               maxLength: 64,
-              pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+              pattern: "^[A-Za-z0-9_/-]+$",
               description: "Optional venue slug.",
               examples: ["demo", "emerald-cafe", "ocean-ember", "lotus-spa"]
             }
@@ -823,7 +822,7 @@ export function getMCPManifest() {
           required: ["status", "conceptSlug", "destinationUrl"],
           properties: {
             status: { type: "string", enum: ["ok", "error"] },
-            conceptSlug: { type: "string", minLength: 2, maxLength: 64, pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+            conceptSlug: { type: "string", minLength: 2, maxLength: 64, pattern: "^[A-Za-z0-9_/-]+$" },
             destinationUrl: { type: "string" },
             message: { type: "string" }
           }
@@ -833,7 +832,7 @@ export function getMCPManifest() {
           required: ["status", "conceptSlug", "destinationUrl"],
           properties: {
             status: { type: "string", enum: ["ok", "error"] },
-            conceptSlug: { type: "string", minLength: 2, maxLength: 64, pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+            conceptSlug: { type: "string", minLength: 2, maxLength: 64, pattern: "^[A-Za-z0-9_/-]+$" },
             destinationUrl: { type: "string" },
             message: { type: "string" }
           }
@@ -869,7 +868,7 @@ export function getMCPManifest() {
                 phone: {
                   type: "string",
                   format: "tel",
-                  pattern: "^\\+?[0-9\\s\\-().]{7,20}$",
+                  pattern: "^\\+?[0-9A-Za-z\\s\\-().]{3,30}$",
                   minLength: 7,
                   maxLength: 20,
                   description: "Customer contact phone number in standard international E.164 format.",
@@ -894,7 +893,7 @@ export function getMCPManifest() {
               type: "string",
               minLength: 3,
               maxLength: 3,
-              pattern: "^[A-Z]{3}$",
+              pattern: "^[A-Za-z]{3}$",
               description: "3-letter ISO 4217 currency code",
               examples: ["USD", "NGN"]
             },
@@ -926,7 +925,7 @@ export function getMCPManifest() {
               type: "string",
               minLength: 3,
               maxLength: 3,
-              pattern: "^[A-Z]{3}$",
+              pattern: "^[A-Za-z]{3}$",
               description: "3-letter ISO 4217 currency code",
               examples: ["USD", "NGN"]
             },
@@ -984,7 +983,7 @@ export function getMCPManifest() {
               type: "string",
               minLength: 3,
               maxLength: 3,
-              pattern: "^[A-Z]{3}$",
+              pattern: "^[A-Za-z]{3}$",
               description: "3-letter ISO 4217 currency code",
               examples: ["USD", "NGN"]
             },
@@ -1009,7 +1008,7 @@ export function getMCPManifest() {
               type: "string",
               minLength: 3,
               maxLength: 3,
-              pattern: "^[A-Z]{3}$",
+              pattern: "^[A-Za-z]{3}$",
               description: "3-letter ISO 4217 currency code",
               examples: ["USD", "NGN"]
             },

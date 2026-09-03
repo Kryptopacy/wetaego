@@ -43,7 +43,7 @@ export function QRGeneratorClient({
 }) {
   const baseUrl = typeof window !== 'undefined' 
     ? window.location.origin 
-    : (process.env.NEXT_PUBLIC_BASE_URL || 'https://ourmenuos.online')
+    : (typeof process !== 'undefined' ? process.env.NEXT_PUBLIC_BASE_URL || 'https://ourmenuos.online' : 'https://ourmenuos.online')
 
   // Generate URL helper
   const generateURL = (num: string, type: QRType): string => {
@@ -151,7 +151,7 @@ export function QRGeneratorClient({
     const generatedUrl = generateURL(normalizedNum, qrType)
 
     // Check duplicates
-    if (items.some(i => i.url.toLowerCase() === generatedUrl.toLowerCase())) {
+    if (items.some((i: QRItem) => i.url.toLowerCase() === generatedUrl.toLowerCase())) {
       toast.error(`A QR code for ${normalizedNum} already exists!`)
       return
     }
@@ -165,7 +165,7 @@ export function QRGeneratorClient({
       customSubtext: customCta.trim() || undefined,
     }
 
-    setItems(prev => [newItem, ...prev])
+    setItems((prev: QRItem[]) => [newItem, ...prev])
     setIdentifier('')
     setSection('')
     setCustomCta('')
@@ -187,7 +187,7 @@ export function QRGeneratorClient({
     for (let i = batchStart; i <= batchEnd; i++) {
       const numLabel = batchPrefix ? `${batchPrefix}-${i}` : `${i}`
       const url = generateURL(numLabel, qrType)
-      if (!items.some(it => it.url.toLowerCase() === url.toLowerCase())) {
+      if (!items.some((it: QRItem) => it.url.toLowerCase() === url.toLowerCase())) {
         newBatch.push({
           id: Math.random().toString(36).substring(2, 9),
           num: numLabel,
@@ -201,14 +201,14 @@ export function QRGeneratorClient({
     if (newBatch.length === 0) {
       toast.info('All items in this range already exist.')
     } else {
-      setItems(prev => [...newBatch, ...prev])
+      setItems((prev: QRItem[]) => [...newBatch, ...prev])
       toast.success(`Created ${newBatch.length} QR codes!`)
     }
     setShowBatchModal(false)
   }
 
   const removeItem = (id: string) => {
-    setItems(prev => prev.filter(i => i.id !== id))
+    setItems((prev: QRItem[]) => prev.filter((i: QRItem) => i.id !== id))
     toast.info('QR Code removed')
   }
 
@@ -249,7 +249,7 @@ export function QRGeneratorClient({
   const tc = themeColor || '#10b981'
 
   // Filter items by category
-  const filteredItems = items.filter(item => {
+  const filteredItems = items.filter((item: QRItem) => {
     if (activeCategory === 'all') return true
     if (activeCategory === 'page') return item.type === 'page' || item.type === 'review'
     return item.type === activeCategory
@@ -262,18 +262,18 @@ export function QRGeneratorClient({
     ]
 
     if (allowedTypes.includes('table')) {
-      list.push({ id: 'table', label: 'Tables & Dining', icon: Utensils, count: items.filter(i => i.type === 'table').length })
+      list.push({ id: 'table', label: 'Tables & Dining', icon: Utensils, count: items.filter((i: QRItem) => i.type === 'table').length })
     }
 
     if (allowedTypes.includes('room')) {
-      list.push({ id: 'room', label: 'Rooms & Stays', icon: Hotel, count: items.filter(i => i.type === 'room').length })
+      list.push({ id: 'room', label: 'Rooms & Stays', icon: Hotel, count: items.filter((i: QRItem) => i.type === 'room').length })
     }
 
     if (allowedTypes.includes('desk')) {
-      list.push({ id: 'desk', label: 'Counter & POS', icon: Monitor, count: items.filter(i => i.type === 'desk').length })
+      list.push({ id: 'desk', label: 'Counter & POS', icon: Monitor, count: items.filter((i: QRItem) => i.type === 'desk').length })
     }
 
-    list.push({ id: 'page', label: 'Pages & Reviews', icon: FileText, count: items.filter(i => i.type === 'page' || i.type === 'review').length })
+    list.push({ id: 'page', label: 'Pages & Reviews', icon: FileText, count: items.filter((i: QRItem) => i.type === 'page' || i.type === 'review').length })
 
     return list
   }, [allowedTypes, items])
@@ -333,7 +333,7 @@ export function QRGeneratorClient({
 
       {/* ── Business Type Scope Tabs ── */}
       <div className="flex flex-wrap gap-2 bg-zinc-900/70 p-1.5 rounded-2xl border border-zinc-800 no-print">
-        {categoryTabs.map((tab) => {
+        {categoryTabs.map((tab: { id: 'all' | 'table' | 'room' | 'desk' | 'page'; label: string; icon: React.ElementType; count: number }) => {
           const Icon = tab.icon
           const isActive = activeCategory === tab.id
           return (
@@ -341,7 +341,7 @@ export function QRGeneratorClient({
               key={tab.id}
               type="button"
               onClick={() => {
-                setActiveCategory(tab.id as typeof activeCategory)
+                setActiveCategory(tab.id)
                 if (tab.id !== 'all') {
                   setQrType(tab.id as QRType)
                 }
@@ -415,7 +415,7 @@ export function QRGeneratorClient({
               <label className="text-zinc-400 font-semibold block mb-1">Target Type</label>
               <select
                 value={qrType}
-                onChange={(e) => setQrType(e.target.value as QRType)}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setQrType(e.target.value as QRType)}
                 className="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-3 py-2 text-white font-bold"
               >
                 {allowedTypes.includes('table') && <option value="table">🍽️ Table</option>}
@@ -429,7 +429,7 @@ export function QRGeneratorClient({
                 type="text"
                 placeholder="e.g. VIP or Patio"
                 value={batchPrefix}
-                onChange={(e) => setBatchPrefix(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setBatchPrefix(e.target.value)}
                 className="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-3 py-2 text-white"
               />
             </div>
@@ -439,7 +439,7 @@ export function QRGeneratorClient({
                 type="number"
                 min="1"
                 value={batchStart}
-                onChange={(e) => setBatchStart(parseInt(e.target.value) || 1)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setBatchStart(parseInt(e.target.value) || 1)}
                 className="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-3 py-2 text-white"
               />
             </div>
@@ -449,7 +449,7 @@ export function QRGeneratorClient({
                 type="number"
                 min="1"
                 value={batchEnd}
-                onChange={(e) => setBatchEnd(parseInt(e.target.value) || 1)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setBatchEnd(parseInt(e.target.value) || 1)}
                 className="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-3 py-2 text-white"
               />
             </div>
@@ -476,7 +476,7 @@ export function QRGeneratorClient({
           </label>
           <select
             value={qrType}
-            onChange={(e) => setQrType(e.target.value as QRType)}
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setQrType(e.target.value as QRType)}
             className="w-full bg-zinc-950 border border-zinc-700 focus:border-emerald-500 text-white text-xs font-semibold px-4 py-3 rounded-xl outline-none transition-all cursor-pointer"
           >
             {allowedTypes.includes('table') && <option value="table">🍽️ Table</option>}
@@ -496,7 +496,7 @@ export function QRGeneratorClient({
             type="text"
             list="pages-datalist"
             value={identifier}
-            onChange={(e) => setIdentifier(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setIdentifier(e.target.value)}
             placeholder={
               qrType === 'page'
                 ? 'e.g. /menu or select below'
@@ -529,7 +529,7 @@ export function QRGeneratorClient({
           <input
             type="text"
             value={section}
-            onChange={(e) => setSection(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSection(e.target.value)}
             placeholder="e.g. Patio, Rooftop"
             className="w-full bg-zinc-950 border border-zinc-700 focus:border-emerald-500 text-white text-xs font-semibold px-4 py-3 rounded-xl outline-none transition-all"
           />
@@ -543,7 +543,7 @@ export function QRGeneratorClient({
           <input
             type="text"
             value={customCta}
-            onChange={(e) => setCustomCta(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCustomCta(e.target.value)}
             placeholder="e.g. Scan for Room Service"
             className="w-full bg-zinc-950 border border-zinc-700 focus:border-emerald-500 text-white text-xs font-semibold px-4 py-3 rounded-xl outline-none transition-all"
           />
@@ -575,7 +575,7 @@ export function QRGeneratorClient({
           </div>
         )}
 
-        {filteredItems.map((item) => (
+        {filteredItems.map((item: QRItem) => (
           <div key={item.id} className="print-break">
             {simpleMode ? (
               <div className="relative group bg-white border border-zinc-200 rounded-2xl p-4 flex flex-col items-center gap-2 print-break shadow-sm">

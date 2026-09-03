@@ -49,7 +49,7 @@ export interface WebMCPTool<TInput = any, TOutput = any> {
   result?: JSONSchema;
   /** The page path this tool is registered on (e.g. '/', '/m/{slug}', '/m/{slug}/checkout'). Used by WebMCP directory for per-page tool attribution. */
   page?: string;
-  execute: (input: TInput) => Promise<TOutput> | TOutput;
+  execute: (input?: TInput) => Promise<TOutput> | TOutput;
   [key: string]: any;
 }
 
@@ -76,7 +76,7 @@ export interface ProvideContextOptions {
 }
 
 export interface ModelContext {
-  registerTool: <TInput = any, TOutput = any>(tool: WebMCPTool<TInput, TOutput>, handler?: (input: TInput) => Promise<TOutput> | TOutput) => WebMCPRegisteredTool | void;
+  registerTool: <TInput = any, TOutput = any>(tool: WebMCPTool<TInput, TOutput>, handler?: (input?: any) => Promise<TOutput> | TOutput) => WebMCPRegisteredTool | void;
   provideContext?: (options: ProvideContextOptions | WebMCPTool[]) => { unregister: () => void } | void;
   unregisterTool?: (name: string) => void;
   getTools?: () => WebMCPTool[];

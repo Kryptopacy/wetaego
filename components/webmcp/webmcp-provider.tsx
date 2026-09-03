@@ -92,20 +92,28 @@ export function WebMCPProvider({
       const contextApi = ensureWebMCPContext()
       const tools = createStorefrontWebMCPTools(context)
 
-      if (typeof contextApi.provideContext === 'function') {
-        try {
-          contextApi.provideContext({ tools })
-        } catch (e) {
-          // ignore provideContext warning
-        }
-      }
-
       // Register all tools onto document.modelContext / navigator.modelContext
       tools.forEach(tool => {
         try {
           const reg = contextApi.registerTool(tool)
-          if (reg && typeof reg.unregister === 'function') {
-            cleanups.push(reg.unregister)
+          if (reg && typeof (reg as any).then === 'function') {
+            (reg as Promise<any>)
+              .then((resolved) => {
+                if (resolved && typeof resolved.unregister === 'function') {
+                  cleanups.push(() => {
+                    try { resolved.unregister() } catch {}
+                  })
+                }
+              })
+              .catch((err) => {
+                if (process.env.NODE_ENV === 'development') {
+                  console.warn('[WebMCP Storefront] Tool registration resolved with notice:', tool.name, err)
+                }
+              })
+          } else if (reg && typeof reg.unregister === 'function') {
+            cleanups.push(() => {
+              try { reg.unregister() } catch {}
+            })
           } else {
             cleanups.push(() => contextApi.unregisterTool && contextApi.unregisterTool(tool.name))
           }

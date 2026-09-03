@@ -9,6 +9,14 @@
 
 **WETAEGO** brings the **Web Model Context Protocol (WebMCP)** to digital commerce and operations at the platform infrastructure layer.
 
+Unlike legacy single-vertical ordering tools, WETAEGO is an **omnichannel, multi-business operating system** powering unified commerce, service booking, and catalog discovery across 6 core industry verticals:
+1. **Dining / Food & Beverage** (multi-course dining, table service, dietary tags, bar tabs, kitchen routing)
+2. **Wellness & Spas** (treatment menus, session durations, therapist/practitioner scheduling)
+3. **Boutique & Retail** (fashion apparel, SKU variants, physical inventory ledger, size/color options)
+4. **Hospitality & Hotel Stays** (room & suite reservations, date-range stays, room-service routing)
+5. **Services, Repairs & Trades** (diagnostic intake, inspection requests, custom service quotes)
+6. **Creator & Media Studios** (service rate cards, consulting packages, studio rentals, milestone deliverables)
+
 WETAEGO implements a dual-layer MCP architecture:
 
 ```
@@ -24,10 +32,12 @@ WETAEGO implements a dual-layer MCP architecture:
                          │                                                             │
                          ▼                                                             ▼
            • Public /m/[slug] Storefronts                                • Multi-Branch Fleet Management
-           • Session-Scoped Cart Binding                                 • Live Order Dispatch & Fulfillment Board
-           • Real-time Zustand/IndexedDB Sync                            • Automated Sales Auditing
-           • Mandatory Human Authorization Gate                          • 86ing / Inventory Status
+           • Unified Multi-Concept Cart                                  • Live Order Dispatch & Fulfillment Board
+           • Cross-Vertical Discovery (Food + Spa + Retail)              • Automated Sales & Booking Auditing
+           • Real-time Zustand/IndexedDB Sync                            • 86ing / Dynamic Service Availability
+           • Mandatory Human Authorization Gate                          • Cross-Industry Inventory & Session Ledgers
 ```
+
 
 ---
 
@@ -370,11 +380,11 @@ Headers:
 
 ## 🏢 Enterprise Multi-Branch Automation Example
 
-### Scenario: Nightly Sales Audit & Automated Stock Adjustment
-An enterprise runs 15 restaurant branches across Lagos and London. Every night at 11:30 PM, their central Claude/OpenAI agent connects to WETAEGO's Staff MCP server:
+### Scenario: Nightly Sales, Bookings & Inventory Reconciliation
+An enterprise group (e.g. *Pacy Group*) operates an integrated hospitality hub spanning dining (*Pacy Grills & Lounge*), wellness retreats (*Pacy Wellness Spa*), fashion boutiques (*Pacy Boutique*), and boutique hotel stays (*Pacy Stays*). Every night at 11:30 PM, their central autonomous agent connects to WETAEGO's Staff MCP server:
 
 ```typescript
-// 1. External Agent connects to OurMenuOS Staff MCP
+// 1. External Enterprise Agent connects to WETAEGO Staff MCP
 const res = await fetch("https://ourmenuos.online/api/mcp", {
   method: "POST",
   headers: {
@@ -388,13 +398,16 @@ const res = await fetch("https://ourmenuos.online/api/mcp", {
 });
 
 const data = await res.json();
-// Returns: { date: "2026-08-27", orderCount: 342, grossRevenue: 4850000, currency: "NGN" }
+// Returns consolidated multi-concept reconciliation across dining tickets, spa bookings, and retail sales:
+// { date: "2026-08-27", orderCount: 342, grossRevenue: 4850000, currency: "NGN", verticals: ["dining", "wellness", "retail", "hospitality"] }
 ```
 
 ---
 
 ## 🔗 Discovery Manifests
-* **MCP Discovery Manifest**: `https://ourmenuos.online/.well-known/mcp.json`
-* **Live Demo Storefront (WebMCP Ready)**: `https://ourmenuos.online/m/demo`
+* **WebMCP Discovery Manifest (Browser / Chrome / In-App Browser)**: `https://ourmenuos.online/.well-known/webmcp.json`
+* **MCP Discovery Manifest (External Automation)**: `https://ourmenuos.online/.well-known/mcp.json`
+* **Live Demo Storefront (Multi-Concept WebMCP Ready)**: `https://ourmenuos.online/m/demo`
 * **OpenAPI 3.1.0 Specification**: `https://ourmenuos.online/openapi.json`
 * **Agent Technical Context**: `https://ourmenuos.online/llms.txt`
+
