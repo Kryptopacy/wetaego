@@ -19,7 +19,14 @@ const METADATA = {
           "industry": { "type": "string", "description": "Industry vertical (e.g. dining, wellness, retail, tech, lodging, services, creative)" },
           "query": { "type": "string", "description": "Keyword search query for business name, description, or offering" },
           "name": { "type": "string", "description": "Exact or partial business display name" },
-          "slug": { "type": "string", "description": "Direct venue slug" },
+          "slug": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 64,
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+            "description": "Direct venue slug",
+            "examples": ["demo", "emerald-cafe", "ocean-ember", "lotus-spa"]
+          },
           "limit": { "type": "integer", "minimum": 1, "maximum": 25, "default": 10 }
         }
       },
@@ -50,7 +57,23 @@ const METADATA = {
         "properties": {
           "query": { "type": "string", "description": "Keyword search query" },
           "category": { "type": "string", "description": "Category name filter" },
-          "venueSlug": { "type": "string", "description": "Optional venue slug to scope search to a single merchant" },
+          "venueSlug": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 64,
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+            "description": "Optional venue slug to scope search to a single merchant",
+            "examples": ["demo", "emerald-cafe", "ocean-ember", "lotus-spa"]
+          },
+          "currency": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 3,
+            "pattern": "^[A-Z]{3}$",
+            "enum": ["USD", "EUR", "GBP", "NGN", "CAD", "AUD", "JPY", "KES", "GHS", "ZAR"],
+            "description": "3-letter ISO 4217 target currency code",
+            "examples": ["USD", "NGN", "EUR", "GBP"]
+          },
           "dietary": { "type": "array", "items": { "type": "string" }, "description": "Dietary tags" },
           "maxPrice": { "type": "number", "minimum": 0, "description": "Maximum budget in currency units" },
           "inStockOnly": { "type": "boolean", "default": true, "description": "Filter in-stock items only" },
@@ -62,7 +85,14 @@ const METADATA = {
         "required": ["venue", "currency", "totalFound", "items"],
         "properties": {
           "venue": { "type": "string" },
-          "currency": { "type": "string" },
+          "currency": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 3,
+            "pattern": "^[A-Z]{3}$",
+            "description": "Authoritative 3-letter ISO 4217 currency code",
+            "examples": ["USD", "NGN"]
+          },
           "totalFound": { "type": "integer" },
           "items": { "type": "array" }
         }
@@ -72,9 +102,60 @@ const METADATA = {
         "required": ["venue", "currency", "totalFound", "items"],
         "properties": {
           "venue": { "type": "string" },
-          "currency": { "type": "string" },
+          "currency": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 3,
+            "pattern": "^[A-Z]{3}$",
+            "description": "Authoritative 3-letter ISO 4217 currency code",
+            "examples": ["USD", "NGN"]
+          },
           "totalFound": { "type": "integer" },
           "items": { "type": "array" }
+        }
+      }
+    },
+    {
+      "name": "wetaego_apply_coupon",
+      "description": "Apply a promotional coupon code or discount voucher to recalculate cart discounts and final total.",
+      "parameters": {
+        "type": "object",
+        "required": ["couponCode"],
+        "properties": {
+          "couponCode": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 30,
+            "pattern": "^[A-Za-z0-9_-]+$",
+            "description": "Promotional coupon code (e.g. SAVE10, WELCOME20, PACY50)",
+            "examples": ["SAVE10", "WELCOME20", "PACY50"]
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": ["status", "success", "couponCode", "discountAmount", "discountPercentage", "total", "currency"],
+        "properties": {
+          "status": { "type": "string", "enum": ["ok", "error"] },
+          "success": { "type": "boolean" },
+          "couponCode": { "type": "string" },
+          "discountAmount": { "type": "number", "minimum": 0 },
+          "discountPercentage": { "type": "number", "minimum": 0, "maximum": 100 },
+          "total": { "type": "number", "minimum": 0 },
+          "currency": { "type": "string", "minLength": 3, "maxLength": 3, "pattern": "^[A-Z]{3}$" }
+        }
+      },
+      "resultSchema": {
+        "type": "object",
+        "required": ["status", "success", "couponCode", "discountAmount", "discountPercentage", "total", "currency"],
+        "properties": {
+          "status": { "type": "string", "enum": ["ok", "error"] },
+          "success": { "type": "boolean" },
+          "couponCode": { "type": "string" },
+          "discountAmount": { "type": "number", "minimum": 0 },
+          "discountPercentage": { "type": "number", "minimum": 0, "maximum": 100 },
+          "total": { "type": "number", "minimum": 0 },
+          "currency": { "type": "string", "minLength": 3, "maxLength": 3, "pattern": "^[A-Z]{3}$" }
         }
       }
     },

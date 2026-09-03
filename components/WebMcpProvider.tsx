@@ -7,7 +7,7 @@ import { BUSINESS_TYPE_PRESETS } from '@/lib/templates/presets'
 
 /**
  * Authoritative WebMCP Client Provider for WETAEGO (OurMenuOS)
- * Registers the 12-tool client commerce & discovery suite onto navigator.modelContext
+ * Registers the 13-tool client commerce & discovery suite onto navigator.modelContext
  * and document.modelContext using both navigator.modelContext.provideContext() and registerTool().
  *
  * Full multi-concept coverage spanning Dining, Wellness, Retail/Boutique, Electronics, Stays, Gadget Repairs, and Media.
@@ -359,6 +359,11 @@ const inMemoryCart = {
     lineTotalFormatted: string
     modifiers: Array<{ modifierId?: string; name: string; value: string; priceDelta?: number }>
   }>,
+  appliedCoupon: null as {
+    code: string
+    discountPercentage: number
+    discountAmount: number
+  } | null,
 }
 
 export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
@@ -378,7 +383,14 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
           enum: ['dining', 'hospitality', 'wellness', 'retail', 'services', 'creator'],
           description: 'Non-overlapping industry vertical filter: "dining" (restaurants, cafes, bars), "hospitality" (hotels, stays, resorts), "wellness" (spas, salons, beauty), "retail" (boutiques, electronics, supermarkets), "services" (repairs, consulting), "creator" (media, studios, rate cards).',
         },
-        slug: { type: 'string', description: 'Exact venue slug identifier (e.g. "demo", "ocean-basket").' },
+        slug: {
+          type: 'string',
+          minLength: 2,
+          maxLength: 64,
+          pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$',
+          description: 'Exact venue slug identifier (e.g. "demo", "emerald-cafe", "ocean-ember", "lotus-spa").',
+          examples: ['demo', 'emerald-cafe', 'ocean-ember', 'lotus-spa'],
+        },
         limit: { type: 'integer', minimum: 1, maximum: 50, default: 10, description: 'Max venues to return (1-50).' },
       },
       additionalProperties: false,
@@ -389,7 +401,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
       properties: {
         status: { type: 'string', enum: ['ok', 'error'], description: 'Execution status' },
         totalFound: { type: 'integer', description: 'Total number of matching venues' },
-        slug: { type: 'string', description: 'Matched direct slug if provided' },
+        slug: { type: 'string', minLength: 2, maxLength: 64, pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$', description: 'Matched direct slug if provided' },
         venueUrl: { type: 'string', description: 'Direct URL to access the matched venue' },
         directoryUrl: { type: 'string', description: 'URL to the full business directory' },
         venues: {
@@ -399,10 +411,17 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
             type: 'object',
             required: ['slug', 'name', 'venueUrl'],
             properties: {
-              slug: { type: 'string', description: 'Unique slug identifier for the venue' },
+              slug: { type: 'string', minLength: 2, maxLength: 64, pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$', description: 'Unique slug identifier for the venue' },
               name: { type: 'string', description: 'Business display name' },
               industry: { type: 'string', description: 'Industry vertical' },
-              currency: { type: 'string', description: 'Default currency code (e.g. NGN, USD)' },
+              currency: {
+                type: 'string',
+                minLength: 3,
+                maxLength: 3,
+                pattern: '^[A-Z]{3}$',
+                description: 'Default 3-letter ISO 4217 currency code (e.g. USD, NGN)',
+                examples: ['USD', 'NGN'],
+              },
               venueUrl: { type: 'string', description: 'Direct storefront URL' },
               description: { type: 'string', description: 'Brief description of the venue' },
             },
@@ -418,7 +437,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
       properties: {
         status: { type: 'string', enum: ['ok', 'error'], description: 'Execution status' },
         totalFound: { type: 'integer', description: 'Total number of matching venues' },
-        slug: { type: 'string', description: 'Matched direct slug if provided' },
+        slug: { type: 'string', minLength: 2, maxLength: 64, pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$', description: 'Matched direct slug if provided' },
         venueUrl: { type: 'string', description: 'Direct URL to access the matched venue' },
         directoryUrl: { type: 'string', description: 'URL to the full business directory' },
         venues: {
@@ -428,10 +447,17 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
             type: 'object',
             required: ['slug', 'name', 'venueUrl'],
             properties: {
-              slug: { type: 'string', description: 'Unique slug identifier for the venue' },
+              slug: { type: 'string', minLength: 2, maxLength: 64, pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$', description: 'Unique slug identifier for the venue' },
               name: { type: 'string', description: 'Business display name' },
               industry: { type: 'string', description: 'Industry vertical' },
-              currency: { type: 'string', description: 'Default currency code' },
+              currency: {
+                type: 'string',
+                minLength: 3,
+                maxLength: 3,
+                pattern: '^[A-Z]{3}$',
+                description: 'Default 3-letter ISO 4217 currency code (e.g. USD, NGN)',
+                examples: ['USD', 'NGN'],
+              },
               venueUrl: { type: 'string', description: 'Direct storefront URL' },
               description: { type: 'string', description: 'Brief description of the venue' },
             },
@@ -482,7 +508,23 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
       properties: {
         query: { type: 'string', description: 'Keyword search query for products, dishes, or services.' },
         category: { type: 'string', description: 'Category name filter (e.g. "Mains", "Apparel", "Spa Services").' },
-        venueSlug: { type: 'string', description: 'Optional venue slug (e.g. "demo", "lounge") to scope search to a specific merchant.' },
+        venueSlug: {
+          type: 'string',
+          minLength: 2,
+          maxLength: 64,
+          pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$',
+          description: 'Optional venue slug (e.g. "demo", "emerald-cafe", "ocean-ember", "lotus-spa") to scope search to a specific merchant.',
+          examples: ['demo', 'emerald-cafe', 'ocean-ember', 'lotus-spa'],
+        },
+        currency: {
+          type: 'string',
+          minLength: 3,
+          maxLength: 3,
+          pattern: '^[A-Z]{3}$',
+          enum: ['USD', 'EUR', 'GBP', 'NGN', 'CAD', 'AUD', 'JPY', 'KES', 'GHS', 'ZAR'],
+          description: '3-letter ISO 4217 target currency code (e.g. USD, EUR, GBP, NGN) for dynamic rate conversion.',
+          examples: ['USD', 'NGN', 'EUR', 'GBP'],
+        },
         dietary: {
           type: 'array',
           items: { type: 'string', enum: ['vegan', 'vegetarian', 'halal', 'kosher', 'gluten_free', 'dairy_free', 'nut_free', 'keto'] },
@@ -500,7 +542,14 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
       required: ['venue', 'currency', 'totalFound', 'items'],
       properties: {
         venue: { type: 'string', description: 'Active venue name' },
-        currency: { type: 'string', description: 'Currency code (e.g. NGN, USD)' },
+        currency: {
+          type: 'string',
+          minLength: 3,
+          maxLength: 3,
+          pattern: '^[A-Z]{3}$',
+          description: 'Authoritative 3-letter ISO 4217 currency code (e.g. USD, NGN)',
+          examples: ['USD', 'NGN'],
+        },
         totalFound: { type: 'integer', description: 'Total matching items found' },
         limit: { type: 'integer', description: 'Page size limit used' },
         offset: { type: 'integer', description: 'Offset applied' },
@@ -534,7 +583,14 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
               },
               isAvailable: { type: 'boolean', description: 'Whether the item is currently in stock or available' },
               hasModifiers: { type: 'boolean', description: 'Whether the item has customizable variants/options' },
-              conceptSlug: { type: 'string', description: 'Department or concept slug if part of a multi-concept venue' },
+              conceptSlug: {
+                type: 'string',
+                minLength: 2,
+                maxLength: 64,
+                pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$',
+                description: 'Department or concept slug if part of a multi-concept venue',
+                examples: ['restaurant', 'pacy-wellness', 'pacy-boutique', 'pacy-gadgets', 'pacy-stays', 'pacy-repairs'],
+              },
               conceptUrl: { type: 'string', description: 'Direct URL to this concept department' },
             },
           },
@@ -548,7 +604,14 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
       required: ['venue', 'currency', 'totalFound', 'items'],
       properties: {
         venue: { type: 'string', description: 'Active venue name' },
-        currency: { type: 'string', description: 'Currency code (e.g. NGN, USD)' },
+        currency: {
+          type: 'string',
+          minLength: 3,
+          maxLength: 3,
+          pattern: '^[A-Z]{3}$',
+          description: 'Authoritative 3-letter ISO 4217 currency code (e.g. USD, NGN)',
+          examples: ['USD', 'NGN'],
+        },
         totalFound: { type: 'integer', description: 'Total matching items found' },
         limit: { type: 'integer', description: 'Page size limit used' },
         offset: { type: 'integer', description: 'Offset applied' },
@@ -582,7 +645,14 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
               },
               isAvailable: { type: 'boolean', description: 'Whether the item is currently in stock' },
               hasModifiers: { type: 'boolean', description: 'Whether the item has customizable variants/options' },
-              conceptSlug: { type: 'string', description: 'Department or concept slug' },
+              conceptSlug: {
+                type: 'string',
+                minLength: 2,
+                maxLength: 64,
+                pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$',
+                description: 'Department or concept slug',
+                examples: ['restaurant', 'pacy-wellness', 'pacy-boutique', 'pacy-gadgets', 'pacy-stays', 'pacy-repairs'],
+              },
               conceptUrl: { type: 'string', description: 'Direct URL to concept department' },
             },
           },
@@ -839,7 +909,14 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
         status: { type: 'string', enum: ['ok', 'error'], description: 'Status code' },
         cartId: { type: 'string', description: 'Unique cart session identifier (format: cart_<slug>_<id>)' },
         venue: { type: 'string', description: 'Active venue name' },
-        currency: { type: 'string', description: 'Currency code' },
+        currency: {
+          type: 'string',
+          minLength: 3,
+          maxLength: 3,
+          pattern: '^[A-Z]{3}$',
+          description: 'Authoritative 3-letter ISO 4217 currency code (e.g. USD, NGN)',
+          examples: ['USD', 'NGN'],
+        },
         itemCount: { type: 'integer', description: 'Total item quantity in cart' },
         subtotal: { type: 'number', description: 'Subtotal in major currency units' },
         subtotalFormatted: { type: 'string', description: 'Formatted subtotal with currency' },
@@ -854,7 +931,14 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
         status: { type: 'string', enum: ['ok', 'error'], description: 'Status code' },
         cartId: { type: 'string', description: 'Unique cart session identifier (format: cart_<slug>_<id>)' },
         venue: { type: 'string', description: 'Active venue name' },
-        currency: { type: 'string', description: 'Currency code' },
+        currency: {
+          type: 'string',
+          minLength: 3,
+          maxLength: 3,
+          pattern: '^[A-Z]{3}$',
+          description: 'Authoritative 3-letter ISO 4217 currency code (e.g. USD, NGN)',
+          examples: ['USD', 'NGN'],
+        },
         itemCount: { type: 'integer', description: 'Total item quantity in cart' },
         subtotal: { type: 'number', description: 'Subtotal in major currency units' },
         subtotalFormatted: { type: 'string', description: 'Formatted subtotal with currency' },
@@ -866,6 +950,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
       inMemoryCart.cartId = `cart_demo_${Date.now().toString(36)}`
       inMemoryCart.tableIdentifier = input?.tableIdentifier || 'Table 12'
       inMemoryCart.lines = []
+      inMemoryCart.appliedCoupon = null
       return {
         status: 'ok',
         venue: 'Pacy Group Dining & Restaurant',
@@ -1082,7 +1167,14 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
       required: ['venue', 'currency', 'itemCount', 'lines', 'subtotal', 'subtotalFormatted', 'total', 'totalFormatted'],
       properties: {
         venue: { type: 'string', description: 'Active venue name' },
-        currency: { type: 'string', description: 'Currency code (e.g. NGN, USD)' },
+        currency: {
+          type: 'string',
+          minLength: 3,
+          maxLength: 3,
+          pattern: '^[A-Z]{3}$',
+          description: 'Authoritative 3-letter ISO 4217 currency code (e.g. USD, NGN)',
+          examples: ['USD', 'NGN'],
+        },
         itemCount: { type: 'integer', description: 'Total item quantity in cart' },
         lines: {
           type: 'array',
@@ -1118,11 +1210,12 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
         },
         subtotal: { type: 'number', description: 'Subtotal before discounts and taxes' },
         subtotalFormatted: { type: 'string', description: 'Formatted subtotal' },
-        discountAmount: { type: 'number', description: 'Total discount amount applied' },
-        discountPercentage: { type: 'number', description: 'Discount percentage if coupon/promotions applied' },
+        appliedCoupon: { type: 'string', nullable: true, description: 'Currently applied promotional coupon code, or null if none' },
+        discountAmount: { type: 'number', minimum: 0, description: 'Total discount amount applied' },
+        discountPercentage: { type: 'number', minimum: 0, maximum: 100, description: 'Discount percentage if coupon/promotions applied' },
         tax: { type: 'number', description: 'Calculated VAT or sales tax' },
         fees: { type: 'number', description: 'Service or delivery fees' },
-        total: { type: 'number', description: 'Final authoritative total amount' },
+        total: { type: 'number', minimum: 0, description: 'Final authoritative total amount' },
         totalFormatted: { type: 'string', description: 'Formatted final total with currency' },
         _hint: { type: 'string', description: 'Agent instruction guidance' },
       },
@@ -1132,7 +1225,14 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
       required: ['venue', 'currency', 'itemCount', 'lines', 'subtotal', 'subtotalFormatted', 'total', 'totalFormatted'],
       properties: {
         venue: { type: 'string', description: 'Active venue name' },
-        currency: { type: 'string', description: 'Currency code (e.g. NGN, USD)' },
+        currency: {
+          type: 'string',
+          minLength: 3,
+          maxLength: 3,
+          pattern: '^[A-Z]{3}$',
+          description: 'Authoritative 3-letter ISO 4217 currency code (e.g. USD, NGN)',
+          examples: ['USD', 'NGN'],
+        },
         itemCount: { type: 'integer', description: 'Total item quantity in cart' },
         lines: {
           type: 'array',
@@ -1168,11 +1268,12 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
         },
         subtotal: { type: 'number', description: 'Subtotal before discounts and taxes' },
         subtotalFormatted: { type: 'string', description: 'Formatted subtotal' },
-        discountAmount: { type: 'number', description: 'Total discount amount applied' },
-        discountPercentage: { type: 'number', description: 'Discount percentage if coupon/promotions applied' },
+        appliedCoupon: { type: 'string', nullable: true, description: 'Currently applied promotional coupon code, or null if none' },
+        discountAmount: { type: 'number', minimum: 0, description: 'Total discount amount applied' },
+        discountPercentage: { type: 'number', minimum: 0, maximum: 100, description: 'Discount percentage if coupon/promotions applied' },
         tax: { type: 'number', description: 'Calculated VAT or sales tax' },
         fees: { type: 'number', description: 'Service or delivery fees' },
-        total: { type: 'number', description: 'Final authoritative total amount' },
+        total: { type: 'number', minimum: 0, description: 'Final authoritative total amount' },
         totalFormatted: { type: 'string', description: 'Formatted final total with currency' },
         _hint: { type: 'string', description: 'Agent instruction guidance' },
       },
@@ -1180,6 +1281,11 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
     execute: async (_input?: { cartId?: string }) => {
       const totalCount = inMemoryCart.lines.reduce((acc, l) => acc + l.quantity, 0)
       const subtotal = Number(inMemoryCart.lines.reduce((acc, l) => acc + l.lineTotal, 0).toFixed(2))
+      const discountPercentage = inMemoryCart.appliedCoupon?.discountPercentage || 0
+      const discountAmount = inMemoryCart.appliedCoupon
+        ? Number(((subtotal * discountPercentage) / 100).toFixed(2))
+        : 0
+      const total = Number(Math.max(0, subtotal - discountAmount).toFixed(2))
       return {
         venue: inMemoryCart.venue || 'Pacy Grills & Lounge (Pacy Group)',
         currency: 'USD',
@@ -1187,13 +1293,16 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
         lines: inMemoryCart.lines,
         subtotal,
         subtotalFormatted: `$${subtotal.toFixed(2)} USD`,
-        discountAmount: 0,
-        discountPercentage: 0,
+        appliedCoupon: inMemoryCart.appliedCoupon?.code || null,
+        discountAmount,
+        discountPercentage,
         tax: 0,
         fees: 0,
-        total: subtotal,
-        totalFormatted: `$${subtotal.toFixed(2)} USD`,
-        _hint: `Cart active. Use wetaego_initiate_checkout to proceed with order.`,
+        total,
+        totalFormatted: `$${total.toFixed(2)} USD`,
+        _hint: inMemoryCart.appliedCoupon
+          ? `Cart active with coupon '${inMemoryCart.appliedCoupon.code}' (${discountPercentage}% OFF). Use wetaego_initiate_checkout to proceed with order.`
+          : `Cart active. Use wetaego_apply_coupon to add promo codes or wetaego_initiate_checkout to proceed with order.`,
       }
     },
   },
@@ -1270,7 +1379,189 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
     },
   },
 
-  // 8. wetaego_recommend_pairings — page: '/m/{slug}'
+  // 8. wetaego_apply_coupon — page: '/m/{slug}'
+  {
+    name: 'wetaego_apply_coupon',
+    page: '/m/{slug}',
+    description:
+      'Apply a promotional coupon code or discount voucher to the active shopping cart session. Validates the code, recalculates discounts, and updates the cart subtotal and final total.',
+    inputSchema: {
+      type: 'object',
+      required: ['couponCode'],
+      properties: {
+        couponCode: {
+          type: 'string',
+          minLength: 3,
+          maxLength: 30,
+          pattern: '^[A-Za-z0-9_-]+$',
+          description:
+            'The promotional discount or coupon code to apply (e.g. SAVE10, WELCOME20, PACY50, VIP15, SUMMER20).',
+          examples: ['SAVE10', 'WELCOME20', 'PACY50', 'VIP15', 'SUMMER20'],
+        },
+        cartId: {
+          type: 'string',
+          description: 'Optional cart session identifier. If omitted, applies to the active session cart.',
+        },
+      },
+      additionalProperties: false,
+    },
+    outputSchema: {
+      type: 'object',
+      required: [
+        'status',
+        'success',
+        'couponCode',
+        'discountAmount',
+        'discountPercentage',
+        'discountFormatted',
+        'subtotal',
+        'subtotalFormatted',
+        'total',
+        'totalFormatted',
+        'currency',
+      ],
+      properties: {
+        status: { type: 'string', enum: ['ok', 'error'], description: 'Execution status code' },
+        success: { type: 'boolean', description: 'Whether the coupon was valid and applied' },
+        couponCode: {
+          type: 'string',
+          minLength: 3,
+          maxLength: 30,
+          pattern: '^[A-Za-z0-9_-]+$',
+          description: 'Applied coupon code',
+        },
+        discountAmount: { type: 'number', minimum: 0, description: 'Authoritative discount amount deducted from subtotal' },
+        discountPercentage: { type: 'number', minimum: 0, maximum: 100, description: 'Discount percentage applied' },
+        discountFormatted: { type: 'string', description: 'Formatted discount amount with currency symbol' },
+        subtotal: { type: 'number', minimum: 0, description: 'Subtotal before discounts' },
+        subtotalFormatted: { type: 'string', description: 'Formatted subtotal with currency' },
+        total: { type: 'number', minimum: 0, description: 'Final order total amount after discounts' },
+        totalFormatted: { type: 'string', description: 'Formatted final total with currency' },
+        currency: {
+          type: 'string',
+          minLength: 3,
+          maxLength: 3,
+          pattern: '^[A-Z]{3}$',
+          description: 'Authoritative 3-letter ISO 4217 currency code (e.g. USD, NGN)',
+          examples: ['USD', 'NGN'],
+        },
+        message: { type: 'string', description: 'Human-readable outcome summary' },
+        _hint: { type: 'string', description: 'Agent workflow guidance' },
+      },
+    },
+    resultSchema: {
+      type: 'object',
+      required: [
+        'status',
+        'success',
+        'couponCode',
+        'discountAmount',
+        'discountPercentage',
+        'discountFormatted',
+        'subtotal',
+        'subtotalFormatted',
+        'total',
+        'totalFormatted',
+        'currency',
+      ],
+      properties: {
+        status: { type: 'string', enum: ['ok', 'error'], description: 'Execution status code' },
+        success: { type: 'boolean', description: 'Whether the coupon was valid and applied' },
+        couponCode: {
+          type: 'string',
+          minLength: 3,
+          maxLength: 30,
+          pattern: '^[A-Za-z0-9_-]+$',
+          description: 'Applied coupon code',
+        },
+        discountAmount: { type: 'number', minimum: 0, description: 'Authoritative discount amount deducted from subtotal' },
+        discountPercentage: { type: 'number', minimum: 0, maximum: 100, description: 'Discount percentage applied' },
+        discountFormatted: { type: 'string', description: 'Formatted discount amount with currency symbol' },
+        subtotal: { type: 'number', minimum: 0, description: 'Subtotal before discounts' },
+        subtotalFormatted: { type: 'string', description: 'Formatted subtotal with currency' },
+        total: { type: 'number', minimum: 0, description: 'Final order total amount after discounts' },
+        totalFormatted: { type: 'string', description: 'Formatted final total with currency' },
+        currency: {
+          type: 'string',
+          minLength: 3,
+          maxLength: 3,
+          pattern: '^[A-Z]{3}$',
+          description: 'Authoritative 3-letter ISO 4217 currency code (e.g. USD, NGN)',
+          examples: ['USD', 'NGN'],
+        },
+        message: { type: 'string', description: 'Human-readable outcome summary' },
+        _hint: { type: 'string', description: 'Agent workflow guidance' },
+      },
+    },
+    execute: async (input: { couponCode: string; cartId?: string }) => {
+      const code = (input.couponCode || '').trim().toUpperCase()
+      if (!code || !/^[A-Za-z0-9_-]{3,30}$/.test(code)) {
+        return {
+          status: 'error',
+          success: false,
+          couponCode: code,
+          discountAmount: 0,
+          discountPercentage: 0,
+          discountFormatted: '$0.00 USD',
+          subtotal: 0,
+          subtotalFormatted: '$0.00 USD',
+          total: 0,
+          totalFormatted: '$0.00 USD',
+          currency: 'USD',
+          message: `Invalid coupon format '${code}'. Code must be 3-30 alphanumeric characters.`,
+          _hint: 'Try standard discount codes: SAVE10 (10% off), WELCOME20 (20% off), PACY50 (50% off), or VIP15 (15% off).',
+        }
+      }
+
+      // Preempt stacking by replacing previous coupon
+      const previousCoupon = inMemoryCart.appliedCoupon?.code
+
+      let discountPercentage = 10
+      if (code.includes('20') || code.includes('SUMMER') || code.includes('WELCOME20')) {
+        discountPercentage = 20
+      } else if (code.includes('50') || code.includes('HALF') || code.includes('PACY50')) {
+        discountPercentage = 50
+      } else if (code.includes('15') || code.includes('VIP')) {
+        discountPercentage = 15
+      } else if (code.includes('25')) {
+        discountPercentage = 25
+      } else if (code.includes('30')) {
+        discountPercentage = 30
+      }
+
+      const subtotal = Number(inMemoryCart.lines.reduce((acc, l) => acc + l.lineTotal, 0).toFixed(2))
+      const discountAmount = Number(((subtotal * discountPercentage) / 100).toFixed(2))
+      const total = Number(Math.max(0, subtotal - discountAmount).toFixed(2))
+
+      inMemoryCart.appliedCoupon = {
+        code,
+        discountPercentage,
+        discountAmount,
+      }
+
+      const message = previousCoupon && previousCoupon !== code
+        ? `Replaced previous coupon '${previousCoupon}' with '${code}'. Applied ${discountPercentage}% discount!`
+        : `Coupon '${code}' applied successfully! ${discountPercentage}% discount deducted.`
+
+      return {
+        status: 'ok',
+        success: true,
+        couponCode: code,
+        discountAmount,
+        discountPercentage,
+        discountFormatted: `-$${discountAmount.toFixed(2)} USD`,
+        subtotal,
+        subtotalFormatted: `$${subtotal.toFixed(2)} USD`,
+        total,
+        totalFormatted: `$${total.toFixed(2)} USD`,
+        currency: 'USD',
+        message,
+        _hint: 'Coupon verified and applied. Use wetaego_initiate_checkout to proceed to checkout with discounted total.',
+      }
+    },
+  },
+
+  // 9. wetaego_recommend_pairings — page: '/m/{slug}'
   {
     name: 'wetaego_recommend_pairings',
     page: '/m/{slug}',
@@ -1289,7 +1580,14 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
       required: ['venue', 'currency', 'count', 'recommendations'],
       properties: {
         venue: { type: 'string', description: 'Active venue name' },
-        currency: { type: 'string', description: 'Currency code' },
+        currency: {
+          type: 'string',
+          minLength: 3,
+          maxLength: 3,
+          pattern: '^[A-Z]{3}$',
+          description: 'Authoritative 3-letter ISO 4217 currency code (e.g. USD, NGN)',
+          examples: ['USD', 'NGN'],
+        },
         count: { type: 'integer', description: 'Number of pairings returned' },
         recommendations: {
           type: 'array',
@@ -1315,7 +1613,14 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
       required: ['venue', 'currency', 'count', 'recommendations'],
       properties: {
         venue: { type: 'string', description: 'Active venue name' },
-        currency: { type: 'string', description: 'Currency code' },
+        currency: {
+          type: 'string',
+          minLength: 3,
+          maxLength: 3,
+          pattern: '^[A-Z]{3}$',
+          description: 'Authoritative 3-letter ISO 4217 currency code (e.g. USD, NGN)',
+          examples: ['USD', 'NGN'],
+        },
         count: { type: 'integer', description: 'Number of pairings returned' },
         recommendations: {
           type: 'array',
@@ -1363,23 +1668,40 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
     }),
   },
 
-  // 9. wetaego_open_business_page — page: '/m/{slug}'
+  // 10. wetaego_open_business_page — page: '/m/{slug}'
   {
     name: 'wetaego_open_business_page',
     page: '/m/{slug}',
     description:
-      'Switch the active storefront viewport to an internal department or category catalog tab (such as "restaurant", "spa", "tech-boutique", "hotel", "creator-rate-card", "repairs", "services") inside the current merchant venue. (To search for other businesses or branches, use wetaego_find_venue.)',
+      'Switch the active storefront viewport to an internal department or category catalog tab (such as "restaurant", "pacy-wellness", "pacy-boutique", "pacy-gadgets", "pacy-stays", "pacy-hotels", "pacy-repairs", "pacy-media") inside the current merchant venue. (To search for other businesses or branches, use wetaego_find_venue.)',
     inputSchema: {
       type: 'object',
       required: ['conceptSlug'],
       properties: {
         conceptSlug: {
           type: 'string',
-          description: 'The slug or keyword of the internal department/concept to open (e.g. "restaurant", "spa", "boutique", "gadgets", "stays", "hotels", "repairs", "media").',
+          minLength: 2,
+          maxLength: 64,
+          pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$',
+          enum: ['restaurant', 'pacy-wellness', 'pacy-boutique', 'pacy-gadgets', 'pacy-stays', 'pacy-hotels', 'pacy-repairs', 'pacy-media', 'menu', 'treatments'],
+          description: 'The standardized kebab-case URL slug of the internal department or concept to open (e.g. "restaurant", "pacy-wellness", "pacy-boutique", "pacy-gadgets", "pacy-stays", "pacy-hotels", "pacy-repairs", "pacy-media").',
+          examples: ['restaurant', 'pacy-wellness', 'pacy-boutique', 'pacy-gadgets', 'pacy-stays', 'pacy-repairs'],
+        },
+        'concept-slug': {
+          type: 'string',
+          minLength: 2,
+          maxLength: 64,
+          pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$',
+          description: 'Kebab-case alias for conceptSlug.',
+          examples: ['restaurant', 'pacy-wellness', 'pacy-boutique'],
         },
         venueSlug: {
           type: 'string',
-          description: 'Optional venue slug (e.g. "demo", "lounge"). If omitted, uses the active venue.',
+          minLength: 2,
+          maxLength: 64,
+          pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$',
+          description: 'Optional venue slug (e.g. "demo", "emerald-cafe", "ocean-ember", "lotus-spa"). If omitted, uses active venue.',
+          examples: ['demo', 'emerald-cafe', 'ocean-ember', 'lotus-spa'],
         },
       },
       additionalProperties: false,
@@ -1389,7 +1711,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
       required: ['status', 'conceptSlug', 'destinationUrl'],
       properties: {
         status: { type: 'string', enum: ['ok', 'error'] },
-        conceptSlug: { type: 'string', description: 'The opened concept slug' },
+        conceptSlug: { type: 'string', minLength: 2, maxLength: 64, pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$', description: 'The opened concept slug' },
         destinationUrl: { type: 'string', description: 'Full URL of the destination department page' },
         message: { type: 'string', description: 'Navigation status description' },
       },
@@ -1399,23 +1721,25 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
       required: ['status', 'conceptSlug', 'destinationUrl'],
       properties: {
         status: { type: 'string', enum: ['ok', 'error'] },
-        conceptSlug: { type: 'string', description: 'The opened concept slug' },
+        conceptSlug: { type: 'string', minLength: 2, maxLength: 64, pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$', description: 'The opened concept slug' },
         destinationUrl: { type: 'string', description: 'Full URL of the destination department page' },
         message: { type: 'string', description: 'Navigation status description' },
       },
     },
-    execute: async ({ conceptSlug, venueSlug }: { conceptSlug: string; venueSlug?: string }) => {
-      const activeVenue = (venueSlug ? DEMO_VENUES.find(v => v.slug.toLowerCase() === venueSlug.toLowerCase()) : null) || DEMO_VENUES[0]
+    execute: async (input: { conceptSlug?: string; 'concept-slug'?: string; concept_slug?: string; venueSlug?: string }) => {
+      const activeVenue = (input.venueSlug ? DEMO_VENUES.find(v => v.slug.toLowerCase() === input.venueSlug?.toLowerCase()) : null) || DEMO_VENUES[0]
       const availableConcepts = activeVenue.concepts || [
         { slug: 'restaurant', title: 'Pacy Grills & Lounge', preset: 'restaurant', templateType: 'catalog' },
       ]
+
+      const targetSlug = input.conceptSlug || input['concept-slug'] || input.concept_slug || 'restaurant'
 
       // Dynamically score all available concepts against the agent query
       let bestMatch = availableConcepts[0]
       let highestScore = -1
 
       for (const concept of availableConcepts) {
-        const score = calculateConceptMatchScore(conceptSlug, concept)
+        const score = calculateConceptMatchScore(targetSlug, concept)
         if (score > highestScore) {
           highestScore = score
           bestMatch = concept
@@ -1432,7 +1756,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
     },
   },
 
-  // 10. wetaego_initiate_checkout — page: '/m/{slug}/checkout'
+  // 11. wetaego_initiate_checkout — page: '/m/{slug}/checkout'
   {
     name: 'wetaego_initiate_checkout',
     page: '/m/{slug}/checkout',
@@ -1445,12 +1769,28 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
         cartId: { type: 'string', description: 'Optional cart session ID to checkout. If omitted, uses active session cart.' },
         fulfillment: { type: 'string', enum: ['dine_in', 'pickup', 'delivery'], description: 'Fulfillment method.' },
         tableIdentifier: { type: 'string', maxLength: 50, description: 'Table number, room, seat, or pickup counter.' },
+        couponCode: {
+          type: 'string',
+          minLength: 3,
+          maxLength: 30,
+          pattern: '^[A-Za-z0-9_-]+$',
+          description: 'Optional promotional coupon or discount voucher code to apply before price locking.',
+          examples: ['SAVE10', 'WELCOME20', 'PACY50'],
+        },
         customer: {
           type: 'object',
           properties: {
             name: { type: 'string', description: 'Customer full name' },
             email: { type: 'string', format: 'email', description: 'Customer contact email' },
-            phone: { type: 'string', description: 'Customer phone number' },
+            phone: {
+              type: 'string',
+              format: 'tel',
+              pattern: '^\\+?[0-9\\s\\-().]{7,20}$',
+              minLength: 7,
+              maxLength: 20,
+              description: 'Customer contact phone number in standard international E.164 format (e.g. +12025550123 or +2348012345678).',
+              examples: ['+12025550123', '+2348012345678'],
+            },
           },
           additionalProperties: false,
         },
@@ -1466,8 +1806,18 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
         checkoutId: { type: 'string', description: 'Unique checkout session identifier required for wetaego_submit_order' },
         fulfillment: { type: 'string', description: 'Selected fulfillment method' },
         venue: { type: 'string', description: 'Active venue name' },
-        currency: { type: 'string', description: 'Currency code' },
+        currency: {
+          type: 'string',
+          minLength: 3,
+          maxLength: 3,
+          pattern: '^[A-Z]{3}$',
+          description: 'Authoritative 3-letter ISO 4217 currency code (e.g. USD, NGN)',
+          examples: ['USD', 'NGN'],
+        },
         subtotal: { type: 'number', description: 'Subtotal amount' },
+        appliedCoupon: { type: 'string', nullable: true, description: 'Applied promotional coupon code or null' },
+        discountAmount: { type: 'number', minimum: 0, description: 'Discount amount deducted from subtotal' },
+        discountPercentage: { type: 'number', minimum: 0, maximum: 100, description: 'Discount percentage applied' },
         tax: { type: 'number', description: 'Calculated tax/VAT amount' },
         fees: { type: 'number', description: 'Applicable service fees' },
         total: { type: 'number', description: 'Final order total amount' },
@@ -1489,8 +1839,18 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
         checkoutId: { type: 'string', description: 'Unique checkout session identifier required for wetaego_submit_order' },
         fulfillment: { type: 'string', description: 'Selected fulfillment method' },
         venue: { type: 'string', description: 'Active venue name' },
-        currency: { type: 'string', description: 'Currency code' },
+        currency: {
+          type: 'string',
+          minLength: 3,
+          maxLength: 3,
+          pattern: '^[A-Z]{3}$',
+          description: 'Authoritative 3-letter ISO 4217 currency code (e.g. USD, NGN)',
+          examples: ['USD', 'NGN'],
+        },
         subtotal: { type: 'number', description: 'Subtotal amount' },
+        appliedCoupon: { type: 'string', nullable: true, description: 'Applied promotional coupon code or null' },
+        discountAmount: { type: 'number', minimum: 0, description: 'Discount amount deducted from subtotal' },
+        discountPercentage: { type: 'number', minimum: 0, maximum: 100, description: 'Discount percentage applied' },
         tax: { type: 'number', description: 'Calculated tax/VAT amount' },
         fees: { type: 'number', description: 'Applicable service fees' },
         total: { type: 'number', description: 'Final order total amount' },
@@ -1504,9 +1864,27 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
         _hint: { type: 'string', description: 'Agent workflow guidance' },
       },
     },
-    execute: async (input: { fulfillment: string; cartId?: string; tableIdentifier?: string; customer?: unknown; notes?: string }) => {
+    execute: async (input: { fulfillment: string; cartId?: string; couponCode?: string; tableIdentifier?: string; customer?: { name?: string; email?: string; phone?: string }; notes?: string }) => {
       const totalCount = inMemoryCart.lines.reduce((acc, l) => acc + l.quantity, 0)
       const subtotal = Number(inMemoryCart.lines.reduce((acc, l) => acc + l.lineTotal, 0).toFixed(2))
+
+      if (input.couponCode && !inMemoryCart.appliedCoupon) {
+        const code = input.couponCode.trim().toUpperCase()
+        let pct = 10
+        if (code.includes('20') || code.includes('SUMMER') || code.includes('WELCOME20')) pct = 20
+        else if (code.includes('50') || code.includes('HALF') || code.includes('PACY50')) pct = 50
+        else if (code.includes('15') || code.includes('VIP')) pct = 15
+        inMemoryCart.appliedCoupon = {
+          code,
+          discountPercentage: pct,
+          discountAmount: Number(((subtotal * pct) / 100).toFixed(2)),
+        }
+      }
+
+      const discountPercentage = inMemoryCart.appliedCoupon?.discountPercentage || 0
+      const discountAmount = inMemoryCart.appliedCoupon ? Number(((subtotal * discountPercentage) / 100).toFixed(2)) : 0
+      const total = Number(Math.max(0, subtotal - discountAmount).toFixed(2))
+
       const checkoutId = `chk_demo_${Date.now().toString(36)}`
       return {
         status: 'ok',
@@ -1515,10 +1893,13 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
         venue: inMemoryCart.venue || 'Pacy Grills & Lounge (Pacy Group)',
         currency: 'USD',
         subtotal,
+        appliedCoupon: inMemoryCart.appliedCoupon?.code || null,
+        discountAmount,
+        discountPercentage,
         tax: 0,
         fees: 0,
-        total: subtotal,
-        totalFormatted: `$${subtotal.toFixed(2)} USD`,
+        total,
+        totalFormatted: `$${total.toFixed(2)} USD`,
         itemCount: totalCount,
         expiresAt: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
         priceLockValidMinutes: 15,
@@ -1529,7 +1910,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
     },
   },
 
-  // 11. wetaego_submit_order — page: '/m/{slug}/checkout'
+  // 12. wetaego_submit_order — page: '/m/{slug}/checkout'
   {
     name: 'wetaego_submit_order',
     page: '/m/{slug}/checkout',
@@ -1561,7 +1942,16 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
         orderId: { type: 'string', description: 'Unique order identifier' },
         checkoutId: { type: 'string', description: 'Associated checkout session ID' },
         venue: { type: 'string', description: 'Venue where order was routed' },
-        currency: { type: 'string', description: 'Currency code' },
+        currency: {
+          type: 'string',
+          minLength: 3,
+          maxLength: 3,
+          pattern: '^[A-Z]{3}$',
+          description: 'Authoritative 3-letter ISO 4217 currency code (e.g. USD, NGN)',
+          examples: ['USD', 'NGN'],
+        },
+        appliedCoupon: { type: 'string', nullable: true, description: 'Redeemed coupon code if applied' },
+        discountAmount: { type: 'number', minimum: 0, description: 'Discount amount applied to order' },
         total: { type: 'number', description: 'Final charged total' },
         totalFormatted: { type: 'string', description: 'Formatted total with currency' },
         message: { type: 'string', description: 'Order status message' },
@@ -1578,7 +1968,16 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
         orderId: { type: 'string', description: 'Unique order identifier' },
         checkoutId: { type: 'string', description: 'Associated checkout session ID' },
         venue: { type: 'string', description: 'Venue where order was routed' },
-        currency: { type: 'string', description: 'Currency code' },
+        currency: {
+          type: 'string',
+          minLength: 3,
+          maxLength: 3,
+          pattern: '^[A-Z]{3}$',
+          description: 'Authoritative 3-letter ISO 4217 currency code (e.g. USD, NGN)',
+          examples: ['USD', 'NGN'],
+        },
+        appliedCoupon: { type: 'string', nullable: true, description: 'Redeemed coupon code if applied' },
+        discountAmount: { type: 'number', minimum: 0, description: 'Discount amount applied to order' },
         total: { type: 'number', description: 'Final charged total' },
         totalFormatted: { type: 'string', description: 'Formatted total with currency' },
         message: { type: 'string', description: 'Order status message' },
@@ -1596,9 +1995,16 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
       }
       const totalCount = inMemoryCart.lines.reduce((acc, l) => acc + l.quantity, 0)
       const subtotal = Number(inMemoryCart.lines.reduce((acc, l) => acc + l.lineTotal, 0).toFixed(2))
+      const discountPercentage = inMemoryCart.appliedCoupon?.discountPercentage || 0
+      const discountAmount = inMemoryCart.appliedCoupon ? Number(((subtotal * discountPercentage) / 100).toFixed(2)) : 0
+      const total = Number(Math.max(0, subtotal - discountAmount).toFixed(2))
       const orderId = `ord_demo_${Date.now().toString(36)}`
+      const appliedCoupon = inMemoryCart.appliedCoupon?.code || null
+
       // Clear cart on successful submission
       inMemoryCart.lines = []
+      inMemoryCart.appliedCoupon = null
+
       return {
         status: 'ok',
         success: true,
@@ -1606,15 +2012,17 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
         checkoutId: input.checkoutId,
         venue: inMemoryCart.venue || 'Pacy Grills & Lounge (Pacy Group)',
         currency: 'USD',
-        total: subtotal,
-        totalFormatted: `$${subtotal.toFixed(2)} USD`,
-        message: `Order #${orderId} confirmed for ${totalCount} items. Routed to kitchen!`,
+        appliedCoupon,
+        discountAmount,
+        total,
+        totalFormatted: `$${total.toFixed(2)} USD`,
+        message: `Order #${orderId} confirmed for ${totalCount} items${appliedCoupon ? ` (Coupon ${appliedCoupon} applied)` : ''}. Routed to kitchen!`,
         _hint: `Order confirmed successfully.`,
       }
     },
   },
 
-  // 12. wetaego_request_staff — page: '/m/{slug}'
+  // 13. wetaego_request_staff — page: '/m/{slug}'
   {
     name: 'wetaego_request_staff',
     page: '/m/{slug}',
@@ -1675,10 +2083,17 @@ export function WebMcpProvider() {
 
     const ctx = ensureWebMCPContext()
 
-    // 1. Call provideContext({ tools: WEBMCP_TOOLS })
+    // Create unprefixed aliases (e.g. 'apply_coupon' alongside 'wetaego_apply_coupon')
+    const aliasTools = WEBMCP_TOOLS.map((t) => ({
+      ...t,
+      name: t.name.replace(/^wetaego_/, ''),
+    }))
+    const allTools = [...WEBMCP_TOOLS, ...aliasTools]
+
+    // 1. Call provideContext({ tools: allTools })
     if (typeof ctx.provideContext === 'function') {
       try {
-        ctx.provideContext({ tools: WEBMCP_TOOLS })
+        ctx.provideContext({ tools: allTools })
       } catch (e) {
         if (process.env.NODE_ENV === 'development') {
           console.warn('[WebMCP] provideContext call warning:', e)
@@ -1688,7 +2103,7 @@ export function WebMcpProvider() {
 
     // 2. Call registerTool on each tool individually
     const cleanups: (() => void)[] = []
-    WEBMCP_TOOLS.forEach((tool) => {
+    allTools.forEach((tool) => {
       try {
         const reg = ctx.registerTool(tool)
         if (reg && typeof reg.unregister === 'function') {

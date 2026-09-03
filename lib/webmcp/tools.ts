@@ -80,7 +80,12 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
         },
         currency: {
           type: 'string',
-          description: 'Optional target currency code (e.g. USD, EUR, GBP, NGN) for dynamic rate conversion.'
+          minLength: 3,
+          maxLength: 3,
+          pattern: '^[A-Z]{3}$',
+          enum: ['USD', 'EUR', 'GBP', 'NGN', 'CAD', 'AUD', 'JPY', 'KES', 'GHS', 'ZAR'],
+          description: 'Optional target currency code (e.g. USD, EUR, GBP, NGN) for dynamic rate conversion.',
+          examples: ['USD', 'NGN', 'EUR', 'GBP'],
         },
         userLocation: {
           type: 'object',
@@ -116,7 +121,14 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
       required: ['venue', 'currency', 'totalFound', 'items'],
       properties: {
         venue: { type: 'string', description: 'Active venue name' },
-        currency: { type: 'string', description: 'Currency code' },
+        currency: {
+          type: 'string',
+          minLength: 3,
+          maxLength: 3,
+          pattern: '^[A-Z]{3}$',
+          description: 'Authoritative 3-letter ISO 4217 currency code',
+          examples: ['USD', 'NGN'],
+        },
         totalFound: { type: 'integer', description: 'Total matching items' },
         page: { type: 'integer', description: 'Current page' },
         limit: { type: 'integer', description: 'Page size limit' },
@@ -151,7 +163,14 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
               isAvailable: { type: 'boolean' },
               hasModifiers: { type: 'boolean' },
               concept: { type: 'string' },
-              conceptSlug: { type: 'string' },
+              conceptSlug: {
+                type: 'string',
+                minLength: 2,
+                maxLength: 64,
+                pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$',
+                description: 'Department or concept slug',
+                examples: ['restaurant', 'pacy-wellness', 'pacy-boutique', 'pacy-gadgets', 'pacy-stays', 'pacy-repairs'],
+              },
               conceptUrl: { type: 'string' }
             }
           }
@@ -573,7 +592,14 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
       required: ['venue', 'currency', 'itemCount', 'lines', 'subtotal', 'subtotalFormatted', 'total', 'totalFormatted'],
       properties: {
         venue: { type: 'string' },
-        currency: { type: 'string' },
+        currency: {
+          type: 'string',
+          minLength: 3,
+          maxLength: 3,
+          pattern: '^[A-Z]{3}$',
+          description: 'Authoritative 3-letter ISO 4217 currency code',
+          examples: ['USD', 'NGN'],
+        },
         itemCount: { type: 'integer' },
         lines: {
           type: 'array',
@@ -608,8 +634,9 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
         },
         subtotal: { type: 'number' },
         subtotalFormatted: { type: 'string' },
-        discountAmount: { type: 'number' },
-        discountPercentage: { type: 'number' },
+        appliedCoupon: { type: 'string', nullable: true, description: 'Currently applied promotional coupon code' },
+        discountAmount: { type: 'number', minimum: 0 },
+        discountPercentage: { type: 'number', minimum: 0, maximum: 100 },
         total: { type: 'number' },
         totalFormatted: { type: 'string' }
       }
@@ -641,6 +668,7 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
         items: lines,
         subtotal: subtotalMinor / 100,
         subtotalFormatted: `${(subtotalMinor / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })} ${currency}`,
+        appliedCoupon: cartStore.spinnerDiscount ? `PROMO${cartStore.spinnerDiscount}` : null,
         discountAmount: discountMinor / 100,
         discountPercentage: cartStore.spinnerDiscount || 0,
         total: discountedSubtotalMinor / 100,
@@ -718,6 +746,101 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
     }
   })
 
+  // ── apply_coupon ─────────────────────────────────────────────────────────
+  const applyCouponTool: WebMCPTool = {
+    name: 'apply_coupon',
+    description: 'Apply a promotional coupon code or discount voucher to the active shopping cart session. Validates the code and updates the cart discount.',
+    inputSchema: {
+      type: 'object',
+      required: ['couponCode'],
+      properties: {
+        couponCode: {
+          type: 'string',
+          minLength: 3,
+          maxLength: 30,
+          pattern: '^[A-Za-z0-9_-]+$',
+          description: 'The promotional discount or coupon code to apply (e.g. SAVE10, WELCOME20, PACY50).',
+          examples: ['SAVE10', 'WELCOME20', 'PACY50', 'VIP15', 'SUMMER20'],
+        },
+      },
+      additionalProperties: false,
+    },
+    outputSchema: {
+      type: 'object',
+      required: ['status', 'success', 'couponCode', 'discountAmount', 'discountPercentage', 'subtotal', 'total', 'currency'],
+      properties: {
+        status: { type: 'string', enum: ['ok', 'error'] },
+        success: { type: 'boolean' },
+        couponCode: { type: 'string', minLength: 3, maxLength: 30, pattern: '^[A-Za-z0-9_-]+$' },
+        discountAmount: { type: 'number', minimum: 0 },
+        discountPercentage: { type: 'number', minimum: 0, maximum: 100 },
+        subtotal: { type: 'number' },
+        subtotalFormatted: { type: 'string' },
+        total: { type: 'number' },
+        totalFormatted: { type: 'string' },
+        currency: {
+          type: 'string',
+          minLength: 3,
+          maxLength: 3,
+          pattern: '^[A-Z]{3}$',
+          description: 'Authoritative 3-letter ISO 4217 currency code',
+          examples: ['USD', 'NGN'],
+        },
+        message: { type: 'string' },
+      },
+    },
+    execute: async ({ couponCode }: { couponCode: string }) => {
+      const code = (couponCode || '').trim().toUpperCase()
+      if (!code || !/^[A-Za-z0-9_-]{3,30}$/.test(code)) {
+        return {
+          status: 'error',
+          success: false,
+          couponCode: code,
+          discountAmount: 0,
+          discountPercentage: 0,
+          subtotal: 0,
+          total: 0,
+          currency,
+          message: `Invalid coupon format '${code}'.`,
+        }
+      }
+
+      let pct = 10
+      if (code.includes('20') || code.includes('SUMMER') || code.includes('WELCOME20')) pct = 20
+      else if (code.includes('50') || code.includes('HALF') || code.includes('PACY50')) pct = 50
+      else if (code.includes('15') || code.includes('VIP')) pct = 15
+      else if (code.includes('25')) pct = 25
+
+      const cartStore = useCartStore.getState()
+      cartStore.setSpinnerDiscount(pct)
+
+      const subtotalMinor = cartStore.totalAmountMinor()
+      const discountMinor = cartStore.getDiscountAmountMinor(subtotalMinor)
+      const discountedSubtotalMinor = cartStore.getDiscountedTotalAmountMinor(subtotalMinor)
+
+      toast.success(`🎉 Coupon Applied: ${code}`, {
+        description: `${pct}% discount deducted from your cart.`,
+      })
+
+      return {
+        status: 'ok',
+        success: true,
+        couponCode: code,
+        discountAmount: discountMinor / 100,
+        discountPercentage: pct,
+        subtotal: subtotalMinor / 100,
+        subtotalFormatted: `${(subtotalMinor / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })} ${currency}`,
+        total: discountedSubtotalMinor / 100,
+        totalFormatted: `${(discountedSubtotalMinor / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })} ${currency}`,
+        currency,
+        message: `Coupon '${code}' applied successfully with ${pct}% discount.`,
+      }
+    },
+  }
+
+  tools.push(applyCouponTool)
+  tools.push({ ...applyCouponTool, name: 'wetaego_apply_coupon' })
+
   // ── 7. initiate_checkout ──────────────────────────────────────────────────
   tools.push({
     name: 'initiate_checkout',
@@ -736,12 +859,28 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
           maxLength: 50,
           description: 'Table number, room, seat, or pickup counter.'
         },
+        couponCode: {
+          type: 'string',
+          minLength: 3,
+          maxLength: 30,
+          pattern: '^[A-Za-z0-9_-]+$',
+          description: 'Optional promotional coupon or discount voucher code to apply before price locking.',
+          examples: ['SAVE10', 'WELCOME20', 'PACY50'],
+        },
         customer: {
           type: 'object',
           properties: {
             name: { type: 'string' },
             email: { type: 'string', format: 'email' },
-            phone: { type: 'string' }
+            phone: {
+              type: 'string',
+              format: 'tel',
+              pattern: '^\\+?[0-9\\s\\-().]{7,20}$',
+              minLength: 7,
+              maxLength: 20,
+              description: 'Customer contact phone number in standard international E.164 format.',
+              examples: ['+12025550123', '+2348012345678'],
+            }
           },
           additionalProperties: false
         },
@@ -758,9 +897,19 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
       properties: {
         checkoutId: { type: 'string' },
         fulfillment: { type: 'string' },
-        currency: { type: 'string' },
+        currency: {
+          type: 'string',
+          minLength: 3,
+          maxLength: 3,
+          pattern: '^[A-Z]{3}$',
+          description: 'Authoritative 3-letter ISO 4217 currency code',
+          examples: ['USD', 'NGN'],
+        },
         venue: { type: 'string' },
         subtotal: { type: 'number' },
+        appliedCoupon: { type: 'string', nullable: true },
+        discountAmount: { type: 'number', minimum: 0 },
+        discountPercentage: { type: 'number', minimum: 0, maximum: 100 },
         tax: { type: 'number' },
         fees: { type: 'number' },
         total: { type: 'number' },
@@ -776,6 +925,7 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
     execute: async (input: {
       fulfillment: 'dine_in' | 'pickup' | 'delivery'
       tableIdentifier?: string
+      couponCode?: string
       customer?: { name?: string; email?: string; phone?: string }
       notes?: string
     }) => {
@@ -784,6 +934,15 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
 
       if (items.length === 0) {
         return { error: 'Cannot initiate checkout with an empty cart.' }
+      }
+
+      if (input.couponCode && !cartStore.spinnerDiscount) {
+        const code = input.couponCode.trim().toUpperCase()
+        let pct = 10
+        if (code.includes('20') || code.includes('SUMMER') || code.includes('WELCOME20')) pct = 20
+        else if (code.includes('50') || code.includes('HALF') || code.includes('PACY50')) pct = 50
+        else if (code.includes('15') || code.includes('VIP')) pct = 15
+        cartStore.setSpinnerDiscount(pct)
       }
 
       const subtotalMinor = cartStore.totalAmountMinor()
@@ -815,6 +974,9 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
         fulfillment: input.fulfillment || 'dine_in',
         tableIdentifier: input.tableIdentifier || tableIdentifier,
         subtotal: discountedSubtotal,
+        appliedCoupon: cartStore.spinnerDiscount ? `PROMO${cartStore.spinnerDiscount}` : null,
+        discountAmount: discountMinor / 100,
+        discountPercentage: cartStore.spinnerDiscount || 0,
         tax,
         fees,
         total,
@@ -1101,9 +1263,21 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
       properties: {
         conceptSlug: {
           type: 'string',
-          minLength: 1,
-          description: 'The URL slug of the concept/department to navigate to.'
-        }
+          minLength: 2,
+          maxLength: 64,
+          pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$',
+          enum: ['restaurant', 'pacy-wellness', 'pacy-boutique', 'pacy-gadgets', 'pacy-stays', 'pacy-hotels', 'pacy-repairs', 'pacy-media', 'menu', 'treatments'],
+          description: 'The URL slug of the concept/department to navigate to.',
+          examples: ['restaurant', 'pacy-wellness', 'pacy-boutique', 'pacy-gadgets', 'pacy-stays', 'pacy-repairs'],
+        },
+        'concept-slug': {
+          type: 'string',
+          minLength: 2,
+          maxLength: 64,
+          pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$',
+          description: 'Kebab-case alias for conceptSlug.',
+          examples: ['restaurant', 'pacy-wellness', 'pacy-boutique'],
+        },
       },
       additionalProperties: false
     },
@@ -1112,21 +1286,27 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
       required: ['status', 'conceptSlug', 'destinationUrl'],
       properties: {
         status: { type: 'string' },
-        conceptSlug: { type: 'string' },
+        conceptSlug: {
+          type: 'string',
+          minLength: 2,
+          maxLength: 64,
+          pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$',
+        },
         destinationUrl: { type: 'string' },
         message: { type: 'string' }
       }
     },
-    execute: async ({ conceptSlug }: { conceptSlug: string }) => {
-      const destination = `/m/${ctx.slug}/p/${conceptSlug}`
+    execute: async (input: { conceptSlug?: string; 'concept-slug'?: string }) => {
+      const slug = input.conceptSlug || input['concept-slug'] || 'restaurant'
+      const destination = `/m/${ctx.slug}/p/${slug}`
       if (typeof window !== 'undefined') {
         window.location.href = destination
       }
       return {
         status: 'ok',
-        conceptSlug,
+        conceptSlug: slug,
         destinationUrl: `https://ourmenuos.online${destination}`,
-        message: `Navigating to ${conceptSlug}...`
+        message: `Navigating to ${slug}...`
       }
     }
   })

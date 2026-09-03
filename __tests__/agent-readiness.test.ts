@@ -107,7 +107,7 @@ describe('Agent Readiness (Ora & Is Agentic Compliance)', () => {
   })
 
   describe('WebMCP Browser API & Tool Registry', () => {
-    it('initializes document.modelContext, navigator.modelContext, and window.modelContext with all 12 tools and resultSchemas', async () => {
+    it('initializes document.modelContext, navigator.modelContext, and window.modelContext with all 13 tools and resultSchemas', async () => {
       const { ensureWebMCPContext } = await import('@/lib/webmcp/registry')
       const { WEBMCP_TOOLS } = await import('@/components/WebMcpProvider')
 
@@ -119,7 +119,7 @@ describe('Agent Readiness (Ora & Is Agentic Compliance)', () => {
       WEBMCP_TOOLS.forEach(tool => ctx.registerTool(tool))
 
       const tools = ctx.getTools ? ctx.getTools() : []
-      expect(tools.length).toBeGreaterThanOrEqual(12)
+      expect(tools.length).toBeGreaterThanOrEqual(13)
 
       const toolNames = tools.map(t => t.name)
       expect(toolNames).toContain('wetaego_find_venue')
@@ -129,6 +129,7 @@ describe('Agent Readiness (Ora & Is Agentic Compliance)', () => {
       expect(toolNames).toContain('wetaego_add_to_cart')
       expect(toolNames).toContain('wetaego_get_cart')
       expect(toolNames).toContain('wetaego_update_cart')
+      expect(toolNames).toContain('wetaego_apply_coupon')
       expect(toolNames).toContain('wetaego_recommend_pairings')
       expect(toolNames).toContain('wetaego_open_business_page')
       expect(toolNames).toContain('wetaego_initiate_checkout')
@@ -143,6 +144,75 @@ describe('Agent Readiness (Ora & Is Agentic Compliance)', () => {
         expect(t.resultSchema).toBeDefined()
         expect(typeof t.execute).toBe('function')
       }
+    })
+
+    it('validates wetaego_apply_coupon applies discount and recalculates cart & checkout totals', async () => {
+      const { WEBMCP_TOOLS } = await import('@/components/WebMcpProvider')
+
+      const createCartTool = WEBMCP_TOOLS.find(t => t.name === 'wetaego_create_cart')!
+      const addToCartTool = WEBMCP_TOOLS.find(t => t.name === 'wetaego_add_to_cart')!
+      const applyCouponTool = WEBMCP_TOOLS.find(t => t.name === 'wetaego_apply_coupon')!
+      const getCartTool = WEBMCP_TOOLS.find(t => t.name === 'wetaego_get_cart')!
+      const checkoutTool = WEBMCP_TOOLS.find(t => t.name === 'wetaego_initiate_checkout')!
+
+      expect(applyCouponTool).toBeDefined()
+
+      // Reset cart and add item
+      await createCartTool.execute!()
+      await addToCartTool.execute!({ itemId: 'item_tartine_1', quantity: 2 })
+
+      // Apply coupon
+      const couponResult = await applyCouponTool.execute!({ couponCode: 'WELCOME20' })
+      expect(couponResult.status).toBe('ok')
+      expect(couponResult.success).toBe(true)
+      expect(couponResult.couponCode).toBe('WELCOME20')
+      expect(couponResult.discountPercentage).toBe(20)
+      expect(couponResult.discountAmount).toBeGreaterThan(0)
+      expect(couponResult.total).toBe(couponResult.subtotal - couponResult.discountAmount)
+
+      // Verify get_cart reflects coupon and updated total
+      const cartResult = await getCartTool.execute!()
+      expect(cartResult.appliedCoupon).toBe('WELCOME20')
+      expect(cartResult.discountPercentage).toBe(20)
+      expect(cartResult.discountAmount).toBe(couponResult.discountAmount)
+      expect(cartResult.total).toBe(couponResult.total)
+
+      // Verify initiate_checkout retains locked discount
+      const checkoutResult = await checkoutTool.execute!({ fulfillment: 'dine_in' })
+      expect(checkoutResult.status).toBe('ok')
+      expect(checkoutResult.appliedCoupon).toBe('WELCOME20')
+      expect(checkoutResult.discountAmount).toBe(couponResult.discountAmount)
+      expect(checkoutResult.total).toBe(couponResult.total)
+    })
+
+    it('enforces strict currency, phone, and concept-slug schemas', async () => {
+      const { WEBMCP_TOOLS } = await import('@/components/WebMcpProvider')
+
+      const searchTool = WEBMCP_TOOLS.find(t => t.name === 'wetaego_search_catalog')!
+      const openPageTool = WEBMCP_TOOLS.find(t => t.name === 'wetaego_open_business_page')!
+      const checkoutTool = WEBMCP_TOOLS.find(t => t.name === 'wetaego_initiate_checkout')!
+
+      // Currency constraint check
+      const currencyProp = searchTool.inputSchema.properties.currency
+      expect(currencyProp.pattern).toBe('^[A-Z]{3}$')
+      expect(currencyProp.minLength).toBe(3)
+      expect(currencyProp.maxLength).toBe(3)
+      expect(currencyProp.enum).toContain('USD')
+      expect(currencyProp.enum).toContain('NGN')
+
+      // Concept-slug constraint check
+      const conceptSlugProp = openPageTool.inputSchema.properties.conceptSlug
+      expect(conceptSlugProp.pattern).toBe('^[a-z0-9]+(?:-[a-z0-9]+)*$')
+      expect(conceptSlugProp.minLength).toBe(2)
+      expect(conceptSlugProp.enum).toContain('restaurant')
+      expect(openPageTool.inputSchema.properties['concept-slug']).toBeDefined()
+
+      // Phone constraint check
+      const phoneProp = (checkoutTool.inputSchema.properties.customer as any).properties.phone
+      expect(phoneProp.format).toBe('tel')
+      expect(phoneProp.minLength).toBe(7)
+      expect(phoneProp.maxLength).toBe(20)
+      expect(phoneProp.pattern).toBeDefined()
     })
   })
 })

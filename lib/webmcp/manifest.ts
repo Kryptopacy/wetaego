@@ -40,7 +40,14 @@ export function getMCPManifest() {
               enum: ["dining", "hospitality", "wellness", "retail", "services", "creator"],
               description: "Non-overlapping industry vertical filter: 'dining', 'hospitality', 'wellness', 'retail', 'services', 'creator'."
             },
-            slug: { type: "string", description: "Direct URL slug of the venue." },
+            slug: {
+              type: "string",
+              minLength: 2,
+              maxLength: 64,
+              pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+              description: "Direct URL slug of the venue (e.g. 'demo', 'emerald-cafe', 'ocean-ember', 'lotus-spa').",
+              examples: ["demo", "emerald-cafe", "ocean-ember", "lotus-spa"]
+            },
             limit: { type: "integer", minimum: 1, maximum: 50, default: 10, description: "Maximum number of venues to return." }
           },
           additionalProperties: false
@@ -51,7 +58,7 @@ export function getMCPManifest() {
           properties: {
             status: { type: "string", enum: ["ok", "error"] },
             totalFound: { type: "integer" },
-            slug: { type: "string" },
+            slug: { type: "string", minLength: 2, maxLength: 64, pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
             venueUrl: { type: "string" },
             directoryUrl: { type: "string" },
             venues: {
@@ -60,10 +67,17 @@ export function getMCPManifest() {
                 type: "object",
                 required: ["slug", "name", "venueUrl"],
                 properties: {
-                  slug: { type: "string" },
+                  slug: { type: "string", minLength: 2, maxLength: 64, pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
                   name: { type: "string" },
                   industry: { type: "string" },
-                  currency: { type: "string" },
+                  currency: {
+                    type: "string",
+                    minLength: 3,
+                    maxLength: 3,
+                    pattern: "^[A-Z]{3}$",
+                    description: "3-letter ISO 4217 currency code",
+                    examples: ["USD", "NGN"]
+                  },
                   venueUrl: { type: "string" },
                   description: { type: "string" }
                 }
@@ -79,7 +93,7 @@ export function getMCPManifest() {
           properties: {
             status: { type: "string", enum: ["ok", "error"] },
             totalFound: { type: "integer" },
-            slug: { type: "string" },
+            slug: { type: "string", minLength: 2, maxLength: 64, pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
             venueUrl: { type: "string" },
             directoryUrl: { type: "string" },
             venues: {
@@ -88,10 +102,17 @@ export function getMCPManifest() {
                 type: "object",
                 required: ["slug", "name", "venueUrl"],
                 properties: {
-                  slug: { type: "string" },
+                  slug: { type: "string", minLength: 2, maxLength: 64, pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
                   name: { type: "string" },
                   industry: { type: "string" },
-                  currency: { type: "string" },
+                  currency: {
+                    type: "string",
+                    minLength: 3,
+                    maxLength: 3,
+                    pattern: "^[A-Z]{3}$",
+                    description: "3-letter ISO 4217 currency code",
+                    examples: ["USD", "NGN"]
+                  },
                   venueUrl: { type: "string" },
                   description: { type: "string" }
                 }
@@ -114,6 +135,23 @@ export function getMCPManifest() {
           properties: {
             query: { type: "string", description: "Natural-language search query." },
             category: { type: "string", description: "Category name filter." },
+            venueSlug: {
+              type: "string",
+              minLength: 2,
+              maxLength: 64,
+              pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+              description: "Optional venue slug to scope search to a single merchant.",
+              examples: ["demo", "emerald-cafe", "ocean-ember", "lotus-spa"]
+            },
+            currency: {
+              type: "string",
+              minLength: 3,
+              maxLength: 3,
+              pattern: "^[A-Z]{3}$",
+              enum: ["USD", "EUR", "GBP", "NGN", "CAD", "AUD", "JPY", "KES", "GHS", "ZAR"],
+              description: "3-letter ISO 4217 target currency code.",
+              examples: ["USD", "NGN", "EUR", "GBP"]
+            },
             dietary: {
               type: "array",
               items: { type: "string", enum: ["vegan", "vegetarian", "halal", "kosher", "gluten_free", "dairy_free", "nut_free", "keto"] },
@@ -131,7 +169,14 @@ export function getMCPManifest() {
           required: ["venue", "currency", "totalFound", "items"],
           properties: {
             venue: { type: "string" },
-            currency: { type: "string" },
+            currency: {
+              type: "string",
+              minLength: 3,
+              maxLength: 3,
+              pattern: "^[A-Z]{3}$",
+              description: "3-letter ISO 4217 currency code",
+              examples: ["USD", "NGN"]
+            },
             totalFound: { type: "integer" },
             limit: { type: "integer" },
             offset: { type: "integer" },
@@ -158,7 +203,14 @@ export function getMCPManifest() {
                     }
                   },
                   isAvailable: { type: "boolean" },
-                  hasModifiers: { type: "boolean" }
+                  hasModifiers: { type: "boolean" },
+                  conceptSlug: {
+                    type: "string",
+                    minLength: 2,
+                    maxLength: 64,
+                    pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+                    description: "Concept or department slug"
+                  }
                 }
               }
             }
@@ -169,7 +221,14 @@ export function getMCPManifest() {
           required: ["venue", "currency", "totalFound", "items"],
           properties: {
             venue: { type: "string" },
-            currency: { type: "string" },
+            currency: {
+              type: "string",
+              minLength: 3,
+              maxLength: 3,
+              pattern: "^[A-Z]{3}$",
+              description: "3-letter ISO 4217 currency code",
+              examples: ["USD", "NGN"]
+            },
             totalFound: { type: "integer" },
             limit: { type: "integer" },
             offset: { type: "integer" },
@@ -196,7 +255,14 @@ export function getMCPManifest() {
                     }
                   },
                   isAvailable: { type: "boolean" },
-                  hasModifiers: { type: "boolean" }
+                  hasModifiers: { type: "boolean" },
+                  conceptSlug: {
+                    type: "string",
+                    minLength: 2,
+                    maxLength: 64,
+                    pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+                    description: "Concept or department slug"
+                  }
                 }
               }
             }
@@ -569,6 +635,85 @@ export function getMCPManifest() {
         }
       },
       {
+        name: "wetaego_apply_coupon",
+        page: "/m/{slug}",
+        scope: "customer",
+        permission: "session/cart-write",
+        confirmation: "none",
+        description: "Apply a promotional coupon code or discount voucher to the active shopping cart session. Validates the code, recalculates discounts, and updates the cart subtotal and final total.",
+        inputSchema: {
+          type: "object",
+          required: ["couponCode"],
+          properties: {
+            couponCode: {
+              type: "string",
+              minLength: 3,
+              maxLength: 30,
+              pattern: "^[A-Za-z0-9_-]+$",
+              description: "The promotional discount or coupon code to apply (e.g. SAVE10, WELCOME20, PACY50, VIP15, SUMMER20).",
+              examples: ["SAVE10", "WELCOME20", "PACY50", "VIP15", "SUMMER20"]
+            },
+            cartId: {
+              type: "string",
+              description: "Optional cart session identifier. If omitted, applies to the active session cart."
+            }
+          },
+          additionalProperties: false
+        },
+        outputSchema: {
+          type: "object",
+          required: ["status", "success", "couponCode", "discountAmount", "discountPercentage", "discountFormatted", "subtotal", "subtotalFormatted", "total", "totalFormatted", "currency"],
+          properties: {
+            status: { type: "string", enum: ["ok", "error"] },
+            success: { type: "boolean" },
+            couponCode: { type: "string", minLength: 3, maxLength: 30, pattern: "^[A-Za-z0-9_-]+$" },
+            discountAmount: { type: "number", minimum: 0 },
+            discountPercentage: { type: "number", minimum: 0, maximum: 100 },
+            discountFormatted: { type: "string" },
+            subtotal: { type: "number", minimum: 0 },
+            subtotalFormatted: { type: "string" },
+            total: { type: "number", minimum: 0 },
+            totalFormatted: { type: "string" },
+            currency: {
+              type: "string",
+              minLength: 3,
+              maxLength: 3,
+              pattern: "^[A-Z]{3}$",
+              description: "3-letter ISO 4217 currency code",
+              examples: ["USD", "NGN"]
+            },
+            message: { type: "string" },
+            _hint: { type: "string" }
+          }
+        },
+        resultSchema: {
+          type: "object",
+          required: ["status", "success", "couponCode", "discountAmount", "discountPercentage", "discountFormatted", "subtotal", "subtotalFormatted", "total", "totalFormatted", "currency"],
+          properties: {
+            status: { type: "string", enum: ["ok", "error"] },
+            success: { type: "boolean" },
+            couponCode: { type: "string", minLength: 3, maxLength: 30, pattern: "^[A-Za-z0-9_-]+$" },
+            discountAmount: { type: "number", minimum: 0 },
+            discountPercentage: { type: "number", minimum: 0, maximum: 100 },
+            discountFormatted: { type: "string" },
+            subtotal: { type: "number", minimum: 0 },
+            subtotalFormatted: { type: "string" },
+            total: { type: "number", minimum: 0 },
+            totalFormatted: { type: "string" },
+            currency: {
+              type: "string",
+              minLength: 3,
+              maxLength: 3,
+              pattern: "^[A-Z]{3}$",
+              description: "3-letter ISO 4217 currency code",
+              examples: ["USD", "NGN"]
+            },
+            message: { type: "string" },
+            _hint: { type: "string" }
+          }
+        }
+      },
+      {
         name: "wetaego_recommend_pairings",
         page: "/m/{slug}",
         scope: "customer",
@@ -640,12 +785,36 @@ export function getMCPManifest() {
         scope: "customer",
         permission: "public/navigation",
         confirmation: "none",
-        description: "Switch department within active storefront: Switch the active view to an internal department or category catalog tab (such as 'restaurant', 'spa', 'boutique', 'repairs') inside the current venue. (Do NOT use to find external businesses; use wetaego_find_venue instead.)",
+        description: "Switch department within active storefront: Switch the active view to an internal department or category catalog tab (such as 'restaurant', 'pacy-wellness', 'pacy-boutique', 'pacy-gadgets', 'pacy-stays', 'pacy-repairs') inside the current venue. (Do NOT use to find external businesses; use wetaego_find_venue instead.)",
         inputSchema: {
           type: "object",
           required: ["conceptSlug"],
           properties: {
-            conceptSlug: { type: "string", minLength: 1, description: "The URL slug of the concept to navigate to." }
+            conceptSlug: {
+              type: "string",
+              minLength: 2,
+              maxLength: 64,
+              pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+              enum: ["restaurant", "pacy-wellness", "pacy-boutique", "pacy-gadgets", "pacy-stays", "pacy-hotels", "pacy-repairs", "pacy-media", "menu", "treatments"],
+              description: "The URL slug of the concept to navigate to.",
+              examples: ["restaurant", "pacy-wellness", "pacy-boutique", "pacy-gadgets", "pacy-stays", "pacy-repairs"]
+            },
+            "concept-slug": {
+              type: "string",
+              minLength: 2,
+              maxLength: 64,
+              pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+              description: "Kebab-case alias for conceptSlug.",
+              examples: ["restaurant", "pacy-wellness", "pacy-boutique"]
+            },
+            venueSlug: {
+              type: "string",
+              minLength: 2,
+              maxLength: 64,
+              pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+              description: "Optional venue slug.",
+              examples: ["demo", "emerald-cafe", "ocean-ember", "lotus-spa"]
+            }
           },
           additionalProperties: false
         },
@@ -654,7 +823,7 @@ export function getMCPManifest() {
           required: ["status", "conceptSlug", "destinationUrl"],
           properties: {
             status: { type: "string", enum: ["ok", "error"] },
-            conceptSlug: { type: "string" },
+            conceptSlug: { type: "string", minLength: 2, maxLength: 64, pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
             destinationUrl: { type: "string" },
             message: { type: "string" }
           }
@@ -664,7 +833,7 @@ export function getMCPManifest() {
           required: ["status", "conceptSlug", "destinationUrl"],
           properties: {
             status: { type: "string", enum: ["ok", "error"] },
-            conceptSlug: { type: "string" },
+            conceptSlug: { type: "string", minLength: 2, maxLength: 64, pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
             destinationUrl: { type: "string" },
             message: { type: "string" }
           }
@@ -684,12 +853,28 @@ export function getMCPManifest() {
             cartId: { type: "string", description: "Optional cart session ID to prepare checkout for. If omitted, uses the active session cart." },
             fulfillment: { type: "string", enum: ["dine_in", "pickup", "delivery"] },
             tableIdentifier: { type: "string", maxLength: 50, description: "Table, room, or seat identifier." },
+            couponCode: {
+              type: "string",
+              minLength: 3,
+              maxLength: 30,
+              pattern: "^[A-Za-z0-9_-]+$",
+              description: "Optional promotional coupon or discount voucher code to apply before price locking.",
+              examples: ["SAVE10", "WELCOME20", "PACY50"]
+            },
             customer: {
               type: "object",
               properties: {
                 name: { type: "string" },
                 email: { type: "string", format: "email" },
-                phone: { type: "string" }
+                phone: {
+                  type: "string",
+                  format: "tel",
+                  pattern: "^\\+?[0-9\\s\\-().]{7,20}$",
+                  minLength: 7,
+                  maxLength: 20,
+                  description: "Customer contact phone number in standard international E.164 format.",
+                  examples: ["+12025550123", "+2348012345678"]
+                }
               },
               additionalProperties: false
             },
@@ -705,8 +890,18 @@ export function getMCPManifest() {
             checkoutId: { type: "string" },
             fulfillment: { type: "string" },
             venue: { type: "string" },
-            currency: { type: "string" },
+            currency: {
+              type: "string",
+              minLength: 3,
+              maxLength: 3,
+              pattern: "^[A-Z]{3}$",
+              description: "3-letter ISO 4217 currency code",
+              examples: ["USD", "NGN"]
+            },
             subtotal: { type: "number" },
+            appliedCoupon: { type: "string", nullable: true },
+            discountAmount: { type: "number", minimum: 0 },
+            discountPercentage: { type: "number", minimum: 0, maximum: 100 },
             tax: { type: "number" },
             fees: { type: "number" },
             total: { type: "number" },
@@ -727,8 +922,18 @@ export function getMCPManifest() {
             checkoutId: { type: "string" },
             fulfillment: { type: "string" },
             venue: { type: "string" },
-            currency: { type: "string" },
+            currency: {
+              type: "string",
+              minLength: 3,
+              maxLength: 3,
+              pattern: "^[A-Z]{3}$",
+              description: "3-letter ISO 4217 currency code",
+              examples: ["USD", "NGN"]
+            },
             subtotal: { type: "number" },
+            appliedCoupon: { type: "string", nullable: true },
+            discountAmount: { type: "number", minimum: 0 },
+            discountPercentage: { type: "number", minimum: 0, maximum: 100 },
             tax: { type: "number" },
             fees: { type: "number" },
             total: { type: "number" },
@@ -775,7 +980,16 @@ export function getMCPManifest() {
             orderId: { type: "string" },
             checkoutId: { type: "string" },
             venue: { type: "string" },
-            currency: { type: "string" },
+            currency: {
+              type: "string",
+              minLength: 3,
+              maxLength: 3,
+              pattern: "^[A-Z]{3}$",
+              description: "3-letter ISO 4217 currency code",
+              examples: ["USD", "NGN"]
+            },
+            appliedCoupon: { type: "string", nullable: true },
+            discountAmount: { type: "number", minimum: 0 },
             total: { type: "number" },
             totalFormatted: { type: "string" },
             message: { type: "string" },
@@ -791,7 +1005,16 @@ export function getMCPManifest() {
             orderId: { type: "string" },
             checkoutId: { type: "string" },
             venue: { type: "string" },
-            currency: { type: "string" },
+            currency: {
+              type: "string",
+              minLength: 3,
+              maxLength: 3,
+              pattern: "^[A-Z]{3}$",
+              description: "3-letter ISO 4217 currency code",
+              examples: ["USD", "NGN"]
+            },
+            appliedCoupon: { type: "string", nullable: true },
+            discountAmount: { type: "number", minimum: 0 },
             total: { type: "number" },
             totalFormatted: { type: "string" },
             message: { type: "string" },

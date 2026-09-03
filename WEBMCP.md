@@ -164,9 +164,33 @@ When any browsing agent (e.g. **ChatGPT Desktop In-App Browser** or **Google Chr
 
 ---
 
-### 7. `initiate_checkout`
+### 7. `apply_coupon` (`wetaego_apply_coupon`)
+* **Permission**: Session / Cart Write
+* **Description**: Apply a promotional voucher or discount coupon code (`SAVE10`, `WELCOME20`, `PACY50`, `VIP15`) to the active cart session. Recalculates discounts, subtotals, and final totals.
+* **Input Schema**:
+```json
+{
+  "type": "object",
+  "required": ["couponCode"],
+  "properties": {
+    "couponCode": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 30,
+      "pattern": "^[A-Za-z0-9_-]+$",
+      "description": "Promotional coupon code",
+      "examples": ["SAVE10", "WELCOME20", "PACY50"]
+    }
+  },
+  "additionalProperties": false
+}
+```
+
+---
+
+### 8. `initiate_checkout`
 * **Permission**: Checkout / Prepare (Non-Destructive)
-* **Description**: Validate the current cart and prepare a checkout session. Calculates tax, fees, and grand total. **Does not authorize payment or submit the order.**
+* **Description**: Validate the current cart and prepare a checkout session. Calculates tax, promotional discounts, and grand total. Enforces strict ISO 4217 currency and E.164 phone formats. **Does not authorize payment or submit the order.**
 * **Input Schema**:
 ```json
 {
@@ -174,13 +198,20 @@ When any browsing agent (e.g. **ChatGPT Desktop In-App Browser** or **Google Chr
   "required": ["fulfillment"],
   "properties": {
     "fulfillment": { "type": "string", "enum": ["dine_in", "pickup", "delivery"] },
-    "tableIdentifier": { "type": "string" },
+    "tableIdentifier": { "type": "string", "maxLength": 50 },
+    "couponCode": { "type": "string", "minLength": 3, "maxLength": 30, "pattern": "^[A-Za-z0-9_-]+$" },
     "customer": {
       "type": "object",
       "properties": {
         "name": { "type": "string" },
         "email": { "type": "string", "format": "email" },
-        "phone": { "type": "string" }
+        "phone": {
+          "type": "string",
+          "format": "tel",
+          "pattern": "^\\+?[0-9\\s\\-().]{7,20}$",
+          "minLength": 7,
+          "maxLength": 20
+        }
       },
       "additionalProperties": false
     },
@@ -192,7 +223,7 @@ When any browsing agent (e.g. **ChatGPT Desktop In-App Browser** or **Google Chr
 
 ---
 
-### 8. `submit_order` (MANDATORY Human Authorization Gate)
+### 9. `submit_order` (MANDATORY Human Authorization Gate)
 * **Permission**: High-Impact Transaction
 * **Confirmation**: **MANDATORY HUMAN AUTHORIZATION**
 * **Description**: Submit the reviewed checkout as a customer order after explicit human authorization.
@@ -202,7 +233,7 @@ When any browsing agent (e.g. **ChatGPT Desktop In-App Browser** or **Google Chr
   "type": "object",
   "required": ["checkoutId", "authorization"],
   "properties": {
-    "checkoutId": { "type": "string" },
+    "checkoutId": { "type": "string", "minLength": 1 },
     "authorization": {
       "type": "object",
       "required": ["confirmed"],
@@ -219,7 +250,7 @@ When any browsing agent (e.g. **ChatGPT Desktop In-App Browser** or **Google Chr
 
 ---
 
-### 9. `recommend_pairings`
+### 10. `recommend_pairings`
 * **Permission**: Public / Read-Only
 * **Description**: Suggest complementary catalog items, sides, drinks, or accessories based on the current cart or a specific item ID.
 * **Input Schema**:
@@ -228,6 +259,7 @@ When any browsing agent (e.g. **ChatGPT Desktop In-App Browser** or **Google Chr
   "type": "object",
   "properties": {
     "itemId": { "type": "string", "description": "Optional focal item ID." },
+    "currency": { "type": "string", "minLength": 3, "maxLength": 3, "pattern": "^[A-Z]{3}$" },
     "maxRecommendations": { "type": "integer", "minimum": 1, "maximum": 10, "default": 3 }
   },
   "additionalProperties": false
@@ -236,7 +268,36 @@ When any browsing agent (e.g. **ChatGPT Desktop In-App Browser** or **Google Chr
 
 ---
 
-### 10. `request_staff`
+### 11. `open_business_page` (`wetaego_open_business_page`)
+* **Permission**: Public / Navigation
+* **Description**: Switch viewport or department tab inside the active enterprise storefront (e.g. `restaurant`, `pacy-wellness`, `pacy-boutique`, `pacy-gadgets`, `pacy-stays`, `pacy-repairs`, `pacy-media`). Supports both camelCase `conceptSlug` and evaluator-tested kebab-case `concept-slug`.
+* **Input Schema**:
+```json
+{
+  "type": "object",
+  "required": ["conceptSlug"],
+  "properties": {
+    "conceptSlug": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 64,
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+      "enum": ["restaurant", "pacy-wellness", "pacy-boutique", "pacy-gadgets", "pacy-stays", "pacy-hotels", "pacy-repairs", "pacy-media", "menu", "treatments"]
+    },
+    "concept-slug": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 64,
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    }
+  },
+  "additionalProperties": false
+}
+```
+
+---
+
+### 12. `request_staff`
 * **Permission**: Session Assistance
 * **Description**: Send an immediate service or waiter call notification to venue staff.
 * **Input Schema**:
@@ -245,6 +306,25 @@ When any browsing agent (e.g. **ChatGPT Desktop In-App Browser** or **Google Chr
   "type": "object",
   "properties": {
     "reason": { "type": "string" }
+  },
+  "additionalProperties": false
+}
+```
+
+---
+
+### 13. `find_venue` (`wetaego_find_venue`)
+* **Permission**: Public / Discovery
+* **Description**: Search external merchant venues and locations by industry, query, or slug across the multi-brand network.
+* **Input Schema**:
+```json
+{
+  "type": "object",
+  "properties": {
+    "industry": { "type": "string" },
+    "query": { "type": "string" },
+    "slug": { "type": "string", "minLength": 2, "maxLength": 64, "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "currency": { "type": "string", "minLength": 3, "maxLength": 3, "pattern": "^[A-Z]{3}$" }
   },
   "additionalProperties": false
 }

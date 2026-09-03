@@ -122,6 +122,15 @@ export function WebMCPTester({ locationName = 'Storefront' }: { locationName?: s
           const res = await globalWebMCPRegistry.executeTool('recommend_pairings', input)
           setOutputJson(res)
         }
+      } else if (scenario === 'apply_coupon') {
+        const tool = tools.find(t => t.name === 'apply_coupon' || t.name === 'wetaego_apply_coupon')
+        if (tool) {
+          handleSelectTool(tool)
+          const input = { couponCode: 'SAVE10' }
+          setInputJson(JSON.stringify(input, null, 2))
+          const res = await globalWebMCPRegistry.executeTool(tool.name, input)
+          setOutputJson(res)
+        }
       }
     } catch (e: any) {
       setOutputJson({ error: e.message || 'Execution failed' })
@@ -234,6 +243,12 @@ export function WebMCPTester({ locationName = 'Storefront' }: { locationName?: s
                   className="px-2.5 py-1 rounded-md bg-purple-950/70 hover:bg-purple-900 text-purple-300 border border-purple-800/50 shrink-0 transition"
                 >
                   ✨ Pairings
+                </button>
+                <button
+                  onClick={() => handleQuickScenario('apply_coupon')}
+                  className="px-2.5 py-1 rounded-md bg-rose-950/70 hover:bg-rose-900 text-rose-300 border border-rose-800/50 shrink-0 transition"
+                >
+                  🎟️ Apply Coupon
                 </button>
               </div>
 
@@ -376,11 +391,14 @@ function getDefaultInputForTool(tool: WebMCPTool): string {
   if (tool.name === 'recommend_pairings') {
     return JSON.stringify({ maxRecommendations: 3 }, null, 2)
   }
+  if (tool.name === 'apply_coupon' || tool.name === 'wetaego_apply_coupon') {
+    return JSON.stringify({ couponCode: 'SAVE10' }, null, 2)
+  }
   if (tool.name === 'request_staff' || tool.name === 'call_staff_or_service') {
     return JSON.stringify({ reason: 'Guest requested bill and water refill' }, null, 2)
   }
-  if (tool.name === 'open_business_page') {
-    return JSON.stringify({ pageSlug: 'dining' }, null, 2)
+  if (tool.name === 'open_business_page' || tool.name === 'wetaego_open_business_page') {
+    return JSON.stringify({ conceptSlug: 'restaurant' }, null, 2)
   }
   return '{}'
 }
