@@ -942,7 +942,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
     name: 'create_cart',
     page: '/m/{slug}',
     description:
-      'Initialize a new shopping cart session or retrieve the existing active cart. Returns a structured "cartId" (e.g. "cart_demo_abc123") that can be passed to subsequent cart and checkout calls.',
+      'Initialize a new shopping cart session for the customer. Returns an authoritative cartId session handle. To inspect existing cart contents, use get_cart. To add items, use add_to_cart.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -1019,7 +1019,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
     name: 'add_to_cart',
     page: '/m/{slug}',
     description:
-      'Add an available catalog item to the active shopping cart with optional modifier selections. Returns the updated cart line items, total item count, and recalculated subtotal.',
+      'Add an available catalog item to the active cart session with optional modifier selections. Returns the updated cartId, cart line items, total item count, and recalculated subtotal.',
     inputSchema: {
       type: 'object',
       required: ['itemId', 'quantity'],
@@ -1047,10 +1047,11 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
     },
     outputSchema: {
       type: 'object',
-      required: ['status', 'success', 'cartItemCount', 'subtotal', 'subtotalFormatted'],
+      required: ['status', 'success', 'cartId', 'cartItemCount', 'subtotal', 'subtotalFormatted'],
       properties: {
         status: { type: 'string', enum: ['ok', 'error'] },
         success: { type: 'boolean', description: 'Whether the item was added successfully' },
+        cartId: { type: 'string', description: 'Active cart session identifier' },
         message: { type: 'string', description: 'Confirmation message' },
         cartItemCount: { type: 'integer', description: 'Total item count in cart after addition' },
         subtotal: { type: 'number', description: 'Updated subtotal amount' },
@@ -1093,10 +1094,11 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
     },
     resultSchema: {
       type: 'object',
-      required: ['status', 'success', 'cartItemCount', 'subtotal', 'subtotalFormatted'],
+      required: ['status', 'success', 'cartId', 'cartItemCount', 'subtotal', 'subtotalFormatted'],
       properties: {
         status: { type: 'string', enum: ['ok', 'error'] },
         success: { type: 'boolean', description: 'Whether the item was added successfully' },
+        cartId: { type: 'string', description: 'Active cart session identifier' },
         message: { type: 'string', description: 'Confirmation message' },
         cartItemCount: { type: 'integer', description: 'Total item count in cart after addition' },
         subtotal: { type: 'number', description: 'Updated subtotal amount' },
@@ -1193,6 +1195,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
       return {
         status: 'ok',
         success: true,
+        cartId: inMemoryCart.cartId,
         message: `Added ${qty}x ${item.name} ($${subtotal.toFixed(2)} USD) to cart.`,
         cartItemCount: totalCount,
         subtotal,
@@ -1208,7 +1211,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
     name: 'get_cart',
     page: '/m/{slug}',
     description:
-      'Return the current cart contents, line items, validated unit prices, modifiers, discount breakdown, applied taxes, and authoritative final total.',
+      'Inspect the contents of the active shopping cart session identified by cartId, including line items, modifier options, subtotal, discounts, taxes, and final total. Does NOT initialize a new cart session (use create_cart).',
     inputSchema: {
       type: 'object',
       properties: {
@@ -1218,8 +1221,9 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
     },
     outputSchema: {
       type: 'object',
-      required: ['venue', 'currency', 'itemCount', 'lines', 'subtotal', 'subtotalFormatted', 'total', 'totalFormatted'],
+      required: ['cartId', 'venue', 'currency', 'itemCount', 'lines', 'subtotal', 'subtotalFormatted', 'total', 'totalFormatted'],
       properties: {
+        cartId: { type: 'string', description: 'Active cart session identifier' },
         venue: { type: 'string', description: 'Active venue name' },
         currency: {
           type: 'string',
@@ -1276,8 +1280,9 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
     },
     resultSchema: {
       type: 'object',
-      required: ['venue', 'currency', 'itemCount', 'lines', 'subtotal', 'subtotalFormatted', 'total', 'totalFormatted'],
+      required: ['cartId', 'venue', 'currency', 'itemCount', 'lines', 'subtotal', 'subtotalFormatted', 'total', 'totalFormatted'],
       properties: {
+        cartId: { type: 'string', description: 'Active cart session identifier' },
         venue: { type: 'string', description: 'Active venue name' },
         currency: {
           type: 'string',
@@ -1341,6 +1346,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
         : 0
       const total = Number(Math.max(0, subtotal - discountAmount).toFixed(2))
       return {
+        cartId: inMemoryCart.cartId,
         venue: inMemoryCart.venue || 'Pacy Grills & Lounge (Pacy Group)',
         currency: 'USD',
         itemCount: totalCount,
@@ -1366,7 +1372,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
     name: 'update_cart',
     page: '/m/{slug}',
     description:
-      'Modify the quantity of an existing line item in the cart or remove it completely by setting quantity to 0.',
+      'Modify the quantity of an existing line item in the cart session or remove it using lineId. Requires lineId. Does NOT add new catalog items (use add_to_cart).',
     inputSchema: {
       type: 'object',
       required: ['lineId'],
@@ -1380,10 +1386,11 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
     },
     outputSchema: {
       type: 'object',
-      required: ['status', 'success', 'remainingLines', 'subtotalFormatted'],
+      required: ['status', 'success', 'cartId', 'remainingLines', 'subtotalFormatted'],
       properties: {
         status: { type: 'string', enum: ['ok', 'error'] },
         success: { type: 'boolean', description: 'Whether the update succeeded' },
+        cartId: { type: 'string', description: 'Active cart session identifier' },
         message: { type: 'string', description: 'Summary message of modification' },
         remainingLines: { type: 'integer', description: 'Number of distinct line items remaining in cart' },
         totalItemCount: { type: 'integer', description: 'Total item quantity in cart' },
@@ -1394,10 +1401,11 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
     },
     resultSchema: {
       type: 'object',
-      required: ['status', 'success', 'remainingLines', 'subtotalFormatted'],
+      required: ['status', 'success', 'cartId', 'remainingLines', 'subtotalFormatted'],
       properties: {
         status: { type: 'string', enum: ['ok', 'error'] },
         success: { type: 'boolean', description: 'Whether the update succeeded' },
+        cartId: { type: 'string', description: 'Active cart session identifier' },
         message: { type: 'string', description: 'Summary message of modification' },
         remainingLines: { type: 'integer', description: 'Number of distinct line items remaining in cart' },
         totalItemCount: { type: 'integer', description: 'Total item quantity in cart' },
@@ -1424,6 +1432,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
       return {
         status: 'ok',
         success: true,
+        cartId: inMemoryCart.cartId,
         message: `Cart updated.`,
         remainingLines: inMemoryCart.lines.length,
         totalItemCount: totalCount,
@@ -1438,7 +1447,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
     name: 'apply_coupon',
     page: '/m/{slug}',
     description:
-      'Apply a promotional coupon code or discount voucher to the active shopping cart session. Validates the code, recalculates discounts, and updates the cart subtotal and final total.',
+      'Apply a promotional coupon code or discount voucher to the active shopping cart session identified by cartId. Recalculates discounts and updates the cart subtotal and final total.',
     inputSchema: {
       type: 'object',
       required: ['couponCode'],
@@ -1464,6 +1473,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
       required: [
         'status',
         'success',
+        'cartId',
         'couponCode',
         'discountAmount',
         'discountPercentage',
@@ -1477,6 +1487,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
       properties: {
         status: { type: 'string', enum: ['ok', 'error'], description: 'Execution status code' },
         success: { type: 'boolean', description: 'Whether the coupon was valid and applied' },
+        cartId: { type: 'string', description: 'Active cart session identifier' },
         couponCode: {
           type: 'string',
           minLength: 3,
@@ -1508,6 +1519,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
       required: [
         'status',
         'success',
+        'cartId',
         'couponCode',
         'discountAmount',
         'discountPercentage',
@@ -1521,6 +1533,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
       properties: {
         status: { type: 'string', enum: ['ok', 'error'], description: 'Execution status code' },
         success: { type: 'boolean', description: 'Whether the coupon was valid and applied' },
+        cartId: { type: 'string', description: 'Active cart session identifier' },
         couponCode: {
           type: 'string',
           minLength: 3,
@@ -1553,6 +1566,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
         return {
           status: 'error',
           success: false,
+          cartId: inMemoryCart.cartId,
           couponCode: code,
           discountAmount: 0,
           discountPercentage: 0,
@@ -1600,6 +1614,7 @@ export const WEBMCP_TOOLS: WebMCPTool<any, any>[] = [
       return {
         status: 'ok',
         success: true,
+        cartId: inMemoryCart.cartId,
         couponCode: code,
         discountAmount,
         discountPercentage,

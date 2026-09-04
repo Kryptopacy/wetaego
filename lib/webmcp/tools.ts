@@ -410,7 +410,7 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
   // ── 3. create_cart ────────────────────────────────────────────────────────
   tools.push({
     name: 'create_cart',
-    description: `Initialize a new shopping cart session or retrieve the existing active cart for the customer session.`,
+    description: `Initialize a new shopping cart session for the customer. Returns an authoritative cartId session handle. To inspect existing cart contents, use get_cart. To add items, use add_to_cart.`,
     inputSchema: {
       type: 'object',
       properties: {
@@ -432,7 +432,7 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
       required: ['status', 'cartId', 'venue', 'currency', 'itemCount', 'subtotal', 'subtotalFormatted'],
       properties: {
         status: { type: 'string', enum: ['ok', 'error'] },
-        cartId: { type: 'string' },
+        cartId: { type: 'string', description: 'Active cart session identifier' },
         venue: { type: 'string' },
         currency: { type: 'string' },
         itemCount: { type: 'integer' },
@@ -462,11 +462,15 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
   // ── 4. add_to_cart ────────────────────────────────────────────────────────
   tools.push({
     name: 'add_to_cart',
-    description: `Add an available catalog item to the active cart using valid modifier selections. Returns updated cart summary.`,
+    description: `Add an available catalog item with selected options to the active cart session identified by cartId. To inspect full cart totals and lines, use get_cart. To modify existing lines, use update_cart.`,
     inputSchema: {
       type: 'object',
       required: ['itemId'],
       properties: {
+        cartId: {
+          type: 'string',
+          description: 'Optional unique cart session ID. If omitted, uses active session cart.'
+        },
         itemId: {
           type: 'string',
           minLength: 1,
@@ -513,10 +517,11 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
     },
     outputSchema: {
       type: 'object',
-      required: ['status', 'success', 'cartItemCount', 'subtotal', 'subtotalFormatted'],
+      required: ['status', 'success', 'cartId', 'cartItemCount', 'subtotal', 'subtotalFormatted'],
       properties: {
         status: { type: 'string', enum: ['ok', 'error'] },
         success: { type: 'boolean' },
+        cartId: { type: 'string', description: 'Active cart session identifier' },
         message: { type: 'string' },
         cartItemCount: { type: 'integer' },
         subtotal: { type: 'number' },
@@ -527,6 +532,7 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
     execute: async (input: {
       itemId: string
       quantity: number
+      cartId?: string
       modifiers?: { modifierId: string; optionIds?: string[] }[]
       variantSelections?: Record<string, string>
       notes?: string
@@ -536,10 +542,10 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
       const item = resolveCatalogItem(menuItems, rawTarget)
 
       if (!item) {
-        return { status: 'error', success: false, error: `Item '${input.itemId || (input as any).itemName}' not found in active catalog. Available items: ${menuItems.slice(0, 5).map(i => i.name).join(', ')}.` }
+        return { status: 'error', success: false, cartId: `cart_${ctx.slug}_${ctx.locationId.slice(0, 8)}`, error: `Item '${input.itemId || (input as any).itemName}' not found in active catalog. Available items: ${menuItems.slice(0, 5).map(i => i.name).join(', ')}.` }
       }
       if (item.is_available === false) {
-        return { status: 'error', success: false, error: `Item '${item.name}' is currently unavailable.` }
+        return { status: 'error', success: false, cartId: `cart_${ctx.slug}_${ctx.locationId.slice(0, 8)}`, error: `Item '${item.name}' is currently unavailable.` }
       }
 
       // 1. Validate mandatory modifier groups
@@ -554,6 +560,7 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
               return {
                 status: 'error',
                 success: false,
+                cartId: `cart_${ctx.slug}_${ctx.locationId.slice(0, 8)}`,
                 error: `Missing required modifier selection for '${mod.name}'. Available options: [${optionNames}].`
               }
             }
@@ -568,6 +575,7 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
         return {
           status: 'error',
           success: false,
+          cartId: `cart_${ctx.slug}_${ctx.locationId.slice(0, 8)}`,
           error: `Cart already contains items from venue '${existingDifferentVenueItem.pageId}'. Pass clearExisting: true to start a new cart for '${ctx.slug}', or checkout the existing cart first.`
         }
       }
@@ -615,6 +623,7 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
       return {
         status: 'ok',
         success: true,
+        cartId: `cart_${ctx.slug}_${ctx.locationId.slice(0, 8)}`,
         message: `Added ${qty}x ${item.name} to cart.`,
         cartItemCount: updated.items.reduce((sum, it) => sum + it.quantity, 0),
         subtotal: subtotalMinor / 100,
@@ -626,16 +635,22 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
   // ── 5. get_cart ───────────────────────────────────────────────────────────
   tools.push({
     name: 'get_cart',
-    description: `Return the current cart, line items, validated prices, modifiers, taxes, and authoritative total.`,
+    description: `Inspect the contents of the active cart session identified by cartId, including line items, modifier options, subtotal, discounts, taxes, and final total. Does NOT initialize a new cart session (use create_cart).`,
     inputSchema: {
       type: 'object',
-      properties: {},
+      properties: {
+        cartId: {
+          type: 'string',
+          description: 'Optional unique cart session ID to inspect. If omitted, returns active session cart.'
+        }
+      },
       additionalProperties: false
     },
     outputSchema: {
       type: 'object',
-      required: ['venue', 'currency', 'itemCount', 'lines', 'subtotal', 'subtotalFormatted', 'total', 'totalFormatted'],
+      required: ['cartId', 'venue', 'currency', 'itemCount', 'lines', 'subtotal', 'subtotalFormatted', 'total', 'totalFormatted'],
       properties: {
+        cartId: { type: 'string', description: 'Active cart session identifier' },
         venue: { type: 'string' },
         currency: {
           type: 'string',
@@ -686,7 +701,7 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
         totalFormatted: { type: 'string' }
       }
     },
-    execute: async () => {
+    execute: async (_input?: { cartId?: string }) => {
       const cartStore = useCartStore.getState()
       const items = cartStore.items
       const subtotalMinor = cartStore.totalAmountMinor()
@@ -706,6 +721,7 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
       }))
 
       return {
+        cartId: `cart_${ctx.slug}_${ctx.locationId.slice(0, 8)}`,
         venue: locationName,
         currency,
         itemCount: items.reduce((sum, it) => sum + it.quantity, 0),
@@ -725,11 +741,15 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
   // ── 6. update_cart ────────────────────────────────────────────────────────
   tools.push({
     name: 'update_cart',
-    description: `Modify an existing cart line or remove it from the current cart. Set quantity to 0 to remove.`,
+    description: `Modify the quantity of an existing line item in the cart session or remove it using lineId. Requires lineId. Does NOT add new catalog items (use add_to_cart).`,
     inputSchema: {
       type: 'object',
       required: ['lineId'],
       properties: {
+        cartId: {
+          type: 'string',
+          description: 'Optional unique cart session ID. If omitted, updates active cart.'
+        },
         lineId: {
           type: 'string',
           minLength: 1,
@@ -751,9 +771,11 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
     },
     outputSchema: {
       type: 'object',
-      required: ['success'],
+      required: ['status', 'success', 'cartId', 'remainingLines', 'subtotalFormatted'],
       properties: {
+        status: { type: 'string', enum: ['ok', 'error'] },
         success: { type: 'boolean' },
+        cartId: { type: 'string', description: 'Active cart session identifier' },
         remainingLines: { type: 'integer' },
         totalItemCount: { type: 'integer' },
         subtotal: { type: 'number' },
@@ -761,13 +783,13 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
         error: { type: 'string' }
       }
     },
-    execute: async (input: { lineId?: string; cartKey?: string; quantity?: number; delta?: number; remove?: boolean; notes?: string }) => {
+    execute: async (input: { lineId?: string; cartKey?: string; quantity?: number; delta?: number; remove?: boolean; notes?: string; cartId?: string }) => {
       const cartStore = useCartStore.getState()
       const targetId = input.lineId || input.cartKey || ''
       const existingLine = cartStore.items.find(i => i.cartKey === targetId)
 
       if (!existingLine) {
-        return { success: false, error: `Cart line with ID '${targetId}' not found.` }
+        return { status: 'error', success: false, cartId: `cart_${ctx.slug}_${ctx.locationId.slice(0, 8)}`, error: `Cart line with ID '${targetId}' not found.` }
       }
 
       if (input.remove || input.quantity === 0) {
@@ -786,7 +808,9 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
       const subtotalMinor = updated.totalAmountMinor()
 
       return {
+        status: 'ok',
         success: true,
+        cartId: `cart_${ctx.slug}_${ctx.locationId.slice(0, 8)}`,
         remainingLines: updated.items.length,
         totalItemCount: updated.items.reduce((sum, it) => sum + it.quantity, 0),
         subtotal: subtotalMinor / 100,
@@ -798,7 +822,7 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
   // ── apply_coupon ─────────────────────────────────────────────────────────
   const applyCouponTool: WebMCPTool = {
     name: 'apply_coupon',
-    description: 'Apply a promotional coupon code or discount voucher to the active shopping cart session. Validates the code and updates the cart discount.',
+    description: 'Apply a promotional coupon code or discount voucher to the active shopping cart session identified by cartId. Recalculates discounts and updates the cart subtotal and final total.',
     inputSchema: {
       type: 'object',
       required: ['couponCode'],
@@ -810,15 +834,20 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
           description: 'The promotional discount or coupon code to apply (e.g. SAVE10, WELCOME20, PACY50).',
           examples: ['SAVE10', 'WELCOME20', 'PACY50', 'VIP15', 'SUMMER20'],
         },
+        cartId: {
+          type: 'string',
+          description: 'Optional cart session identifier. If omitted, applies to the active session cart.',
+        },
       },
       additionalProperties: true,
     },
     outputSchema: {
       type: 'object',
-      required: ['status', 'success', 'couponCode', 'discountAmount', 'discountPercentage', 'subtotal', 'total', 'currency'],
+      required: ['status', 'success', 'cartId', 'couponCode', 'discountAmount', 'discountPercentage', 'subtotal', 'total', 'currency'],
       properties: {
         status: { type: 'string', enum: ['ok', 'error'] },
         success: { type: 'boolean' },
+        cartId: { type: 'string', description: 'Active cart session identifier' },
         couponCode: { type: 'string', minLength: 2, maxLength: 60 },
         discountAmount: { type: 'number', minimum: 0 },
         discountPercentage: { type: 'number', minimum: 0, maximum: 100 },
@@ -837,7 +866,7 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
         message: { type: 'string' },
       },
     },
-    execute: async (input: { couponCode?: string; code?: string }) => {
+    execute: async (input: { couponCode?: string; code?: string; cartId?: string }) => {
       const raw = (input?.couponCode || input?.code || '').toString().trim()
       const match = raw.match(/[A-Za-z0-9_-]{3,30}/)
       const code = (match ? match[0] : raw).toUpperCase()
@@ -845,6 +874,7 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
         return {
           status: 'error',
           success: false,
+          cartId: `cart_${ctx.slug}_${ctx.locationId.slice(0, 8)}`,
           couponCode: raw,
           discountAmount: 0,
           discountPercentage: 0,
@@ -875,6 +905,7 @@ export function createStorefrontWebMCPTools(ctx: StorefrontContext): WebMCPTool[
       return {
         status: 'ok',
         success: true,
+        cartId: `cart_${ctx.slug}_${ctx.locationId.slice(0, 8)}`,
         couponCode: code,
         discountAmount: discountMinor / 100,
         discountPercentage: pct,

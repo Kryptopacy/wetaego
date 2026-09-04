@@ -400,7 +400,7 @@ export function getMCPManifest() {
         scope: "customer",
         permission: "session-scoped",
         confirmation: "none",
-        description: "Initialize a new shopping cart session or retrieve the existing active cart for the customer session.",
+        description: "Initialize a new shopping cart session for the customer. Returns an authoritative cartId session handle. To inspect existing cart contents, use get_cart. To add items, use add_to_cart.",
         inputSchema: {
           type: "object",
           properties: {
@@ -414,7 +414,7 @@ export function getMCPManifest() {
           required: ["status", "cartId", "venue", "currency", "itemCount", "subtotal", "subtotalFormatted"],
           properties: {
             status: { type: "string", enum: ["ok", "error"] },
-            cartId: { type: "string" },
+            cartId: { type: "string", description: "Active cart session identifier" },
             venue: { type: "string" },
             currency: { type: "string" },
             itemCount: { type: "integer" },
@@ -428,7 +428,7 @@ export function getMCPManifest() {
           required: ["status", "cartId", "venue", "currency", "itemCount", "subtotal", "subtotalFormatted"],
           properties: {
             status: { type: "string", enum: ["ok", "error"] },
-            cartId: { type: "string" },
+            cartId: { type: "string", description: "Active cart session identifier" },
             venue: { type: "string" },
             currency: { type: "string" },
             itemCount: { type: "integer" },
@@ -444,7 +444,7 @@ export function getMCPManifest() {
         scope: "customer",
         permission: "session/cart-write",
         confirmation: "none",
-        description: "Add an available catalog item to the active cart using only valid modifier selections.",
+        description: "Add an available catalog item with selected options to the active cart session identified by cartId. To inspect full cart totals and lines, use get_cart. To modify existing lines, use update_cart.",
         inputSchema: {
           type: "object",
           required: ["itemId", "quantity"],
@@ -471,10 +471,11 @@ export function getMCPManifest() {
         },
         outputSchema: {
           type: "object",
-          required: ["status", "success", "cartItemCount", "subtotal", "subtotalFormatted"],
+          required: ["status", "success", "cartId", "cartItemCount", "subtotal", "subtotalFormatted"],
           properties: {
             status: { type: "string", enum: ["ok", "error"] },
             success: { type: "boolean" },
+            cartId: { type: "string", description: "Active cart session identifier" },
             message: { type: "string" },
             cartItemCount: { type: "integer" },
             subtotal: { type: "number" },
@@ -485,10 +486,11 @@ export function getMCPManifest() {
         },
         resultSchema: {
           type: "object",
-          required: ["status", "success", "cartItemCount", "subtotal", "subtotalFormatted"],
+          required: ["status", "success", "cartId", "cartItemCount", "subtotal", "subtotalFormatted"],
           properties: {
             status: { type: "string", enum: ["ok", "error"] },
             success: { type: "boolean" },
+            cartId: { type: "string", description: "Active cart session identifier" },
             message: { type: "string" },
             cartItemCount: { type: "integer" },
             subtotal: { type: "number" },
@@ -504,7 +506,7 @@ export function getMCPManifest() {
         scope: "customer",
         permission: "session/read",
         confirmation: "none",
-        description: "Return the current cart, line items, validated prices, modifiers, taxes, fees and current authoritative total.",
+        description: "Inspect the contents of the active cart session identified by cartId, including line items, modifier options, subtotal, discounts, taxes, and final total. Does NOT initialize a new cart session (use create_cart).",
         inputSchema: {
           type: "object",
           properties: {
@@ -514,8 +516,9 @@ export function getMCPManifest() {
         },
         outputSchema: {
           type: "object",
-          required: ["venue", "currency", "itemCount", "lines", "subtotal", "subtotalFormatted", "total", "totalFormatted"],
+          required: ["cartId", "venue", "currency", "itemCount", "lines", "subtotal", "subtotalFormatted", "total", "totalFormatted"],
           properties: {
+            cartId: { type: "string", description: "Active cart session identifier" },
             venue: { type: "string" },
             currency: { type: "string" },
             itemCount: { type: "integer" },
@@ -560,8 +563,9 @@ export function getMCPManifest() {
         },
         resultSchema: {
           type: "object",
-          required: ["venue", "currency", "itemCount", "lines", "subtotal", "subtotalFormatted", "total", "totalFormatted"],
+          required: ["cartId", "venue", "currency", "itemCount", "lines", "subtotal", "subtotalFormatted", "total", "totalFormatted"],
           properties: {
+            cartId: { type: "string", description: "Active cart session identifier" },
             venue: { type: "string" },
             currency: { type: "string" },
             itemCount: { type: "integer" },
@@ -598,7 +602,7 @@ export function getMCPManifest() {
         scope: "customer",
         permission: "session/cart-write",
         confirmation: "none",
-        description: "Modify an existing cart line or remove it from the current cart session. Quantity 0 removes the item.",
+        description: "Modify the quantity of an existing line item in the cart session or remove it using lineId. Requires lineId. Does NOT add new catalog items (use add_to_cart).",
         inputSchema: {
           type: "object",
           required: ["lineId"],
@@ -612,10 +616,11 @@ export function getMCPManifest() {
         },
         outputSchema: {
           type: "object",
-          required: ["status", "success", "remainingLines", "subtotalFormatted"],
+          required: ["status", "success", "cartId", "remainingLines", "subtotalFormatted"],
           properties: {
             status: { type: "string", enum: ["ok", "error"] },
             success: { type: "boolean" },
+            cartId: { type: "string", description: "Active cart session identifier" },
             remainingLines: { type: "integer" },
             totalItemCount: { type: "integer" },
             subtotal: { type: "number" },
@@ -624,10 +629,11 @@ export function getMCPManifest() {
         },
         resultSchema: {
           type: "object",
-          required: ["status", "success", "remainingLines", "subtotalFormatted"],
+          required: ["status", "success", "cartId", "remainingLines", "subtotalFormatted"],
           properties: {
             status: { type: "string", enum: ["ok", "error"] },
             success: { type: "boolean" },
+            cartId: { type: "string", description: "Active cart session identifier" },
             remainingLines: { type: "integer" },
             totalItemCount: { type: "integer" },
             subtotal: { type: "number" },
@@ -641,7 +647,7 @@ export function getMCPManifest() {
         scope: "customer",
         permission: "session/cart-write",
         confirmation: "none",
-        description: "Apply a promotional coupon code or discount voucher to the active shopping cart session. Validates the code, recalculates discounts, and updates the cart subtotal and final total.",
+        description: "Apply a promotional coupon code or discount voucher to the active shopping cart session identified by cartId. Recalculates discounts and updates the cart subtotal and final total.",
         inputSchema: {
           type: "object",
           required: ["couponCode"],
@@ -663,10 +669,11 @@ export function getMCPManifest() {
         },
         outputSchema: {
           type: "object",
-          required: ["status", "success", "couponCode", "discountAmount", "discountPercentage", "discountFormatted", "subtotal", "subtotalFormatted", "total", "totalFormatted", "currency"],
+          required: ["status", "success", "cartId", "couponCode", "discountAmount", "discountPercentage", "discountFormatted", "subtotal", "subtotalFormatted", "total", "totalFormatted", "currency"],
           properties: {
             status: { type: "string", enum: ["ok", "error"] },
             success: { type: "boolean" },
+            cartId: { type: "string", description: "Active cart session identifier" },
             couponCode: { type: "string", minLength: 3, maxLength: 30, pattern: "^[A-Za-z0-9_-]+$" },
             discountAmount: { type: "number", minimum: 0 },
             discountPercentage: { type: "number", minimum: 0, maximum: 100 },
@@ -689,10 +696,11 @@ export function getMCPManifest() {
         },
         resultSchema: {
           type: "object",
-          required: ["status", "success", "couponCode", "discountAmount", "discountPercentage", "discountFormatted", "subtotal", "subtotalFormatted", "total", "totalFormatted", "currency"],
+          required: ["status", "success", "cartId", "couponCode", "discountAmount", "discountPercentage", "discountFormatted", "subtotal", "subtotalFormatted", "total", "totalFormatted", "currency"],
           properties: {
             status: { type: "string", enum: ["ok", "error"] },
             success: { type: "boolean" },
+            cartId: { type: "string", description: "Active cart session identifier" },
             couponCode: { type: "string", minLength: 3, maxLength: 30, pattern: "^[A-Za-z0-9_-]+$" },
             discountAmount: { type: "number", minimum: 0 },
             discountPercentage: { type: "number", minimum: 0, maximum: 100 },
