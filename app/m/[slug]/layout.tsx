@@ -3,7 +3,10 @@ import { GlobalFeedbackFAB } from './components/global-feedback-fab'
 import { ThemeInjector } from './theme-injector'
 import { Plus_Jakarta_Sans, Cormorant_Garamond, Outfit, Space_Grotesk } from 'next/font/google'
 
-const fontModern = Plus_Jakarta_Sans({ subsets: ['latin'], variable: '--font-modern' })
+// Storefront typography is per-location (modern/elegant/playful/industrial), so
+// preloading the "modern" font unconditionally wastes bandwidth on storefronts
+// that use another family and triggers "preloaded but not used" warnings.
+const fontModern = Plus_Jakarta_Sans({ subsets: ['latin'], variable: '--font-modern', preload: false })
 const fontElegant = Cormorant_Garamond({ subsets: ['latin'], weight: ['400', '600', '700'], variable: '--font-elegant', preload: false })
 const fontPlayful = Outfit({ subsets: ['latin'], variable: '--font-playful', preload: false })
 const fontIndustrial = Space_Grotesk({ subsets: ['latin'], variable: '--font-industrial', preload: false })
