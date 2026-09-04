@@ -7,6 +7,7 @@ import type { Json } from '@/lib/supabase/types'
 import { z } from 'zod'
 import { zfd } from 'zod-form-data'
 import { authActionClient } from '@/lib/safe-action'
+import { requirePageOwnership } from '@/lib/auth/org-guard'
 
 const MAX_FILE_SIZE = 30 * 1024 * 1024 // 30MB
 const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'video/mp4', 'video/webm', 'video/quicktime']
@@ -180,7 +181,7 @@ export const updatePage = authActionClient
     theme_color: zfd.text(z.string().max(7).optional()),
     background_color: zfd.text(z.string().max(7).optional()),
   }))
-  .action(async ({ parsedInput, ctx: { supabase } }) => {
+  .action(async ({ parsedInput, ctx: { user, supabase } }) => {
     const {
       pageId, title, content, billing_enabled, billing_mode, payment_mode, deposit_percentage,
       randomizer_enabled, hide_delivery, payment_channels, payment_options, refund_policy, milestones_enabled,
@@ -198,6 +199,10 @@ export const updatePage = authActionClient
       revalidatePath('/dashboard/pages')
       return { success: true }
     }
+
+    // Ownership check: verify the page belongs to the caller's organization
+    // before the admin-client write.
+    await requirePageOwnership(supabase, user.id, pageId, 'editor')
 
     const { data: existing } = await supabase.from('location_pages').select('template_data').eq('id', pageId).single()
     const template_data = { 

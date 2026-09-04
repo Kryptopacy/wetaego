@@ -6,6 +6,7 @@ import { z } from 'zod'
 import { zfd } from 'zod-form-data'
 import { authActionClient } from '@/lib/safe-action'
 import { createAdminClient } from '@/lib/supabase/server'
+import { requireOrgRole, requirePageOwnership } from '@/lib/auth/org-guard'
 
 export const createCategory = authActionClient
   .schema(zfd.formData({
@@ -13,11 +14,14 @@ export const createCategory = authActionClient
     page_id: zfd.text(z.string().min(1, "Page ID is required")),
     name: zfd.text(z.string().min(1, "Name is required").max(100, "Name must be less than 100 characters")),
   }))
-  .action(async ({ parsedInput: { organization_id, page_id, name }, ctx: { user } }) => {
+  .action(async ({ parsedInput: { organization_id, page_id, name }, ctx: { user, supabase } }) => {
     if (organization_id === 'demo-org') {
       revalidatePath('/dashboard/menu')
       return { success: true }
     }
+
+    await requireOrgRole(supabase, user.id, organization_id, 'editor')
+    await requirePageOwnership(supabase, user.id, page_id, 'editor')
 
     const adminClient = await createAdminClient()
     const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-')
@@ -54,7 +58,7 @@ export const createItem = authActionClient
     department: zfd.text(z.string().optional()),
     image: z.instanceof(File).optional()
   }))
-  .action(async ({ parsedInput, ctx: { supabase } }) => {
+  .action(async ({ parsedInput, ctx: { user, supabase } }) => {
     const {
       organization_id: orgId,
       page_id: pageId,
@@ -75,6 +79,9 @@ export const createItem = authActionClient
       revalidatePath('/dashboard/menu')
       return { success: true }
     }
+
+    await requireOrgRole(supabase, user.id, orgId, 'editor')
+    await requirePageOwnership(supabase, user.id, pageId, 'editor')
 
     const collection_ids = JSON.parse(collectionIdsRaw)
     const dietary_tags = dietaryTagsRaw ? JSON.parse(dietaryTagsRaw) : []
@@ -157,7 +164,7 @@ export const updateItem = authActionClient
     department: zfd.text(z.string().optional()),
     image: z.instanceof(File).optional()
   }))
-  .action(async ({ parsedInput, ctx: { supabase } }) => {
+  .action(async ({ parsedInput, ctx: { user, supabase } }) => {
     const {
       item_id: itemId,
       name,
@@ -174,6 +181,8 @@ export const updateItem = authActionClient
     
     const locPages = item.location_pages as unknown as { locations: { organization_id: string } }
     const orgId = locPages.locations.organization_id
+
+    await requireOrgRole(supabase, user.id, orgId, 'editor')
 
     if (orgId === 'demo-org') {
       revalidatePath('/dashboard/menu')
@@ -233,7 +242,7 @@ export const updateItem = authActionClient
 
 export const deleteItem = authActionClient
   .schema(z.object({ itemId: z.string().min(1) }))
-  .action(async ({ parsedInput: { itemId } }) => {
+  .action(async ({ parsedInput: { itemId }, ctx: { user, supabase } }) => {
     const adminClient = await createAdminClient()
     const { data: item } = await adminClient.from('page_items').select('location_pages!inner(location_id, locations!inner(organization_id))').eq('id', itemId).single()
     if (!item) throw new Error('Item not found')
@@ -246,6 +255,8 @@ export const deleteItem = authActionClient
       return { success: true }
     }
 
+    await requireOrgRole(supabase, user.id, orgId, 'editor')
+
     const { error } = await adminClient.from('page_items').delete().eq('id', itemId)
     if (error) throw new Error(error.message)
 
@@ -256,7 +267,7 @@ export const deleteItem = authActionClient
 
 export const toggleItemStatus = authActionClient
   .schema(z.object({ itemId: z.string().min(1), currentStatus: z.string().min(1) }))
-  .action(async ({ parsedInput: { itemId, currentStatus }, ctx: { user } }) => {
+  .action(async ({ parsedInput: { itemId, currentStatus }, ctx: { user, supabase } }) => {
     const nextStatus = currentStatus === 'available' ? 'sold_out' : 'available'
     if (itemId.startsWith('item-')) {
       revalidatePath('/dashboard/menu')
@@ -269,6 +280,8 @@ export const toggleItemStatus = authActionClient
 
     const locPages = item.location_pages as unknown as { locations: { organization_id: string } }
     const orgId = locPages.locations.organization_id
+
+    await requireOrgRole(supabase, user.id, orgId, 'editor')
 
     const { error } = await adminClient
       .from('page_items')
@@ -295,11 +308,13 @@ export const applyTranslations = authActionClient
       }))
     }))
   }))
-  .action(async ({ parsedInput: { orgId, translatedCategories }, ctx: { user } }) => {
+  .action(async ({ parsedInput: { orgId, translatedCategories }, ctx: { user, supabase } }) => {
     if (orgId === 'demo-org') {
       revalidatePath('/dashboard/menu')
       return { success: true }
     }
+
+    await requireOrgRole(supabase, user.id, orgId, 'editor')
 
     const adminClient = await createAdminClient()
 
@@ -321,7 +336,7 @@ export const applyTranslations = authActionClient
 
 export const bulkInsertMenu = authActionClient
   .schema(zfd.formData(z.any()))
-  .action(async ({ parsedInput: formData, ctx: { user } }) => {
+  .action(async ({ parsedInput: formData, ctx: { user, supabase } }) => {
     const orgId = formData.get('organization_id') as string
     const pageId = formData.get('menu_id') as string // Reused as pageId
     const itemsRaw = formData.get('items') as string
@@ -330,6 +345,9 @@ export const bulkInsertMenu = authActionClient
       revalidatePath('/dashboard/menu')
       return { success: true }
     }
+
+    await requireOrgRole(supabase, user.id, orgId, 'editor')
+    await requirePageOwnership(supabase, user.id, pageId, 'editor')
 
     const adminClient = await createAdminClient()
     const items = JSON.parse(itemsRaw)

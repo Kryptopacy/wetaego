@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
+import { isAdminEmail } from '@/lib/utils/admin'
 import { format } from 'date-fns'
 
 export async function GET(req: Request) {
@@ -19,7 +20,7 @@ export async function GET(req: Request) {
     let query = adminClient.from('orders').select('created_at, total_amount_minor').eq('status', 'paid')
     let countQuery = adminClient.from('orders').select('*', { count: 'exact', head: true })
 
-    // If orgId is provided, run for specific org, else run for ENTIRE platform (Hackathon Total)
+    // If orgId is provided, run for specific org, else run for ENTIRE platform
     if (organizationId) {
        // Verify user is part of the org
       const { data: member } = await supabase
@@ -39,14 +40,16 @@ export async function GET(req: Request) {
         isAuthorized = !!org
       }
 
-      if (!isAuthorized) {
+      if (!isAuthorized && !isAdminEmail(user.email)) {
         return NextResponse.json({ error: 'Forbidden for this org' }, { status: 403 })
       }
       query = query.eq('organization_id', organizationId)
       countQuery = countQuery.eq('organization_id', organizationId)
     } else {
-      // Platform-wide aggregate. You could optionally restrict this to superadmins.
-      // For hackathon purposes, we will aggregate all data.
+      // Platform-wide aggregate: restricted to platform admins only.
+      if (!isAdminEmail(user.email)) {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      }
     }
 
     // 2. Calculate Total Revenue (Orders with status 'paid')

@@ -38,8 +38,8 @@ import { notifyBusiness } from '@/lib/notifications/dispatcher'
 export async function submitServiceRequest(formData: FormData): Promise<SafeResult<{ success: boolean }>> {
   try {
     const { checkRateLimit } = await import('@/lib/upstash');
-    const cookieStore = await cookies();
-    const sessionId = cookieStore.get('session_id')?.value || 'anonymous';
+    const { getGuestSessionId } = await import('@/lib/auth/guest-session');
+    const sessionId = await getGuestSessionId();
     const { success } = await checkRateLimit('service_request', sessionId);
     
     if (!success) {
@@ -143,8 +143,8 @@ export async function processCheckout(params: {
   try {
     // --- Rate Limiting & Idempotency ---
     const { checkRateLimit, withIdempotency } = await import('@/lib/upstash');
-    const cookieStore = await cookies();
-    const sessionId = cookieStore.get('session_id')?.value || 'anonymous';
+    const { getGuestSessionId } = await import('@/lib/auth/guest-session');
+    const sessionId = await getGuestSessionId();
     const { success } = await checkRateLimit('checkout', sessionId);
     if (!success) {
       throw new Error('Too many requests. Please wait a minute before placing another order.');
@@ -270,8 +270,20 @@ export async function processCheckout(params: {
     }
     const appliedDeliveryFee = (isDelivery && location?.delivery_fee_minor) ? location.delivery_fee_minor : 0
     
-    // Sanitize client-provided tax to prevent negative injection
-    const sanitizedTaxMinor = Math.max(0, taxTotalMinor || 0)
+    // Recompute tax server-side from the merchant's configured location_taxes
+    // rules — never trust the client-supplied tax figure for the charge amount.
+    const { data: activeTaxes } = await supabase
+      .from('location_taxes')
+      .select('percentage')
+      .eq('location_id', locationId)
+      .eq('is_active', true)
+
+    const taxableBaseMinor = Math.max(0, serverSubtotalMinor - clampedDiscountMinor)
+    const serverTaxMinor = (activeTaxes || []).reduce(
+      (sum, t) => sum + Math.floor(taxableBaseMinor * ((t.percentage || 0) / 100)),
+      0
+    )
+    const sanitizedTaxMinor = Math.max(0, serverTaxMinor)
 
     // Calculate final total (Taxes are included upfront, but Tips are handled post-service)
     const verifiedTotalMinor = Math.max(0, serverSubtotalMinor - clampedDiscountMinor) + sanitizedTaxMinor + appliedDeliveryFee
@@ -306,8 +318,8 @@ export async function processCheckout(params: {
       delivery_fee_minor: appliedDeliveryFee || null,
       customer_note: customerNote ? customerNote.slice(0, 500) : null,
       customer_email: customerEmail || null,
-      subtotal_minor: subtotalMinor || 0,
-      tax_total_minor: taxTotalMinor || 0,
+      subtotal_minor: serverSubtotalMinor || 0,
+      tax_total_minor: sanitizedTaxMinor || 0,
       tax_breakdown: taxBreakdown || [],
       resource_id: resourceId || null,
       idempotency_key: idempotencyKey || null,
@@ -390,7 +402,12 @@ export async function processCheckout(params: {
     throw new Error(stockError.message || 'One or more items in your cart just sold out. Please review your cart.')
   }
 
-  let chargeAmountMinor = paymentFractionMinor ?? verifiedTotalMinor
+  // Client-supplied split share can never exceed the server-verified total.
+  const requestedFractionMinor =
+    paymentFractionMinor != null && Number.isFinite(paymentFractionMinor)
+      ? Math.min(Math.max(0, Math.floor(paymentFractionMinor)), verifiedTotalMinor)
+      : null
+  let chargeAmountMinor = requestedFractionMinor ?? verifiedTotalMinor
   let finalPaymentMethod: string = paymentMethod
 
   // 4c. Process Wallet Split Tender
@@ -987,8 +1004,8 @@ const quoteSchema = z.object({
 export async function submitQuoteRequest(formData: FormData): Promise<SafeResult<{ success: boolean, referenceNumber?: string, accessPin?: string }>> {
   try {
     const { checkRateLimit } = await import('@/lib/upstash');
-    const cookieStore = await cookies();
-    const sessionId = cookieStore.get('session_id')?.value || 'anonymous';
+    const { getGuestSessionId } = await import('@/lib/auth/guest-session');
+    const sessionId = await getGuestSessionId();
     const { success } = await checkRateLimit('quote_request', sessionId);
     
     if (!success) {
@@ -1037,8 +1054,8 @@ export async function submitQuoteRequest(formData: FormData): Promise<SafeResult
 export async function submitPaymentProof(formData: FormData): Promise<SafeResult<{ url: string }>> {
   try {
     const { checkRateLimit } = await import('@/lib/upstash');
-    const cookieStore = await cookies();
-    const sessionId = cookieStore.get('session_id')?.value || 'anonymous';
+    const { getGuestSessionId } = await import('@/lib/auth/guest-session');
+    const sessionId = await getGuestSessionId();
     const { success } = await checkRateLimit('upload_proof', sessionId);
     
     if (!success) {

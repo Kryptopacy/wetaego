@@ -1,23 +1,33 @@
 import { NextResponse } from 'next/server'
+import { createAdminClient } from '@/lib/supabase/server'
+
+export const dynamic = 'force-dynamic'
 
 export async function GET() {
+  let dbOk = false
+  try {
+    const supabase = await createAdminClient()
+    const { error } = await supabase.from('organizations').select('id', { count: 'exact', head: true }).limit(1)
+    dbOk = !error
+  } catch {
+    dbOk = false
+  }
+
+  const status = dbOk ? 'ok' : 'degraded'
   return NextResponse.json(
     {
-      status: 'ok',
+      status,
       service: 'WETAEGO API',
       version: '1.0.0',
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
-      features: {
-        chat: 'operational',
-        menu_ocr: 'operational',
-        live_gemini: 'operational',
-        escpos_printing: 'operational',
+      checks: {
+        database: dbOk ? 'operational' : 'unreachable',
         payment_gateways: ['paystack', 'bachs']
       }
     },
     {
-      status: 200,
+      status: dbOk ? 200 : 503,
       headers: {
         'Cache-Control': 'no-cache',
         'Access-Control-Allow-Origin': '*'

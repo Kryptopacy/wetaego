@@ -7,6 +7,7 @@ import { redirect } from 'next/navigation'
 import { getPricingSettings } from '@/lib/utils/settings'
 import { getUsdToNgnRate } from '@/lib/payments/exchange'
 import { authActionClient } from '@/lib/safe-action'
+import { requireOrgRole } from '@/lib/auth/org-guard'
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
 import { zfd } from 'zod-form-data'
@@ -17,14 +18,14 @@ export const subscribeToLite = authActionClient
     currency: z.string().optional().default('NGN'),
     billing_cycle: z.enum(['monthly', 'annually']).optional().default('monthly')
   })))
-  .action(async ({ parsedInput: { organization_id, currency, billing_cycle }, ctx: { user } }) => {
-    const supabase = await createClient()
-    
+  .action(async ({ parsedInput: { organization_id, currency, billing_cycle }, ctx: { user, supabase } }) => {
     const { cookies } = await import('next/headers')
     const cookieStore = await cookies()
     if (cookieStore.get('demo_mode')?.value === '1') {
       throw new Error('Billing is disabled in Demo Mode')
     }
+
+    await requireOrgRole(supabase, user.id, organization_id, 'owner')
 
     const { data: org } = await supabase
       .from('organizations')
@@ -61,8 +62,8 @@ export const subscribeToPro = authActionClient
     currency: z.string().optional().default('NGN'),
     billing_cycle: z.enum(['monthly', 'annually']).optional().default('monthly')
   })))
-  .action(async ({ parsedInput: { organization_id, currency, billing_cycle }, ctx: { user } }) => {
-    const supabase = await createClient()
+  .action(async ({ parsedInput: { organization_id, currency, billing_cycle }, ctx: { user, supabase } }) => {
+    await requireOrgRole(supabase, user.id, organization_id, 'owner')
 
     const { data: org } = await supabase
       .from('organizations')
@@ -96,12 +97,39 @@ export const cancelSubscription = authActionClient
   .schema(zfd.formData(z.object({
     organization_id: z.string()
   })))
-  .action(async ({ parsedInput: { organization_id } }) => {
-    const supabase = await createClient()
+  .action(async ({ parsedInput: { organization_id }, ctx: { user, supabase } }) => {
+    await requireOrgRole(supabase, user.id, organization_id, 'owner')
+
+    const { data: org } = await (supabase
+      .from('organizations') as any)
+      .select('subscription_plan, paystack_subscription_code, subscription_email_token')
+      .eq('id', organization_id)
+      .single()
+
+    if (!org) throw new Error('Organization not found')
+
+    // Disable the recurring charge at the gateway when we have a subscription
+    // reference, so the merchant actually stops being billed.
+    const subscriptionCode = (org as any)?.paystack_subscription_code as string | null
+    const emailToken = (org as any)?.subscription_email_token as string | null
+    if (process.env.PAYSTACK_SECRET_KEY && subscriptionCode && emailToken) {
+      try {
+        await fetch('https://api.paystack.co/subscription/disable', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ code: subscriptionCode, email_token: emailToken }),
+        })
+      } catch (err) {
+        console.error('Failed to disable Paystack subscription:', err)
+      }
+    }
 
     await supabase
       .from('organizations')
-      .update({ 
+      .update({
         subscription_status: 'canceled',
         subscription_plan: 'free'
       })
@@ -115,10 +143,10 @@ export const buyCredits = authActionClient
     organization_id: z.string(),
     credits: z.string().transform(v => parseInt(v, 10))
   })))
-  .action(async ({ parsedInput: { organization_id, credits }, ctx: { user } }) => {
-    const supabase = await createClient()
-
+  .action(async ({ parsedInput: { organization_id, credits }, ctx: { user, supabase } }) => {
     if (!organization_id || credits <= 0) throw new Error('Invalid data')
+
+    await requireOrgRole(supabase, user.id, organization_id, 'owner')
 
     // SECURITY PATCH: Strict validation of credit packages to prevent arbitrary injection
     if (![10, 25, 50].includes(credits)) {
@@ -169,8 +197,8 @@ export const redeemCoupon = authActionClient
     organization_id: z.string(),
     code: z.string().transform(v => v.toUpperCase().trim())
   })))
-  .action(async ({ parsedInput: { organization_id, code }, ctx: { user } }) => {
-    const supabase = await createClient()
+  .action(async ({ parsedInput: { organization_id, code }, ctx: { user, supabase } }) => {
+    await requireOrgRole(supabase, user.id, organization_id, 'owner')
 
     // Call the atomic RPC to redeem the coupon
     const { data: success, error: rpcError } = await supabase.rpc('redeem_coupon_rpc', {

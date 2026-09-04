@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '*/5 * * * *'  # Every 5 mins: Webhooks DLQ
-    - cron: '0 1 * * *'    # 1:00 AM: Abandoned Carts
+    - cron: '*/15 * * * *' # Every 15 mins: Abandoned Carts (inventory release)
     - cron: '0 2 * * *'    # 2:00 AM: Abandoned Bookings
     - cron: '0 8 * * *'    # 8:00 AM: Daily Tasks
     - cron: '0 9 * * *'    # 9:00 AM: Trial Reminders
@@ -25,7 +25,7 @@ jobs:
           curl -s -X GET "$URL/api/cron/webhooks" -H "Authorization: Bearer $CRON_SECRET"
         
       - name: Hit Abandoned Carts Endpoint
-        if: github.event.schedule == '0 1 * * *' || github.event_name == 'workflow_dispatch'
+        if: github.event.schedule == '*/15 * * * *' || github.event_name == 'workflow_dispatch'
         run: |
           URL="${PROD_URL:-https://ourmenuos.online}"
           curl -s -X GET "$URL/api/cron/abandoned-carts" -H "Authorization: Bearer $CRON_SECRET"

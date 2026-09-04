@@ -33,8 +33,8 @@ export async function submitFeedbackAndTip(
 ) {
   try {
     const { checkRateLimit } = await import('@/lib/upstash');
-    const cookieStore = await cookies();
-    const sessionId = cookieStore.get('session_id')?.value || 'anonymous';
+    const { getGuestSessionId } = await import('@/lib/auth/guest-session');
+    const sessionId = await getGuestSessionId();
     const { success } = await checkRateLimit('feedback_submit', sessionId);
     
     if (!success) {
