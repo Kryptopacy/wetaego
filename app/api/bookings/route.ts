@@ -121,17 +121,17 @@ export async function POST(req: Request) {
       : basePrice
 
     // 1. Create the booking record atomically under FOR UPDATE row locks to prevent race conditions
-    const primaryItemId = targetItemIds.length === 1 ? targetItemIds[0] : null
+    const primaryItemId = targetItemIds.length === 1 ? targetItemIds[0] : undefined
     const { data: bookingData, error: bookingError } = await adminClient.rpc('create_booking_atomic', {
       p_page_id: page_id,
       p_item_id: primaryItemId,
       p_customer_name: customer_name,
-      p_customer_email: customer_email || null,
+      p_customer_email: customer_email || undefined,
       p_customer_phone: customer_phone,
-      p_booking_date: booking_date || null,
-      p_booking_end_date: booking_end_date || null,
-      p_booking_time: booking_time || null,
-      p_booking_end_time: booking_end_time || null,
+      p_booking_date: booking_date || undefined,
+      p_booking_end_date: booking_end_date || undefined,
+      p_booking_time: booking_time || undefined,
+      p_booking_end_time: booking_end_time || undefined,
       p_number_of_guests: number_of_guests || 1,
       p_booking_notes: (targetItemIds.length > 1 ? `Multi-item Booking: ${targetItemIds.length} items.\n\n` : '') + (booking_notes || ''),
       p_total_amount_minor: basePrice,

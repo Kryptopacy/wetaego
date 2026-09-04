@@ -16,12 +16,31 @@ const mockInsert = vi.fn()
 const mockUpload = vi.fn()
 const mockGetPublicUrl = vi.fn()
 
+// Chainable query mock for ownership guards (organization_members, location_pages)
+const mockMembershipResult = { data: { role: 'owner' }, error: null }
+const mockPageResult = {
+  data: { id: 'page_123', location_id: 'loc_123', locations: { organization_id: 'org_123' } },
+  error: null,
+}
+const makeChain = (result: unknown) => {
+  const chain = {
+    select: vi.fn(() => chain),
+    eq: vi.fn(() => chain),
+    maybeSingle: vi.fn(() => Promise.resolve(result)),
+    single: vi.fn(() => Promise.resolve(result)),
+    limit: vi.fn(() => chain),
+  }
+  return chain
+}
+
 vi.mock('@/lib/supabase/server', () => ({
   createClient: vi.fn(() => ({
     auth: {
       getUser: mockGetUser,
     },
-    from: vi.fn((table) => {
+    from: vi.fn((table: string) => {
+      if (table === 'organization_members') return makeChain(mockMembershipResult)
+      if (table === 'location_pages') return makeChain(mockPageResult)
       if (table === 'page_collections' || table === 'page_items' || table === 'page_item_collections') {
         return { insert: mockInsert, update: vi.fn(), delete: vi.fn(), select: vi.fn() }
       }
@@ -35,7 +54,9 @@ vi.mock('@/lib/supabase/server', () => ({
     },
   })),
   createAdminClient: vi.fn(() => ({
-    from: vi.fn((table) => {
+    from: vi.fn((table: string) => {
+      if (table === 'organization_members') return makeChain(mockMembershipResult)
+      if (table === 'location_pages') return makeChain(mockPageResult)
       if (table === 'page_collections' || table === 'page_items' || table === 'page_item_collections') {
         return { insert: mockInsert, update: vi.fn(), delete: vi.fn(), select: vi.fn() }
       }

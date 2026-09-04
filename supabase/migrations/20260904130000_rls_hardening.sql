@@ -1,32 +1,17 @@
 -- Launch security hardening: tighten permissive RLS policies that leaked
--- cross-tenant data, per security audit.
+-- cross-tenant data, per security audit. Idempotent.
 
--- 1. order_milestones: was readable by anon and writable by any authenticated
---    user platform-wide (USING (true)). Restrict to org members.
+-- 1. order_milestones: legacy permissive policies (USING (true)) — dropped.
+--    The org-scoped "Org members can manage milestones" policy from
+--    20260721181500_fix_database_linters.sql remains authoritative.
 DROP POLICY IF EXISTS "Enable read access for order_milestones" ON public.order_milestones;
 DROP POLICY IF EXISTS "Enable insert access for order_milestones" ON public.order_milestones;
 DROP POLICY IF EXISTS "Enable update access for order_milestones" ON public.order_milestones;
 
-CREATE POLICY "Org members can manage milestones" ON public.order_milestones
-  FOR ALL TO authenticated
-  USING (
-    EXISTS (
-      SELECT 1 FROM public.orders o
-      WHERE o.id = order_milestones.order_id
-        AND private.has_org_role(o.organization_id, array['owner', 'manager', 'editor']::public.member_role[])
-    )
-  )
-  WITH CHECK (
-    EXISTS (
-      SELECT 1 FROM public.orders o
-      WHERE o.id = order_milestones.order_id
-        AND private.has_org_role(o.organization_id, array['owner', 'manager', 'editor']::public.member_role[])
-    )
-  );
-
 -- 2. user_profiles: was readable by any authenticated user platform-wide.
 --    Restrict to the user themself plus members of orgs they belong to.
 DROP POLICY IF EXISTS "Authenticated users can read user_profiles" ON public.user_profiles;
+DROP POLICY IF EXISTS "user_profiles scoped read" ON public.user_profiles;
 
 CREATE POLICY "user_profiles scoped read" ON public.user_profiles
   FOR SELECT TO authenticated
@@ -44,7 +29,6 @@ CREATE POLICY "user_profiles scoped read" ON public.user_profiles
   );
 
 -- 3. location_promo_codes: code strings were publicly enumerable.
+--    Promo validation runs through the service-role (admin) client server-side,
+--    so public read of raw code rows is not required for checkout.
 DROP POLICY IF EXISTS "Promo codes are viewable by everyone." ON public.location_promo_codes;
-
--- The storefront applies codes server-side via validated input; public read
--- of raw code rows is not required for the checkout flow.

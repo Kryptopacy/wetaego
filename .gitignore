@@ -70,3 +70,5 @@ unused_vars_report.md
 report.xlsx
 implementation_plan ___09072027
 .kilo/
+
+!scripts/*.mjs

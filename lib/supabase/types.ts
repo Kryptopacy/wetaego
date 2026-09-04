@@ -2468,6 +2468,13 @@ export type Database = {
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "organization_invites_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "location_pages"
+            referencedColumns: ["id"]
+          },
         ]
       }
       organization_kyc: {
@@ -3399,6 +3406,7 @@ export type Database = {
         Row: {
           created_at: string
           custom_request_text: string | null
+          customer_note: string | null
           id: string
           location_id: string
           organization_id: string
@@ -3411,6 +3419,7 @@ export type Database = {
         Insert: {
           created_at?: string
           custom_request_text?: string | null
+          customer_note?: string | null
           id?: string
           location_id: string
           organization_id: string
@@ -3423,6 +3432,7 @@ export type Database = {
         Update: {
           created_at?: string
           custom_request_text?: string | null
+          customer_note?: string | null
           id?: string
           location_id?: string
           organization_id?: string
@@ -3699,6 +3709,67 @@ export type Database = {
         }
         Relationships: []
       }
+      wallet_transactions: {
+        Row: {
+          amount_minor: number
+          balance_after_minor: number | null
+          created_at: string
+          customer_id: string
+          description: string | null
+          id: string
+          order_id: string | null
+          organization_id: string
+          status: string
+          transaction_type: string
+        }
+        Insert: {
+          amount_minor: number
+          balance_after_minor?: number | null
+          created_at?: string
+          customer_id: string
+          description?: string | null
+          id?: string
+          order_id?: string | null
+          organization_id: string
+          status?: string
+          transaction_type: string
+        }
+        Update: {
+          amount_minor?: number
+          balance_after_minor?: number | null
+          created_at?: string
+          customer_id?: string
+          description?: string | null
+          id?: string
+          order_id?: string | null
+          organization_id?: string
+          status?: string
+          transaction_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wallet_transactions_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customer_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wallet_transactions_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wallet_transactions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       webhook_events: {
         Row: {
           error_message: string | null
@@ -3765,24 +3836,6 @@ export type Database = {
       }
     }
     Functions: {
-      create_booking_atomic: {
-        Args: {
-          p_page_id: string
-          p_item_id: string | null
-          p_customer_name: string
-          p_customer_email: string | null
-          p_customer_phone: string
-          p_booking_date: string | null
-          p_booking_end_date: string | null
-          p_booking_time: string | null
-          p_booking_end_time: string | null
-          p_number_of_guests: number
-          p_booking_notes: string
-          p_total_amount_minor: number
-          p_payment_status: string
-        }
-        Returns: Json
-      }
       accept_invite_by_token: {
         Args: { lookup_token: string }
         Returns: boolean
@@ -3817,6 +3870,24 @@ export type Database = {
       cleanup_demo_accounts: { Args: never; Returns: undefined }
       cleanup_expired_kiosk_tokens: { Args: never; Returns: undefined }
       cleanup_stale_orders: { Args: never; Returns: undefined }
+      create_booking_atomic: {
+        Args: {
+          p_booking_date?: string
+          p_booking_end_date?: string
+          p_booking_end_time?: string
+          p_booking_notes?: string
+          p_booking_time?: string
+          p_customer_email?: string
+          p_customer_name?: string
+          p_customer_phone?: string
+          p_item_id?: string
+          p_number_of_guests?: number
+          p_page_id: string
+          p_payment_status?: string
+          p_total_amount_minor?: number
+        }
+        Returns: Json
+      }
       decrement_stock: { Args: { p_items: Json }; Returns: boolean }
       delete_ad_hoc_item_rpc: {
         Args: { p_order_item_id: string }
@@ -3904,6 +3975,15 @@ export type Database = {
         Args: { p_code: string; p_organization_id: string }
         Returns: boolean
       }
+      refund_wallet: {
+        Args: {
+          p_amount_minor: number
+          p_customer_id: string
+          p_description?: string
+          p_organization_id: string
+        }
+        Returns: number
+      }
     }
     Enums: {
       availability_status: "available" | "low" | "sold_out" | "hidden"
@@ -3938,7 +4018,7 @@ export type Database = {
       payment_provider: "paystack" | "stripe"
       publication_status: "draft" | "published" | "archived"
       service_request_status: "pending" | "acknowledged" | "resolved"
-      service_request_type: "waiter" | "bill" | "cleanup"
+      service_request_type: "waiter" | "bill" | "cleanup" | "manager_escalation"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -3954,12 +4034,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -3983,11 +4063,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -4008,11 +4088,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -4033,11 +4113,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -4050,11 +4130,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -4102,7 +4182,7 @@ export const Constants = {
       payment_provider: ["paystack", "stripe"],
       publication_status: ["draft", "published", "archived"],
       service_request_status: ["pending", "acknowledged", "resolved"],
-      service_request_type: ["waiter", "bill", "cleanup"],
+      service_request_type: ["waiter", "bill", "cleanup", "manager_escalation"],
     },
   },
 } as const

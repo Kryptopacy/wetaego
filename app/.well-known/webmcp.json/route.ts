@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { WEBMCP_MANIFEST } from '@/lib/webmcp/manifest'
+import { getMCPManifest } from '@/lib/webmcp/manifest'
 
 export const dynamic = 'force-static'
 export const revalidate = 86400
@@ -12,7 +12,7 @@ const HEADERS = {
 }
 
 export async function GET() {
-  return NextResponse.json(WEBMCP_MANIFEST, { status: 200, headers: HEADERS })
+  return NextResponse.json(getMCPManifest(), { status: 200, headers: HEADERS })
 }
 
 export async function OPTIONS() {
